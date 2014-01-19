@@ -38,13 +38,25 @@ impl GapBuffer {
   }
 
   fn insert(&mut self, offset: uint, byte: u8) {
-    self.confirmGap(offset);
+    self.confirm_gap(offset);
     self.buffer[offset] = byte;
     self.gap_offset += 1;
     self.gap_size -= 1;
   }
 
-  fn confirmGap(&mut self, new_gap_offset: uint) {
+  fn delete(&mut self, offset: uint) {
+    if (self.len() == 0) { return };
+
+    self.confirm_gap(offset + 1);
+    self.gap_offset -= 1;
+    self.gap_size += 1;
+  }
+
+  fn len(& self) -> uint {
+    self.buffer.len() - self.gap_size
+  }
+
+  fn confirm_gap(&mut self, new_gap_offset: uint) {
     if self.gap_size == 0 {
       self.gap_offset = self.buffer.len();
       self.buffer.grow(INITIAL_GAP_SIZE, &0u8);
@@ -79,17 +91,18 @@ fn main()
 
 #[test]
 fn test_new() {
-  let buf = GapBuffer::new("abc");
-  assert_eq!(str::from_utf8(buf.buffer.slice_from(buf.gap_size)), "abc");
+  let str = "abc";
+  let buf = GapBuffer::new(str);
+  assert_eq!(buf.gap_offset, 0);
+  assert_eq!(buf.gap_size, INITIAL_GAP_SIZE);
+  assert_eq!(buf.len(), str.len());
+  assert_eq!(str::from_utf8(buf.buffer.slice_from(buf.gap_size)), str);
 }
 
 #[test]
 fn test_copy() {
   let str = "abc";
   let mut buf = GapBuffer::new(str);
-  assert_eq!(buf.gap_offset, 0);
-  assert_eq!(buf.gap_size, INITIAL_GAP_SIZE);
-  assert_eq!(str::from_utf8(buf.buffer.slice_from(buf.gap_size)), str);
 
   buf.copy(buf.gap_offset + buf.gap_size, buf.gap_offset, str.len());
 
@@ -105,5 +118,21 @@ fn test_insert() {
 
   assert_eq!(buf.gap_offset, 1);
   assert_eq!(buf.gap_size, INITIAL_GAP_SIZE - 1);
+  assert_eq!(buf.len(), str.len() + 1);
   assert_eq!(str::from_utf8(buf.buffer.slice(0, 1)), "d");
+}
+
+#[test]
+fn test_delete() {
+  let str = "abc";
+  let mut buf = GapBuffer::new(str);
+
+  buf.insert(0, 'd'.to_ascii().to_byte());
+  buf.insert(0, 'e'.to_ascii().to_byte());
+  buf.delete(0);
+
+  assert_eq!(buf.gap_offset, 0);
+  assert_eq!(buf.gap_size, INITIAL_GAP_SIZE - 1);
+  assert_eq!(buf.len(), str.len() + 1);
+  assert_eq!(str::from_utf8(buf.buffer.slice(0, 1)), "e");
 }
