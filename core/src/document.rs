@@ -38,8 +38,8 @@ struct Document<'a> {
 }
 
 impl<'a> Document<'a> {
-  fn new<'a>(initial_text: &str) -> ~Document<'a> {
-    ~Document { buffer: ~GapBuffer::new(initial_text) }
+  fn new<'a>(initial_text: &str) -> Document<'a> {
+    Document { buffer: ~GapBuffer::new(initial_text) }
   }
 
   fn iter(&'a mut self) -> DocumentIterator<'a> {
@@ -163,14 +163,20 @@ impl Editable for GapBuffer {
   }
 
   fn get(&self, index: uint) -> u8 {
-    self.buffer[index]
+    if index < self.gap_offset {
+      self.buffer[index]
+    } else {
+      self.buffer[self.gap_size + index]
+    }
   }
 }
 
 mod tests {
   use std::str;
   use std::vec;
+  // TODO: Why do these need to import explicitly?
   use super::GapBuffer;
+  use super::Document;
   use super::Editable;
   use super::INITIAL_GAP_SIZE;
 
@@ -225,15 +231,35 @@ mod tests {
   #[test]
   fn test_len() {
     let str = "abc";
-    let mut doc = GapBuffer::new(str);
+    let mut buf = GapBuffer::new(str);
 
-    assert_eq!(doc.len(), 3);
+    assert_eq!(buf.len(), 3);
 
-    doc.insert(0, 'd'.to_ascii().to_byte());
-    doc.insert(0, 'e'.to_ascii().to_byte());
-    doc.delete(0);
+    buf.insert(0, 'd'.to_ascii().to_byte());
+    buf.insert(0, 'e'.to_ascii().to_byte());
+    buf.delete(0);
 
-    assert_eq!(doc.len(), 4);
+    assert_eq!(buf.len(), 4);
+  }
+
+  #[test]
+  fn test_get() {
+    let str = "abc";
+    let buf = GapBuffer::new(str);
+
+    assert_eq!(buf.get(0).to_ascii().to_char(), 'a');
+  }
+
+  #[test]
+  fn test_iter() {
+    let str = "abc";
+    let mut doc = Document::new(str);
+
+    let mut index = 0;
+    for ch in doc.iter() {
+      assert_eq!(ch, str[index]);
+      index += 1;
+    }
   }
 }
 
