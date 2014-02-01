@@ -3,4 +3,4 @@
 #[license = "MIT"];
 #[crate_type = "lib"];
 
-pub mod gap_buffer;
+pub mod document;
