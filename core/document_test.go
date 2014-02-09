@@ -34,3 +34,22 @@ func TestInsert(t *testing.T) {
 		t.Error("buf should not be nil")
 	}
 }
+
+func TestDelete(t *testing.T) {
+	gb := NewGapBuffer()
+	gb.Insert(0, 'a')
+	gb.Insert(1, 'b')
+	gb.Insert(2, 'c')
+	// then
+	if gb.Len() != 3 {
+		t.Error("buf should not be nil")
+	}
+
+	// when
+	gb.Delete(0)
+
+	// then
+	if gb.Len() != 2 {
+		t.Error("buf should not be nil")
+	}
+}
