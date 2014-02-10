@@ -19,7 +19,9 @@ func NewGapBuffer() *GapBuffer {
 func (b *GapBuffer) confirmGap(newGapOffset uint) {
 	if b.gapSize == 0 {
 		b.gapOffset = uint(len(b.buffer))
-		b.buffer = make([]byte, len(b.buffer)+INITIAL_GAP_SIZE)
+		newBuffer := make([]byte, len(b.buffer)+INITIAL_GAP_SIZE)
+		copy(newBuffer, b.buffer)
+		b.buffer = newBuffer
 		b.gapSize = INITIAL_GAP_SIZE
 	}
 
@@ -54,6 +56,7 @@ func (gb *GapBuffer) Len() uint {
 	return uint(len(gb.buffer)) - gb.gapSize
 }
 
+// TODO: error handling
 func (gb *GapBuffer) Get(index uint) byte {
 	var i uint = 0
 	if index < gb.gapOffset {

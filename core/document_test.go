@@ -28,10 +28,10 @@ func TestInsert(t *testing.T) {
 
 	// then
 	if gb.Len() != 1 {
-		t.Error("buf should not be nil")
+		t.Error("Len() should be 1")
 	}
 	if gb.Get(0) != 'a' {
-		t.Error("buf should not be nil")
+		t.Error("char at 0 should be 'a'")
 	}
 }
 
@@ -40,9 +40,8 @@ func TestDelete(t *testing.T) {
 	gb.Insert(0, 'a')
 	gb.Insert(1, 'b')
 	gb.Insert(2, 'c')
-	// then
 	if gb.Len() != 3 {
-		t.Error("buf should not be nil")
+		t.Error("length should be 3")
 	}
 
 	// when
@@ -50,6 +49,43 @@ func TestDelete(t *testing.T) {
 
 	// then
 	if gb.Len() != 2 {
-		t.Error("buf should not be nil")
+		t.Error("length should be 2")
+	}
+
+	if gb.Get(0) != 'b' {
+		t.Error("char at 0 should be 'b'")
+	}
+	if gb.Get(1) != 'c' {
+		t.Error("char at 1 should be 'c'")
+	}
+}
+
+func TestDeleteEmpty(t *testing.T) {
+	gb := NewGapBuffer()
+
+	// when
+	gb.Delete(0)
+
+	// then
+	if gb.Len() != 0 {
+		t.Error("length should be 0")
+	}
+}
+
+func TestGrowBuffer(t *testing.T) {
+	gb := NewGapBuffer()
+
+	// when
+	for i := uint(0); i < INITIAL_GAP_SIZE; i++ {
+		gb.Insert(i, 'a')
+	}
+	gb.Insert(INITIAL_GAP_SIZE, 'b')
+
+	// then
+	if gb.Len() != INITIAL_GAP_SIZE+1 {
+		t.Error("length should be 0")
+	}
+	if gb.Get(INITIAL_GAP_SIZE) != 'b' {
+		t.Errorf("char at %v should be 'b', actual: %v", INITIAL_GAP_SIZE, gb.Get(INITIAL_GAP_SIZE))
 	}
 }
