@@ -108,3 +108,23 @@ func TestForEach(t *testing.T) {
 		t.Errorf("expected: ac, actual: %x", ss)
 	}
 }
+
+func TestSubscribe(t *testing.T) {
+	gb := NewGapBuffer()
+	var called = 0
+	gb.Subscribe(func() {
+		called++
+	})
+	gb.Subscribe(func() {
+		called++
+	})
+
+	// when
+	gb.Insert(0, 'a')
+	gb.Insert(1, 'b')
+
+	// then
+	if called != 4 {
+		t.Errorf("expected: 4, actual: %v", called)
+	}
+}

@@ -1,18 +1,20 @@
 package core
 
 type GapBuffer struct {
-	buffer    []byte
-	gapOffset uint
-	gapSize   uint
+	buffer      []byte
+	gapOffset   uint
+	gapSize     uint
+	subscribers []func()
 }
 
 const INITIAL_GAP_SIZE = 128
 
 func NewGapBuffer() *GapBuffer {
 	return &GapBuffer{
-		buffer:    make([]byte, INITIAL_GAP_SIZE),
-		gapOffset: 0,
-		gapSize:   INITIAL_GAP_SIZE,
+		buffer:      make([]byte, INITIAL_GAP_SIZE),
+		gapOffset:   0,
+		gapSize:     INITIAL_GAP_SIZE,
+		subscribers: make([]func(), 0),
 	}
 }
 
@@ -40,6 +42,8 @@ func (gb *GapBuffer) Insert(offset uint, by byte) {
 	gb.buffer[offset] = by
 	gb.gapOffset++
 	gb.gapSize--
+
+	gb.callSubscribers()
 }
 
 func (gb *GapBuffer) Delete(offset uint) {
@@ -50,6 +54,14 @@ func (gb *GapBuffer) Delete(offset uint) {
 	gb.confirmGap(offset + 1)
 	gb.gapOffset--
 	gb.gapSize++
+
+	gb.callSubscribers()
+}
+
+func (gb *GapBuffer) callSubscribers() {
+	for _, f := range gb.subscribers {
+		f()
+	}
 }
 
 func (gb *GapBuffer) Len() uint {
@@ -74,4 +86,8 @@ func (gb *GapBuffer) ForEach(f func(byte)) {
 			f(b)
 		}
 	}
+}
+
+func (gb *GapBuffer) Subscribe(f func()) {
+	gb.subscribers = append(gb.subscribers, f)
 }
