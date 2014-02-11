@@ -89,3 +89,22 @@ func TestGrowBuffer(t *testing.T) {
 		t.Errorf("char at %v should be 'b', actual: %v", INITIAL_GAP_SIZE, gb.Get(INITIAL_GAP_SIZE))
 	}
 }
+
+func TestForEach(t *testing.T) {
+	gb := NewGapBuffer()
+	gb.Insert(0, 'a')
+	gb.Insert(1, 'b')
+	gb.Insert(2, 'c')
+	gb.Delete(1)
+
+	// when
+	var ss string
+	gb.ForEach(func(b byte) {
+		ss += string(b)
+	})
+
+	// then
+	if ss != "ac" {
+		t.Errorf("expected: ac, actual: %x", ss)
+	}
+}
