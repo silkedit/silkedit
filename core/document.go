@@ -79,11 +79,11 @@ func (gb *GapBuffer) Get(index uint) byte {
 	return gb.buffer[i]
 }
 
-func (gb *GapBuffer) ForEach(f func(byte)) {
+func (gb *GapBuffer) ForEach(f func(int, byte)) {
 	gapEnd := gb.gapOffset + gb.gapSize - 1
 	for i, b := range gb.buffer {
 		if uint(i) < gb.gapOffset || gapEnd < uint(i) {
-			f(b)
+			f(i, b)
 		}
 	}
 }

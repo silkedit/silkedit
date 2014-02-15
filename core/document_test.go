@@ -99,7 +99,7 @@ func TestForEach(t *testing.T) {
 
 	// when
 	var ss string
-	gb.ForEach(func(b byte) {
+	gb.ForEach(func(i int, b byte) {
 		ss += string(b)
 	})
 
