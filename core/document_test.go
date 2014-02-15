@@ -6,7 +6,7 @@ import (
 
 func TestNewGapBuffer(t *testing.T) {
 	// when
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 
 	// then
 	if gb == nil {
@@ -18,7 +18,7 @@ func TestNewGapBuffer(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 	if gb.Len() != 0 {
 		t.Error("Len should be 0")
 	}
@@ -36,7 +36,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 	gb.Insert(0, 'a')
 	gb.Insert(1, 'b')
 	gb.Insert(2, 'c')
@@ -61,7 +61,7 @@ func TestDelete(t *testing.T) {
 }
 
 func TestDeleteEmpty(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 
 	// when
 	gb.Delete(0)
@@ -73,7 +73,7 @@ func TestDeleteEmpty(t *testing.T) {
 }
 
 func TestGrowBuffer(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 
 	// when
 	for i := uint(0); i < INITIAL_GAP_SIZE; i++ {
@@ -91,7 +91,7 @@ func TestGrowBuffer(t *testing.T) {
 }
 
 func TestForEach(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 	gb.Insert(0, 'a')
 	gb.Insert(1, 'b')
 	gb.Insert(2, 'c')
@@ -110,7 +110,7 @@ func TestForEach(t *testing.T) {
 }
 
 func TestSubscribe(t *testing.T) {
-	gb := NewGapBuffer()
+	gb := newGapBuffer()
 	var called = 0
 	gb.Subscribe(func() {
 		called++
@@ -126,5 +126,18 @@ func TestSubscribe(t *testing.T) {
 	// then
 	if called != 4 {
 		t.Errorf("expected: 4, actual: %v", called)
+	}
+}
+
+func TestDocument(t *testing.T) {
+	// then
+	gb := NewDocument()
+
+	// when
+	if gb == nil {
+		t.Error("buf should not be nil")
+	}
+	if gb.Len() != 0 {
+		t.Error("Len should be 0")
 	}
 }

@@ -1,5 +1,14 @@
 package core
 
+type Document interface {
+	Insert(uint, byte)
+	Delete(uint)
+	Len() uint
+	Get(uint) byte
+	ForEach(func(int, byte))
+	Subscribe(func())
+}
+
 type GapBuffer struct {
 	buffer      []byte
 	gapOffset   uint
@@ -9,7 +18,11 @@ type GapBuffer struct {
 
 const INITIAL_GAP_SIZE = 128
 
-func NewGapBuffer() *GapBuffer {
+func NewDocument() Document {
+	return newGapBuffer()
+}
+
+func newGapBuffer() *GapBuffer {
 	return &GapBuffer{
 		buffer:      make([]byte, INITIAL_GAP_SIZE),
 		gapOffset:   0,

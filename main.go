@@ -7,7 +7,7 @@ import (
 )
 
 type DocumentView struct {
-	doc    *core.GapBuffer
+	doc    core.Document
 	line   int
 	column int
 }
@@ -42,7 +42,7 @@ func main() {
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
 	view := DocumentView{
-		doc:    core.NewGapBuffer(),
+		doc:    core.NewDocument(),
 		line:   0,
 		column: 0,
 	}
