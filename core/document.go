@@ -1,11 +1,16 @@
 package core
 
+import (
+	"github.com/golang/glog"
+	"unicode/utf8"
+)
+
 type Document interface {
-	Insert(uint, byte)
+	Insert(uint, rune) int
 	Delete(uint)
 	Len() uint
 	Get(uint) byte
-	ForEach(func(int, byte))
+	ForEach(func(rune))
 	Subscribe(func())
 }
 
@@ -50,13 +55,21 @@ func (b *GapBuffer) confirmGap(newGapOffset uint) {
 	b.gapOffset = newGapOffset
 }
 
-func (gb *GapBuffer) Insert(offset uint, by byte) {
+func (gb *GapBuffer) insertByte(offset uint, by byte) {
 	gb.confirmGap(offset)
 	gb.buffer[offset] = by
 	gb.gapOffset++
 	gb.gapSize--
+}
 
+func (gb *GapBuffer) Insert(offset uint, r rune) int {
+	buf := make([]byte, 4)
+	n := utf8.EncodeRune(buf, r)
+	for i := 0; i < n; i++ {
+		gb.insertByte(offset+uint(i), buf[i])
+	}
 	gb.callSubscribers()
+	return n
 }
 
 func (gb *GapBuffer) Delete(offset uint) {
@@ -92,12 +105,22 @@ func (gb *GapBuffer) Get(index uint) byte {
 	return gb.buffer[i]
 }
 
-func (gb *GapBuffer) ForEach(f func(int, byte)) {
-	gapEnd := gb.gapOffset + gb.gapSize - 1
-	for i, b := range gb.buffer {
-		if uint(i) < gb.gapOffset || gapEnd < uint(i) {
-			f(i, b)
-		}
+func (gb *GapBuffer) ForEach(f func(rune)) {
+	beforeGap := gb.buffer[:gb.gapOffset]
+	for len(beforeGap) > 0 {
+		r, size := utf8.DecodeRune(beforeGap)
+		glog.Infof("r: %v, size: %v", r, size)
+		f(r)
+		beforeGap = beforeGap[size:]
+	}
+
+	gapEnd := gb.gapOffset + gb.gapSize
+	afterGap := gb.buffer[gapEnd:]
+	for len(afterGap) > 0 {
+		r, size := utf8.DecodeRune(afterGap)
+		glog.Infof("r: %v, size: %v", r, size)
+		f(r)
+		afterGap = afterGap[size:]
 	}
 }
 

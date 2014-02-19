@@ -99,8 +99,8 @@ func TestForEach(t *testing.T) {
 
 	// when
 	var ss string
-	gb.ForEach(func(i int, b byte) {
-		ss += string(b)
+	gb.ForEach(func(r rune) {
+		ss += string(r)
 	})
 
 	// then

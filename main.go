@@ -2,8 +2,10 @@ package main
 
 import (
 	"./core"
+	"flag"
+	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
-	"unicode/utf8"
+	"github.com/shinichy/go-wcwidth"
 )
 
 type DocumentView struct {
@@ -12,28 +14,37 @@ type DocumentView struct {
 	column int
 }
 
-func (v *DocumentView) Insert(r rune) {
-	buf := make([]byte, 4)
-	n := utf8.EncodeRune(buf, r)
-	for i := 0; i < n; i++ {
-		v.doc.Insert(uint(v.column), buf[i])
-		v.column++
+func NewDocumentView() *DocumentView {
+	view := DocumentView{
+		doc:    core.NewDocument(),
+		line:   0,
+		column: 0,
 	}
+	view.doc.Subscribe(view.draw)
+	return &view
+}
 
-	v.draw()
+func (v *DocumentView) Insert(r rune) {
+	glog.Infof("Insert: %v", r)
+	n := v.doc.Insert(uint(v.column), r)
+	v.column += n
 }
 
 func (v *DocumentView) draw() {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-	v.doc.ForEach(func(i int, b byte) {
-		termbox.SetCell(i, v.line, rune(b), coldef, coldef)
+	i := 0
+	v.doc.ForEach(func(r rune) {
+		termbox.SetCell(i, v.line, r, coldef, coldef)
+		i += wcwidth.Wcwidth(r)
 	})
 
 	termbox.Flush()
 }
 
 func main() {
+	flag.Parse()
+	glog.Info("Initialize termbox")
 	err := termbox.Init()
 	if err != nil {
 		panic(err)
@@ -41,12 +52,7 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
-	view := DocumentView{
-		doc:    core.NewDocument(),
-		line:   0,
-		column: 0,
-	}
-
+	view := NewDocumentView()
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -63,4 +69,6 @@ mainloop:
 			panic(ev.Err)
 		}
 	}
+
+	glog.Flush()
 }
