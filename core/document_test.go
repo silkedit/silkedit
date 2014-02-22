@@ -37,26 +37,29 @@ func TestInsert(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	gb := newGapBuffer()
-	gb.Insert(0, 'a')
-	gb.Insert(1, 'b')
+	gb.Insert(0, 'あ')
+	gb.Insert(1, 'い')
 	gb.Insert(2, 'c')
 	if gb.Len() != 3 {
-		t.Error("length should be 3")
+		t.Errorf("expected: %v, actual: %v", 3, gb.Len())
 	}
 
 	// when
-	gb.Delete(0)
+	isSuccess := gb.Delete(1)
+	if isSuccess != true {
+		t.Errorf("deletedSize should be true, actual: %v", isSuccess)
+	}
 
 	// then
 	if gb.Len() != 2 {
-		t.Error("length should be 2")
+		t.Errorf("expected: %v, actual: %v", 2, gb.Len())
 	}
 
-	if gb.Get(0) != 'b' {
-		t.Error("char at 0 should be 'b'")
+	if gb.Get(0) != 'い' {
+		t.Errorf("expected char at 0: %v, actual: %v", 'い', gb.Get(0))
 	}
 	if gb.Get(1) != 'c' {
-		t.Error("char at 1 should be 'c'")
+		t.Errorf("expected char at 1: %v, actual: %v", 'c', gb.Get(1))
 	}
 }
 
@@ -76,7 +79,7 @@ func TestGrowBuffer(t *testing.T) {
 	gb := newGapBuffer()
 
 	// when
-	for i := uint(0); i < INITIAL_GAP_SIZE; i++ {
+	for i := 0; i < INITIAL_GAP_SIZE; i++ {
 		gb.Insert(i, 'a')
 	}
 	gb.Insert(INITIAL_GAP_SIZE, 'b')
@@ -95,7 +98,7 @@ func TestForEach(t *testing.T) {
 	gb.Insert(0, 'a')
 	gb.Insert(1, 'b')
 	gb.Insert(2, 'c')
-	gb.Delete(1)
+	gb.Delete(2)
 
 	// when
 	var ss string

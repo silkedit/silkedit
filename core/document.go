@@ -6,18 +6,18 @@ import (
 )
 
 type Document interface {
-	Insert(uint, rune) int
-	Delete(uint)
-	Len() uint
-	Get(uint) byte
+	Insert(int, rune) bool
+	Delete(int) bool
+	Len() int
+	Get(int) rune
 	ForEach(func(rune))
 	Subscribe(func())
 }
 
 type GapBuffer struct {
 	buffer      []byte
-	gapOffset   uint
-	gapSize     uint
+	gapOffset   int
+	gapSize     int
 	subscribers []func()
 }
 
@@ -36,9 +36,9 @@ func newGapBuffer() *GapBuffer {
 	}
 }
 
-func (b *GapBuffer) confirmGap(newGapOffset uint) {
+func (b *GapBuffer) confirmGap(newGapOffset int) {
 	if b.gapSize == 0 {
-		b.gapOffset = uint(len(b.buffer))
+		b.gapOffset = len(b.buffer)
 		newBuffer := make([]byte, len(b.buffer)+INITIAL_GAP_SIZE)
 		copy(newBuffer, b.buffer)
 		b.buffer = newBuffer
@@ -55,33 +55,50 @@ func (b *GapBuffer) confirmGap(newGapOffset uint) {
 	b.gapOffset = newGapOffset
 }
 
-func (gb *GapBuffer) insertByte(offset uint, by byte) {
-	gb.confirmGap(offset)
-	gb.buffer[offset] = by
+func (gb *GapBuffer) insertByte(pos int, by byte) {
+	gb.confirmGap(pos)
+	gb.buffer[pos] = by
 	gb.gapOffset++
 	gb.gapSize--
 }
 
-func (gb *GapBuffer) Insert(offset uint, r rune) int {
-	buf := make([]byte, 4)
-	n := utf8.EncodeRune(buf, r)
-	for i := 0; i < n; i++ {
-		gb.insertByte(offset+uint(i), buf[i])
-	}
-	gb.callSubscribers()
-	return n
-}
-
-func (gb *GapBuffer) Delete(offset uint) {
-	if gb.Len() == 0 {
-		return
-	}
-
-	gb.confirmGap(offset + 1)
+func (gb *GapBuffer) deleteByte(pos int) {
+	gb.confirmGap(pos + 1)
 	gb.gapOffset--
 	gb.gapSize++
+}
+
+// todo: change return type to bool
+
+// Insert a rune at cursor pos.
+// Returns the number of characters
+func (gb *GapBuffer) Insert(pos int, r rune) bool {
+	buf := make([]byte, 4)
+	n := utf8.EncodeRune(buf, r)
+	bytePos := gb.toBytePos(pos)
+	for i := 0; i < n; i++ {
+		gb.insertByte(bytePos+i, buf[i])
+	}
+	gb.callSubscribers()
+	return true
+}
+
+// Delete a character before cursor pos.
+func (gb *GapBuffer) Delete(pos int) bool {
+	if gb.Len() == 0 || pos <= 0 {
+		glog.Warningf("Can't delete at cursor pos: %v. Buffer length: %v", pos, gb.Len())
+		return false
+	}
+
+	bytePos := gb.toBytePos(pos - 1)
+	r, size := utf8.DecodeRune(gb.buffer[bytePos:])
+	glog.Infof("Delete: %c, bytes: %v, pos: %v", r, size, pos)
+	for i := size - 1; i >= 0; i-- {
+		gb.deleteByte(bytePos + i)
+	}
 
 	gb.callSubscribers()
+	return true
 }
 
 func (gb *GapBuffer) callSubscribers() {
@@ -90,19 +107,35 @@ func (gb *GapBuffer) callSubscribers() {
 	}
 }
 
-func (gb *GapBuffer) Len() uint {
-	return uint(len(gb.buffer)) - gb.gapSize
+func (gb *GapBuffer) Len() int {
+	beforeGap := gb.buffer[:gb.gapOffset]
+	l := utf8.RuneCount(beforeGap)
+	gapEnd := gb.gapOffset + gb.gapSize
+	afterGap := gb.buffer[gapEnd:]
+	l += utf8.RuneCount(afterGap)
+	return l
+}
+
+func (gb *GapBuffer) toBytePos(pos int) int {
+	n := 0
+	for i := 0; i < pos; i++ {
+		if n == gb.gapOffset && (n+gb.gapSize) != len(gb.buffer) {
+			n += gb.gapSize
+		}
+		_, size := utf8.DecodeRune(gb.buffer[n:])
+		n += size
+	}
+	if n == gb.gapOffset && (n+gb.gapSize) != len(gb.buffer) {
+		n += gb.gapSize
+	}
+	return n
 }
 
 // TODO: error handling
-func (gb *GapBuffer) Get(index uint) byte {
-	var i uint = 0
-	if index < gb.gapOffset {
-		i = index
-	} else {
-		i = gb.gapSize + index
-	}
-	return gb.buffer[i]
+func (gb *GapBuffer) Get(pos int) rune {
+	n := gb.toBytePos(pos)
+	r, _ := utf8.DecodeRune(gb.buffer[n:])
+	return r
 }
 
 func (gb *GapBuffer) ForEach(f func(rune)) {

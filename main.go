@@ -25,6 +25,9 @@ mainloop:
 			switch ev.Key {
 			case termbox.KeyEsc:
 				break mainloop
+			case termbox.KeyBackspace:
+			case termbox.KeyBackspace2:
+				view.Delete()
 			default:
 				if ev.Ch != 0 {
 					view.Insert(ev.Ch)

@@ -25,8 +25,15 @@ func NewDocumentView() *DocumentView {
 
 func (v *DocumentView) Insert(r rune) {
 	glog.Infof("Insert: %v", r)
-	n := v.doc.Insert(uint(v.column), r)
-	v.column += n
+	if v.doc.Insert(v.column, r) {
+		v.column += 1
+	}
+}
+
+func (v *DocumentView) Delete() {
+	if v.doc.Delete(v.column) {
+		v.column -= 1
+	}
 }
 
 func (v *DocumentView) draw() {
