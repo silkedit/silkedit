@@ -39,10 +39,15 @@ func (v *DocumentView) Delete() {
 func (v *DocumentView) draw() {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-	i := 0
+	column, line := 0, 0
 	v.doc.ForEach(func(r rune) {
-		termbox.SetCell(i, v.line, r, coldef, coldef)
-		i += wcwidth.Wcwidth(r)
+		if r == '\n' {
+			line++
+			column = 0
+		} else {
+			termbox.SetCell(column, line, r, coldef, coldef)
+			column += wcwidth.Wcwidth(r)
+		}
 	})
 
 	termbox.Flush()

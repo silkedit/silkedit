@@ -28,6 +28,11 @@ mainloop:
 			case termbox.KeyBackspace:
 			case termbox.KeyBackspace2:
 				view.Delete()
+			case termbox.KeySpace:
+				view.Insert(' ')
+			case termbox.KeyEnter:
+				// todo: create a new line character configuration. #16
+				view.Insert('\n')
 			default:
 				if ev.Ch != 0 {
 					view.Insert(ev.Ch)
