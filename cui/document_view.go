@@ -19,7 +19,8 @@ func NewDocumentView() *DocumentView {
 		line:   0,
 		column: 0,
 	}
-	view.doc.Subscribe(view.draw)
+	view.drawCursor()
+	view.doc.Subscribe(view.drawDoc)
 	return &view
 }
 
@@ -28,15 +29,31 @@ func (v *DocumentView) Insert(r rune) {
 	if v.doc.Insert(v.column, r) {
 		v.column += 1
 	}
+	v.drawCursor()
 }
 
 func (v *DocumentView) Delete() {
 	if v.doc.Delete(v.column) {
 		v.column -= 1
 	}
+	v.drawCursor()
 }
 
-func (v *DocumentView) draw() {
+func (v *DocumentView) drawCursor() {
+	column, line := 0, 0
+	v.doc.ForEach(func(r rune) {
+		if r == '\n' {
+			line++
+			column = 0
+		} else {
+			column += wcwidth.Wcwidth(r)
+		}
+	})
+	termbox.SetCursor(column, line)
+	termbox.Flush()
+}
+
+func (v *DocumentView) drawDoc() {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
 	column, line := 0, 0
@@ -49,6 +66,5 @@ func (v *DocumentView) draw() {
 			column += wcwidth.Wcwidth(r)
 		}
 	})
-
 	termbox.Flush()
 }
