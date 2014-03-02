@@ -1,7 +1,8 @@
 package main
 
 import (
-	"./cui"
+	"bitbucket.org/shinichy/sk/core"
+	. "./api"
 	"flag"
 	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
@@ -17,7 +18,8 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
-	view := cui.NewDocumentView()
+	drawer := TermboxDrawer{}
+	view := core.NewDocumentView(drawer)
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
