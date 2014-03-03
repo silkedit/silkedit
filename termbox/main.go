@@ -2,7 +2,7 @@ package main
 
 import (
 	"bitbucket.org/shinichy/sk/core"
-	. "./api"
+	"bitbucket.org/shinichy/sk/termbox/api"
 	"flag"
 	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
@@ -18,7 +18,7 @@ func main() {
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
-	drawer := TermboxDrawer{}
+	drawer := api.TermboxDrawer{}
 	view := core.NewDocumentView()
 	drawer.DrawCursor(view)
 	view.Doc.Subscribe(func(ev int, info interface{}) {
