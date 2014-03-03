@@ -19,7 +19,20 @@ func main() {
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
 	drawer := TermboxDrawer{}
-	view := core.NewDocumentView(drawer)
+	view := core.NewDocumentView()
+	drawer.DrawCursor(view)
+	view.Doc.Subscribe(func(ev int, info interface{}) {
+		switch ev {
+		case core.DOCUMENT_INSERT, core.DOCUMENT_DELETE:
+			drawer.DrawDoc(view)
+		}
+	})
+	view.Subscribe(func(ev int, info interface{}) {
+		switch ev {
+		case core.DOCUMENT_VIEW_INSERT, core.DOCUMENT_VIEW_DELETE:
+			drawer.DrawCursor(view)
+		}
+	})
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {

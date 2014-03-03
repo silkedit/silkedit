@@ -6,19 +6,19 @@ import (
 )
 
 type Document interface {
+IObservable
 	Insert(int, rune) bool
 	Delete(int) bool
 	Len() int
 	Get(int) rune
 	ForEach(func(rune))
-	Subscribe(func())
 }
 
 type GapBuffer struct {
-	buffer      []byte
+	*Observable
+buffer      []byte
 	gapOffset   int
 	gapSize     int
-	subscribers []func()
 }
 
 const INITIAL_GAP_SIZE = 128
@@ -29,10 +29,10 @@ func NewDocument() Document {
 
 func newGapBuffer() *GapBuffer {
 	return &GapBuffer{
+		Observable:  NewObservable(),
 		buffer:      make([]byte, INITIAL_GAP_SIZE),
 		gapOffset:   0,
 		gapSize:     INITIAL_GAP_SIZE,
-		subscribers: make([]func(), 0),
 	}
 }
 
@@ -79,7 +79,7 @@ func (gb *GapBuffer) Insert(pos int, r rune) bool {
 	for i := 0; i < n; i++ {
 		gb.insertByte(bytePos+i, buf[i])
 	}
-	gb.callSubscribers()
+	gb.callSubscribers(DOCUMENT_INSERT, nil)
 	return true
 }
 
@@ -97,14 +97,8 @@ func (gb *GapBuffer) Delete(pos int) bool {
 		gb.deleteByte(bytePos + i)
 	}
 
-	gb.callSubscribers()
+	gb.callSubscribers(DOCUMENT_DELETE, nil)
 	return true
-}
-
-func (gb *GapBuffer) callSubscribers() {
-	for _, f := range gb.subscribers {
-		f()
-	}
 }
 
 func (gb *GapBuffer) Len() int {
@@ -155,8 +149,4 @@ func (gb *GapBuffer) ForEach(f func(rune)) {
 		f(r)
 		afterGap = afterGap[size:]
 	}
-}
-
-func (gb *GapBuffer) Subscribe(f func()) {
-	gb.subscribers = append(gb.subscribers, f)
 }
