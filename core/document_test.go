@@ -115,10 +115,10 @@ func TestForEach(t *testing.T) {
 func TestSubscribe(t *testing.T) {
 	gb := newGapBuffer()
 	var called = 0
-	gb.Subscribe(func() {
+	gb.Subscribe(func(int, interface{}) {
 		called++
 	})
-	gb.Subscribe(func() {
+	gb.Subscribe(func(int, interface{}) {
 		called++
 	})
 
