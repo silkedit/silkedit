@@ -21,6 +21,12 @@ func NewDocumentView() *DocumentView {
 	return &view
 }
 
+func (v *DocumentView) InsertString(s string) {
+	for _, r := range s {
+		v.Insert(r)
+	}
+}
+
 func (v *DocumentView) Insert(r rune) {
 	glog.Infof("Insert: %v", r)
 	if v.Doc.Insert(v.column, r) {

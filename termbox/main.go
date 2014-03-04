@@ -1,15 +1,19 @@
 package main
 
 import (
+	"flag"
 	"bitbucket.org/shinichy/sk/core"
 	"bitbucket.org/shinichy/sk/termbox/api"
-	"flag"
+	"bitbucket.org/shinichy/sk/termbox/config"
 	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
 )
 
 func main() {
 	flag.Parse()
+	glog.Info("Loading settings")
+	config.Load()
+
 	glog.Info("Initialize termbox")
 	err := termbox.Init()
 	if err != nil {
@@ -46,8 +50,7 @@ mainloop:
 			case termbox.KeySpace:
 				view.Insert(' ')
 			case termbox.KeyEnter:
-				// todo: create a new line character configuration. #16
-				view.Insert('\n')
+				view.InsertString(config.Conf.LineSeparator())
 			default:
 				if ev.Ch != 0 {
 					view.Insert(ev.Ch)
