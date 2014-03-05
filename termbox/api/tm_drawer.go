@@ -2,7 +2,6 @@ package api
 
 import (
 	"bitbucket.org/shinichy/sk/core"
-	"bitbucket.org/shinichy/sk/termbox/config"
 	"github.com/nsf/termbox-go"
 	"github.com/shinichy/go-wcwidth"
 )
