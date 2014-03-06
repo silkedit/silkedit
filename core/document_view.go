@@ -36,9 +36,21 @@ func (v *DocumentView) Insert(r rune) {
 }
 
 func (v *DocumentView) Delete() {
-	if v.Doc.Delete(v.column) {
-		v.column -= 1
+	if v.column <= 0 {
+		return
 	}
+
+	delCount := 1
+	if v.Doc.Get(v.column-1) == '\n' && v.column-2 >= 0 && v.Doc.Get(v.column-2) == '\r' {
+		delCount = 2
+	}
+
+	for i := 0; i < delCount; i++ {
+		if v.Doc.Delete(v.column) {
+			v.column -= 1
+		}
+	}
+
 	v.callSubscribers(DOCUMENT_VIEW_DELETE, nil)
 }
 

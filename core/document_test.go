@@ -93,7 +93,7 @@ func TestGrowBuffer(t *testing.T) {
 	}
 }
 
-func TestForEach(t *testing.T) {
+func TestIterator(t *testing.T) {
 	gb := newGapBuffer()
 	gb.Insert(0, 'a')
 	gb.Insert(1, 'b')
@@ -102,9 +102,12 @@ func TestForEach(t *testing.T) {
 
 	// when
 	var ss string
-	gb.ForEach(func(r rune) {
+	iter := gb.Iterator()
+	for {
+		r, hasNext := iter()
+		if !hasNext { break }
 		ss += string(r)
-	})
+	}
 
 	// then
 	if ss != "ac" {

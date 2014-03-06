@@ -11,13 +11,13 @@ IObservable
 	Delete(int) bool
 	Len() int
 	Get(int) rune
-	ForEach(func(rune))
+	Iterator() func() (rune, bool)
 }
 
 type GapBuffer struct {
 	*Observable
-buffer      []byte
-	gapOffset   int
+	buffer      []byte
+gapOffset   int
 	gapSize     int
 }
 
@@ -91,8 +91,7 @@ func (gb *GapBuffer) Delete(pos int) bool {
 	}
 
 	bytePos := gb.toBytePos(pos - 1)
-	r, size := utf8.DecodeRune(gb.buffer[bytePos:])
-	glog.Infof("Delete: %c, bytes: %v, pos: %v", r, size, pos)
+	_, size := utf8.DecodeRune(gb.buffer[bytePos:])
 	for i := size - 1; i >= 0; i-- {
 		gb.deleteByte(bytePos + i)
 	}
@@ -127,26 +126,33 @@ func (gb *GapBuffer) toBytePos(pos int) int {
 
 // TODO: error handling
 func (gb *GapBuffer) Get(pos int) rune {
+	if pos < 0 {
+		glog.Errorf("invalid pos: %v", pos)
+		return 0
+	}
+
 	n := gb.toBytePos(pos)
 	r, _ := utf8.DecodeRune(gb.buffer[n:])
 	return r
 }
 
-func (gb *GapBuffer) ForEach(f func(rune)) {
+func (gb *GapBuffer) Iterator() func() (rune, bool) {
 	beforeGap := gb.buffer[:gb.gapOffset]
-	for len(beforeGap) > 0 {
-		r, size := utf8.DecodeRune(beforeGap)
-		glog.Infof("r: %v, size: %v", r, size)
-		f(r)
-		beforeGap = beforeGap[size:]
-	}
-
 	gapEnd := gb.gapOffset + gb.gapSize
 	afterGap := gb.buffer[gapEnd:]
-	for len(afterGap) > 0 {
-		r, size := utf8.DecodeRune(afterGap)
-		glog.Infof("r: %v, size: %v", r, size)
-		f(r)
-		afterGap = afterGap[size:]
+	return func() (rune, bool) {
+		if len(beforeGap) > 0 {
+			r, size := utf8.DecodeRune(beforeGap)
+			beforeGap = beforeGap[size:]
+			return r, true
+		}
+
+		if len(afterGap) > 0 {
+			r, size := utf8.DecodeRune(afterGap)
+			afterGap = afterGap[size:]
+			return r, true
+		}
+
+		return 0, false
 	}
 }
