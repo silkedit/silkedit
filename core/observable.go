@@ -18,7 +18,7 @@ func NewObservable() *Observable {
 	}
 }
 
-func (o *Observable) callSubscribers(ev int, info interface{}) {
+func (o *Observable) CallSubscribers(ev int, info interface{}) {
 	for _, f := range o.subscribers {
 		f(ev, info)
 	}

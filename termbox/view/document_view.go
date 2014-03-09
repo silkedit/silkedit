@@ -1,23 +1,45 @@
-package core
+package view
 
 import (
 	"github.com/golang/glog"
+	"bitbucket.org/shinichy/sk/core"
+	"bitbucket.org/shinichy/sk/termbox/events"
 )
 
 type DocumentView struct {
-	*Observable
-Doc    Document
-	line   int
+	*core.Observable
+	Doc    core.Document
+line   int
 	column int
+}
+
+var getDrawer = func() Drawer {
+	return TermboxDrawer{}
 }
 
 func NewDocumentView() *DocumentView {
 	view := DocumentView{
-		Observable: NewObservable(),
-		Doc:    NewDocument(),
+		Observable: core.NewObservable(),
+		Doc:    core.NewDocument(),
 		line:   0,
 		column: 0,
 	}
+
+	drawer := getDrawer()
+	drawer.DrawCursor(&view)
+	view.Doc.Subscribe(func(ev int, info interface{}) {
+		switch ev {
+		case core.DOCUMENT_INSERT, core.DOCUMENT_DELETE:
+			drawer.DrawDoc(&view)
+		}
+	})
+	view.Subscribe(func(ev int, info interface{}) {
+		switch ev {
+		case events.DOCUMENT_VIEW_INSERT, events.DOCUMENT_VIEW_DELETE:
+			drawer.DrawCursor(&view)
+		}
+	})
+
 	return &view
 }
 
@@ -32,7 +54,7 @@ func (v *DocumentView) Insert(r rune) {
 	if v.Doc.Insert(v.column, r) {
 		v.column += 1
 	}
-	v.callSubscribers(DOCUMENT_VIEW_INSERT, nil)
+	v.CallSubscribers(events.DOCUMENT_VIEW_INSERT, nil)
 }
 
 func (v *DocumentView) Delete() {
@@ -51,7 +73,7 @@ func (v *DocumentView) Delete() {
 		}
 	}
 
-	v.callSubscribers(DOCUMENT_VIEW_DELETE, nil)
+	v.CallSubscribers(events.DOCUMENT_VIEW_DELETE, nil)
 }
 
 func (v *DocumentView) CursorPos() (column int, line int) {

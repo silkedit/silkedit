@@ -1,14 +1,13 @@
-package api
+package view
 
 import (
-	"bitbucket.org/shinichy/sk/core"
 	"github.com/nsf/termbox-go"
 	"github.com/shinichy/go-wcwidth"
 )
 
 type TermboxDrawer struct{}
 
-func (d TermboxDrawer) DrawCursor(v *core.DocumentView) {
+func (d TermboxDrawer) DrawCursor(v *DocumentView) {
 	column, line := 0, 0
 	iter := v.Doc.Iterator()
 	for {
@@ -34,7 +33,7 @@ func (d TermboxDrawer) DrawCursor(v *core.DocumentView) {
 	termbox.Flush()
 }
 
-func (d TermboxDrawer) DrawDoc(v *core.DocumentView) {
+func (d TermboxDrawer) DrawDoc(v *DocumentView) {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
 	column, line := 0, 0

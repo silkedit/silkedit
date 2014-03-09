@@ -17,8 +17,8 @@ IObservable
 type GapBuffer struct {
 	*Observable
 	buffer      []byte
-gapOffset   int
-	gapSize     int
+	gapOffset   int
+gapSize     int
 }
 
 const INITIAL_GAP_SIZE = 128
@@ -79,7 +79,7 @@ func (gb *GapBuffer) Insert(pos int, r rune) bool {
 	for i := 0; i < n; i++ {
 		gb.insertByte(bytePos+i, buf[i])
 	}
-	gb.callSubscribers(DOCUMENT_INSERT, nil)
+	gb.CallSubscribers(DOCUMENT_INSERT, nil)
 	return true
 }
 
@@ -96,7 +96,7 @@ func (gb *GapBuffer) Delete(pos int) bool {
 		gb.deleteByte(bytePos + i)
 	}
 
-	gb.callSubscribers(DOCUMENT_DELETE, nil)
+	gb.CallSubscribers(DOCUMENT_DELETE, nil)
 	return true
 }
 

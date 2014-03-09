@@ -2,8 +2,7 @@ package main
 
 import (
 	"flag"
-	"bitbucket.org/shinichy/sk/core"
-	"bitbucket.org/shinichy/sk/termbox/api"
+	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
 	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
@@ -21,22 +20,8 @@ func main() {
 	}
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
+	view := view.NewDocumentView()
 
-	drawer := api.TermboxDrawer{}
-	view := core.NewDocumentView()
-	drawer.DrawCursor(view)
-	view.Doc.Subscribe(func(ev int, info interface{}) {
-		switch ev {
-		case core.DOCUMENT_INSERT, core.DOCUMENT_DELETE:
-			drawer.DrawDoc(view)
-		}
-	})
-	view.Subscribe(func(ev int, info interface{}) {
-		switch ev {
-		case core.DOCUMENT_VIEW_INSERT, core.DOCUMENT_VIEW_DELETE:
-			drawer.DrawCursor(view)
-		}
-	})
 mainloop:
 	for {
 		switch ev := termbox.PollEvent(); ev.Type {
@@ -44,8 +29,7 @@ mainloop:
 			switch ev.Key {
 			case termbox.KeyEsc:
 				break mainloop
-			case termbox.KeyBackspace:
-			case termbox.KeyBackspace2:
+			case termbox.KeyBackspace, termbox.KeyBackspace2:
 				view.Delete()
 			case termbox.KeySpace:
 				view.Insert(' ')
