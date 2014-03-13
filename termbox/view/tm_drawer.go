@@ -32,7 +32,6 @@ func (d TermboxDrawer) DrawCursor(x int, y int, v *DocumentView) {
 		}
 	}
 	termbox.SetCursor(column, line)
-	termbox.Flush()
 }
 
 func (d TermboxDrawer) DrawDoc(x int, y int, v *DocumentView) {
@@ -60,5 +59,4 @@ func (d TermboxDrawer) DrawDoc(x int, y int, v *DocumentView) {
 			column += wcwidth.Wcwidth(r)
 		}
 	}
-	termbox.Flush()
 }

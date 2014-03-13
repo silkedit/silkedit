@@ -15,8 +15,8 @@ func NewView() *View {
 		y: 0,
 		width: 0,
 		height: 0,
-		maxWidth: 0,
-		maxHeight: 0,
+		maxWidth: -1,
+		maxHeight: -1,
 	}
 }
 

@@ -24,11 +24,18 @@ func main() {
 	// construct views
 	root := view.NewStackView()
 	v := view.NewDocumentView()
+	statusView := view.NewStatusView()
 	width, height := termbox.Size()
 	root.SetWidth(width)
 	root.SetHeight(height)
 	root.Add(v)
-	root.Draw(0, 0)
+	root.Add(statusView)
+	go func() {
+		for {
+			root.Draw(0, 0)
+			termbox.Flush()
+		}
+	}()
 
 mainloop:
 	for {
