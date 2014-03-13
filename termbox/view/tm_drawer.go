@@ -7,8 +7,10 @@ import (
 
 type TermboxDrawer struct{}
 
-func (d TermboxDrawer) DrawCursor(v *DocumentView) {
-	column, line := 0, 0
+var tmDrawer = TermboxDrawer{}
+
+func (d TermboxDrawer) DrawCursor(x int, y int, v *DocumentView) {
+	column, line := x, y
 	iter := v.Doc.Iterator()
 	for {
 		r, hasNext := iter()
@@ -17,14 +19,14 @@ func (d TermboxDrawer) DrawCursor(v *DocumentView) {
 		switch r {
 		case '\r':
 			line++
-			column = 0
+			column = x
 			r, hasNext = iter()
 			if r != '\n' {
 				continue
 			}
 		case '\n':
 			line++
-			column = 0
+			column = x
 		default:
 			column += wcwidth.Wcwidth(r)
 		}
@@ -33,10 +35,10 @@ func (d TermboxDrawer) DrawCursor(v *DocumentView) {
 	termbox.Flush()
 }
 
-func (d TermboxDrawer) DrawDoc(v *DocumentView) {
+func (d TermboxDrawer) DrawDoc(x int, y int, v *DocumentView) {
 	const coldef = termbox.ColorDefault
 	termbox.Clear(coldef, coldef)
-	column, line := 0, 0
+	column, line := x, y
 	iter := v.Doc.Iterator()
 	for {
 		r, hasNext := iter()
@@ -45,14 +47,14 @@ func (d TermboxDrawer) DrawDoc(v *DocumentView) {
 		switch r {
 		case '\r':
 			line++
-			column = 0
+			column = x
 			r, hasNext = iter()
 			if r != '\n' {
 				continue
 			}
 		case '\n':
 			line++
-			column = 0
+			column = x
 		default:
 			termbox.SetCell(column, line, r, coldef, coldef)
 			column += wcwidth.Wcwidth(r)

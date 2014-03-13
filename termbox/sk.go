@@ -20,7 +20,15 @@ func main() {
 	}
 	defer termbox.Close()
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
-	view := view.NewDocumentView()
+
+	// construct views
+	root := view.NewStackView()
+	v := view.NewDocumentView()
+	width, height := termbox.Size()
+	root.SetWidth(width)
+	root.SetHeight(height)
+	root.Add(v)
+	root.Draw(0, 0)
 
 mainloop:
 	for {
@@ -30,14 +38,14 @@ mainloop:
 			case termbox.KeyEsc:
 				break mainloop
 			case termbox.KeyBackspace, termbox.KeyBackspace2:
-				view.Delete()
+				v.Delete()
 			case termbox.KeySpace:
-				view.Insert(' ')
+				v.Insert(' ')
 			case termbox.KeyEnter:
-				view.InsertString(config.Conf.LineSeparator())
+				v.InsertString(config.Conf.LineSeparator())
 			default:
 				if ev.Ch != 0 {
-					view.Insert(ev.Ch)
+					v.Insert(ev.Ch)
 				}
 			}
 		case termbox.EventError:

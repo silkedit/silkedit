@@ -8,39 +8,45 @@ import (
 
 type DocumentView struct {
 	*core.Observable
+	*View
 	Doc    core.Document
-line   int
+	line   int
 	column int
 }
 
-var getDrawer = func() Drawer {
-	return TermboxDrawer{}
+var getDrawer = func() DocumentDrawer {
+	return tmDrawer
 }
 
 func NewDocumentView() *DocumentView {
 	view := DocumentView{
 		Observable: core.NewObservable(),
+		View: NewView(),
 		Doc:    core.NewDocument(),
 		line:   0,
 		column: 0,
 	}
 
 	drawer := getDrawer()
-	drawer.DrawCursor(&view)
 	view.Doc.Subscribe(func(ev int, info interface{}) {
 		switch ev {
 		case core.DOCUMENT_INSERT, core.DOCUMENT_DELETE:
-			drawer.DrawDoc(&view)
+			drawer.DrawDoc(view.x, view.y, &view)
 		}
 	})
 	view.Subscribe(func(ev int, info interface{}) {
 		switch ev {
 		case events.DOCUMENT_VIEW_INSERT, events.DOCUMENT_VIEW_DELETE:
-			drawer.DrawCursor(&view)
+			drawer.DrawCursor(view.x, view.y, &view)
 		}
 	})
 
 	return &view
+}
+
+func (v *DocumentView) Draw(x int, y int) {
+	getDrawer().DrawCursor(x, y, v)
+	getDrawer().DrawDoc(x, y, v)
 }
 
 func (v *DocumentView) InsertString(s string) {

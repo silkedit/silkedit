@@ -1,6 +1,11 @@
 package view
 
 type Drawer interface {
-	DrawCursor(*DocumentView)
-	DrawDoc(*DocumentView)
+	Draw(x int, y int)
+	Height() int
+	Width() int
+	SetHeight(int)
+	SetWidth(int)
+	MaxHeight() int
+	MaxWidth() int
 }

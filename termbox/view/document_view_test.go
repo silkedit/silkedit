@@ -8,11 +8,11 @@ import (
 
 type TestDrawer struct{}
 
-func (d TestDrawer) DrawCursor(v *DocumentView) {
+func (d TestDrawer) DrawCursor(int, int, *DocumentView) {
 
 }
 
-func (d TestDrawer) DrawDoc(v *DocumentView) {
+func (d TestDrawer) DrawDoc(int, int, *DocumentView) {
 
 }
 
@@ -21,7 +21,7 @@ type TestSuite struct {
 }
 
 func (suite *TestSuite) SetupTest() {
-	getDrawer = func() Drawer {
+	getDrawer = func() DocumentDrawer {
 		return TestDrawer{}
 	}
 }

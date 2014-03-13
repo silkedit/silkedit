@@ -18,7 +18,7 @@ type GapBuffer struct {
 	*Observable
 	buffer      []byte
 	gapOffset   int
-gapSize     int
+	gapSize     int
 }
 
 const INITIAL_GAP_SIZE = 128
