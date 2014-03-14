@@ -4,6 +4,7 @@ import (
 	"flag"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
+	"bitbucket.org/shinichy/sk/termbox/mode"
 	"github.com/golang/glog"
 	"github.com/nsf/termbox-go"
 )
@@ -30,15 +31,12 @@ func main() {
 	root.SetHeight(height)
 	root.Add(v)
 	root.Add(statusView)
-	go func() {
-		for {
-			root.Draw(0, 0)
-			termbox.Flush()
-		}
-	}()
+	root.Draw(0, 0)
+	termbox.Flush()
 
 mainloop:
 	for {
+		// event handling
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
 			switch ev.Key {
@@ -58,6 +56,9 @@ mainloop:
 		case termbox.EventError:
 			panic(ev.Err)
 		}
+
+		root.Draw(0, 0)
+		termbox.Flush()
 	}
 
 	glog.Flush()
