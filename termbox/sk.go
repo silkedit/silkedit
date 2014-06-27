@@ -4,9 +4,8 @@ import (
 	"flag"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
-	"bitbucket.org/shinichy/sk/termbox/mode"
 	"github.com/golang/glog"
-	"github.com/nsf/termbox-go"
+	termbox "github.com/nsf/termbox-go"
 )
 
 func main() {

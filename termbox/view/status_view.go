@@ -1,8 +1,8 @@
 package view
 
 import (
-	"github.com/nsf/termbox-go"
-	"github.com/shinichy/go-wcwidth"
+	termbox "github.com/nsf/termbox-go"
+	wcwidth "github.com/shinichy/go-wcwidth"
 )
 
 type StatusView struct {
