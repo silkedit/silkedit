@@ -2,8 +2,10 @@ package main
 
 import (
 	"flag"
+	"os"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
+	"bitbucket.org/shinichy/sk/termbox/key"
 	"github.com/golang/glog"
 	termbox "github.com/nsf/termbox-go"
 )
@@ -18,7 +20,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	defer termbox.Close()
+
+	defer func() {
+		termbox.Close()
+		glog.Flush()
+		os.Exit(0)
+	}()
+
 	termbox.SetInputMode(termbox.InputEsc | termbox.InputMouse)
 
 	// construct views
@@ -33,25 +41,11 @@ func main() {
 	root.Draw(0, 0)
 	termbox.Flush()
 
-mainloop:
 	for {
 		// event handling
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			switch ev.Key {
-			case termbox.KeyEsc:
-				break mainloop
-			case termbox.KeyBackspace, termbox.KeyBackspace2:
-				v.Delete()
-			case termbox.KeySpace:
-				v.Insert(' ')
-			case termbox.KeyEnter:
-				v.InsertString(config.Conf.LineSeparator())
-			default:
-				if ev.Ch != 0 {
-					v.Insert(ev.Ch)
-				}
-			}
+			key.DispatchKey(v, ev)
 		case termbox.EventError:
 			panic(ev.Err)
 		}
@@ -59,6 +53,4 @@ mainloop:
 		root.Draw(0, 0)
 		termbox.Flush()
 	}
-
-	glog.Flush()
 }
