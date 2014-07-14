@@ -2,14 +2,14 @@ package config
 
 import (
 	"testing"
-	"github.com/BurntSushi/toml"
+	yaml "gopkg.in/yaml.v1"
 )
 
 func TestLineSeparator(t *testing.T) {
-	blob := `
-default_line_separator = "LF"
+	data := `
+default_line_separator: "LF"
 `
-	if _, err := toml.Decode(blob, &(Conf)); err != nil {
+	if err := yaml.Unmarshal([]byte(data), &Conf); err != nil {
 		t.Error("Can't read the setting")
 	}
 

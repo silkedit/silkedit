@@ -5,7 +5,6 @@ import (
 	"os"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
-	"bitbucket.org/shinichy/sk/termbox/key"
 	"github.com/golang/glog"
 	termbox "github.com/nsf/termbox-go"
 )
@@ -14,6 +13,9 @@ func main() {
 	flag.Parse()
 	glog.Info("Loading settings")
 	config.Load()
+
+	glog.Info("Loading key maps")
+	config.LoadKeyMap()
 
 	glog.Info("Initialize termbox")
 	err := termbox.Init()
@@ -45,7 +47,7 @@ func main() {
 		// event handling
 		switch ev := termbox.PollEvent(); ev.Type {
 		case termbox.EventKey:
-			key.DispatchKey(v, ev)
+			config.DispatchKey(v, ev)
 		case termbox.EventError:
 			panic(ev.Err)
 		}

@@ -2,22 +2,29 @@ package config
 
 import (
 	"github.com/golang/glog"
-	"github.com/BurntSushi/toml"
+	"io/ioutil"
+	yaml "gopkg.in/yaml.v1"
 )
 
 const (
-	configFilePath = "sk.toml"
+	configFilePath = "sk.yml"
 )
 
 type Config struct {
-	DefaultLineSeparator string `toml:"default_line_separator"`
+	DefaultLineSeparator string "default_line_separator"
 }
 
 var Conf Config
 
 func Load() {
-	if _, err := toml.DecodeFile(configFilePath, &Conf); err != nil {
-		glog.Errorf("Can't read the setting file: %v", configFilePath)
+	contents, err := ioutil.ReadFile(configFilePath)
+	if err != nil {
+		glog.Errorf("Can't read the setting file: %v", err)
+		return
+	}
+
+	if err := yaml.Unmarshal([]byte(contents), &Conf); err != nil {
+		glog.Errorf("Failed to unmarshal, %v, %v", configFilePath, err)
 	}
 }
 
