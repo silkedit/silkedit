@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/golang/glog"
+	log "github.com/cihub/seelog"
 	"io/ioutil"
 	yaml "gopkg.in/yaml.v1"
 )
@@ -19,17 +19,17 @@ var Conf Config
 func Load() {
 	contents, err := ioutil.ReadFile(configFilePath)
 	if err != nil {
-		glog.Errorf("Can't read the setting file: %v", err)
+		log.Errorf("Can't read the setting file: %v", err)
 		return
 	}
 
 	if err := yaml.Unmarshal([]byte(contents), &Conf); err != nil {
-		glog.Errorf("Failed to unmarshal, %v, %v", configFilePath, err)
+		log.Errorf("Failed to unmarshal, %v, %v", configFilePath, err)
 	}
 }
 
 func (c *Config) LineSeparator() string {
-	glog.Infof("default_line_separator: %v", c.DefaultLineSeparator)
+	log.Infof("default_line_separator: %v", c.DefaultLineSeparator)
 	if c.DefaultLineSeparator == "LF" {
 		return "\n"
 	} else {

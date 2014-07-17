@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/golang/glog"
+	log "github.com/cihub/seelog"
 	"unicode/utf8"
 )
 
@@ -86,7 +86,7 @@ func (gb *GapBuffer) Insert(pos int, r rune) bool {
 // Delete a character before cursor pos.
 func (gb *GapBuffer) Delete(pos int) bool {
 	if gb.Len() == 0 || pos <= 0 {
-		glog.Warningf("Can't delete at cursor pos: %v. Buffer length: %v", pos, gb.Len())
+		log.Warnf("Can't delete at cursor pos: %v. Buffer length: %v", pos, gb.Len())
 		return false
 	}
 
@@ -127,7 +127,7 @@ func (gb *GapBuffer) toBytePos(pos int) int {
 // TODO: error handling
 func (gb *GapBuffer) Get(pos int) rune {
 	if pos < 0 {
-		glog.Errorf("invalid pos: %v", pos)
+		log.Errorf("invalid pos: %v", pos)
 		return 0
 	}
 

@@ -3,7 +3,7 @@ package config
 import (
 	yaml "gopkg.in/yaml.v1"
 	"io/ioutil"
-	"github.com/golang/glog"
+	log "github.com/cihub/seelog"
 	termbox "github.com/nsf/termbox-go"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	. "bitbucket.org/shinichy/sk/termbox/command"
@@ -30,12 +30,12 @@ var KeyCommandMap = make(map[KeyIdentifier]Command)
 func LoadKeyMap() {
 	contents, err := ioutil.ReadFile(keyMapFilePath)
 	if err != nil {
-		glog.Errorf("Can't read the setting file: %v", err)
+		log.Errorf("Can't read the setting file: %v", err)
 		return
 	}
 
 	if err := yaml.Unmarshal([]byte(contents), &shortcutDefinition); err != nil {
-		glog.Errorf("Failed to unmarshal. path: %v, %v", keyMapFilePath, err)
+		log.Errorf("Failed to unmarshal. path: %v, %v", keyMapFilePath, err)
 		return
 	}
 
@@ -46,14 +46,14 @@ func LoadKeyMap() {
 				KeyCommandMap[*id] = cmd
 				count++
 			} else {
-				glog.Warningf("Unknown cmd: %v", shortcut.Cmd)
+				log.Warnf("Unknown cmd: %v", shortcut.Cmd)
 			}
 		} else {
-			glog.Warningf("Unknown key string: %v", shortcut.Key)
+			log.Warnf("Unknown key string: %v", shortcut.Key)
 		}
 	}
 
-	glog.Infof("%v key maps loaded", count)
+	log.Infof("%v key maps loaded", count)
 }
 
 func convertKeyToEv(key string) (*KeyIdentifier, error) {
@@ -65,7 +65,7 @@ func convertKeyToEv(key string) (*KeyIdentifier, error) {
 }
 
 func DispatchKey(v *view.DocumentView, ev termbox.Event) {
-	glog.Infof("Event: %v", ev)
+	log.Debugf("Event: %v", ev)
 
 	id := KeyIdentifier{key: ev.Key, ch: ev.Ch}
 	if cmd, exists := KeyCommandMap[id]; exists {

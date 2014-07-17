@@ -5,27 +5,34 @@ import (
 	"os"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	"bitbucket.org/shinichy/sk/termbox/config"
-	"github.com/golang/glog"
 	termbox "github.com/nsf/termbox-go"
+	log "github.com/cihub/seelog"
 )
 
 func main() {
+	if logger, err := log.LoggerFromConfigAsFile("seelog.xml"); err != nil {
+		panic(err)
+	} else {
+		log.ReplaceLogger(logger)
+	}
+
 	flag.Parse()
-	glog.Info("Loading settings")
+	log.Info("Loading settings")
 	config.Load()
 
-	glog.Info("Loading key maps")
+	log.Info("Loading key maps")
 	config.LoadKeyMap()
 
-	glog.Info("Initialize termbox")
-	err := termbox.Init()
-	if err != nil {
+	log.Info("Initialize termbox")
+	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
 
 	defer func() {
+		log.Info("shutting down")
+		log.Info("")
+		log.Flush()
 		termbox.Close()
-		glog.Flush()
 		os.Exit(0)
 	}()
 

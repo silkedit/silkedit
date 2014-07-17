@@ -1,7 +1,7 @@
 package view
 
 import (
-	"github.com/golang/glog"
+	log "github.com/cihub/seelog"
 	"bitbucket.org/shinichy/sk/core"
 	"bitbucket.org/shinichy/sk/termbox/events"
 )
@@ -56,7 +56,7 @@ func (v *DocumentView) InsertString(s string) {
 }
 
 func (v *DocumentView) Insert(r rune) {
-	glog.Infof("Insert: %v", r)
+	log.Debugf("Insert: %v", r)
 	if v.Doc.Insert(v.column, r) {
 		v.column += 1
 	}
