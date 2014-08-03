@@ -1,29 +1,23 @@
 package config
 
 import (
-	yaml "gopkg.in/yaml.v1"
 	"io/ioutil"
 	log "github.com/cihub/seelog"
 	termbox "github.com/nsf/termbox-go"
 	"bitbucket.org/shinichy/sk/termbox/view"
 	. "bitbucket.org/shinichy/sk/termbox/command"
 	"fmt"
+	"github.com/robertkrimen/otto"
 )
 
 const (
-	keyMapFilePath = "key.yml"
+	keyMapFilePath = "key.js"
 )
-
-type KeyMapDefinition struct {
-	Shortcuts []struct{Key string; Cmd string}
-}
 
 type KeyIdentifier struct {
 	key    termbox.Key       // one of Key* constants, invalid if 'Ch' is not 0
 	ch     rune      // a unicode character
 }
-
-var shortcutDefinition KeyMapDefinition
 
 var KeyCommandMap = make(map[KeyIdentifier]Command)
 
@@ -34,22 +28,48 @@ func LoadKeyMap() {
 		return
 	}
 
-	if err := yaml.Unmarshal([]byte(contents), &shortcutDefinition); err != nil {
-		log.Errorf("Failed to unmarshal. path: %v, %v", keyMapFilePath, err)
+	vm := otto.New()
+	var value, errOtto = vm.Run(contents)
+	if errOtto != nil {
+		log.Errorf("Can't read the setting file: %v", errOtto)
+		return
+	}
+
+	it, errExport := value.Export()
+	if errExport != nil{
+		log.Errorf("Can't read the setting file: %v", errExport)
+		return
+	}
+
+	arr, ok := it.([]interface{})
+	if !ok {
+		log.Errorf("Can't read the setting file: %v", err)
 		return
 	}
 
 	count := 0
-	for _, shortcut := range shortcutDefinition.Shortcuts {
-		if id, err := convertKeyToEv(shortcut.Key); err == nil {
-			if cmd, exists := Commands[shortcut.Cmd]; exists {
-				KeyCommandMap[*id] = cmd
-				count++
-			} else {
-				log.Warnf("Unknown cmd: %v", shortcut.Cmd)
+	for i := 0; i < len(arr); i++ {
+		shortcut, ok := arr[i].(map[string]interface{})
+		if ok {
+			key, keyExists := shortcut["key"]
+			cmd, cmdExists := shortcut["command"]
+			if keyExists && cmdExists {
+				key, _ := key.(string)
+				cmd, _ := cmd.(string)
+				if id, err := convertKeyToEv(key); err == nil {
+					if cmd, exists := Commands[cmd]; exists {
+						KeyCommandMap[*id] = cmd
+						count++
+					} else {
+						log.Warnf("Unknown cmd: %v", cmd)
+					}
+				} else {
+					log.Warnf("Unknown key string: %v", key)
+				}
 			}
+
 		} else {
-			log.Warnf("Unknown key string: %v", shortcut.Key)
+			log.Warnf("pos %v is not map[string]string", i)
 		}
 	}
 

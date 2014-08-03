@@ -3,18 +3,18 @@ package config
 import (
 	log "github.com/cihub/seelog"
 	"io/ioutil"
-	yaml "gopkg.in/yaml.v1"
+	"github.com/robertkrimen/otto"
 )
 
 const (
-	configFilePath = "sk.yml"
+	configFilePath = "sk.js"
 )
 
 type Config struct {
 	DefaultLineSeparator string "default_line_separator"
 }
 
-var Conf Config
+var Conf = Config{}
 
 func Load() {
 	contents, err := ioutil.ReadFile(configFilePath)
@@ -23,8 +23,26 @@ func Load() {
 		return
 	}
 
-	if err := yaml.Unmarshal([]byte(contents), &Conf); err != nil {
-		log.Errorf("Failed to unmarshal, %v, %v", configFilePath, err)
+	vm := otto.New()
+	value, err := vm.Run(contents)
+	if err != nil {
+		log.Errorf("Can't read the setting file: %v", err)
+		return
+	}
+
+	itf, err := value.Export()
+	if err != nil{
+		log.Errorf("Can't read the setting file: %v", err)
+		return
+	}
+
+	config, ok := itf.(map[string]interface{})
+	if ok {
+		value, ok := config["default_line_separator"]
+		if ok {
+			var defaultLineSeparator, _ = value.(string)
+			Conf.DefaultLineSeparator = defaultLineSeparator
+		}
 	}
 }
 
