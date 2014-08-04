@@ -31,6 +31,8 @@ func main() {
 	defer func() {
 		log.Info("shutting down")
 		log.Info("")
+		log.Info("")
+		log.Info("")
 		log.Flush()
 		termbox.Close()
 		os.Exit(0)
