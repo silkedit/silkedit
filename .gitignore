@@ -1,3 +1,8 @@
-coverage.out
-.idea/
-termbox/sk
+.DS_Store
+*.autosave
+
+#QtCreator project files
+*.pro.user
+=======
+*.pro.user*
+*~

@@ -1,8 +1,0 @@
-<seelog>
-  <outputs formatid="common">
-    <rollingfile type="date" filename="/Users/shinichi/Library/Logs/sk/sk.log" datepattern="02.01.2006" maxrolls="7"/>
-  </outputs>
-  <formats>
-    <format id="common" format="%Date(2006-01-02 15:04:05.000) [%LEV] %Msg  (%File:%Line)%n"/>
-  </formats>
-</seelog>
