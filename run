@@ -1,0 +1,38 @@
+#!/bin/sh
+
+clean() {
+	  if [ -f Makefile ]; then
+			make clean
+	  fi
+
+		echo "Remvoing .qmake.stash Makefile sk.app"
+    rm -f .qmake.stash
+    rm -f Makefile
+    rm -rf sk.app
+}
+
+build() {
+	  qmake -r
+
+	  if [ -f Makefile ]; then
+			make
+	  fi
+}
+
+case "$1" in
+  clean)
+    clean
+    echo
+    ;;
+
+  build)
+		build
+    echo
+    ;;
+
+  *)
+    echo $"Usage: $0 {clean|build}"
+    exit 1
+esac
+
+exit 0

@@ -40,7 +40,7 @@
 
 #include <QtWidgets>
 
-#include "codeeditor.h"
+#include "sk.h"
 
 int main(int argv, char **args)
 {
