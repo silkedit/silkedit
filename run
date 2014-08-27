@@ -25,7 +25,7 @@ build() {
 
 		macdeployqt sk.app
 		mkdir dmg
-		cp sk.app dmg
+		cp -r sk.app dmg
 		ln -s /Applications dmg/Applications
 		hdiutil create -volname sk -srcfolder dmg -ov -format UDZO sk.dmg
 }
