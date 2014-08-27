@@ -1,5 +1,8 @@
 #!/bin/sh
 
+alias qmake=~/Qt/5.3/clang_64/bin/qmake
+alias macdeployqt=~/Qt/5.3/clang_64/bin/macdeployqt
+
 clean() {
 	  if [ -f Makefile ]; then
 			make clean
