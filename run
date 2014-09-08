@@ -21,10 +21,13 @@ clean() {
 }
 
 build() {
-	  qmake -r
+	  #qmake -r
+		cmake CMakeLists.txt -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja; ninja
 
-	  if [ -f Makefile ]; then
-			make
+	  #if [ -f Makefile ]; then
+	  if [ -f build.ninja ]; then
+			#make
+			ninja
 	  fi
 
 		macdeployqt sk.app
