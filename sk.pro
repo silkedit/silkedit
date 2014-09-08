@@ -12,3 +12,6 @@ target.path = $$[QT_INSTALL_EXAMPLES]/widgets/widgets/codeeditor
 INSTALLS += target
 
 CONFIG+=c++11
+
+OTHER_FILES += \
+    CMakeLists.txt
