@@ -38,19 +38,16 @@ Thumbs.db
 
 # qtcreator generated files
 *.pro.user*
+*.txt.user*
 *.creator.user*
 *.qbs.user*
 *.qmlproject.user*
 *.pluginspec
-*.json
 /src/app/Info.plist
 app_version.h
 /src/plugins/coreplugin/ide_version.h
 /share/qtcreator/externaltools
 phony.c
-
-# xemacs temporary files
-*.flc
 
 # Vim temporary files
 .*.swp
@@ -73,9 +70,6 @@ phony.c
 # MinGW generated files
 *.Debug
 *.Release
-
-# Python byte code
-*.pyc
 
 # translation related:
 /share/qtcreator/translations/*_tr.h
@@ -107,6 +101,7 @@ release/
 ipch/
 tmp/
 dmg/
+target/
 # ignore both a directory as well as a symlink
 /share/qtcreator/QtProject
 
@@ -136,3 +131,14 @@ dmg/
 # qbs builds
 /*-debug/
 /*-release/
+
+# CMake & Ninja
+.ninja_deps
+.ninja_log
+CMakeCache.txt
+CMakeFiles/
+build.ninja
+cmake_install.cmake
+rules.ninja
+sk_automoc.cpp
+compile_commands.json
