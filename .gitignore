@@ -131,14 +131,3 @@ target/
 # qbs builds
 /*-debug/
 /*-release/
-
-# CMake & Ninja
-.ninja_deps
-.ninja_log
-CMakeCache.txt
-CMakeFiles/
-build.ninja
-cmake_install.cmake
-rules.ninja
-sk_automoc.cpp
-compile_commands.json

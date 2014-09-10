@@ -1,10 +1,29 @@
-#!/bin/sh
+#!/bin/bash
 
 alias qmake=~/Qt/5.3/clang_64/bin/qmake
 alias macdeployqt=~/Qt/5.3/clang_64/bin/macdeployqt
 
+LIGHT_GREEN='\x1B[0;32m'
+NC='\x1B[0m' # No Color
+
 pre_commit() {
+	  # clang-format
 		find . -name \*.cpp -or -name \*.h | xargs clang-format -style=google -i
+
+		# clang-check
+		cmake ../sk-build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja -DCMAKE_BUILD_TYPE=Debug
+		result=$(find src -name '*.cpp'|xargs clang-check -p ../sk-build 2>&1)
+		if [ $(echo ${result} | grep warnings -c) -ne 0 ]
+		then
+			echo "${result}"
+			exit 1
+		fi
+
+		echo -e "${LIGHT_GREEN}Good to commit!${NC}"
+}
+
+check() {
+		find src -name '*.cpp'|xargs clang-check -p ../sk-build 2>&1
 }
 
 clean() {
@@ -43,6 +62,11 @@ case "$1" in
     echo
     ;;
 
+	check)
+		check
+		echo
+		;;
+
   clean)
     clean
     echo
@@ -54,7 +78,7 @@ case "$1" in
 		;;
 
   *)
-    echo $"Usage: $0 {build|clean|pre-commit}"
+    echo $"Usage: $0 {build|check|clean|pre-commit}"
     exit 1
 esac
 
