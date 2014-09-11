@@ -1,5 +1,4 @@
-#ifndef VIEDITVIEW_H
-#define VIEDITVIEW_H
+#pragma once
 
 #include <QPlainTextEdit>
 #include <QObject>
@@ -64,5 +63,3 @@ class LineNumberArea : public QWidget {
  private:
   ViEditView *m_codeEditor;
 };
-
-#endif

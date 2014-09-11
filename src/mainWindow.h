@@ -1,5 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 
@@ -18,5 +17,3 @@ class MainWindow : public QMainWindow {
 
   ViEditView *m_editor;
 };
-
-#endif  // MAINWINDOW_H
