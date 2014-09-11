@@ -2,7 +2,8 @@
 
 #include "viEditView.h"
 
-int main(int argv, char **args) {
+int main(int argv, char **args)
+{
   QApplication app(argv, args);
 
   ViEditView editor;

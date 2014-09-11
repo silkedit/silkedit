@@ -2,7 +2,8 @@
 
 #include "viEditView.h"
 
-ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
+ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD)
+{
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this,
@@ -16,7 +17,8 @@ ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
   highlightCurrentLine();
 }
 
-int ViEditView::lineNumberAreaWidth() {
+int ViEditView::lineNumberAreaWidth()
+{
   int digits = 1;
   int max = qMax(1, blockCount());
   while (max >= 10) {
@@ -29,21 +31,25 @@ int ViEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void ViEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
+void ViEditView::updateLineNumberAreaWidth(int /* newBlockCount */)
+{
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void ViEditView::updateLineNumberArea(const QRect &rect, int dy) {
+void ViEditView::updateLineNumberArea(const QRect &rect, int dy)
+{
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
     m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(),
                              rect.height());
 
-  if (rect.contains(viewport()->rect())) updateLineNumberAreaWidth(0);
+  if (rect.contains(viewport()->rect()))
+    updateLineNumberAreaWidth(0);
 }
 
-void ViEditView::resizeEvent(QResizeEvent *e) {
+void ViEditView::resizeEvent(QResizeEvent *e)
+{
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
@@ -51,18 +57,20 @@ void ViEditView::resizeEvent(QResizeEvent *e) {
       QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void ViEditView::keyPressEvent(QKeyEvent *event) {
+void ViEditView::keyPressEvent(QKeyEvent *event)
+{
   switch (mode()) {
-    case CMD:
-      cmdModeKeyPressEvent(event);
-      break;
-    case INSERT:
-      insertModeKeyPressEvent(event);
-      break;
+  case CMD:
+    cmdModeKeyPressEvent(event);
+    break;
+  case INSERT:
+    insertModeKeyPressEvent(event);
+    break;
   }
 }
 
-void ViEditView::cmdModeKeyPressEvent(QKeyEvent *event) {
+void ViEditView::cmdModeKeyPressEvent(QKeyEvent *event)
+{
   QString text = event->text();
   if (text == "i") {
     setMode(INSERT);
@@ -70,7 +78,8 @@ void ViEditView::cmdModeKeyPressEvent(QKeyEvent *event) {
   }
 }
 
-void ViEditView::insertModeKeyPressEvent(QKeyEvent *event) {
+void ViEditView::insertModeKeyPressEvent(QKeyEvent *event)
+{
   if (event->key() == Qt::Key_Escape) {
     setMode(CMD);
     return;
@@ -78,7 +87,8 @@ void ViEditView::insertModeKeyPressEvent(QKeyEvent *event) {
   QPlainTextEdit::keyPressEvent(event);
 }
 
-void ViEditView::highlightCurrentLine() {
+void ViEditView::highlightCurrentLine()
+{
   QList<QTextEdit::ExtraSelection> extraSelections;
 
   if (!isReadOnly()) {
@@ -96,7 +106,8 @@ void ViEditView::highlightCurrentLine() {
   setExtraSelections(extraSelections);
 }
 
-void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
+void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event)
+{
   QPainter painter(m_lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 

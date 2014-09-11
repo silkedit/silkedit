@@ -12,15 +12,16 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class ViEditView : public QPlainTextEdit {
+class ViEditView : public QPlainTextEdit
+{
   Q_OBJECT
- public:
+public:
   enum Mode {
     CMD = 0,
     INSERT,
   };
 
- public:
+public:
   ViEditView(QWidget *parent = 0);
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
@@ -29,37 +30,41 @@ class ViEditView : public QPlainTextEdit {
   Mode mode() const { return m_mode; }
   void setMode(Mode mode) { m_mode = mode; }
 
- protected:
+protected:
   void resizeEvent(QResizeEvent *event);
   void keyPressEvent(QKeyEvent *event);
   void cmdModeKeyPressEvent(QKeyEvent *);
   void insertModeKeyPressEvent(QKeyEvent *);
 
- private slots:
+private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect &, int);
 
- private:
+private:
   QWidget *m_lineNumberArea;
   Mode m_mode;
 };
 
-class LineNumberArea : public QWidget {
- public:
-  LineNumberArea(ViEditView *editor) : QWidget(editor) {
+class LineNumberArea : public QWidget
+{
+public:
+  LineNumberArea(ViEditView *editor) : QWidget(editor)
+  {
     m_codeEditor = editor;
   }
 
-  QSize sizeHint() const {
+  QSize sizeHint() const
+  {
     return QSize(m_codeEditor->lineNumberAreaWidth(), 0);
   }
 
- protected:
-  void paintEvent(QPaintEvent *event) {
+protected:
+  void paintEvent(QPaintEvent *event)
+  {
     m_codeEditor->lineNumberAreaPaintEvent(event);
   }
 
- private:
+private:
   ViEditView *m_codeEditor;
 };

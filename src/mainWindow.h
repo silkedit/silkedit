@@ -4,14 +4,15 @@
 
 #include "viEditView.h"
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
   Q_OBJECT
 
- public:
+public:
   MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~MainWindow();
 
- private:
+private:
   MainWindow(const MainWindow &);
   MainWindow &operator=(const MainWindow &);
 
