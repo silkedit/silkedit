@@ -130,3 +130,10 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event)
     ++blockNumber;
   }
 }
+
+void ViEditView::setMode(Mode mode) {
+    if (mode != m_mode) {
+        m_mode = mode;
+        emit modeChanged();
+    }
+}

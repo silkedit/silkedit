@@ -15,6 +15,7 @@ class LineNumberArea;
 class ViEditView : public QPlainTextEdit
 {
   Q_OBJECT
+
 public:
   enum Mode {
     CMD = 0,
@@ -28,13 +29,16 @@ public:
   int lineNumberAreaWidth();
 
   Mode mode() const { return m_mode; }
-  void setMode(Mode mode) { m_mode = mode; }
+  void setMode(Mode mode);
 
 protected:
   void resizeEvent(QResizeEvent *event);
   void keyPressEvent(QKeyEvent *event);
   void cmdModeKeyPressEvent(QKeyEvent *);
   void insertModeKeyPressEvent(QKeyEvent *);
+
+signals:
+  void modeChanged(/*Mode*/);
 
 private slots:
   void updateLineNumberAreaWidth(int newBlockCount);

@@ -12,6 +12,9 @@ public:
   MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~MainWindow();
 
+public slots:
+  void onModeChanged();
+
 private:
   MainWindow(const MainWindow &);
   MainWindow &operator=(const MainWindow &);
