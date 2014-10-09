@@ -1,26 +1,34 @@
 #include <QStatusBar>
+
+#include "vi.h"
 #include "mainWindow.h"
+#include "viEditView.h"
+#include "viEngine.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags)
-{
+    : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
+
+  m_viEngine = new ViEngine;
   m_editor = new ViEditView;
   setCentralWidget(m_editor);
+  m_viEngine->setEditor(m_editor);
 
-  connect(m_editor, SIGNAL(modeChanged()), this, SLOT(onModeChanged()));
-  onModeChanged();
+  connect(m_viEngine, SIGNAL(modeChanged(Mode)), this,
+          SLOT(onModeChanged(Mode)));
+  connect(m_viEngine, SIGNAL(modeChanged(Mode)), m_editor, SLOT(setMode(Mode)));
+  onModeChanged(m_viEngine->mode());
 }
 
 MainWindow::~MainWindow() {}
 
-void MainWindow::onModeChanged() {
+void MainWindow::onModeChanged(Mode mode) {
   QString text;
-  switch ( m_editor->mode()) {
-  case ViEditView::CMD:
+  switch (mode) {
+  case CMD:
     text = "CMD";
     break;
-  case ViEditView::INSERT:
+  case INSERT:
     text = "INSERT";
     break;
   }

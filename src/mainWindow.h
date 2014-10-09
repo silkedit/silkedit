@@ -2,10 +2,12 @@
 
 #include <QMainWindow>
 
-#include "viEditView.h"
+#include "vi.h"
 
-class MainWindow : public QMainWindow
-{
+class ViEditView;
+class ViEngine;
+
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
@@ -13,11 +15,12 @@ public:
   ~MainWindow();
 
 public slots:
-  void onModeChanged();
+  void onModeChanged(Mode);
 
 private:
   MainWindow(const MainWindow &);
   MainWindow &operator=(const MainWindow &);
 
   ViEditView *m_editor;
+  ViEngine *m_viEngine;
 };

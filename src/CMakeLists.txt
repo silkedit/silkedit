@@ -5,12 +5,13 @@ set(CMAKE_AUTOMOC ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra")
 
-set(SK_SOURCES main.cpp mainWindow.cpp viEditView.cpp)
+set(SK_SOURCES main.cpp mainWindow.cpp viEditView.cpp viEngine.cpp)
+set(SK_HEADERS vi.h)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 
-add_executable(sk MACOSX_BUNDLE ${SK_SOURCES})
+add_executable(sk MACOSX_BUNDLE ${SK_SOURCES} ${SK_HEADERS})
 
 # Use the Widgets module from Qt 5.
 target_link_libraries(sk Qt5::Widgets)

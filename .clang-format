@@ -1,1 +1,1 @@
-{BasedOnStyle: llvm, BreakBeforeBinaryOperators: true, Standard: Cpp11, BreakBeforeBraces: Linux}
+{BasedOnStyle: llvm, BreakBeforeBinaryOperators: true, Standard: Cpp11}
