@@ -11,8 +11,8 @@ pre_commit() {
 		find . -name \*.cpp -or -name \*.h | xargs clang-format -i
 
 		# clang-check
-		cmake ../sk-build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja -DCMAKE_BUILD_TYPE=Debug
-		result=$(find src -name '*.cpp'|xargs clang-check -p ../sk-build 2>&1)
+		cmake ../silkedit-build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja -DCMAKE_BUILD_TYPE=Debug
+		result=$(find src -name '*.cpp'|xargs clang-check -p ../silkedit-build 2>&1)
 		if [ $(echo ${result} | grep warning -c) -ne 0 ]
 		then
 			echo "${result}"
@@ -23,7 +23,7 @@ pre_commit() {
 }
 
 check() {
-		find src -name '*.cpp'|xargs clang-check -p ../sk-build 2>&1
+		find src -name '*.cpp'|xargs clang-check -p ../silkedit-build 2>&1
 }
 
 clean() {
@@ -31,7 +31,7 @@ clean() {
 			make clean
 	  fi
 
-		files=(.qmake.stash Makefile sk.app sk.dmg dmg)
+		files=(.qmake.stash Makefile SilkEdit.app SilkEdit.dmg dmg)
 
 		for (( i = 0; i < ${#files[*]}; i++ )) {
 			echo "Removing ${files[i]}"
@@ -40,20 +40,17 @@ clean() {
 }
 
 build() {
-	  #qmake -r
 		cmake CMakeLists.txt -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja; ninja
 
-	  #if [ -f Makefile ]; then
 	  if [ -f build.ninja ]; then
-			#make
 			ninja
 	  fi
 
-		macdeployqt sk.app
+		macdeployqt src/SilkEdit.app
 		mkdir dmg
-		cp -r sk.app dmg
+		cp -r src/SilkEdit.app dmg
 		ln -s /Applications dmg/Applications
-		hdiutil create -volname sk -srcfolder dmg -ov -format UDZO sk.dmg
+		hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
 }
 
 case "$1" in
