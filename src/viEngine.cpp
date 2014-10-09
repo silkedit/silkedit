@@ -3,7 +3,7 @@
 #include "viEditView.h"
 
 ViEngine::ViEngine(QObject *parent)
-    : m_mode(CMD), m_editor(nullptr), QObject(parent) {}
+    : QObject(parent), m_mode(CMD), m_editor(nullptr) {}
 
 ViEngine::~ViEngine() {}
 
