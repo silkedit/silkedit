@@ -13,7 +13,7 @@ pre_commit() {
 		# clang-check
 		cmake ../sk-build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja -DCMAKE_BUILD_TYPE=Debug
 		result=$(find src -name '*.cpp'|xargs clang-check -p ../sk-build 2>&1)
-		if [ $(echo ${result} | grep warnings -c) -ne 0 ]
+		if [ $(echo ${result} | grep warning -c) -ne 0 ]
 		then
 			echo "${result}"
 			exit 1
