@@ -94,7 +94,14 @@ case "$1" in
     ;;
 
   *)
-    echo $"Usage: $0 {analyze|build|clean|pre-commit}"
+
+		cat << EOF
+analyze     static analysis
+build       create an app and an installer
+clean       clean build dir
+pre-commit  run clang-format and clang-check
+EOF
+
     exit 1
 esac
 
