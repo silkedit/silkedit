@@ -78,6 +78,7 @@ phony.c
 # Directories to ignore
 # ---------------------
 
+build/
 debug/
 release/
 /lib/
@@ -127,7 +128,3 @@ target/
 /src/tools/qml/qmldump/qmldump
 /src/tools/examplesscanner/examplesscanner
 /src/tools/valgrindfake/valgrind-fake
-
-# qbs builds
-/*-debug/
-/*-release/
