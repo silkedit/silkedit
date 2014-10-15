@@ -18,6 +18,8 @@ public:
   void setMode(Mode mode);
   void setEditor(ViEditView *editor);
 
+  void processExCommand(const QString &text);
+
 #if !USE_EVENT_FILTER
   bool processKeyPressEvent(QKeyEvent *event);
 #endif

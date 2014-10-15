@@ -5,4 +5,5 @@
 enum Mode {
   CMD = 0,
   INSERT,
+  CMDLINE,
 };

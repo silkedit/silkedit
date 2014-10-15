@@ -14,6 +14,8 @@ void ViEngine::setEditor(ViEditView *editor) {
 #endif
 }
 
+void ViEngine::processExCommand(const QString &text) { setMode(CMD); }
+
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
     m_mode = mode;
@@ -48,10 +50,11 @@ bool ViEngine::processKeyPressEvent(QKeyEvent *event) {
 
 bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
   QString text = event->text();
-  if (text.isEmpty()) return false;
+  if (text.isEmpty())
+    return false;
   bool rc = true;
   ushort ch = text[0].unicode();
-  if (ch == '0' && m_repeatCount != 0 || ch >= '1' && ch <= '9') {
+  if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
     m_repeatCount = m_repeatCount * 10 + (ch - '0');
     return true;
   }
@@ -72,6 +75,9 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
     break;
   case 'j':
     m_editor->moveCursor(QTextCursor::Down, repeatCount());
+    break;
+  case ':':
+    setMode(CMDLINE);
     break;
   default:
     rc = false;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QLineEdit>
 
 #include "vi.h"
 
@@ -16,6 +17,7 @@ public:
 
 public slots:
   void onModeChanged(Mode);
+  void cmdLineReturnPressed();
 
 private:
   MainWindow(const MainWindow &);
@@ -23,4 +25,5 @@ private:
 
   ViEditView *m_editor;
   ViEngine *m_viEngine;
+  QLineEdit *m_cmdLineEdit;
 };

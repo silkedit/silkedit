@@ -35,8 +35,7 @@ int ViEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n)
-{
+void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n) {
   QTextCursor cur = textCursor();
   cur.movePosition(mv, QTextCursor::MoveAnchor, n);
   setTextCursor(cur);
