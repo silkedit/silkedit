@@ -18,6 +18,11 @@ public:
 public slots:
   void onModeChanged(Mode);
   void cmdLineReturnPressed();
+  void cmdLineCursorPositionChanged(int, int);
+  void cmdLineTextChanged(const QString &text);
+
+protected:
+  bool eventFilter(QObject *obj, QEvent *evnet);
 
 private:
   MainWindow(const MainWindow &);

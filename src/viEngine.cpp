@@ -32,6 +32,9 @@ bool ViEngine::eventFilter(QObject *obj, QEvent *event) {
       return true;
     case INSERT:
       return insertModeKeyPressEvent(static_cast<QKeyEvent *>(event));
+    default:
+      // TODO: add logging
+      break;
     }
   }
   return false;
