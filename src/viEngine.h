@@ -29,8 +29,10 @@ protected:
   bool eventFilter(QObject *, QEvent *);
   bool cmdModeKeyPressEvent(QKeyEvent *);
   bool insertModeKeyPressEvent(QKeyEvent *);
+  int repeatCount() const { return !m_repeatCount ? 1 : m_repeatCount; }
 
 private:
   Mode m_mode;
   ViEditView *m_editor;
+  int m_repeatCount;
 };

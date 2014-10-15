@@ -48,11 +48,38 @@ bool ViEngine::processKeyPressEvent(QKeyEvent *event) {
 
 bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
   QString text = event->text();
-  if (text == "i") {
-    setMode(INSERT);
+  if (text.isEmpty()) return false;
+  bool rc = true;
+  ushort ch = text[0].unicode();
+  if (ch == '0' && m_repeatCount != 0 || ch >= '1' && ch <= '9') {
+    m_repeatCount = m_repeatCount * 10 + (ch - '0');
     return true;
   }
-  return false;
+
+  switch (ch) {
+  case 'i':
+    setMode(INSERT);
+    return true;
+  case 'h':
+    m_editor->moveCursor(QTextCursor::Left, repeatCount());
+    break;
+  case ' ':
+  case 'l':
+    m_editor->moveCursor(QTextCursor::Right, repeatCount());
+    break;
+  case 'k':
+    m_editor->moveCursor(QTextCursor::Up, repeatCount());
+    break;
+  case 'j':
+    m_editor->moveCursor(QTextCursor::Down, repeatCount());
+    break;
+  default:
+    rc = false;
+    break;
+  }
+
+  m_repeatCount = 0;
+  return rc;
 }
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent *event) {

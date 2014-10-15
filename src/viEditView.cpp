@@ -35,6 +35,13 @@ int ViEditView::lineNumberAreaWidth() {
   return space;
 }
 
+void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n)
+{
+  QTextCursor cur = textCursor();
+  cur.movePosition(mv, QTextCursor::MoveAnchor, n);
+  setTextCursor(cur);
+}
+
 void ViEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
