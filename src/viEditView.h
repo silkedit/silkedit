@@ -27,7 +27,7 @@ public:
 
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
-  void moveCursor(QTextCursor::MoveOperation, int = 1);
+  void moveCursor(int mv, int = 1);
   void doDelete(int n);
   void doUndo(int n);
   void doRedo(int n);
@@ -47,6 +47,10 @@ protected:
   void drawCursor();
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
+  int firstNonBlankCharPos(const QString &text);
+  bool isTabOrSpace(const QChar ch);
+  void moveToFirstNonBlankChar(QTextCursor &cur);
+
 #if !USE_EVENT_FILTER
   void keyPressEvent(QKeyEvent *event);
 #endif

@@ -37,11 +37,13 @@ int ViEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n) {
+void ViEditView::moveCursor(int mv, int n) {
   QTextCursor cur = textCursor();
   const int pos = cur.position();
   QTextBlock block = cur.block();
   const int blockPos = block.position();
+  const QString blockText = block.text();
+  bool moved = false;
   switch(mv) {
   case QTextCursor::Left: {
     n = qMin(n, pos - blockPos);
@@ -55,11 +57,35 @@ void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n) {
     n = qMin(n, endpos - pos);
     break;
   }
+  case ViMoveOperation::FirstNonBlankChar:
+    cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
+    moved = true;
+    break;
+  case ViMoveOperation::LastChar: {
+    int ix = blockText.length();
+    if (ix != 0) --ix;
+    cur.setPosition(blockPos + ix);
+    moved = true;
+    break;
+  }
+  case ViMoveOperation::NextLine:
+    cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, n);
+    moveToFirstNonBlankChar(cur);
+    moved = true;
+    break;
+  case ViMoveOperation::PrevLine:
+    cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, n);
+    moveToFirstNonBlankChar(cur);
+    moved = true;
+    break;
   default:
     break;
   }
 
-  cur.movePosition(mv, QTextCursor::MoveAnchor, n);
+  if (!moved) {
+    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, n);
+  }
+
   setTextCursor(cur);
 }
 
@@ -217,6 +243,30 @@ void ViEditView::makeFontBigger(bool bigger) {
     ++sz;
   } else if (!--sz) return;
   setFontPointSize(sz);
+}
+
+int ViEditView::firstNonBlankCharPos(const QString &text)
+{
+  int ix = 0;
+  while (ix < text.length() && isTabOrSpace(text[ix])) {
+    ++ix;
+  }
+  return ix;
+}
+
+inline bool ViEditView::isTabOrSpace(const QChar ch)
+{
+  return ch == '\t' || ch == ' ';
+}
+
+void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur)
+{
+  QTextBlock block = cur.block();
+  const int blockPos = block.position();
+  const QString blockText = block.text();
+  if (!blockText.isEmpty()) {
+    cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
+  }
 }
 
 void ViEditView::doDelete(int n)

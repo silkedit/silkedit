@@ -94,6 +94,22 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
   case 'U':
     m_editor->doRedo(repeatCount());
     break;
+  case '0':
+    m_editor->moveCursor(QTextCursor::StartOfBlock);
+    break;
+  case '^':
+    m_editor->moveCursor(ViMoveOperation::FirstNonBlankChar);
+    break;
+  case '$':
+    m_editor->moveCursor(ViMoveOperation::LastChar);
+    break;
+  case '\r': // Enter
+  case '+':
+    m_editor->moveCursor(ViMoveOperation::NextLine);
+    break;
+  case '-':
+    m_editor->moveCursor(ViMoveOperation::PrevLine);
+    break;
   default:
     rc = false;
     break;

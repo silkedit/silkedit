@@ -7,3 +7,12 @@ enum Mode {
   INSERT,
   CMDLINE,
 };
+
+namespace ViMoveOperation {
+  enum {
+    FirstNonBlankChar = 100, // ^
+    LastChar, // $
+    NextLine, // Enter, +
+    PrevLine, // -
+  };
+}
