@@ -199,6 +199,44 @@ void ViEditView::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
+void ViEditView::doDelete(int n)
+{
+  QTextCursor cur = textCursor();
+  if (!cur.hasSelection()) {
+    const int pos = cur.position();
+    int dst;
+    if (n > 0) {
+      cur.movePosition(QTextCursor::EndOfBlock);
+      const int endpos = cur.position();
+      if (pos == endpos) return;
+      dst = qMin(pos + n, endpos);
+      cur.setPosition(pos);
+    } else {
+      const int blockPos = cur.block().position();
+      if (pos == blockPos) return;
+      dst = qMax(pos + n, blockPos);
+    }
+
+    cur.setPosition(dst, QTextCursor::KeepAnchor);
+  }
+
+  cur.deleteChar();
+}
+
+void ViEditView::doUndo(int n)
+{
+  for (int i = 0; i < n; i++) {
+    undo();
+  }
+}
+
+void ViEditView::doRedo(int n)
+{
+  for (int i = 0; i < n; i++) {
+    redo();
+  }
+}
+
 void ViEditView::wheelEvent(QWheelEvent *e) {
   Qt::KeyboardModifiers mod = e->modifiers();
   if ((mod & Qt::ControlModifier) != 0) {

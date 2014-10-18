@@ -28,6 +28,9 @@ public:
   void lineNumberAreaPaintEvent(QPaintEvent *event);
   int lineNumberAreaWidth();
   void moveCursor(QTextCursor::MoveOperation, int = 1);
+  void doDelete(int n);
+  void doUndo(int n);
+  void doRedo(int n);
 
 #if !USE_EVENT_FILTER
   void setViEngine(ViEngine *viEngine) { m_viEngine = viEngine; }

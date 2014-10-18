@@ -82,6 +82,18 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
   case ':':
     setMode(CMDLINE);
     break;
+  case 'x':
+    m_editor->doDelete(repeatCount());
+    break;
+  case 'X':
+    m_editor->doDelete(-repeatCount());
+    break;
+  case 'u':
+    m_editor->doUndo(repeatCount());
+    break;
+  case 'U':
+    m_editor->doRedo(repeatCount());
+    break;
   default:
     rc = false;
     break;
