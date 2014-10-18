@@ -151,6 +151,28 @@ void ViEditView::paintEvent(QPaintEvent *e) {
   setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
   setCursorWidth(m_cursorWidth);
+
+  const int bottom = viewport()->rect().height();
+  QPainter painter(viewport());
+  painter.setPen(Qt::blue);
+  QTextCursor cur = textCursor();
+  cur.movePosition(QTextCursor::End);
+  const int posEOF = cur.position();
+  QTextBlock block = firstVisibleBlock();
+  while (block.isValid()) {
+    cur.setPosition(block.position());
+    cur.movePosition(QTextCursor::EndOfBlock);
+    if (cur.position() == posEOF) {
+      break;
+    }
+    QRect r = cursorRect(cur);
+    if (r.top() >= bottom) break;
+    painter.drawText(QPointF(r.left(), r.bottom()), "←");
+    block = block.next();
+  }
+  cur.movePosition(QTextCursor::End);
+  QRect r = cursorRect(cur);
+  painter.drawText(QPointF(r.left(), r.bottom()), "[EOF]");
 }
 
 void ViEditView::drawCursor() {
