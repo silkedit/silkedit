@@ -184,3 +184,26 @@ void ViEditView::drawCursor() {
   }
   painter.fillRect(r, Qt::red);
 }
+
+void ViEditView::setFontPointSize(int sz) {
+  QFont ft = font();
+  ft.setPointSize(sz);
+  setFont(ft);
+}
+
+void ViEditView::makeFontBigger(bool bigger) {
+  int sz = font().pointSize();
+  if (bigger) {
+    ++sz;
+  } else if (!--sz) return;
+  setFontPointSize(sz);
+}
+
+void ViEditView::wheelEvent(QWheelEvent *e) {
+  Qt::KeyboardModifiers mod = e->modifiers();
+  if ((mod & Qt::ControlModifier) != 0) {
+    makeFontBigger(e->delta() > 0);
+  } else {
+    QPlainTextEdit::wheelEvent(e);
+  }
+}

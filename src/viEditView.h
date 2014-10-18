@@ -40,7 +40,10 @@ public slots:
 protected:
   void resizeEvent(QResizeEvent *event);
   void paintEvent(QPaintEvent *e);
+  void wheelEvent(QWheelEvent *event);
   void drawCursor();
+  void setFontPointSize(int sz);
+  void makeFontBigger(bool bigger);
 #if !USE_EVENT_FILTER
   void keyPressEvent(QKeyEvent *event);
 #endif
