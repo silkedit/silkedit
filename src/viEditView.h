@@ -14,6 +14,7 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 class ViEngine;
+class QElapsedTimer;
 
 class ViEditView : public QPlainTextEdit {
   Q_OBJECT
@@ -38,6 +39,8 @@ public slots:
 
 protected:
   void resizeEvent(QResizeEvent *event);
+  void paintEvent(QPaintEvent *e);
+  void drawCursor();
 #if !USE_EVENT_FILTER
   void keyPressEvent(QKeyEvent *event);
 #endif
@@ -53,6 +56,9 @@ private slots:
 private:
   Mode m_mode;
   QWidget *m_lineNumberArea;
+  int m_cursorWidth;
+  qint64 m_tickCount;
+  QElapsedTimer *m_timer;
 #if !USE_EVENT_FILTER
   ViEngine *m_viEngine;
 #endif

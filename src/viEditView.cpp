@@ -6,6 +6,8 @@
 
 ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
   m_lineNumberArea = new LineNumberArea(this);
+  m_timer = new QElapsedTimer();
+  m_timer->start();
 
   connect(this, SIGNAL(blockCountChanged(int)), this,
           SLOT(updateLineNumberAreaWidth(int)));
@@ -74,21 +76,21 @@ void ViEditView::keyPressEvent(QKeyEvent *event) {
 #endif
 
 void ViEditView::highlightCurrentLine() {
-  QList<QTextEdit::ExtraSelection> extraSelections;
+//  QList<QTextEdit::ExtraSelection> extraSelections;
 
-  if (!isReadOnly()) {
-    QTextEdit::ExtraSelection selection;
+//  if (!isReadOnly()) {
+//    QTextEdit::ExtraSelection selection;
 
-    QColor lineColor = QColor(Qt::yellow).lighter(160);
+//    QColor lineColor = QColor(Qt::yellow).lighter(160);
 
-    selection.format.setBackground(lineColor);
-    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-    selection.cursor = textCursor();
-    selection.cursor.clearSelection();
-    extraSelections.append(selection);
-  }
+//    selection.format.setBackground(lineColor);
+//    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+//    selection.cursor = textCursor();
+//    selection.cursor.clearSelection();
+//    extraSelections.append(selection);
+//  }
 
-  setExtraSelections(extraSelections);
+//  setExtraSelections(extraSelections);
 }
 
 void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
@@ -116,6 +118,7 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
 }
 
 void ViEditView::setMode(Mode mode) {
+  m_tickCount = m_timer->elapsed();
   if (mode != m_mode) {
     m_mode = mode;
     emit modeChanged(mode);
@@ -133,8 +136,29 @@ void ViEditView::onCursorPositionChanged() {
     if (!wd) {
       wd = fontMetrics().width(QChar(' '));
     }
-    setCursorWidth(wd);
+    m_cursorWidth = wd;
   } else {
-    setCursorWidth(1);
+    m_cursorWidth = 1;
   }
+}
+
+void ViEditView::paintEvent(QPaintEvent *e) {
+  const int blinkPeriod = 1200;
+  qint64 tc = m_timer->elapsed() - m_tickCount;
+  if (tc % blinkPeriod < blinkPeriod / 2) {
+    drawCursor();
+  }
+  setCursorWidth(0);
+  QPlainTextEdit::paintEvent(e);
+  setCursorWidth(m_cursorWidth);
+}
+
+void ViEditView::drawCursor() {
+  QPainter painter(viewport());
+  QRect r = cursorRect();
+  r.setWidth(m_cursorWidth);
+  if (mode() == CMD) {
+    r = QRect(r.left(), r.top() + r.height()/2, r.width(), r.height()/2);
+  }
+  painter.fillRect(r, Qt::red);
 }
