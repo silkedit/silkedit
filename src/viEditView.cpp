@@ -39,6 +39,26 @@ int ViEditView::lineNumberAreaWidth() {
 
 void ViEditView::moveCursor(QTextCursor::MoveOperation mv, int n) {
   QTextCursor cur = textCursor();
+  const int pos = cur.position();
+  QTextBlock block = cur.block();
+  const int blockPos = block.position();
+  switch(mv) {
+  case QTextCursor::Left: {
+    n = qMin(n, pos - blockPos);
+    break;
+  }
+  case QTextCursor::Right: {
+    const QString text = block.text();
+    if (text.isEmpty()) return; // new line or EOF only
+    const int endpos = blockPos + text.length() - 1;
+    if (pos >= endpos) return;
+    n = qMin(n, endpos - pos);
+    break;
+  }
+  default:
+    break;
+  }
+
   cur.movePosition(mv, QTextCursor::MoveAnchor, n);
   setTextCursor(cur);
 }

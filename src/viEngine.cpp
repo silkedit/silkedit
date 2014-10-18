@@ -105,6 +105,9 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent *event) {
   if (event->key() == Qt::Key_Escape) {
+    if (mode() == INSERT) {
+      m_editor->moveCursor(QTextCursor::Left);
+    }
     setMode(CMD);
     return true;
   }
