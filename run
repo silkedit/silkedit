@@ -45,6 +45,8 @@ clean() {
 
 # release build
 build() {
+	  ant
+
 		ensure_dir target
 		cd target
 
@@ -54,9 +56,10 @@ build() {
 			ninja
 	  fi
 
-		macdeployqt src/SilkEdit.app
+		echo "Creating dmg..."
+		macdeployqt SilkEdit.app
 		mkdir dmg
-		cp -r src/SilkEdit.app dmg
+		cp -r SilkEdit.app dmg
 		ln -s /Applications dmg/Applications
 		hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
 }
@@ -70,7 +73,7 @@ analyze() {
 		scan-build -o ./build-analysis ninja
 }
 
-#set -e
+set -e
 
 case "$1" in
   build)

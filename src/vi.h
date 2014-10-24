@@ -9,10 +9,10 @@ enum Mode {
 };
 
 namespace ViMoveOperation {
-  enum {
-    FirstNonBlankChar = 100, // ^
-    LastChar, // $
-    NextLine, // Enter, +
-    PrevLine, // -
-  };
+enum {
+  FirstNonBlankChar = 100, // ^
+  LastChar,                // $
+  NextLine,                // Enter, +
+  PrevLine,                // -
+};
 }

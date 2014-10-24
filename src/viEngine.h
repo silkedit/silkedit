@@ -5,6 +5,7 @@
 
 class QKeyEvent;
 class ViEditView;
+class RubyEvaluator;
 
 class ViEngine : public QObject {
   Q_OBJECT
@@ -36,5 +37,6 @@ protected:
 private:
   Mode m_mode;
   ViEditView *m_editor;
+  RubyEvaluator *m_rubyEvaluator;
   int m_repeatCount;
 };

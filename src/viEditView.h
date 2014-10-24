@@ -31,6 +31,7 @@ public:
   void doDelete(int n);
   void doUndo(int n);
   void doRedo(int n);
+  void evalRuby(const QString &str);
 
 #if !USE_EVENT_FILTER
   void setViEngine(ViEngine *viEngine) { m_viEngine = viEngine; }

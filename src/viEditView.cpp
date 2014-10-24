@@ -44,16 +44,18 @@ void ViEditView::moveCursor(int mv, int n) {
   const int blockPos = block.position();
   const QString blockText = block.text();
   bool moved = false;
-  switch(mv) {
+  switch (mv) {
   case QTextCursor::Left: {
     n = qMin(n, pos - blockPos);
     break;
   }
   case QTextCursor::Right: {
     const QString text = block.text();
-    if (text.isEmpty()) return; // new line or EOF only
+    if (text.isEmpty())
+      return; // new line or EOF only
     const int endpos = blockPos + text.length() - 1;
-    if (pos >= endpos) return;
+    if (pos >= endpos)
+      return;
     n = qMin(n, endpos - pos);
     break;
   }
@@ -63,7 +65,8 @@ void ViEditView::moveCursor(int mv, int n) {
     break;
   case ViMoveOperation::LastChar: {
     int ix = blockText.length();
-    if (ix != 0) --ix;
+    if (ix != 0)
+      --ix;
     cur.setPosition(blockPos + ix);
     moved = true;
     break;
@@ -83,7 +86,8 @@ void ViEditView::moveCursor(int mv, int n) {
   }
 
   if (!moved) {
-    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, n);
+    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv),
+                     QTextCursor::MoveAnchor, n);
   }
 
   setTextCursor(cur);
@@ -122,21 +126,21 @@ void ViEditView::keyPressEvent(QKeyEvent *event) {
 #endif
 
 void ViEditView::highlightCurrentLine() {
-//  QList<QTextEdit::ExtraSelection> extraSelections;
+  //  QList<QTextEdit::ExtraSelection> extraSelections;
 
-//  if (!isReadOnly()) {
-//    QTextEdit::ExtraSelection selection;
+  //  if (!isReadOnly()) {
+  //    QTextEdit::ExtraSelection selection;
 
-//    QColor lineColor = QColor(Qt::yellow).lighter(160);
+  //    QColor lineColor = QColor(Qt::yellow).lighter(160);
 
-//    selection.format.setBackground(lineColor);
-//    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-//    selection.cursor = textCursor();
-//    selection.cursor.clearSelection();
-//    extraSelections.append(selection);
-//  }
+  //    selection.format.setBackground(lineColor);
+  //    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+  //    selection.cursor = textCursor();
+  //    selection.cursor.clearSelection();
+  //    extraSelections.append(selection);
+  //  }
 
-//  setExtraSelections(extraSelections);
+  //  setExtraSelections(extraSelections);
 }
 
 void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
@@ -212,7 +216,8 @@ void ViEditView::paintEvent(QPaintEvent *e) {
       break;
     }
     QRect r = cursorRect(cur);
-    if (r.top() >= bottom) break;
+    if (r.top() >= bottom)
+      break;
     painter.drawText(QPointF(r.left(), r.bottom()), "←");
     block = block.next();
   }
@@ -226,7 +231,7 @@ void ViEditView::drawCursor() {
   QRect r = cursorRect();
   r.setWidth(m_cursorWidth);
   if (mode() == CMD) {
-    r = QRect(r.left(), r.top() + r.height()/2, r.width(), r.height()/2);
+    r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
   }
   painter.fillRect(r, Qt::red);
 }
@@ -241,12 +246,12 @@ void ViEditView::makeFontBigger(bool bigger) {
   int sz = font().pointSize();
   if (bigger) {
     ++sz;
-  } else if (!--sz) return;
+  } else if (!--sz)
+    return;
   setFontPointSize(sz);
 }
 
-int ViEditView::firstNonBlankCharPos(const QString &text)
-{
+int ViEditView::firstNonBlankCharPos(const QString &text) {
   int ix = 0;
   while (ix < text.length() && isTabOrSpace(text[ix])) {
     ++ix;
@@ -254,13 +259,11 @@ int ViEditView::firstNonBlankCharPos(const QString &text)
   return ix;
 }
 
-inline bool ViEditView::isTabOrSpace(const QChar ch)
-{
+inline bool ViEditView::isTabOrSpace(const QChar ch) {
   return ch == '\t' || ch == ' ';
 }
 
-void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur)
-{
+void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur) {
   QTextBlock block = cur.block();
   const int blockPos = block.position();
   const QString blockText = block.text();
@@ -269,8 +272,7 @@ void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur)
   }
 }
 
-void ViEditView::doDelete(int n)
-{
+void ViEditView::doDelete(int n) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {
     const int pos = cur.position();
@@ -278,12 +280,14 @@ void ViEditView::doDelete(int n)
     if (n > 0) {
       cur.movePosition(QTextCursor::EndOfBlock);
       const int endpos = cur.position();
-      if (pos == endpos) return;
+      if (pos == endpos)
+        return;
       dst = qMin(pos + n, endpos);
       cur.setPosition(pos);
     } else {
       const int blockPos = cur.block().position();
-      if (pos == blockPos) return;
+      if (pos == blockPos)
+        return;
       dst = qMax(pos + n, blockPos);
     }
 
@@ -293,19 +297,19 @@ void ViEditView::doDelete(int n)
   cur.deleteChar();
 }
 
-void ViEditView::doUndo(int n)
-{
+void ViEditView::doUndo(int n) {
   for (int i = 0; i < n; i++) {
     undo();
   }
 }
 
-void ViEditView::doRedo(int n)
-{
+void ViEditView::doRedo(int n) {
   for (int i = 0; i < n; i++) {
     redo();
   }
 }
+
+void ViEditView::evalRuby(const QString &str) {}
 
 void ViEditView::wheelEvent(QWheelEvent *e) {
   Qt::KeyboardModifiers mod = e->modifiers();

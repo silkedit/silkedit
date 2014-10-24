@@ -2,4 +2,25 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(silkedit)
 
-ADD_SUBDIRECTORY(src)
+# Instruct CMake to run moc automatically when needed.
+set(CMAKE_AUTOMOC ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wno-unused-parameter")
+
+file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
+file(GLOB_RECURSE SILK_HEADERS src/*.h)
+
+# Find the QtWidgets library
+find_package(Qt5Widgets REQUIRED)
+
+IF (APPLE)
+  find_library(CoreFoundationLibrary CoreFoundation)
+ENDIF (APPLE)
+
+include_directories(include)
+
+link_directories(lib)
+
+add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
+
+target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 ${CoreFoundationLibrary})

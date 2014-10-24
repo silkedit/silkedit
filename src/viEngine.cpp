@@ -1,6 +1,7 @@
 #include <QtGui>
 #include "viEngine.h"
 #include "viEditView.h"
+#include "rubyEvaluator.h"
 
 ViEngine::ViEngine(QObject *parent)
     : QObject(parent), m_mode(CMD), m_editor(nullptr) {}
@@ -110,6 +111,11 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
   case '-':
     m_editor->moveCursor(ViMoveOperation::PrevLine);
     break;
+  case 'r': {
+    RubyEvaluator &evaluator = RubyEvaluator::singleton();
+    evaluator.eval(m_editor->toPlainText());
+    break;
+  }
   default:
     rc = false;
     break;
