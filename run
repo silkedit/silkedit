@@ -40,7 +40,7 @@ ensure_dir() {
 }
 
 clean() {
-	  rm -rf target
+	  rm -rf target lib include
 }
 
 # resolve dependency
