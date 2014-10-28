@@ -43,9 +43,19 @@ clean() {
 	  rm -rf target
 }
 
+# resolve dependency
+resolve() {
+	  ant
+
+		echo "Unzipping include.zip"
+		# -o: overwrite  existing  files  without  prompting
+		unzip -o lib/include-*.zip
+		rm lib/include-*.zip
+}
+
 # release build
 build() {
-	  ant
+		resolve
 
 		ensure_dir target
 		cd target
@@ -96,6 +106,11 @@ case "$1" in
     echo
     ;;
 
+	resolve)
+		resolve
+		echo
+		;;
+
   *)
 
 		cat << EOF
@@ -103,6 +118,7 @@ analyze     static analysis
 build       create an app and an installer
 clean       clean target dir
 pre-commit  run clang-format and clang-check
+resolve     resolve dependency
 EOF
 
     exit 1

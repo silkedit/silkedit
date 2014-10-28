@@ -3,3 +3,4 @@ CMakeLists.txt.user
 target/
 ruby_host/ruby_host
 lib/
+include/
