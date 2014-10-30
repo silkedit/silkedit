@@ -8,112 +8,115 @@ NC='\x1B[0m' # No Color
 
 # run clang-format and clang-check
 pre_commit() {
-	  # clang-format
-		find . -name \*.cpp -or -name \*.h | xargs clang-format -i
+      # clang-format
+      find . -name \*.cpp -or -name \*.h | xargs clang-format -i
 
-		# clang-check
-		ensure_dir target
-		cd target
+        # clang-check
+        ensure_dir target
+        cd target
 
-		cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-		result=$(find ../src -name '*.cpp'|xargs clang-check -p . 2>&1)
-		if [ $(echo ${result} | grep warning -c) -ne 0 ]
-		then
-			echo "${result}"
-			exit 1
-		fi
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+        result=$(find ../src -name '*.cpp'|xargs clang-check -p . 2>&1)
+        if [ $(echo ${result} | grep warning -c) -ne 0 ]
+            then
+            echo "${result}"
+            exit 1
+        fi
 
-		echo -e "${LIGHT_GREEN}Good to commit!${NC}"
-}
+        echo -e "${LIGHT_GREEN}Good to commit!${NC}"
+    }
 
 # Create a new directory with the specified name if it doesn't exist.
 # Recreate it if it already exists.
 ensure_dir() {
-		if [ -d $1 ]; then
-				echo "Recreating $1 directory..."
-				rm -rf $1
-		else
-				echo "Creating $1 directory..."
-		fi
+    if [ -d $1 ]; then
+        echo "Recreating $1 directory..."
+        rm -rf $1
+    else
+        echo "Creating $1 directory..."
+    fi
 
-		mkdir $1
+    mkdir $1
 }
 
 clean() {
-	  rm -rf target lib include
+    rm -rf target lib include
 }
 
 # resolve dependency
 resolve() {
-	  ant
+    ant
 
-		echo "Unzipping include.zip"
-		# -o: overwrite  existing  files  without  prompting
-		unzip -o lib/include-*.zip
-		rm lib/include-*.zip
+    for f in lib/include-*.zip
+    do
+        echo "Unzipping $f"
+        # -o: overwrite  existing  files  without  prompting
+        unzip -o $f
+        rm $f
+    done
 }
 
 # release build
 build() {
-		resolve
+    resolve
 
-		ensure_dir target
-		cd target
+    ensure_dir target
+    cd target
 
-		cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
 
-	  if [ -f build.ninja ]; then
-			ninja
-	  fi
+    if [ -f build.ninja ]; then
+        ninja
+    fi
 
-		echo "Creating dmg..."
-		macdeployqt SilkEdit.app
-		mkdir dmg
-		cp -r SilkEdit.app dmg
-		ln -s /Applications dmg/Applications
-		hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
+    echo "Creating dmg..."
+    macdeployqt SilkEdit.app
+    mkdir dmg
+    cp -r SilkEdit.app dmg
+    ln -s /Applications dmg/Applications
+    hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
 }
 
 # static analysis
 analyze() {
-		ensure_dir target
-		cd target
+    ensure_dir target
+    cd target
 
-		scan-build cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-		scan-build -o ./build-analysis ninja
+    scan-build cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+    scan-build -o ./build-analysis ninja
 }
 
 set -e
 
 case "$1" in
-  build)
-		build
-    echo
-    ;;
+    build)
+        build
+        echo
+        ;;
 
-  clean)
-    clean
-    echo
-    ;;
+    clean)
+        clean
+        echo
+        ;;
 
-	pre-commit)
-		pre_commit
-		echo
-		;;
+    pre-commit)
+        pre_commit
+        echo
+        ;;
 
-  analyze)
-		analyze
-    echo
-    ;;
+    analyze)
+        analyze
+        echo
+        ;;
 
-	resolve)
-		resolve
-		echo
-		;;
+    resolve)
+        resolve
+        echo
+        ;;
 
-  *)
+    *)
 
-		cat << EOF
+        cat << EOF
 analyze     static analysis
 build       create an app and an installer
 clean       clean target dir
@@ -121,7 +124,7 @@ pre-commit  run clang-format and clang-check
 resolve     resolve dependency
 EOF
 
-    exit 1
+        exit 1
 esac
 
 exit 0

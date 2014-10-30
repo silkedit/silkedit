@@ -1,6 +1,7 @@
 <ivy-module version="2.0">
   <info organisation="com.silksmiths" module="silkedit"/>
   <dependencies>
-    <dependency org="com.silksmiths" name="libruby" rev="2.1.3"/>
+    <dependency org="com.silksmiths" name="ruby" rev="2.1.3"/>
+    <dependency org="com.silksmiths" name="yaml-cpp" rev="0.5.1"/>
   </dependencies>
 </ivy-module>
