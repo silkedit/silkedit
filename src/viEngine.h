@@ -11,7 +11,7 @@ class ViEngine : public QObject {
   Q_OBJECT
 
 public:
-  ViEngine(QObject *parent = 0);
+  ViEngine(QObject *parent = nullptr);
   ~ViEngine();
 
   Mode mode() const { return m_mode; }
@@ -37,6 +37,5 @@ protected:
 private:
   Mode m_mode;
   ViEditView *m_editor;
-  RubyEvaluator *m_rubyEvaluator;
   int m_repeatCount;
 };

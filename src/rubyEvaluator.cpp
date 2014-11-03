@@ -13,6 +13,7 @@ RubyEvaluator::~RubyEvaluator() {
   ruby_cleanup(0);
 }
 
+// FIXME: make this thread safe!
 void RubyEvaluator::eval(const QString &text) {
   int state;
   qDebug() << "evaluated ruby code" << text;

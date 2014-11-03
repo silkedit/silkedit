@@ -1,9 +1,12 @@
 #pragma once
 
 #include <memory>
+#include "macros.h"
 
+// http://cflat-inc.hatenablog.com/entry/2014/03/04/214608
 template <class T> class Singleton {
 public:
+  virtual ~Singleton() = default;
   static T &singleton() {
     static typename T::singleton_pointer_type s_singleton(T::createInstance());
     return getReference(s_singleton);
@@ -21,8 +24,5 @@ protected:
   Singleton() {}
 
 private:
-  Singleton(const Singleton &) = delete;
-  Singleton &operator=(const Singleton &) = delete;
-  Singleton(Singleton &&) = delete;
-  Singleton &operator=(Singleton &&) = delete;
+  DISABLE_COPY_AND_MOVE(Singleton)
 };

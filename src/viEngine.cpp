@@ -1,10 +1,16 @@
+#include <memory>
 #include <QtGui>
 #include "viEngine.h"
 #include "viEditView.h"
 #include "rubyEvaluator.h"
+#include "commandService.h"
+#include "commands/changeModeCommand.h"
 
 ViEngine::ViEngine(QObject *parent)
-    : QObject(parent), m_mode(CMD), m_editor(nullptr) {}
+    : QObject(parent), m_mode(CMD), m_editor(nullptr) {
+  std::unique_ptr<ChangeModeCommand> cmd(new ChangeModeCommand(this));
+  CommandService::singleton().addCommand(cmd->name(), std::move(cmd));
+}
 
 ViEngine::~ViEngine() {}
 
@@ -65,7 +71,7 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent *event) {
 
   switch (ch) {
   case 'i':
-    setMode(INSERT);
+    CommandService::singleton().runCommand("change_mode");
     return true;
   case 'h':
     m_editor->moveCursor(QTextCursor::Left, repeatCount());
