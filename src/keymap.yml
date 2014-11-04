@@ -1,0 +1,11 @@
+# Normal mode keymap
+
+- context: mode == normal
+  keymap:
+    i: change_to_insert_mode
+
+# Insert mode keymap
+
+- context: mode == insert
+  keymap:
+    escape: change_to_normal_mode

@@ -10,6 +10,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wno-
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
+configure_file("src/keymap.yml" "keymap.yml")
+
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 
@@ -23,4 +25,4 @@ link_directories(lib)
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
 
-target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 ${CoreFoundationLibrary})
+target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 yaml-cpp-0.5.1 ${CoreFoundationLibrary})

@@ -4,10 +4,13 @@
 #include "mainWindow.h"
 #include "viEditView.h"
 #include "viEngine.h"
+#include "keymapService.h"
 
 MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
+
+  KeymapService::singleton().load("keymap.yml");
 
   m_viEngine = new ViEngine;
   m_editor = new ViEditView;

@@ -3,10 +3,10 @@
 #include "command.h"
 #include "../viEngine.h"
 
-class ChangeModeCommand : public ICommand {
+class ChangeToInsertModeCommand : public ICommand {
 
 public:
-  ChangeModeCommand(ViEngine* viEngine);
+  ChangeToInsertModeCommand(ViEngine* viEngine);
 
 private:
   void doRun() override;
