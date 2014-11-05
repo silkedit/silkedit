@@ -5,12 +5,11 @@
 #include "rubyEvaluator.h"
 #include "commandService.h"
 #include "keymapService.h"
-#include "commands/changeToInsertModeCommand.h"
+#include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(QObject *parent)
-    : QObject(parent), m_mode(CMD), m_editor(nullptr) {
-  std::unique_ptr<ChangeToInsertModeCommand> cmd(new ChangeToInsertModeCommand(this));
-  CommandService::singleton().addCommand(cmd->name(), std::move(cmd));
+ViEngine::ViEngine(QObject *parent) : QObject(parent), m_mode(CMD), m_editor(nullptr) {
+  std::unique_ptr<ChangeModeCommand> cmd(new ChangeModeCommand(this));
+  CommandService::singleton().addCommand(std::move(cmd));
 }
 
 ViEngine::~ViEngine() {}

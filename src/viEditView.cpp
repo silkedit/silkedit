@@ -9,14 +9,10 @@ ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
   m_timer = new QElapsedTimer();
   m_timer->start();
 
-  connect(this, SIGNAL(blockCountChanged(int)), this,
-          SLOT(updateLineNumberAreaWidth(int)));
-  connect(this, SIGNAL(updateRequest(QRect, int)), this,
-          SLOT(updateLineNumberArea(QRect, int)));
-  connect(this, SIGNAL(cursorPositionChanged()), this,
-          SLOT(highlightCurrentLine()));
-  connect(this, SIGNAL(cursorPositionChanged()), this,
-          SLOT(onCursorPositionChanged()));
+  connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+  connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
+  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
@@ -86,8 +82,7 @@ void ViEditView::moveCursor(int mv, int n) {
   }
 
   if (!moved) {
-    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv),
-                     QTextCursor::MoveAnchor, n);
+    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, n);
   }
 
   setTextCursor(cur);
@@ -101,8 +96,7 @@ void ViEditView::updateLineNumberArea(const QRect &rect, int dy) {
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
-    m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(),
-                             rect.height());
+    m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
 
   if (rect.contains(viewport()->rect()))
     updateLineNumberAreaWidth(0);
@@ -112,8 +106,7 @@ void ViEditView::resizeEvent(QResizeEvent *e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
-  m_lineNumberArea->setGeometry(
-      QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+  m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
 #if !USE_EVENT_FILTER
@@ -156,8 +149,8 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(0, top, m_lineNumberArea->width(),
-                       fontMetrics().height(), Qt::AlignRight, number);
+      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
+                       number);
     }
 
     block = block.next();
@@ -259,9 +252,7 @@ int ViEditView::firstNonBlankCharPos(const QString &text) {
   return ix;
 }
 
-inline bool ViEditView::isTabOrSpace(const QChar ch) {
-  return ch == '\t' || ch == ' ';
-}
+inline bool ViEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
 
 void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur) {
   QTextBlock block = cur.block();

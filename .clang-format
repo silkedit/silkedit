@@ -1,1 +1,1 @@
-{BasedOnStyle: llvm, BreakBeforeBinaryOperators: true, Standard: Cpp11}
+{BasedOnStyle: llvm, BreakBeforeBinaryOperators: true, Standard: Cpp11, ColumnLimit: 100}

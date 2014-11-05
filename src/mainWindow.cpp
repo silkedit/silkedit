@@ -6,8 +6,7 @@
 #include "viEngine.h"
 #include "keymapService.h"
 
-MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags) {
+MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
 
   KeymapService::singleton().load("keymap.yml");
@@ -19,11 +18,9 @@ MainWindow::MainWindow(QWidget *parent, Qt::WindowFlags flags)
   statusBar()->addWidget(m_cmdLineEdit = new QLineEdit(), 1);
   m_cmdLineEdit->installEventFilter(this);
 
-  connect(m_viEngine, SIGNAL(modeChanged(Mode)), this,
-          SLOT(onModeChanged(Mode)));
+  connect(m_viEngine, SIGNAL(modeChanged(Mode)), this, SLOT(onModeChanged(Mode)));
   connect(m_viEngine, SIGNAL(modeChanged(Mode)), m_editor, SLOT(setMode(Mode)));
-  connect(m_cmdLineEdit, SIGNAL(returnPressed()), this,
-          SLOT(cmdLineReturnPressed()));
+  connect(m_cmdLineEdit, SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   connect(m_cmdLineEdit, SIGNAL(cursorPositionChanged(int, int)), this,
           SLOT(cmdLineCursorPositionChanged(int, int)));
   connect(m_cmdLineEdit, SIGNAL(textChanged(QString)), this,
@@ -74,8 +71,7 @@ void MainWindow::cmdLineTextChanged(const QString &text) {
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
-  if (obj == m_cmdLineEdit && event->type() == QEvent::KeyPress
-      && m_viEngine->mode() == CMDLINE) {
+  if (obj == m_cmdLineEdit && event->type() == QEvent::KeyPress && m_viEngine->mode() == CMDLINE) {
     QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
     if (keyEvent->key() == Qt::Key_Escape) {
       m_viEngine->setMode(CMD);

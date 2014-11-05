@@ -2,7 +2,7 @@
 
 - context: mode == normal
   keymap:
-    i: change_to_insert_mode
+    i: { cmd: change_mode, args: { mode: insert }}
 
 # Insert mode keymap
 
