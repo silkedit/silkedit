@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wno-
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
-configure_file("src/keymap.yml" "keymap.yml")
+configure_file("src/keymap.yml" "keymap.yml" COPYONLY)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
