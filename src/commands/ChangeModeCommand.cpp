@@ -1,8 +1,8 @@
 #include <QDebug>
 
 #include "ChangeModeCommand.h"
-#include "../vi.h"
-#include "../stlSpecialization.h"
+#include "vi.h"
+#include "stlSpecialization.h"
 
 ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
     : ICommand("change_mode"), m_viEngine(viEngine) {

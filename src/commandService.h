@@ -6,7 +6,7 @@
 
 #include "macros.h"
 #include "singleton.h"
-#include "commands/command.h"
+#include "commands/ICommand.h"
 #include "stlSpecialization.h"
 
 class CommandService : public Singleton<CommandService> {

@@ -5,7 +5,7 @@
 #include <QVariant>
 #include <QDebug>
 
-#include "../macros.h"
+#include "macros.h"
 
 class ICommand {
   DISABLE_COPY(ICommand)

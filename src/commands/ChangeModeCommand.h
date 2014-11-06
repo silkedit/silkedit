@@ -1,7 +1,7 @@
 #pragma once
 
-#include "command.h"
-#include "../viEngine.h"
+#include "ICommand.h"
+#include "viEngine.h"
 
 class ChangeModeCommand : public ICommand {
  public:
