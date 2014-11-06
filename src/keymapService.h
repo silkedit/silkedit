@@ -12,17 +12,17 @@
 class KeymapService : public Singleton<KeymapService> {
   DISABLE_COPY_AND_MOVE(KeymapService)
 
-public:
+ public:
   ~KeymapService() = default;
 
-  void load(const QString &filename);
-  void dispatch(const QString &key);
+  void load(const QString& filename);
+  void dispatch(const QString& key);
 
-private:
+ private:
   friend class Singleton<KeymapService>;
   KeymapService() = default;
 
-  std::unordered_map<QString, QVariant> parseArgs(const YAML::Node &argsNode);
+  std::unordered_map<QString, QVariant> parseArgs(const YAML::Node& argsNode);
 
   std::unordered_map<QString, CommandEvent> m_keymaps;
 };

@@ -2,8 +2,8 @@
 
 #include "commandService.h"
 
-void CommandService::runCommand(const QString &name,
-                                const std::unordered_map<QString, QVariant> &args) {
+void CommandService::runCommand(const QString& name,
+                                const std::unordered_map<QString, QVariant>& args) {
   if (m_commands.find(name) != m_commands.end()) {
     m_commands[name]->run(args);
   } else {

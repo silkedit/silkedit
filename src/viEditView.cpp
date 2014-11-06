@@ -4,7 +4,7 @@
 #include "viEditView.h"
 #include "viEngine.h"
 
-ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
+ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(CMD) {
   m_lineNumberArea = new LineNumberArea(this);
   m_timer = new QElapsedTimer();
   m_timer->start();
@@ -18,7 +18,8 @@ ViEditView::ViEditView(QWidget *parent) : QPlainTextEdit(parent), m_mode(CMD) {
   highlightCurrentLine();
 }
 
-ViEditView::~ViEditView() {}
+ViEditView::~ViEditView() {
+}
 
 int ViEditView::lineNumberAreaWidth() {
   int digits = 1;
@@ -41,44 +42,44 @@ void ViEditView::moveCursor(int mv, int n) {
   const QString blockText = block.text();
   bool moved = false;
   switch (mv) {
-  case QTextCursor::Left: {
-    n = qMin(n, pos - blockPos);
-    break;
-  }
-  case QTextCursor::Right: {
-    const QString text = block.text();
-    if (text.isEmpty())
-      return; // new line or EOF only
-    const int endpos = blockPos + text.length() - 1;
-    if (pos >= endpos)
-      return;
-    n = qMin(n, endpos - pos);
-    break;
-  }
-  case ViMoveOperation::FirstNonBlankChar:
-    cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
-    moved = true;
-    break;
-  case ViMoveOperation::LastChar: {
-    int ix = blockText.length();
-    if (ix != 0)
-      --ix;
-    cur.setPosition(blockPos + ix);
-    moved = true;
-    break;
-  }
-  case ViMoveOperation::NextLine:
-    cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, n);
-    moveToFirstNonBlankChar(cur);
-    moved = true;
-    break;
-  case ViMoveOperation::PrevLine:
-    cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, n);
-    moveToFirstNonBlankChar(cur);
-    moved = true;
-    break;
-  default:
-    break;
+    case QTextCursor::Left: {
+      n = qMin(n, pos - blockPos);
+      break;
+    }
+    case QTextCursor::Right: {
+      const QString text = block.text();
+      if (text.isEmpty())
+        return;  // new line or EOF only
+      const int endpos = blockPos + text.length() - 1;
+      if (pos >= endpos)
+        return;
+      n = qMin(n, endpos - pos);
+      break;
+    }
+    case ViMoveOperation::FirstNonBlankChar:
+      cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
+      moved = true;
+      break;
+    case ViMoveOperation::LastChar: {
+      int ix = blockText.length();
+      if (ix != 0)
+        --ix;
+      cur.setPosition(blockPos + ix);
+      moved = true;
+      break;
+    }
+    case ViMoveOperation::NextLine:
+      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, n);
+      moveToFirstNonBlankChar(cur);
+      moved = true;
+      break;
+    case ViMoveOperation::PrevLine:
+      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, n);
+      moveToFirstNonBlankChar(cur);
+      moved = true;
+      break;
+    default:
+      break;
   }
 
   if (!moved) {
@@ -92,7 +93,7 @@ void ViEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void ViEditView::updateLineNumberArea(const QRect &rect, int dy) {
+void ViEditView::updateLineNumberArea(const QRect& rect, int dy) {
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
@@ -102,7 +103,7 @@ void ViEditView::updateLineNumberArea(const QRect &rect, int dy) {
     updateLineNumberAreaWidth(0);
 }
 
-void ViEditView::resizeEvent(QResizeEvent *e) {
+void ViEditView::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
@@ -110,7 +111,7 @@ void ViEditView::resizeEvent(QResizeEvent *e) {
 }
 
 #if !USE_EVENT_FILTER
-void ViEditView::keyPressEvent(QKeyEvent *event) {
+void ViEditView::keyPressEvent(QKeyEvent* event) {
   if (m_viEngine != 0 && m_viEngine->processKeyPressEvent(event)) {
     return;
   }
@@ -136,7 +137,7 @@ void ViEditView::highlightCurrentLine() {
   //  setExtraSelections(extraSelections);
 }
 
-void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
+void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   QPainter painter(m_lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 
@@ -149,8 +150,8 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent *event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
-                       number);
+      painter.drawText(
+          0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();
@@ -185,7 +186,7 @@ void ViEditView::onCursorPositionChanged() {
   }
 }
 
-void ViEditView::paintEvent(QPaintEvent *e) {
+void ViEditView::paintEvent(QPaintEvent* e) {
   const int blinkPeriod = 1200;
   qint64 tc = m_timer->elapsed() - m_tickCount;
   if (tc % blinkPeriod < blinkPeriod / 2) {
@@ -244,7 +245,7 @@ void ViEditView::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
-int ViEditView::firstNonBlankCharPos(const QString &text) {
+int ViEditView::firstNonBlankCharPos(const QString& text) {
   int ix = 0;
   while (ix < text.length() && isTabOrSpace(text[ix])) {
     ++ix;
@@ -252,9 +253,11 @@ int ViEditView::firstNonBlankCharPos(const QString &text) {
   return ix;
 }
 
-inline bool ViEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
+inline bool ViEditView::isTabOrSpace(const QChar ch) {
+  return ch == '\t' || ch == ' ';
+}
 
-void ViEditView::moveToFirstNonBlankChar(QTextCursor &cur) {
+void ViEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();
   const int blockPos = block.position();
   const QString blockText = block.text();
@@ -300,9 +303,10 @@ void ViEditView::doRedo(int n) {
   }
 }
 
-void ViEditView::evalRuby(const QString &str) {}
+void ViEditView::evalRuby(const QString& str) {
+}
 
-void ViEditView::wheelEvent(QWheelEvent *e) {
+void ViEditView::wheelEvent(QWheelEvent* e) {
   Qt::KeyboardModifiers mod = e->modifiers();
   if ((mod & Qt::ControlModifier) != 0) {
     makeFontBigger(e->delta() > 0);

@@ -8,11 +8,11 @@
 #include "macros.h"
 
 class RubyEvaluator : public Singleton<RubyEvaluator> {
-public:
+ public:
   virtual ~RubyEvaluator();
-  void eval(const QString &text);
+  void eval(const QString& text);
 
-private:
+ private:
   DISABLE_COPY_AND_MOVE(RubyEvaluator)
 
   friend class Singleton<RubyEvaluator>;

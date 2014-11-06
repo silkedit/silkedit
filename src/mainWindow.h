@@ -11,24 +11,24 @@ class ViEngine;
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
-public:
-  MainWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+ public:
+  MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~MainWindow();
 
-public slots:
+ public slots:
   void onModeChanged(Mode);
   void cmdLineReturnPressed();
   void cmdLineCursorPositionChanged(int, int);
-  void cmdLineTextChanged(const QString &text);
+  void cmdLineTextChanged(const QString& text);
 
-protected:
-  bool eventFilter(QObject *obj, QEvent *evnet);
+ protected:
+  bool eventFilter(QObject* obj, QEvent* evnet);
 
-private:
-  MainWindow(const MainWindow &);
-  MainWindow &operator=(const MainWindow &);
+ private:
+  MainWindow(const MainWindow&);
+  MainWindow& operator=(const MainWindow&);
 
-  ViEditView *m_editor;
-  ViEngine *m_viEngine;
-  QLineEdit *m_cmdLineEdit;
+  ViEditView* m_editor;
+  ViEngine* m_viEngine;
+  QLineEdit* m_cmdLineEdit;
 };

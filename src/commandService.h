@@ -12,14 +12,15 @@
 class CommandService : public Singleton<CommandService> {
   DISABLE_COPY_AND_MOVE(CommandService)
 
-public:
+ public:
   virtual ~CommandService() = default;
 
-  void runCommand(const QString &name, const std::unordered_map<QString, QVariant> &args
-                                       = std::unordered_map<QString, QVariant>());
+  void runCommand(
+      const QString& name,
+      const std::unordered_map<QString, QVariant>& args = std::unordered_map<QString, QVariant>());
   void addCommand(std::unique_ptr<ICommand> cmd);
 
-private:
+ private:
   friend class Singleton<CommandService>;
   CommandService() = default;
 

@@ -14,7 +14,7 @@ RubyEvaluator::~RubyEvaluator() {
 }
 
 // FIXME: make this thread safe!
-void RubyEvaluator::eval(const QString &text) {
+void RubyEvaluator::eval(const QString& text) {
   int state;
   qDebug() << "evaluated ruby code" << text;
   rb_eval_string_protect(text.toStdString().c_str(), &state);

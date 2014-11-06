@@ -9,14 +9,14 @@
 
 class ICommand {
   DISABLE_COPY(ICommand)
-public:
+ public:
   ICommand(QString name) : m_name(name) {}
-  ICommand(ICommand &&) = default;
+  ICommand(ICommand&&) = default;
   virtual ~ICommand() = default;
 
-  ICommand &operator=(ICommand &&) = default;
+  ICommand& operator=(ICommand&&) = default;
 
-  inline void run(const std::unordered_map<QString, QVariant> &args) {
+  inline void run(const std::unordered_map<QString, QVariant>& args) {
     qDebug() << "Start command: " << m_name;
     doRun(args);
     qDebug() << "End command: " << m_name;
@@ -24,8 +24,8 @@ public:
 
   inline QString name() { return m_name; }
 
-private:
-  virtual void doRun(const std::unordered_map<QString, QVariant> &args) = 0;
+ private:
+  virtual void doRun(const std::unordered_map<QString, QVariant>& args) = 0;
 
   QString m_name;
 };

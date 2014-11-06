@@ -4,10 +4,11 @@
 #include "../vi.h"
 #include "../stlSpecialization.h"
 
-ChangeModeCommand::ChangeModeCommand(ViEngine *viEngine)
-    : ICommand("change_mode"), m_viEngine(viEngine) {}
+ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
+    : ICommand("change_mode"), m_viEngine(viEngine) {
+}
 
-void ChangeModeCommand::doRun(const std::unordered_map<QString, QVariant> &args) {
+void ChangeModeCommand::doRun(const std::unordered_map<QString, QVariant>& args) {
   if (args.find("mode") != args.end()) {
     QVariant modeVar = args.at("mode");
     if (modeVar.canConvert<QString>()) {

@@ -6,10 +6,13 @@ alias macdeployqt=~/Qt/5.3/clang_64/bin/macdeployqt
 LIGHT_GREEN='\x1B[0;32m'
 NC='\x1B[0m' # No Color
 
+format() {
+    find . -name \*.cpp -or -name \*.h | xargs clang-format -i
+}
+
 # run clang-format and clang-check
 pre_commit() {
-      # clang-format
-      find . -name \*.cpp -or -name \*.h | xargs clang-format -i
+	      format
 
         # clang-check
         ensure_dir target
@@ -89,37 +92,37 @@ analyze() {
 set -e
 
 case "$1" in
-    build)
-        build
-        echo
-        ;;
-
-    clean)
-        clean
-        echo
-        ;;
-
-    pre-commit)
-        pre_commit
-        echo
-        ;;
-
     analyze)
         analyze
         echo
         ;;
-
+    build)
+        build
+        echo
+        ;;
+    clean)
+        clean
+        echo
+        ;;
+    format)
+        format
+        echo
+        ;;
+    pre-commit)
+        pre_commit
+        echo
+        ;;
     resolve)
         resolve
         echo
         ;;
-
     *)
 
         cat << EOF
 analyze     static analysis
 build       create an app and an installer
 clean       clean target dir
+format      format sources
 pre-commit  run clang-format and clang-check
 resolve     resolve dependency
 EOF
