@@ -6,6 +6,7 @@
 // http://cflat-inc.hatenablog.com/entry/2014/03/04/214608
 template <class T>
 class Singleton {
+  DISABLE_COPY_AND_MOVE(Singleton)
  public:
   virtual ~Singleton() = default;
   static T& singleton() {
@@ -21,7 +22,4 @@ class Singleton {
 
  protected:
   Singleton() {}
-
- private:
-  DISABLE_COPY_AND_MOVE(Singleton)
 };

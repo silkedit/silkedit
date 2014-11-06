@@ -1,17 +1,15 @@
 #pragma once
 
-#include <unordered_map>
-#include <QString>
-#include <QVariant>
-#include <QDebug>
-
 #include "macros.h"
 
-class ICommand {
-  DISABLE_COPY_AND_MOVE(ICommand)
+class IOperator {
+  DISABLE_COPY(ICommand)
  public:
-  explicit ICommand(QString name) : m_name(name) {}
+  ICommand(QString name) : m_name(name) {}
+  ICommand(ICommand&&) = default;
   virtual ~ICommand() = default;
+
+  ICommand& operator=(ICommand&&) = default;
 
   inline void run(const std::unordered_map<QString, QVariant>& args) {
     qDebug() << "Start command: " << m_name;

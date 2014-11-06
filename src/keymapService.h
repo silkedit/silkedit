@@ -8,6 +8,7 @@
 #include "singleton.h"
 #include "stlSpecialization.h"
 #include "CommandEvent.h"
+#include "viEngine.h"
 
 class KeymapService : public Singleton<KeymapService> {
   DISABLE_COPY_AND_MOVE(KeymapService)
@@ -15,7 +16,7 @@ class KeymapService : public Singleton<KeymapService> {
  public:
   ~KeymapService() = default;
 
-  void load(const QString& filename);
+  void load(const QString& filename, ViEngine* viEngine);
   void dispatch(const QString& key);
 
  private:

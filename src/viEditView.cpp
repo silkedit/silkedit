@@ -4,7 +4,7 @@
 #include "viEditView.h"
 #include "viEngine.h"
 
-ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(CMD) {
+ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::CMD) {
   m_lineNumberArea = new LineNumberArea(this);
   m_timer = new QElapsedTimer();
   m_timer->start();
@@ -171,7 +171,7 @@ void ViEditView::setMode(Mode mode) {
 }
 
 void ViEditView::onCursorPositionChanged() {
-  if (mode() == CMD) {
+  if (mode() == Mode::CMD) {
     QTextCursor cur = textCursor();
     cur.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
     QString text = cur.selectedText();
@@ -224,7 +224,7 @@ void ViEditView::drawCursor() {
   QPainter painter(viewport());
   QRect r = cursorRect();
   r.setWidth(m_cursorWidth);
-  if (mode() == CMD) {
+  if (mode() == Mode::CMD) {
     r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
   }
   painter.fillRect(r, Qt::red);

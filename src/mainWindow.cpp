@@ -9,9 +9,9 @@
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
 
-  KeymapService::singleton().load("keymap.yml");
-
   m_viEngine = new ViEngine;
+  KeymapService::singleton().load("keymap.yml", m_viEngine);
+
   m_editor = new ViEditView;
   setCentralWidget(m_editor);
   m_viEngine->setEditor(m_editor);
@@ -37,13 +37,13 @@ MainWindow::~MainWindow() {
 void MainWindow::onModeChanged(Mode mode) {
   QString text;
   switch (mode) {
-    case CMD:
+    case Mode::CMD:
       text = "CMD";
       break;
-    case INSERT:
+    case Mode::INSERT:
       text = "INSERT";
       break;
-    case CMDLINE:
+    case Mode::CMDLINE:
       m_cmdLineEdit->setText(":");
       m_cmdLineEdit->show();
       m_cmdLineEdit->setFocus(Qt::OtherFocusReason);
@@ -69,15 +69,16 @@ void MainWindow::cmdLineCursorPositionChanged(int oldPos, int newPos) {
 
 void MainWindow::cmdLineTextChanged(const QString& text) {
   if (text.isEmpty() || text[0] != ':') {
-    m_viEngine->setMode(CMD);
+    m_viEngine->setMode(Mode::CMD);
   }
 }
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == m_cmdLineEdit && event->type() == QEvent::KeyPress && m_viEngine->mode() == CMDLINE) {
+  if (obj == m_cmdLineEdit && event->type() == QEvent::KeyPress &&
+      m_viEngine->mode() == Mode::CMDLINE) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
     if (keyEvent->key() == Qt::Key_Escape) {
-      m_viEngine->setMode(CMD);
+      m_viEngine->setMode(Mode::CMD);
       return true;
     }
   }

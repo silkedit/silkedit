@@ -2,7 +2,7 @@
 
 #define USE_EVENT_FILTER 1
 
-enum Mode {
+enum class Mode {
   CMD = 0,
   INSERT,
   CMDLINE,

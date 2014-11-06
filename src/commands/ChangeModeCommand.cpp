@@ -14,9 +14,9 @@ void ChangeModeCommand::doRun(const std::unordered_map<QString, QVariant>& args)
     if (modeVar.canConvert<QString>()) {
       QString mode = modeVar.toString().toLower();
       if (mode == "insert") {
-        m_viEngine->setMode(INSERT);
+        m_viEngine->setMode(Mode::INSERT);
       } else if (mode == "normal") {
-        m_viEngine->setMode(CMD);
+        m_viEngine->setMode(Mode::CMD);
       } else {
         qWarning() << "invalid mode: " << mode;
       }

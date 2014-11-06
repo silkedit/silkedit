@@ -13,7 +13,7 @@ class CommandService : public Singleton<CommandService> {
   DISABLE_COPY_AND_MOVE(CommandService)
 
  public:
-  virtual ~CommandService() = default;
+  ~CommandService() = default;
 
   void runCommand(
       const QString& name,

@@ -7,7 +7,7 @@
 #include "keymapService.h"
 #include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(QObject* parent) : QObject(parent), m_mode(CMD), m_editor(nullptr) {
+ViEngine::ViEngine(QObject* parent) : QObject(parent), m_mode(Mode::CMD), m_editor(nullptr) {
   std::unique_ptr<ChangeModeCommand> cmd(new ChangeModeCommand(this));
   CommandService::singleton().addCommand(std::move(cmd));
 }
@@ -23,7 +23,7 @@ void ViEngine::setEditor(ViEditView* editor) {
 }
 
 void ViEngine::processExCommand(const QString& text) {
-  setMode(CMD);
+  setMode(Mode::CMD);
 }
 
 void ViEngine::setMode(Mode mode) {
@@ -36,11 +36,12 @@ void ViEngine::setMode(Mode mode) {
 #if 1
 bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
   if (obj == m_editor && event->type() == QEvent::KeyPress) {
+    // TODO: KeymapService must dispatch!
     switch (mode()) {
-      case CMD:
+      case Mode::CMD:
         cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
         return true;
-      case INSERT:
+      case Mode::INSERT:
         return insertModeKeyPressEvent(static_cast<QKeyEvent*>(event));
       default:
         // TODO: add logging
@@ -90,7 +91,7 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
       m_editor->moveCursor(QTextCursor::Down, repeatCount());
       break;
     case ':':
-      setMode(CMDLINE);
+      setMode(Mode::CMDLINE);
       break;
     case 'x':
       m_editor->doDelete(repeatCount());
@@ -136,10 +137,10 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent* event) {
   if (event->key() == Qt::Key_Escape) {
-    if (mode() == INSERT) {
+    if (mode() == Mode::INSERT) {
       m_editor->moveCursor(QTextCursor::Left);
     }
-    setMode(CMD);
+    setMode(Mode::CMD);
     return true;
   }
   return false;
