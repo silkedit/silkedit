@@ -28,6 +28,9 @@ void ViEngine::processExCommand(const QString& text) {
 
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
+    if (m_mode == Mode::INSERT) {
+      m_editor->moveCursor(QTextCursor::Left);
+    }
     m_mode = mode;
     emit modeChanged(mode);
   }
@@ -73,62 +76,62 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
     return true;
   }
 
-  switch (ch) {
-    case 'i':
-      KeymapService::singleton().dispatch("i");
-      return true;
-    case 'h':
-      m_editor->moveCursor(QTextCursor::Left, repeatCount());
-      break;
-    case ' ':
-    case 'l':
-      m_editor->moveCursor(QTextCursor::Right, repeatCount());
-      break;
-    case 'k':
-      m_editor->moveCursor(QTextCursor::Up, repeatCount());
-      break;
-    case 'j':
-      m_editor->moveCursor(QTextCursor::Down, repeatCount());
-      break;
-    case ':':
-      setMode(Mode::CMDLINE);
-      break;
-    case 'x':
-      m_editor->doDelete(repeatCount());
-      break;
-    case 'X':
-      m_editor->doDelete(-repeatCount());
-      break;
-    case 'u':
-      m_editor->doUndo(repeatCount());
-      break;
-    case 'U':
-      m_editor->doRedo(repeatCount());
-      break;
-    case '0':
-      m_editor->moveCursor(QTextCursor::StartOfBlock);
-      break;
-    case '^':
-      m_editor->moveCursor(ViMoveOperation::FirstNonBlankChar);
-      break;
-    case '$':
-      m_editor->moveCursor(ViMoveOperation::LastChar);
-      break;
-    case '\r':  // Enter
-    case '+':
-      m_editor->moveCursor(ViMoveOperation::NextLine);
-      break;
-    case '-':
-      m_editor->moveCursor(ViMoveOperation::PrevLine);
-      break;
-    case 'r': {
-      RubyEvaluator& evaluator = RubyEvaluator::singleton();
-      evaluator.eval(m_editor->toPlainText());
-      break;
+  bool isHandled = KeymapService::singleton().dispatch(text);
+  if (!isHandled) {
+    switch (ch) {
+      case 'h':
+        m_editor->moveCursor(QTextCursor::Left, repeatCount());
+        break;
+      case ' ':
+      case 'l':
+        m_editor->moveCursor(QTextCursor::Right, repeatCount());
+        break;
+      case 'k':
+        m_editor->moveCursor(QTextCursor::Up, repeatCount());
+        break;
+      case 'j':
+        m_editor->moveCursor(QTextCursor::Down, repeatCount());
+        break;
+      case ':':
+        setMode(Mode::CMDLINE);
+        break;
+      case 'x':
+        m_editor->doDelete(repeatCount());
+        break;
+      case 'X':
+        m_editor->doDelete(-repeatCount());
+        break;
+      case 'u':
+        m_editor->doUndo(repeatCount());
+        break;
+      case 'U':
+        m_editor->doRedo(repeatCount());
+        break;
+      case '0':
+        m_editor->moveCursor(QTextCursor::StartOfBlock);
+        break;
+      case '^':
+        m_editor->moveCursor(ViMoveOperation::FirstNonBlankChar);
+        break;
+      case '$':
+        m_editor->moveCursor(ViMoveOperation::LastChar);
+        break;
+      case '\r':  // Enter
+      case '+':
+        m_editor->moveCursor(ViMoveOperation::NextLine);
+        break;
+      case '-':
+        m_editor->moveCursor(ViMoveOperation::PrevLine);
+        break;
+      case 'r': {
+        RubyEvaluator& evaluator = RubyEvaluator::singleton();
+        evaluator.eval(m_editor->toPlainText());
+        break;
+      }
+      default:
+        rc = false;
+        break;
     }
-    default:
-      rc = false;
-      break;
   }
 
   m_repeatCount = 0;
@@ -136,6 +139,11 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 }
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent* event) {
+  bool isHandled = KeymapService::singleton().dispatch(event->text());
+  if (isHandled) {
+    return true;
+  }
+
   if (event->key() == Qt::Key_Escape) {
     if (mode() == Mode::INSERT) {
       m_editor->moveCursor(QTextCursor::Left);

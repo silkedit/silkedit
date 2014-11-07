@@ -17,7 +17,7 @@ class KeymapService : public Singleton<KeymapService> {
   ~KeymapService() = default;
 
   void load(const QString& filename, ViEngine* viEngine);
-  void dispatch(const QString& key);
+  bool dispatch(const QString& key);
 
  private:
   friend class Singleton<KeymapService>;

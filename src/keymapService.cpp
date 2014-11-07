@@ -97,11 +97,14 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
   }
 }
 
-void KeymapService::dispatch(const QString& key) {
+bool KeymapService::dispatch(const QString& key) {
+  qDebug() << "key: " << key;
   if (m_keymaps.find(key) != m_keymaps.end()) {
     CommandEvent& ev = m_keymaps.at(key);
     ev.execute();
+    return true;
   } else {
-    qDebug() << "key: " << key << " is not defined.";
+    //    qDebug() << "key: " << key << " is not defined.";
+    return false;
   }
 }

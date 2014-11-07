@@ -8,4 +8,4 @@
 
 - context: mode == insert
   keymap:
-    escape: { cmd: change_mode, args: { mode: normal }}
+    p: { cmd: change_mode, args: { mode: normal }}
