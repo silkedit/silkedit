@@ -5,10 +5,10 @@
 #include <QString>
 
 #include "macros.h"
-#include "singleton.h"
+#include "Singleton.h"
 #include "stlSpecialization.h"
 #include "CommandEvent.h"
-#include "viEngine.h"
+#include "ViEngine.h"
 
 class KeymapService : public Singleton<KeymapService> {
   DISABLE_COPY_AND_MOVE(KeymapService)

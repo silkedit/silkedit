@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <ruby.h>
-#include "rubyEvaluator.h"
+#include "RubyEvaluator.h"
 
 RubyEvaluator::RubyEvaluator() {
   qDebug() << "constructor of RubyEvaluator called";

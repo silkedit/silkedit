@@ -1,7 +1,7 @@
 #include <string>
 #include <QDebug>
 
-#include "keymapService.h"
+#include "KeymapService.h"
 #include "CommandEvent.h"
 #include "ModeContext.h"
 

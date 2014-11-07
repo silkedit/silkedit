@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ICommand.h"
-#include "viEngine.h"
+#include "ViEngine.h"
 
 class ChangeModeCommand : public ICommand {
   DISABLE_COPY_AND_MOVE(ChangeModeCommand)

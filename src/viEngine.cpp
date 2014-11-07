@@ -1,10 +1,10 @@
 #include <memory>
 #include <QtGui>
-#include "viEngine.h"
-#include "viEditView.h"
-#include "rubyEvaluator.h"
-#include "commandService.h"
-#include "keymapService.h"
+#include "ViEngine.h"
+#include "ViEditView.h"
+#include "RubyEvaluator.h"
+#include "CommandService.h"
+#include "KeymapService.h"
 #include "commands/ChangeModeCommand.h"
 
 ViEngine::ViEngine(QObject* parent) : QObject(parent), m_mode(Mode::CMD), m_editor(nullptr) {

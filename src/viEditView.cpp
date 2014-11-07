@@ -1,8 +1,8 @@
 #include <QtWidgets>
 
 #include "vi.h"
-#include "viEditView.h"
-#include "viEngine.h"
+#include "ViEditView.h"
+#include "ViEngine.h"
 
 ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::CMD) {
   m_lineNumberArea = new LineNumberArea(this);

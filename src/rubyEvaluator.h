@@ -4,7 +4,7 @@
 
 #include <QString>
 
-#include "singleton.h"
+#include "Singleton.h"
 #include "macros.h"
 
 class RubyEvaluator : public Singleton<RubyEvaluator> {

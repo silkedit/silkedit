@@ -1,7 +1,7 @@
 #pragma once
 
 #include "IContext.h"
-#include "viEngine.h"
+#include "ViEngine.h"
 
 class ModeContext : public IContextBase<QString> {
   DISABLE_COPY(ModeContext)

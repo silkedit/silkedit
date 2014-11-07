@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "commandService.h"
+#include "CommandService.h"
 
 void CommandService::runCommand(const QString& name,
                                 const std::unordered_map<QString, QVariant>& args) {

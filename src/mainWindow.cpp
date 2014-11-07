@@ -1,10 +1,10 @@
 #include <QStatusBar>
 
 #include "vi.h"
-#include "mainWindow.h"
-#include "viEditView.h"
-#include "viEngine.h"
-#include "keymapService.h"
+#include "MainWindow.h"
+#include "ViEditView.h"
+#include "ViEngine.h"
+#include "KeymapService.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
