@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
 #include <QString>
+#include <QKeyEvent>
+#include <QKeySequence>
 
 #include "macros.h"
 #include "Singleton.h"
@@ -17,7 +19,7 @@ class KeymapService : public Singleton<KeymapService> {
   ~KeymapService() = default;
 
   void load(const QString& filename, ViEngine* viEngine);
-  bool dispatch(const QString& key);
+  bool dispatch(const QKeyEvent& ev);
 
  private:
   friend class Singleton<KeymapService>;
@@ -25,5 +27,5 @@ class KeymapService : public Singleton<KeymapService> {
 
   std::unordered_map<QString, QVariant> parseArgs(const YAML::Node& argsNode);
 
-  std::unordered_map<QString, CommandEvent> m_keymaps;
+  std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
 };

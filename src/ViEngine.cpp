@@ -76,7 +76,7 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
     return true;
   }
 
-  bool isHandled = KeymapService::singleton().dispatch(text);
+  bool isHandled = KeymapService::singleton().dispatch(*event);
   if (!isHandled) {
     switch (ch) {
       case 'h':
@@ -139,7 +139,7 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 }
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent* event) {
-  bool isHandled = KeymapService::singleton().dispatch(event->text());
+  bool isHandled = KeymapService::singleton().dispatch(*event);
   if (isHandled) {
     return true;
   }

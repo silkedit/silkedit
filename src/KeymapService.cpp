@@ -1,11 +1,16 @@
 #include <string>
 #include <QDebug>
+#include <QShortcut>
+#include <QList>
+#include <QString>
+#include <QRegularExpression>
 
 #include "KeymapService.h"
 #include "CommandEvent.h"
 #include "ModeContext.h"
 
 namespace {
+
 std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode, ViEngine* viEngine) {
   std::shared_ptr<IContext> context;
   if (contextNode) {
@@ -31,6 +36,47 @@ std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode, ViEngine* 
   }
 
   return context;
+}
+
+QKeySequence toSequence(const QKeyEvent& ev) {
+  int keyInt = ev.key();
+  Qt::KeyboardModifiers modifiers = ev.modifiers();
+  /*
+  Note: On Mac OS X, the ControlModifier value corresponds to the Command keys on the Macintosh
+  keyboard, and the MetaModifier value corresponds to the Control keys. The KeypadModifier value will
+  also be set when an arrow key is pressed as the arrow keys are considered part of the keypad.
+  Note: On Windows Keyboards, Qt::MetaModifier and Qt::Key_Meta are mapped to the Windows key.
+
+  http://qt-project.org/doc/qt-5.3/qt.html#KeyboardModifier-enum
+  */
+  if (modifiers & Qt::ShiftModifier)
+    keyInt += Qt::SHIFT;
+  if (modifiers & Qt::AltModifier)
+    keyInt += Qt::ALT;
+#if defined(Q_OS_MAC)
+  if (modifiers & Qt::ControlModifier)  // Cmd key
+    keyInt += Qt::META;
+  if (modifiers & Qt::MetaModifier)  // Ctrl key
+    keyInt += Qt::CTRL;
+#else
+  if (modifiers & Qt::ControlModifier)
+    keyInt += Qt::CTRL;
+  if (modifiers & Qt::MetaModifier)
+    keyInt += Qt::META;
+#endif
+
+  return std::move(QKeySequence(keyInt));
+}
+
+QKeySequence toSequence(QString str) {
+  QRegularExpression re("cmd|command", QRegularExpression::CaseInsensitiveOption);
+  QRegularExpressionMatch match = re.match(str);
+  if (!match.hasMatch()) {
+    return std::move(QKeySequence(str));
+  } else {
+    QString replacedStr = str.replace(match.capturedStart(), match.capturedLength(), "meta");
+    return std::move(QKeySequence(replacedStr));
+  }
 }
 }
 
@@ -63,7 +109,8 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
       assert(keymap.IsMap());
 
       for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); ++keymapIter) {
-        QString key = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
+        QString keyStr = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
+        QKeySequence key = toSequence(keyStr);
         YAML::Node valueNode = keymapIter->second;
         switch (valueNode.Type()) {
           case YAML::NodeType::Scalar: {
@@ -97,7 +144,8 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
   }
 }
 
-bool KeymapService::dispatch(const QString& key) {
+bool KeymapService::dispatch(const QKeyEvent& ev) {
+  QKeySequence key = toSequence(ev);
   qDebug() << "key: " << key;
   if (m_keymaps.find(key) != m_keymaps.end()) {
     CommandEvent& ev = m_keymaps.at(key);
