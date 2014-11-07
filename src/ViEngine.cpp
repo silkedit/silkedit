@@ -66,6 +66,8 @@ bool ViEngine::processKeyPressEvent(QKeyEvent* event) {
 #endif
 
 bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
+  bool isHandled = KeymapService::singleton().dispatch(*event);
+
   QString text = event->text();
   if (text.isEmpty())
     return false;
@@ -76,7 +78,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
     return true;
   }
 
-  bool isHandled = KeymapService::singleton().dispatch(*event);
   if (!isHandled) {
     switch (ch) {
       case 'h':

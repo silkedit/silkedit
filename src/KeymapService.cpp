@@ -43,8 +43,8 @@ QKeySequence toSequence(const QKeyEvent& ev) {
   Qt::KeyboardModifiers modifiers = ev.modifiers();
   /*
   Note: On Mac OS X, the ControlModifier value corresponds to the Command keys on the Macintosh
-  keyboard, and the MetaModifier value corresponds to the Control keys. The KeypadModifier value will
-  also be set when an arrow key is pressed as the arrow keys are considered part of the keypad.
+  keyboard, and the MetaModifier value corresponds to the Control keys. The KeypadModifier value
+  will also be set when an arrow key is pressed as the arrow keys are considered part of the keypad.
   Note: On Windows Keyboards, Qt::MetaModifier and Qt::Key_Meta are mapped to the Windows key.
 
   http://qt-project.org/doc/qt-5.3/qt.html#KeyboardModifier-enum
@@ -68,15 +68,22 @@ QKeySequence toSequence(const QKeyEvent& ev) {
   return std::move(QKeySequence(keyInt));
 }
 
-QKeySequence toSequence(QString str) {
-  QRegularExpression re("cmd|command", QRegularExpression::CaseInsensitiveOption);
+QString replace(QString str, const QString& regex, const QString& after) {
+  QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
   QRegularExpressionMatch match = re.match(str);
   if (!match.hasMatch()) {
-    return std::move(QKeySequence(str));
+    return std::move(str);
   } else {
-    QString replacedStr = str.replace(match.capturedStart(), match.capturedLength(), "meta");
-    return std::move(QKeySequence(replacedStr));
+    QString replacedStr = str.replace(match.capturedStart(), match.capturedLength(), after);
+    return std::move(replacedStr);
   }
+}
+
+QKeySequence toSequence(QString str) {
+  QString replacedWithMetaStr = replace(str, "cmd|command", "meta");
+  QString replacedWithAltStr = replace(replacedWithMetaStr, "opt|option", "alt");
+
+  return std::move(replacedWithAltStr);
 }
 }
 
