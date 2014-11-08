@@ -36,7 +36,6 @@ void ViEngine::setMode(Mode mode) {
   }
 }
 
-#if 1
 bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
   if (obj == m_editor && event->type() == QEvent::KeyPress) {
     // TODO: KeymapService must dispatch!
@@ -53,17 +52,6 @@ bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
   }
   return false;
 }
-#else
-bool ViEngine::processKeyPressEvent(QKeyEvent* event) {
-  switch (mode()) {
-    case CMD:
-      return cmdModeKeyPressEvent(event);
-    case INSERT:
-      return insertModeKeyPressEvent(event);
-  }
-  return false;
-}
-#endif
 
 bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
   bool isHandled = KeymapService::singleton().dispatch(*event);

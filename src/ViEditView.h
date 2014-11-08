@@ -33,10 +33,6 @@ class ViEditView : public QPlainTextEdit {
   void doRedo(int n);
   void evalRuby(const QString& str);
 
-#if !USE_EVENT_FILTER
-  void setViEngine(ViEngine* viEngine) { m_viEngine = viEngine; }
-#endif
-
  public slots:
   void setMode(Mode mode);
   void onCursorPositionChanged();
@@ -52,10 +48,6 @@ class ViEditView : public QPlainTextEdit {
   bool isTabOrSpace(const QChar ch);
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
-#if !USE_EVENT_FILTER
-  void keyPressEvent(QKeyEvent* event);
-#endif
-
 signals:
   void modeChanged(Mode);
 
@@ -70,9 +62,6 @@ signals:
   int m_cursorWidth;
   qint64 m_tickCount;
   QElapsedTimer* m_timer;
-#if !USE_EVENT_FILTER
-  ViEngine* m_viEngine;
-#endif
 };
 
 class LineNumberArea : public QWidget {

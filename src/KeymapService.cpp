@@ -156,8 +156,7 @@ bool KeymapService::dispatch(const QKeyEvent& ev) {
   qDebug() << "key: " << key;
   if (m_keymaps.find(key) != m_keymaps.end()) {
     CommandEvent& ev = m_keymaps.at(key);
-    ev.execute();
-    return true;
+    return ev.execute();
   } else {
     //    qDebug() << "key: " << key << " is not defined.";
     return false;

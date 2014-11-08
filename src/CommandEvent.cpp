@@ -19,8 +19,11 @@ CommandEvent::CommandEvent(const QString& name,
     : m_cmdName(name), m_args(std::move(args)), m_context(context) {
 }
 
-void CommandEvent::execute() {
+bool CommandEvent::execute() {
   if (!m_context || m_context->isSatisfied()) {
     CommandService::singleton().runCommand(m_cmdName, m_args);
+    return true;
   }
+
+  return false;
 }

@@ -20,7 +20,7 @@ class CommandEvent {
   ~CommandEvent() = default;
   DEFAULT_MOVE(CommandEvent)
 
-  void execute();
+  bool execute();
 
  private:
   QString m_cmdName;

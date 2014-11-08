@@ -110,15 +110,6 @@ void ViEditView::resizeEvent(QResizeEvent* e) {
   m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-#if !USE_EVENT_FILTER
-void ViEditView::keyPressEvent(QKeyEvent* event) {
-  if (m_viEngine != 0 && m_viEngine->processKeyPressEvent(event)) {
-    return;
-  }
-  QPlainTextEdit::keyPressEvent(event);
-}
-#endif
-
 void ViEditView::highlightCurrentLine() {
   //  QList<QTextEdit::ExtraSelection> extraSelections;
 

@@ -21,10 +21,6 @@ class ViEngine : public QObject {
 
   void processExCommand(const QString& text);
 
-#if !USE_EVENT_FILTER
-  bool processKeyPressEvent(QKeyEvent* event);
-#endif
-
 signals:
   void modeChanged(Mode);
 
