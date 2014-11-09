@@ -15,6 +15,8 @@
     enter: { cmd: move_cursor, args: { operation: next_line }}
     shift++: { cmd: move_cursor, args: { operation: next_line }}
     -: { cmd: move_cursor, args: { operation: prev_line }}
+    x: delete
+    shift+x: { cmd: delete, args: { direction: backward }}
 
 # Insert mode keymap
 

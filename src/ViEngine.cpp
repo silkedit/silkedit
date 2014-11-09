@@ -7,6 +7,7 @@
 #include "KeymapService.h"
 #include "commands/ChangeModeCommand.h"
 #include "commands/MoveCursorCommand.h"
+#include "commands/DeleteCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
@@ -17,6 +18,9 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
 
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this->m_editor));
   CommandService::singleton().addCommand(std::move(moveCursorCmd));
+
+  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this->m_editor));
+  CommandService::singleton().addCommand(std::move(deleteCmd));
 }
 
 ViEngine::~ViEngine() {
@@ -68,12 +72,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 
   if (!isHandled) {
     switch (ch) {
-      case 'x':
-        m_editor->doDelete(repeatCount());
-        break;
-      case 'X':
-        m_editor->doDelete(-repeatCount());
-        break;
       case 'u':
         m_editor->doUndo(repeatCount());
         break;
