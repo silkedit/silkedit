@@ -68,9 +68,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 
   if (!isHandled) {
     switch (ch) {
-      case ':':
-        setMode(Mode::CMDLINE);
-        break;
       case 'x':
         m_editor->doDelete(repeatCount());
         break;
@@ -82,22 +79,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
         break;
       case 'U':
         m_editor->doRedo(repeatCount());
-        break;
-      case '0':
-        m_editor->moveCursor(QTextCursor::StartOfBlock);
-        break;
-      case '^':
-        m_editor->moveCursor(ViMoveOperation::FirstNonBlankChar);
-        break;
-      case '$':
-        m_editor->moveCursor(ViMoveOperation::LastChar);
-        break;
-      case '\r':  // Enter
-      case '+':
-        m_editor->moveCursor(ViMoveOperation::NextLine);
-        break;
-      case '-':
-        m_editor->moveCursor(ViMoveOperation::PrevLine);
         break;
       case 'r': {
         RubyEvaluator& evaluator = RubyEvaluator::singleton();

@@ -15,7 +15,7 @@ class ICommand {
   virtual ~ICommand() = default;
 
   inline void run(const CommandArgument& args, int repeat = 1) {
-    qDebug() << "Start command: " << m_name << "repeat: " << repeat;
+    qDebug() << "Start command: " << m_name << "args: " << args << "repeat: " << repeat;
     doRun(args, repeat);
     qDebug() << "End command: " << m_name;
   }

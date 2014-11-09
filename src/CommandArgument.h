@@ -3,6 +3,7 @@
 #include <boost/optional.hpp>
 #include <unordered_map>
 #include <QVariant>
+#include <QDebug>
 
 #include "macros.h"
 #include "stlSpecialization.h"
@@ -30,6 +31,14 @@ class CommandArgument {
     }
 
     return argVar.value<T>();
+  }
+
+  friend QDebug operator<<(QDebug dbg, const CommandArgument& arg) {
+    for (std::pair<QString, QVariant> pair : arg.m_args) {
+      dbg.nospace() << pair.first << ": " << pair.second;
+    }
+
+    return dbg.space();
   }
 
  private:

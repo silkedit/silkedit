@@ -3,11 +3,18 @@
 - context: mode == normal
   keymap:
     i: { cmd: change_mode, args: { mode: insert }}
+    'shift+:': { cmd: change_mode, args: { mode: commandline }}
     h: { cmd: move_cursor, args: { operation: left }}
     j: { cmd: move_cursor, args: { operation: down }}
     k: { cmd: move_cursor, args: { operation: up }}
     l: { cmd: move_cursor, args: { operation: right }}
     space: { cmd: move_cursor, args: { operation: right }}
+    0: { cmd: move_cursor, args: { operation: start_of_block }}
+    'shift+^': { cmd: move_cursor, args: { operation: first_non_blank_char }}
+    'shift+$': { cmd: move_cursor, args: { operation: last_char }}
+    enter: { cmd: move_cursor, args: { operation: next_line }}
+    shift++: { cmd: move_cursor, args: { operation: next_line }}
+    -: { cmd: move_cursor, args: { operation: prev_line }}
 
 # Insert mode keymap
 

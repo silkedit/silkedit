@@ -82,8 +82,9 @@ QString replace(QString str, const QString& regex, const QString& after) {
 QKeySequence toSequence(QString str) {
   QString replacedWithMetaStr = replace(str, "cmd|command", "meta");
   QString replacedWithAltStr = replace(replacedWithMetaStr, "opt|option", "alt");
+  QString replacedWithReturnStr = replace(replacedWithAltStr, "enter", "return");
 
-  return std::move(replacedWithAltStr);
+  return std::move(replacedWithReturnStr);
 }
 
 CommandArgument parseArgs(const YAML::Node& argsNode) {

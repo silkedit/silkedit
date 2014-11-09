@@ -14,6 +14,8 @@ void ChangeModeCommand::doRun(const CommandArgument& args, int repeat) {
       m_viEngine->setMode(Mode::INSERT);
     } else if (*mode == "normal") {
       m_viEngine->setMode(Mode::CMD);
+    } else if (*mode == "commandline") {
+      m_viEngine->setMode(Mode::CMDLINE);
     } else {
       qWarning() << "invalid mode: " << *mode;
     }

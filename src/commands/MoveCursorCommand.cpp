@@ -16,6 +16,16 @@ int toMoveOperation(const QString& str) {
     return QTextCursor::Left;
   } else if (str.toLower() == "right") {
     return QTextCursor::Right;
+  } else if (str.toLower() == "start_of_block") {
+    return QTextCursor::StartOfBlock;
+  } else if (str.toLower() == "first_non_blank_char") {
+    return ViMoveOperation::FirstNonBlankChar;
+  } else if (str.toLower() == "last_char") {
+    return ViMoveOperation::LastChar;
+  } else if (str.toLower() == "next_line") {
+    return ViMoveOperation::NextLine;
+  } else if (str.toLower() == "prev_line") {
+    return ViMoveOperation::PrevLine;
   } else {
     return QTextCursor::NoMove;
   }
