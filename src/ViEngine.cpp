@@ -1,16 +1,12 @@
 #include <memory>
 #include <QtGui>
+
 #include "ViEngine.h"
 #include "ViEditView.h"
 #include "RubyEvaluator.h"
 #include "CommandService.h"
 #include "KeymapService.h"
 #include "commands/ChangeModeCommand.h"
-#include "commands/MoveCursorCommand.h"
-#include "commands/DeleteCommand.h"
-#include "commands/UndoCommand.h"
-#include "commands/RedoCommand.h"
-#include "commands/EvalAsRubyCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
@@ -18,24 +14,6 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandService::singleton().addCommand(std::move(changeModeCmd));
-
-  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this->m_editor));
-  CommandService::singleton().addCommand(std::move(moveCursorCmd));
-
-  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this->m_editor));
-  CommandService::singleton().addCommand(std::move(deleteCmd));
-
-  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand(this->m_editor));
-  CommandService::singleton().addCommand(std::move(undoCmd));
-
-  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this->m_editor));
-  CommandService::singleton().addCommand(std::move(redoCmd));
-
-  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand(this->m_editor));
-  CommandService::singleton().addCommand(std::move(evalAsRubyCmd));
-}
-
-ViEngine::~ViEngine() {
 }
 
 void ViEngine::processExCommand(const QString& text) {
@@ -59,7 +37,7 @@ bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
         cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
         return true;
       case Mode::INSERT:
-        return KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(event), m_repeatCount);
+        return KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(event));
       default:
         // TODO: add logging
         break;

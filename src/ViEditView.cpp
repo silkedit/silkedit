@@ -3,8 +3,30 @@
 #include "vi.h"
 #include "ViEditView.h"
 #include "ViEngine.h"
+#include "CommandService.h"
+#include "commands/MoveCursorCommand.h"
+#include "commands/DeleteCommand.h"
+#include "commands/UndoCommand.h"
+#include "commands/RedoCommand.h"
+#include "commands/EvalAsRubyCommand.h"
 
 ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::CMD) {
+  // add commands
+  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
+  CommandService::singleton().addCommand(std::move(moveCursorCmd));
+
+  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this));
+  CommandService::singleton().addCommand(std::move(deleteCmd));
+
+  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand(this));
+  CommandService::singleton().addCommand(std::move(undoCmd));
+
+  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this));
+  CommandService::singleton().addCommand(std::move(redoCmd));
+
+  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand(this));
+  CommandService::singleton().addCommand(std::move(evalAsRubyCmd));
+
   m_lineNumberArea = new LineNumberArea(this);
   m_timer = new QElapsedTimer();
   m_timer->start();
@@ -16,9 +38,6 @@ ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::C
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
-}
-
-ViEditView::~ViEditView() {
 }
 
 int ViEditView::lineNumberAreaWidth() {

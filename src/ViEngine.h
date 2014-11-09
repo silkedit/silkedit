@@ -12,7 +12,7 @@ class ViEngine : public QObject {
 
  public:
   ViEngine(ViEditView* viEditView, QObject* parent = nullptr);
-  ~ViEngine();
+  ~ViEngine() = default;
 
   Mode mode() const { return m_mode; }
 

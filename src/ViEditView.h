@@ -21,7 +21,7 @@ class ViEditView : public QPlainTextEdit {
 
  public:
   ViEditView(QWidget* parent = 0);
-  ~ViEditView();
+  ~ViEditView() = default;
 
   Mode mode() const { return m_mode; }
 
