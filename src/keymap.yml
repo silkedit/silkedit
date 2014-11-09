@@ -19,6 +19,7 @@
     shift+x: { cmd: delete, args: { direction: backward }}
     u: undo
     ctrl+r: redo
+    r: eval_as_ruby
 
 # Insert mode keymap
 

@@ -155,28 +155,13 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
   }
 }
 
-bool KeymapService::dispatch(const QKeyEvent& ev) {
-  QKeySequence key = toSequence(ev);
+bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
+  QKeySequence key = toSequence(*event);
   qDebug() << "key: " << key;
-
-  if (key.isEmpty())
-    return false;
-
-  ushort ch = key.toString()[0].unicode();
-  if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
-    m_repeatCount = m_repeatCount * 10 + (ch - '0');
-    return true;
-  }
 
   if (m_keymaps.find(key) != m_keymaps.end()) {
     CommandEvent& ev = m_keymaps.at(key);
-    if (m_repeatCount > 0) {
-      bool isHandled = ev.execute(m_repeatCount);
-      m_repeatCount = 0;
-      return isHandled;
-    } else {
-      return ev.execute();
-    }
+    return ev.execute(repeat);
   } else {
     return false;
   }

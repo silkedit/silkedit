@@ -10,6 +10,7 @@
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
 #include "commands/RedoCommand.h"
+#include "commands/EvalAsRubyCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
@@ -29,6 +30,9 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
 
   std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this->m_editor));
   CommandService::singleton().addCommand(std::move(redoCmd));
+
+  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand(this->m_editor));
+  CommandService::singleton().addCommand(std::move(evalAsRubyCmd));
 }
 
 ViEngine::~ViEngine() {
@@ -50,13 +54,12 @@ void ViEngine::setMode(Mode mode) {
 
 bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
   if (obj == m_editor && event->type() == QEvent::KeyPress) {
-    // TODO: KeymapService must dispatch!
     switch (mode()) {
       case Mode::CMD:
         cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
         return true;
       case Mode::INSERT:
-        return insertModeKeyPressEvent(static_cast<QKeyEvent*>(event));
+        return KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(event), m_repeatCount);
       default:
         // TODO: add logging
         break;
@@ -66,35 +69,20 @@ bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
 }
 
 bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
-  bool isHandled = KeymapService::singleton().dispatch(*event);
-
   QString text = event->text();
   if (text.isEmpty())
     return false;
-  bool rc = true;
   ushort ch = text[0].unicode();
   if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
     m_repeatCount = m_repeatCount * 10 + (ch - '0');
     return true;
   }
 
-  if (!isHandled) {
-    switch (ch) {
-      case 'r': {
-        RubyEvaluator& evaluator = RubyEvaluator::singleton();
-        evaluator.eval(m_editor->toPlainText());
-        break;
-      }
-      default:
-        rc = false;
-        break;
-    }
+  if (m_repeatCount > 0) {
+    bool isHandled = KeymapService::singleton().dispatch(event, m_repeatCount);
+    m_repeatCount = 0;
+    return isHandled;
+  } else {
+    return KeymapService::singleton().dispatch(event);
   }
-
-  m_repeatCount = 0;
-  return rc;
-}
-
-bool ViEngine::insertModeKeyPressEvent(QKeyEvent* event) {
-  return KeymapService::singleton().dispatch(*event);
 }

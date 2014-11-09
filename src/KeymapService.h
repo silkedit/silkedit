@@ -19,12 +19,11 @@ class KeymapService : public Singleton<KeymapService> {
   ~KeymapService() = default;
 
   void load(const QString& filename, ViEngine* viEngine);
-  bool dispatch(const QKeyEvent& ev);
+  bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:
   friend class Singleton<KeymapService>;
   KeymapService() = default;
 
   std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
-  int m_repeatCount;
 };
