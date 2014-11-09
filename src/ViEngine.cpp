@@ -8,6 +8,8 @@
 #include "commands/ChangeModeCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
+#include "commands/UndoCommand.h"
+#include "commands/RedoCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
@@ -21,6 +23,12 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
 
   std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this->m_editor));
   CommandService::singleton().addCommand(std::move(deleteCmd));
+
+  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand(this->m_editor));
+  CommandService::singleton().addCommand(std::move(undoCmd));
+
+  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this->m_editor));
+  CommandService::singleton().addCommand(std::move(redoCmd));
 }
 
 ViEngine::~ViEngine() {
@@ -72,12 +80,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 
   if (!isHandled) {
     switch (ch) {
-      case 'u':
-        m_editor->doUndo(repeatCount());
-        break;
-      case 'U':
-        m_editor->doRedo(repeatCount());
-        break;
       case 'r': {
         RubyEvaluator& evaluator = RubyEvaluator::singleton();
         evaluator.eval(m_editor->toPlainText());
@@ -94,17 +96,5 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 }
 
 bool ViEngine::insertModeKeyPressEvent(QKeyEvent* event) {
-  bool isHandled = KeymapService::singleton().dispatch(*event);
-  if (isHandled) {
-    return true;
-  }
-
-  if (event->key() == Qt::Key_Escape) {
-    if (mode() == Mode::INSERT) {
-      m_editor->moveCursor(QTextCursor::Left);
-    }
-    setMode(Mode::CMD);
-    return true;
-  }
-  return false;
+  return KeymapService::singleton().dispatch(*event);
 }

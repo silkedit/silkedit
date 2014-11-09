@@ -134,11 +134,11 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
 
             YAML::Node argsNode = valueNode["args"];
             if (argsNode.IsMap()) {
-                assert(argsNode.IsMap());
-                CommandArgument args = parseArgs(argsNode);
-                m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, args, context)));
+              assert(argsNode.IsMap());
+              CommandArgument args = parseArgs(argsNode);
+              m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, args, context)));
             } else {
-                m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, context)));
+              m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, context)));
             }
 
             break;

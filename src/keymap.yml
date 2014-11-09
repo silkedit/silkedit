@@ -17,9 +17,11 @@
     -: { cmd: move_cursor, args: { operation: prev_line }}
     x: delete
     shift+x: { cmd: delete, args: { direction: backward }}
+    u: undo
+    ctrl+r: redo
 
 # Insert mode keymap
 
 - context: mode == insert
   keymap:
-    p: { cmd: change_mode, args: { mode: normal }}
+    escape: { cmd: change_mode, args: { mode: normal }}
