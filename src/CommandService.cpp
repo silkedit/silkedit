@@ -2,10 +2,9 @@
 
 #include "CommandService.h"
 
-void CommandService::runCommand(const QString& name,
-                                const std::unordered_map<QString, QVariant>& args) {
+void CommandService::runCommand(const QString& name, const CommandArgument& args, int repeat) {
   if (m_commands.find(name) != m_commands.end()) {
-    m_commands[name]->run(args);
+    m_commands[name]->run(args, repeat);
   } else {
     qDebug() << "Can't find a command: " << name;
   }

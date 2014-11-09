@@ -11,13 +11,12 @@ class ViEngine : public QObject {
   Q_OBJECT
 
  public:
-  ViEngine(QObject* parent = nullptr);
+  ViEngine(ViEditView* viEditView, QObject* parent = nullptr);
   ~ViEngine();
 
   Mode mode() const { return m_mode; }
 
   void setMode(Mode mode);
-  void setEditor(ViEditView* editor);
 
   void processExCommand(const QString& text);
 

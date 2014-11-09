@@ -4,13 +4,13 @@
 #include "ViEngine.h"
 
 class ChangeModeCommand : public ICommand {
-  DISABLE_COPY_AND_MOVE(ChangeModeCommand)
  public:
   ChangeModeCommand(ViEngine* viEngine);
   ~ChangeModeCommand() = default;
+  DEFAULT_COPY_AND_MOVE(ChangeModeCommand)
 
  private:
-  void doRun(const std::unordered_map<QString, QVariant>& args) override;
+  void doRun(const CommandArgument& args, int repeat = 1) override;
 
   ViEngine* m_viEngine;
 };

@@ -3,6 +3,11 @@
 - context: mode == normal
   keymap:
     i: { cmd: change_mode, args: { mode: insert }}
+    h: { cmd: move_cursor, args: { operation: left }}
+    j: { cmd: move_cursor, args: { operation: down }}
+    k: { cmd: move_cursor, args: { operation: up }}
+    l: { cmd: move_cursor, args: { operation: right }}
+    space: { cmd: move_cursor, args: { operation: right }}
 
 # Insert mode keymap
 

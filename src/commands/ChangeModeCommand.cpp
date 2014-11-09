@@ -8,18 +8,14 @@ ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
     : ICommand("change_mode"), m_viEngine(viEngine) {
 }
 
-void ChangeModeCommand::doRun(const std::unordered_map<QString, QVariant>& args) {
-  if (args.find("mode") != args.end()) {
-    QVariant modeVar = args.at("mode");
-    if (modeVar.canConvert<QString>()) {
-      QString mode = modeVar.toString().toLower();
-      if (mode == "insert") {
-        m_viEngine->setMode(Mode::INSERT);
-      } else if (mode == "normal") {
-        m_viEngine->setMode(Mode::CMD);
-      } else {
-        qWarning() << "invalid mode: " << mode;
-      }
+void ChangeModeCommand::doRun(const CommandArgument& args, int repeat) {
+  if (auto mode = args.find<QString>("mode")) {
+    if (*mode == "insert") {
+      m_viEngine->setMode(Mode::INSERT);
+    } else if (*mode == "normal") {
+      m_viEngine->setMode(Mode::CMD);
+    } else {
+      qWarning() << "invalid mode: " << *mode;
     }
   }
 }

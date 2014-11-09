@@ -85,9 +85,8 @@ QKeySequence toSequence(QString str) {
 
   return std::move(replacedWithAltStr);
 }
-}
 
-std::unordered_map<QString, QVariant> KeymapService::parseArgs(const YAML::Node& argsNode) {
+CommandArgument parseArgs(const YAML::Node& argsNode) {
   std::unordered_map<QString, QVariant> args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
     QString arg = QString::fromUtf8(argsIter->first.as<std::string>().c_str());
@@ -95,7 +94,8 @@ std::unordered_map<QString, QVariant> KeymapService::parseArgs(const YAML::Node&
     args.insert(std::make_pair(std::move(arg), QVariant(value)));
   }
 
-  return std::move(args);
+  return std::move(CommandArgument(args));
+}
 }
 
 // FIXME: Why does this need ViEngine?
@@ -134,7 +134,7 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
             YAML::Node argsNode = valueNode["args"];
             assert(argsNode.IsMap());
 
-            std::unordered_map<QString, QVariant> args = parseArgs(argsNode);
+            CommandArgument args = parseArgs(argsNode);
 
             m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, args, context)));
             break;
@@ -154,11 +154,26 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
 bool KeymapService::dispatch(const QKeyEvent& ev) {
   QKeySequence key = toSequence(ev);
   qDebug() << "key: " << key;
+
+  if (key.isEmpty())
+    return false;
+
+  ushort ch = key.toString()[0].unicode();
+  if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
+    m_repeatCount = m_repeatCount * 10 + (ch - '0');
+    return true;
+  }
+
   if (m_keymaps.find(key) != m_keymaps.end()) {
     CommandEvent& ev = m_keymaps.at(key);
-    return ev.execute();
+    if (m_repeatCount > 0) {
+      bool isHandled = ev.execute(m_repeatCount);
+      m_repeatCount = 0;
+      return isHandled;
+    } else {
+      return ev.execute();
+    }
   } else {
-    //    qDebug() << "key: " << key << " is not defined.";
     return false;
   }
 }

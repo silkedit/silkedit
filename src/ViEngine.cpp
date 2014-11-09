@@ -6,20 +6,20 @@
 #include "CommandService.h"
 #include "KeymapService.h"
 #include "commands/ChangeModeCommand.h"
+#include "commands/MoveCursorCommand.h"
 
-ViEngine::ViEngine(QObject* parent) : QObject(parent), m_mode(Mode::CMD), m_editor(nullptr) {
-  std::unique_ptr<ChangeModeCommand> cmd(new ChangeModeCommand(this));
-  CommandService::singleton().addCommand(std::move(cmd));
+ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
+    : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
+  m_editor->installEventFilter(this);
+
+  std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
+  CommandService::singleton().addCommand(std::move(changeModeCmd));
+
+  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this->m_editor));
+  CommandService::singleton().addCommand(std::move(moveCursorCmd));
 }
 
 ViEngine::~ViEngine() {
-}
-
-void ViEngine::setEditor(ViEditView* editor) {
-  m_editor = editor;
-#if USE_EVENT_FILTER
-  m_editor->installEventFilter(this);
-#endif
 }
 
 void ViEngine::processExCommand(const QString& text) {
@@ -68,19 +68,6 @@ bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
 
   if (!isHandled) {
     switch (ch) {
-      case 'h':
-        m_editor->moveCursor(QTextCursor::Left, repeatCount());
-        break;
-      case ' ':
-      case 'l':
-        m_editor->moveCursor(QTextCursor::Right, repeatCount());
-        break;
-      case 'k':
-        m_editor->moveCursor(QTextCursor::Up, repeatCount());
-        break;
-      case 'j':
-        m_editor->moveCursor(QTextCursor::Down, repeatCount());
-        break;
       case ':':
         setMode(Mode::CMDLINE);
         break;

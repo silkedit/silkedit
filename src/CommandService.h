@@ -6,7 +6,7 @@
 
 #include "macros.h"
 #include "singleton.h"
-#include "commands/ICommand.h"
+#include "ICommand.h"
 #include "stlSpecialization.h"
 
 class CommandService : public Singleton<CommandService> {
@@ -15,9 +15,9 @@ class CommandService : public Singleton<CommandService> {
  public:
   ~CommandService() = default;
 
-  void runCommand(
-      const QString& name,
-      const std::unordered_map<QString, QVariant>& args = std::unordered_map<QString, QVariant>());
+  void runCommand(const QString& name,
+                  const CommandArgument& args = CommandArgument(),
+                  int repeat = 1);
   void addCommand(std::unique_ptr<ICommand> cmd);
 
  private:

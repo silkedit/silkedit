@@ -25,7 +25,6 @@ class KeymapService : public Singleton<KeymapService> {
   friend class Singleton<KeymapService>;
   KeymapService() = default;
 
-  std::unordered_map<QString, QVariant> parseArgs(const YAML::Node& argsNode);
-
   std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
+  int m_repeatCount;
 };

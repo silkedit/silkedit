@@ -9,12 +9,12 @@
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("Code Editor Example"));
 
-  m_viEngine = new ViEngine;
-  KeymapService::singleton().load("keymap.yml", m_viEngine);
-
   m_editor = new ViEditView;
   setCentralWidget(m_editor);
-  m_viEngine->setEditor(m_editor);
+
+  m_viEngine = new ViEngine(m_editor);
+  KeymapService::singleton().load("keymap.yml", m_viEngine);
+
   statusBar()->addWidget(m_cmdLineEdit = new QLineEdit(), 1);
   m_cmdLineEdit->installEventFilter(this);
 

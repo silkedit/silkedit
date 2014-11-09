@@ -10,11 +10,11 @@ class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
+class QElapsedTimer;
 QT_END_NAMESPACE
 
 class LineNumberArea;
 class ViEngine;
-class QElapsedTimer;
 
 class ViEditView : public QPlainTextEdit {
   Q_OBJECT
