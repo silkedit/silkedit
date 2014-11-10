@@ -8,7 +8,7 @@ ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
     : ICommand("change_mode"), m_viEngine(viEngine) {
 }
 
-void ChangeModeCommand::doRun(const CommandArgument& args, int repeat) {
+void ChangeModeCommand::doRun(const CommandArgument& args, int) {
   if (auto mode = args.find<QString>("mode")) {
     if (*mode == "insert") {
       m_viEngine->setMode(Mode::INSERT);

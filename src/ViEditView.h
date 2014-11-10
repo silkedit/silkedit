@@ -31,7 +31,6 @@ class ViEditView : public QPlainTextEdit {
   void doDelete(int n);
   void doUndo(int n);
   void doRedo(int n);
-  void evalRuby(const QString& str);
 
  public slots:
   void setMode(Mode mode);

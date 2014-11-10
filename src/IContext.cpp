@@ -1,3 +1,5 @@
+#include <QString>
+
 #include "IContext.h"
 
 template <typename T>

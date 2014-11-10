@@ -2,15 +2,15 @@
 
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
-#include <QString>
-#include <QKeyEvent>
-#include <QKeySequence>
 
+#include "CommandEvent.h"
 #include "macros.h"
 #include "Singleton.h"
 #include "stlSpecialization.h"
-#include "CommandEvent.h"
-#include "ViEngine.h"
+
+class QKeySequence;
+class QKeyEvent;
+class QString;
 
 class KeymapService : public Singleton<KeymapService> {
   DISABLE_COPY_AND_MOVE(KeymapService)
@@ -18,7 +18,7 @@ class KeymapService : public Singleton<KeymapService> {
  public:
   ~KeymapService() = default;
 
-  void load(const QString& filename, ViEngine* viEngine);
+  void load(const QString& filename);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:

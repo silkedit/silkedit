@@ -4,15 +4,16 @@
 #include <QList>
 #include <QString>
 #include <QRegularExpression>
+#include <QKeyEvent>
 
+#include "ContextService.h"
 #include "KeymapService.h"
 #include "CommandEvent.h"
 #include "ModeContext.h"
 
 namespace {
 
-std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode, ViEngine* viEngine) {
-  std::shared_ptr<IContext> context;
+std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
   if (contextNode) {
     QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
     QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
@@ -29,13 +30,17 @@ std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode, ViEngine* 
       }
 
       QString operand = list[2];
-      if (key == "mode") {
-        context.reset(new ModeContext(viEngine, op, operand));
+
+      std::shared_ptr<IContext> context = ContextService::singleton().tryCreate(key, op, operand);
+      if (context) {
+        return context;
+      } else {
+        qWarning() << "can't find a context with key: " << key;
       }
     }
   }
 
-  return context;
+  return nullptr;
 }
 
 QKeySequence toSequence(const QKeyEvent& ev) {
@@ -99,8 +104,7 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 }
 
-// FIXME: Why does this need ViEngine?
-void KeymapService::load(const QString& filename, ViEngine* viEngine) {
+void KeymapService::load(const QString& filename) {
   std::string name = filename.toUtf8().constData();
   try {
     YAML::Node keymaps = YAML::LoadFile(name);
@@ -111,7 +115,7 @@ void KeymapService::load(const QString& filename, ViEngine* viEngine) {
       YAML::Node node = *it;
       assert(node.IsMap());
 
-      std::shared_ptr<IContext> context = parseContext(node["context"], viEngine);
+      std::shared_ptr<IContext> context = parseContext(node["context"]);
 
       YAML::Node keymap = node["keymap"];
       assert(keymap.IsMap());

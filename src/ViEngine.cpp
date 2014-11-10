@@ -4,7 +4,9 @@
 #include "ViEditView.h"
 #include "RubyEvaluator.h"
 #include "CommandService.h"
+#include "ContextService.h"
 #include "KeymapService.h"
+#include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
@@ -13,9 +15,14 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandService::singleton().addCommand(std::move(changeModeCmd));
+
+  ContextService::singleton().add(
+      "mode", [this](Operator op, const QString& operand) -> std::shared_ptr<IContext> {
+        return std::shared_ptr<IContext>(new ModeContext(this, op, operand));
+      });
 }
 
-void ViEngine::processExCommand(const QString& text) {
+void ViEngine::processExCommand(const QString&) {
   setMode(Mode::CMD);
 }
 

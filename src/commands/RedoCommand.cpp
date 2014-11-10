@@ -5,6 +5,6 @@
 RedoCommand::RedoCommand(ViEditView* viEditView) : ICommand("redo"), m_viEditView(viEditView) {
 }
 
-void RedoCommand::doRun(const CommandArgument& args, int repeat) {
+void RedoCommand::doRun(const CommandArgument&, int repeat) {
   m_viEditView->doRedo(repeat);
 }

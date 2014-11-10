@@ -1,8 +1,11 @@
 #pragma once
 
-#include <QVariant>
+#include <functional>
 
 #include "macros.h"
+
+class QVariant;
+class QString;
 
 enum class Operator {
   EQUALS,
@@ -16,6 +19,8 @@ class IContext {
 
   virtual bool isSatisfied() = 0;
 };
+
+typedef std::function<std::shared_ptr<IContext>(Operator, const QString&)> CREATION_METHOD;
 
 template <typename T>
 class IContextBase : public IContext {

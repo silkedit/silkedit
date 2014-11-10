@@ -321,9 +321,6 @@ void ViEditView::doRedo(int n) {
   }
 }
 
-void ViEditView::evalRuby(const QString& str) {
-}
-
 void ViEditView::wheelEvent(QWheelEvent* e) {
   Qt::KeyboardModifiers mod = e->modifiers();
   if ((mod & Qt::ControlModifier) != 0) {

@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
   setCentralWidget(m_editor);
 
   m_viEngine = new ViEngine(m_editor);
-  KeymapService::singleton().load("keymap.yml", m_viEngine);
+  KeymapService::singleton().load("keymap.yml");
 
   statusBar()->addWidget(m_cmdLineEdit = new QLineEdit(), 1);
   m_cmdLineEdit->installEventFilter(this);
@@ -61,7 +61,7 @@ void MainWindow::cmdLineReturnPressed() {
   }
 }
 
-void MainWindow::cmdLineCursorPositionChanged(int oldPos, int newPos) {
+void MainWindow::cmdLineCursorPositionChanged(int, int newPos) {
   if (newPos == 0) {
     m_cmdLineEdit->setCursorPosition(1);
   }
