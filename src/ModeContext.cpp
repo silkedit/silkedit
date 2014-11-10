@@ -19,3 +19,10 @@ QString ModeContext::key() {
       return "";
   }
 }
+
+ModeContextCreator::ModeContextCreator(ViEngine* viEngine) : m_viEngine(viEngine) {
+}
+
+std::shared_ptr<IContext> ModeContextCreator::create(Operator op, const QString& operand) {
+  return std::shared_ptr<IContext>(new ModeContext(m_viEngine, op, operand));
+}

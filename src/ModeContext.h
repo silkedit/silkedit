@@ -7,11 +7,24 @@ class ModeContext : public IContextBase<QString> {
   DISABLE_COPY(ModeContext)
  public:
   ModeContext(ViEngine* viEngine, Operator op, const QString& operand);
-  virtual ~ModeContext() = default;
+  ~ModeContext() = default;
   DEFAULT_MOVE(ModeContext)
 
  private:
   ViEngine* m_viEngine;
 
   QString key() override;
+};
+
+class ModeContextCreator : public IContextCreator {
+  DISABLE_COPY(ModeContextCreator)
+ public:
+  ModeContextCreator(ViEngine* viEngine);
+  ~ModeContextCreator() = default;
+  DEFAULT_MOVE(ModeContextCreator)
+
+  std::shared_ptr<IContext> create(Operator op, const QString& operand) override;
+
+ private:
+  ViEngine* m_viEngine;
 };

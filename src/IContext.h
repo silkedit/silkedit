@@ -1,7 +1,5 @@
 #pragma once
 
-#include <functional>
-
 #include "macros.h"
 
 class QVariant;
@@ -20,7 +18,14 @@ class IContext {
   virtual bool isSatisfied() = 0;
 };
 
-typedef std::function<std::shared_ptr<IContext>(Operator, const QString&)> CREATION_METHOD;
+class IContextCreator {
+  DISABLE_COPY_AND_MOVE(IContextCreator)
+ public:
+  IContextCreator() = default;
+  virtual ~IContextCreator() = default;
+
+  virtual std::shared_ptr<IContext> create(Operator op, const QString& operand) = 0;
+};
 
 template <typename T>
 class IContextBase : public IContext {

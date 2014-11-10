@@ -17,9 +17,7 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
   CommandService::singleton().addCommand(std::move(changeModeCmd));
 
   ContextService::singleton().add(
-      "mode", [this](Operator op, const QString& operand) -> std::shared_ptr<IContext> {
-        return std::shared_ptr<IContext>(new ModeContext(this, op, operand));
-      });
+      "mode", std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 }
 
 void ViEngine::processExCommand(const QString&) {

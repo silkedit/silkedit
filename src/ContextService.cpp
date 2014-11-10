@@ -2,7 +2,7 @@
 
 #include "ContextService.h"
 
-void ContextService::add(const QString& key, CREATION_METHOD creationMethod) {
+void ContextService::add(const QString& key, std::unique_ptr<IContextCreator> creationMethod) {
   m_contexts[key] = std::move(creationMethod);
 }
 
@@ -12,5 +12,5 @@ std::shared_ptr<IContext> ContextService::tryCreate(const QString& key,
   if (m_contexts.find(key) == m_contexts.end())
     return nullptr;
 
-  return m_contexts.at(key)(op, operand);
+  return m_contexts.at(key)->create(op, operand);
 }

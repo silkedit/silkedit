@@ -16,12 +16,12 @@ class ContextService : public Singleton<ContextService> {
  public:
   ~ContextService() = default;
 
-  void add(const QString& key, CREATION_METHOD creationMethod);
+  void add(const QString& key, std::unique_ptr<IContextCreator> creator);
   std::shared_ptr<IContext> tryCreate(const QString& key, Operator op, const QString& operand);
 
  private:
   friend class Singleton<ContextService>;
   ContextService() = default;
 
-  std::unordered_map<QString, CREATION_METHOD> m_contexts;
+  std::unordered_map<QString, std::unique_ptr<IContextCreator>> m_contexts;
 };
