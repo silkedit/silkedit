@@ -3,6 +3,7 @@
 #include "vi.h"
 #include "ViEditView.h"
 #include "ViEngine.h"
+#include "KeymapService.h"
 #include "CommandService.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
@@ -193,6 +194,13 @@ void ViEditView::onCursorPositionChanged() {
     m_cursorWidth = wd;
   } else {
     m_cursorWidth = 1;
+  }
+}
+
+void ViEditView::keyPressEvent(QKeyEvent* e) {
+  bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
+  if (!isHandled) {
+    QPlainTextEdit::keyPressEvent(e);
   }
 }
 

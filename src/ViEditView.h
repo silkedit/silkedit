@@ -38,6 +38,8 @@ class ViEditView : public QPlainTextEdit {
   void onCursorPositionChanged();
 
  protected:
+  virtual void keyPressEvent(QKeyEvent* e);
+
   void resizeEvent(QResizeEvent* event);
   void paintEvent(QPaintEvent* e);
   void wheelEvent(QWheelEvent* event);

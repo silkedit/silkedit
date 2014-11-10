@@ -5,7 +5,6 @@
 
 class QKeyEvent;
 class ViEditView;
-class RubyEvaluator;
 
 class ViEngine : public QObject {
   Q_OBJECT
@@ -26,8 +25,6 @@ signals:
  protected:
   bool eventFilter(QObject*, QEvent*);
   bool cmdModeKeyPressEvent(QKeyEvent*);
-  bool insertModeKeyPressEvent(QKeyEvent*);
-  int repeatCount() const { return !m_repeatCount ? 1 : m_repeatCount; }
 
  private:
   Mode m_mode;
