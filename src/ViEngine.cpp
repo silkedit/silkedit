@@ -8,7 +8,7 @@
 #include "commands/ChangeModeCommand.h"
 
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
-    : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView) {
+    : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView), m_repeatCount(0) {
   m_editor->installEventFilter(this);
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
@@ -37,22 +37,22 @@ bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
   return false;
 }
 
-bool ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
+void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
   QString text = event->text();
-  if (text.isEmpty())
-    return false;
+  if (text.isEmpty()) {
+    return;
+  }
 
   ushort ch = text[0].unicode();
   if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
     m_repeatCount = m_repeatCount * 10 + (ch - '0');
-    return true;
+    return;
   }
 
   if (m_repeatCount > 0) {
-    bool isHandled = KeymapService::singleton().dispatch(event, m_repeatCount);
+    KeymapService::singleton().dispatch(event, m_repeatCount);
     m_repeatCount = 0;
-    return isHandled;
   } else {
-    return false;
+    KeymapService::singleton().dispatch(event);
   }
 }

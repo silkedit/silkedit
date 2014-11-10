@@ -24,7 +24,7 @@ signals:
 
  protected:
   bool eventFilter(QObject*, QEvent*);
-  bool cmdModeKeyPressEvent(QKeyEvent*);
+  void cmdModeKeyPressEvent(QKeyEvent*);
 
  private:
   Mode m_mode;
