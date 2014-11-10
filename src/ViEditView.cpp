@@ -2,7 +2,6 @@
 
 #include "vi.h"
 #include "ViEditView.h"
-#include "ViEngine.h"
 #include "KeymapService.h"
 #include "CommandService.h"
 #include "commands/MoveCursorCommand.h"
@@ -29,8 +28,6 @@ ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::C
   CommandService::singleton().addCommand(std::move(evalAsRubyCmd));
 
   m_lineNumberArea = new LineNumberArea(this);
-  m_timer = new QElapsedTimer();
-  m_timer->start();
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
@@ -173,7 +170,6 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
 }
 
 void ViEditView::setMode(Mode mode) {
-  m_tickCount = m_timer->elapsed();
   if (mode != m_mode) {
     m_mode = mode;
     emit modeChanged(mode);
@@ -205,11 +201,7 @@ void ViEditView::keyPressEvent(QKeyEvent* e) {
 }
 
 void ViEditView::paintEvent(QPaintEvent* e) {
-  const int blinkPeriod = 1200;
-  qint64 tc = m_timer->elapsed() - m_tickCount;
-  if (tc % blinkPeriod < blinkPeriod / 2) {
-    drawCursor();
-  }
+  drawCursor();
   setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
   setCursorWidth(m_cursorWidth);

@@ -14,7 +14,6 @@ class QElapsedTimer;
 QT_END_NAMESPACE
 
 class LineNumberArea;
-class ViEngine;
 
 class ViEditView : public QPlainTextEdit {
   Q_OBJECT
@@ -61,8 +60,6 @@ signals:
   Mode m_mode;
   QWidget* m_lineNumberArea;
   int m_cursorWidth;
-  qint64 m_tickCount;
-  QElapsedTimer* m_timer;
 };
 
 class LineNumberArea : public QWidget {
