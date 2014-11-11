@@ -3,10 +3,11 @@
 #include <unordered_map>
 #include <memory>
 
-#include "IContext.h"
 #include "macros.h"
-#include "singleton.h"
 #include "stlSpecialization.h"
+#include "IContext.h"
+#include "Singleton.h"
+#include "DefaultContext.h"
 
 class QString;
 
@@ -18,6 +19,9 @@ class ContextService : public Singleton<ContextService> {
 
   void add(const QString& key, std::unique_ptr<IContextCreator> creator);
   std::shared_ptr<IContext> tryCreate(const QString& key, Operator op, const QString& operand);
+  std::shared_ptr<DefaultContext> createDefault() {
+    return std::shared_ptr<DefaultContext>(new DefaultContext());
+  }
 
  private:
   friend class Singleton<ContextService>;

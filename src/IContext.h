@@ -16,7 +16,7 @@ class IContext {
 
   virtual bool isSatisfied() = 0;
 
-protected:
+ protected:
   IContext() = default;
 };
 
@@ -27,7 +27,7 @@ class IContextCreator {
 
   virtual std::shared_ptr<IContext> create(Operator op, const QString& operand) = 0;
 
-protected:
+ protected:
   IContextCreator() = default;
 };
 

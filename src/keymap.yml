@@ -1,3 +1,11 @@
+# Default keymap
+
+- keymap:
+    ctrl+b: { cmd: move_cursor, args: { operation: left }}
+    ctrl+f: { cmd: move_cursor, args: { operation: right }}
+    ctrl+p: { cmd: move_cursor, args: { operation: up }}
+    ctrl+n: { cmd: move_cursor, args: { operation: down }}
+
 # Normal mode keymap
 
 - context: mode == normal

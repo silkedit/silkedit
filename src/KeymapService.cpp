@@ -14,7 +14,7 @@
 namespace {
 
 std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
-  if (contextNode) {
+  if (contextNode.IsDefined()) {
     QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
     QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
     if (list.size() != 3) {
@@ -36,6 +36,8 @@ std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
         return context;
       }
     }
+  } else {
+    return ContextService::singleton().createDefault();
   }
 
   return nullptr;
@@ -116,7 +118,8 @@ void KeymapService::load(const QString& filename) {
       YAML::Node contextNode = node["context"];
       std::shared_ptr<IContext> context = parseContext(contextNode);
       if (!context) {
-        qWarning() << "can't find a context: " << QString::fromUtf8(contextNode.as<std::string>().c_str());
+        qWarning() << "can't find a context: "
+                   << QString::fromUtf8(contextNode.as<std::string>().c_str());
         continue;
       }
 

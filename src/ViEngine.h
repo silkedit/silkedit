@@ -43,7 +43,6 @@ signals:
   void cmdLineReturnPressed();
   void cmdLineCursorPositionChanged(int, int);
   void cmdLineTextChanged(const QString& text);
-
 };
 
 class ViCursorDrawer : public ICursorDrawer {
