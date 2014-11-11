@@ -3,7 +3,6 @@
 #include <QPlainTextEdit>
 #include <QObject>
 
-#include "vi.h"
 #include "ICursorDrawer.h"
 
 QT_BEGIN_NAMESPACE
@@ -23,8 +22,6 @@ class ViEditView : public QPlainTextEdit {
   ViEditView(QWidget* parent = 0);
   ~ViEditView() = default;
 
-  inline Mode mode() const { return m_mode; }
-
   inline void setCursorDrawer(std::unique_ptr<ICursorDrawer> cursorDrawer) {
     m_cursorDrawer = std::move(cursorDrawer);
   }
@@ -37,8 +34,7 @@ class ViEditView : public QPlainTextEdit {
   void doRedo(int n);
 
  public slots:
-  void setMode(Mode mode);
-  void onCursorPositionChanged();
+  void updateCursor();
 
  protected:
   virtual void keyPressEvent(QKeyEvent* e);
@@ -59,7 +55,6 @@ class ViEditView : public QPlainTextEdit {
   void updateLineNumberArea(const QRect&, int);
 
  private:
-  Mode m_mode;
   QWidget* m_lineNumberArea;
   std::unique_ptr<ICursorDrawer> m_cursorDrawer;
 };

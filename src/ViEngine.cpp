@@ -14,6 +14,8 @@ ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
   m_editor->installEventFilter(this);
   m_editor->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
 
+  connect(this, SIGNAL(modeChanged(Mode)), m_editor, SLOT(updateCursor()));
+
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandService::singleton().addCommand(std::move(changeModeCmd));
 
@@ -70,4 +72,21 @@ std::tuple<QRect, QColor> ViCursorDrawer::draw(const QRect& cursorRect) {
     r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
   }
   return std::make_tuple(r, QColor("red"));
+}
+
+void ViCursorDrawer::updateCursor(const ViEditView& viEditView) {
+  if (m_viEngine->mode() == Mode::CMD) {
+    QTextCursor cur = viEditView.textCursor();
+    cur.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+    QString text = cur.selectedText();
+    QChar ch = text.isEmpty() ? QChar(' ') : text[0];
+    int wd = viEditView.fontMetrics().width(ch);
+    if (!wd) {
+      wd = viEditView.fontMetrics().width(QChar(' '));
+    }
+    qDebug() << "cursor width: " << wd;
+    setCursorWidth(wd);
+  } else {
+    setCursorWidth(1);
+  }
 }

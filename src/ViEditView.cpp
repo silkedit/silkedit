@@ -12,7 +12,7 @@
 #include "commands/EvalAsRubyCommand.h"
 
 ViEditView::ViEditView(QWidget* parent)
-    : QPlainTextEdit(parent), m_mode(Mode::CMD), m_cursorDrawer(new DefaultCursorDrawer) {
+    : QPlainTextEdit(parent), m_cursorDrawer(new DefaultCursorDrawer) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().addCommand(std::move(moveCursorCmd));
@@ -34,7 +34,7 @@ ViEditView::ViEditView(QWidget* parent)
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(onCursorPositionChanged()));
+  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursor()));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
@@ -171,27 +171,8 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 }
 
-void ViEditView::setMode(Mode mode) {
-  if (mode != m_mode) {
-    m_mode = mode;
-    onCursorPositionChanged();
-  }
-}
-
-void ViEditView::onCursorPositionChanged() {
-  if (mode() == Mode::CMD) {
-    QTextCursor cur = textCursor();
-    cur.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-    QString text = cur.selectedText();
-    QChar ch = text.isEmpty() ? QChar(' ') : text[0];
-    int wd = fontMetrics().width(ch);
-    if (!wd) {
-      wd = fontMetrics().width(QChar(' '));
-    }
-    m_cursorDrawer->setCursorWidth(wd);
-  } else {
-    m_cursorDrawer->setCursorWidth(1);
-  }
+void ViEditView::updateCursor() {
+  m_cursorDrawer->updateCursor(*this);
 }
 
 void ViEditView::keyPressEvent(QKeyEvent* e) {

@@ -42,6 +42,7 @@ class ViCursorDrawer : public ICursorDrawer {
   DEFAULT_MOVE(ViCursorDrawer)
 
   std::tuple<QRect, QColor> draw(const QRect& cursorRect) override;
+  void updateCursor(const ViEditView& viEditView) override;
 
  private:
   ViEngine* m_viEngine;

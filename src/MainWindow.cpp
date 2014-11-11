@@ -19,7 +19,6 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
   m_cmdLineEdit->installEventFilter(this);
 
   connect(m_viEngine, SIGNAL(modeChanged(Mode)), this, SLOT(onModeChanged(Mode)));
-  connect(m_viEngine, SIGNAL(modeChanged(Mode)), m_editor, SLOT(setMode(Mode)));
   connect(m_cmdLineEdit, SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   connect(m_cmdLineEdit,
           SIGNAL(cursorPositionChanged(int, int)),
