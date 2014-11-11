@@ -1,7 +1,9 @@
 #pragma once
 
 #include <QObject>
+
 #include "vi.h"
+#include "ICursorDrawer.h"
 
 class QKeyEvent;
 class ViEditView;
@@ -30,4 +32,17 @@ signals:
   Mode m_mode;
   ViEditView* m_editor;
   int m_repeatCount;
+};
+
+class ViCursorDrawer : public ICursorDrawer {
+  DISABLE_COPY(ViCursorDrawer)
+ public:
+  ViCursorDrawer(ViEngine* viEngine) : m_viEngine(viEngine) {}
+  ~ViCursorDrawer() = default;
+  DEFAULT_MOVE(ViCursorDrawer)
+
+  std::tuple<QRect, QColor> draw(const QRect& cursorRect) override;
+
+ private:
+  ViEngine* m_viEngine;
 };

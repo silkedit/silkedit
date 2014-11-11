@@ -3,6 +3,7 @@
 #include "vi.h"
 #include "ViEditView.h"
 #include "KeymapService.h"
+#include "DefaultCursorDrawer.h"
 #include "CommandService.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
@@ -10,7 +11,8 @@
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 
-ViEditView::ViEditView(QWidget* parent) : QPlainTextEdit(parent), m_mode(Mode::CMD) {
+ViEditView::ViEditView(QWidget* parent)
+    : QPlainTextEdit(parent), m_mode(Mode::CMD), m_cursorDrawer(new DefaultCursorDrawer) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().addCommand(std::move(moveCursorCmd));
@@ -172,7 +174,6 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
 void ViEditView::setMode(Mode mode) {
   if (mode != m_mode) {
     m_mode = mode;
-    emit modeChanged(mode);
     onCursorPositionChanged();
   }
 }
@@ -187,9 +188,9 @@ void ViEditView::onCursorPositionChanged() {
     if (!wd) {
       wd = fontMetrics().width(QChar(' '));
     }
-    m_cursorWidth = wd;
+    m_cursorDrawer->setCursorWidth(wd);
   } else {
-    m_cursorWidth = 1;
+    m_cursorDrawer->setCursorWidth(1);
   }
 }
 
@@ -204,7 +205,7 @@ void ViEditView::paintEvent(QPaintEvent* e) {
   drawCursor();
   setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
-  setCursorWidth(m_cursorWidth);
+  setCursorWidth(m_cursorDrawer->cursorWidth());
 
   const int bottom = viewport()->rect().height();
   QPainter painter(viewport());
@@ -231,13 +232,17 @@ void ViEditView::paintEvent(QPaintEvent* e) {
 }
 
 void ViEditView::drawCursor() {
-  QPainter painter(viewport());
-  QRect r = cursorRect();
-  r.setWidth(m_cursorWidth);
-  if (mode() == Mode::CMD) {
-    r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
+  if (!m_cursorDrawer) {
+    qCritical() << "cursorDrawer is null!";
+    return;
   }
-  painter.fillRect(r, Qt::red);
+
+  QPainter painter(viewport());
+  auto tuple = m_cursorDrawer->draw(cursorRect());
+  QRect& r = std::get<0>(tuple);
+  QColor& color = std::get<1>(tuple);
+
+  painter.fillRect(r, color);
 }
 
 void ViEditView::setFontPointSize(int sz) {

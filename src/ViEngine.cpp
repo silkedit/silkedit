@@ -12,6 +12,7 @@
 ViEngine::ViEngine(ViEditView* viEditView, QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_editor(viEditView), m_repeatCount(0) {
   m_editor->installEventFilter(this);
+  m_editor->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandService::singleton().addCommand(std::move(changeModeCmd));
@@ -60,4 +61,13 @@ void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
   } else {
     KeymapService::singleton().dispatch(event);
   }
+}
+
+std::tuple<QRect, QColor> ViCursorDrawer::draw(const QRect& cursorRect) {
+  QRect r = cursorRect;
+  r.setWidth(cursorWidth());
+  if (m_viEngine->mode() == Mode::CMD) {
+    r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
+  }
+  return std::make_tuple(r, QColor("red"));
 }

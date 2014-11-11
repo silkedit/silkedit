@@ -4,6 +4,7 @@
 #include <QObject>
 
 #include "vi.h"
+#include "ICursorDrawer.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -22,7 +23,11 @@ class ViEditView : public QPlainTextEdit {
   ViEditView(QWidget* parent = 0);
   ~ViEditView() = default;
 
-  Mode mode() const { return m_mode; }
+  inline Mode mode() const { return m_mode; }
+
+  inline void setCursorDrawer(std::unique_ptr<ICursorDrawer> cursorDrawer) {
+    m_cursorDrawer = std::move(cursorDrawer);
+  }
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -48,9 +53,6 @@ class ViEditView : public QPlainTextEdit {
   bool isTabOrSpace(const QChar ch);
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
-signals:
-  void modeChanged(Mode);
-
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
@@ -59,7 +61,7 @@ signals:
  private:
   Mode m_mode;
   QWidget* m_lineNumberArea;
-  int m_cursorWidth;
+  std::unique_ptr<ICursorDrawer> m_cursorDrawer;
 };
 
 class LineNumberArea : public QWidget {
