@@ -1,34 +1,22 @@
 #pragma once
 
+#include <memory>
 #include <QMainWindow>
-#include <QLineEdit>
 
-#include "vi.h"
-
-class ViEditView;
-class ViEngine;
+#include "macros.h"
+#include "ViEditView.h"
+#include "ViEngine.h"
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
+  DISABLE_COPY(MainWindow)
 
  public:
   MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
-  ~MainWindow();
-
- public slots:
-  void onModeChanged(Mode);
-  void cmdLineReturnPressed();
-  void cmdLineCursorPositionChanged(int, int);
-  void cmdLineTextChanged(const QString& text);
-
- protected:
-  bool eventFilter(QObject* obj, QEvent* evnet);
+  ~MainWindow() = default;
+  DEFAULT_MOVE(MainWindow)
 
  private:
-  MainWindow(const MainWindow&);
-  MainWindow& operator=(const MainWindow&);
-
-  ViEditView* m_editor;
-  ViEngine* m_viEngine;
-  QLineEdit* m_cmdLineEdit;
+  std::unique_ptr<ViEditView> m_editor;
+  std::unique_ptr<ViEngine> m_viEngine;
 };
