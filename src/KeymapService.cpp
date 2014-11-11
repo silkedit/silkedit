@@ -34,8 +34,6 @@ std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
       std::shared_ptr<IContext> context = ContextService::singleton().tryCreate(key, op, operand);
       if (context) {
         return context;
-      } else {
-        qWarning() << "can't find a context with key: " << key;
       }
     }
   }
@@ -115,7 +113,12 @@ void KeymapService::load(const QString& filename) {
       YAML::Node node = *it;
       assert(node.IsMap());
 
-      std::shared_ptr<IContext> context = parseContext(node["context"]);
+      YAML::Node contextNode = node["context"];
+      std::shared_ptr<IContext> context = parseContext(contextNode);
+      if (!context) {
+        qWarning() << "can't find a context: " << QString::fromUtf8(contextNode.as<std::string>().c_str());
+        continue;
+      }
 
       YAML::Node keymap = node["keymap"];
       assert(keymap.IsMap());

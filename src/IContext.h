@@ -12,19 +12,23 @@ enum class Operator {
 class IContext {
   DISABLE_COPY_AND_MOVE(IContext)
  public:
-  IContext() = default;
   virtual ~IContext() = default;
 
   virtual bool isSatisfied() = 0;
+
+protected:
+  IContext() = default;
 };
 
 class IContextCreator {
   DISABLE_COPY_AND_MOVE(IContextCreator)
  public:
-  IContextCreator() = default;
   virtual ~IContextCreator() = default;
 
   virtual std::shared_ptr<IContext> create(Operator op, const QString& operand) = 0;
+
+protected:
+  IContextCreator() = default;
 };
 
 template <typename T>
