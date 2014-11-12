@@ -11,6 +11,7 @@ file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
 configure_file("src/keymap.yml" "keymap.yml" COPYONLY)
+configure_file("src/config.yml" "config.yml" COPYONLY)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
