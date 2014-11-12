@@ -3,10 +3,13 @@
 #include "ChangeModeCommand.h"
 #include "vi.h"
 #include "stlSpecialization.h"
+#include "ViEngine.h"
 
 ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
-    : ICommand("change_mode"), m_viEngine(viEngine) {
+    : ICommand(ChangeModeCommand::name), m_viEngine(viEngine) {
 }
+
+const QString ChangeModeCommand::name = "change_mode";
 
 void ChangeModeCommand::doRun(const CommandArgument& args, int) {
   if (auto mode = args.find<QString>("mode")) {

@@ -18,6 +18,7 @@ class ContextService : public Singleton<ContextService> {
   ~ContextService() = default;
 
   void add(const QString& key, std::unique_ptr<IContextCreator> creator);
+  void remove(const QString& key);
   std::shared_ptr<IContext> tryCreate(const QString& key, Operator op, const QString& operand);
   std::shared_ptr<DefaultContext> createDefault() {
     return std::shared_ptr<DefaultContext>(new DefaultContext());

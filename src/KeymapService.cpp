@@ -105,6 +105,8 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 
 void KeymapService::load(const QString& filename) {
+  m_keymaps.clear();
+
   std::string name = filename.toUtf8().constData();
   try {
     YAML::Node keymaps = YAML::LoadFile(name);

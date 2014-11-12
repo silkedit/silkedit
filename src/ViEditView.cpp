@@ -15,19 +15,19 @@ ViEditView::ViEditView(QWidget* parent)
     : QPlainTextEdit(parent), m_cursorDrawer(new DefaultCursorDrawer) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
-  CommandService::singleton().addCommand(std::move(moveCursorCmd));
+  CommandService::singleton().add(std::move(moveCursorCmd));
 
   std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this));
-  CommandService::singleton().addCommand(std::move(deleteCmd));
+  CommandService::singleton().add(std::move(deleteCmd));
 
   std::unique_ptr<UndoCommand> undoCmd(new UndoCommand(this));
-  CommandService::singleton().addCommand(std::move(undoCmd));
+  CommandService::singleton().add(std::move(undoCmd));
 
   std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this));
-  CommandService::singleton().addCommand(std::move(redoCmd));
+  CommandService::singleton().add(std::move(redoCmd));
 
   std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand(this));
-  CommandService::singleton().addCommand(std::move(evalAsRubyCmd));
+  CommandService::singleton().add(std::move(evalAsRubyCmd));
 
   m_lineNumberArea = new LineNumberArea(this);
 
@@ -38,6 +38,10 @@ ViEditView::ViEditView(QWidget* parent)
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
+}
+
+void ViEditView::resetCursorDrawer() {
+  m_cursorDrawer.reset(new DefaultCursorDrawer());
 }
 
 int ViEditView::lineNumberAreaWidth() {

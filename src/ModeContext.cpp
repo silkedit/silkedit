@@ -2,6 +2,8 @@
 #include "ModeContext.h"
 #include "vi.h"
 
+const QString ModeContext::name = "mode";
+
 ModeContext::ModeContext(ViEngine* viEngine, Operator op, const QString& operand)
     : IContextBase(op, operand), m_viEngine(viEngine) {
 }

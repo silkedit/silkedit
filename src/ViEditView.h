@@ -26,6 +26,8 @@ class ViEditView : public QPlainTextEdit {
     m_cursorDrawer = std::move(cursorDrawer);
   }
 
+  void resetCursorDrawer();
+
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
   void moveCursor(int mv, int = 1);

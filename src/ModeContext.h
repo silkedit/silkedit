@@ -6,6 +6,8 @@
 class ModeContext : public IContextBase<QString> {
   DISABLE_COPY(ModeContext)
  public:
+  static const QString name;
+
   ModeContext(ViEngine* viEngine, Operator op, const QString& operand);
   ~ModeContext() = default;
   DEFAULT_MOVE(ModeContext)

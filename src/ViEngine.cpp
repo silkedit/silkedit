@@ -4,7 +4,6 @@
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "ViEditView.h"
-#include "RubyEvaluator.h"
 #include "CommandService.h"
 #include "ContextService.h"
 #include "KeymapService.h"
@@ -17,12 +16,21 @@ ViEngine::ViEngine(ViEditView* viEditView, MainWindow* mainWindow, QObject* pare
       m_editor(viEditView),
       m_mainWindow(mainWindow),
       m_repeatCount(0),
-      m_cmdLineEdit(new QLineEdit()) {
+      m_cmdLineEdit(new QLineEdit()),
+      m_isEnabled(false) {
+}
+
+void ViEngine::processExCommand(const QString&) {
+  setMode(Mode::CMD);
+}
+
+void ViEngine::enable() {
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
-  CommandService::singleton().addCommand(std::move(changeModeCmd));
+  CommandService::singleton().add(std::move(changeModeCmd));
 
   ContextService::singleton().add(
-      "mode", std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
+      ModeContext::name,
+      std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
   m_editor->installEventFilter(this);
   m_editor->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
@@ -31,6 +39,8 @@ ViEngine::ViEngine(ViEditView* viEditView, MainWindow* mainWindow, QObject* pare
   m_cmdLineEdit->installEventFilter(this);
 
   connect(this, SIGNAL(modeChanged(Mode)), m_editor, SLOT(updateCursor()));
+  connect(this, SIGNAL(enabled()), m_editor, SLOT(updateCursor()));
+  connect(this, SIGNAL(disabled()), m_editor, SLOT(updateCursor()));
   connect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   connect(m_cmdLineEdit.get(),
           SIGNAL(cursorPositionChanged(int, int)),
@@ -41,11 +51,43 @@ ViEngine::ViEngine(ViEditView* viEditView, MainWindow* mainWindow, QObject* pare
           this,
           SLOT(cmdLineTextChanged(const QString&)));
 
-  onModeChanged(mode());
+  m_mode = Mode::CMD;
+  onModeChanged(m_mode);
+  m_repeatCount = 0;
+
+  KeymapService::singleton().load();
+
+  m_isEnabled = true;
+
+  emit enabled();
 }
 
-void ViEngine::processExCommand(const QString&) {
-  setMode(Mode::CMD);
+void ViEngine::disable() {
+  CommandService::singleton().remove(ChangeModeCommand::name);
+  ContextService::singleton().remove(ModeContext::name);
+
+  m_editor->removeEventFilter(this);
+  m_editor->resetCursorDrawer();
+
+  m_mainWindow->statusBar()->removeWidget(m_cmdLineEdit.get());
+  m_mainWindow->statusBar()->clearMessage();
+  m_cmdLineEdit->removeEventFilter(this);
+
+  disconnect(this, SIGNAL(modeChanged(Mode)), m_editor, SLOT(updateCursor()));
+  disconnect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
+  disconnect(m_cmdLineEdit.get(),
+             SIGNAL(cursorPositionChanged(int, int)),
+             this,
+             SLOT(cmdLineCursorPositionChanged(int, int)));
+  disconnect(m_cmdLineEdit.get(),
+             SIGNAL(textChanged(QString)),
+             this,
+             SLOT(cmdLineTextChanged(const QString&)));
+
+  KeymapService::singleton().load();
+
+  m_isEnabled = false;
+  emit disabled();
 }
 
 void ViEngine::setMode(Mode mode) {

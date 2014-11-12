@@ -18,7 +18,8 @@ class CommandService : public Singleton<CommandService> {
   void runCommand(const QString& name,
                   const CommandArgument& args = CommandArgument(),
                   int repeat = 1);
-  void addCommand(std::unique_ptr<ICommand> cmd);
+  void add(std::unique_ptr<ICommand> cmd);
+  void remove(const QString& name);
 
  private:
   friend class Singleton<CommandService>;

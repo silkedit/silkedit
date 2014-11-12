@@ -18,7 +18,7 @@ class KeymapService : public Singleton<KeymapService> {
  public:
   ~KeymapService() = default;
 
-  void load(const QString& filename);
+  void load(const QString& filename = "keymap.yml");
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:
