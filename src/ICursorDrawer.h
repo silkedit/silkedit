@@ -8,7 +8,7 @@
 class QRect;
 class QColor;
 
-class ViEditView;
+class TextEditView;
 
 class ICursorDrawer {
   DISABLE_COPY_AND_MOVE(ICursorDrawer)
@@ -21,7 +21,7 @@ class ICursorDrawer {
   void setCursorWidth(int width) { m_width = width; }
 
   virtual std::tuple<QRect, QColor> draw(const QRect& cursorRect) = 0;
-  virtual void updateCursor(const ViEditView&) {}
+  virtual void updateCursor(const TextEditView&) {}
 
  private:
   QString m_name;

@@ -3,17 +3,17 @@
 
 #include "MainWindow.h"
 #include "ViEngine.h"
-#include "ViEditView.h"
+#include "TextEditView.h"
 #include "CommandService.h"
 #include "ContextService.h"
 #include "KeymapService.h"
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(ViEditView* viEditView, MainWindow* mainWindow, QObject* parent)
+ViEngine::ViEngine(TextEditView* textEditView, MainWindow* mainWindow, QObject* parent)
     : QObject(parent),
       m_mode(Mode::CMD),
-      m_editor(viEditView),
+      m_textEditView(textEditView),
       m_mainWindow(mainWindow),
       m_repeatCount(0),
       m_cmdLineEdit(new QLineEdit()),
@@ -32,15 +32,15 @@ void ViEngine::enable() {
       ModeContext::name,
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
-  m_editor->installEventFilter(this);
-  m_editor->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
+  m_textEditView->installEventFilter(this);
+  m_textEditView->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
 
   m_mainWindow->statusBar()->addWidget(m_cmdLineEdit.get(), 1);
   m_cmdLineEdit->installEventFilter(this);
 
-  connect(this, SIGNAL(modeChanged(Mode)), m_editor, SLOT(updateCursor()));
-  connect(this, SIGNAL(enabled()), m_editor, SLOT(updateCursor()));
-  connect(this, SIGNAL(disabled()), m_editor, SLOT(updateCursor()));
+  connect(this, SIGNAL(modeChanged(Mode)), m_textEditView, SLOT(updateCursor()));
+  connect(this, SIGNAL(enabled()), m_textEditView, SLOT(updateCursor()));
+  connect(this, SIGNAL(disabled()), m_textEditView, SLOT(updateCursor()));
   connect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   connect(m_cmdLineEdit.get(),
           SIGNAL(cursorPositionChanged(int, int)),
@@ -66,14 +66,14 @@ void ViEngine::disable() {
   CommandService::singleton().remove(ChangeModeCommand::name);
   ContextService::singleton().remove(ModeContext::name);
 
-  m_editor->removeEventFilter(this);
-  m_editor->resetCursorDrawer();
+  m_textEditView->removeEventFilter(this);
+  m_textEditView->resetCursorDrawer();
 
   m_mainWindow->statusBar()->removeWidget(m_cmdLineEdit.get());
   m_mainWindow->statusBar()->clearMessage();
   m_cmdLineEdit->removeEventFilter(this);
 
-  disconnect(this, SIGNAL(modeChanged(Mode)), m_editor, SLOT(updateCursor()));
+  disconnect(this, SIGNAL(modeChanged(Mode)), m_textEditView, SLOT(updateCursor()));
   disconnect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   disconnect(m_cmdLineEdit.get(),
              SIGNAL(cursorPositionChanged(int, int)),
@@ -93,7 +93,7 @@ void ViEngine::disable() {
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
     if (m_mode == Mode::INSERT) {
-      m_editor->moveCursor(QTextCursor::Left);
+      m_textEditView->moveCursor(QTextCursor::Left);
     }
     m_mode = mode;
     onModeChanged(mode);
@@ -142,7 +142,7 @@ void ViEngine::cmdLineTextChanged(const QString& text) {
 }
 
 bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == m_editor && event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
+  if (obj == m_textEditView && event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
     cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
     return true;
   }
@@ -187,15 +187,15 @@ std::tuple<QRect, QColor> ViCursorDrawer::draw(const QRect& cursorRect) {
   return std::make_tuple(r, QColor("red"));
 }
 
-void ViCursorDrawer::updateCursor(const ViEditView& viEditView) {
+void ViCursorDrawer::updateCursor(const TextEditView& TextEditView) {
   if (m_viEngine->mode() == Mode::CMD) {
-    QTextCursor cur = viEditView.textCursor();
+    QTextCursor cur = TextEditView.textCursor();
     cur.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
     QString text = cur.selectedText();
     QChar ch = text.isEmpty() ? QChar(' ') : text[0];
-    int wd = viEditView.fontMetrics().width(ch);
+    int wd = TextEditView.fontMetrics().width(ch);
     if (!wd) {
-      wd = viEditView.fontMetrics().width(QChar(' '));
+      wd = TextEditView.fontMetrics().width(QChar(' '));
     }
     setCursorWidth(wd);
   } else {

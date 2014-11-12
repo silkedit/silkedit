@@ -15,12 +15,12 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class ViEditView : public QPlainTextEdit {
+class TextEditView : public QPlainTextEdit {
   Q_OBJECT
 
  public:
-  ViEditView(QWidget* parent = 0);
-  ~ViEditView() = default;
+  TextEditView(QWidget* parent = 0);
+  ~TextEditView() = default;
 
   inline void setCursorDrawer(std::unique_ptr<ICursorDrawer> cursorDrawer) {
     m_cursorDrawer = std::move(cursorDrawer);
@@ -63,7 +63,7 @@ class ViEditView : public QPlainTextEdit {
 
 class LineNumberArea : public QWidget {
  public:
-  LineNumberArea(ViEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
+  LineNumberArea(TextEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
 
   QSize sizeHint() const { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
 
@@ -71,5 +71,5 @@ class LineNumberArea : public QWidget {
   void paintEvent(QPaintEvent* event) { m_codeEditor->lineNumberAreaPaintEvent(event); }
 
  private:
-  ViEditView* m_codeEditor;
+  TextEditView* m_codeEditor;
 };

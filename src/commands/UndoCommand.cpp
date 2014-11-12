@@ -2,9 +2,9 @@
 
 #include "UndoCommand.h"
 
-UndoCommand::UndoCommand(ViEditView* viEditView) : ICommand("undo"), m_viEditView(viEditView) {
+UndoCommand::UndoCommand(TextEditView* textEditView) : ICommand("undo"), m_textEditView(textEditView) {
 }
 
 void UndoCommand::doRun(const CommandArgument&, int repeat) {
-  m_viEditView->doUndo(repeat);
+  m_textEditView->doUndo(repeat);
 }

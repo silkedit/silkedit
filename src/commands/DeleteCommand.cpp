@@ -5,20 +5,20 @@
 #include "vi.h"
 #include "stlSpecialization.h"
 
-DeleteCommand::DeleteCommand(ViEditView* viEditView)
-    : ICommand("delete"), m_viEditView(viEditView) {
+DeleteCommand::DeleteCommand(TextEditView* textEditView)
+    : ICommand("delete"), m_textEditView(textEditView) {
 }
 
 void DeleteCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto direction = args.find<QString>("direction")) {
     if (*direction == "backward") {
-      m_viEditView->doDelete(-repeat);
+      m_textEditView->doDelete(-repeat);
     } else if (*direction == "forward") {
-      m_viEditView->doDelete(repeat);
+      m_textEditView->doDelete(repeat);
     } else {
       qWarning() << "invalid direction";
     }
   } else {
-    m_viEditView->doDelete(repeat);
+    m_textEditView->doDelete(repeat);
   }
 }

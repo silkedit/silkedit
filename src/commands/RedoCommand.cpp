@@ -2,9 +2,9 @@
 
 #include "RedoCommand.h"
 
-RedoCommand::RedoCommand(ViEditView* viEditView) : ICommand("redo"), m_viEditView(viEditView) {
+RedoCommand::RedoCommand(TextEditView* textEditView) : ICommand("redo"), m_textEditView(textEditView) {
 }
 
 void RedoCommand::doRun(const CommandArgument&, int repeat) {
-  m_viEditView->doRedo(repeat);
+  m_textEditView->doRedo(repeat);
 }

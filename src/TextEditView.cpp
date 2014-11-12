@@ -1,7 +1,7 @@
 #include <QtWidgets>
 
 #include "vi.h"
-#include "ViEditView.h"
+#include "TextEditView.h"
 #include "KeymapService.h"
 #include "DefaultCursorDrawer.h"
 #include "CommandService.h"
@@ -11,7 +11,7 @@
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 
-ViEditView::ViEditView(QWidget* parent)
+TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), m_cursorDrawer(new DefaultCursorDrawer) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
@@ -40,11 +40,11 @@ ViEditView::ViEditView(QWidget* parent)
   highlightCurrentLine();
 }
 
-void ViEditView::resetCursorDrawer() {
+void TextEditView::resetCursorDrawer() {
   m_cursorDrawer.reset(new DefaultCursorDrawer());
 }
 
-int ViEditView::lineNumberAreaWidth() {
+int TextEditView::lineNumberAreaWidth() {
   int digits = 1;
   int max = qMax(1, blockCount());
   while (max >= 10) {
@@ -57,7 +57,7 @@ int ViEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void ViEditView::moveCursor(int mv, int n) {
+void TextEditView::moveCursor(int mv, int n) {
   QTextCursor cur = textCursor();
   const int pos = cur.position();
   QTextBlock block = cur.block();
@@ -112,11 +112,11 @@ void ViEditView::moveCursor(int mv, int n) {
   setTextCursor(cur);
 }
 
-void ViEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
+void TextEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void ViEditView::updateLineNumberArea(const QRect& rect, int dy) {
+void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
@@ -126,14 +126,14 @@ void ViEditView::updateLineNumberArea(const QRect& rect, int dy) {
     updateLineNumberAreaWidth(0);
 }
 
-void ViEditView::resizeEvent(QResizeEvent* e) {
+void TextEditView::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
   m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void ViEditView::highlightCurrentLine() {
+void TextEditView::highlightCurrentLine() {
   //  QList<QTextEdit::ExtraSelection> extraSelections;
 
   //  if (!isReadOnly()) {
@@ -151,7 +151,7 @@ void ViEditView::highlightCurrentLine() {
   //  setExtraSelections(extraSelections);
 }
 
-void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
+void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   QPainter painter(m_lineNumberArea);
   painter.fillRect(event->rect(), Qt::lightGray);
 
@@ -175,18 +175,18 @@ void ViEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 }
 
-void ViEditView::updateCursor() {
+void TextEditView::updateCursor() {
   m_cursorDrawer->updateCursor(*this);
 }
 
-void ViEditView::keyPressEvent(QKeyEvent* e) {
+void TextEditView::keyPressEvent(QKeyEvent* e) {
   bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
   if (!isHandled) {
     QPlainTextEdit::keyPressEvent(e);
   }
 }
 
-void ViEditView::paintEvent(QPaintEvent* e) {
+void TextEditView::paintEvent(QPaintEvent* e) {
   drawCursor();
   setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
@@ -216,7 +216,7 @@ void ViEditView::paintEvent(QPaintEvent* e) {
   painter.drawText(QPointF(r.left(), r.bottom()), "[EOF]");
 }
 
-void ViEditView::drawCursor() {
+void TextEditView::drawCursor() {
   if (!m_cursorDrawer) {
     qCritical() << "cursorDrawer is null!";
     return;
@@ -230,13 +230,13 @@ void ViEditView::drawCursor() {
   painter.fillRect(r, color);
 }
 
-void ViEditView::setFontPointSize(int sz) {
+void TextEditView::setFontPointSize(int sz) {
   QFont ft = font();
   ft.setPointSize(sz);
   setFont(ft);
 }
 
-void ViEditView::makeFontBigger(bool bigger) {
+void TextEditView::makeFontBigger(bool bigger) {
   int sz = font().pointSize();
   if (bigger) {
     ++sz;
@@ -245,7 +245,7 @@ void ViEditView::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
-int ViEditView::firstNonBlankCharPos(const QString& text) {
+int TextEditView::firstNonBlankCharPos(const QString& text) {
   int ix = 0;
   while (ix < text.length() && isTabOrSpace(text[ix])) {
     ++ix;
@@ -253,11 +253,11 @@ int ViEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool ViEditView::isTabOrSpace(const QChar ch) {
+inline bool TextEditView::isTabOrSpace(const QChar ch) {
   return ch == '\t' || ch == ' ';
 }
 
-void ViEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
+void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();
   const int blockPos = block.position();
   const QString blockText = block.text();
@@ -266,7 +266,7 @@ void ViEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   }
 }
 
-void ViEditView::doDelete(int n) {
+void TextEditView::doDelete(int n) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {
     const int pos = cur.position();
@@ -291,19 +291,19 @@ void ViEditView::doDelete(int n) {
   cur.deleteChar();
 }
 
-void ViEditView::doUndo(int n) {
+void TextEditView::doUndo(int n) {
   for (int i = 0; i < n; i++) {
     undo();
   }
 }
 
-void ViEditView::doRedo(int n) {
+void TextEditView::doRedo(int n) {
   for (int i = 0; i < n; i++) {
     redo();
   }
 }
 
-void ViEditView::wheelEvent(QWheelEvent* e) {
+void TextEditView::wheelEvent(QWheelEvent* e) {
   Qt::KeyboardModifiers mod = e->modifiers();
   if ((mod & Qt::ControlModifier) != 0) {
     makeFontBigger(e->delta() > 0);

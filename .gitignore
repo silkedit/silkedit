@@ -1,5 +1,7 @@
 .DS_Store
 CMakeLists.txt.user
+*.autosave
+
 target/
 ruby_host/ruby_host
 lib/

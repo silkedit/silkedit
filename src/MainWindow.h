@@ -4,7 +4,7 @@
 #include <QMainWindow>
 
 #include "macros.h"
-#include "ViEditView.h"
+#include "TextEditView.h"
 #include "ViEngine.h"
 
 class MainWindow : public QMainWindow {
@@ -17,6 +17,6 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
  private:
-  std::unique_ptr<ViEditView> m_editor;
+  std::unique_ptr<TextEditView> m_textEditView;
   std::unique_ptr<ViEngine> m_viEngine;
 };

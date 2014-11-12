@@ -32,13 +32,13 @@ int toMoveOperation(const QString& str) {
 }
 }
 
-MoveCursorCommand::MoveCursorCommand(ViEditView* viEditView)
-    : ICommand("move_cursor"), m_viEditView(viEditView) {
+MoveCursorCommand::MoveCursorCommand(TextEditView* textEditView)
+    : ICommand("move_cursor"), m_textEditView(textEditView) {
 }
 
 void MoveCursorCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto operationStr = args.find<QString>("operation")) {
     int operation = toMoveOperation(*operationStr);
-    m_viEditView->moveCursor(operation, repeat);
+    m_textEditView->moveCursor(operation, repeat);
   }
 }
