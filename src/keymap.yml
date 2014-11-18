@@ -6,6 +6,7 @@
     ctrl+p: { cmd: move_cursor, args: { operation: up }}
     ctrl+n: { cmd: move_cursor, args: { operation: down }}
     ctrl+cmd+i: toggle_vim_emulation
+    cmd+o: open_file
 
 # Normal mode keymap
 

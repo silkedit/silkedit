@@ -188,9 +188,9 @@ void TextEditView::keyPressEvent(QKeyEvent* e) {
 
 void TextEditView::paintEvent(QPaintEvent* e) {
   drawCursor();
-  setCursorWidth(0);
+//  setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
-  setCursorWidth(m_cursorDrawer->cursorWidth());
+//  setCursorWidth(m_cursorDrawer->cursorWidth());
 
   const int bottom = viewport()->rect().height();
   QPainter painter(viewport());

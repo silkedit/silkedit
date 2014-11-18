@@ -27,8 +27,7 @@ void ConfigService::load(const QString& filename) {
   }
 }
 
-bool ConfigService::isTrue(const QString &key)
-{
+bool ConfigService::isTrue(const QString& key) {
   if (m_configs.count(key) != 0) {
     return m_configs[key] == "true";
   }

@@ -1,8 +1,11 @@
+#include <QFileDialog>
+
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"
 #include "CommandService.h"
 #include "commands/ToggleVimEmulationCommand.h"
+#include "commands/OpenFileCommand.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("SilkEdit"));
@@ -21,6 +24,9 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
   std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
       new ToggleVimEmulationCommand(m_viEngine.get()));
   CommandService::singleton().add(std::move(toggleVimEmulationCmd));
+
+  std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand(m_textEditView.get()));
+  CommandService::singleton().add(std::move(openFileCmd));
 
   KeymapService::singleton().load();
 }
