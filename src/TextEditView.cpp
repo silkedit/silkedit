@@ -3,7 +3,6 @@
 #include "vi.h"
 #include "TextEditView.h"
 #include "KeymapService.h"
-#include "DefaultCursorDrawer.h"
 #include "CommandService.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
@@ -12,7 +11,7 @@
 #include "commands/EvalAsRubyCommand.h"
 
 TextEditView::TextEditView(QWidget* parent)
-    : QPlainTextEdit(parent), m_cursorDrawer(new DefaultCursorDrawer) {
+    : QPlainTextEdit(parent) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().add(std::move(moveCursorCmd));
@@ -38,10 +37,12 @@ TextEditView::TextEditView(QWidget* parent)
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
-}
 
-void TextEditView::resetCursorDrawer() {
-  m_cursorDrawer.reset(new DefaultCursorDrawer());
+  // Solarized Light
+  setStyleSheet("QPlainTextEdit{color: #657b83; background-color: #fdf6e3;"
+                            " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
+
+  QApplication::setCursorFlashTime(0);
 }
 
 int TextEditView::lineNumberAreaWidth() {
@@ -175,10 +176,6 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 }
 
-void TextEditView::updateCursor() {
-  m_cursorDrawer->updateCursor(*this);
-}
-
 void TextEditView::keyPressEvent(QKeyEvent* e) {
   bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
   if (!isHandled) {
@@ -187,10 +184,7 @@ void TextEditView::keyPressEvent(QKeyEvent* e) {
 }
 
 void TextEditView::paintEvent(QPaintEvent* e) {
-  drawCursor();
-//  setCursorWidth(0);
   QPlainTextEdit::paintEvent(e);
-//  setCursorWidth(m_cursorDrawer->cursorWidth());
 
   const int bottom = viewport()->rect().height();
   QPainter painter(viewport());
@@ -214,20 +208,6 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   cur.movePosition(QTextCursor::End);
   QRect r = cursorRect(cur);
   painter.drawText(QPointF(r.left(), r.bottom()), "[EOF]");
-}
-
-void TextEditView::drawCursor() {
-  if (!m_cursorDrawer) {
-    qCritical() << "cursorDrawer is null!";
-    return;
-  }
-
-  QPainter painter(viewport());
-  auto tuple = m_cursorDrawer->draw(cursorRect());
-  QRect& r = std::get<0>(tuple);
-  QColor& color = std::get<1>(tuple);
-
-  painter.fillRect(r, color);
 }
 
 void TextEditView::setFontPointSize(int sz) {
@@ -301,6 +281,12 @@ void TextEditView::doRedo(int n) {
   for (int i = 0; i < n; i++) {
     redo();
   }
+}
+
+void TextEditView::setThinCursor(bool on)
+{
+  setOverwriteMode(!on);
+  update();
 }
 
 void TextEditView::wheelEvent(QWheelEvent* e) {

@@ -5,7 +5,6 @@
 #include <QLineEdit>
 
 #include "vi.h"
-#include "ICursorDrawer.h"
 
 class QKeyEvent;
 class TextEditView;
@@ -49,18 +48,5 @@ signals:
   void cmdLineReturnPressed();
   void cmdLineCursorPositionChanged(int, int);
   void cmdLineTextChanged(const QString& text);
-};
-
-class ViCursorDrawer : public ICursorDrawer {
-  DISABLE_COPY(ViCursorDrawer)
- public:
-  ViCursorDrawer(ViEngine* viEngine) : m_viEngine(viEngine) {}
-  ~ViCursorDrawer() = default;
-  DEFAULT_MOVE(ViCursorDrawer)
-
-  std::tuple<QRect, QColor> draw(const QRect& cursorRect) override;
-  void updateCursor(const TextEditView& TextEditView) override;
-
- private:
-  ViEngine* m_viEngine;
+  void updateCursor();
 };

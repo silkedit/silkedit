@@ -3,8 +3,6 @@
 #include <QPlainTextEdit>
 #include <QObject>
 
-#include "ICursorDrawer.h"
-
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
 class QResizeEvent;
@@ -22,21 +20,13 @@ class TextEditView : public QPlainTextEdit {
   TextEditView(QWidget* parent = 0);
   ~TextEditView() = default;
 
-  inline void setCursorDrawer(std::unique_ptr<ICursorDrawer> cursorDrawer) {
-    m_cursorDrawer = std::move(cursorDrawer);
-  }
-
-  void resetCursorDrawer();
-
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
   void moveCursor(int mv, int = 1);
   void doDelete(int n);
   void doUndo(int n);
   void doRedo(int n);
-
- public slots:
-  void updateCursor();
+  void setThinCursor(bool on);
 
  protected:
   virtual void keyPressEvent(QKeyEvent* e);
@@ -44,7 +34,6 @@ class TextEditView : public QPlainTextEdit {
   void resizeEvent(QResizeEvent* event);
   void paintEvent(QPaintEvent* e);
   void wheelEvent(QWheelEvent* event);
-  void drawCursor();
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   int firstNonBlankCharPos(const QString& text);
@@ -58,7 +47,6 @@ class TextEditView : public QPlainTextEdit {
 
  private:
   QWidget* m_lineNumberArea;
-  std::unique_ptr<ICursorDrawer> m_cursorDrawer;
 };
 
 class LineNumberArea : public QWidget {

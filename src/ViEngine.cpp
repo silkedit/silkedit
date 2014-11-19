@@ -33,14 +33,11 @@ void ViEngine::enable() {
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
   m_textEditView->installEventFilter(this);
-  m_textEditView->setCursorDrawer(std::unique_ptr<ViCursorDrawer>(new ViCursorDrawer(this)));
+  m_textEditView->setThinCursor(false);
 
   m_mainWindow->statusBar()->addWidget(m_cmdLineEdit.get(), 1);
   m_cmdLineEdit->installEventFilter(this);
 
-  connect(this, SIGNAL(modeChanged(Mode)), m_textEditView, SLOT(updateCursor()));
-  connect(this, SIGNAL(enabled()), m_textEditView, SLOT(updateCursor()));
-  connect(this, SIGNAL(disabled()), m_textEditView, SLOT(updateCursor()));
   connect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   connect(m_cmdLineEdit.get(),
           SIGNAL(cursorPositionChanged(int, int)),
@@ -67,13 +64,12 @@ void ViEngine::disable() {
   ContextService::singleton().remove(ModeContext::name);
 
   m_textEditView->removeEventFilter(this);
-  m_textEditView->resetCursorDrawer();
+  m_textEditView->setThinCursor(true);
 
   m_mainWindow->statusBar()->removeWidget(m_cmdLineEdit.get());
   m_mainWindow->statusBar()->clearMessage();
   m_cmdLineEdit->removeEventFilter(this);
 
-  disconnect(this, SIGNAL(modeChanged(Mode)), m_textEditView, SLOT(updateCursor()));
   disconnect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
   disconnect(m_cmdLineEdit.get(),
              SIGNAL(cursorPositionChanged(int, int)),
@@ -120,6 +116,17 @@ void ViEngine::onModeChanged(Mode mode) {
 
   m_cmdLineEdit->hide();
   m_mainWindow->statusBar()->showMessage(text);
+
+  updateCursor();
+}
+
+void ViEngine::updateCursor()
+{
+  if (mode() == Mode::CMD) {
+    m_textEditView->setThinCursor(false);
+  } else {
+    m_textEditView->setThinCursor(true);
+  }
 }
 
 void ViEngine::cmdLineReturnPressed() {
@@ -175,30 +182,5 @@ void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
     m_repeatCount = 0;
   } else {
     KeymapService::singleton().dispatch(event);
-  }
-}
-
-std::tuple<QRect, QColor> ViCursorDrawer::draw(const QRect& cursorRect) {
-  QRect r = cursorRect;
-  r.setWidth(cursorWidth());
-  if (m_viEngine->mode() == Mode::CMD) {
-    r = QRect(r.left(), r.top() + r.height() / 2, r.width(), r.height() / 2);
-  }
-  return std::make_tuple(r, QColor("red"));
-}
-
-void ViCursorDrawer::updateCursor(const TextEditView& TextEditView) {
-  if (m_viEngine->mode() == Mode::CMD) {
-    QTextCursor cur = TextEditView.textCursor();
-    cur.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
-    QString text = cur.selectedText();
-    QChar ch = text.isEmpty() ? QChar(' ') : text[0];
-    int wd = TextEditView.fontMetrics().width(ch);
-    if (!wd) {
-      wd = TextEditView.fontMetrics().width(QChar(' '));
-    }
-    setCursorWidth(wd);
-  } else {
-    setCursorWidth(1);
   }
 }
