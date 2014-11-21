@@ -1,0 +1,3 @@
+[submodule "stextedit"]
+	path = stextedit
+	url = git@bitbucket.org:shinichy/stextedit.git

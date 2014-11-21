@@ -39,7 +39,7 @@ ensure_dir() {
         echo "Creating $1 directory..."
     fi
 
-    mkdir $1
+    mkdir -p $1
 }
 
 clean() {
@@ -62,6 +62,10 @@ resolve() {
 # release build
 build() {
     resolve
+
+    # build stextedit
+    git submodule init && git submodule update
+    (cd stextedit && ./run build)
 
     ensure_dir target
     cd target

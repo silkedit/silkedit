@@ -11,7 +11,7 @@
 #include "commands/EvalAsRubyCommand.h"
 
 TextEditView::TextEditView(QWidget* parent)
-    : QPlainTextEdit(parent) {
+    : STextEdit(parent) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().add(std::move(moveCursorCmd));
@@ -39,7 +39,7 @@ TextEditView::TextEditView(QWidget* parent)
   highlightCurrentLine();
 
   // Solarized Light
-  setStyleSheet("QPlainTextEdit{color: #657b83; background-color: #fdf6e3;"
+  setStyleSheet("STextEdit{color: #657b83; background-color: #fdf6e3;"
                             " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
 
   QApplication::setCursorFlashTime(0);
@@ -128,7 +128,7 @@ void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
 }
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
-  QPlainTextEdit::resizeEvent(e);
+  STextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
   m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
@@ -179,12 +179,12 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
 void TextEditView::keyPressEvent(QKeyEvent* e) {
   bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
   if (!isHandled) {
-    QPlainTextEdit::keyPressEvent(e);
+    STextEdit::keyPressEvent(e);
   }
 }
 
 void TextEditView::paintEvent(QPaintEvent* e) {
-  QPlainTextEdit::paintEvent(e);
+  STextEdit::paintEvent(e);
 
   const int bottom = viewport()->rect().height();
   QPainter painter(viewport());
@@ -294,6 +294,6 @@ void TextEditView::wheelEvent(QWheelEvent* e) {
   if ((mod & Qt::ControlModifier) != 0) {
     makeFontBigger(e->delta() > 0);
   } else {
-    QPlainTextEdit::wheelEvent(e);
+    STextEdit::wheelEvent(e);
   }
 }

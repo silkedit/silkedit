@@ -23,10 +23,10 @@ IF (APPLE)
   find_library(CoreFoundationLibrary CoreFoundation)
 ENDIF (APPLE)
 
-include_directories(include src)
+include_directories(include src stextedit/mysrc)
 
-link_directories(lib)
+link_directories(lib stextedit/build)
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
 
-target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 yaml-cpp-0.5.1 ${CoreFoundationLibrary})
+target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 yaml-cpp-0.5.1 stextedit ${CoreFoundationLibrary})

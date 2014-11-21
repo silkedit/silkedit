@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QPlainTextEdit>
+#include <stextedit.h>
 #include <QObject>
 
 QT_BEGIN_NAMESPACE
@@ -13,7 +13,7 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class TextEditView : public QPlainTextEdit {
+class TextEditView : public STextEdit {
   Q_OBJECT
 
  public:
