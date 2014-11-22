@@ -57,15 +57,20 @@ resolve() {
         unzip -o $f
         rm $f
     done
+
+    # build stextedit
+    if [ ! -d stextedit ]; then
+        git submodule init && git submodule update
+    else
+        echo "Running: git submodule foreach git pull origin master"
+        git submodule foreach git pull origin master
+    fi
+    (cd stextedit && ./run build)
 }
 
 # release build
 build() {
     resolve
-
-    # build stextedit
-    git submodule init && git submodule update
-    (cd stextedit && ./run build)
 
     ensure_dir target
     cd target
