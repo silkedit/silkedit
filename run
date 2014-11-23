@@ -7,7 +7,7 @@ LIGHT_GREEN='\x1B[0;32m'
 NC='\x1B[0m' # No Color
 
 format() {
-    find . -name \*.cpp -or -name \*.h | xargs clang-format -i
+    find src -name \*.cpp -or -name \*.h | xargs clang-format -i
 }
 
 # run clang-format and clang-check

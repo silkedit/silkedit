@@ -120,8 +120,7 @@ void ViEngine::onModeChanged(Mode mode) {
   updateCursor();
 }
 
-void ViEngine::updateCursor()
-{
+void ViEngine::updateCursor() {
   if (mode() == Mode::CMD) {
     m_textEditView->setThinCursor(false);
   } else {

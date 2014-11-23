@@ -19,6 +19,8 @@ class CommandEvent {
   ~CommandEvent() = default;
   DEFAULT_MOVE(CommandEvent)
 
+  QString cmdName() { return m_cmdName; }
+
   bool execute(int repeat = 1);
 
  private:

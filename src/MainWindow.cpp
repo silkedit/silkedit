@@ -1,8 +1,11 @@
 #include <QFileDialog>
+#include <QMenuBar>
+#include <QAction>
 
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"
+#include "CommandAction.h"
 #include "CommandService.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/OpenFileCommand.h"
@@ -28,5 +31,11 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand(m_textEditView.get()));
   CommandService::singleton().add(std::move(openFileCmd));
 
+  // Load keymap settings after registering commands
   KeymapService::singleton().load();
+
+  auto openFileAction = new CommandAction(tr("&Open..."), OpenFileCommand::name, this);
+
+  auto fileMenu = menuBar()->addMenu(tr("&File"));
+  fileMenu->addAction(openFileAction);
 }

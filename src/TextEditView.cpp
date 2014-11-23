@@ -10,8 +10,7 @@
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 
-TextEditView::TextEditView(QWidget* parent)
-    : STextEdit(parent) {
+TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().add(std::move(moveCursorCmd));
@@ -33,14 +32,14 @@ TextEditView::TextEditView(QWidget* parent)
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(updateCursor()));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
 
   // Solarized Light
-  setStyleSheet("STextEdit{color: #657b83; background-color: #fdf6e3;"
-                            " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
+  setStyleSheet(
+      "STextEdit{color: #657b83; background-color: #fdf6e3;"
+      " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
 
   QApplication::setCursorFlashTime(0);
 }
@@ -283,8 +282,7 @@ void TextEditView::doRedo(int n) {
   }
 }
 
-void TextEditView::setThinCursor(bool on)
-{
+void TextEditView::setThinCursor(bool on) {
   setOverwriteMode(!on);
   update();
 }

@@ -2,6 +2,7 @@
 
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
+#include <boost/optional.hpp>
 
 #include "CommandEvent.h"
 #include "macros.h"
@@ -19,11 +20,18 @@ class KeymapService : public Singleton<KeymapService> {
   ~KeymapService() = default;
 
   void load(const QString& filename = "keymap.yml");
+  boost::optional<QKeySequence> findShortcut(QString cmdName);
+
+ public slots:
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:
   friend class Singleton<KeymapService>;
   KeymapService() = default;
 
+  void add(const QKeySequence& key, CommandEvent cmdEvent);
+  void clear();
+
   std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
+  std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
 };

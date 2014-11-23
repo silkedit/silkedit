@@ -58,17 +58,10 @@ QKeySequence toSequence(const QKeyEvent& ev) {
     keyInt += Qt::SHIFT;
   if (modifiers & Qt::AltModifier)
     keyInt += Qt::ALT;
-#if defined(Q_OS_MAC)
-  if (modifiers & Qt::ControlModifier)  // Cmd key
-    keyInt += Qt::META;
-  if (modifiers & Qt::MetaModifier)  // Ctrl key
+  if (modifiers & Qt::ControlModifier)  // Cmd key on Mac
     keyInt += Qt::CTRL;
-#else
-  if (modifiers & Qt::ControlModifier)
-    keyInt += Qt::CTRL;
-  if (modifiers & Qt::MetaModifier)
+  if (modifiers & Qt::MetaModifier)  // Ctrl key on Mac
     keyInt += Qt::META;
-#endif
 
   return std::move(QKeySequence(keyInt));
 }
@@ -85,8 +78,9 @@ QString replace(QString str, const QString& regex, const QString& after) {
 }
 
 QKeySequence toSequence(QString str) {
-  QString replacedWithMetaStr = replace(str, "cmd|command", "meta");
-  QString replacedWithAltStr = replace(replacedWithMetaStr, "opt|option", "alt");
+  QString replacedWithMetaStr = replace(str, "ctrl|control", "meta");
+  QString replacedWithCtrlStr = replace(replacedWithMetaStr, "cmd|command", "ctrl");
+  QString replacedWithAltStr = replace(replacedWithCtrlStr, "opt|option", "alt");
   QString replacedWithReturnStr = replace(replacedWithAltStr, "enter", "return");
 
   return std::move(replacedWithReturnStr);
@@ -105,7 +99,7 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 
 void KeymapService::load(const QString& filename) {
-  m_keymaps.clear();
+  clear();
 
   std::string name = filename.toUtf8().constData();
   try {
@@ -136,7 +130,7 @@ void KeymapService::load(const QString& filename) {
           case YAML::NodeType::Scalar: {
             QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
             qDebug() << "key: " << key << ", cmd: " << cmd;
-            m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, context)));
+            add(key, CommandEvent(cmd, context));
             break;
           }
           case YAML::NodeType::Map: {
@@ -148,9 +142,9 @@ void KeymapService::load(const QString& filename) {
             if (argsNode.IsMap()) {
               assert(argsNode.IsMap());
               CommandArgument args = parseArgs(argsNode);
-              m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, args, context)));
+              add(key, CommandEvent(cmd, args, context));
             } else {
-              m_keymaps.insert(std::make_pair(key, CommandEvent(cmd, context)));
+              add(key, CommandEvent(cmd, context));
             }
 
             break;
@@ -177,4 +171,22 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   } else {
     return false;
   }
+}
+
+boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
+  if (m_cmdShortcuts.find(cmdName) != m_cmdShortcuts.end()) {
+    return m_cmdShortcuts.at(cmdName);
+  } else {
+    return boost::none;
+  }
+}
+
+void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
+  m_cmdShortcuts.insert(std::make_pair(cmdEvent.cmdName(), key));
+  m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
+}
+
+void KeymapService::clear() {
+  m_keymaps.clear();
+  m_cmdShortcuts.clear();
 }

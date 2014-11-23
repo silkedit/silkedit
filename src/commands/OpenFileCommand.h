@@ -16,7 +16,6 @@ class OpenFileCommand : public QObject, public ICommand {
 
  private:
   void doRun(const CommandArgument& args, int repeat = 1) override;
-  void hoge();
 
   TextEditView* m_textEditView;
 };
