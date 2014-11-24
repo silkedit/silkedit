@@ -4,16 +4,17 @@
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
+#include "LayoutView.h"
 #include "CommandService.h"
 #include "ContextService.h"
 #include "KeymapService.h"
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(TextEditView* textEditView, MainWindow* mainWindow, QObject* parent)
+ViEngine::ViEngine(LayoutView* layoutView, MainWindow* mainWindow, QObject* parent)
     : QObject(parent),
       m_mode(Mode::CMD),
-      m_textEditView(textEditView),
+      m_layoutView(layoutView),
       m_mainWindow(mainWindow),
       m_repeatCount(0),
       m_cmdLineEdit(new QLineEdit()),
@@ -32,8 +33,10 @@ void ViEngine::enable() {
       ModeContext::name,
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
-  m_textEditView->installEventFilter(this);
-  m_textEditView->setThinCursor(false);
+  m_mainWindow->installEventFilter(this);
+  if (auto view = m_layoutView->activeEditView()) {
+    view->setThinCursor(false);
+  }
 
   m_mainWindow->statusBar()->addWidget(m_cmdLineEdit.get(), 1);
   m_cmdLineEdit->installEventFilter(this);
@@ -63,8 +66,10 @@ void ViEngine::disable() {
   CommandService::singleton().remove(ChangeModeCommand::name);
   ContextService::singleton().remove(ModeContext::name);
 
-  m_textEditView->removeEventFilter(this);
-  m_textEditView->setThinCursor(true);
+  m_mainWindow->removeEventFilter(this);
+  if (auto view = m_layoutView->activeEditView()) {
+    view->setThinCursor(true);
+  }
 
   m_mainWindow->statusBar()->removeWidget(m_cmdLineEdit.get());
   m_mainWindow->statusBar()->clearMessage();
@@ -88,8 +93,8 @@ void ViEngine::disable() {
 
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
-    if (m_mode == Mode::INSERT) {
-      m_textEditView->moveCursor(QTextCursor::Left);
+    if (m_mode == Mode::INSERT && m_layoutView->activeEditView()) {
+      m_layoutView->activeEditView()->moveCursor(QTextCursor::Left);
     }
     m_mode = mode;
     onModeChanged(mode);
@@ -122,9 +127,13 @@ void ViEngine::onModeChanged(Mode mode) {
 
 void ViEngine::updateCursor() {
   if (mode() == Mode::CMD) {
-    m_textEditView->setThinCursor(false);
+    if (auto view = m_layoutView->activeEditView()) {
+      view->setThinCursor(false);
+    }
   } else {
-    m_textEditView->setThinCursor(true);
+    if (auto view = m_layoutView->activeEditView()) {
+      view->setThinCursor(true);
+    }
   }
 }
 
@@ -148,12 +157,12 @@ void ViEngine::cmdLineTextChanged(const QString& text) {
 }
 
 bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
-  if (obj == m_textEditView && event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
+  if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
     cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
     return true;
   }
 
-  if (obj == m_cmdLineEdit.get() && event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
+  if (event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
     QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
     if (keyEvent->key() == Qt::Key_Escape) {
       setMode(Mode::CMD);

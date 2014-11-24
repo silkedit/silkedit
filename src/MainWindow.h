@@ -17,9 +17,6 @@ class MainWindow : public QMainWindow {
   ~MainWindow() = default;
   DEFAULT_MOVE(MainWindow)
 
- protected:
-  void keyPressEvent(QKeyEvent* e) override;
-
  private:
   std::unique_ptr<LayoutView> m_layoutView;
   std::unique_ptr<ViEngine> m_viEngine;

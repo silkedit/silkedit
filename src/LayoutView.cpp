@@ -8,8 +8,10 @@
 #include "TextEditView.h"
 #include "FileDocument.h"
 #include "STabWidget.h"
+#include "KeymapService.h"
 
-LayoutView::LayoutView() : m_tabbar(new STabWidget(this)), m_layout(new QHBoxLayout) {
+LayoutView::LayoutView()
+    : m_tabbar(new STabWidget(this)), m_layout(new QHBoxLayout), m_activeEditView(nullptr) {
   m_tabbar->setAcceptDrops(true);
 
   m_tabbar->setElideMode(Qt::ElideRight);
@@ -26,13 +28,38 @@ LayoutView::LayoutView() : m_tabbar(new STabWidget(this)), m_layout(new QHBoxLay
   setLayout(m_layout);
   setContentsMargins(0, 0, 0, 0);
 
-  std::unique_ptr<TextEditView> view(new TextEditView);
-  m_tabbar->addTab(std::move(view), "untitled");
+  QObject::connect(m_tabbar.get(), &QTabWidget::currentChanged, [this](int index) {
+    // This lambda is called after m_tabbar is deleted when shutdown.
+    if (!m_tabbar)
+      return;
+
+    qDebug("currentChanged. index: %i, tab count: %i", index, m_tabbar->count());
+    if (auto w = m_tabbar->widget(index)) {
+      m_activeEditView = qobject_cast<TextEditView*>(w);
+      m_activeEditView->setFocus();
+      m_tabbar->setCurrentIndex(index);
+    }
+  });
+
+  addNewDocument();
+  m_tabbar->setFocus();
 }
 
 void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
   std::unique_ptr<TextEditView> view(new TextEditView);
-  view->setDocument(doc);
-  QFileInfo info(filename);
-  m_tabbar->addTab(std::move(view), info.fileName());
+  if (doc) {
+    view->setDocument(doc);
+  }
+  view->installEventFilter(&KeymapService::singleton());
+
+  QString label("untitled");
+  if (!filename.isEmpty()) {
+    QFileInfo info(filename);
+    label = info.fileName();
+  }
+  m_tabbar->addTab(std::move(view), label);
+}
+
+void LayoutView::addNewDocument() {
+  addDocument("", nullptr);
 }

@@ -173,6 +173,12 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   }
 }
 
+bool KeymapService::eventFilter(QObject*, QEvent* event) {
+  if (event->type() == QEvent::KeyPress) {
+    return dispatch(static_cast<QKeyEvent*>(event));
+  }
+}
+
 boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
   if (m_cmdShortcuts.find(cmdName) != m_cmdShortcuts.end()) {
     return m_cmdShortcuts.at(cmdName);

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <yaml-cpp/yaml.h>
 #include <boost/optional.hpp>
+#include <QObject>
 
 #include "CommandEvent.h"
 #include "macros.h"
@@ -13,7 +14,8 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapService : public Singleton<KeymapService> {
+class KeymapService : public QObject, public Singleton<KeymapService> {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(KeymapService)
 
  public:
@@ -24,6 +26,9 @@ class KeymapService : public Singleton<KeymapService> {
 
  public slots:
   bool dispatch(QKeyEvent* ev, int repeat = 1);
+
+ protected:
+  bool eventFilter(QObject* watched, QEvent* event) override;
 
  private:
   friend class Singleton<KeymapService>;

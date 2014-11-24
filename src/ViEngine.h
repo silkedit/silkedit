@@ -9,12 +9,13 @@
 class QKeyEvent;
 class TextEditView;
 class MainWindow;
+class LayoutView;
 
 class ViEngine : public QObject {
   Q_OBJECT
 
  public:
-  ViEngine(TextEditView* textEditView, MainWindow* mainWindow, QObject* parent = nullptr);
+  ViEngine(LayoutView* layoutView, MainWindow* mainWindow, QObject* parent = nullptr);
   ~ViEngine() = default;
 
   Mode mode() const { return m_mode; }
@@ -36,7 +37,7 @@ signals:
 
  private:
   Mode m_mode;
-  TextEditView* m_textEditView;
+  LayoutView* m_layoutView;
   MainWindow* m_mainWindow;
   int m_repeatCount;
   std::unique_ptr<QLineEdit> m_cmdLineEdit;

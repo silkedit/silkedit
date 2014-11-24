@@ -21,15 +21,15 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   setCentralWidget(m_layoutView.get());
 
-  //  m_viEngine.reset(new ViEngine(m_layoutView.get(), this));
+  m_viEngine.reset(new ViEngine(m_layoutView.get(), this));
 
-  //  if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
-  //    m_viEngine->enable();
-  //  }
+  if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
+    m_viEngine->enable();
+  }
 
-  //  std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
-  //      new ToggleVimEmulationCommand(m_viEngine.get()));
-  //  CommandService::singleton().add(std::move(toggleVimEmulationCmd));
+  std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
+      new ToggleVimEmulationCommand(m_viEngine.get()));
+  CommandService::singleton().add(std::move(toggleVimEmulationCmd));
 
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
@@ -41,11 +41,4 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   auto fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openFileAction);
-}
-
-void MainWindow::keyPressEvent(QKeyEvent* e) {
-  bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
-  if (!isHandled) {
-    QMainWindow::keyPressEvent(e);
-  }
 }
