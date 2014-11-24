@@ -50,7 +50,7 @@ void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
   if (doc) {
     view->setDocument(doc);
   }
-  view->installEventFilter(&KeymapService::singleton());
+  view->installEventFilter(&KeyHandler::singleton());
 
   QString label("untitled");
   if (!filename.isEmpty()) {

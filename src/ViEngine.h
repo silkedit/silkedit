@@ -5,13 +5,14 @@
 #include <QLineEdit>
 
 #include "vi.h"
+#include "IKeyEventFilter.h"
 
 class QKeyEvent;
 class TextEditView;
 class MainWindow;
 class LayoutView;
 
-class ViEngine : public QObject {
+class ViEngine : public QObject, public IKeyEventFilter {
   Q_OBJECT
 
  public:
@@ -25,6 +26,7 @@ class ViEngine : public QObject {
   void enable();
   void disable();
   bool isEnabled() { return m_isEnabled; }
+  bool keyEventFilter(QKeyEvent* event) override;
 
 signals:
   void modeChanged(Mode);
@@ -32,7 +34,6 @@ signals:
   void disabled();
 
  protected:
-  bool eventFilter(QObject*, QEvent*);
   void cmdModeKeyPressEvent(QKeyEvent*);
 
  private:

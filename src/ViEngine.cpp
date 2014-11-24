@@ -33,7 +33,7 @@ void ViEngine::enable() {
       ModeContext::name,
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
-  m_mainWindow->installEventFilter(this);
+  KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = m_layoutView->activeEditView()) {
     view->setThinCursor(false);
   }
@@ -66,7 +66,7 @@ void ViEngine::disable() {
   CommandService::singleton().remove(ChangeModeCommand::name);
   ContextService::singleton().remove(ModeContext::name);
 
-  m_mainWindow->removeEventFilter(this);
+  KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = m_layoutView->activeEditView()) {
     view->setThinCursor(true);
   }
@@ -89,6 +89,24 @@ void ViEngine::disable() {
 
   m_isEnabled = false;
   emit disabled();
+}
+
+bool ViEngine::keyEventFilter(QKeyEvent *event)
+{
+  if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
+    cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
+    return true;
+  }
+
+  if (event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+    if (keyEvent->key() == Qt::Key_Escape) {
+      setMode(Mode::CMD);
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void ViEngine::setMode(Mode mode) {
@@ -154,23 +172,6 @@ void ViEngine::cmdLineTextChanged(const QString& text) {
   if (text.isEmpty() || text[0] != ':') {
     setMode(Mode::CMD);
   }
-}
-
-bool ViEngine::eventFilter(QObject* obj, QEvent* event) {
-  if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
-    cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
-    return true;
-  }
-
-  if (event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    if (keyEvent->key() == Qt::Key_Escape) {
-      setMode(Mode::CMD);
-      return true;
-    }
-  }
-
-  return false;
 }
 
 void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {

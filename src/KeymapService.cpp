@@ -5,6 +5,7 @@
 #include <QString>
 #include <QRegularExpression>
 #include <QKeyEvent>
+#include <QApplication>
 
 #include "ContextService.h"
 #include "KeymapService.h"
@@ -173,18 +174,17 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   }
 }
 
-bool KeymapService::eventFilter(QObject*, QEvent* event) {
-  if (event->type() == QEvent::KeyPress) {
-    return dispatch(static_cast<QKeyEvent*>(event));
-  }
-}
-
 boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
   if (m_cmdShortcuts.find(cmdName) != m_cmdShortcuts.end()) {
     return m_cmdShortcuts.at(cmdName);
   } else {
     return boost::none;
   }
+}
+
+bool KeymapService::keyEventFilter(QKeyEvent *event)
+{
+  return dispatch(event);
 }
 
 void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
@@ -195,4 +195,32 @@ void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
 void KeymapService::clear() {
   m_keymaps.clear();
   m_cmdShortcuts.clear();
+}
+
+bool KeyHandler::eventFilter(QObject *, QEvent *event)
+{
+  if (event->type() == QEvent::KeyPress) {
+    for (const auto& filter: m_keyEventFilters) {
+      if (filter->keyEventFilter(static_cast<QKeyEvent*>(event))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+KeyHandler::KeyHandler()
+{
+  registerKeyEventFilter(&KeymapService::singleton());
+}
+
+void KeyHandler::registerKeyEventFilter(IKeyEventFilter *filter)
+{
+  m_keyEventFilters.insert(filter);
+}
+
+void KeyHandler::unregisterKeyEventFilter(IKeyEventFilter *filter)
+{
+  m_keyEventFilters.erase(filter);
 }
