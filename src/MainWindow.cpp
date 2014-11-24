@@ -2,6 +2,7 @@
 #include <QMenuBar>
 #include <QAction>
 
+#include "DocumentService.h"
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"
@@ -15,20 +16,22 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   ConfigService::singleton().load();
 
-  m_textEditView.reset(new TextEditView);
-  setCentralWidget(m_textEditView.get());
+  m_layoutView.reset(new LayoutView);
+  DocumentService::singleton().setLayoutView(m_layoutView.get());
 
-  m_viEngine.reset(new ViEngine(m_textEditView.get(), this));
+  setCentralWidget(m_layoutView.get());
 
-  if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
-    m_viEngine->enable();
-  }
+  //  m_viEngine.reset(new ViEngine(m_layoutView.get(), this));
 
-  std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
-      new ToggleVimEmulationCommand(m_viEngine.get()));
-  CommandService::singleton().add(std::move(toggleVimEmulationCmd));
+  //  if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
+  //    m_viEngine->enable();
+  //  }
 
-  std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand(m_textEditView.get()));
+  //  std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
+  //      new ToggleVimEmulationCommand(m_viEngine.get()));
+  //  CommandService::singleton().add(std::move(toggleVimEmulationCmd));
+
+  std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
 
   // Load keymap settings after registering commands
@@ -38,4 +41,11 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   auto fileMenu = menuBar()->addMenu(tr("&File"));
   fileMenu->addAction(openFileAction);
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* e) {
+  bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
+  if (!isHandled) {
+    QMainWindow::keyPressEvent(e);
+  }
 }

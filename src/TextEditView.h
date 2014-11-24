@@ -28,9 +28,6 @@ class TextEditView : public STextEdit {
   void doRedo(int n);
   void setThinCursor(bool on);
 
- protected:
-  virtual void keyPressEvent(QKeyEvent* e);
-
   void resizeEvent(QResizeEvent* event);
   void paintEvent(QPaintEvent* e);
   void wheelEvent(QWheelEvent* event);

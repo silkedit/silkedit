@@ -175,13 +175,6 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 }
 
-void TextEditView::keyPressEvent(QKeyEvent* e) {
-  bool isHandled = KeymapService::singleton().dispatch(static_cast<QKeyEvent*>(e));
-  if (!isHandled) {
-    STextEdit::keyPressEvent(e);
-  }
-}
-
 void TextEditView::paintEvent(QPaintEvent* e) {
   STextEdit::paintEvent(e);
 

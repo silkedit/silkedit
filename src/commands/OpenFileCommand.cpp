@@ -2,12 +2,12 @@
 #include <QFileDialog>
 
 #include "OpenFileCommand.h"
+#include "DocumentService.h"
 #include "vi.h"
 
 const QString OpenFileCommand::name = "open_file";
 
-OpenFileCommand::OpenFileCommand(TextEditView* textEditView)
-    : ICommand(OpenFileCommand::name), m_textEditView(textEditView) {
+OpenFileCommand::OpenFileCommand() : ICommand(OpenFileCommand::name) {
 }
 
 void OpenFileCommand::doRun(const CommandArgument&, int) {
@@ -15,10 +15,5 @@ void OpenFileCommand::doRun(const CommandArgument&, int) {
   if (filename.isNull())
     return;
 
-  QFile file(filename);
-  if (!file.open(QIODevice::ReadWrite))
-    return;
-
-  QTextStream in(&file);
-  m_textEditView->setPlainText(in.readAll());
+  DocumentService::singleton().open(filename);
 }
