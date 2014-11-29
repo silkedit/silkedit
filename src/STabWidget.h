@@ -7,6 +7,8 @@
 #include "macros.h"
 #include "set_unique_ptr.h"
 
+class TextEditView;
+
 class STabWidget : public QTabWidget {
   DISABLE_COPY(STabWidget)
 
@@ -15,7 +17,8 @@ class STabWidget : public QTabWidget {
   ~STabWidget();
   DEFAULT_MOVE(STabWidget)
 
-  int addTab(QWidget* widget, const QString& label);
+  int addTab(QWidget* page, const QString& label);
+  int addTextEditView(TextEditView* view, const QString& label);
 
  protected:
   void tabInserted(int index) override;

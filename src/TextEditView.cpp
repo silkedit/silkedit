@@ -10,7 +10,8 @@
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 
-TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
+TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
+    : STextEdit(parent), m_path(path) {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
   CommandService::singleton().add(std::move(moveCursorCmd));

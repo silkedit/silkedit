@@ -46,18 +46,22 @@ LayoutView::LayoutView()
 }
 
 void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
-  TextEditView* view = new TextEditView();
+  TextEditView* view;
+  QString label("untitled");
+
+  if (!filename.isEmpty()) {
+    QFileInfo info(filename);
+    label = info.fileName();
+    view = new TextEditView(filename);
+  } else {
+    view = new TextEditView();
+  }
+  Q_ASSERT(view);
   if (doc) {
     view->setDocument(doc);
   }
   view->installEventFilter(&KeyHandler::singleton());
-
-  QString label("untitled");
-  if (!filename.isEmpty()) {
-    QFileInfo info(filename);
-    label = info.fileName();
-  }
-  m_tabbar->addTab(view, label);
+  m_tabbar->addTextEditView(view, label);
 }
 
 void LayoutView::addNewDocument() {

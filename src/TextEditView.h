@@ -1,7 +1,9 @@
 #pragma once
 
-#include <stextedit.h>
+#include <boost/optional.hpp>
 #include <QObject>
+
+#include <stextedit.h>
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -17,8 +19,10 @@ class TextEditView : public STextEdit {
   Q_OBJECT
 
  public:
-  explicit TextEditView(QWidget* parent = 0);
+  explicit TextEditView(boost::optional<QString> path = boost::none, QWidget* parent = 0);
   ~TextEditView();
+
+  boost::optional<QString> path() { return m_path; }
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -44,6 +48,7 @@ class TextEditView : public STextEdit {
 
  private:
   QWidget* m_lineNumberArea;
+  boost::optional<QString> m_path;
 };
 
 class LineNumberArea : public QWidget {
