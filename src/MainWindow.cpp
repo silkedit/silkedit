@@ -21,6 +21,9 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   setCentralWidget(m_layoutView.get());
 
+  // Set focus to active edit view
+  m_layoutView->activeEditView()->setFocus();
+
   m_viEngine.reset(new ViEngine(m_layoutView.get(), this));
 
   if (ConfigService::singleton().isTrue("enable_vim_emulation")) {

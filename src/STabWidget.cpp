@@ -19,3 +19,9 @@ void STabWidget::tabRemoved(int index) {
 
   QTabWidget::tabRemoved(index);
 }
+
+void STabWidget::tabInserted(int index)
+{
+  setCurrentIndex(index);
+  QTabWidget::tabInserted(index);
+}

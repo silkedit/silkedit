@@ -36,13 +36,10 @@ LayoutView::LayoutView()
     qDebug("currentChanged. index: %i, tab count: %i", index, m_tabbar->count());
     if (auto w = m_tabbar->widget(index)) {
       m_activeEditView = qobject_cast<TextEditView*>(w);
-      m_activeEditView->setFocus();
-      m_tabbar->setCurrentIndex(index);
     }
   });
 
   addNewDocument();
-  m_tabbar->setFocus();
 }
 
 void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {

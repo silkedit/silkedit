@@ -18,6 +18,7 @@ class STabWidget : public QTabWidget {
 
  protected:
   void tabRemoved(int index) override;
+  void tabInserted(int index) override;
 
  private:
   std::unordered_set<std::unique_ptr<QWidget>> m_widgets;
