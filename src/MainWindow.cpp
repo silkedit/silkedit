@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
   ConfigService::singleton().load();
 
   m_layoutView.reset(new LayoutView);
-  DocumentService::singleton().setLayoutView(m_layoutView.get());
+  DocumentService::singleton().setTabWidget(m_layoutView->tabWidget());
 
   setCentralWidget(m_layoutView.get());
 

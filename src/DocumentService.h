@@ -8,7 +8,7 @@
 #include "macros.h"
 #include "stlSpecialization.h"
 
-class LayoutView;
+class STabWidget;
 
 class DocumentService : public Singleton<DocumentService> {
   DISABLE_COPY_AND_MOVE(DocumentService)
@@ -16,12 +16,11 @@ class DocumentService : public Singleton<DocumentService> {
   ~DocumentService() = default;
 
   bool open(const QString& filename);
-  void setLayoutView(LayoutView* layoutView) { m_layoutView = layoutView; }
+  void setTabWidget(STabWidget* tabWidget) { m_tabWidget = tabWidget; }
 
  private:
   friend class Singleton<DocumentService>;
   DocumentService();
 
-  std::unordered_map<QString, FileDocument> m_documents;
-  LayoutView* m_layoutView;
+  STabWidget* m_tabWidget;
 };

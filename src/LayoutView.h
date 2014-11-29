@@ -19,9 +19,7 @@ class LayoutView : public QWidget {
   DEFAULT_MOVE(LayoutView)
 
   TextEditView* activeEditView() { return m_activeEditView; }
-
-  void addDocument(const QString& filename, QTextDocument* doc);
-  void addNewDocument();
+  STabWidget* tabWidget() { return m_tabbar.get(); }
 
   std::unique_ptr<STabWidget> m_tabbar;
   QHBoxLayout* m_layout;

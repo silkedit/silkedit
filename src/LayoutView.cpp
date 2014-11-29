@@ -6,7 +6,6 @@
 
 #include "LayoutView.h"
 #include "TextEditView.h"
-#include "FileDocument.h"
 #include "STabWidget.h"
 #include "KeymapService.h"
 
@@ -42,28 +41,5 @@ LayoutView::LayoutView()
     }
   });
 
-  addNewDocument();
-}
-
-void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
-  TextEditView* view;
-  QString label("untitled");
-
-  if (!filename.isEmpty()) {
-    QFileInfo info(filename);
-    label = info.fileName();
-    view = new TextEditView(filename);
-  } else {
-    view = new TextEditView();
-  }
-  Q_ASSERT(view);
-  if (doc) {
-    view->setDocument(doc);
-  }
-  view->installEventFilter(&KeyHandler::singleton());
-  m_tabbar->addTextEditView(view, label);
-}
-
-void LayoutView::addNewDocument() {
-  addDocument("", nullptr);
+  m_tabbar->addNew();
 }

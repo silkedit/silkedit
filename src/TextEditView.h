@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <boost/optional.hpp>
 #include <QObject>
 
@@ -23,6 +24,10 @@ class TextEditView : public STextEdit {
   ~TextEditView();
 
   boost::optional<QString> path() { return m_path; }
+  void setDocument(std::shared_ptr<QTextDocument> document) {
+    m_document = document;
+    STextEdit::setDocument(document.get());
+  }
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -49,6 +54,7 @@ class TextEditView : public STextEdit {
  private:
   QWidget* m_lineNumberArea;
   boost::optional<QString> m_path;
+  std::shared_ptr<QTextDocument> m_document;
 };
 
 class LineNumberArea : public QWidget {

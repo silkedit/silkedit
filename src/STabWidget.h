@@ -18,7 +18,8 @@ class STabWidget : public QTabWidget {
   DEFAULT_MOVE(STabWidget)
 
   int addTab(QWidget* page, const QString& label);
-  int addTextEditView(TextEditView* view, const QString& label);
+  int open(const QString& path);
+  void addNew();
 
  protected:
   void tabInserted(int index) override;

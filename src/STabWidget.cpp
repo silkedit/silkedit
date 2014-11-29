@@ -1,6 +1,12 @@
-#include "STabWidget.h"
+#include <memory>
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+#include <QTextDocument>
 
+#include "STabWidget.h"
 #include "TextEditView.h"
+#include "KeymapService.h"
 
 STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
   QObject::connect(this, &QTabWidget::tabCloseRequested, [this](int index) {
@@ -24,18 +30,39 @@ int STabWidget::addTab(QWidget* page, const QString& label) {
   return index;
 }
 
-int STabWidget::addTextEditView(TextEditView* view, const QString& label) {
+// todo: Move this method to tab group later
+int STabWidget::open(const QString& path) {
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
-    boost::optional<QString> path1 = view->path();
     boost::optional<QString> path2 = v->path();
-    if (v && path1 && path2 && *path1 == *path2) {
+    if (v && path2 && path == *path2) {
       setCurrentIndex(i);
-      return 0;
+      return i;
     }
   }
 
+  QFile file(path);
+  if (!file.open(QIODevice::ReadWrite))
+    return -1;
+
+  QTextStream in(&file);
+  std::shared_ptr<QTextDocument> newDoc(new QTextDocument(in.readAll()));
+  STextDocumentLayout* layout = new STextDocumentLayout(newDoc.get());
+  newDoc->setDocumentLayout(layout);
+
+  QFileInfo info(path);
+  QString label(info.fileName());
+
+  TextEditView* view = new TextEditView(path);
+  view->setDocument(std::move(newDoc));
+  view->installEventFilter(&KeyHandler::singleton());
   return addTab(view, label);
+}
+
+void STabWidget::addNew() {
+  TextEditView* view = new TextEditView();
+  view->installEventFilter(&KeyHandler::singleton());
+  addTab(view, "untitled");
 }
 
 void STabWidget::tabInserted(int index) {
