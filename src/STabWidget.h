@@ -5,21 +5,21 @@
 #include <QTabWidget>
 
 #include "macros.h"
+#include "set_unique_ptr.h"
 
 class STabWidget : public QTabWidget {
   DISABLE_COPY(STabWidget)
 
  public:
   explicit STabWidget(QWidget* parent = nullptr);
-  ~STabWidget() = default;
+  ~STabWidget();
   DEFAULT_MOVE(STabWidget)
 
-  int addTab(std::unique_ptr<QWidget> widget, const QString& label);
+  int addTab(QWidget* widget, const QString& label);
 
  protected:
-  void tabRemoved(int index) override;
   void tabInserted(int index) override;
 
  private:
-  std::unordered_set<std::unique_ptr<QWidget>> m_widgets;
+  std::unordered_set<set_unique_ptr<QWidget>> m_widgets;
 };

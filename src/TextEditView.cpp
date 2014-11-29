@@ -44,6 +44,10 @@ TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
   QApplication::setCursorFlashTime(0);
 }
 
+TextEditView::~TextEditView() {
+  qDebug("~TextEditView");
+}
+
 int TextEditView::lineNumberAreaWidth() {
   int digits = 1;
   int max = qMax(1, blockCount());

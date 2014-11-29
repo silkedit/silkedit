@@ -38,11 +38,11 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
 };
 
-class KeyHandler: public QObject, public Singleton<KeyHandler> {
+class KeyHandler : public QObject, public Singleton<KeyHandler> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(KeyHandler)
-  public:
-    ~KeyHandler() = default;
+ public:
+  ~KeyHandler() = default;
 
   void registerKeyEventFilter(IKeyEventFilter* filter);
   void unregisterKeyEventFilter(IKeyEventFilter* filter);
@@ -50,7 +50,7 @@ class KeyHandler: public QObject, public Singleton<KeyHandler> {
  protected:
   bool eventFilter(QObject* watched, QEvent* event) override;
 
-private:
+ private:
   friend class Singleton<KeyHandler>;
   KeyHandler();
 

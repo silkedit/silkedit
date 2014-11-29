@@ -30,12 +30,15 @@ LayoutView::LayoutView()
 
   QObject::connect(m_tabbar.get(), &QTabWidget::currentChanged, [this](int index) {
     // This lambda is called after m_tabbar is deleted when shutdown.
-    if (!m_tabbar)
+    if (!m_tabbar || index < 0)
       return;
 
     qDebug("currentChanged. index: %i, tab count: %i", index, m_tabbar->count());
     if (auto w = m_tabbar->widget(index)) {
       m_activeEditView = qobject_cast<TextEditView*>(w);
+    } else {
+      qDebug("active edit view is null");
+      m_activeEditView = nullptr;
     }
   });
 
@@ -43,7 +46,7 @@ LayoutView::LayoutView()
 }
 
 void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
-  std::unique_ptr<TextEditView> view(new TextEditView);
+  TextEditView* view = new TextEditView();
   if (doc) {
     view->setDocument(doc);
   }
@@ -54,7 +57,7 @@ void LayoutView::addDocument(const QString& filename, QTextDocument* doc) {
     QFileInfo info(filename);
     label = info.fileName();
   }
-  m_tabbar->addTab(std::move(view), label);
+  m_tabbar->addTab(view, label);
 }
 
 void LayoutView::addNewDocument() {

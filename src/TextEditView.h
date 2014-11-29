@@ -17,8 +17,8 @@ class TextEditView : public STextEdit {
   Q_OBJECT
 
  public:
-  TextEditView(QWidget* parent = 0);
-  ~TextEditView() = default;
+  explicit TextEditView(QWidget* parent = 0);
+  ~TextEditView();
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();

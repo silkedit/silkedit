@@ -91,8 +91,7 @@ void ViEngine::disable() {
   emit disabled();
 }
 
-bool ViEngine::keyEventFilter(QKeyEvent *event)
-{
+bool ViEngine::keyEventFilter(QKeyEvent* event) {
   if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
     cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
     return true;

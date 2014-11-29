@@ -182,8 +182,7 @@ boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
   }
 }
 
-bool KeymapService::keyEventFilter(QKeyEvent *event)
-{
+bool KeymapService::keyEventFilter(QKeyEvent* event) {
   return dispatch(event);
 }
 
@@ -197,10 +196,9 @@ void KeymapService::clear() {
   m_cmdShortcuts.clear();
 }
 
-bool KeyHandler::eventFilter(QObject *, QEvent *event)
-{
+bool KeyHandler::eventFilter(QObject*, QEvent* event) {
   if (event->type() == QEvent::KeyPress) {
-    for (const auto& filter: m_keyEventFilters) {
+    for (const auto& filter : m_keyEventFilters) {
       if (filter->keyEventFilter(static_cast<QKeyEvent*>(event))) {
         return true;
       }
@@ -210,17 +208,14 @@ bool KeyHandler::eventFilter(QObject *, QEvent *event)
   return false;
 }
 
-KeyHandler::KeyHandler()
-{
+KeyHandler::KeyHandler() {
   registerKeyEventFilter(&KeymapService::singleton());
 }
 
-void KeyHandler::registerKeyEventFilter(IKeyEventFilter *filter)
-{
+void KeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
   m_keyEventFilters.insert(filter);
 }
 
-void KeyHandler::unregisterKeyEventFilter(IKeyEventFilter *filter)
-{
+void KeyHandler::unregisterKeyEventFilter(IKeyEventFilter* filter) {
   m_keyEventFilters.erase(filter);
 }
