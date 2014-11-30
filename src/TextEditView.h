@@ -27,6 +27,7 @@ class TextEditView : public STextEdit {
   void setDocument(std::shared_ptr<QTextDocument> document) {
     m_document = document;
     STextEdit::setDocument(document.get());
+    updateLineNumberAreaWidth(blockCount());
   }
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
@@ -61,10 +62,10 @@ class LineNumberArea : public QWidget {
  public:
   LineNumberArea(TextEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
 
-  QSize sizeHint() const { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
+  QSize sizeHint() const override { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
 
  protected:
-  void paintEvent(QPaintEvent* event) { m_codeEditor->lineNumberAreaPaintEvent(event); }
+  void paintEvent(QPaintEvent* event) override { m_codeEditor->lineNumberAreaPaintEvent(event); }
 
  private:
   TextEditView* m_codeEditor;

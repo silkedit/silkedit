@@ -98,10 +98,12 @@ void TextEditView::moveCursor(int mv, int n) {
 }
 
 void TextEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
+//  qDebug("updateLineNumberAreaWidth");
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
 void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
+//  qDebug("updateLineNumberArea");
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
