@@ -5,12 +5,10 @@
 
 class RedoCommand : public ICommand {
  public:
-  RedoCommand(TextEditView* textEditView);
+  RedoCommand();
   ~RedoCommand() = default;
   DEFAULT_COPY_AND_MOVE(RedoCommand)
 
  private:
   void doRun(const CommandArgument& args, int repeat = 1) override;
-
-  TextEditView* m_textEditView;
 };

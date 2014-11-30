@@ -4,6 +4,7 @@
 #include "MoveCursorCommand.h"
 #include "vi.h"
 #include "stlSpecialization.h"
+#include "API.h"
 
 namespace {
 
@@ -32,13 +33,13 @@ int toMoveOperation(const QString& str) {
 }
 }
 
-MoveCursorCommand::MoveCursorCommand(TextEditView* textEditView)
-    : ICommand("move_cursor"), m_textEditView(textEditView) {
+MoveCursorCommand::MoveCursorCommand()
+    : ICommand("move_cursor") {
 }
 
 void MoveCursorCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto operationStr = args.find<QString>("operation")) {
     int operation = toMoveOperation(*operationStr);
-    m_textEditView->moveCursor(operation, repeat);
+    API::singleton().activeEditView()->moveCursor(operation, repeat);
   }
 }

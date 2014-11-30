@@ -2,6 +2,7 @@
 #include <QMenuBar>
 #include <QAction>
 
+#include "API.h"
 #include "DocumentService.h"
 #include "MainWindow.h"
 #include "KeymapService.h"
@@ -10,6 +11,11 @@
 #include "CommandService.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/OpenFileCommand.h"
+#include "commands/MoveCursorCommand.h"
+#include "commands/DeleteCommand.h"
+#include "commands/UndoCommand.h"
+#include "commands/RedoCommand.h"
+#include "commands/EvalAsRubyCommand.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(parent, flags) {
   this->setWindowTitle(QObject::tr("SilkEdit"));
@@ -18,17 +24,34 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags) : QMainWindow(par
 
   m_layoutView.reset(new LayoutView);
   DocumentService::singleton().setTabWidget(m_layoutView->tabWidget());
+  API::singleton().init(m_layoutView->tabWidget());
 
   setCentralWidget(m_layoutView.get());
 
   // Set focus to active edit view
-  m_layoutView->activeEditView()->setFocus();
+  API::singleton().activeEditView()->setFocus();
 
-  m_viEngine.reset(new ViEngine(m_layoutView.get(), this));
+  m_viEngine.reset(new ViEngine(this));
 
   if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
     m_viEngine->enable();
   }
+
+  // add commands
+  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand);
+  CommandService::singleton().add(std::move(moveCursorCmd));
+
+  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand);
+  CommandService::singleton().add(std::move(deleteCmd));
+
+  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand);
+  CommandService::singleton().add(std::move(undoCmd));
+
+  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
+  CommandService::singleton().add(std::move(redoCmd));
+
+  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
+  CommandService::singleton().add(std::move(evalAsRubyCmd));
 
   std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
       new ToggleVimEmulationCommand(m_viEngine.get()));

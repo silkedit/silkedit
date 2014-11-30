@@ -18,10 +18,8 @@ class LayoutView : public QWidget {
   ~LayoutView() = default;
   DEFAULT_MOVE(LayoutView)
 
-  TextEditView* activeEditView() { return m_activeEditView; }
   STabWidget* tabWidget() { return m_tabbar.get(); }
 
   std::unique_ptr<STabWidget> m_tabbar;
   QHBoxLayout* m_layout;
-  TextEditView* m_activeEditView;
 };

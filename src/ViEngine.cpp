@@ -1,6 +1,7 @@
 #include <memory>
 #include <QStatusBar>
 
+#include "API.h"
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
@@ -11,10 +12,9 @@
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(LayoutView* layoutView, MainWindow* mainWindow, QObject* parent)
+ViEngine::ViEngine(MainWindow* mainWindow, QObject* parent)
     : QObject(parent),
       m_mode(Mode::CMD),
-      m_layoutView(layoutView),
       m_mainWindow(mainWindow),
       m_repeatCount(0),
       m_cmdLineEdit(new QLineEdit()),
@@ -34,7 +34,7 @@ void ViEngine::enable() {
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = m_layoutView->activeEditView()) {
+  if (auto view = API::singleton().activeEditView()) {
     view->setThinCursor(false);
   }
 
@@ -67,7 +67,7 @@ void ViEngine::disable() {
   ContextService::singleton().remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = m_layoutView->activeEditView()) {
+  if (auto view = API::singleton().activeEditView()) {
     view->setThinCursor(true);
   }
 
@@ -110,8 +110,8 @@ bool ViEngine::keyEventFilter(QKeyEvent* event) {
 
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
-    if (m_mode == Mode::INSERT && m_layoutView->activeEditView()) {
-      m_layoutView->activeEditView()->moveCursor(QTextCursor::Left);
+    if (m_mode == Mode::INSERT && API::singleton().activeEditView()) {
+      API::singleton().activeEditView()->moveCursor(QTextCursor::Left);
     }
     m_mode = mode;
     onModeChanged(mode);
@@ -144,11 +144,11 @@ void ViEngine::onModeChanged(Mode mode) {
 
 void ViEngine::updateCursor() {
   if (mode() == Mode::CMD) {
-    if (auto view = m_layoutView->activeEditView()) {
+    if (auto view = API::singleton().activeEditView()) {
       view->setThinCursor(false);
     }
   } else {
-    if (auto view = m_layoutView->activeEditView()) {
+    if (auto view = API::singleton().activeEditView()) {
       view->setThinCursor(true);
     }
   }

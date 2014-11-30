@@ -16,7 +16,7 @@ class ViEngine : public QObject, public IKeyEventFilter {
   Q_OBJECT
 
  public:
-  ViEngine(LayoutView* layoutView, MainWindow* mainWindow, QObject* parent = nullptr);
+  ViEngine(MainWindow* mainWindow, QObject* parent = nullptr);
   ~ViEngine() = default;
 
   Mode mode() const { return m_mode; }
@@ -38,7 +38,6 @@ signals:
 
  private:
   Mode m_mode;
-  LayoutView* m_layoutView;
   MainWindow* m_mainWindow;
   int m_repeatCount;
   std::unique_ptr<QLineEdit> m_cmdLineEdit;

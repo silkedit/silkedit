@@ -4,29 +4,9 @@
 #include "TextEditView.h"
 #include "KeymapService.h"
 #include "CommandService.h"
-#include "commands/MoveCursorCommand.h"
-#include "commands/DeleteCommand.h"
-#include "commands/UndoCommand.h"
-#include "commands/RedoCommand.h"
-#include "commands/EvalAsRubyCommand.h"
 
 TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
     : STextEdit(parent), m_path(path) {
-  // add commands
-  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand(this));
-  CommandService::singleton().add(std::move(moveCursorCmd));
-
-  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand(this));
-  CommandService::singleton().add(std::move(deleteCmd));
-
-  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand(this));
-  CommandService::singleton().add(std::move(undoCmd));
-
-  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand(this));
-  CommandService::singleton().add(std::move(redoCmd));
-
-  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand(this));
-  CommandService::singleton().add(std::move(evalAsRubyCmd));
 
   m_lineNumberArea = new LineNumberArea(this);
 

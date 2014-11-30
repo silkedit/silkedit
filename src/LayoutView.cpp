@@ -10,7 +10,7 @@
 #include "KeymapService.h"
 
 LayoutView::LayoutView()
-    : m_tabbar(new STabWidget(this)), m_layout(new QHBoxLayout), m_activeEditView(nullptr) {
+    : m_tabbar(new STabWidget(this)), m_layout(new QHBoxLayout) {
   m_tabbar->setAcceptDrops(true);
 
   m_tabbar->setElideMode(Qt::ElideRight);
@@ -26,20 +26,6 @@ LayoutView::LayoutView()
   // LayoutView takes ownership of this layout by calling setLayout
   setLayout(m_layout);
   setContentsMargins(0, 0, 0, 0);
-
-  QObject::connect(m_tabbar.get(), &QTabWidget::currentChanged, [this](int index) {
-    // This lambda is called after m_tabbar is deleted when shutdown.
-    if (!m_tabbar || index < 0)
-      return;
-
-    qDebug("currentChanged. index: %i, tab count: %i", index, m_tabbar->count());
-    if (auto w = m_tabbar->widget(index)) {
-      m_activeEditView = qobject_cast<TextEditView*>(w);
-    } else {
-      qDebug("active edit view is null");
-      m_activeEditView = nullptr;
-    }
-  });
 
   m_tabbar->addNew();
 }

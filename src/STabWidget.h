@@ -20,10 +20,12 @@ class STabWidget : public QTabWidget {
   int addTab(QWidget* page, const QString& label);
   int open(const QString& path);
   void addNew();
+  TextEditView* activeEditView() { return m_activeEditView; }
 
  protected:
   void tabInserted(int index) override;
 
  private:
   std::unordered_set<set_unique_ptr<QWidget>> m_widgets;
+  TextEditView* m_activeEditView;
 };

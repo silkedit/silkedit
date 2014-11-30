@@ -2,11 +2,12 @@
 
 #include "EvalAsRubyCommand.h"
 #include "RubyEvaluator.h"
+#include "API.h"
 
-EvalAsRubyCommand::EvalAsRubyCommand(TextEditView* textEditView)
-    : ICommand("eval_as_ruby"), m_textEditView(textEditView) {
+EvalAsRubyCommand::EvalAsRubyCommand()
+    : ICommand("eval_as_ruby") {
 }
 
 void EvalAsRubyCommand::doRun(const CommandArgument&, int) {
-  RubyEvaluator::singleton().eval(m_textEditView->toPlainText());
+  RubyEvaluator::singleton().eval(API::singleton().activeEditView()->toPlainText());
 }

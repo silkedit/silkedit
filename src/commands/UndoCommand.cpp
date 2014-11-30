@@ -1,11 +1,12 @@
 #include <QDebug>
 
 #include "UndoCommand.h"
+#include "API.h"
 
-UndoCommand::UndoCommand(TextEditView* textEditView)
-    : ICommand("undo"), m_textEditView(textEditView) {
+UndoCommand::UndoCommand()
+    : ICommand("undo") {
 }
 
 void UndoCommand::doRun(const CommandArgument&, int repeat) {
-  m_textEditView->doUndo(repeat);
+  API::singleton().activeEditView()->doUndo(repeat);
 }

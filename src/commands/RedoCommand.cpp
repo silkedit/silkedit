@@ -1,11 +1,12 @@
 #include <QDebug>
 
 #include "RedoCommand.h"
+#include "API.h"
 
-RedoCommand::RedoCommand(TextEditView* textEditView)
-    : ICommand("redo"), m_textEditView(textEditView) {
+RedoCommand::RedoCommand()
+    : ICommand("redo") {
 }
 
 void RedoCommand::doRun(const CommandArgument&, int repeat) {
-  m_textEditView->doRedo(repeat);
+  API::singleton().activeEditView()->doRedo(repeat);
 }

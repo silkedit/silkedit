@@ -9,6 +9,20 @@
 #include "KeymapService.h"
 
 STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
+  QObject::connect(this, &QTabWidget::currentChanged, [this](int index) {
+    // This lambda is called after m_tabbar is deleted when shutdown.
+    if (index < 0)
+      return;
+
+    qDebug("currentChanged. index: %i, tab count: %i", index, count());
+    if (auto w = widget(index)) {
+      m_activeEditView = qobject_cast<TextEditView*>(w);
+    } else {
+      qDebug("active edit view is null");
+      m_activeEditView = nullptr;
+    }
+  });
+
   QObject::connect(this, &QTabWidget::tabCloseRequested, [this](int index) {
     if (QWidget* w = widget(index)) {
       QTabWidget::removeTab(index);
