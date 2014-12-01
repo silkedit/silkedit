@@ -6,7 +6,7 @@
 
 class CommandAction : public QAction {
  public:
-  CommandAction(const QString& text, const QString& cmdName, QObject* parent);
+  CommandAction(const QString& text, const QString& cmdName, QObject* parent = nullptr);
   ~CommandAction() = default;
   DEFAULT_COPY_AND_MOVE(CommandAction)
 

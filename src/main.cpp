@@ -1,5 +1,10 @@
 #include <QApplication>
+#include <QMenuBar>
+#include <QAction>
+#include <QSize>
 
+#include "STabWidget.h"
+#include "CommandAction.h"
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"
@@ -46,11 +51,24 @@ int main(int argv, char** args) {
   KeymapService::singleton().load();
 
   MainWindow* w = MainWindow::create();
+  w->resize(QSize(1280,720));
   w->show();
+  w->tabBar()->addNew();
+
+  // Set focus to active edit view
+  if (auto v = w->tabBar()->activeEditView()) {
+    v->setFocus();
+  }
 
   if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
     viEngine.enable();
   }
+
+  QMenuBar menuBar(nullptr);
+  auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenFileCommand::name);
+
+  auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
+  fileMenu->addAction(openFileAction);
 
   return app.exec();
 }

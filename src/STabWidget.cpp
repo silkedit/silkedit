@@ -97,8 +97,9 @@ void STabWidget::tabInserted(int index) {
 
 void STabWidget::DetachTab(int index, QPoint& /*dropPoint*/) {
   qDebug("DetachTab");
-  //  // Create Window
-  //  MainWindow* w = new MainWindow;
+    // Create Window
+  MainWindow* window = MainWindow::create();
+  window->show();
   //  MHDetachedWindow* detachedWidget = new MHDetachedWindow (parentWidget ());
   //  detachedWidget->setWindowModality (Qt::NonModal);
   //  // With layouter

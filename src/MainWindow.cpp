@@ -1,14 +1,10 @@
 #include <QFileDialog>
-#include <QMenuBar>
-#include <QAction>
 #include <QMainWindow>
 #include <QApplication>
 
 #include "API.h"
 #include "MainWindow.h"
-#include "CommandAction.h"
 #include "STabWidget.h"
-#include "commands/OpenFileCommand.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags), m_tabbar(new STabWidget(this)) {
@@ -17,18 +13,6 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   this->setWindowTitle(QObject::tr("SilkEdit"));
 
   setCentralWidget(m_tabbar);
-
-  auto openFileAction = new CommandAction(tr("&Open..."), OpenFileCommand::name, this);
-
-  auto fileMenu = menuBar()->addMenu(tr("&File"));
-  fileMenu->addAction(openFileAction);
-
-  m_tabbar->addNew();
-
-  // Set focus to active edit view
-  if (auto v = m_tabbar->activeEditView()) {
-    v->setFocus();
-  }
 }
 
 MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
