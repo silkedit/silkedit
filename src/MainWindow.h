@@ -18,11 +18,12 @@ class MainWindow : public QMainWindow {
   static MainWindow* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<MainWindow*> windows() { return s_windows; }
 
-  ~MainWindow() = default;
+  ~MainWindow();
   DEFAULT_MOVE(MainWindow)
 
   STabWidget* tabBar() { return m_tabbar; }
   void show();
+  void close();
 
  private:
   static QList<MainWindow*> s_windows;

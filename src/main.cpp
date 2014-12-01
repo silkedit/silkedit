@@ -1,7 +1,6 @@
 #include <QApplication>
 #include <QMenuBar>
 #include <QAction>
-#include <QSize>
 
 #include "STabWidget.h"
 #include "CommandAction.h"
@@ -51,7 +50,6 @@ int main(int argv, char** args) {
   KeymapService::singleton().load();
 
   MainWindow* w = MainWindow::create();
-  w->resize(QSize(1280,720));
   w->show();
   w->tabBar()->addNew();
 

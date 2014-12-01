@@ -4,7 +4,9 @@
 
 #include "macros.h"
 
+class QMouseEvent;
 class QMainWindow;
+class FakeWindow;
 
 class STabBar : public QTabBar {
   Q_OBJECT
@@ -18,20 +20,14 @@ class STabBar : public QTabBar {
  protected:
   void mousePressEvent(QMouseEvent* event) override;
   void mouseMoveEvent(QMouseEvent* event) override;
-  void dragEnterEvent(QDragEnterEvent* event) override;
-  void dragMoveEvent(QDragMoveEvent* event) override;
-  void dropEvent(QDropEvent* event) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
 
 signals:
   // Detach Tab
-  void OnDetachTab(int index, QPoint& dropPoint);
-  // Move Tab
-  void OnMoveTab(int fromIndex, int toIndex);
+  void OnDetachTab(int index, const QPoint& dropPoint);
 
  private:
   QPoint m_dragStartPos;
-  QPoint m_dragMovedPos;
-  QPoint m_dragDropedPos;
   bool m_dragInitiated;
-  int m_dragCurrentIndex;
+  FakeWindow* m_fakeWindow;
 };

@@ -24,15 +24,18 @@ class STabWidget : public QTabWidget {
   void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
 
+signals:
+  void allTabRemoved();
+
  public slots:
   // Detach Tab
-  void DetachTab(int index, QPoint&);
+  void DetachTab(int index, const QPoint&);
 
  protected:
   void tabInserted(int index) override;
+  void tabRemoved(int index) override;
 
  private:
-  std::unordered_set<set_unique_ptr<QWidget>> m_widgets;
   TextEditView* m_activeEditView;
   STabBar* m_tabBar;
 };

@@ -10,9 +10,9 @@
 #include "STabBar.h"
 #include "MainWindow.h"
 
-STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
-  m_tabBar = new STabBar(this);
-  connect(m_tabBar, SIGNAL(OnDetachTab(int, QPoint&)), this, SLOT(DetachTab(int, QPoint&)));
+STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent), m_tabBar(new STabBar(this)) {
+  connect(
+      m_tabBar, SIGNAL(OnDetachTab(int, const QPoint&)), this, SLOT(DetachTab(int, const QPoint&)));
 
   setTabBar(m_tabBar);
   setMovable(true);
@@ -37,21 +37,20 @@ STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
     if (QWidget* w = widget(index)) {
       QTabWidget::removeTab(index);
       qDebug("tab widget (index %i) is deleted", index);
-      int numDeleted = m_widgets.erase(make_find_ptr(w));
-      qDebug("m_widgets size: %lu", m_widgets.size());
-      Q_ASSERT(numDeleted == 1);
+      w->deleteLater();
     }
   });
 }
 
 STabWidget::~STabWidget() {
   qDebug("~STabWidget");
-  disconnect(m_tabBar, SIGNAL(OnDetachTab(int, QPoint&)), this, SLOT(DetachTab(int, QPoint&)));
+  disconnect(
+      m_tabBar, SIGNAL(OnDetachTab(int, const QPoint&)), this, SLOT(DetachTab(int, const QPoint&)));
 }
 
 int STabWidget::addTab(QWidget* page, const QString& label) {
+  page->setParent(this);
   int index = QTabWidget::addTab(page, label);
-  m_widgets.insert(set_unique_ptr<QWidget>(page));
   return index;
 }
 
@@ -95,33 +94,20 @@ void STabWidget::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void STabWidget::DetachTab(int index, QPoint& /*dropPoint*/) {
-  qDebug("DetachTab");
-    // Create Window
+void STabWidget::tabRemoved(int) {
+  if (count() == 0) {
+    emit allTabRemoved();
+  }
+}
+
+void STabWidget::DetachTab(int index, const QPoint& dropPoint) {
+  qDebug() << "DetachTab."
+           << "dropPoint: " << dropPoint;
   MainWindow* window = MainWindow::create();
   window->show();
-  //  MHDetachedWindow* detachedWidget = new MHDetachedWindow (parentWidget ());
-  //  detachedWidget->setWindowModality (Qt::NonModal);
-  //  // With layouter
-  //  QVBoxLayout *mainLayout = new QVBoxLayout(detachedWidget);
-  //  mainLayout->setContentsMargins(0, 0, 0, 0);
-
-  //  // Find Widget and connect
-  //  MHWorkflowWidget* tearOffWidget = dynamic_cast <MHWorkflowWidget*> (widget (index));
-  //  detachedWidget->setWindowTitle (tabText (index));
-  //  // Remove from tab bar
-  //  tearOffWidget->setParent (detachedWidget);
-
-  //  // Make first active
-  //  if (0 < count ())
-  //  {
-  //    setCurrentIndex (0);
-  //  }
-
-  //  // Create and show
-  //  mainLayout->addWidget(tearOffWidget);
-  //  // Needs to be done explicit
-  //  tearOffWidget->show ();
-  //  detachedWidget->resize (640, 480);
-  //  detachedWidget->show ();
+  window->move(dropPoint);
+  QWidget* w = widget(index);
+  if (w) {
+    window->tabBar()->addTab(w, tabText(index));
+  }
 }
