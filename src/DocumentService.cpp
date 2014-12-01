@@ -5,16 +5,16 @@
 #include <stextedit.h>
 
 #include "DocumentService.h"
-#include "LayoutView.h"
+#include "MainWindow.h"
+#include "API.h"
+#include "STabWidget.h"
 
 bool DocumentService::open(const QString& filename) {
-  if (m_tabWidget) {
-    return m_tabWidget->open(filename) >= 0;
+  MainWindow* window = API::activeWindow();
+  if (window) {
+    return window->tabBar()->open(filename) >= 0;
   } else {
     qWarning("m_tabWidget is null");
     return false;
   }
-}
-
-DocumentService::DocumentService() : m_tabWidget(nullptr) {
 }

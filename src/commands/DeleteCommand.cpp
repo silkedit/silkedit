@@ -6,20 +6,19 @@
 #include "vi.h"
 #include "stlSpecialization.h"
 
-DeleteCommand::DeleteCommand()
-    : ICommand("delete") {
+DeleteCommand::DeleteCommand() : ICommand("delete") {
 }
 
 void DeleteCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto direction = args.find<QString>("direction")) {
     if (*direction == "backward") {
-      API::singleton().activeEditView()->doDelete(-repeat);
+      API::activeEditView()->doDelete(-repeat);
     } else if (*direction == "forward") {
-      API::singleton().activeEditView()->doDelete(repeat);
+      API::activeEditView()->doDelete(repeat);
     } else {
       qWarning() << "invalid direction";
     }
   } else {
-    API::singleton().activeEditView()->doDelete(repeat);
+    API::activeEditView()->doDelete(repeat);
   }
 }

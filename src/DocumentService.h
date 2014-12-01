@@ -16,11 +16,8 @@ class DocumentService : public Singleton<DocumentService> {
   ~DocumentService() = default;
 
   bool open(const QString& filename);
-  void setTabWidget(STabWidget* tabWidget) { m_tabWidget = tabWidget; }
 
  private:
   friend class Singleton<DocumentService>;
-  DocumentService();
-
-  STabWidget* m_tabWidget;
+  DocumentService() = default;
 };

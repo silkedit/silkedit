@@ -7,8 +7,18 @@
 #include "STabWidget.h"
 #include "TextEditView.h"
 #include "KeymapService.h"
+#include "STabBar.h"
+#include "MainWindow.h"
 
 STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
+  m_tabBar = new STabBar(this);
+  connect(m_tabBar, SIGNAL(OnDetachTab(int, QPoint&)), this, SLOT(DetachTab(int, QPoint&)));
+
+  setTabBar(m_tabBar);
+  setMovable(true);
+  setDocumentMode(true);
+  setTabsClosable(true);
+
   QObject::connect(this, &QTabWidget::currentChanged, [this](int index) {
     // This lambda is called after m_tabbar is deleted when shutdown.
     if (index < 0)
@@ -36,6 +46,7 @@ STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent) {
 
 STabWidget::~STabWidget() {
   qDebug("~STabWidget");
+  disconnect(m_tabBar, SIGNAL(OnDetachTab(int, QPoint&)), this, SLOT(DetachTab(int, QPoint&)));
 }
 
 int STabWidget::addTab(QWidget* page, const QString& label) {
@@ -82,4 +93,34 @@ void STabWidget::addNew() {
 void STabWidget::tabInserted(int index) {
   setCurrentIndex(index);
   QTabWidget::tabInserted(index);
+}
+
+void STabWidget::DetachTab(int index, QPoint& /*dropPoint*/) {
+  qDebug("DetachTab");
+  //  // Create Window
+  //  MainWindow* w = new MainWindow;
+  //  MHDetachedWindow* detachedWidget = new MHDetachedWindow (parentWidget ());
+  //  detachedWidget->setWindowModality (Qt::NonModal);
+  //  // With layouter
+  //  QVBoxLayout *mainLayout = new QVBoxLayout(detachedWidget);
+  //  mainLayout->setContentsMargins(0, 0, 0, 0);
+
+  //  // Find Widget and connect
+  //  MHWorkflowWidget* tearOffWidget = dynamic_cast <MHWorkflowWidget*> (widget (index));
+  //  detachedWidget->setWindowTitle (tabText (index));
+  //  // Remove from tab bar
+  //  tearOffWidget->setParent (detachedWidget);
+
+  //  // Make first active
+  //  if (0 < count ())
+  //  {
+  //    setCurrentIndex (0);
+  //  }
+
+  //  // Create and show
+  //  mainLayout->addWidget(tearOffWidget);
+  //  // Needs to be done explicit
+  //  tearOffWidget->show ();
+  //  detachedWidget->resize (640, 480);
+  //  detachedWidget->show ();
 }

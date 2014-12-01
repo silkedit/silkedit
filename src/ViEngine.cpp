@@ -5,27 +5,19 @@
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
-#include "LayoutView.h"
 #include "CommandService.h"
 #include "ContextService.h"
 #include "KeymapService.h"
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
-ViEngine::ViEngine(MainWindow* mainWindow, QObject* parent)
-    : QObject(parent),
-      m_mode(Mode::CMD),
-      m_mainWindow(mainWindow),
-      m_repeatCount(0),
-      m_cmdLineEdit(new QLineEdit()),
-      m_isEnabled(false) {
-}
-
-void ViEngine::processExCommand(const QString&) {
-  setMode(Mode::CMD);
+ViEngine::ViEngine(QObject* parent)
+    : QObject(parent), m_mode(Mode::CMD), m_repeatCount(0), m_isEnabled(false) {
 }
 
 void ViEngine::enable() {
+  qDebug("enabling ViEngine");
+
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandService::singleton().add(std::move(changeModeCmd));
 
@@ -34,22 +26,9 @@ void ViEngine::enable() {
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = API::singleton().activeEditView()) {
+  if (auto view = API::activeEditView()) {
     view->setThinCursor(false);
   }
-
-  m_mainWindow->statusBar()->addWidget(m_cmdLineEdit.get(), 1);
-  m_cmdLineEdit->installEventFilter(this);
-
-  connect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
-  connect(m_cmdLineEdit.get(),
-          SIGNAL(cursorPositionChanged(int, int)),
-          this,
-          SLOT(cmdLineCursorPositionChanged(int, int)));
-  connect(m_cmdLineEdit.get(),
-          SIGNAL(textChanged(QString)),
-          this,
-          SLOT(cmdLineTextChanged(const QString&)));
 
   m_mode = Mode::CMD;
   onModeChanged(m_mode);
@@ -67,23 +46,11 @@ void ViEngine::disable() {
   ContextService::singleton().remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = API::singleton().activeEditView()) {
+  if (auto view = API::activeEditView()) {
     view->setThinCursor(true);
   }
 
-  m_mainWindow->statusBar()->removeWidget(m_cmdLineEdit.get());
-  m_mainWindow->statusBar()->clearMessage();
-  m_cmdLineEdit->removeEventFilter(this);
-
-  disconnect(m_cmdLineEdit.get(), SIGNAL(returnPressed()), this, SLOT(cmdLineReturnPressed()));
-  disconnect(m_cmdLineEdit.get(),
-             SIGNAL(cursorPositionChanged(int, int)),
-             this,
-             SLOT(cmdLineCursorPositionChanged(int, int)));
-  disconnect(m_cmdLineEdit.get(),
-             SIGNAL(textChanged(QString)),
-             this,
-             SLOT(cmdLineTextChanged(const QString&)));
+  foreach (MainWindow* window, API::windows()) { window->statusBar()->clearMessage(); }
 
   KeymapService::singleton().load();
 
@@ -110,8 +77,8 @@ bool ViEngine::keyEventFilter(QKeyEvent* event) {
 
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
-    if (m_mode == Mode::INSERT && API::singleton().activeEditView()) {
-      API::singleton().activeEditView()->moveCursor(QTextCursor::Left);
+    if (m_mode == Mode::INSERT && API::activeEditView()) {
+      API::activeEditView()->moveCursor(QTextCursor::Left);
     }
     m_mode = mode;
     onModeChanged(mode);
@@ -130,46 +97,25 @@ void ViEngine::onModeChanged(Mode mode) {
       text = "INSERT";
       break;
     case Mode::CMDLINE:
-      m_cmdLineEdit->setText(":");
-      m_cmdLineEdit->show();
-      m_cmdLineEdit->setFocus(Qt::OtherFocusReason);
       return;
   }
 
-  m_cmdLineEdit->hide();
-  m_mainWindow->statusBar()->showMessage(text);
+  if (MainWindow* window = API::activeWindow()) {
+    window->statusBar()->showMessage(text);
+  }
 
   updateCursor();
 }
 
 void ViEngine::updateCursor() {
   if (mode() == Mode::CMD) {
-    if (auto view = API::singleton().activeEditView()) {
+    if (auto view = API::activeEditView()) {
       view->setThinCursor(false);
     }
   } else {
-    if (auto view = API::singleton().activeEditView()) {
+    if (auto view = API::activeEditView()) {
       view->setThinCursor(true);
     }
-  }
-}
-
-void ViEngine::cmdLineReturnPressed() {
-  QString text = m_cmdLineEdit->text();
-  if (!text.isEmpty() && text[0] == ':') {
-    processExCommand(text.mid(1));
-  }
-}
-
-void ViEngine::cmdLineCursorPositionChanged(int, int newPos) {
-  if (newPos == 0) {
-    m_cmdLineEdit->setCursorPosition(1);
-  }
-}
-
-void ViEngine::cmdLineTextChanged(const QString& text) {
-  if (text.isEmpty() || text[0] != ':') {
-    setMode(Mode::CMD);
   }
 }
 

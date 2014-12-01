@@ -6,6 +6,8 @@
 #include "ConfigService.h"
 
 void ConfigService::load(const QString& filename) {
+  qDebug("loading configuration");
+
   m_configs.clear();
 
   std::string name = filename.toUtf8().constData();

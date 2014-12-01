@@ -7,7 +7,6 @@
 
 TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
     : STextEdit(parent), m_path(path) {
-
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -98,12 +97,12 @@ void TextEditView::moveCursor(int mv, int n) {
 }
 
 void TextEditView::updateLineNumberAreaWidth(int /* newBlockCount */) {
-//  qDebug("updateLineNumberAreaWidth");
+  //  qDebug("updateLineNumberAreaWidth");
   setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
 
 void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
-//  qDebug("updateLineNumberArea");
+  //  qDebug("updateLineNumberArea");
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else

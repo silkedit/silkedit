@@ -1,23 +1,20 @@
 #pragma once
 
+#include <QList>
+
 #include "macros.h"
-#include "Singleton.h"
 
 class TextEditView;
-class STabWidget;
+class MainWindow;
 
-class API : public Singleton<API> {
+class API {
   DISABLE_COPY_AND_MOVE(API)
 
  public:
+  API() = default;
   ~API() = default;
 
-  void init(STabWidget* tabWidget);
-  TextEditView* activeEditView();
-
- private:
-  friend class Singleton<API>;
-  API() = default;
-
-  STabWidget* m_tabWidget;
+  static TextEditView* activeEditView();
+  static MainWindow* activeWindow();
+  static QList<MainWindow*> windows();
 };

@@ -1,17 +1,28 @@
+#include <QApplication>
+
 #include "API.h"
 #include "STabWidget.h"
+#include "MainWindow.h"
 
-void API::init(STabWidget *tabWidget)
-{
-  m_tabWidget = tabWidget;
-}
-
-TextEditView *API::activeEditView()
-{
-  if (m_tabWidget) {
-    return m_tabWidget->activeEditView();
+TextEditView* API::activeEditView() {
+  MainWindow* window = activeWindow();
+  if (window) {
+    return window->tabBar()->activeEditView();
   } else {
-    qWarning("m_tabWidget is null");
     return nullptr;
   }
+}
+
+MainWindow* API::activeWindow() {
+  MainWindow* window = qobject_cast<MainWindow*>(QApplication::activeWindow());
+  if (window) {
+    return window;
+  } else {
+    qWarning("active window is null");
+    return nullptr;
+  }
+}
+
+QList<MainWindow*> API::windows() {
+  return MainWindow::windows();
 }
