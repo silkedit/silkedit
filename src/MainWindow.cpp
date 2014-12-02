@@ -8,16 +8,20 @@
 #include "STabWidget.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags), m_tabbar(new STabWidget(this)) {
+    : QMainWindow(parent, flags), m_tabWidget(new STabWidget(this)) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
 
-  setCentralWidget(m_tabbar);
+  setCentralWidget(m_tabWidget);
 
-  QObject::connect(m_tabbar, &STabWidget::allTabRemoved, [this]() {
+  QObject::connect(m_tabWidget, &STabWidget::allTabRemoved, [this]() {
     qDebug() << "allTabRemoved";
-    close();
+    if (m_tabWidget->tabDragging()) {
+      hide();
+    } else {
+      close();
+    }
   });
 }
 

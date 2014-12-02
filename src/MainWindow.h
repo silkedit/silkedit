@@ -21,7 +21,7 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   DEFAULT_MOVE(MainWindow)
 
-  STabWidget* tabBar() { return m_tabbar; }
+  STabWidget* tabWidget() { return m_tabWidget; }
   void show();
   void close();
 
@@ -29,5 +29,5 @@ class MainWindow : public QMainWindow {
   static QList<MainWindow*> s_windows;
 
   MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
-  STabWidget* m_tabbar;
+  STabWidget* m_tabWidget;
 };

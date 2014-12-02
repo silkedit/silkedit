@@ -10,9 +10,22 @@
 #include "STabBar.h"
 #include "MainWindow.h"
 
-STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent), m_tabBar(new STabBar(this)) {
-  connect(
-      m_tabBar, SIGNAL(OnDetachTab(int, const QPoint&)), this, SLOT(DetachTab(int, const QPoint&)));
+STabWidget::STabWidget(QWidget* parent)
+    : QTabWidget(parent), m_tabBar(new STabBar(this)), m_draggingWidget(nullptr) {
+  connect(m_tabBar,
+          SIGNAL(onDetachTabStarted(int, const QPoint&)),
+          this,
+          SLOT(detachTabStarted(int, const QPoint&)));
+
+  connect(m_tabBar,
+          SIGNAL(onDetachTabEntered(const QPoint&)),
+          this,
+          SLOT(detachTabEntered(const QPoint&)));
+
+  connect(m_tabBar,
+          SIGNAL(onDetachTabFinished(const QPoint&)),
+          this,
+          SLOT(detachTabFinished(const QPoint&)));
 
   setTabBar(m_tabBar);
   setMovable(true);
@@ -44,14 +57,30 @@ STabWidget::STabWidget(QWidget* parent) : QTabWidget(parent), m_tabBar(new STabB
 
 STabWidget::~STabWidget() {
   qDebug("~STabWidget");
-  disconnect(
-      m_tabBar, SIGNAL(OnDetachTab(int, const QPoint&)), this, SLOT(DetachTab(int, const QPoint&)));
+  disconnect(m_tabBar,
+             SIGNAL(onDetachTabStarted(int, const QPoint&)),
+             this,
+             SLOT(detachTabStarted(int, const QPoint&)));
+
+  disconnect(m_tabBar,
+             SIGNAL(onDetachTabEntered(const QPoint&)),
+             this,
+             SLOT(detachTabEntered(const QPoint&)));
+
+  disconnect(m_tabBar,
+             SIGNAL(onDetachTabFinished(const QPoint&)),
+             this,
+             SLOT(detachTabFinished(const QPoint&)));
 }
 
 int STabWidget::addTab(QWidget* page, const QString& label) {
   page->setParent(this);
-  int index = QTabWidget::addTab(page, label);
-  return index;
+  return QTabWidget::addTab(page, label);
+}
+
+int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
+  w->setParent(this);
+  return QTabWidget::insertTab(index, w, label);
 }
 
 // todo: Move this method to tab group later
@@ -89,6 +118,30 @@ void STabWidget::addNew() {
   addTab(view, "untitled");
 }
 
+bool STabWidget::tabDragging() {
+  return m_draggingWidget != nullptr;
+}
+
+void STabWidget::detachTabStarted(int index, const QPoint&) {
+  qDebug("DetachTabStarted");
+  m_draggingWidget = widget(index);
+  m_tabText = tabText(index);
+  removeTab(index);
+  Q_ASSERT(m_draggingWidget);
+}
+
+void STabWidget::detachTabEntered(const QPoint& enterPoint) {
+  qDebug("DetachTabEntered");
+  int index = tabBar()->tabAt(enterPoint);
+  int newIndex = insertTab(index, m_draggingWidget, m_tabText);
+  m_draggingWidget = nullptr;
+  setCurrentIndex(newIndex);
+  QPoint tabCenterPos = tabBar()->tabRect(newIndex).center();
+
+  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint;
+  m_tabBar->startMovingTab(tabCenterPos, enterPoint);
+}
+
 void STabWidget::tabInserted(int index) {
   setCurrentIndex(index);
   QTabWidget::tabInserted(index);
@@ -100,14 +153,17 @@ void STabWidget::tabRemoved(int) {
   }
 }
 
-void STabWidget::DetachTab(int index, const QPoint& dropPoint) {
+void STabWidget::detachTabFinished(const QPoint& dropPoint) {
   qDebug() << "DetachTab."
-           << "dropPoint: " << dropPoint;
+           << "dropPoint:" << dropPoint;
   MainWindow* window = MainWindow::create();
   window->show();
   window->move(dropPoint);
-  QWidget* w = widget(index);
-  if (w) {
-    window->tabBar()->addTab(w, tabText(index));
+  if (m_draggingWidget) {
+    window->tabWidget()->addTab(m_draggingWidget, m_tabText);
+    m_draggingWidget = nullptr;
+    tabRemoved(-1);
+  } else {
+    qWarning("draggign widget is null");
   }
 }

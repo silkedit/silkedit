@@ -7,7 +7,7 @@
 TextEditView* API::activeEditView() {
   MainWindow* window = activeWindow();
   if (window) {
-    return window->tabBar()->activeEditView();
+    return window->tabWidget()->activeEditView();
   } else {
     return nullptr;
   }

@@ -20,16 +20,20 @@ class STabWidget : public QTabWidget {
   DEFAULT_MOVE(STabWidget)
 
   int addTab(QWidget* page, const QString& label);
+  int insertTab(int index, QWidget* w, const QString& label);
   int open(const QString& path);
   void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
+  bool tabDragging();
 
 signals:
   void allTabRemoved();
 
  public slots:
   // Detach Tab
-  void DetachTab(int index, const QPoint&);
+  void detachTabStarted(int index, const QPoint&);
+  void detachTabEntered(const QPoint& enterPoint);
+  void detachTabFinished(const QPoint&);
 
  protected:
   void tabInserted(int index) override;
@@ -38,4 +42,6 @@ signals:
  private:
   TextEditView* m_activeEditView;
   STabBar* m_tabBar;
+  QWidget* m_draggingWidget;
+  QString m_tabText;
 };

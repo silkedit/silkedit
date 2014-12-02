@@ -17,6 +17,8 @@ class STabBar : public QTabBar {
   ~STabBar() = default;
   DEFAULT_MOVE(STabBar)
 
+  void startMovingTab(const QPoint& tabPos, const QPoint& currentPos);
+
  protected:
   void mousePressEvent(QMouseEvent* event) override;
   void mouseMoveEvent(QMouseEvent* event) override;
@@ -24,7 +26,9 @@ class STabBar : public QTabBar {
 
 signals:
   // Detach Tab
-  void OnDetachTab(int index, const QPoint& dropPoint);
+  void onDetachTabStarted(int index, const QPoint& startPoint);
+  void onDetachTabEntered(const QPoint& enterPoint);
+  void onDetachTabFinished(const QPoint& dropPoint);
 
  private:
   QPoint m_dragStartPos;

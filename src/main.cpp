@@ -51,10 +51,10 @@ int main(int argv, char** args) {
 
   MainWindow* w = MainWindow::create();
   w->show();
-  w->tabBar()->addNew();
+  w->tabWidget()->addNew();
 
   // Set focus to active edit view
-  if (auto v = w->tabBar()->activeEditView()) {
+  if (auto v = w->tabWidget()->activeEditView()) {
     v->setFocus();
   }
 
