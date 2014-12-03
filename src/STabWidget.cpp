@@ -140,7 +140,8 @@ void STabWidget::detachTabEntered(const QPoint& enterPoint) {
   tabRemoved(-1);
   QPoint tabCenterPos = tabBar()->tabRect(newIndex).center();
 
-  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint << "relativeEnterPos:" << relativeEnterPos;
+  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint
+           << "relativeEnterPos:" << relativeEnterPos;
   m_tabBar->startMovingTab(tabCenterPos);
 }
 
@@ -155,8 +156,7 @@ void STabWidget::tabRemoved(int) {
   }
 }
 
-void STabWidget::mouseReleaseEvent(QMouseEvent *event)
-{
+void STabWidget::mouseReleaseEvent(QMouseEvent* event) {
   qDebug("mouseReleaseEvent in STabWidget");
   QTabWidget::mouseReleaseEvent(event);
 }

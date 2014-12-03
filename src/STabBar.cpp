@@ -8,7 +8,8 @@
 #include "API.h"
 #include "MainWindow.h"
 
-STabBar::STabBar(QWidget* parent) : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false) {
+STabBar::STabBar(QWidget* parent)
+    : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false) {
   setAcceptDrops(true);
 
   setElideMode(Qt::ElideRight);
@@ -53,8 +54,8 @@ void STabBar::mousePressEvent(QMouseEvent* event) {
 //////////////////////////////////////////////////////////////////////////////
 void STabBar::mouseMoveEvent(QMouseEvent* event) {
   // If we call winId() here, drag no longer works.
-//  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
-//    qDebug() << "mouseMoveEvent" << event;
+  //  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
+  //    qDebug() << "mouseMoveEvent" << event;
 
   // first mouse enter event after dragging
   if (m_dragInitiated && geometry().contains(event->pos())) {
@@ -67,7 +68,8 @@ void STabBar::mouseMoveEvent(QMouseEvent* event) {
   }
 
   // dragging tab is over an another tab bar.
-  QWidget* widgetUnderMouse = QApplication::widgetAt(event->screenPos().x(), event->screenPos().y());
+  QWidget* widgetUnderMouse =
+      QApplication::widgetAt(event->screenPos().x(), event->screenPos().y());
   STabBar* anotherTabBar = qobject_cast<STabBar*>(widgetUnderMouse);
 
   if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
@@ -84,16 +86,15 @@ void STabBar::mouseMoveEvent(QMouseEvent* event) {
     return QTabBar::mouseMoveEvent(event);
   }
 
-//    qDebug() << "manhattanLength? " << ((event->pos() - m_dragStartPos).manhattanLength() <
-//    QApplication::startDragDistance()) << "outside of tabbar? " <<
-//    !geometry().contains(event->pos());
-  if (!m_dragStartPos.isNull() &&
-      ((event->buttons() & Qt::LeftButton)) &&
+  //    qDebug() << "manhattanLength? " << ((event->pos() - m_dragStartPos).manhattanLength() <
+  //    QApplication::startDragDistance()) << "outside of tabbar? " <<
+  //    !geometry().contains(event->pos());
+  if (!m_dragStartPos.isNull() && ((event->buttons() & Qt::LeftButton)) &&
       ((event->pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()) &&
       (!geometry().contains(event->pos()))) {
     m_dragInitiated = true;
     // Stop the move to be able to convert to a drag
-    QMouseEvent finishMoveEvent (
+    QMouseEvent finishMoveEvent(
         QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
     QTabBar::mouseMoveEvent(&finishMoveEvent);
 
@@ -127,18 +128,16 @@ void STabBar::mouseReleaseEvent(QMouseEvent* event) {
   QTabBar::mouseReleaseEvent(event);
 }
 
-void STabBar::finishDrag()
-{
-    m_dragInitiated = false;
-    m_dragStartPos = QPoint();
-    if (m_fakeWindow) {
-      m_fakeWindow->close();
-      m_fakeWindow = nullptr;
-    }
+void STabBar::finishDrag() {
+  m_dragInitiated = false;
+  m_dragStartPos = QPoint();
+  if (m_fakeWindow) {
+    m_fakeWindow->close();
+    m_fakeWindow = nullptr;
+  }
 }
 
-void STabBar::grabMouse()
-{
+void STabBar::grabMouse() {
   QTabBar::grabMouse();
   m_isGrabbingMouse = true;
 }
