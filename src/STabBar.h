@@ -17,7 +17,7 @@ class STabBar : public QTabBar {
   ~STabBar() = default;
   DEFAULT_MOVE(STabBar)
 
-  void startMovingTab(const QPoint& tabPos, const QPoint& currentPos);
+  void startMovingTab(const QPoint& tabPos);
 
  protected:
   void mousePressEvent(QMouseEvent* event) override;
@@ -34,4 +34,9 @@ signals:
   QPoint m_dragStartPos;
   bool m_dragInitiated;
   FakeWindow* m_fakeWindow;
+  STabBar* m_anotherTabBar;
+  bool m_isGrabbingMouse;
+
+  void finishDrag();
+  void grabMouse();
 };

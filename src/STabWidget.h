@@ -24,7 +24,7 @@ class STabWidget : public QTabWidget {
   int open(const QString& path);
   void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
-  bool tabDragging();
+  bool tabDragging() { return m_tabDragging; }
 
 signals:
   void allTabRemoved();
@@ -38,10 +38,10 @@ signals:
  protected:
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
+  void mouseReleaseEvent(QMouseEvent* event) override;
 
  private:
   TextEditView* m_activeEditView;
   STabBar* m_tabBar;
-  QWidget* m_draggingWidget;
-  QString m_tabText;
+  bool m_tabDragging;
 };

@@ -7,6 +7,7 @@ FakeWindow::FakeWindow(STabBar* tabbar, const QPoint& pos) {
   qDebug() << "constructor of FakeWindow. pos:" << pos;
   setWindowFlags(Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
   setAttribute(Qt::WA_DeleteOnClose);
+  setAttribute(Qt::WA_ShowWithoutActivating);
 
   QRect rect = tabbar->tabRect(tabbar->currentIndex());
   QPixmap pixmap = tabbar->grab(rect);

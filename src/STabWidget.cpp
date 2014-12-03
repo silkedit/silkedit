@@ -3,15 +3,17 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QTextDocument>
+#include <QThread>
 
 #include "STabWidget.h"
 #include "TextEditView.h"
 #include "KeymapService.h"
 #include "STabBar.h"
 #include "MainWindow.h"
+#include "DraggingTabInfo.h"
 
 STabWidget::STabWidget(QWidget* parent)
-    : QTabWidget(parent), m_tabBar(new STabBar(this)), m_draggingWidget(nullptr) {
+    : QTabWidget(parent), m_tabBar(new STabBar(this)), m_tabDragging(false) {
   connect(m_tabBar,
           SIGNAL(onDetachTabStarted(int, const QPoint&)),
           this,
@@ -118,28 +120,28 @@ void STabWidget::addNew() {
   addTab(view, "untitled");
 }
 
-bool STabWidget::tabDragging() {
-  return m_draggingWidget != nullptr;
-}
-
 void STabWidget::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
-  m_draggingWidget = widget(index);
-  m_tabText = tabText(index);
+  m_tabDragging = true;
+  DraggingTabInfo::setWidget(widget(index));
+  DraggingTabInfo::setTabText(tabText(index));
   removeTab(index);
-  Q_ASSERT(m_draggingWidget);
+  Q_ASSERT(DraggingTabInfo::widget());
 }
 
 void STabWidget::detachTabEntered(const QPoint& enterPoint) {
   qDebug("DetachTabEntered");
-  int index = tabBar()->tabAt(enterPoint);
-  int newIndex = insertTab(index, m_draggingWidget, m_tabText);
-  m_draggingWidget = nullptr;
-  setCurrentIndex(newIndex);
+  qDebug() << "tabBar()->mapToGlobal(QPoint(0, 0)):" << tabBar()->mapToGlobal(QPoint(0, 0));
+  QPoint relativeEnterPos = enterPoint - tabBar()->mapToGlobal(QPoint(0, 0));
+  int index = tabBar()->tabAt(relativeEnterPos);
+  int newIndex = insertTab(index, DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+  DraggingTabInfo::setWidget(nullptr);
+  m_tabDragging = false;
+  tabRemoved(-1);
   QPoint tabCenterPos = tabBar()->tabRect(newIndex).center();
 
-  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint;
-  m_tabBar->startMovingTab(tabCenterPos, enterPoint);
+  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint << "relativeEnterPos:" << relativeEnterPos;
+  m_tabBar->startMovingTab(tabCenterPos);
 }
 
 void STabWidget::tabInserted(int index) {
@@ -153,15 +155,22 @@ void STabWidget::tabRemoved(int) {
   }
 }
 
+void STabWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+  qDebug("mouseReleaseEvent in STabWidget");
+  QTabWidget::mouseReleaseEvent(event);
+}
+
 void STabWidget::detachTabFinished(const QPoint& dropPoint) {
   qDebug() << "DetachTab."
            << "dropPoint:" << dropPoint;
   MainWindow* window = MainWindow::create();
-  window->show();
   window->move(dropPoint);
-  if (m_draggingWidget) {
-    window->tabWidget()->addTab(m_draggingWidget, m_tabText);
-    m_draggingWidget = nullptr;
+  window->show();
+  if (DraggingTabInfo::widget()) {
+    window->tabWidget()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+    DraggingTabInfo::setWidget(nullptr);
+    m_tabDragging = false;
     tabRemoved(-1);
   } else {
     qWarning("draggign widget is null");
