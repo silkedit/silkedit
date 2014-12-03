@@ -34,7 +34,6 @@ signals:
   QPoint m_dragStartPos;
   bool m_dragInitiated;
   FakeWindow* m_fakeWindow;
-  STabBar* m_anotherTabBar;
   bool m_isGrabbingMouse;
 
   void finishDrag();
