@@ -36,6 +36,7 @@ class MainWindow : public QMainWindow {
   QBoxLayout* m_layout;
 
   STabWidget* createTabWidget();
+  void removeTabWidget(STabWidget* widget);
   void addTabWidgetHorizontally(QWidget* widget, const QString& label);
   //  void addTabWidgetVertically();
 };

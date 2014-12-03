@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   setWindowTitle(QObject::tr("SilkEdit"));
 
   auto tabWidget = createTabWidget();
+  // Note: The ownership of tabWidget is transferred to the layout, and it's the layout's responsibility to delete it.
   m_layout->addWidget(tabWidget);
   m_layout->setContentsMargins(0, 0, 0, 0);
   m_layout->setSpacing(0);
@@ -30,10 +31,10 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
 }
 
 STabWidget* MainWindow::createTabWidget() {
-  auto tabWidget = new STabWidget(this);
+  auto tabWidget = new STabWidget();
   QObject::connect(tabWidget, &STabWidget::allTabRemoved, [this, tabWidget]() {
     qDebug() << "allTabRemoved";
-    m_tabWidgets.removeOne(tabWidget);
+    removeTabWidget(tabWidget);
 
     if (m_tabWidgets.size() == 0) {
       if (tabWidget->tabDragging()) {
@@ -47,6 +48,14 @@ STabWidget* MainWindow::createTabWidget() {
   m_tabWidgets.append(tabWidget);
 
   return tabWidget;
+}
+
+void MainWindow::removeTabWidget(STabWidget *widget)
+{
+    m_tabWidgets.removeOne(widget);
+    // Note: The ownership of widget remains the same as when it was added.
+    m_layout->removeWidget(widget);
+    widget->deleteLater();
 }
 
 MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
