@@ -224,6 +224,12 @@ void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   }
 }
 
+TextEditView* TextEditView::clone() {
+  TextEditView* editView = new TextEditView(path());
+  editView->setDocument(m_document);
+  return editView;
+}
+
 void TextEditView::doDelete(int n) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {

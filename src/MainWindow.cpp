@@ -7,25 +7,29 @@
 #include "API.h"
 #include "MainWindow.h"
 #include "STabWidget.h"
+#include "TextEditView.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
-    : QMainWindow(parent, flags), m_activeTabWidget(nullptr), m_layout(new QBoxLayout(QBoxLayout::LeftToRight)) {
+    : QMainWindow(parent, flags),
+      m_activeTabWidget(nullptr),
+      m_layout(new QBoxLayout(QBoxLayout::LeftToRight)) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
 
   auto tabWidget = createTabWidget();
   m_layout->addWidget(tabWidget);
-  m_layout->setContentsMargins(0,0,0,0);
-  QWidget *window = new QWidget(this);
+  m_layout->setContentsMargins(0, 0, 0, 0);
+  m_layout->setSpacing(0);
+  m_layout->setMargin(0);
+  QWidget* window = new QWidget(this);
   // window becomes parent of this layout by setLayout
   window->setLayout(m_layout);
   setCentralWidget(window);
   m_activeTabWidget = tabWidget;
 }
 
-STabWidget* MainWindow::createTabWidget()
-{
+STabWidget* MainWindow::createTabWidget() {
   auto tabWidget = new STabWidget(this);
   QObject::connect(tabWidget, &STabWidget::allTabRemoved, [this, tabWidget]() {
     qDebug() << "allTabRemoved";
@@ -67,15 +71,23 @@ void MainWindow::close() {
   }
 }
 
-void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label)
-{
+void MainWindow::splitTabHorizontally() {
+  if (m_activeTabWidget) {
+    TextEditView* activeEditView = m_activeTabWidget->activeEditView();
+    QString label = m_activeTabWidget->tabText(m_activeTabWidget->currentIndex());
+    if (activeEditView) {
+      TextEditView* anotherEditView = activeEditView->clone();
+      addTabWidgetHorizontally(anotherEditView, label);
+    }
+  }
+}
+
+void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
   auto tabWidget = createTabWidget();
   if (m_layout->direction() == QBoxLayout::LeftToRight) {
     tabWidget->addTab(widget, label);
     m_layout->addWidget(tabWidget);
   }
-
-  m_activeTabWidget = tabWidget;
 }
 
 QList<MainWindow*> MainWindow::s_windows;

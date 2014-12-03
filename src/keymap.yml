@@ -7,6 +7,7 @@
     ctrl+n: { cmd: move_cursor, args: { operation: down }}
     ctrl+cmd+i: toggle_vim_emulation
     cmd+o: open_file
+    ctrl+w: split_horizontally
 
 # Normal mode keymap
 

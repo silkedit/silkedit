@@ -3,8 +3,10 @@
 #include <memory>
 #include <boost/optional.hpp>
 #include <QObject>
-
 #include <stextedit.h>
+
+#include "macros.h"
+#include "ICloneable.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -16,7 +18,7 @@ QT_END_NAMESPACE
 
 class LineNumberArea;
 
-class TextEditView : public STextEdit {
+class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:
@@ -46,6 +48,7 @@ class TextEditView : public STextEdit {
   int firstNonBlankCharPos(const QString& text);
   bool isTabOrSpace(const QChar ch);
   void moveToFirstNonBlankChar(QTextCursor& cur);
+  TextEditView* clone() override;
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);

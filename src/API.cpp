@@ -13,6 +13,15 @@ TextEditView* API::activeEditView() {
   }
 }
 
+STabWidget* API::activeTabWidget() {
+  MainWindow* window = activeWindow();
+  if (window) {
+    return window->activeTabWidget();
+  } else {
+    return nullptr;
+  }
+}
+
 MainWindow* API::activeWindow() {
   MainWindow* window = qobject_cast<MainWindow*>(QApplication::activeWindow());
   if (window) {

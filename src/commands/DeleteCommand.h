@@ -1,7 +1,6 @@
 #pragma once
 
 #include "ICommand.h"
-#include "TextEditView.h"
 
 class DeleteCommand : public ICommand {
  public:

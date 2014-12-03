@@ -1,10 +1,8 @@
 #include <QDebug>
-#include <QTextCursor>
 
-#include "API.h"
 #include "DeleteCommand.h"
-#include "vi.h"
-#include "stlSpecialization.h"
+#include "API.h"
+#include "TextEditView.h"
 
 DeleteCommand::DeleteCommand() : ICommand("delete") {
 }

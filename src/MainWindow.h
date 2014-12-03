@@ -25,8 +25,7 @@ class MainWindow : public QMainWindow {
   STabWidget* activeTabWidget() { return m_activeTabWidget; }
   void show();
   void close();
-  void addTabWidgetHorizontally(QWidget* widget, const QString& label);
-//  void addTabWidgetVertically();
+  void splitTabHorizontally();
 
  private:
   static QList<MainWindow*> s_windows;
@@ -37,4 +36,6 @@ class MainWindow : public QMainWindow {
   QBoxLayout* m_layout;
 
   STabWidget* createTabWidget();
+  void addTabWidgetHorizontally(QWidget* widget, const QString& label);
+  //  void addTabWidgetVertically();
 };

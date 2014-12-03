@@ -15,6 +15,7 @@
 #include "commands/UndoCommand.h"
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
+#include "commands/SplitHorizontallyCommand.h"
 
 int main(int argv, char** args) {
   QApplication app(argv, args);
@@ -39,6 +40,9 @@ int main(int argv, char** args) {
 
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
+
+  std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
+  CommandService::singleton().add(std::move(splitHorizontallyCmd));
 
   ViEngine viEngine;
 
