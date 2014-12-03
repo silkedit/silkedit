@@ -168,7 +168,7 @@ void STabWidget::detachTabFinished(const QPoint& dropPoint) {
   window->move(dropPoint);
   window->show();
   if (DraggingTabInfo::widget()) {
-    window->tabWidget()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+    window->activeTabWidget()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
     DraggingTabInfo::setWidget(nullptr);
     m_tabDragging = false;
     tabRemoved(-1);

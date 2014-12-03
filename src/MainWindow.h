@@ -9,6 +9,7 @@
 #include "ViEngine.h"
 
 class STabWidget;
+class QBoxLayout;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -21,13 +22,19 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
   DEFAULT_MOVE(MainWindow)
 
-  STabWidget* tabWidget() { return m_tabWidget; }
+  STabWidget* activeTabWidget() { return m_activeTabWidget; }
   void show();
   void close();
+  void addTabWidgetHorizontally(QWidget* widget, const QString& label);
+//  void addTabWidgetVertically();
 
  private:
   static QList<MainWindow*> s_windows;
 
   MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
-  STabWidget* m_tabWidget;
+  STabWidget* m_activeTabWidget;
+  QList<STabWidget*> m_tabWidgets;
+  QBoxLayout* m_layout;
+
+  STabWidget* createTabWidget();
 };

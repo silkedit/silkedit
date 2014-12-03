@@ -12,7 +12,7 @@
 bool DocumentService::open(const QString& filename) {
   MainWindow* window = API::activeWindow();
   if (window) {
-    return window->tabWidget()->open(filename) >= 0;
+    return window->activeTabWidget()->open(filename) >= 0;
   } else {
     qWarning("m_tabWidget is null");
     return false;
