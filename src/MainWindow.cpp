@@ -110,11 +110,11 @@ void MainWindow::splitTabVertically() {
 }
 
 void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, QBoxLayout::TopToBottom, QBoxLayout::LeftToRight);
+  addTabWidget(widget, label, QBoxLayout::LeftToRight, QBoxLayout::TopToBottom);
 }
 
 void MainWindow::addTabWidgetVertically(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, QBoxLayout::LeftToRight, QBoxLayout::TopToBottom);
+  addTabWidget(widget, label, QBoxLayout::TopToBottom, QBoxLayout::LeftToRight);
 }
 
 void MainWindow::addTabWidget(QWidget* widget,
