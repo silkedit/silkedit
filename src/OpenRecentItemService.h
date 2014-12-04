@@ -18,7 +18,7 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
 
   QMenu* openRecentMenu() { return m_openRecentMenu.get(); }
 
-  public slots:
+ public slots:
   void updateOpenRecentItem(const QString& path);
 
  private:
