@@ -10,6 +10,7 @@
 #include "CommandService.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/OpenFileCommand.h"
+#include "commands/NewFileCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
@@ -42,6 +43,9 @@ int main(int argv, char** args) {
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
 
+  std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
+  CommandService::singleton().add(std::move(newFileCmd));
+
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
 
@@ -72,8 +76,10 @@ int main(int argv, char** args) {
 
   QMenuBar menuBar(nullptr);
   auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenFileCommand::name);
+  auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
 
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
+  fileMenu->addAction(newFileAction);
   fileMenu->addAction(openFileAction);
 
   return app.exec();
