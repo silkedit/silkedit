@@ -23,6 +23,10 @@
 int main(int argv, char** args) {
   SilkApp app(argv, args);
 
+  MainWindow* w = MainWindow::create();
+  w->activeTabWidget()->addNew();
+  w->show();
+
   ConfigService::singleton().load();
 
   // add commands
@@ -59,14 +63,10 @@ int main(int argv, char** args) {
       new ToggleVimEmulationCommand(&viEngine));
   CommandService::singleton().add(std::move(toggleVimEmulationCmd));
 
-  // Load keymap settings after registering commands
+//   Load keymap settings after registering commands
   KeymapService::singleton().load();
 
-  MainWindow* w = MainWindow::create();
-  w->show();
-  w->activeTabWidget()->addNew();
-
-  // Set focus to active edit view
+//   Set focus to active edit view
   if (auto v = w->activeTabWidget()->activeEditView()) {
     v->setFocus();
   }
