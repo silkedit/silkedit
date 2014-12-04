@@ -1,7 +1,7 @@
-#include <QApplication>
 #include <QMenuBar>
 #include <QAction>
 
+#include "SilkApp.h"
 #include "STabWidget.h"
 #include "CommandAction.h"
 #include "MainWindow.h"
@@ -19,7 +19,7 @@
 #include "commands/SplitVerticallyCommand.h"
 
 int main(int argv, char** args) {
-  QApplication app(argv, args);
+  SilkApp app(argv, args);
 
   ConfigService::singleton().load();
 

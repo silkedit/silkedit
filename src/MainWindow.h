@@ -25,6 +25,7 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
   STabWidget* activeTabWidget() { return m_activeTabWidget; }
+  void setActiveTabWidget(STabWidget* tabWidget) { m_activeTabWidget = tabWidget; }
   void show();
   void close();
   void splitTabHorizontally();
