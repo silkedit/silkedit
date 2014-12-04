@@ -181,9 +181,12 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   }
 
   // check partial match
-  auto partiallyMatchedKey = std::find_if(m_keymaps.begin(), m_keymaps.end(), [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
-    return key.matches(p.first) == QKeySequence::PartialMatch;
-  });
+  auto partiallyMatchedKey =
+      std::find_if(m_keymaps.begin(),
+                   m_keymaps.end(),
+                   [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
+        return key.matches(p.first) == QKeySequence::PartialMatch;
+      });
 
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");

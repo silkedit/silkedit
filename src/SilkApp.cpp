@@ -8,18 +8,19 @@
 namespace {
 template <typename T>
 T findParent(QWidget* widget) {
-  if (!widget) return nullptr;
+  if (!widget)
+    return nullptr;
 
   T desiredWidget = qobject_cast<T>(widget->parentWidget());
-  if (desiredWidget) return desiredWidget;
+  if (desiredWidget)
+    return desiredWidget;
   return findParent<T>(widget->parentWidget());
 }
 }
 
-SilkApp::SilkApp(int &argc, char **argv): QApplication(argc, argv)
-{
+SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   // Track active STabWidget
-  QObject::connect(this, &QApplication::focusChanged, [](QWidget* , QWidget* now){
+  QObject::connect(this, &QApplication::focusChanged, [](QWidget*, QWidget* now) {
     qDebug("focusChanged");
     if (TextEditView* editView = qobject_cast<TextEditView*>(now)) {
       if (STabWidget* tabWidget = findParent<STabWidget*>(editView)) {
