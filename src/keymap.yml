@@ -32,6 +32,10 @@
     u: undo
     ctrl+r: redo
     r: eval_as_ruby
+    left: { cmd: move_cursor, args: { operation: left }}
+    down: { cmd: move_cursor, args: { operation: down }}
+    up: { cmd: move_cursor, args: { operation: up }}
+    right: { cmd: move_cursor, args: { operation: right }}
 
 # Insert mode keymap
 

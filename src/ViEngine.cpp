@@ -121,14 +121,13 @@ void ViEngine::updateCursor() {
 
 void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
   QString text = event->text();
-  if (text.isEmpty()) {
-    return;
-  }
 
-  ushort ch = text[0].unicode();
-  if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
-    m_repeatCount = m_repeatCount * 10 + (ch - '0');
-    return;
+  if (!text.isEmpty()) {
+    ushort ch = text[0].unicode();
+    if ((ch == '0' && m_repeatCount != 0) || (ch >= '1' && ch <= '9')) {
+      m_repeatCount = m_repeatCount * 10 + (ch - '0');
+      return;
+    }
   }
 
   if (m_repeatCount > 0) {
