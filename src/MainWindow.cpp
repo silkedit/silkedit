@@ -16,10 +16,12 @@ QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
     QBoxLayout* subLayout = qobject_cast<QBoxLayout*>(layout->itemAt(i)->layout());
     if (subLayout) {
       QBoxLayout* foundLayout = findItemFromLayout(subLayout, item);
-      if (foundLayout) return foundLayout;
+      if (foundLayout)
+        return foundLayout;
     }
     QWidget* widget = layout->itemAt(i)->widget();
-    if (widget && widget == item) return layout;
+    if (widget && widget == item)
+      return layout;
   }
 
   return nullptr;
@@ -98,25 +100,27 @@ void MainWindow::close() {
 }
 
 void MainWindow::splitTabHorizontally() {
-  splitTab(std::bind(&MainWindow::addTabWidgetHorizontally, this, std::placeholders::_1, std::placeholders::_2));
+  splitTab(std::bind(
+      &MainWindow::addTabWidgetHorizontally, this, std::placeholders::_1, std::placeholders::_2));
 }
 
-void MainWindow::splitTabVertically()
-{
-  splitTab(std::bind(&MainWindow::addTabWidgetVertically, this, std::placeholders::_1, std::placeholders::_2));
+void MainWindow::splitTabVertically() {
+  splitTab(std::bind(
+      &MainWindow::addTabWidgetVertically, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
   addTabWidget(widget, label, QBoxLayout::TopToBottom, QBoxLayout::LeftToRight);
 }
 
-void MainWindow::addTabWidgetVertically(QWidget *widget, const QString &label)
-{
+void MainWindow::addTabWidgetVertically(QWidget* widget, const QString& label) {
   addTabWidget(widget, label, QBoxLayout::LeftToRight, QBoxLayout::TopToBottom);
 }
 
-void MainWindow::addTabWidget(QWidget *widget, const QString &label, QBoxLayout::Direction activeLayoutDirection, QBoxLayout::Direction newDirection)
-{
+void MainWindow::addTabWidget(QWidget* widget,
+                              const QString& label,
+                              QBoxLayout::Direction activeLayoutDirection,
+                              QBoxLayout::Direction newDirection) {
   auto tabWidget = createTabWidget();
   tabWidget->addTab(widget, label);
 
@@ -135,8 +139,7 @@ void MainWindow::addTabWidget(QWidget *widget, const QString &label, QBoxLayout:
   }
 }
 
-void MainWindow::splitTab(std::function<void(QWidget *, const QString &)> func)
-{
+void MainWindow::splitTab(std::function<void(QWidget*, const QString&)> func) {
   if (m_activeTabWidget) {
     TextEditView* activeEditView = m_activeTabWidget->activeEditView();
     QString label = m_activeTabWidget->tabText(m_activeTabWidget->currentIndex());

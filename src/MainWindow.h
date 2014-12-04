@@ -42,6 +42,9 @@ class MainWindow : public QMainWindow {
   void removeTabWidget(STabWidget* widget);
   void addTabWidgetHorizontally(QWidget* widget, const QString& label);
   void addTabWidgetVertically(QWidget* widget, const QString& label);
-  void addTabWidget(QWidget* widget, const QString& label, QBoxLayout::Direction activeLayoutDirection, QBoxLayout::Direction newDirection);
+  void addTabWidget(QWidget* widget,
+                    const QString& label,
+                    QBoxLayout::Direction activeLayoutDirection,
+                    QBoxLayout::Direction newDirection);
   void splitTab(std::function<void(QWidget*, const QString&)> func);
 };
