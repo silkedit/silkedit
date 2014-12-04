@@ -69,13 +69,12 @@ QKeySequence toSequence(const QKeyEvent& ev) {
 
 QString replace(QString str, const QString& regex, const QString& after) {
   QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
-  QRegularExpressionMatch match = re.match(str);
-  if (!match.hasMatch()) {
-    return std::move(str);
-  } else {
-    QString replacedStr = str.replace(match.capturedStart(), match.capturedLength(), after);
-    return std::move(replacedStr);
+  QRegularExpressionMatchIterator iter = re.globalMatch(str);
+  while (iter.hasNext()) {
+    QRegularExpressionMatch match = iter.next();
+    str = str.replace(match.capturedStart(), match.capturedLength(), after);
   }
+  return str;
 }
 
 QKeySequence toSequence(QString str) {
@@ -166,12 +165,34 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   QKeySequence key = toSequence(*event);
   qDebug() << "key: " << key;
 
-  if (m_keymaps.find(key) != m_keymaps.end()) {
-    CommandEvent& ev = m_keymaps.at(key);
-    return ev.execute(repeat);
-  } else {
-    return false;
+  if (!m_partiallyMatchedKeyString.isEmpty()) {
+    qDebug() << "partially matched key:" << m_partiallyMatchedKeyString;
+    key = QKeySequence(m_partiallyMatchedKeyString + "," + key.toString());
+    qDebug() << "combinded key:" << key;
   }
+
+  // check exact match
+  if (m_keymaps.find(key) != m_keymaps.end()) {
+    m_partiallyMatchedKeyString.clear();
+    CommandEvent& ev = m_keymaps.at(key);
+    if (ev.execute(repeat)) {
+      return true;
+    }
+  }
+
+  // check partial match
+  auto partiallyMatchedKey = std::find_if(m_keymaps.begin(), m_keymaps.end(), [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
+    return key.matches(p.first) == QKeySequence::PartialMatch;
+  });
+
+  if (partiallyMatchedKey != m_keymaps.end()) {
+    qDebug("partial match");
+    m_partiallyMatchedKeyString = key.toString();
+    return true;
+  }
+
+  // no match
+  return false;
 }
 
 boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {

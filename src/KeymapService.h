@@ -36,6 +36,7 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
 
   std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
+  QString m_partiallyMatchedKeyString;
 };
 
 class KeyHandler : public QObject, public Singleton<KeyHandler> {
