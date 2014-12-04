@@ -89,8 +89,8 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
 int STabWidget::open(const QString& path) {
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
-    boost::optional<QString> path2 = v->path();
-    if (v && path2 && path == *path2) {
+    QString path2 = v->path();
+    if (v && !path2.isEmpty() && path == path2) {
       setCurrentIndex(i);
       return i;
     }

@@ -1,6 +1,7 @@
 #include <QMenuBar>
 #include <QAction>
 
+#include "OpenRecentItemService.h"
 #include "SilkApp.h"
 #include "STabWidget.h"
 #include "CommandAction.h"
@@ -81,6 +82,7 @@ int main(int argv, char** args) {
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);
   fileMenu->addAction(openFileAction);
+  fileMenu->addMenu(OpenRecentItemService::singleton().openRecentMenu());
 
   return app.exec();
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <boost/optional.hpp>
 #include <QObject>
 #include <stextedit.h>
 
@@ -22,10 +21,10 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:
-  explicit TextEditView(boost::optional<QString> path = boost::none, QWidget* parent = 0);
-  ~TextEditView();
+  explicit TextEditView(const QString& path = "", QWidget* parent = 0);
+  virtual ~TextEditView();
 
-  boost::optional<QString> path() { return m_path; }
+  QString path() { return m_path; }
   void setDocument(std::shared_ptr<QTextDocument> document) {
     m_document = document;
     STextEdit::setDocument(document.get());
@@ -50,6 +49,9 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   void moveToFirstNonBlankChar(QTextCursor& cur);
   TextEditView* clone() override;
 
+signals:
+  void destroying(const QString& path);
+
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
@@ -57,7 +59,7 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
 
  private:
   QWidget* m_lineNumberArea;
-  boost::optional<QString> m_path;
+  QString m_path;
   std::shared_ptr<QTextDocument> m_document;
 };
 

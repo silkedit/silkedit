@@ -4,14 +4,17 @@
 #include "TextEditView.h"
 #include "KeymapService.h"
 #include "CommandService.h"
+#include "OpenRecentItemService.h"
 
-TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
+TextEditView::TextEditView(const QString& path, QWidget* parent)
     : STextEdit(parent), m_path(path) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+
+  connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemService::singleton(), SLOT(updateOpenRecentItem(const QString&)));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
@@ -26,6 +29,7 @@ TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
 }
 
 TextEditView::~TextEditView() {
+  emit destroying(m_path);
   qDebug("~TextEditView");
 }
 
