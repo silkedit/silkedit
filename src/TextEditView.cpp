@@ -22,6 +22,7 @@ TextEditView::TextEditView(boost::optional<QString> path, QWidget* parent)
       " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
 
   QApplication::setCursorFlashTime(0);
+  installEventFilter(&KeyHandler::singleton());
 }
 
 TextEditView::~TextEditView() {

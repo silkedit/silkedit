@@ -9,6 +9,7 @@ TextEditView* API::activeEditView() {
   if (window) {
     return window->activeTabWidget()->activeEditView();
   } else {
+    qDebug("active edit view is null");
     return nullptr;
   }
 }
@@ -18,6 +19,7 @@ STabWidget* API::activeTabWidget() {
   if (window) {
     return window->activeTabWidget();
   } else {
+    qDebug("active tab widget is null");
     return nullptr;
   }
 }

@@ -110,13 +110,11 @@ int STabWidget::open(const QString& path) {
 
   TextEditView* view = new TextEditView(path);
   view->setDocument(std::move(newDoc));
-  view->installEventFilter(&KeyHandler::singleton());
   return addTab(view, label);
 }
 
 void STabWidget::addNew() {
   TextEditView* view = new TextEditView();
-  view->installEventFilter(&KeyHandler::singleton());
   addTab(view, "untitled");
 }
 

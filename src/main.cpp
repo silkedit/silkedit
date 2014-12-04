@@ -16,6 +16,7 @@
 #include "commands/RedoCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
+#include "commands/SplitVerticallyCommand.h"
 
 int main(int argv, char** args) {
   QApplication app(argv, args);
@@ -43,6 +44,9 @@ int main(int argv, char** args) {
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
+
+  std::unique_ptr<SplitVerticallyCommand> splitVerticallyCmd(new SplitVerticallyCommand());
+  CommandService::singleton().add(std::move(splitVerticallyCmd));
 
   ViEngine viEngine;
 

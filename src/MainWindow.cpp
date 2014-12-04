@@ -3,16 +3,33 @@
 #include <QApplication>
 #include <QDebug>
 #include <QBoxLayout>
+#include <QLayout>
 
 #include "API.h"
 #include "MainWindow.h"
 #include "STabWidget.h"
 #include "TextEditView.h"
 
+namespace {
+QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
+  for (int i = 0; i < layout->count(); i++) {
+    QBoxLayout* subLayout = qobject_cast<QBoxLayout*>(layout->itemAt(i)->layout());
+    if (subLayout) {
+      QBoxLayout* foundLayout = findItemFromLayout(subLayout, item);
+      if (foundLayout) return foundLayout;
+    }
+    QWidget* widget = layout->itemAt(i)->widget();
+    if (widget && widget == item) return layout;
+  }
+
+  return nullptr;
+}
+}
+
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_activeTabWidget(nullptr),
-      m_layout(new QBoxLayout(QBoxLayout::LeftToRight)) {
+      m_rootLayout(new QBoxLayout(QBoxLayout::LeftToRight)) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
@@ -20,13 +37,13 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   auto tabWidget = createTabWidget();
   // Note: The ownership of tabWidget is transferred to the layout, and it's the layout's
   // responsibility to delete it.
-  m_layout->addWidget(tabWidget);
-  m_layout->setContentsMargins(0, 0, 0, 0);
-  m_layout->setSpacing(0);
-  m_layout->setMargin(0);
+  m_rootLayout->addWidget(tabWidget);
+  m_rootLayout->setContentsMargins(0, 0, 0, 0);
+  m_rootLayout->setSpacing(0);
+  m_rootLayout->setMargin(0);
   QWidget* window = new QWidget(this);
   // window becomes parent of this layout by setLayout
-  window->setLayout(m_layout);
+  window->setLayout(m_rootLayout);
   setCentralWidget(window);
   m_activeTabWidget = tabWidget;
 }
@@ -54,7 +71,7 @@ STabWidget* MainWindow::createTabWidget() {
 void MainWindow::removeTabWidget(STabWidget* widget) {
   m_tabWidgets.removeOne(widget);
   // Note: The ownership of widget remains the same as when it was added.
-  m_layout->removeWidget(widget);
+  m_rootLayout->removeWidget(widget);
   widget->deleteLater();
 }
 
@@ -81,21 +98,52 @@ void MainWindow::close() {
 }
 
 void MainWindow::splitTabHorizontally() {
+  splitTab(std::bind(&MainWindow::addTabWidgetHorizontally, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+void MainWindow::splitTabVertically()
+{
+  splitTab(std::bind(&MainWindow::addTabWidgetVertically, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
+  addTabWidget(widget, label, QBoxLayout::TopToBottom, QBoxLayout::LeftToRight);
+}
+
+void MainWindow::addTabWidgetVertically(QWidget *widget, const QString &label)
+{
+  addTabWidget(widget, label, QBoxLayout::LeftToRight, QBoxLayout::TopToBottom);
+}
+
+void MainWindow::addTabWidget(QWidget *widget, const QString &label, QBoxLayout::Direction activeLayoutDirection, QBoxLayout::Direction newDirection)
+{
+  auto tabWidget = createTabWidget();
+  tabWidget->addTab(widget, label);
+
+  STabWidget* activeTabWidget = API::activeTabWidget();
+  QBoxLayout* layoutInActiveEditView = findItemFromLayout(m_rootLayout, activeTabWidget);
+  if (layoutInActiveEditView->direction() == activeLayoutDirection) {
+    int index = layoutInActiveEditView->indexOf(activeTabWidget);
+    Q_ASSERT(index >= 0);
+    layoutInActiveEditView->removeWidget(activeTabWidget);
+    QBoxLayout* layout = new QBoxLayout(newDirection);
+    layout->addWidget(activeTabWidget);
+    layout->addWidget(tabWidget);
+    layoutInActiveEditView->insertLayout(index, layout);
+  } else {
+    layoutInActiveEditView->addWidget(tabWidget);
+  }
+}
+
+void MainWindow::splitTab(std::function<void(QWidget *, const QString &)> func)
+{
   if (m_activeTabWidget) {
     TextEditView* activeEditView = m_activeTabWidget->activeEditView();
     QString label = m_activeTabWidget->tabText(m_activeTabWidget->currentIndex());
     if (activeEditView) {
       TextEditView* anotherEditView = activeEditView->clone();
-      addTabWidgetHorizontally(anotherEditView, label);
+      func(anotherEditView, label);
     }
-  }
-}
-
-void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
-  auto tabWidget = createTabWidget();
-  if (m_layout->direction() == QBoxLayout::LeftToRight) {
-    tabWidget->addTab(widget, label);
-    m_layout->addWidget(tabWidget);
   }
 }
 
