@@ -1,3 +1,5 @@
+#include <qDebug>
+
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
@@ -9,6 +11,11 @@ void OpenRecentItemService::clear() {
 void OpenRecentItemService::addOpenRecentItem(const QString& path) {
   if (path.isEmpty()) {
     qDebug("path is empty");
+    return;
+  }
+
+  if (std::find(m_recentItems.begin(), m_recentItems.end(), path) != m_recentItems.end()) {
+    qDebug() << path << "is already in recent file list";
     return;
   }
 
