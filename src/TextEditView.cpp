@@ -16,7 +16,7 @@ TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(par
   connect(this,
           SIGNAL(destroying(const QString&)),
           &OpenRecentItemService::singleton(),
-          SLOT(updateOpenRecentItem(const QString&)));
+          SLOT(addOpenRecentItem(const QString&)));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
