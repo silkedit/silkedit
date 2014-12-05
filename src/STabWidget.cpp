@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 #include <QTextDocument>
-#include <QThread>
+#include <QMessageBox>
 
 #include "STabWidget.h"
 #include "TextEditView.h"
@@ -11,6 +11,7 @@
 #include "STabBar.h"
 #include "MainWindow.h"
 #include "DraggingTabInfo.h"
+#include "SilkApp.h"
 
 namespace {
 QString getFileNameFrom(const QString& path) {
@@ -153,7 +154,30 @@ void STabWidget::saveAllTabs() {
 }
 
 void STabWidget::closeActiveTab() {
-  removeTab(indexOf(m_activeEditView));
+  if (m_activeEditView) {
+    if (m_activeEditView->document()->isModified()) {
+      QMessageBox msgBox;
+      msgBox.setText(tr("Do you want to save the changes made to the document %1?").arg(getFileNameFrom(m_activeEditView->path())));
+      msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
+      msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+      msgBox.setDefaultButton(QMessageBox::Save);
+      msgBox.setIconPixmap(SilkApp::windowIcon().pixmap(64, 64));
+      int ret = msgBox.exec();
+      switch (ret) {
+        case QMessageBox::Save:
+            m_activeEditView->save();
+            break;
+        case QMessageBox::Discard:
+            break;
+        case QMessageBox::Cancel:
+            return;
+        default:
+            qWarning("ret is invalid");
+            return;
+      }
+    }
+    removeTab(indexOf(m_activeEditView));
+  }
 }
 
 void STabWidget::detachTabStarted(int index, const QPoint&) {
