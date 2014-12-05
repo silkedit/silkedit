@@ -64,7 +64,8 @@ int main(int argv, char** args) {
   std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
   CommandService::singleton().add(std::move(saveAllCmd));
 
-  CommandService::singleton().add(std::move(std::unique_ptr<CloseFileCommand>(new CloseFileCommand)));
+  CommandService::singleton().add(
+      std::move(std::unique_ptr<CloseFileCommand>(new CloseFileCommand)));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
@@ -78,10 +79,10 @@ int main(int argv, char** args) {
       new ToggleVimEmulationCommand(&viEngine));
   CommandService::singleton().add(std::move(toggleVimEmulationCmd));
 
-//   Load keymap settings after registering commands
+  //   Load keymap settings after registering commands
   KeymapService::singleton().load();
 
-//   Set focus to active edit view
+  //   Set focus to active edit view
   if (auto v = w->activeTabWidget()->activeEditView()) {
     v->setFocus();
   }

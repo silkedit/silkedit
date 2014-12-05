@@ -42,16 +42,16 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
 
 class OpenRecentAction : public QAction {
   DISABLE_COPY(OpenRecentAction)
-  public:
-    explicit OpenRecentAction(QObject* parent = nullptr);
-    ~OpenRecentAction() = default;
-    DEFAULT_MOVE(OpenRecentAction)
+ public:
+  explicit OpenRecentAction(QObject* parent = nullptr);
+  ~OpenRecentAction() = default;
+  DEFAULT_MOVE(OpenRecentAction)
 };
 
 class ClearRecentItemListAction : public QAction {
   DISABLE_COPY(ClearRecentItemListAction)
-  public:
-    explicit ClearRecentItemListAction(QObject* parent = nullptr);
-    ~ClearRecentItemListAction() = default;
-    DEFAULT_MOVE(ClearRecentItemListAction)
+ public:
+  explicit ClearRecentItemListAction(QObject* parent = nullptr);
+  ~ClearRecentItemListAction() = default;
+  DEFAULT_MOVE(ClearRecentItemListAction)
 };

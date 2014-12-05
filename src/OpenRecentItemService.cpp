@@ -1,8 +1,7 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
-void OpenRecentItemService::clear()
-{
+void OpenRecentItemService::clear() {
   m_recentItems.clear();
   updateOpenRecentItems();
 }
@@ -32,8 +31,7 @@ OpenRecentItemService::OpenRecentItemService() : m_openRecentMenu(new QMenu(tr("
   updateOpenRecentItems();
 }
 
-void OpenRecentItemService::updateOpenRecentItems()
-{
+void OpenRecentItemService::updateOpenRecentItems() {
   // delete extra recent items
   while (m_recentItems.size() > MAX_RECENT_ITEMS) {
     m_recentItems.pop_back();
@@ -56,9 +54,7 @@ void OpenRecentItemService::updateOpenRecentItems()
   }
 }
 
-
-OpenRecentAction::OpenRecentAction(QObject* parent): QAction(parent)
-{
+OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
   QObject::connect(this, &QAction::triggered, [this]() {
     if (data().isValid()) {
       DocumentService::singleton().open(data().toString());
@@ -66,10 +62,8 @@ OpenRecentAction::OpenRecentAction(QObject* parent): QAction(parent)
   });
 }
 
-
-ClearRecentItemListAction::ClearRecentItemListAction(QObject *parent): QAction(tr("Clear List"), parent)
-{
-  QObject::connect(this, &QAction::triggered, [this]() {
-    OpenRecentItemService::singleton().clear();
-  });
+ClearRecentItemListAction::ClearRecentItemListAction(QObject* parent)
+    : QAction(tr("Clear List"), parent) {
+  QObject::connect(
+      this, &QAction::triggered, [this]() { OpenRecentItemService::singleton().clear(); });
 }

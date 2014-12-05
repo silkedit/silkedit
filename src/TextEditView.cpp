@@ -36,9 +36,9 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-void TextEditView::setPath(const QString &path)
-{
-  if (path.isEmpty()) return;
+void TextEditView::setPath(const QString& path) {
+  if (path.isEmpty())
+    return;
 
   m_path = path;
   emit pathUpdated(path);
@@ -246,13 +246,11 @@ TextEditView* TextEditView::clone() {
   return editView;
 }
 
-void TextEditView::save()
-{
+void TextEditView::save() {
   DocumentService::singleton().save(m_path, document());
 }
 
-void TextEditView::saveAs()
-{
+void TextEditView::saveAs() {
   QString newFilePath = DocumentService::singleton().saveAs(m_path, document());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);

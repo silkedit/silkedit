@@ -13,10 +13,10 @@
 #include "DraggingTabInfo.h"
 
 namespace {
-  QString getFileNameFrom(const QString& path) {
-    QFileInfo info(path);
-    return info.fileName();
-  }
+QString getFileNameFrom(const QString& path) {
+  QFileInfo info(path);
+  return info.fileName();
+}
 }
 
 STabWidget::STabWidget(QWidget* parent)
@@ -90,7 +90,7 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView) {
-    QObject::connect(editView, &TextEditView::pathUpdated, [this, w](const QString& path){
+    QObject::connect(editView, &TextEditView::pathUpdated, [this, w](const QString& path) {
       setTabText(indexOf(w), getFileNameFrom(path));
     });
   }
@@ -126,8 +126,7 @@ void STabWidget::addNew() {
   addTab(view, "untitled");
 }
 
-void STabWidget::saveAllTabs()
-{
+void STabWidget::saveAllTabs() {
   for (int i = 0; i < count(); i++) {
     auto editView = qobject_cast<TextEditView*>(widget(i));
     if (editView && !editView->path().isEmpty()) {
@@ -136,8 +135,7 @@ void STabWidget::saveAllTabs()
   }
 }
 
-void STabWidget::closeActiveTab()
-{
+void STabWidget::closeActiveTab() {
   removeTab(indexOf(m_activeEditView));
 }
 

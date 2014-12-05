@@ -21,8 +21,7 @@ bool DocumentService::open(const QString& filename) {
   }
 }
 
-void DocumentService::save(const QString &path, QTextDocument *doc)
-{
+void DocumentService::save(const QString& path, QTextDocument* doc) {
   if (path.isEmpty()) {
     qWarning("path is empty");
     return;
@@ -40,8 +39,7 @@ void DocumentService::save(const QString &path, QTextDocument *doc)
   }
 }
 
-QString DocumentService::saveAs(const QString &path, QTextDocument *doc)
-{
+QString DocumentService::saveAs(const QString& path, QTextDocument* doc) {
   QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), path);
   save(filePath, doc);
   return filePath;

@@ -99,9 +99,8 @@ void MainWindow::close() {
   }
 }
 
-void MainWindow::saveAllTabs()
-{
-  for (auto tabWidget: m_tabWidgets) {
+void MainWindow::saveAllTabs() {
+  for (auto tabWidget : m_tabWidgets) {
     tabWidget->saveAllTabs();
   }
 }

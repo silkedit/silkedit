@@ -46,7 +46,7 @@ signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
 
-protected:
+ protected:
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
