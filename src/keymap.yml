@@ -10,6 +10,7 @@
     cmd+o: open_file
     cmd+s: save
     shift+cmd+s: save_as
+    opt+cmd+s: save_all
     ctrl+w, s: split_horizontally
     ctrl+w, v: split_vertically
 

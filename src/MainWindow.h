@@ -2,8 +2,8 @@
 
 #include <functional>
 #include <memory>
+#include <list>
 #include <QMainWindow>
-#include <QList>
 #include <QBoxLayout>
 
 #include "macros.h"
@@ -28,6 +28,7 @@ class MainWindow : public QMainWindow {
   void setActiveTabWidget(STabWidget* tabWidget) { m_activeTabWidget = tabWidget; }
   void show();
   void close();
+  void saveAllTabs();
   void splitTabHorizontally();
   void splitTabVertically();
 
@@ -36,7 +37,7 @@ class MainWindow : public QMainWindow {
 
   MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   STabWidget* m_activeTabWidget;
-  QList<STabWidget*> m_tabWidgets;
+  std::list<STabWidget*> m_tabWidgets;
   QBoxLayout* m_rootLayout;
 
   STabWidget* createTabWidget();

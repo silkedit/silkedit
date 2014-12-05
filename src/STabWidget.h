@@ -25,6 +25,7 @@ class STabWidget : public QTabWidget {
   void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
   bool tabDragging() { return m_tabDragging; }
+  void saveAllTabs();
 
 signals:
   void allTabRemoved();

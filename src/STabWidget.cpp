@@ -126,6 +126,16 @@ void STabWidget::addNew() {
   addTab(view, "untitled");
 }
 
+void STabWidget::saveAllTabs()
+{
+  for (int i = 0; i < count(); i++) {
+    auto editView = qobject_cast<TextEditView*>(widget(i));
+    if (editView && !editView->path().isEmpty()) {
+      editView->save();
+    }
+  }
+}
+
 void STabWidget::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;

@@ -65,13 +65,13 @@ STabWidget* MainWindow::createTabWidget() {
     }
   });
 
-  m_tabWidgets.append(tabWidget);
+  m_tabWidgets.push_back(tabWidget);
 
   return tabWidget;
 }
 
 void MainWindow::removeTabWidget(STabWidget* widget) {
-  m_tabWidgets.removeOne(widget);
+  m_tabWidgets.remove(widget);
   // Note: The ownership of widget remains the same as when it was added.
   m_rootLayout->removeWidget(widget);
   widget->deleteLater();
@@ -96,6 +96,13 @@ void MainWindow::show() {
 void MainWindow::close() {
   if (s_windows.removeOne(this)) {
     deleteLater();
+  }
+}
+
+void MainWindow::saveAllTabs()
+{
+  for (auto tabWidget: m_tabWidgets) {
+    tabWidget->saveAllTabs();
   }
 }
 

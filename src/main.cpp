@@ -14,6 +14,7 @@
 #include "commands/NewFileCommand.h"
 #include "commands/SaveFileCommand.h"
 #include "commands/SaveAsCommand.h"
+#include "commands/SaveAllCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
@@ -59,6 +60,9 @@ int main(int argv, char** args) {
   std::unique_ptr<SaveAsCommand> saveAsCmd(new SaveAsCommand());
   CommandService::singleton().add(std::move(saveAsCmd));
 
+  std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
+  CommandService::singleton().add(std::move(saveAllCmd));
+
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
 
@@ -88,6 +92,7 @@ int main(int argv, char** args) {
   auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
   auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
   auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
+  auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
 
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);
@@ -95,6 +100,7 @@ int main(int argv, char** args) {
   fileMenu->addMenu(OpenRecentItemService::singleton().openRecentMenu());
   fileMenu->addAction(saveFileAction);
   fileMenu->addAction(saveAsAction);
+  fileMenu->addAction(saveAllAction);
 
   return app.exec();
 }
