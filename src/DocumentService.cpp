@@ -5,6 +5,7 @@
 #include <QTextDocument>
 #include <QTextBlock>
 #include <QFileDialog>
+#include <QDebug>
 
 #include "DocumentService.h"
 #include "MainWindow.h"
@@ -33,8 +34,13 @@ void DocumentService::save(const QString& path, QTextDocument* doc) {
   QFile outFile(path);
   if (outFile.open(QIODevice::WriteOnly)) {
     QTextStream out(&outFile);
-    for (QTextBlock it = doc->begin(); it != doc->end(); it = it.next()) {
-      out << it.text() << endl;
+    for (int i = 0; i < doc->blockCount(); i++) {
+      if (i < doc->blockCount() - 1) {
+        out << doc->findBlockByNumber(i).text() << endl;
+      } else {
+        // don't output a new line character in the last block.
+        out << doc->findBlockByNumber(i).text();
+      }
     }
   }
 }
