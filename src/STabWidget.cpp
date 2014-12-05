@@ -150,7 +150,20 @@ void STabWidget::closeAllTabs() {
   }
 
   for (auto w: widgets) {
-    qDebug("closing widget");
+    closeTab(w);
+  }
+}
+
+void STabWidget::closeOtherTabs()
+{
+  std::list<QWidget*> widgets;
+  for (int i = 0; i < count(); i++) {
+    if (i != currentIndex()) {
+      widgets.push_back(widget(i));
+    }
+  }
+
+  for (auto w: widgets) {
     closeTab(w);
   }
 }

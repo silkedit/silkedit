@@ -28,6 +28,7 @@ class STabWidget : public QTabWidget {
   void saveAllTabs();
   void closeActiveTab();
   void closeAllTabs();
+  void closeOtherTabs();
 
 signals:
   void allTabRemoved();

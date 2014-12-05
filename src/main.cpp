@@ -17,6 +17,7 @@
 #include "commands/SaveAllCommand.h"
 #include "commands/CloseTabCommand.h"
 #include "commands/CloseAllTabsCommand.h"
+#include "commands/CloseOtherTabsCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
@@ -71,6 +72,9 @@ int main(int argv, char** args) {
   CommandService::singleton().add(
       std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
 
+  CommandService::singleton().add(
+      std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
+
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
 
@@ -101,8 +105,9 @@ int main(int argv, char** args) {
   auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
   auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
   auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
-  auto closeFileAction = new CommandAction(QObject::tr("&Close"), CloseTabCommand::name);
-  auto closeAllFilesAction = new CommandAction(QObject::tr("&Close All Tabs"), CloseAllTabsCommand::name);
+  auto closeTabAction = new CommandAction(QObject::tr("&Close"), CloseTabCommand::name);
+  auto closeAllTabsAction = new CommandAction(QObject::tr("&Close All Tabs"), CloseAllTabsCommand::name);
+  auto closeOtherTabsAction = new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
 
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);
@@ -111,8 +116,9 @@ int main(int argv, char** args) {
   fileMenu->addAction(saveFileAction);
   fileMenu->addAction(saveAsAction);
   fileMenu->addAction(saveAllAction);
-  fileMenu->addAction(closeFileAction);
-  fileMenu->addAction(closeAllFilesAction);
+  fileMenu->addAction(closeTabAction);
+  fileMenu->addAction(closeAllTabsAction);
+  fileMenu->addAction(closeOtherTabsAction);
 
   return app.exec();
 }
