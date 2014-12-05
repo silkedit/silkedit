@@ -28,3 +28,11 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
   std::list<std::unique_ptr<QAction>> m_recentItemActions;
   std::unique_ptr<QMenu> m_openRecentMenu;
 };
+
+class OpenRecentAction : public QAction {
+  DISABLE_COPY(OpenRecentAction)
+  public:
+    explicit OpenRecentAction(QObject* parent = nullptr);
+    ~OpenRecentAction() = default;
+    DEFAULT_MOVE(OpenRecentAction)
+};
