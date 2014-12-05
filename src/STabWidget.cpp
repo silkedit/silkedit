@@ -12,6 +12,7 @@
 #include "MainWindow.h"
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
+#include "DocumentService.h"
 
 namespace {
 QString getFileNameFrom(const QString& path) {
@@ -127,7 +128,7 @@ int STabWidget::open(const QString& path) {
 
 void STabWidget::addNew() {
   TextEditView* view = new TextEditView();
-  addTab(view, "untitled");
+  addTab(view, DocumentService::DEFAULT_FILE_NAME);
 }
 
 void STabWidget::saveAllTabs() {

@@ -13,6 +13,7 @@ class STabWidget;
 class DocumentService : public Singleton<DocumentService> {
   DISABLE_COPY_AND_MOVE(DocumentService)
  public:
+  static const QString DEFAULT_FILE_NAME;
   ~DocumentService() = default;
 
   bool open(const QString& filename);

@@ -12,6 +12,8 @@
 #include "API.h"
 #include "STabWidget.h"
 
+const QString DocumentService::DEFAULT_FILE_NAME = "untitled";
+
 bool DocumentService::open(const QString& filename) {
   MainWindow* window = API::activeWindow();
   if (window) {
@@ -24,7 +26,7 @@ bool DocumentService::open(const QString& filename) {
 
 void DocumentService::save(const QString& path, QTextDocument* doc) {
   if (path.isEmpty()) {
-    qWarning("path is empty");
+    saveAs(DEFAULT_FILE_NAME, doc);
     return;
   } else if (!doc) {
     qWarning("document is null");
@@ -47,6 +49,9 @@ void DocumentService::save(const QString& path, QTextDocument* doc) {
 
 QString DocumentService::saveAs(const QString& path, QTextDocument* doc) {
   QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), path);
-  save(filePath, doc);
+  if (!filePath.isEmpty()) {
+    save(filePath, doc);
+  }
+
   return filePath;
 }
