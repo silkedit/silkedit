@@ -48,4 +48,7 @@ signals:
   bool m_tabDragging;
 
   void removeTabAndWidget(int index);
+
+private slots:
+  void updateTabTextBasedOn(bool changed);
 };

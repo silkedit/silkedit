@@ -248,6 +248,7 @@ TextEditView* TextEditView::clone() {
 
 void TextEditView::save() {
   DocumentService::singleton().save(m_path, document());
+  emit saved();
 }
 
 void TextEditView::saveAs() {
@@ -255,6 +256,7 @@ void TextEditView::saveAs() {
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
   }
+  emit saved();
 }
 
 void TextEditView::doDelete(int n) {

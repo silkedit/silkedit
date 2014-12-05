@@ -45,6 +45,7 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
 signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
+  void saved();
 
  protected:
   void resizeEvent(QResizeEvent* event) override;

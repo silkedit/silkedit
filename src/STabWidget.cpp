@@ -88,23 +88,13 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView) {
-    QObject::connect(editView, &TextEditView::pathUpdated, [this, w](const QString& path) {
-      setTabText(indexOf(w), getFileNameFrom(path));
+    QObject::connect(editView, &TextEditView::pathUpdated, [this, editView](const QString& path) {
+      setTabText(indexOf(editView), getFileNameFrom(path));
     });
-    if (!editView->document()) {
-      qDebug("editView->document() is null");
-    }
-    QObject::connect(editView, &STextEdit::modificationChanged, [this, w](bool changed) {
-      qDebug("modificationChanged");
-      int index = indexOf(w);
-      QString text = tabText(index);
-      if (changed) {
-        setTabText(index, text + "*");
-      } else if(text.endsWith('*')) {
-        text.chop(1);
-        setTabText(index, text);
-      }
+    QObject::connect(editView, &TextEditView::saved, [editView]() {
+      editView->document()->setModified(false);
     });
+    connect(editView, SIGNAL(modificationChanged(bool)), this, SLOT(updateTabTextBasedOn(bool)));
   } else {
     qDebug("inserted widget is not TextEditView");
   }
@@ -224,6 +214,23 @@ void STabWidget::removeTabAndWidget(int index)
     w->deleteLater();
   }
   removeTab(index);
+}
+
+void STabWidget::updateTabTextBasedOn(bool changed)
+{
+  qDebug("modificationChanged");
+  if (QWidget* w = qobject_cast<QWidget*>(QObject::sender())) {
+    int index = indexOf(w);
+    QString text = tabText(index);
+    if (changed) {
+      setTabText(index, text + "*");
+    } else if(text.endsWith('*')) {
+      text.chop(1);
+      setTabText(index, text);
+    }
+  } else {
+    qDebug("sender is null or not QWidget");
+  }
 }
 
 void STabWidget::detachTabFinished(const QPoint& dropPoint) {
