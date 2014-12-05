@@ -93,6 +93,22 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
     QObject::connect(editView, &TextEditView::pathUpdated, [this, w](const QString& path) {
       setTabText(indexOf(w), getFileNameFrom(path));
     });
+    if (!editView->document()) {
+      qDebug("editView->document() is null");
+    }
+    QObject::connect(editView, &STextEdit::modificationChanged, [this, w](bool changed) {
+      qDebug("modificationChanged");
+      int index = indexOf(w);
+      QString text = tabText(index);
+      if (changed) {
+        setTabText(index, text + "*");
+      } else if(text.endsWith('*')) {
+        text.chop(1);
+        setTabText(index, text);
+      }
+    });
+  } else {
+    qDebug("inserted widget is not TextEditView");
   }
   return QTabWidget::insertTab(index, w, label);
 }
@@ -113,6 +129,7 @@ int STabWidget::open(const QString& path) {
 
   QTextStream in(&file);
   std::shared_ptr<QTextDocument> newDoc(new QTextDocument(in.readAll()));
+  newDoc->setModified(false);
   STextDocumentLayout* layout = new STextDocumentLayout(newDoc.get());
   newDoc->setDocumentLayout(layout);
 
