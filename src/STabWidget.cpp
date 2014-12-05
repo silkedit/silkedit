@@ -57,8 +57,8 @@ STabWidget::STabWidget(QWidget* parent)
   });
 
   QObject::connect(this, &QTabWidget::tabCloseRequested, [this](int index) {
-      qDebug("tab widget (index %i) is deleted", index);
-      removeTabAndWidget(index);
+    qDebug("tab widget (index %i) is deleted", index);
+    removeTabAndWidget(index);
   });
 }
 
@@ -91,9 +91,8 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
     QObject::connect(editView, &TextEditView::pathUpdated, [this, editView](const QString& path) {
       setTabText(indexOf(editView), getFileNameFrom(path));
     });
-    QObject::connect(editView, &TextEditView::saved, [editView]() {
-      editView->document()->setModified(false);
-    });
+    QObject::connect(
+        editView, &TextEditView::saved, [editView]() { editView->document()->setModified(false); });
     connect(editView, SIGNAL(modificationChanged(bool)), this, SLOT(updateTabTextBasedOn(bool)));
   } else {
     qDebug("inserted widget is not TextEditView");
@@ -144,7 +143,8 @@ void STabWidget::closeActiveTab() {
   if (m_activeEditView) {
     if (m_activeEditView->document()->isModified()) {
       QMessageBox msgBox;
-      msgBox.setText(tr("Do you want to save the changes made to the document %1?").arg(getFileNameFrom(m_activeEditView->path())));
+      msgBox.setText(tr("Do you want to save the changes made to the document %1?")
+                         .arg(getFileNameFrom(m_activeEditView->path())));
       msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
       msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
       msgBox.setDefaultButton(QMessageBox::Save);
@@ -152,15 +152,15 @@ void STabWidget::closeActiveTab() {
       int ret = msgBox.exec();
       switch (ret) {
         case QMessageBox::Save:
-            m_activeEditView->save();
-            break;
+          m_activeEditView->save();
+          break;
         case QMessageBox::Discard:
-            break;
+          break;
         case QMessageBox::Cancel:
-            return;
+          return;
         default:
-            qWarning("ret is invalid");
-            return;
+          qWarning("ret is invalid");
+          return;
       }
     }
     removeTabAndWidget(indexOf(m_activeEditView));
@@ -208,23 +208,21 @@ void STabWidget::mouseReleaseEvent(QMouseEvent* event) {
   QTabWidget::mouseReleaseEvent(event);
 }
 
-void STabWidget::removeTabAndWidget(int index)
-{
+void STabWidget::removeTabAndWidget(int index) {
   if (auto w = widget(index)) {
     w->deleteLater();
   }
   removeTab(index);
 }
 
-void STabWidget::updateTabTextBasedOn(bool changed)
-{
+void STabWidget::updateTabTextBasedOn(bool changed) {
   qDebug("modificationChanged");
   if (QWidget* w = qobject_cast<QWidget*>(QObject::sender())) {
     int index = indexOf(w);
     QString text = tabText(index);
     if (changed) {
       setTabText(index, text + "*");
-    } else if(text.endsWith('*')) {
+    } else if (text.endsWith('*')) {
       text.chop(1);
       setTabText(index, text);
     }

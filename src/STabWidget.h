@@ -49,6 +49,6 @@ signals:
 
   void removeTabAndWidget(int index);
 
-private slots:
+ private slots:
   void updateTabTextBasedOn(bool changed);
 };
