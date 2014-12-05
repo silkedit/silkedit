@@ -12,6 +12,13 @@
 #include "MainWindow.h"
 #include "DraggingTabInfo.h"
 
+namespace {
+  QString getFileNameFrom(const QString& path) {
+    QFileInfo info(path);
+    return info.fileName();
+  }
+}
+
 STabWidget::STabWidget(QWidget* parent)
     : QTabWidget(parent), m_tabBar(new STabBar(this)), m_tabDragging(false) {
   connect(m_tabBar,
@@ -76,12 +83,17 @@ STabWidget::~STabWidget() {
 }
 
 int STabWidget::addTab(QWidget* page, const QString& label) {
-  page->setParent(this);
-  return QTabWidget::addTab(page, label);
+  return insertTab(-1, page, label);
 }
 
 int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
+  TextEditView* editView = qobject_cast<TextEditView*>(w);
+  if (editView) {
+    QObject::connect(editView, &TextEditView::pathUpdated, [this, w](const QString& path){
+      setTabText(indexOf(w), getFileNameFrom(path));
+    });
+  }
   return QTabWidget::insertTab(index, w, label);
 }
 
@@ -104,12 +116,9 @@ int STabWidget::open(const QString& path) {
   STextDocumentLayout* layout = new STextDocumentLayout(newDoc.get());
   newDoc->setDocumentLayout(layout);
 
-  QFileInfo info(path);
-  QString label(info.fileName());
-
   TextEditView* view = new TextEditView(path);
   view->setDocument(std::move(newDoc));
-  return addTab(view, label);
+  return addTab(view, getFileNameFrom(path));
 }
 
 void STabWidget::addNew() {

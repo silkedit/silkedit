@@ -36,6 +36,14 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
+void TextEditView::setPath(const QString &path)
+{
+  if (path.isEmpty()) return;
+
+  m_path = path;
+  emit pathUpdated(path);
+}
+
 int TextEditView::lineNumberAreaWidth() {
   int digits = 1;
   int max = qMax(1, blockCount());
@@ -241,6 +249,14 @@ TextEditView* TextEditView::clone() {
 void TextEditView::save()
 {
   DocumentService::singleton().save(m_path, document());
+}
+
+void TextEditView::saveAs()
+{
+  QString newFilePath = DocumentService::singleton().saveAs(m_path, document());
+  if (!newFilePath.isEmpty()) {
+    setPath(newFilePath);
+  }
 }
 
 void TextEditView::doDelete(int n) {

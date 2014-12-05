@@ -8,7 +8,8 @@
     ctrl+cmd+i: toggle_vim_emulation
     cmd+n: new_file
     cmd+o: open_file
-    cmd+s: save_file
+    cmd+s: save
+    shift+cmd+s: save_as
     ctrl+w, s: split_horizontally
     ctrl+w, v: split_vertically
 

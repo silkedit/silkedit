@@ -4,7 +4,7 @@
 #include "API.h"
 #include "TextEditView.h"
 
-const QString SaveFileCommand::name = "save_file";
+const QString SaveFileCommand::name = "save";
 
 SaveFileCommand::SaveFileCommand() : ICommand(SaveFileCommand::name) {
 }

@@ -40,9 +40,11 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   void setThinCursor(bool on);
   TextEditView* clone() override;
   void save();
+  void saveAs();
 
 signals:
   void destroying(const QString& path);
+  void pathUpdated(const QString& path);
 
 protected:
   void resizeEvent(QResizeEvent* event) override;
@@ -58,6 +60,8 @@ protected:
   QWidget* m_lineNumberArea;
   QString m_path;
   std::shared_ptr<QTextDocument> m_document;
+
+  void setPath(const QString& path);
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
