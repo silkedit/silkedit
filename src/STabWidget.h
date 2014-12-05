@@ -29,6 +29,7 @@ class STabWidget : public QTabWidget {
   void closeActiveTab();
   void closeAllTabs();
   void closeOtherTabs();
+  int indexOfPath(const QString& path);
 
 signals:
   void allTabRemoved();

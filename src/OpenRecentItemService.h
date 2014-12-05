@@ -22,6 +22,7 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
 
   QMenu* openRecentMenu() { return m_openRecentMenu.get(); }
   void clear();
+  void reopenLastClosedFile();
 
  public slots:
   void addOpenRecentItem(const QString& path);
@@ -36,6 +37,7 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
   std::list<QString> m_recentItems;
   std::unique_ptr<QMenu> m_openRecentMenu;
   ClearRecentItemListAction* m_clearRecentItemListAction;
+  QAction* m_reopenLastClosedFileAction;
 
   void updateOpenRecentItems();
 };

@@ -2,10 +2,25 @@
 
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
+#include "API.h"
+#include "STabWidget.h"
+#include "CommandAction.h"
+#include "commands/ReopenLastClosedFileCommand.h"
 
 void OpenRecentItemService::clear() {
   m_recentItems.clear();
   updateOpenRecentItems();
+}
+
+void OpenRecentItemService::reopenLastClosedFile()
+{
+  for (auto& path: m_recentItems) {
+    auto tabWidget = API::activeTabWidget();
+    if (tabWidget->indexOfPath(path) < 0) {
+      tabWidget->open(path);
+      return;
+    }
+  }
 }
 
 void OpenRecentItemService::addOpenRecentItem(const QString& path) {
@@ -24,6 +39,10 @@ void OpenRecentItemService::addOpenRecentItem(const QString& path) {
 }
 
 OpenRecentItemService::OpenRecentItemService() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
+  m_reopenLastClosedFileAction = new CommandAction(QObject::tr("&Reopen Last Closed File"), ReopenLastClosedFileCommand::name, m_openRecentMenu.get());
+  m_openRecentMenu->addAction(m_reopenLastClosedFileAction);
+  m_openRecentMenu->addSeparator();
+
   for (int i = 0; i < MAX_RECENT_ITEMS; i++) {
     auto action = new OpenRecentAction(m_openRecentMenu.get());
     action->setVisible(false);
@@ -45,6 +64,7 @@ void OpenRecentItemService::updateOpenRecentItems() {
   }
 
   m_clearRecentItemListAction->setEnabled(m_recentItems.empty() ? false : true);
+  m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   int index = 0;
   for (auto& item : m_recentItems) {
@@ -61,6 +81,8 @@ void OpenRecentItemService::updateOpenRecentItems() {
   }
 }
 
+// OpenRecentAction
+
 OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
   QObject::connect(this, &QAction::triggered, [this]() {
     if (data().isValid()) {
@@ -68,6 +90,8 @@ OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
     }
   });
 }
+
+// ClearRecentItemListAction
 
 ClearRecentItemListAction::ClearRecentItemListAction(QObject* parent)
     : QAction(tr("Clear List"), parent) {

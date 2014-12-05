@@ -102,13 +102,10 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
 }
 
 int STabWidget::open(const QString& path) {
-  for (int i = 0; i < count(); i++) {
-    TextEditView* v = qobject_cast<TextEditView*>(widget(i));
-    QString path2 = v->path();
-    if (v && !path2.isEmpty() && path == path2) {
-      setCurrentIndex(i);
-      return i;
-    }
+  int index = indexOfPath(path);
+  if (index >= 0) {
+    setCurrentIndex(index);
+    return index;
   }
 
   QFile file(path);
@@ -150,13 +147,12 @@ void STabWidget::closeAllTabs() {
     widgets.push_back(widget(i));
   }
 
-  for (auto w: widgets) {
+  for (auto w : widgets) {
     closeTab(w);
   }
 }
 
-void STabWidget::closeOtherTabs()
-{
+void STabWidget::closeOtherTabs() {
   std::list<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
     if (i != currentIndex()) {
@@ -164,9 +160,21 @@ void STabWidget::closeOtherTabs()
     }
   }
 
-  for (auto w: widgets) {
+  for (auto w : widgets) {
     closeTab(w);
   }
+}
+
+int STabWidget::indexOfPath(const QString& path) {
+  for (int i = 0; i < count(); i++) {
+    TextEditView* v = qobject_cast<TextEditView*>(widget(i));
+    QString path2 = v->path();
+    if (v && !path2.isEmpty() && path == path2) {
+      return i;
+    }
+  }
+
+  return -1;
 }
 
 void STabWidget::detachTabStarted(int index, const QPoint&) {
@@ -217,7 +225,7 @@ void STabWidget::removeTabAndWidget(int index) {
   removeTab(index);
 }
 
-void STabWidget::closeTab(QWidget *w) {
+void STabWidget::closeTab(QWidget* w) {
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView && editView->document()->isModified()) {
     QMessageBox msgBox;

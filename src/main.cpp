@@ -18,6 +18,7 @@
 #include "commands/CloseTabCommand.h"
 #include "commands/CloseAllTabsCommand.h"
 #include "commands/CloseOtherTabsCommand.h"
+#include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
@@ -28,10 +29,6 @@
 
 int main(int argv, char** args) {
   SilkApp app(argv, args);
-
-  MainWindow* w = MainWindow::create();
-  w->activeTabWidget()->addNew();
-  w->show();
 
   ConfigService::singleton().load();
 
@@ -75,6 +72,9 @@ int main(int argv, char** args) {
   CommandService::singleton().add(
       std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
 
+  CommandService::singleton().add(
+      std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
+
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
 
@@ -89,6 +89,10 @@ int main(int argv, char** args) {
 
   //   Load keymap settings after registering commands
   KeymapService::singleton().load();
+
+  MainWindow* w = MainWindow::create();
+  w->activeTabWidget()->addNew();
+  w->show();
 
   //   Set focus to active edit view
   if (auto v = w->activeTabWidget()->activeEditView()) {
