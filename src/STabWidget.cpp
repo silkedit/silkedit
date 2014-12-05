@@ -136,6 +136,11 @@ void STabWidget::saveAllTabs()
   }
 }
 
+void STabWidget::closeActiveTab()
+{
+  removeTab(indexOf(m_activeEditView));
+}
+
 void STabWidget::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;
