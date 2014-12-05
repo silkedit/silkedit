@@ -29,12 +29,15 @@ void OpenRecentItemService::addOpenRecentItem(const QString& path) {
     return;
   }
 
-  if (std::find(m_recentItems.begin(), m_recentItems.end(), path) != m_recentItems.end()) {
+  auto foundIter = std::find(m_recentItems.begin(), m_recentItems.end(), path);
+  if (foundIter != m_recentItems.end()) {
+    // Move found item to top
+    m_recentItems.splice(m_recentItems.begin(), m_recentItems, foundIter);
     qDebug() << path << "is already in recent file list";
-    return;
+  } else {
+    m_recentItems.push_front(path);
   }
 
-  m_recentItems.push_front(path);
   updateOpenRecentItems();
 }
 
@@ -68,7 +71,6 @@ void OpenRecentItemService::updateOpenRecentItems() {
 
   int index = 0;
   for (auto& item : m_recentItems) {
-    qDebug("add recent menu item");
     m_recentItemActions[index]->setText(item);
     m_recentItemActions[index]->setData(item);
     m_recentItemActions[index]->setVisible(true);
