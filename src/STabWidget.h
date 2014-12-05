@@ -46,4 +46,6 @@ signals:
   TextEditView* m_activeEditView;
   STabBar* m_tabBar;
   bool m_tabDragging;
+
+  void removeTabAndWidget(int index);
 };

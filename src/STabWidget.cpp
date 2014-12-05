@@ -57,11 +57,8 @@ STabWidget::STabWidget(QWidget* parent)
   });
 
   QObject::connect(this, &QTabWidget::tabCloseRequested, [this](int index) {
-    if (QWidget* w = widget(index)) {
-      QTabWidget::removeTab(index);
       qDebug("tab widget (index %i) is deleted", index);
-      w->deleteLater();
-    }
+      removeTabAndWidget(index);
   });
 }
 
@@ -176,7 +173,7 @@ void STabWidget::closeActiveTab() {
             return;
       }
     }
-    removeTab(indexOf(m_activeEditView));
+    removeTabAndWidget(indexOf(m_activeEditView));
   }
 }
 
@@ -219,6 +216,14 @@ void STabWidget::tabRemoved(int) {
 void STabWidget::mouseReleaseEvent(QMouseEvent* event) {
   qDebug("mouseReleaseEvent in STabWidget");
   QTabWidget::mouseReleaseEvent(event);
+}
+
+void STabWidget::removeTabAndWidget(int index)
+{
+  if (auto w = widget(index)) {
+    w->deleteLater();
+  }
+  removeTab(index);
 }
 
 void STabWidget::detachTabFinished(const QPoint& dropPoint) {
