@@ -27,6 +27,7 @@ class STabWidget : public QTabWidget {
   bool tabDragging() { return m_tabDragging; }
   void saveAllTabs();
   void closeActiveTab();
+  void closeAllTabs();
 
 signals:
   void allTabRemoved();
@@ -48,6 +49,7 @@ signals:
   bool m_tabDragging;
 
   void removeTabAndWidget(int index);
+  void closeTab(QWidget* w);
 
  private slots:
   void updateTabTextBasedOn(bool changed);

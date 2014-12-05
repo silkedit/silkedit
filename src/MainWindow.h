@@ -29,6 +29,7 @@ class MainWindow : public QMainWindow {
   void show();
   void close();
   void saveAllTabs();
+  void closeAllTabs();
   void splitTabHorizontally();
   void splitTabVertically();
 

@@ -105,6 +105,12 @@ void MainWindow::saveAllTabs() {
   }
 }
 
+void MainWindow::closeAllTabs() {
+  for (auto tabWidget : m_tabWidgets) {
+    tabWidget->closeAllTabs();
+  }
+}
+
 void MainWindow::splitTabHorizontally() {
   splitTab(std::bind(
       &MainWindow::addTabWidgetHorizontally, this, std::placeholders::_1, std::placeholders::_2));

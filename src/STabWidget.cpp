@@ -140,30 +140,18 @@ void STabWidget::saveAllTabs() {
 }
 
 void STabWidget::closeActiveTab() {
-  if (m_activeEditView) {
-    if (m_activeEditView->document()->isModified()) {
-      QMessageBox msgBox;
-      msgBox.setText(tr("Do you want to save the changes made to the document %1?")
-                         .arg(getFileNameFrom(m_activeEditView->path())));
-      msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
-      msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-      msgBox.setDefaultButton(QMessageBox::Save);
-      msgBox.setIconPixmap(SilkApp::windowIcon().pixmap(64, 64));
-      int ret = msgBox.exec();
-      switch (ret) {
-        case QMessageBox::Save:
-          m_activeEditView->save();
-          break;
-        case QMessageBox::Discard:
-          break;
-        case QMessageBox::Cancel:
-          return;
-        default:
-          qWarning("ret is invalid");
-          return;
-      }
-    }
-    removeTabAndWidget(indexOf(m_activeEditView));
+  closeTab(currentWidget());
+}
+
+void STabWidget::closeAllTabs() {
+  std::list<QWidget*> widgets;
+  for (int i = 0; i < count(); i++) {
+    widgets.push_back(widget(i));
+  }
+
+  for (auto w: widgets) {
+    qDebug("closing widget");
+    closeTab(w);
   }
 }
 
@@ -215,8 +203,38 @@ void STabWidget::removeTabAndWidget(int index) {
   removeTab(index);
 }
 
+void STabWidget::closeTab(QWidget *w) {
+  TextEditView* editView = qobject_cast<TextEditView*>(w);
+  if (editView && editView->document()->isModified()) {
+    QMessageBox msgBox;
+    msgBox.setText(tr("Do you want to save the changes made to the document %1?")
+                       .arg(getFileNameFrom(editView->path())));
+    msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
+    msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Save);
+    msgBox.setIconPixmap(SilkApp::windowIcon().pixmap(64, 64));
+    int ret = msgBox.exec();
+    switch (ret) {
+      case QMessageBox::Save:
+        editView->save();
+        break;
+      case QMessageBox::Discard:
+        break;
+      case QMessageBox::Cancel:
+        return;
+      default:
+        qWarning("ret is invalid");
+        return;
+    }
+  } else {
+    qDebug("widget is not TextEditView or not modified");
+  }
+
+  removeTabAndWidget(indexOf(w));
+}
+
 void STabWidget::updateTabTextBasedOn(bool changed) {
-  qDebug("modificationChanged");
+  qDebug() << "updateTabTextBasedOn. changed:" << changed;
   if (QWidget* w = qobject_cast<QWidget*>(QObject::sender())) {
     int index = indexOf(w);
     QString text = tabText(index);
