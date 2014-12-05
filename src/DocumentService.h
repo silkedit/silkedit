@@ -16,6 +16,7 @@ class DocumentService : public Singleton<DocumentService> {
   ~DocumentService() = default;
 
   bool open(const QString& filename);
+  void save(const QString& path, QTextDocument* document);
 
  private:
   friend class Singleton<DocumentService>;

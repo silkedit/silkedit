@@ -5,6 +5,7 @@
 #include "KeymapService.h"
 #include "CommandService.h"
 #include "OpenRecentItemService.h"
+#include "DocumentService.h"
 
 TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(parent), m_path(path) {
   m_lineNumberArea = new LineNumberArea(this);
@@ -235,6 +236,11 @@ TextEditView* TextEditView::clone() {
   TextEditView* editView = new TextEditView(path());
   editView->setDocument(m_document);
   return editView;
+}
+
+void TextEditView::save()
+{
+  DocumentService::singleton().save(m_path, document());
 }
 
 void TextEditView::doDelete(int n) {

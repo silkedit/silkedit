@@ -38,29 +38,31 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   void doUndo(int n);
   void doRedo(int n);
   void setThinCursor(bool on);
+  TextEditView* clone() override;
+  void save();
 
-  void resizeEvent(QResizeEvent* event);
-  void paintEvent(QPaintEvent* e);
-  void wheelEvent(QWheelEvent* event);
+signals:
+  void destroying(const QString& path);
+
+protected:
+  void resizeEvent(QResizeEvent* event) override;
+  void paintEvent(QPaintEvent* e) override;
+  void wheelEvent(QWheelEvent* event) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   int firstNonBlankCharPos(const QString& text);
   bool isTabOrSpace(const QChar ch);
   void moveToFirstNonBlankChar(QTextCursor& cur);
-  TextEditView* clone() override;
-
-signals:
-  void destroying(const QString& path);
-
- private slots:
-  void updateLineNumberAreaWidth(int newBlockCount);
-  void highlightCurrentLine();
-  void updateLineNumberArea(const QRect&, int);
 
  private:
   QWidget* m_lineNumberArea;
   QString m_path;
   std::shared_ptr<QTextDocument> m_document;
+
+ private slots:
+  void updateLineNumberAreaWidth(int newBlockCount);
+  void highlightCurrentLine();
+  void updateLineNumberArea(const QRect&, int);
 };
 
 class LineNumberArea : public QWidget {

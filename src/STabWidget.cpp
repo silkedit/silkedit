@@ -85,7 +85,6 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   return QTabWidget::insertTab(index, w, label);
 }
 
-// todo: Move this method to tab group later
 int STabWidget::open(const QString& path) {
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
