@@ -63,8 +63,7 @@ int main(int argv, char** args) {
   std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
   CommandService::singleton().add(std::move(saveAllCmd));
 
-  CommandService::singleton().add(
-      std::move(std::unique_ptr<CloseTabCommand>(new CloseTabCommand)));
+  CommandService::singleton().add(std::move(std::unique_ptr<CloseTabCommand>(new CloseTabCommand)));
 
   CommandService::singleton().add(
       std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
@@ -110,8 +109,10 @@ int main(int argv, char** args) {
   auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
   auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
   auto closeTabAction = new CommandAction(QObject::tr("&Close"), CloseTabCommand::name);
-  auto closeAllTabsAction = new CommandAction(QObject::tr("&Close All Tabs"), CloseAllTabsCommand::name);
-  auto closeOtherTabsAction = new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
+  auto closeAllTabsAction =
+      new CommandAction(QObject::tr("&Close All Tabs"), CloseAllTabsCommand::name);
+  auto closeOtherTabsAction =
+      new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
 
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);

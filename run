@@ -8,7 +8,7 @@ NC='\x1B[0m' # No Color
 
 format() {
     find src -name \*.cpp -or -name \*.h | xargs clang-format -i
-    if [ x"$1" = '-commit' ]; then
+    if [ "$1" = '-commit' ]; then
         git commit -am "clang-format"
     fi
 }

@@ -12,9 +12,8 @@ void OpenRecentItemService::clear() {
   updateOpenRecentItems();
 }
 
-void OpenRecentItemService::reopenLastClosedFile()
-{
-  for (auto& path: m_recentItems) {
+void OpenRecentItemService::reopenLastClosedFile() {
+  for (auto& path : m_recentItems) {
     auto tabWidget = API::activeTabWidget();
     if (tabWidget->indexOfPath(path) < 0) {
       tabWidget->open(path);
@@ -42,7 +41,9 @@ void OpenRecentItemService::addOpenRecentItem(const QString& path) {
 }
 
 OpenRecentItemService::OpenRecentItemService() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
-  m_reopenLastClosedFileAction = new CommandAction(QObject::tr("&Reopen Last Closed File"), ReopenLastClosedFileCommand::name, m_openRecentMenu.get());
+  m_reopenLastClosedFileAction = new CommandAction(QObject::tr("&Reopen Last Closed File"),
+                                                   ReopenLastClosedFileCommand::name,
+                                                   m_openRecentMenu.get());
   m_openRecentMenu->addAction(m_reopenLastClosedFileAction);
   m_openRecentMenu->addSeparator();
 
