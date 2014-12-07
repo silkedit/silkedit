@@ -20,6 +20,7 @@
     cmd+x: cut
     cmd+c: copy
     cmd+v: paste
+    cmd+a: select_all
 
 # Normal mode keymap
 
