@@ -5,6 +5,8 @@
 
 class UndoCommand : public ICommand {
  public:
+  static const QString name;
+
   UndoCommand();
   ~UndoCommand() = default;
   DEFAULT_COPY_AND_MOVE(UndoCommand)

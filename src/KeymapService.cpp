@@ -15,30 +15,26 @@
 namespace {
 
 std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
-  if (contextNode.IsDefined()) {
-    QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
-    QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
-    if (list.size() != 3) {
-      qWarning() << "context must be \"key operator operand\". size: " << list.size();
-    } else {
-      QString key = list[0];
-
-      // Parse operator expression
-      QString opStr = list[1];
-      Operator op = Operator::EQUALS;
-      if (opStr == "==") {
-        op = Operator::EQUALS;
-      }
-
-      QString operand = list[2];
-
-      std::shared_ptr<IContext> context = ContextService::singleton().tryCreate(key, op, operand);
-      if (context) {
-        return context;
-      }
-    }
+  QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
+  QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
+  if (list.size() != 3) {
+    qWarning() << "context must be \"key operator operand\". size: " << list.size();
   } else {
-    return ContextService::singleton().createDefault();
+    QString key = list[0];
+
+    // Parse operator expression
+    QString opStr = list[1];
+    Operator op = Operator::EQUALS;
+    if (opStr == "==") {
+      op = Operator::EQUALS;
+    }
+
+    QString operand = list[2];
+
+    std::shared_ptr<IContext> context = ContextService::singleton().tryCreate(key, op, operand);
+    if (context) {
+      return context;
+    }
   }
 
   return nullptr;
@@ -112,11 +108,14 @@ void KeymapService::load(const QString& filename) {
       assert(node.IsMap());
 
       YAML::Node contextNode = node["context"];
-      std::shared_ptr<IContext> context = parseContext(contextNode);
-      if (!context) {
-        qWarning() << "can't find a context: "
-                   << QString::fromUtf8(contextNode.as<std::string>().c_str());
-        continue;
+      std::shared_ptr<IContext> context = nullptr;
+      if (contextNode.IsDefined()) {
+        context = parseContext(contextNode);
+        if (!context) {
+          qWarning() << "can't find a context: "
+                     << QString::fromUtf8(contextNode.as<std::string>().c_str());
+          continue;
+        }
       }
 
       YAML::Node keymap = node["keymap"];
@@ -199,7 +198,8 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
 }
 
 boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
-  if (m_cmdShortcuts.find(cmdName) != m_cmdShortcuts.end()) {
+  auto foundIter = m_cmdShortcuts.find(cmdName);
+  if (foundIter != m_cmdShortcuts.end() && m_keymaps.at(foundIter->second).hasContext() == false) {
     return m_cmdShortcuts.at(cmdName);
   } else {
     return boost::none;

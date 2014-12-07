@@ -103,6 +103,8 @@ int main(int argv, char** args) {
   }
 
   QMenuBar menuBar(nullptr);
+
+  // File Menu actions
   auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenFileCommand::name);
   auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
   auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
@@ -114,6 +116,7 @@ int main(int argv, char** args) {
   auto closeOtherTabsAction =
       new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
 
+  // File Menu
   auto fileMenu = menuBar.addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);
   fileMenu->addAction(openFileAction);
@@ -124,6 +127,13 @@ int main(int argv, char** args) {
   fileMenu->addAction(closeTabAction);
   fileMenu->addAction(closeAllTabsAction);
   fileMenu->addAction(closeOtherTabsAction);
+
+  // Edit Menu actions
+  auto undoAction = new CommandAction(QObject::tr("&Undo"), UndoCommand::name);
+
+  // Edit Menu
+  auto editMenu = menuBar.addMenu(QObject::tr("&Edit"));
+  editMenu->addAction(undoAction);
 
   return app.exec();
 }

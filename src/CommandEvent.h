@@ -22,6 +22,7 @@ class CommandEvent {
   QString cmdName() { return m_cmdName; }
 
   bool execute(int repeat = 1);
+  bool hasContext();
 
  private:
   QString m_cmdName;

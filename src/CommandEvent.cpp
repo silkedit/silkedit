@@ -26,3 +26,8 @@ bool CommandEvent::execute(int repeat) {
 
   return false;
 }
+
+bool CommandEvent::hasContext()
+{
+  return m_context != nullptr;
+}

@@ -3,7 +3,9 @@
 #include "UndoCommand.h"
 #include "API.h"
 
-UndoCommand::UndoCommand() : ICommand("undo") {
+const QString UndoCommand::name = "undo";
+
+UndoCommand::UndoCommand() : ICommand(name) {
 }
 
 void UndoCommand::doRun(const CommandArgument&, int repeat) {

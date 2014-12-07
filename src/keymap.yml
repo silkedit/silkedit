@@ -15,6 +15,7 @@
     shift+cmd+t: reopen_last_closed_file
     ctrl+w, s: split_horizontally
     ctrl+w, v: split_vertically
+    cmd+z: undo
 
 # Normal mode keymap
 

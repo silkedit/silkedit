@@ -7,7 +7,6 @@
 #include "stlSpecialization.h"
 #include "IContext.h"
 #include "Singleton.h"
-#include "DefaultContext.h"
 
 class QString;
 
@@ -20,9 +19,6 @@ class ContextService : public Singleton<ContextService> {
   void add(const QString& key, std::unique_ptr<IContextCreator> creator);
   void remove(const QString& key);
   std::shared_ptr<IContext> tryCreate(const QString& key, Operator op, const QString& operand);
-  std::shared_ptr<DefaultContext> createDefault() {
-    return std::shared_ptr<DefaultContext>(new DefaultContext());
-  }
 
  private:
   friend class Singleton<ContextService>;
