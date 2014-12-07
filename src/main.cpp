@@ -23,6 +23,8 @@
 #include "commands/DeleteCommand.h"
 #include "commands/UndoCommand.h"
 #include "commands/RedoCommand.h"
+#include "commands/CutCommand.h"
+#include "commands/PasteCommand.h"
 #include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
@@ -73,6 +75,9 @@ int main(int argv, char** args) {
 
   CommandService::singleton().add(
       std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
+
+  CommandService::singleton().add(std::move(std::unique_ptr<CutCommand>(new CutCommand)));
+  CommandService::singleton().add(std::move(std::unique_ptr<PasteCommand>(new PasteCommand)));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
@@ -131,11 +136,16 @@ int main(int argv, char** args) {
   // Edit Menu actions
   auto undoAction = new CommandAction(QObject::tr("&Undo"), UndoCommand::name);
   auto redoAction = new CommandAction(QObject::tr("&Redo"), RedoCommand::name);
+  auto cutAction = new CommandAction(QObject::tr("&Cut"), CutCommand::name);
+  auto pasteAction = new CommandAction(QObject::tr("&Paste"), PasteCommand::name);
 
   // Edit Menu
   auto editMenu = menuBar.addMenu(QObject::tr("&Edit"));
   editMenu->addAction(undoAction);
   editMenu->addAction(redoAction);
+  editMenu->addSeparator();
+  editMenu->addAction(cutAction);
+  editMenu->addAction(pasteAction);
 
   return app.exec();
 }

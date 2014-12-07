@@ -17,6 +17,8 @@
     ctrl+w, v: split_vertically
     cmd+z: undo
     cmd+shift+z: redo
+    cmd+x: cut
+    cmd+v: paste
 
 # Normal mode keymap
 
