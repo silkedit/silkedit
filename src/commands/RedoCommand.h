@@ -5,6 +5,8 @@
 
 class RedoCommand : public ICommand {
  public:
+  static const QString name;
+
   RedoCommand();
   ~RedoCommand() = default;
   DEFAULT_COPY_AND_MOVE(RedoCommand)

@@ -130,10 +130,12 @@ int main(int argv, char** args) {
 
   // Edit Menu actions
   auto undoAction = new CommandAction(QObject::tr("&Undo"), UndoCommand::name);
+  auto redoAction = new CommandAction(QObject::tr("&Redo"), RedoCommand::name);
 
   // Edit Menu
   auto editMenu = menuBar.addMenu(QObject::tr("&Edit"));
   editMenu->addAction(undoAction);
+  editMenu->addAction(redoAction);
 
   return app.exec();
 }

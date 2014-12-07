@@ -16,6 +16,7 @@
     ctrl+w, s: split_horizontally
     ctrl+w, v: split_vertically
     cmd+z: undo
+    cmd+shift+z: redo
 
 # Normal mode keymap
 
