@@ -18,6 +18,7 @@
     cmd+z: undo
     cmd+shift+z: redo
     cmd+x: cut
+    cmd+c: copy
     cmd+v: paste
 
 # Normal mode keymap
