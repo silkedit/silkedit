@@ -31,8 +31,8 @@ struct Regex {
   int lastIndex;
   int lastFound;
 
-  Regex() : re(nullptr) {}
-  Regex(const QString& pattern) : re(new QRegularExpression(pattern)) {}
+  Regex() : re(nullptr), lastIndex(0), lastFound(0) {}
+  Regex(const QString& pattern) : re(new QRegularExpression(pattern)), lastIndex(0), lastFound(0) {}
 
   MatchObject* find(const QString& data, int pos);
   // func (r *Regex) Find(data string, pos int) MatchObject {

@@ -368,7 +368,7 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
         pat = pair.first;
         ret = pair.second;
       } else {
-//        qDebug() << "Not found in repository:" << include;
+        qWarning() << "Not found in repository:" << include;
       }
     } else if (z == '$') {
       // todo: implement tmLanguage $ include directives
@@ -565,7 +565,7 @@ Language* LanguageProvider::languageFromFile(const QString& fn) {
 
   QVariant root = PListParser::parsePList(&file);
   if (!root.canConvert<QVariantMap>()) {
-//    qDebug("root is not dict");
+    qWarning("root is not dict");
     return nullptr;
   }
 
