@@ -251,6 +251,11 @@ Region Node::updateRange() {
   return range;
 }
 
+QString Node::toString() const
+{
+  return format("");
+}
+
 QString Node::format(QString indent) const {
   if (children.length() == 0) {
     return indent +
@@ -285,7 +290,7 @@ Pattern::Pattern(const QString& p_include)
 }
 
 std::pair<Pattern*, MatchObject*> Pattern::firstMatch(const QString& data, int pos) {
-  qDebug("firstMatch. pos: %d", pos);
+//  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* pat = nullptr;
   MatchObject* ret = nullptr;
@@ -307,7 +312,6 @@ std::pair<Pattern*, MatchObject*> Pattern::firstMatch(const QString& data, int p
       i++;
     } else {
       // If it wasn't found now, it'll never be found, so the pattern can be popped from the cache
-      qDebug("cachedPattenrs->removeFirst");
       cachedPatterns->removeAt(i);
     }
   }
@@ -315,14 +319,14 @@ std::pair<Pattern*, MatchObject*> Pattern::firstMatch(const QString& data, int p
 }
 
 std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
-  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
+//  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedData.isEmpty() && cachedData == data) {
     if (!cachedMatch) {
-      qDebug("cachedMatch is null");
+//      qDebug("cachedMatch is null");
       return std::make_pair(nullptr, nullptr);
     }
     if ((*cachedMatch)[0] >= pos && cachedPat->cachedMatch) {
-      qDebug("hits++");
+//      qDebug("hits++");
       hits++;
       return std::make_pair(cachedPat, cachedMatch);
     }
@@ -342,7 +346,7 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
       Q_ASSERT(cachedPatterns->size() == 0);
     }
   }
-  qDebug("misses++");
+//  qDebug("misses++");
   misses++;
 
   Pattern* pat = nullptr;
@@ -358,13 +362,13 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
     if (z == '#') {
       QString key = include.mid(1, include.length() - 1);
       if (owner->repository.contains(key)) {
-        qDebug("include %s", qPrintable(include));
+//        qDebug("include %s", qPrintable(include));
         Pattern* p2 = owner->repository.value(key);
         auto pair = p2->cache(data, pos);
         pat = pair.first;
         ret = pair.second;
       } else {
-        qDebug() << "Not found in repository:" << include;
+//        qDebug() << "Not found in repository:" << include;
       }
     } else if (z == '$') {
       // todo: implement tmLanguage $ include directives
@@ -390,7 +394,7 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
 }
 
 Node* Pattern::createNode(const QString& data, int pos, DataSource* d, MatchObject* mo) {
-  qDebug() << "createNode. mo:" << *mo;
+//  qDebug() << "createNode. mo:" << *mo;
   Node* ret = new Node(name, Region((*mo)[0], (*mo)[1]), d);
 
   if (match.re) {
@@ -561,7 +565,7 @@ Language* LanguageProvider::languageFromFile(const QString& fn) {
 
   QVariant root = PListParser::parsePList(&file);
   if (!root.canConvert<QVariantMap>()) {
-    qDebug("root is not dict");
+//    qDebug("root is not dict");
     return nullptr;
   }
 
@@ -642,7 +646,7 @@ int Region::end() const {
 }
 
 MatchObject* Regex::find(const QString& data, int pos) {
-  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
+//  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
   if (lastIndex > pos) {
     lastFound = 0;
   }

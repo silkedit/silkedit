@@ -204,8 +204,10 @@ class Node {
   Region updateRange();
   //  func (n *Node) UpdateRange() text.Region {
 
+  QString toString() const;
+
   friend QDebug operator<<(QDebug dbg, const Node& node) {
-    dbg.nospace() << node.format("");
+    dbg.nospace() << node.toString();
     return dbg.space();
   }
 

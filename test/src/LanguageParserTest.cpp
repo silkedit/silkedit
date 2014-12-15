@@ -2,6 +2,21 @@
 
 #include "TmLanguage.h"
 
+namespace {
+  void compareLineByLine(const QString& str1, const QString& str2) {
+    QStringList list1 = str1.split('\n');
+    QStringList list2 = str2.split('\n');
+    if (str1.size() != str2.size()) {
+      qDebug() << str1;
+    }
+    QCOMPARE(list1.size(), list2.size());
+
+    for (int i = 0; i < list1.size(); i++) {
+      QCOMPARE(list1.at(i), list2.at(i));
+    }
+  }
+}
+
 class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
@@ -85,8 +100,12 @@ void LanguageParserTest::parseTmLanguage()
   QTextStream in(&file);
   LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
   Node* root = parser->parse();
-  qDebug("finish parsing.");
-  qDebug() << *root;
+
+  QFile resFile("testdata/plist2.tmlang.res");
+  QVERIFY(resFile.open(QIODevice::ReadOnly));
+
+  QTextStream resIn(&resFile);
+  compareLineByLine(root->toString(), resIn.readAll());
 }
 
 void LanguageParserTest::regexFind()
