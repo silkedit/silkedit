@@ -15,9 +15,12 @@ file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
 configure_file("src/keymap.yml" "keymap.yml" COPYONLY)
 configure_file("src/config.yml" "config.yml" COPYONLY)
+file(COPY "packages" DESTINATION .)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Xml REQUIRED)
+find_package(Qt5Test REQUIRED)
 
 IF (APPLE)
   find_library(CoreFoundationLibrary CoreFoundation)
@@ -29,4 +32,7 @@ link_directories(lib stextedit/build)
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
 
-target_link_libraries(SilkEdit Qt5::Widgets ruby-2.1.3 yaml-cpp-0.5.1 stextedit ${CoreFoundationLibrary})
+target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml ruby-2.1.3 yaml-cpp-0.5.1 stextedit ${CoreFoundationLibrary})
+
+ENABLE_TESTING()
+add_subdirectory(test)

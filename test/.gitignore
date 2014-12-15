@@ -1,0 +1,8 @@
+.DS_Store
+CMakeLists.txt.user
+*.autosave
+
+build/
+ruby_host/ruby_host
+lib/
+include/

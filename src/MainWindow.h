@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow {
  private:
   static QList<MainWindow*> s_windows;
 
-  MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+  explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   STabWidget* m_activeTabWidget;
   std::list<STabWidget*> m_tabWidgets;
   QBoxLayout* m_rootLayout;
