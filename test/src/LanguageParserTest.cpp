@@ -28,7 +28,7 @@ class LanguageParserTest : public QObject {
 };
 
 void LanguageParserTest::LanguageFromFile() {
-  Language* lang = LanguageProvider::languageFromFile("packages/C++.tmLanguage");
+  Language* lang = LanguageProvider::languageFromFile("testdata/C++.tmLanguage");
 
   // fileTypes
   QCOMPARE(lang->fileTypes.size(), 13);
@@ -80,7 +80,7 @@ void LanguageParserTest::LanguageFromFile() {
 
 void LanguageParserTest::LanguageFromScope()
 {
-  Language* lang = LanguageProvider::languageFromFile("packages/C++.tmLanguage");
+  Language* lang = LanguageProvider::languageFromFile("testdata/C++.tmLanguage");
   Language* langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
   QVERIFY(langFromScope);
   QVERIFY(!LanguageProvider::languageFromScope("missing scope"));
