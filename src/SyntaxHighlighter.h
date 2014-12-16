@@ -1,9 +1,11 @@
 #pragma once
 
+#include <memory>
 #include <QSyntaxHighlighter>
 
 #include "macros.h"
 #include "TmLanguage.h"
+#include "Theme.h"
 
 // The SyntaxHighlighter interface is responsible for
 // identifying the extent and name of code scopes given
@@ -21,6 +23,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   DISABLE_COPY(SyntaxHighlighter)
 
  public:
+  ~SyntaxHighlighter() = default;
   DEFAULT_MOVE(SyntaxHighlighter)
 
   static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
@@ -37,6 +40,8 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   // fast as possible.
   QString scopeName(int point);
 
+  void setTheme(const QString& themeFileName);
+
  protected:
   void highlightBlock(const QString& text) override;
 
@@ -45,9 +50,9 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
+  std::unique_ptr<Theme> m_theme;
 
   SyntaxHighlighter(QTextDocument* doc, Node* root);
-  ~SyntaxHighlighter() = default;
 
   // Given a text region, returns the innermost node covering that region.
   // Side-effects: Writes to m_lastScopeBuf...

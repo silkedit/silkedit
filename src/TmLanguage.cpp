@@ -645,6 +645,11 @@ int Region::end() const {
   return qMax(a, b);
 }
 
+int Region::length() const
+{
+  return end() - begin();
+}
+
 MatchObject* Regex::find(const QString& data, int pos) {
 //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
   if (lastIndex > pos) {

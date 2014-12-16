@@ -5,35 +5,18 @@
 #include "PListParser.h"
 #include "Util.h"
 
-SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, Node *root) : QSyntaxHighlighter(doc), m_rootNode(root), m_lastScopeNode(nullptr) {
-
-//  QString fileName = "packages/Solarized (Light).tmTheme";
-//  QFile file(fileName);
-//  if (!file.open(QIODevice::ReadOnly)) {
-//    qWarning("unable to open a file");
-//    return;
-//  }
-
-//  QVariant root = PListParser::parsePList(&file);
-//  if (!root.canConvert<QVariantMap>()) {
-//    qDebug("root is not dict");
-//    return;
-//  }
-
-//  QVariantMap rootMap = root.toMap();
-//  QString name = rootMap["name"].toString();
-  //  qDebug() << "Theme name:" << name;
+SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, Node* root)
+    : QSyntaxHighlighter(doc), m_rootNode(root), m_lastScopeNode(nullptr) {
 }
 
-SyntaxHighlighter *SyntaxHighlighter::create(QTextDocument *doc, LanguageParser *parser)
-{
+SyntaxHighlighter* SyntaxHighlighter::create(QTextDocument* doc, LanguageParser* parser) {
   Node* rootNode = parser->parse();
+//  qDebug() << *rootNode;
   if (rootNode) {
     return new SyntaxHighlighter(doc, rootNode);
   } else {
     return nullptr;
   }
-
 }
 
 Region SyntaxHighlighter::scopeExtent(int point) {
@@ -49,7 +32,52 @@ QString SyntaxHighlighter::scopeName(int point) {
   return m_lastScopeName;
 }
 
+void SyntaxHighlighter::setTheme(const QString& themeFileName) {
+  m_theme.reset(Theme::loadTheme(themeFileName));
+}
+
 void SyntaxHighlighter::highlightBlock(const QString& text) {
+  qDebug("highlightBlock. text: %s", qPrintable(text));
+  if (!m_theme) {
+    return;
+  }
+
+  int pos = currentBlock().position();
+  for (int i = 0; i < text.length();) {
+    updateScope(pos + i);
+    if (!m_lastScopeNode) {
+      qDebug("lastScopeNode is null. after updateScope(%d)", pos + i);
+      return;
+    }
+
+    if (m_lastScopeNode->isLeaf()) {
+      Region region = m_lastScopeNode->range;
+      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
+      std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
+      if (format) {
+//        qDebug("setFormat(%d, %d, %s",
+//               i,
+//               qMin(text.length(), region.length()),
+//               qPrintable(format->foreground().color().name()));
+        setFormat(i, qMin(text.length(), region.length()), *format);
+      } else {
+        qDebug("format not found for %s", qPrintable(m_lastScopeName));
+      }
+      i += region.length();
+    } else {
+      std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
+      if (format) {
+//        qDebug("setFormat(%d, %d, %s",
+//               i,
+//               1,
+//               qPrintable(format->foreground().color().name()));
+        setFormat(i, 1, *format);
+      } else {
+        qDebug("format not found for %s", qPrintable(m_lastScopeName));
+      }
+      i++;
+    }
+  }
 }
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
@@ -74,11 +102,13 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
     idx++;
   }
 
-  if (node != m_lastScopeNode && node->range.covers(search) && !node->name.isEmpty()) {
-    if (m_lastScopeBuf.length() > 0) {
-      m_lastScopeBuf.append(' ');
+  if (node != m_lastScopeNode && node->range.covers(search)) {
+    if (!node->name.isEmpty()) {
+      if (m_lastScopeBuf.length() > 0) {
+        m_lastScopeBuf.append(' ');
+      }
+      m_lastScopeBuf.append(node->name);
     }
-    m_lastScopeBuf.append(node->name);
     return node;
   }
 

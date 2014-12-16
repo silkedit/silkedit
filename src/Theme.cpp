@@ -6,6 +6,8 @@ const QString nameStr = "name";
 const QString scopeStr = "scope";
 const QString settingsStr = "settings";
 const QString uuidStr = "uuid";
+const QString foregroundStr = "foreground";
+const QString backgroundStr = "background";
 
 Settings* toSettings(QVariant var) {
   if (!var.canConvert<QVariantMap>()) {
@@ -42,7 +44,11 @@ ScopeSetting* toScopeSetting(QVariant var) {
 
   // scope
   if (map.contains(scopeStr)) {
-    scopeSetting->scope = map.value(scopeStr).toString();
+    QStringList scopeList = map.value(scopeStr).toString().split(',');
+    for (int i = 0; i < scopeList.length(); i++) {
+      scopeList[i] = scopeList[i].trimmed();
+    }
+    scopeSetting->scopes = scopeList;
   }
 
   // settings
@@ -84,9 +90,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   // settings
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach (const QVariant& var, settingList) {
-      theme->settings.append(toScopeSetting(var));
-    }
+    foreach (const QVariant& var, settingList) { theme->settings.append(toScopeSetting(var)); }
   }
 
   // UUID
@@ -95,4 +99,51 @@ Theme* Theme::loadTheme(const QString& filename) {
   }
 
   return theme;
+}
+
+ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
+  QString na = scope;
+  while (na.length() > 0) {
+    QString sn = na;
+    int i = sn.lastIndexOf(" ");
+    if (i != -1) {
+      sn = sn.right(sn.length() - (i + 1));
+    }
+
+    foreach (ScopeSetting* j, settings) {
+      if (j->scopes.contains(sn)) {
+        return j;
+      }
+    }
+
+    int i2 = na.lastIndexOf(".");
+    if (i2 == -1) {
+      break;
+    } else if (i > i2) {
+      na = na.left(i);
+    } else {
+      na = na.left(i2).trimmed();
+    }
+  }
+  return settings[0];
+}
+
+std::unique_ptr<QTextCharFormat> Theme::spice(const QString& scope) {
+  if (settings.isEmpty())
+    return nullptr;
+
+  QTextCharFormat* format = new QTextCharFormat();
+  ScopeSetting* def = settings[0];
+  ScopeSetting* s = closestMatchingSetting(scope);
+  if (s) {
+    QColor fg = s->settings->value(foregroundStr, def->settings->value(foregroundStr));
+    Q_ASSERT(fg.isValid());
+    format->setForeground(fg);
+
+    QColor bg = s->settings->value(backgroundStr, def->settings->value(backgroundStr));
+    Q_ASSERT(bg.isValid());
+    format->setBackground(bg);
+  }
+
+  return std::unique_ptr<QTextCharFormat>(format);
 }

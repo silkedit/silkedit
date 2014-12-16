@@ -6,6 +6,7 @@
 
 #include "macros.h"
 #include "ICloneable.h"
+#include "SyntaxHighlighter.h"
 
 QT_BEGIN_NAMESPACE
 class QPaintEvent;
@@ -25,11 +26,7 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   virtual ~TextEditView();
 
   QString path() { return m_path; }
-  void setDocument(std::shared_ptr<QTextDocument> document) {
-    m_document = document;
-    STextEdit::setDocument(document.get());
-    updateLineNumberAreaWidth(blockCount());
-  }
+  void setDocument(std::shared_ptr<QTextDocument> document);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -61,6 +58,7 @@ signals:
   QWidget* m_lineNumberArea;
   QString m_path;
   std::shared_ptr<QTextDocument> m_document;
+  std::unique_ptr<SyntaxHighlighter> m_syntaxHighlighter;
 
   void setPath(const QString& path);
 

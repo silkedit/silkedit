@@ -34,7 +34,7 @@ add_executable(UtilTest ${UTIL_TEST_SRCS} )
 target_link_libraries(UtilTest Qt5::Gui Qt5::Xml Qt5::Test )
 add_test( name UtilTest command UtilTest)
 
-set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/TmLanguage.cpp ../src/PListParser.cpp ../src/Util.cpp src/SyntaxHighlighterTest.cpp)
+set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/TmLanguage.cpp ../src/PListParser.cpp ../src/Util.cpp ../src/Theme.cpp src/SyntaxHighlighterTest.cpp)
 add_executable(SyntaxHighlighterTest ${SYNTAX_HIGHLIGHTER_TEST_SRCS} )
 target_link_libraries(SyntaxHighlighterTest Qt5::Gui Qt5::Xml Qt5::Test )
 add_test( name SyntaxHighlighterTest command SyntaxHighlighterTest)

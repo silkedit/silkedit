@@ -2,17 +2,14 @@
 
 #include "Theme.h"
 
-namespace {
-}
-
 class ThemeTest : public QObject {
   Q_OBJECT
  private slots:
   void loadTheme();
+  void spice();
 };
 
-void ThemeTest::loadTheme()
-{
+void ThemeTest::loadTheme() {
   Theme* theme = Theme::loadTheme("testdata/Monokai.tmTheme");
 
   // name
@@ -31,15 +28,39 @@ void ThemeTest::loadTheme()
   QCOMPARE(theme->settings.size(), 22);
   ScopeSetting* setting1 = theme->settings.at(0);
   QVERIFY(setting1->name.isEmpty());
-  QVERIFY(setting1->scope.isEmpty());
+  QVERIFY(setting1->scopes.isEmpty());
   QCOMPARE(setting1->settings->size(), 6);
   QCOMPARE(setting1->settings->value("background"), QColor("#272822"));
 
   ScopeSetting* setting2 = theme->settings.at(1);
   QCOMPARE(setting2->name, QString("Comment"));
-  QCOMPARE(setting2->scope, QString("comment"));
+  QCOMPARE(setting2->scopes, QStringList("comment"));
   QCOMPARE(setting2->settings->size(), 1);
   QCOMPARE(setting2->settings->value("foreground"), QColor("#75715E"));
+}
+
+void ThemeTest::spice() {
+  Theme* theme = Theme::loadTheme("testdata/Monokai.tmTheme");
+  auto format = theme->spice("entity.name.tag.localname.xml");
+  QCOMPARE(format->foreground().color(), QColor("#F92672"));
+
+  // scope has more than 1 selectors (13.4 Grouping).
+  // http://manual.macromates.com/en/scope_selectors
+//  <dict>
+//          <key>name</key>
+//          <string>User-defined constant</string>
+//          <key>scope</key>
+//          <string>constant.character, constant.other</string>
+//          <key>settings</key>
+//          <dict>
+//                  <key>foreground</key>
+//                  <string>#AE81FF</string>
+//          </dict>
+//  </dict>
+  format = theme->spice("constant.character.entity.xml");
+  QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
+  format = theme->spice("constant.other.entity.xml");
+  QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
 }
 
 QTEST_MAIN(ThemeTest)

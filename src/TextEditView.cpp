@@ -36,6 +36,18 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
+void TextEditView::setDocument(std::shared_ptr<QTextDocument> document) {
+  m_document = document;
+  STextEdit::setDocument(document.get());
+  updateLineNumberAreaWidth(blockCount());
+  const QVector<QString> files({"packages/XML.plist"});
+
+  foreach (QString fn, files) { LanguageProvider::languageFromFile(fn); }
+  LanguageParser* parser = LanguageParser::create("text.xml", document->toPlainText());
+  m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser));
+  m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
+}
+
 void TextEditView::setPath(const QString& path) {
   if (path.isEmpty())
     return;

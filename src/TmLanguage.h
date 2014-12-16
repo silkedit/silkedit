@@ -3,6 +3,7 @@
 #include <QVector>
 #include <QRegularExpression>
 #include <QMap>
+#include <QDebug>
 
 #include "macros.h"
 
@@ -187,6 +188,8 @@ struct Region {
   // is the maximum value.
   //  func (r Region) End() int {
   int end() const;
+
+  int length() const;
 };
 
 class Node {
@@ -205,6 +208,7 @@ class Node {
   //  func (n *Node) UpdateRange() text.Region {
 
   QString toString() const;
+  bool isLeaf() { return children.size() == 0; }
 
   friend QDebug operator<<(QDebug dbg, const Node& node) {
     dbg.nospace() << node.toString();

@@ -1,18 +1,21 @@
 #pragma once
 
+#include <memory>
 #include <QMap>
 #include <QString>
 #include <QColor>
 #include <QVector>
 #include <QUuid>
+#include <QTextCharFormat>
 
 #include "macros.h"
+#include "TmLanguage.h"
 
 typedef QMap<QString, QColor> Settings;
 
 struct ScopeSetting {
   QString name;
-  QString scope;
+  QStringList scopes;
   Settings* settings;
 
   ScopeSetting():settings(nullptr){}
@@ -27,6 +30,7 @@ class Theme {
   DEFAULT_MOVE(Theme)
 
   static Theme* loadTheme(const QString& filename);
+  std::unique_ptr<QTextCharFormat> spice(const QString& scope);
 
   Settings* gutterSettings;
   QString name;
@@ -34,4 +38,5 @@ class Theme {
   QUuid uuid;
 
  private:
+  ScopeSetting* closestMatchingSetting(const QString& scope);
 };
