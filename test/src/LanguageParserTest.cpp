@@ -20,7 +20,6 @@ namespace {
 class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
-  void test();
   void LanguageFromFile();
   void LanguageFromScope();
   void parseTmLanguage();
@@ -114,31 +113,6 @@ void LanguageParserTest::regexFind()
   MatchObject* mo = re.find(R"(<?xml version="1.0" encoding="UTF-8"?>)", 0);
   QCOMPARE(mo->size(), 6);
   QCOMPARE(*mo, QVector<int>({0, 5, 0, 2, 2, 5}));
-}
-
-void LanguageParserTest::test()
-{
-//  QVector<QString> vector(0);
-//  vector.append("one");
-//  vector.append("two");
-//  vector.append("three");
-//  QCOMPARE(vector.size(), 3);
-
-//  QVector<QString> copied(vector);
-//  QCOMPARE(copied.size(), 3);
-  // vector: ["one", "two", "three"]
-//  QRegularExpression re("(<\\?)\\s*([-_a-zA-Z0-9]+)");
-//  QRegularExpressionMatch match = re.match("<?xml version=");
-//  QVERIFY(match.hasMatch());
-
-//  QVector<int> ret;
-//  for (int i = 0; i < match.capturedLength(); i++) {
-//    ret.append(match.capturedStart(i));
-//    ret.append(match.capturedEnd(i));
-//  }
-//  QCOMPARE(match.captured(0), QString("<?xml"));
-//  QCOMPARE(match.captured(1), QString("<?"));
-//  QCOMPARE(match.captured(2), QString("xml"));
 }
 
 QTEST_MAIN(LanguageParserTest)
