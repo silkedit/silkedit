@@ -28,6 +28,8 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
 
+  void setParser(LanguageParser* parser);
+
   // Returns the Region of the inner most Scope extent which contains "point".
   //
   // This method can be called a lot by plugins, and should therefore be as

@@ -125,18 +125,19 @@ class LanguageProvider {
   static Language* languageFromScope(const QString& scopeName);
   static Language* languageFromExtension(const QString& ext);
   static Language* languageFromFile(const QString& path);
-  static QVector<Language*> languages() { return m_languages; }
+  static QVector<QPair<QString, QString>> langNameAndScopePairs() { return m_langNameAndScopePairs; }
 
   static void loadLanguages();
 
 private:
-  static QVector<Language*> m_languages;
-  static QMap<QString, Language*> scopeLanguageMap;
-  static QMap<QString, Language*> extensionLanguageMap;
+  static QVector<QPair<QString, QString>> m_langNameAndScopePairs;
+  static QMap<QString, QString> scopeLangFilePathMap;
+  static QMap<QString, QString> extensionLangFilePathMap;
 
   LanguageProvider();
 };
 
+// Language cannot be shared (means mutable) across multiple documents because RootPattern and patterns in a repository have some cache and they are unique for a certain document.
 class Language {
  public:
   QVector<QString> fileTypes;

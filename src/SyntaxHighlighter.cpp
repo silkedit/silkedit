@@ -19,6 +19,14 @@ SyntaxHighlighter* SyntaxHighlighter::create(QTextDocument* doc, LanguageParser*
   }
 }
 
+void SyntaxHighlighter::setParser(LanguageParser *parser)
+{
+  if (!parser) return;
+
+  m_rootNode = parser->parse();
+  m_lastScopeNode = nullptr;
+}
+
 Region SyntaxHighlighter::scopeExtent(int point) {
   updateScope(point);
   if (m_lastScopeNode) {

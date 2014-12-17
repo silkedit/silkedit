@@ -7,7 +7,8 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
-TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(parent), m_path(path), m_lang(nullptr) {
+TextEditView::TextEditView(const QString& path, QWidget* parent)
+    : STextEdit(parent), m_path(path), m_lang(nullptr) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -53,6 +54,16 @@ void TextEditView::setDocument(std::shared_ptr<QTextDocument> document) {
     LanguageParser* parser = LanguageParser::create(m_lang->scopeName, document->toPlainText());
     m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser));
     m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
+  }
+}
+
+void TextEditView::setLanguage(const QString& scopeName) {
+  qDebug("setLanguage: %s", qPrintable(scopeName));
+  m_lang = LanguageProvider::languageFromScope(scopeName);
+  if (m_lang && m_syntaxHighlighter) {
+    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, document()->toPlainText());
+    m_syntaxHighlighter->setParser(parser);
+    m_syntaxHighlighter->rehighlight();
   }
 }
 

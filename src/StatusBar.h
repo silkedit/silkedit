@@ -17,6 +17,9 @@ class StatusBar: public QStatusBar {
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
+  signals:
+    void languageChanged(const QString& scopeName);
+
   public slots:
   void onActiveTextEditViewChanged(TextEditView* editView);
 

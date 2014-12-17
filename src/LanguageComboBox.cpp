@@ -2,7 +2,7 @@
 #include "TmLanguage.h"
 
 LanguageComboBox::LanguageComboBox(QWidget* parent) : QComboBox(parent) {
-  foreach (Language* lang, LanguageProvider::languages()) {
-    addItem(lang->name());
+  foreach (auto& pair, LanguageProvider::langNameAndScopePairs()) {
+    addItem(pair.first, pair.second);
   }
 }
