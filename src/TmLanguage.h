@@ -1,11 +1,11 @@
 #pragma once
 
 #include <QVector>
-#include <QRegularExpression>
 #include <QMap>
 #include <QDebug>
 
 #include "macros.h"
+#include "Regexp.h"
 
 class TmLanguage {
   DISABLE_COPY(TmLanguage)
@@ -28,12 +28,12 @@ typedef QVector<Capture> Captures;
 typedef QVector<int> MatchObject;
 
 struct Regex {
-  QRegularExpression* re;
+  Regexp* re;
   int lastIndex;
   int lastFound;
 
   Regex() : re(nullptr), lastIndex(0), lastFound(0) {}
-  Regex(const QString& pattern) : re(new QRegularExpression(pattern)), lastIndex(0), lastFound(0) {}
+  Regex(const QString& pattern) : re(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
 
   MatchObject* find(const QString& data, int pos);
   // func (r *Regex) Find(data string, pos int) MatchObject {

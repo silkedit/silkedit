@@ -1,20 +1,25 @@
+#include <string.h>
+#include <stdio.h>
+#include <string.h>
 #include <QtTest/QtTest>
 
 #include "TmLanguage.h"
 
 namespace {
-  void compareLineByLine(const QString& str1, const QString& str2) {
-    QStringList list1 = str1.split('\n');
-    QStringList list2 = str2.split('\n');
-    if (str1.size() != str2.size()) {
-      qDebug() << str1;
-    }
-    QCOMPARE(list1.size(), list2.size());
 
-    for (int i = 0; i < list1.size(); i++) {
-      QCOMPARE(list1.at(i), list2.at(i));
-    }
+void compareLineByLine(const QString& str1, const QString& str2) {
+  QStringList list1 = str1.split('\n');
+  QStringList list2 = str2.split('\n');
+  if (str1.size() != str2.size()) {
+    qDebug() << str1;
   }
+  QCOMPARE(list1.size(), list2.size());
+
+  for (int i = 0; i < list1.size(); i++) {
+    QCOMPARE(list1.at(i), list2.at(i));
+  }
+}
+
 }
 
 class LanguageParserTest : public QObject {
@@ -23,7 +28,6 @@ class LanguageParserTest : public QObject {
   void LanguageFromFile();
   void LanguageFromScope();
   void parseTmLanguage();
-  void regexFind();
 };
 
 void LanguageParserTest::LanguageFromFile() {
@@ -39,9 +43,7 @@ void LanguageParserTest::LanguageFromFile() {
   // rootPattern
   Pattern* rootPattern = lang->rootPattern;
   QVERIFY(!rootPattern->patterns->isEmpty());
-  foreach (Pattern* pat, *(rootPattern->patterns)) {
-    QVERIFY(pat);
-  }
+  foreach (Pattern* pat, *(rootPattern->patterns)) { QVERIFY(pat); }
 
   QCOMPARE(rootPattern->owner, lang);
 
@@ -77,21 +79,18 @@ void LanguageParserTest::LanguageFromFile() {
   QCOMPARE(lang->scopeName, QString("source.c++"));
 }
 
-void LanguageParserTest::LanguageFromScope()
-{
+void LanguageParserTest::LanguageFromScope() {
   Language* lang = LanguageProvider::languageFromFile("testdata/C++.tmLanguage");
   Language* langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
   QVERIFY(langFromScope);
   QVERIFY(!LanguageProvider::languageFromScope("missing scope"));
 }
 
-void LanguageParserTest::parseTmLanguage()
-{
-  const QVector<QString> files({"testdata/Property List (XML).tmLanguage", "testdata/XML.plist", "testdata/Go.tmLanguage"});
+void LanguageParserTest::parseTmLanguage() {
+  const QVector<QString> files(
+      {"testdata/Property List (XML).tmLanguage", "testdata/XML.plist", "testdata/Go.tmLanguage"});
 
-  foreach (QString fn, files) {
-    QVERIFY(LanguageProvider::languageFromFile(fn));
-  }
+  foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
 
   QFile file("testdata/plist2.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));
@@ -105,14 +104,6 @@ void LanguageParserTest::parseTmLanguage()
 
   QTextStream resIn(&resFile);
   compareLineByLine(root->toString(), resIn.readAll());
-}
-
-void LanguageParserTest::regexFind()
-{
-  Regex re("(<\\?)\\s*([-_a-zA-Z0-9]+)");
-  MatchObject* mo = re.find(R"(<?xml version="1.0" encoding="UTF-8"?>)", 0);
-  QCOMPARE(mo->size(), 6);
-  QCOMPARE(*mo, QVector<int>({0, 5, 0, 2, 2, 5}));
 }
 
 QTEST_MAIN(LanguageParserTest)

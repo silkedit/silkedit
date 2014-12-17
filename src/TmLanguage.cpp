@@ -673,26 +673,18 @@ MatchObject* Regex::find(const QString& data, int pos) {
   }
   lastIndex = pos;
   while (lastFound < data.length()) {
-    QRegularExpressionMatch match = re->match(data.right(data.length() - lastFound));
-    if (!match.hasMatch()) {
+    std::unique_ptr<QVector<int>> ret(re->findStringSubmatchIndex(data.right(data.length() - lastFound)));
+    if (!ret) {
       break;
-    }
-
-    QVector<int> ret(0);
-    for (int i = 0; i <= match.lastCapturedIndex(); ++i) {
-      ret.append(match.capturedStart(i));
-      ret.append(match.capturedEnd(i));
-    }
-    if ((ret[0] + lastFound) < pos) {
-      if (ret[0] == 0) {
+    } else if (((*ret)[0] + lastFound) < pos) {
+      if ((*ret)[0] == 0) {
         lastFound++;
       } else {
-        lastFound += ret[0];
+        lastFound += (*ret)[0];
       }
       continue;
     }
-
-    MatchObject* mo = new MatchObject(ret);
+    MatchObject* mo = new MatchObject(*ret);
     fix(mo, lastFound);
 
     return mo;

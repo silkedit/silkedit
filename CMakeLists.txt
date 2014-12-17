@@ -22,17 +22,21 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Test REQUIRED)
 
+# Find oniguruma using pkg-config
+INCLUDE(FindPkgConfig)
+pkg_check_modules(Oniguruma REQUIRED oniguruma)
+
 IF (APPLE)
   find_library(CoreFoundationLibrary CoreFoundation)
 ENDIF (APPLE)
 
-include_directories(include src stextedit/mysrc)
+include_directories(include src stextedit/mysrc ${Oniguruma_INCLUDE_DIRS})
 
-link_directories(lib stextedit/build)
+link_directories(lib stextedit/build ${Oniguruma_LIBRARY_DIRS})
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
 
-target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml ruby-2.1.3 yaml-cpp-0.5.1 stextedit ${CoreFoundationLibrary})
+target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml ruby-2.1.3 yaml-cpp-0.5.1 stextedit ${Oniguruma_LIBRARIES} ${CoreFoundationLibrary})
 
 ENABLE_TESTING()
 add_subdirectory(test)

@@ -17,11 +17,19 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Test REQUIRED)
 
-include_directories(../src src)
+# Find oniguruma using pkg-config
+INCLUDE(FindPkgConfig)
+pkg_check_modules(Oniguruma REQUIRED oniguruma)
 
-set(LANGUAGE_PARSER_TEST_SRCS ../src/TmLanguage.cpp ../src/PListParser.cpp src/LanguageParserTest.cpp)
+include_directories(../src src ${Oniguruma_INCLUDE_DIRS})
+
+link_directories(${Oniguruma_LIBRARY_DIRS})
+
+set(TEST_LIBRARIES ${Oniguruma_LIBRARIES})
+
+set(LANGUAGE_PARSER_TEST_SRCS ../src/TmLanguage.cpp ../src/PListParser.cpp ../src/Regexp.cpp src/LanguageParserTest.cpp)
 add_executable(LanguageParserTest ${LANGUAGE_PARSER_TEST_SRCS} )
-target_link_libraries(LanguageParserTest Qt5::Gui Qt5::Xml Qt5::Test )
+target_link_libraries(LanguageParserTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
 add_test( name LanguageParserTest command LanguageParserTest)
 
 set(THEME_TEST_SRCS ../src/Theme.cpp ../src/PListParser.cpp src/ThemeTest.cpp)
@@ -34,7 +42,12 @@ add_executable(UtilTest ${UTIL_TEST_SRCS} )
 target_link_libraries(UtilTest Qt5::Gui Qt5::Xml Qt5::Test )
 add_test( name UtilTest command UtilTest)
 
-set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/TmLanguage.cpp ../src/PListParser.cpp ../src/Util.cpp ../src/Theme.cpp src/SyntaxHighlighterTest.cpp)
+set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/TmLanguage.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Theme.cpp src/SyntaxHighlighterTest.cpp)
 add_executable(SyntaxHighlighterTest ${SYNTAX_HIGHLIGHTER_TEST_SRCS} )
-target_link_libraries(SyntaxHighlighterTest Qt5::Gui Qt5::Xml Qt5::Test )
+target_link_libraries(SyntaxHighlighterTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
 add_test( name SyntaxHighlighterTest command SyntaxHighlighterTest)
+
+set(REGEXP_TEST_SRCS ../src/Regexp.cpp src/RegexpTest.cpp)
+add_executable(RegexpTest ${REGEXP_TEST_SRCS} )
+target_link_libraries(RegexpTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
+add_test( name RegexpTest command RegexpTest)
