@@ -27,6 +27,7 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
 
   QString path() { return m_path; }
   void setDocument(std::shared_ptr<QTextDocument> document);
+  Language* lang() { return m_lang; }
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -59,6 +60,7 @@ signals:
   QString m_path;
   std::shared_ptr<QTextDocument> m_document;
   std::unique_ptr<SyntaxHighlighter> m_syntaxHighlighter;
+  Language* m_lang;
 
   void setPath(const QString& path);
 

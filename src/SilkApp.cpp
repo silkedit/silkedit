@@ -19,14 +19,15 @@ T findParent(QWidget* widget) {
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
-  // Track active STabWidget
-  QObject::connect(this, &QApplication::focusChanged, [](QWidget*, QWidget* now) {
+  // Track active TextEditView and STabWidget
+  QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* now) {
     qDebug("focusChanged");
     if (TextEditView* editView = qobject_cast<TextEditView*>(now)) {
       if (STabWidget* tabWidget = findParent<STabWidget*>(editView)) {
         if (MainWindow* window = qobject_cast<MainWindow*>(tabWidget->window())) {
           qDebug("window->setActiveTabWidget");
           window->setActiveTabWidget(tabWidget);
+          emit window->activeTextEditViewChanged(editView);
         } else {
           qDebug("top window is not MainWindow");
         }

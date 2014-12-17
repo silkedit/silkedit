@@ -122,13 +122,18 @@ public:
 
 class LanguageProvider {
  public:
-  static QMap<QString, QString> scope;
+  static Language* languageFromScope(const QString& scopeName);
+  static Language* languageFromExtension(const QString& ext);
+  static Language* languageFromFile(const QString& path);
+  static QVector<Language*> languages() { return m_languages; }
 
-  static Language* getLanguage(const QString& id);
-  static Language* languageFromScope(const QString& id);
-  static Language* languageFromFile(const QString& fn);
+  static void loadLanguages();
 
 private:
+  static QVector<Language*> m_languages;
+  static QMap<QString, Language*> scopeLanguageMap;
+  static QMap<QString, Language*> extensionLanguageMap;
+
   LanguageProvider();
 };
 
@@ -144,6 +149,7 @@ class Language {
 
   void tweak();
   QString toString() const;
+  QString name();
 };
 
 class LanguageParser : public DataSource {

@@ -34,6 +34,8 @@
 int main(int argv, char** args) {
   SilkApp app(argv, args);
 
+  LanguageProvider::loadLanguages();
+
   ConfigService::singleton().load();
 
   // add commands

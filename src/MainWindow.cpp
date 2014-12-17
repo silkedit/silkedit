@@ -9,6 +9,7 @@
 #include "MainWindow.h"
 #include "STabWidget.h"
 #include "TextEditView.h"
+#include "StatusBar.h"
 
 namespace {
 QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
@@ -48,6 +49,10 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   window->setLayout(m_rootLayout);
   setCentralWidget(window);
   m_activeTabWidget = tabWidget;
+
+  StatusBar* sbar = new StatusBar(this);
+  connect(this, &MainWindow::activeTextEditViewChanged, sbar, &StatusBar::onActiveTextEditViewChanged);
+  setStatusBar(sbar);
 }
 
 STabWidget* MainWindow::createTabWidget() {

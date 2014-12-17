@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QRegularExpression>
 #include <QFile>
+#include <QDir>
 
 #include "TmLanguage.h"
 #include "PListParser.h"
@@ -140,8 +141,8 @@ Pattern* toPattern(QVariantMap map) {
 }
 }
 
-LanguageParser* LanguageParser::create(const QString& scope, const QString& data) {
-  if (Language* lang = LanguageProvider::getLanguage(scope)) {
+LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
+  if (Language* lang = LanguageProvider::languageFromScope(scopeName)) {
     LanguageParser* parser = new LanguageParser(lang);
     for (int i = 0; i < data.length(); i++) {
       parser->data.append(data.at(i));
@@ -359,6 +360,7 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
     ret = begin.find(data, pos);
   } else if (!include.isEmpty()) {
     QChar z = include[0];
+    // # means an item name in the repository
     if (z == '#') {
       QString key = include.mid(1, include.length() - 1);
       if (owner->repository.contains(key)) {
@@ -373,7 +375,8 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
     } else if (z == '$') {
       // todo: implement tmLanguage $ include directives
       qWarning() << "Unhandled include directive:" << include;
-    } else if (Language* l = LanguageProvider::getLanguage(include)) {
+    // external syntax definitions e.g. source.c++
+    } else if (Language* l = LanguageProvider::languageFromScope(include)) {
       return l->rootPattern->cache(data, pos);
     } else {
       if (!failed.contains(include)) {
@@ -537,27 +540,21 @@ QString Pattern::toString() const {
   return ret;
 }
 
-QMap<QString, QString> LanguageProvider::scope;
+QVector<Language*> LanguageProvider::m_languages(0);
+QMap<QString, Language*> LanguageProvider::scopeLanguageMap;
+QMap<QString, Language*> LanguageProvider::extensionLanguageMap;
 
-Language* LanguageProvider::getLanguage(const QString& id) {
-  if (Language* l = languageFromScope(id)) {
-    return l;
-  } else {
-    return languageFromFile(id);
-  }
+Language* LanguageProvider::languageFromScope(const QString& scope) {
+  return scopeLanguageMap.value(scope, nullptr);
 }
 
-Language* LanguageProvider::languageFromScope(const QString& id) {
-  if (scope.contains(id)) {
-    return languageFromFile(scope.value(id));
-  } else {
-    qWarning() << "Can't handle id" << id;
-    return nullptr;
-  }
+Language *LanguageProvider::languageFromExtension(const QString &ext)
+{
+  return extensionLanguageMap.value(ext, nullptr);
 }
 
-Language* LanguageProvider::languageFromFile(const QString& fn) {
-  QFile file(fn);
+Language* LanguageProvider::languageFromFile(const QString& path) {
+  QFile file(path);
   if (!file.open(QIODevice::ReadOnly)) {
     qWarning("unable to open a file");
     return nullptr;
@@ -580,7 +577,9 @@ Language* LanguageProvider::languageFromFile(const QString& fn) {
       QSequentialIterable iterable = fileTypesVar.value<QSequentialIterable>();
       foreach (const QVariant& v, iterable) {
         if (v.canConvert<QString>()) {
-          lang->fileTypes.append(v.toString());
+          QString ext = v.toString();
+          lang->fileTypes.append(ext);
+          extensionLanguageMap[ext] = lang;
         }
       }
     }
@@ -621,15 +620,24 @@ Language* LanguageProvider::languageFromFile(const QString& fn) {
     }
   }
 
-  scope[lang->scopeName] = fn;
+  scopeLanguageMap[lang->scopeName] = lang;
+  m_languages.append(lang);
 
   lang->tweak();
   return lang;
 }
 
+void LanguageProvider::loadLanguages()
+{
+  QDir dir("packages");
+  Q_ASSERT(dir.exists());
+  foreach (const QString& fileName, dir.entryList(QStringList("*.tmLanguage"))) {
+    qDebug("loading %s", qPrintable(dir.filePath(fileName)));
+    languageFromFile(dir.filePath(fileName));
+  }
+}
+
 bool Region::covers(const Region& r2) {
-  //  return r.Contains(r2.Begin()) && r2.End() <= r.End()
-  // todo: check this logic again
   return contains(r2.begin()) && r2.end() <= end();
 }
 
@@ -697,6 +705,11 @@ void Language::tweak() {
 
 QString Language::toString() const {
   return QString("%1\n%2\n").arg(scopeName).arg(rootPattern->toString());
+}
+
+QString Language::name()
+{
+  return rootPattern ? rootPattern->name : "";
 }
 
 QString RootPattern::toString() const {

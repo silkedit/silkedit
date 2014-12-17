@@ -101,6 +101,7 @@ void ViEngine::onModeChanged(Mode mode) {
   }
 
   if (MainWindow* window = API::activeWindow()) {
+    Q_ASSERT(window->statusBar());
     window->statusBar()->showMessage(text);
   }
 

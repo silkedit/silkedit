@@ -7,7 +7,7 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
-TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(parent), m_path(path) {
+TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(parent), m_path(path), m_lang(nullptr) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -29,6 +29,15 @@ TextEditView::TextEditView(const QString& path, QWidget* parent) : STextEdit(par
 
   QApplication::setCursorFlashTime(0);
   installEventFilter(&KeyHandler::singleton());
+
+  int dotPos = path.lastIndexOf('.');
+  if (dotPos >= 0) {
+    QString ext = path.mid(dotPos + 1);
+    qDebug("ext: %s", qPrintable(ext));
+    m_lang = LanguageProvider::languageFromExtension(ext);
+  } else {
+    qDebug("extension not found. path: %s", qPrintable(path));
+  }
 }
 
 TextEditView::~TextEditView() {
@@ -40,12 +49,11 @@ void TextEditView::setDocument(std::shared_ptr<QTextDocument> document) {
   m_document = document;
   STextEdit::setDocument(document.get());
   updateLineNumberAreaWidth(blockCount());
-  const QVector<QString> files({"packages/XML.plist"});
-
-  foreach (QString fn, files) { LanguageProvider::languageFromFile(fn); }
-  LanguageParser* parser = LanguageParser::create("text.xml", document->toPlainText());
-  m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser));
-  m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
+  if (m_lang) {
+    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, document->toPlainText());
+    m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser));
+    m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
+  }
 }
 
 void TextEditView::setPath(const QString& path) {
