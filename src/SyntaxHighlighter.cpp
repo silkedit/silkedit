@@ -90,15 +90,15 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
   int idx = Util::binarySearch(node->children.length(), [search, node](int i) {
-    return node->children[i]->range.a >= search.a || node->children[i]->range.covers(search);
+    return node->children[i]->range.begin() >= search.begin() || node->children[i]->range.covers(search);
   });
 
   while (idx < node->children.length()) {
-    Node* c = node->children[idx];
-    if (c->range.a > search.b) {
+    Node* child = node->children[idx];
+    if (child->range.begin() > search.end()) {
       break;
     }
-    if (c->range.covers(search)) {
+    if (child->range.covers(search)) {
       if (!node->name.isEmpty() && node != m_lastScopeNode) {
         if (m_lastScopeBuf.length() > 0) {
           m_lastScopeBuf.append(' ');

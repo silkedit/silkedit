@@ -9,7 +9,7 @@
 #include <QTextCharFormat>
 
 #include "macros.h"
-#include "TmLanguage.h"
+#include "LanguageParser.h"
 
 typedef QMap<QString, QColor> Settings;
 

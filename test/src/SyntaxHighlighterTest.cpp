@@ -1,7 +1,7 @@
 #include <QtTest/QtTest>
 #include <QTextDocument>
 
-#include "TmLanguage.h"
+#include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 
 class SyntaxHighlighterTest : public QObject {
@@ -23,14 +23,14 @@ void SyntaxHighlighterTest::scopeExtent() {
   LanguageParser* plistParser = LanguageParser::create("text.xml.plist", doc->toPlainText());
   auto plistHighlighter = SyntaxHighlighter::create(doc, plistParser);
   Region region = plistHighlighter->scopeExtent(10);
-  QCOMPARE(region.a, 5);
-  QCOMPARE(region.b, 13);
+  QCOMPARE(region.begin(), 5);
+  QCOMPARE(region.end(), 13);
   QCOMPARE(plistHighlighter->scopeName(10),
            QString("text.xml.plist meta.tag.preprocessor.xml entity.other.attribute-name.xml"));
 
   region = plistHighlighter->scopeExtent(14);
-  QCOMPARE(region.a, 14);
-  QCOMPARE(region.b, 15);
+  QCOMPARE(region.begin(), 14);
+  QCOMPARE(region.end(), 15);
   QCOMPARE(plistHighlighter->scopeName(14),
            QString(
                "text.xml.plist meta.tag.preprocessor.xml string.quoted.double.xml "
@@ -49,13 +49,13 @@ void SyntaxHighlighterTest::scopeExtent() {
   //   148-157: ""
   //     149-156: "entity.other.attribute-name.localname.xml" - Data: "version"
   region = xmlHighlighter->scopeExtent(148);
-  QCOMPARE(region.a, 148);
-  QCOMPARE(region.b, 157);
+  QCOMPARE(region.begin(), 148);
+  QCOMPARE(region.end(), 157);
   QCOMPARE(xmlHighlighter->scopeName(148), QString("text.xml meta.tag.xml"));
 
   region = xmlHighlighter->scopeExtent(149);
-  QCOMPARE(region.a, 149);
-  QCOMPARE(region.b, 156);
+  QCOMPARE(region.begin(), 149);
+  QCOMPARE(region.end(), 156);
   QCOMPARE(xmlHighlighter->scopeName(149), QString("text.xml meta.tag.xml entity.other.attribute-name.localname.xml"));
 }
 

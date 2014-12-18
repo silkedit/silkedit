@@ -4,7 +4,7 @@
 #include <QSyntaxHighlighter>
 
 #include "macros.h"
-#include "TmLanguage.h"
+#include "LanguageParser.h"
 #include "Theme.h"
 
 // The SyntaxHighlighter interface is responsible for

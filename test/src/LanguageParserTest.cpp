@@ -3,7 +3,7 @@
 #include <string.h>
 #include <QtTest/QtTest>
 
-#include "TmLanguage.h"
+#include "LanguageParser.h"
 
 namespace {
 
@@ -45,19 +45,19 @@ void LanguageParserTest::LanguageFromFile() {
   QVERIFY(!rootPattern->patterns->isEmpty());
   foreach (Pattern* pat, *(rootPattern->patterns)) { QVERIFY(pat); }
 
-  QCOMPARE(rootPattern->owner, lang);
+  QCOMPARE(rootPattern->lang, lang);
 
   Pattern* includePattern = rootPattern->patterns->at(0);
   QCOMPARE(includePattern->include, QString("#special_block"));
 
   Pattern* matchPattern = rootPattern->patterns->at(2);
-  QCOMPARE(matchPattern->match.re->pattern(), QString("\\b(friend|explicit|virtual)\\b"));
+  QCOMPARE(matchPattern->match.regex->pattern(), QString("\\b(friend|explicit|virtual)\\b"));
   QCOMPARE(matchPattern->name, QString("storage.modifier.c++"));
 
   Pattern* beginEndPattern = rootPattern->patterns->at(14);
-  QVERIFY(!beginEndPattern->begin.re->pattern().isEmpty());
+  QVERIFY(!beginEndPattern->begin.regex->pattern().isEmpty());
   QCOMPARE(beginEndPattern->beginCaptures.size(), 2);
-  QVERIFY(!beginEndPattern->end.re->pattern().isEmpty());
+  QVERIFY(!beginEndPattern->end.regex->pattern().isEmpty());
   QCOMPARE(beginEndPattern->endCaptures.size(), 1);
   QCOMPARE(beginEndPattern->name, QString("meta.function.destructor.c++"));
   QCOMPARE(beginEndPattern->patterns->size(), 1);
@@ -65,14 +65,14 @@ void LanguageParserTest::LanguageFromFile() {
   // repository
   QVERIFY(!lang->repository.isEmpty());
   Pattern* blockPat = lang->repository.value("block");
-  QCOMPARE(blockPat->begin.re->pattern(), QString("\\{"));
-  QCOMPARE(blockPat->end.re->pattern(), QString("\\}"));
+  QCOMPARE(blockPat->begin.regex->pattern(), QString("\\{"));
+  QCOMPARE(blockPat->end.regex->pattern(), QString("\\}"));
   QCOMPARE(blockPat->name, QString("meta.block.c++"));
   QVector<Pattern*>* patterns = blockPat->patterns;
   QCOMPARE(patterns->size(), 2);
   Pattern* firstPat = patterns->at(0);
   QCOMPARE(firstPat->captures.size(), 2);
-  QVERIFY(!firstPat->match.re->pattern().isEmpty());
+  QVERIFY(!firstPat->match.regex->pattern().isEmpty());
   QCOMPARE(firstPat->name, QString("meta.function-call.c"));
 
   // scopeName
@@ -110,7 +110,6 @@ void LanguageParserTest::parseTmLanguage() {
   QVERIFY(cppFile.open(QIODevice::ReadOnly));
   parser = LanguageParser::create("source.c++", QTextStream(&cppFile).readAll());
   root = parser->parse();
-  qDebug() << *root;
 }
 
 QTEST_MAIN(LanguageParserTest)
