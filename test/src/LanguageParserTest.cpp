@@ -104,6 +104,13 @@ void LanguageParserTest::parseTmLanguage() {
 
   QTextStream resIn(&resFile);
   compareLineByLine(root->toString(), resIn.readAll());
+
+  // $base(=$self)
+  QFile cppFile("testdata/test.cpp");
+  QVERIFY(cppFile.open(QIODevice::ReadOnly));
+  parser = LanguageParser::create("source.c++", QTextStream(&cppFile).readAll());
+  root = parser->parse();
+  qDebug() << *root;
 }
 
 QTEST_MAIN(LanguageParserTest)

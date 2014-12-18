@@ -360,9 +360,8 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
     pat = this;
     ret = begin.find(data, pos);
   } else if (!include.isEmpty()) {
-    QChar z = include[0];
     // # means an item name in the repository
-    if (z == '#') {
+    if (include.startsWith('#')) {
       QString key = include.mid(1, include.length() - 1);
       if (owner->repository.contains(key)) {
         //        qDebug("include %s", qPrintable(include));
@@ -373,10 +372,10 @@ std::pair<Pattern*, MatchObject*> Pattern::cache(const QString& data, int pos) {
       } else {
         qWarning() << "Not found in repository:" << include;
       }
-    } else if (z == '$') {
-      // todo: implement tmLanguage $ include directives
-      qWarning() << "Unhandled include directive:" << include;
-      // external syntax definitions e.g. source.c++
+    } else if (include == "$self" || include == "$base") {
+//      qDebug("include %s", qPrintable(include));
+      return owner->rootPattern->cache(data, pos);
+    // external syntax definitions e.g. source.c++
     } else if (Language* l = LanguageProvider::languageFromScope(include)) {
       return l->rootPattern->cache(data, pos);
     } else {
