@@ -6,16 +6,18 @@
 Regexp::~Regexp()
 {
   onig_free(m_reg);
-  onig_end();
+//  onig_end();
 }
 
 Regexp *Regexp::compile(const QString &expr)
 {
+//  qDebug("compile Regexp: %s", qPrintable(expr));
   regex_t* reg = nullptr;
   OnigErrorInfo einfo;
 
   QByteArray ba = expr.toUtf8();
   unsigned char* pattern = (unsigned char*)ba.constData();
+  Q_ASSERT(pattern);
 
   // todo: check encoding!
   int r = onig_new(&reg,

@@ -1,20 +1,20 @@
-#pragma once
+//#pragma once
 
-#include <memory>
+//#include <memory>
 
-#include <QString>
+//#include <QString>
 
-#include "Singleton.h"
-#include "macros.h"
+//#include "Singleton.h"
+//#include "macros.h"
 
-class RubyEvaluator : public Singleton<RubyEvaluator> {
- public:
-  virtual ~RubyEvaluator();
-  void eval(const QString& text);
+//class RubyEvaluator : public Singleton<RubyEvaluator> {
+// public:
+//  virtual ~RubyEvaluator();
+//  void eval(const QString& text);
 
- private:
-  DISABLE_COPY_AND_MOVE(RubyEvaluator)
+// private:
+//  DISABLE_COPY_AND_MOVE(RubyEvaluator)
 
-  friend class Singleton<RubyEvaluator>;
-  RubyEvaluator();
-};
+//  friend class Singleton<RubyEvaluator>;
+//  RubyEvaluator();
+//};

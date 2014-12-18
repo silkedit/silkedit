@@ -27,7 +27,7 @@
 #include "commands/CopyCommand.h"
 #include "commands/PasteCommand.h"
 #include "commands/SelectAllCommand.h"
-#include "commands/EvalAsRubyCommand.h"
+//#include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 
@@ -51,8 +51,8 @@ int main(int argv, char** args) {
   std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
   CommandService::singleton().add(std::move(redoCmd));
 
-  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
-  CommandService::singleton().add(std::move(evalAsRubyCmd));
+//  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
+//  CommandService::singleton().add(std::move(evalAsRubyCmd));
 
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
