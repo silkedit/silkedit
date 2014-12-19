@@ -5,18 +5,17 @@
 #include "PListParser.h"
 #include "Util.h"
 
-SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, Node* root)
-    : QSyntaxHighlighter(doc), m_rootNode(root), m_lastScopeNode(nullptr) {
-}
-
-SyntaxHighlighter* SyntaxHighlighter::create(QTextDocument* doc, LanguageParser* parser) {
-  Node* rootNode = parser->parse();
-//  qDebug() << *rootNode;
-  if (rootNode) {
-    return new SyntaxHighlighter(doc, rootNode);
-  } else {
-    return nullptr;
-  }
+// Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass dammy QObject first then call setDocument(doc) later to control the order of slot calls for contentsChange signal.
+SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser *parser)
+    : QSyntaxHighlighter(new QObject()), m_rootNode(parser->parse()), m_lastScopeNode(nullptr), m_parser(parser) {
+  QObject::connect(doc, &QTextDocument::contentsChange, [this](int position, int charsRemoved, int charsAdded) {
+    qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved, charsAdded);
+    m_parser->setText(document()->toPlainText());
+    adjust(position, charsAdded - charsRemoved);
+    qDebug() << *m_rootNode;
+//    m_rootNode.reset(m_parser->parse());
+  });
+  setDocument(doc);
 }
 
 void SyntaxHighlighter::setParser(LanguageParser *parser)
@@ -42,6 +41,15 @@ QString SyntaxHighlighter::scopeName(int point) {
 
 void SyntaxHighlighter::setTheme(const QString& themeFileName) {
   m_theme.reset(Theme::loadTheme(themeFileName));
+}
+
+void SyntaxHighlighter::adjust(int pos, int delta)
+{
+  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
+  if (m_rootNode) {
+    m_rootNode->adjust(pos, delta);
+  }
+  m_rootNode->updateChildren(Region(pos, pos + delta), m_parser.get());
 }
 
 void SyntaxHighlighter::highlightBlock(const QString& text) {
@@ -124,6 +132,8 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
 }
 
 void SyntaxHighlighter::updateScope(int point) {
+//  qDebug("updateScope(point: %d)", point);
+
   if (!m_rootNode)
     return;
 

@@ -12,8 +12,8 @@ Document::Document(const QString& path, const QString& text) : QTextDocument(tex
     qDebug("ext: %s", qPrintable(ext));
     m_lang.reset(LanguageProvider::languageFromExtension(ext));
     if (m_lang) {
-      std::unique_ptr<LanguageParser> parser(LanguageParser::create(m_lang->scopeName, text));
-      m_syntaxHighlighter.reset(SyntaxHighlighter::create(this, parser.get()));
+      LanguageParser* parser = LanguageParser::create(m_lang->scopeName, text);
+      m_syntaxHighlighter.reset(new SyntaxHighlighter(this, parser));
       if (m_syntaxHighlighter) {
         m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
       }

@@ -23,10 +23,11 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   DISABLE_COPY(SyntaxHighlighter)
 
  public:
+  static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
+
+  SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser);
   ~SyntaxHighlighter() = default;
   DEFAULT_MOVE(SyntaxHighlighter)
-
-  static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
 
   void setParser(LanguageParser* parser);
 
@@ -43,18 +44,18 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   QString scopeName(int point);
 
   void setTheme(const QString& themeFileName);
+  void adjust(int pos, int delta);
 
  protected:
   void highlightBlock(const QString& text) override;
 
  private:
-  std::unique_ptr<Node> m_rootNode;
+  std::unique_ptr<RootNode> m_rootNode;
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
   std::unique_ptr<Theme> m_theme;
-
-  SyntaxHighlighter(QTextDocument* doc, Node* root);
+  std::unique_ptr<LanguageParser> m_parser;
 
   // Given a text region, returns the innermost node covering that region.
   // Side-effects: Writes to m_lastScopeBuf...

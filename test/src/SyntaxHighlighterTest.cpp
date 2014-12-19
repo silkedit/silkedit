@@ -21,7 +21,7 @@ void SyntaxHighlighterTest::scopeExtent() {
   QTextStream in(&file);
   QTextDocument* doc = new QTextDocument(in.readAll());
   LanguageParser* plistParser = LanguageParser::create("text.xml.plist", doc->toPlainText());
-  auto plistHighlighter = SyntaxHighlighter::create(doc, plistParser);
+  auto plistHighlighter = new SyntaxHighlighter(doc, plistParser);
   Region region = plistHighlighter->scopeExtent(10);
   QCOMPARE(region.begin(), 5);
   QCOMPARE(region.end(), 13);
@@ -39,7 +39,7 @@ void SyntaxHighlighterTest::scopeExtent() {
   // XML
 
   LanguageParser* xmlParser = LanguageParser::create("text.xml", doc->toPlainText());
-  auto xmlHighlighter = SyntaxHighlighter::create(doc, xmlParser);
+  auto xmlHighlighter = new SyntaxHighlighter(doc, xmlParser);
 
   // Node at 148 has an empty name like this
 

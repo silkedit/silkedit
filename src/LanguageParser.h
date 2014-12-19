@@ -20,6 +20,7 @@ typedef QVector<Capture> Captures;
 struct Language;
 class LanguageParser;
 struct Node;
+struct RootNode;
 class Region;
 
 struct Regex {
@@ -134,8 +135,10 @@ class LanguageParser {
   ~LanguageParser() = default;
   DEFAULT_MOVE(LanguageParser)
 
-  Node* parse();
+  RootNode* parse();
+  QVector<Node*> parse(const Region& region);
   QString getData(int start, int end);
+  void setText(const QString& text) { m_text = text; }
 
  private:
   std::unique_ptr<Language> m_lang;
@@ -148,13 +151,15 @@ class Region {
 public:
   Region() : m_begin(0), m_end(0) {}
   Region(int begin, int end) {
-    m_begin = begin;
-    m_end = end;
+    m_begin = qMin(begin, end);
+    m_end = qMax(begin, end);
   }
 
   bool covers(const Region& r2);
   bool contains(int point);
   bool isEmpty() { return m_begin == m_end; }
+  // Adjusts the region in place for the given position and delta
+  void adjust(int pos, int delta);
 
   int begin() const { return m_begin; }
   void setBegin(int p);
@@ -177,13 +182,14 @@ struct Node {
 
   Node(LanguageParser* parser, const QString& name);
   Node(const QString& p_name, Region p_range, LanguageParser* p_p);
-  ~Node() = default;
+  virtual ~Node() = default;
   DEFAULT_MOVE(Node)
 
   void append(Node* child);
   Region updateRange();
   QString toString() const;
   bool isLeaf() { return children.size() == 0; }
+  virtual void adjust(int pos, int delta);
 
   friend QDebug operator<<(QDebug dbg, const Node& node) {
     dbg.nospace() << node.toString();
@@ -193,4 +199,12 @@ struct Node {
  private:
   QString data() const;
   QString format(QString indent) const;
+};
+
+struct RootNode : public Node {
+  RootNode(LanguageParser* parser, const QString& name);
+
+  void adjust(int pos, int delta) override;
+  QVector<Node*> nodesCovering(const Region& region);
+  void updateChildren(const Region& region, LanguageParser* parser);
 };
