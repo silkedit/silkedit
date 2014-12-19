@@ -20,13 +20,13 @@
 // will be going on in parallel in a separate thread and the "monkey patch"
 // will allow some accuracy in the meantime until the Parse operation has finished.
 class SyntaxHighlighter : public QSyntaxHighlighter {
+  Q_OBJECT
   DISABLE_COPY(SyntaxHighlighter)
 
  public:
-  ~SyntaxHighlighter() = default;
+  SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser);
+  ~SyntaxHighlighter();
   DEFAULT_MOVE(SyntaxHighlighter)
-
-  static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
 
   void setParser(LanguageParser* parser);
 
@@ -43,18 +43,21 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   QString scopeName(int point);
 
   void setTheme(const QString& themeFileName);
+  void adjust(int pos, int delta);
+
+public slots:
+  void updateNode(int position, int charsRemoved, int charsAdded);
 
  protected:
   void highlightBlock(const QString& text) override;
 
  private:
-  std::unique_ptr<Node> m_rootNode;
+  std::unique_ptr<RootNode> m_rootNode;
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
   std::unique_ptr<Theme> m_theme;
-
-  SyntaxHighlighter(QTextDocument* doc, Node* root);
+  std::unique_ptr<LanguageParser> m_parser;
 
   // Given a text region, returns the innermost node covering that region.
   // Side-effects: Writes to m_lastScopeBuf...

@@ -9,6 +9,7 @@
 #include "macros.h"
 #include "Regexp.h"
 #include "stlSpecialization.h"
+#include "Region.h"
 
 struct Capture {
   int key;
@@ -20,6 +21,7 @@ typedef QVector<Capture> Captures;
 struct Language;
 class LanguageParser;
 struct Node;
+struct RootNode;
 class Region;
 
 struct Regex {
@@ -30,7 +32,7 @@ struct Regex {
   Regex() : lastIndex(0), lastFound(0) {}
   explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
 
-  QVector<Region>* find(const QString& data, int pos);
+  QVector<Region>* find(const QString& data, int begin);
   QString toString() const;
 
   friend QDebug operator<<(QDebug dbg, const Regex& regex) {
@@ -70,6 +72,7 @@ struct Pattern {
                           Node* parent,
                           Captures captures);
   void tweak(Language* l);
+  void clearCache();
 
   virtual QString toString() const;
 
@@ -124,6 +127,7 @@ struct Language {
   void tweak();
   QString toString() const;
   QString name();
+  void clearCache();
 };
 
 class LanguageParser {
@@ -134,37 +138,17 @@ class LanguageParser {
   ~LanguageParser() = default;
   DEFAULT_MOVE(LanguageParser)
 
-  Node* parse();
+  RootNode* parse();
+  QVector<Node*> parse(const Region& region);
   QString getData(int start, int end);
+  void setText(const QString& text) { m_text = text; }
+  void clearCache();
 
  private:
   std::unique_ptr<Language> m_lang;
   QString m_text;
 
   LanguageParser(Language* lang, const QString& str);
-};
-
-class Region {
-public:
-  Region() : m_begin(0), m_end(0) {}
-  Region(int begin, int end) {
-    m_begin = begin;
-    m_end = end;
-  }
-
-  bool covers(const Region& r2);
-  bool contains(int point);
-  bool isEmpty() { return m_begin == m_end; }
-
-  int begin() const { return m_begin; }
-  void setBegin(int p);
-  int end() const { return m_end; }
-  void setEnd(int p);
-  int length() const;
-
-private:
-  int m_begin;
-  int m_end;
 };
 
 struct Node {
@@ -177,13 +161,14 @@ struct Node {
 
   Node(LanguageParser* parser, const QString& name);
   Node(const QString& p_name, Region p_range, LanguageParser* p_p);
-  ~Node() = default;
+  virtual ~Node() = default;
   DEFAULT_MOVE(Node)
 
   void append(Node* child);
   Region updateRange();
   QString toString() const;
   bool isLeaf() { return children.size() == 0; }
+  virtual void adjust(int pos, int delta);
 
   friend QDebug operator<<(QDebug dbg, const Node& node) {
     dbg.nospace() << node.toString();
@@ -193,4 +178,11 @@ struct Node {
  private:
   QString data() const;
   QString format(QString indent) const;
+};
+
+struct RootNode : public Node {
+  RootNode(LanguageParser* parser, const QString& name);
+
+  void adjust(int pos, int delta) override;
+  void updateChildren(const Region& region, LanguageParser* parser);
 };

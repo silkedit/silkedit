@@ -7,10 +7,11 @@
 #include "SyntaxHighlighter.h"
 
 class Document : public QTextDocument {
+  Q_OBJECT
   DISABLE_COPY(Document)
 
  public:
-  ~Document() = default;
+  ~Document();
   DEFAULT_MOVE(Document)
 
   static Document* create(const QString& path = "");
