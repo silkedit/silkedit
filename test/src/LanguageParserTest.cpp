@@ -41,7 +41,7 @@ void LanguageParserTest::LanguageFromFile() {
   QCOMPARE(lang->firstLineMatch, QString("-\\*- C\\+\\+ -\\*-"));
 
   // rootPattern
-  Pattern* rootPattern = lang->rootPattern;
+  Pattern* rootPattern = std::move(lang->rootPattern.get());
   QVERIFY(!rootPattern->patterns->isEmpty());
   foreach (Pattern* pat, *(rootPattern->patterns)) { QVERIFY(pat); }
 
@@ -63,12 +63,12 @@ void LanguageParserTest::LanguageFromFile() {
   QCOMPARE(beginEndPattern->patterns->size(), 1);
 
   // repository
-  QVERIFY(!lang->repository.isEmpty());
-  Pattern* blockPat = lang->repository.value("block");
+  QVERIFY(!lang->repository.empty());
+  Pattern* blockPat = lang->repository.at("block").get();
   QCOMPARE(blockPat->begin.regex->pattern(), QString("\\{"));
   QCOMPARE(blockPat->end.regex->pattern(), QString("\\}"));
   QCOMPARE(blockPat->name, QString("meta.block.c++"));
-  QVector<Pattern*>* patterns = blockPat->patterns;
+  QVector<Pattern*>* patterns = blockPat->patterns.get();
   QCOMPARE(patterns->size(), 2);
   Pattern* firstPat = patterns->at(0);
   QCOMPARE(firstPat->captures.size(), 2);

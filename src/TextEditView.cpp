@@ -51,8 +51,8 @@ void TextEditView::setDocument(std::shared_ptr<QTextDocument> document) {
   STextEdit::setDocument(document.get());
   updateLineNumberAreaWidth(blockCount());
   if (m_lang) {
-    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, document->toPlainText());
-    m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser));
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create(m_lang->scopeName, document->toPlainText()));
+    m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser.get()));
     m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
   }
 }

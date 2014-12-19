@@ -23,7 +23,7 @@ void SyntaxHighlighter::setParser(LanguageParser *parser)
 {
   if (!parser) return;
 
-  m_rootNode = parser->parse();
+  m_rootNode.reset(parser->parse());
   m_lastScopeNode = nullptr;
 }
 
@@ -89,12 +89,12 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 }
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
-  int idx = Util::binarySearch(node->children.length(), [search, node](int i) {
+  int idx = Util::binarySearch(node->children.size(), [search, node](int i) {
     return node->children[i]->range.begin() >= search.begin() || node->children[i]->range.covers(search);
   });
 
-  while (idx < node->children.length()) {
-    Node* child = node->children[idx];
+  while (idx < (int)node->children.size()) {
+    Node* child = node->children[idx].get();
     if (child->range.begin() > search.end()) {
       break;
     }
@@ -105,7 +105,7 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
         }
         m_lastScopeBuf.append(node->name);
       }
-      return findScope(search, node->children[idx]);
+      return findScope(search, node->children[idx].get());
     }
     idx++;
   }
@@ -129,7 +129,7 @@ void SyntaxHighlighter::updateScope(int point) {
 
   Region search(point, point + 1);
   if (m_lastScopeNode && m_lastScopeNode->range.covers(search)) {
-    if (m_lastScopeNode->children.length() != 0) {
+    if (m_lastScopeNode->children.size() != 0) {
       Node* no = findScope(search, m_lastScopeNode);
       if (no && no != m_lastScopeNode) {
         m_lastScopeNode = no;
@@ -141,6 +141,6 @@ void SyntaxHighlighter::updateScope(int point) {
 
   m_lastScopeNode = nullptr;
   m_lastScopeBuf.clear();
-  m_lastScopeNode = findScope(search, m_rootNode);
+  m_lastScopeNode = findScope(search, m_rootNode.get());
   m_lastScopeName = QString(m_lastScopeBuf);
 }

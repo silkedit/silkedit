@@ -123,7 +123,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   const QString patternsStr = "patterns";
   if (map.contains(patternsStr)) {
     QVariant patternsVar = map.value(patternsStr);
-    pat->patterns = toPatterns(patternsVar);
+    pat->patterns.reset(toPatterns(patternsVar));
   }
 }
 
@@ -149,16 +149,16 @@ LanguageParser* LanguageParser::create(const QString& scopeName, const QString& 
 }
 
 Node* LanguageParser::parse() {
-  Node* rootNode = new Node(this, lang->scopeName);
+  Node* rootNode = new Node(this, m_lang->scopeName);
   int iter = MAX_ITER_COUNT;
-  for (int pos = 0; pos < text.length() && iter > 0; iter--) {
-    auto pair = lang->rootPattern->cache(text, pos);
+  for (int pos = 0; pos < m_text.length() && iter > 0; iter--) {
+    auto pair = m_lang->rootPattern->cache(m_text, pos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     //    if (pat && ret) {
     //      qDebug() << "pat:" << *pat << "ret:" << *ret;
     //    }
-    int nl = text.indexOf(QRegularExpression("\n|\r"), pos);
+    int nl = m_text.indexOf(QRegularExpression("\n|\r"), pos);
     if (nl != -1) {
       nl += pos;
     }
@@ -167,12 +167,12 @@ Node* LanguageParser::parse() {
       break;
     } else if (nl > 0 && nl <= (*regions)[0].begin()) {
       pos = nl;
-      while (pos < text.length() && (text[pos] == '\n' || text[pos] == '\r')) {
+      while (pos < m_text.length() && (m_text[pos] == '\n' || m_text[pos] == '\r')) {
         pos++;
       }
     } else {
       Q_ASSERT(regions);
-      Node* n = pattern->createNode(text, this, *regions);
+      Node* n = pattern->createNode(m_text, this, *regions);
       rootNode->append(n);
       pos = n->range.end();
     }
@@ -186,12 +186,12 @@ Node* LanguageParser::parse() {
 }
 
 QString LanguageParser::getData(int a, int b) {
-  a = clamp(0, text.length(), a);
-  b = clamp(0, text.length(), b);
-  return text.mid(a, b - a);
+  a = clamp(0, m_text.length(), a);
+  b = clamp(0, m_text.length(), b);
+  return m_text.mid(a, b - a);
 }
 
-LanguageParser::LanguageParser(Language* lang, const QString& str) : lang(lang), text(str) {
+LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {
 }
 
 Node::Node(LanguageParser* p_p, const QString& p_name) {
@@ -206,12 +206,14 @@ Node::Node(const QString& p_name, Region p_range, LanguageParser* p_p) {
 }
 
 void Node::append(Node* child) {
-  children.append(child);
+//  children.append(child);
+  children.push_back(std::move(std::unique_ptr<Node>(child)));
 }
 
 Region Node::updateRange() {
-  foreach (Node* child, children) {
-    Region curr = child->updateRange();
+  for (auto& child : children) {
+//  foreach (Node* child, children) {
+    Region curr = child.get()->updateRange();
     if (curr.begin() < range.begin()) {
       range.setBegin(curr.begin());
     }
@@ -227,7 +229,7 @@ QString Node::toString() const {
 }
 
 QString Node::format(QString indent) const {
-  if (children.length() == 0) {
+  if (children.size() == 0) {
     return indent +
            QString("%1-%2: \"%3\" - Data: \"%4\"\n")
                .arg(range.begin())
@@ -238,7 +240,7 @@ QString Node::format(QString indent) const {
   QString ret;
   ret = ret % indent % QString("%1-%2: \"%3\"\n").arg(range.begin()).arg(range.end()).arg(name);
   indent += "\t";
-  foreach (Node* child, children) { ret = ret % child->format(indent); }
+  for (auto& child : children) { ret = ret % child.get()->format(indent); }
   return ret;
 }
 
@@ -251,7 +253,6 @@ Pattern::Pattern() : Pattern("") {
 
 Pattern::Pattern(const QString& p_include)
     : include(p_include),
-      patterns(nullptr),
       lang(nullptr),
       cachedPattern(nullptr),
       cachedPatterns(nullptr),
@@ -304,11 +305,11 @@ std::pair<Pattern *, QVector<Region> *> Pattern::cache(const QString& str, int p
     }
   } else {
     //    qDebug("cachedPatterns = nullptr");
-    cachedPatterns = nullptr;
+    cachedPatterns.reset(nullptr);
   }
 
   if (!cachedPatterns) {
-    cachedPatterns = new QVector<Pattern*>(patterns ? patterns->size() : 0);
+    cachedPatterns.reset(new QVector<Pattern*>(patterns ? patterns->size() : 0));
     //    qDebug("copying patterns to cachedPatterns. cachedPatterns.size: %d",
     //    cachedPatterns->size());
     for (int i = 0; i < cachedPatterns->size(); i++) {
@@ -336,9 +337,9 @@ std::pair<Pattern *, QVector<Region> *> Pattern::cache(const QString& str, int p
     // # means an item name in the repository
     if (include.startsWith('#')) {
       QString key = include.mid(1);
-      if (lang->repository.contains(key)) {
+      if (lang->repository.find(key) != lang->repository.end()) {
         //        qDebug("include %s", qPrintable(include));
-        Pattern* p2 = lang->repository.value(key);
+        Pattern* p2 = lang->repository.at(key).get();
         auto pair = p2->cache(str, pos);
         pattern = pair.first;
         regions = pair.second;
@@ -578,22 +579,21 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
   }
 
   // patterns
-  RootPattern* rootPattern = toRootPattern(rootMap);
-  lang->rootPattern = rootPattern;
+  lang->rootPattern.reset(toRootPattern(rootMap));
 
   // repository
   const QString repository = "repository";
   if (rootMap.contains(repository)) {
     QVariantMap repositoryMap = rootMap.value(repository).toMap();
     if (!repository.isEmpty()) {
-      QMapIterator<QString, QVariant> i(repositoryMap);
-      while (i.hasNext()) {
-        i.next();
-        QString key = i.key();
-        if (i.value().canConvert<QVariantMap>()) {
-          QVariantMap subMap = i.value().toMap();
+      QMapIterator<QString, QVariant> iter(repositoryMap);
+      while (iter.hasNext()) {
+        iter.next();
+        QString key = iter.key();
+        if (iter.value().canConvert<QVariantMap>()) {
+          QVariantMap subMap = iter.value().toMap();
           if (Pattern* pattern = toPattern(subMap)) {
-            lang->repository.insert(key, pattern);
+            lang->repository[key] = std::move(std::unique_ptr<Pattern>(pattern));
           }
         }
       }
@@ -691,7 +691,10 @@ QString Regex::toString() const {
 
 void Language::tweak() {
   rootPattern->tweak(this);
-  foreach (Pattern* p, repository) { p->tweak(this); }
+//  foreach (Pattern* p, repository) { p->tweak(this); }
+  for (auto& pair: repository) {
+    pair.second->tweak(this);
+  }
 }
 
 QString Language::toString() const {

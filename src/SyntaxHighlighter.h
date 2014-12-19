@@ -48,7 +48,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   void highlightBlock(const QString& text) override;
 
  private:
-  Node* m_rootNode;
+  std::unique_ptr<Node> m_rootNode;
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;

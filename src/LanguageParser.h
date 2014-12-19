@@ -1,11 +1,14 @@
 #pragma once
 
+#include <vector>
+#include <unordered_map>
 #include <QVector>
 #include <QMap>
 #include <QDebug>
 
 #include "macros.h"
 #include "Regexp.h"
+#include "stlSpecialization.h"
 
 struct Capture {
   int key;
@@ -20,12 +23,12 @@ struct Node;
 class Region;
 
 struct Regex {
-  Regexp* regex;
+  std::unique_ptr<Regexp> regex;
   int lastIndex;
   int lastFound;
 
-  Regex() : regex(nullptr), lastIndex(0), lastFound(0) {}
-  Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
+  Regex() : lastIndex(0), lastFound(0) {}
+  explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
 
   QVector<Region>* find(const QString& data, int pos);
   QString toString() const;
@@ -46,17 +49,17 @@ struct Pattern {
   Captures beginCaptures;
   Regex end;
   Captures endCaptures;
-  QVector<Pattern*>* patterns;
+  std::unique_ptr<QVector<Pattern*>> patterns;
   Language* lang;
   QStringRef cachedStr;
   Pattern* cachedPattern;
-  QVector<Pattern*>* cachedPatterns;
+  std::unique_ptr<QVector<Pattern*>> cachedPatterns;
   QVector<Region>* cachedRegions;
   int hits;
   int misses;
 
   Pattern();
-  Pattern(const QString& p_include);
+  explicit Pattern(const QString& p_include);
   virtual ~Pattern() = default;
 
   std::pair<Pattern*, QVector<Region>*> searchInPatterns(const QString& data, int pos);
@@ -106,13 +109,14 @@ class LanguageProvider {
   ~LanguageProvider() = delete;
 };
 
+// todo: check who is the owner of Language?
 // Language cannot be shared (means mutable) across multiple documents because RootPattern and
 // patterns in a repository have some cache and they are unique for a certain document.
 struct Language {
   QVector<QString> fileTypes;
   QString firstLineMatch;
-  RootPattern* rootPattern;  // patterns
-  QMap<QString, Pattern*> repository;
+  std::unique_ptr<RootPattern> rootPattern;  // patterns
+  std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   QString scopeName;
 
   Language() : rootPattern(nullptr) {}
@@ -123,18 +127,21 @@ struct Language {
 };
 
 class LanguageParser {
+  DISABLE_COPY(LanguageParser)
  public:
   static LanguageParser* create(const QString& scope, const QString& text);
+
+  ~LanguageParser() = default;
+  DEFAULT_MOVE(LanguageParser)
 
   Node* parse();
   QString getData(int start, int end);
 
  private:
-  Language* lang;
-  QString text;
+  std::unique_ptr<Language> m_lang;
+  QString m_text;
 
   LanguageParser(Language* lang, const QString& str);
-  ~LanguageParser() = default;
 };
 
 class Region {
@@ -161,13 +168,17 @@ private:
 };
 
 struct Node {
+  DISABLE_COPY(Node)
+
   Region range;
   QString name;
-  QVector<Node*> children;
+  std::vector<std::unique_ptr<Node>> children;
   LanguageParser* parser;
 
   Node(LanguageParser* parser, const QString& name);
   Node(const QString& p_name, Region p_range, LanguageParser* p_p);
+  ~Node() = default;
+  DEFAULT_MOVE(Node)
 
   void append(Node* child);
   Region updateRange();
