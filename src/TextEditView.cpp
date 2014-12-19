@@ -7,8 +7,8 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
-TextEditView::TextEditView(const QString& path, QWidget* parent)
-    : STextEdit(parent), m_path(path), m_lang(nullptr) {
+TextEditView::TextEditView(QWidget* parent)
+    : STextEdit(parent) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -30,40 +30,36 @@ TextEditView::TextEditView(const QString& path, QWidget* parent)
 
   QApplication::setCursorFlashTime(0);
   installEventFilter(&KeyHandler::singleton());
-
-  int dotPos = path.lastIndexOf('.');
-  if (dotPos >= 0) {
-    QString ext = path.mid(dotPos + 1);
-    qDebug("ext: %s", qPrintable(ext));
-    m_lang = LanguageProvider::languageFromExtension(ext);
-  } else {
-    qDebug("extension not found. path: %s", qPrintable(path));
-  }
 }
 
 TextEditView::~TextEditView() {
-  emit destroying(m_path);
+  emit destroying(m_document->path());
   qDebug("~TextEditView");
 }
 
-void TextEditView::setDocument(std::shared_ptr<QTextDocument> document) {
+QString TextEditView::path()
+{
+  return m_document ? m_document->path() : "";
+}
+
+void TextEditView::setDocument(std::shared_ptr<Document> document) {
   m_document = document;
   STextEdit::setDocument(document.get());
   updateLineNumberAreaWidth(blockCount());
-  if (m_lang) {
-    std::unique_ptr<LanguageParser> parser(LanguageParser::create(m_lang->scopeName, document->toPlainText()));
-    m_syntaxHighlighter.reset(SyntaxHighlighter::create(document.get(), parser.get()));
-    m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
-  }
 }
 
-void TextEditView::setLanguage(const QString& scopeName) {
-  qDebug("setLanguage: %s", qPrintable(scopeName));
-  m_lang = LanguageProvider::languageFromScope(scopeName);
-  if (m_lang && m_syntaxHighlighter) {
-    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, document()->toPlainText());
-    m_syntaxHighlighter->setParser(parser);
-    m_syntaxHighlighter->rehighlight();
+Language *TextEditView::language()
+{
+  if (m_document) {
+    return m_document->language();
+  }
+  return nullptr;
+}
+
+void TextEditView::setLanguage(const QString &scopeName)
+{
+  if (m_document) {
+    m_document->setLanguage(scopeName);
   }
 }
 
@@ -71,7 +67,7 @@ void TextEditView::setPath(const QString& path) {
   if (path.isEmpty())
     return;
 
-  m_path = path;
+  m_document->setPath(path);
   emit pathUpdated(path);
 }
 
@@ -272,18 +268,18 @@ void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
 }
 
 TextEditView* TextEditView::clone() {
-  TextEditView* editView = new TextEditView(path());
+  TextEditView* editView = new TextEditView();
   editView->setDocument(m_document);
   return editView;
 }
 
 void TextEditView::save() {
-  DocumentService::singleton().save(m_path, document());
+  DocumentService::singleton().save(m_document.get());
   emit saved();
 }
 
 void TextEditView::saveAs() {
-  QString newFilePath = DocumentService::singleton().saveAs(m_path, document());
+  QString newFilePath = DocumentService::singleton().saveAs(m_document.get());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
   }

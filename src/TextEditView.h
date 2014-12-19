@@ -7,14 +7,13 @@
 #include "macros.h"
 #include "ICloneable.h"
 #include "SyntaxHighlighter.h"
+#include "Document.h"
 
-QT_BEGIN_NAMESPACE
 class QPaintEvent;
 class QResizeEvent;
 class QSize;
 class QWidget;
 class QElapsedTimer;
-QT_END_NAMESPACE
 
 class LineNumberArea;
 
@@ -22,12 +21,12 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:
-  explicit TextEditView(const QString& path = "", QWidget* parent = 0);
+  explicit TextEditView(QWidget* parent = 0);
   virtual ~TextEditView();
 
-  QString path() { return m_path; }
-  void setDocument(std::shared_ptr<QTextDocument> document);
-  Language* language() { return m_lang; }
+  QString path();
+  void setDocument(std::shared_ptr<Document> document);
+  Language* language();
   void setLanguage(const QString& scopeName);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
@@ -58,10 +57,7 @@ signals:
 
  private:
   QWidget* m_lineNumberArea;
-  QString m_path;
-  std::shared_ptr<QTextDocument> m_document;
-  std::unique_ptr<SyntaxHighlighter> m_syntaxHighlighter;
-  Language* m_lang;
+  std::shared_ptr<Document> m_document;
 
   void setPath(const QString& path);
 

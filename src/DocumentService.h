@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <QString>
 
-#include "FileDocument.h"
+#include "Document.h"
 #include "Singleton.h"
 #include "macros.h"
 #include "stlSpecialization.h"
@@ -17,8 +17,8 @@ class DocumentService : public Singleton<DocumentService> {
   ~DocumentService() = default;
 
   bool open(const QString& filename);
-  void save(const QString& path, QTextDocument* doc);
-  QString saveAs(const QString& path, QTextDocument* doc);
+  void save(Document* doc);
+  QString saveAs(Document* doc);
 
  private:
   friend class Singleton<DocumentService>;

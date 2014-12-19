@@ -1,8 +1,6 @@
 #include <memory>
 #include <QFile>
 #include <QFileInfo>
-#include <QTextStream>
-#include <QTextDocument>
 #include <QMessageBox>
 
 #include "STabWidget.h"
@@ -102,23 +100,20 @@ int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
 }
 
 int STabWidget::open(const QString& path) {
+  qDebug("STabWidget::open(%s)", qPrintable(path));
   int index = indexOfPath(path);
   if (index >= 0) {
     setCurrentIndex(index);
     return index;
   }
 
-  QFile file(path);
-  if (!file.open(QIODevice::ReadWrite))
+  std::shared_ptr<Document> newDoc(Document::create(path));
+  if (!newDoc) {
     return -1;
-
-  QTextStream in(&file);
-  std::shared_ptr<QTextDocument> newDoc(new QTextDocument(in.readAll()));
+  }
   newDoc->setModified(false);
-  STextDocumentLayout* layout = new STextDocumentLayout(newDoc.get());
-  newDoc->setDocumentLayout(layout);
 
-  TextEditView* view = new TextEditView(path);
+  TextEditView* view = new TextEditView(this);
   view->setDocument(std::move(newDoc));
   return addTab(view, getFileNameFrom(path));
 }
@@ -131,7 +126,7 @@ void STabWidget::addNew() {
 void STabWidget::saveAllTabs() {
   for (int i = 0; i < count(); i++) {
     auto editView = qobject_cast<TextEditView*>(widget(i));
-    if (editView && !editView->path().isEmpty()) {
+    if (editView) {
       editView->save();
     }
   }
@@ -166,6 +161,7 @@ void STabWidget::closeOtherTabs() {
 }
 
 int STabWidget::indexOfPath(const QString& path) {
+//  qDebug("STabWidget::indexOfPath(%s)", qPrintable(path));
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
     QString path2 = v->path();

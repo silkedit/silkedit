@@ -24,16 +24,17 @@ bool DocumentService::open(const QString& filename) {
   }
 }
 
-void DocumentService::save(const QString& path, QTextDocument* doc) {
-  if (path.isEmpty()) {
-    saveAs(DEFAULT_FILE_NAME, doc);
+void DocumentService::save(Document *doc) {
+  if (doc->path().isEmpty()) {
+    doc->setPath(DEFAULT_FILE_NAME);
+    saveAs(doc);
     return;
   } else if (!doc) {
     qWarning("document is null");
     return;
   }
 
-  QFile outFile(path);
+  QFile outFile(doc->path());
   if (outFile.open(QIODevice::WriteOnly)) {
     QTextStream out(&outFile);
     for (int i = 0; i < doc->blockCount(); i++) {
@@ -47,10 +48,11 @@ void DocumentService::save(const QString& path, QTextDocument* doc) {
   }
 }
 
-QString DocumentService::saveAs(const QString& path, QTextDocument* doc) {
-  QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), path);
+QString DocumentService::saveAs(Document* doc) {
+  QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path());
   if (!filePath.isEmpty()) {
-    save(filePath, doc);
+    doc->setPath(filePath);
+    save(doc);
   }
 
   return filePath;
