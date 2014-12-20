@@ -20,13 +20,12 @@
 // will be going on in parallel in a separate thread and the "monkey patch"
 // will allow some accuracy in the meantime until the Parse operation has finished.
 class SyntaxHighlighter : public QSyntaxHighlighter {
+  Q_OBJECT
   DISABLE_COPY(SyntaxHighlighter)
 
  public:
-  static SyntaxHighlighter* create(QTextDocument* doc, LanguageParser* parser);
-
   SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser);
-  ~SyntaxHighlighter() = default;
+  ~SyntaxHighlighter();
   DEFAULT_MOVE(SyntaxHighlighter)
 
   void setParser(LanguageParser* parser);
@@ -45,6 +44,9 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   void setTheme(const QString& themeFileName);
   void adjust(int pos, int delta);
+
+public slots:
+  void updateNode(int position, int charsRemoved, int charsAdded);
 
  protected:
   void highlightBlock(const QString& text) override;

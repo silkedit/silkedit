@@ -30,6 +30,7 @@
 //#include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
+#include "Dummy.h"
 
 int main(int argv, char** args) {
   SilkApp app(argv, args);
@@ -156,6 +157,8 @@ int main(int argv, char** args) {
   editMenu->addAction(copyAction);
   editMenu->addAction(pasteAction);
   editMenu->addAction(selectAllAction);
+
+//  new Dummy();
 
   return app.exec();
 }

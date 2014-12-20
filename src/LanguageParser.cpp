@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <QStringList>
 #include <QStringBuilder>
 #include <QDebug>
@@ -16,14 +17,6 @@ const int MAX_ITER_COUNT = 10000;
 int clamp(int min, int max, int v) {
   return qMax(min, qMin(max, v));
 }
-
-// void fix(QVector<int>& indices, int add) {
-//  for (int i = 0; i < indices.length(); i++) {
-//    if (indices[i] != -1) {
-//      indices[i] += add;
-//    }
-//  }
-//}
 
 Captures toCaptures(QVariantMap map) {
   Captures captures(0);
@@ -148,20 +141,18 @@ LanguageParser* LanguageParser::create(const QString& scopeName, const QString& 
   }
 }
 
-RootNode *LanguageParser::parse() {
+RootNode* LanguageParser::parse() {
   RootNode* rootNode = new RootNode(this, m_lang->scopeName);
   QVector<Node*> children = parse(Region(0, m_text.length()));
-  foreach (Node* child, children) {
-    rootNode->append(child);
-  }
+  foreach (Node* child, children) { rootNode->append(child); }
 
   rootNode->updateRange();
   return rootNode;
 }
 
 // parse in [begin, end) (doensn't include end)
-QVector<Node*> LanguageParser::parse(const Region &region)
-{
+QVector<Node*> LanguageParser::parse(const Region& region) {
+  qDebug("parse. region: %s", qPrintable(region.toString()));
   QTime t;
   t.start();
 
@@ -189,7 +180,9 @@ QVector<Node*> LanguageParser::parse(const Region &region)
     } else {
       Q_ASSERT(regions);
       Node* n = pattern->createNode(m_text, this, *regions);
-      nodes.append(n);
+      if (region.intersects(n->range)) {
+        nodes.append(n);
+      }
       pos = n->range.end();
     }
   }
@@ -206,6 +199,12 @@ QString LanguageParser::getData(int a, int b) {
   a = clamp(0, m_text.length(), a);
   b = clamp(0, m_text.length(), b);
   return m_text.mid(a, b - a);
+}
+
+void LanguageParser::clearCache() {
+  if (m_lang) {
+    m_lang->clearCache();
+  }
 }
 
 LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {
@@ -316,7 +315,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
   return std::make_pair(resultPattern, resultRegions);
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int pos) {
+std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int beginPos) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
@@ -324,7 +323,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int pos
       return std::make_pair(nullptr, nullptr);
     }
 
-    if ((*cachedRegions)[0].begin() >= pos && cachedPattern->cachedRegions) {
+    if ((*cachedRegions)[0].begin() >= beginPos && cachedPattern->cachedRegions) {
       //      qDebug("hits++");
       //      hits++;
       return std::make_pair(cachedPattern, cachedRegions);
@@ -355,10 +354,10 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int pos
   QVector<Region>* regions = nullptr;
   if (match.regex) {
     pattern = this;
-    regions = match.find(str, pos);
+    regions = match.find(str, beginPos);
   } else if (begin.regex) {
     pattern = this;
-    regions = begin.find(str, pos);
+    regions = begin.find(str, beginPos);
   } else if (!include.isEmpty()) {
     // # means an item name in the repository
     if (include.startsWith('#')) {
@@ -366,7 +365,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int pos
       if (lang->repository.find(key) != lang->repository.end()) {
         //        qDebug("include %s", qPrintable(include));
         Pattern* p2 = lang->repository.at(key).get();
-        auto pair = p2->cache(str, pos);
+        auto pair = p2->cache(str, beginPos);
         pattern = pair.first;
         regions = pair.second;
       } else {
@@ -375,15 +374,15 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int pos
       // $self and $base means the current entire syntax definition
     } else if (include == "$self" || include == "$base") {
       //      qDebug("include %s", qPrintable(include));
-      return lang->rootPattern->cache(str, pos);
+      return lang->rootPattern->cache(str, beginPos);
       // external syntax definitions e.g. source.c++
     } else if (Language* anotherLang = LanguageProvider::languageFromScope(include)) {
-      return anotherLang->rootPattern->cache(str, pos);
+      return anotherLang->rootPattern->cache(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
   } else {
-    auto pair = searchInPatterns(str, pos);
+    auto pair = searchInPatterns(str, beginPos);
     pattern = pair.first;
     regions = pair.second;
   }
@@ -491,7 +490,7 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
       continue;
     }
     for (int j = i - 1; j >= 0; j--) {
-      if (regions[j].covers(regions[i])) {
+      if (regions[j].fullyCovers(regions[i])) {
         parentIndices[i] = j;
         break;
       }
@@ -526,6 +525,25 @@ void Pattern::tweak(Language* l) {
   if (patterns) {
     foreach (Pattern* p, *patterns) { p->tweak(l); }
   }
+}
+
+void Pattern::clearCache() {
+  cachedPattern = nullptr;
+  cachedPatterns.reset(nullptr);
+  if (cachedRegions) {
+    cachedRegions->clear();
+  }
+  cachedStr.clear();
+  if (patterns) {
+    foreach (Pattern* pat, *patterns) { pat->clearCache(); }
+  }
+
+  match.lastFound = 0;
+  match.lastIndex = 0;
+  begin.lastFound = 0;
+  begin.lastIndex = 0;
+  end.lastFound = 0;
+  end.lastIndex = 0;
 }
 
 QString Pattern::toString() const {
@@ -648,68 +666,18 @@ void LanguageProvider::loadLanguages() {
   }
 }
 
-bool Region::covers(const Region& r2) {
-  return contains(r2.begin()) && r2.end() <= end();
-}
-
-bool Region::contains(int point) {
-  return begin() <= point && point <= end();
-}
-
-void Region::adjust(int pos, int delta) {
-  if (m_begin >= pos) {
-    m_begin += delta;
-  } else {
-    int diff = pos + delta - m_begin;
-    if (diff < 0) {
-      m_begin += diff;
-    }
-  }
-
-  if (m_end >= pos) {
-    m_end += delta;
-  } else {
-    int diff = pos + delta - m_end;
-    if (diff < 0) {
-      m_end += diff;
-    }
-  }
-}
-
-void Region::setBegin(int p) {
-  if (p <= m_end) {
-    m_begin = p;
-  } else {
-    qWarning("%d > end", p);
-  }
-  Q_ASSERT(m_begin <= m_end);
-}
-
-void Region::setEnd(int p) {
-  if (p >= m_begin) {
-    m_end = p;
-  } else {
-    qWarning("%d < begin", p);
-  }
-  Q_ASSERT(m_begin <= m_end);
-}
-
-int Region::length() const {
-  return end() - begin();
-}
-
-QVector<Region>* Regex::find(const QString& str, int pos) {
+QVector<Region>* Regex::find(const QString& str, int begin) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
-  if (lastIndex > pos) {
+  if (lastIndex > begin) {
     lastFound = 0;
   }
 
-  lastIndex = pos;
+  lastIndex = begin;
   while (lastFound < str.length()) {
     std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.mid(lastFound)));
     if (!indices) {
       break;
-    } else if (((*indices)[0] + lastFound) < pos) {
+    } else if (((*indices)[0] + lastFound) < begin) {
       if ((*indices)[0] == 0) {
         lastFound++;
       } else {
@@ -720,7 +688,6 @@ QVector<Region>* Regex::find(const QString& str, int pos) {
 
     Q_ASSERT(indices);
     Q_ASSERT(indices->length() % 2 == 0);
-    //    fix(*indices, lastFound);
     for (int i = 0; i < indices->length(); i++) {
       if ((*indices)[i] != -1) {
         (*indices)[i] += lastFound;
@@ -760,6 +727,15 @@ QString Language::name() {
   return rootPattern ? rootPattern->name : "";
 }
 
+void Language::clearCache() {
+  if (rootPattern) {
+    rootPattern->clearCache();
+  }
+  for (auto& pair : repository) {
+    pair.second->clearCache();
+  }
+}
+
 QString RootPattern::toString() const {
   QString ret;
   if (patterns) {
@@ -768,44 +744,48 @@ QString RootPattern::toString() const {
   return ret;
 }
 
-
-RootNode::RootNode(LanguageParser *parser, const QString &name): Node(parser, name)
-{
-
+RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {
 }
 
-void RootNode::adjust(int pos, int delta)
-{
+void RootNode::adjust(int pos, int delta) {
   range.setEnd(range.end() + delta);
   for (auto& child : children) {
     child->adjust(pos, delta);
   }
 }
 
-QVector<Node *> RootNode::nodesCovering(const Region& region)
-{
-  QVector<Node*> nodes(0);
-  for (auto& child : children) {
-    if (child.get()->range.covers(region)) {
-      nodes.append(child.get());
-    }
-  }
-  return nodes;
-}
+void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
+  qDebug("updateChildren. region: %s",
+         qPrintable(region.toString()));
+  parser->clearCache();
 
-void RootNode::updateChildren(const Region &region, LanguageParser *parser)
-{
-  qDebug("updateChildren");
-  for (int i = 0; i < children.size();) {
-    if (children[i]->range.covers(region)) {
-      QVector<Node*> newNodes = parser->parse(children[i]->range);
-      children.erase(i);
-      foreach (Node* node, newNodes) {
-        children.insert(i, std::move(std::unique_ptr<Node>(node)));
-        i++;
-      }
+  Region affectedRegion(region);
+  Q_ASSERT(affectedRegion.begin() == region.begin());
+  Q_ASSERT(affectedRegion.end() == region.end());
+
+  for (auto it = children.begin(); it != children.end();) {
+    qDebug("child region: %s", qPrintable((*it)->range.toString()));
+    if ((*it)->range.intersects(region)) {
+      qDebug() << "affected child:" << (*it)->range;
+      // update affected region
+      affectedRegion.setBegin(qMin(affectedRegion.begin(), (*it)->range.begin()));
+      affectedRegion.setEnd(qMax(affectedRegion.end(), (*it)->range.end()));
+      it = children.erase(it);
     } else {
-      i++;
+      it++;
     }
   }
+
+  QVector<Node*> newNodes = parser->parse(affectedRegion);
+  foreach (Node* node, newNodes) {
+    qDebug("new node: %s", qPrintable(node->toString()));
+    children.push_back(std::move(std::unique_ptr<Node>(node)));
+  }
+  std::sort(children.begin(),
+            children.end(),
+            [](const std::unique_ptr<Node>& x,
+               const std::unique_ptr<Node>& y) { return x->range.begin() < y->range.begin(); });
+
+  qDebug("new children.size: %d", (int)children.size());
+  qDebug() << *this;
 }

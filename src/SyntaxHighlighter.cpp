@@ -5,22 +5,27 @@
 #include "PListParser.h"
 #include "Util.h"
 
-// Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass dammy QObject first then call setDocument(doc) later to control the order of slot calls for contentsChange signal.
-SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser *parser)
-    : QSyntaxHighlighter(new QObject()), m_rootNode(parser->parse()), m_lastScopeNode(nullptr), m_parser(parser) {
-  QObject::connect(doc, &QTextDocument::contentsChange, [this](int position, int charsRemoved, int charsAdded) {
-    qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved, charsAdded);
-    m_parser->setText(document()->toPlainText());
-    adjust(position, charsAdded - charsRemoved);
-    qDebug() << *m_rootNode;
-//    m_rootNode.reset(m_parser->parse());
-  });
+// fixme: memory leak of new QObject();
+// Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass
+// dammy QObject first then call setDocument(doc) later to control the order of slot calls for
+// contentsChange signal.
+SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
+    : QSyntaxHighlighter(new QObject()),
+      m_rootNode(parser->parse()),
+      m_lastScopeNode(nullptr),
+      m_parser(parser) {
+  connect(doc, SIGNAL(contentsChange(int,int,int)), this, SLOT(updateNode(int,int,int)));
+
   setDocument(doc);
 }
 
-void SyntaxHighlighter::setParser(LanguageParser *parser)
-{
-  if (!parser) return;
+SyntaxHighlighter::~SyntaxHighlighter() {
+  qDebug("~SyntaxHighlighter");
+}
+
+void SyntaxHighlighter::setParser(LanguageParser* parser) {
+  if (!parser)
+    return;
 
   m_rootNode.reset(parser->parse());
   m_lastScopeNode = nullptr;
@@ -43,22 +48,51 @@ void SyntaxHighlighter::setTheme(const QString& themeFileName) {
   m_theme.reset(Theme::loadTheme(themeFileName));
 }
 
-void SyntaxHighlighter::adjust(int pos, int delta)
-{
+void SyntaxHighlighter::adjust(int pos, int delta) {
   qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
   if (m_rootNode) {
     m_rootNode->adjust(pos, delta);
   }
-  m_rootNode->updateChildren(Region(pos, pos + delta), m_parser.get());
+
+  QTextBlock beginBlock = document()->findBlock(pos);
+  if (!beginBlock.isValid()) {
+    qDebug("beginBlock is invalid");
+    return;
+  }
+
+  QTextBlock endBlock = document()->findBlock(pos + delta);
+  if (!endBlock.isValid()) {
+    qDebug("endBlock is invalid");
+    return;
+  }
+
+  m_rootNode->updateChildren(Region(beginBlock.position(), endBlock.position() + endBlock.length()),
+                             m_parser.get());
+  m_lastScopeNode = nullptr;
+  m_lastScopeBuf.clear();
+  m_lastScopeName = "";
+}
+
+void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)",
+         position,
+         charsRemoved,
+         charsAdded);
+  if (document()) {
+    m_parser->setText(document()->toPlainText());
+    adjust(position, charsAdded - charsRemoved);
+  }
 }
 
 void SyntaxHighlighter::highlightBlock(const QString& text) {
-  qDebug("highlightBlock. text: %s", qPrintable(text));
   if (!m_theme) {
+    qDebug("theme is null");
     return;
   }
 
   int pos = currentBlock().position();
+  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), pos);
+
   for (int i = 0; i < text.length();) {
     updateScope(pos + i);
     if (!m_lastScopeNode) {
@@ -71,10 +105,10 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
       std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
       if (format) {
-//        qDebug("setFormat(%d, %d, %s",
-//               i,
-//               qMin(text.length(), region.length()),
-//               qPrintable(format->foreground().color().name()));
+        //        qDebug("setFormat(%d, %d, %s",
+        //               i,
+        //               qMin(text.length(), region.length()),
+        //               qPrintable(format->foreground().color().name()));
         setFormat(i, qMin(text.length(), region.length()), *format);
       } else {
         qDebug("format not found for %s", qPrintable(m_lastScopeName));
@@ -83,10 +117,10 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
     } else {
       std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
       if (format) {
-//        qDebug("setFormat(%d, %d, %s",
-//               i,
-//               1,
-//               qPrintable(format->foreground().color().name()));
+        //        qDebug("setFormat(%d, %d, %s",
+        //               i,
+        //               1,
+        //               qPrintable(format->foreground().color().name()));
         setFormat(i, 1, *format);
       } else {
         qDebug("format not found for %s", qPrintable(m_lastScopeName));
@@ -98,7 +132,8 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
   int idx = Util::binarySearch(node->children.size(), [search, node](int i) {
-    return node->children[i]->range.begin() >= search.begin() || node->children[i]->range.covers(search);
+    return node->children[i]->range.begin() >= search.begin() ||
+           node->children[i]->range.fullyCovers(search);
   });
 
   while (idx < (int)node->children.size()) {
@@ -106,7 +141,7 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
     if (child->range.begin() > search.end()) {
       break;
     }
-    if (child->range.covers(search)) {
+    if (child->range.fullyCovers(search)) {
       if (!node->name.isEmpty() && node != m_lastScopeNode) {
         if (m_lastScopeBuf.length() > 0) {
           m_lastScopeBuf.append(' ');
@@ -118,7 +153,7 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
     idx++;
   }
 
-  if (node != m_lastScopeNode && node->range.covers(search)) {
+  if (node != m_lastScopeNode && node->range.fullyCovers(search)) {
     if (!node->name.isEmpty()) {
       if (m_lastScopeBuf.length() > 0) {
         m_lastScopeBuf.append(' ');
@@ -132,13 +167,15 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
 }
 
 void SyntaxHighlighter::updateScope(int point) {
-//  qDebug("updateScope(point: %d)", point);
+  //  qDebug("updateScope(point: %d)", point);
 
-  if (!m_rootNode)
+  if (!m_rootNode) {
+    qDebug("root node is null");
     return;
+  }
 
   Region search(point, point + 1);
-  if (m_lastScopeNode && m_lastScopeNode->range.covers(search)) {
+  if (m_lastScopeNode && m_lastScopeNode->range.fullyCovers(search)) {
     if (m_lastScopeNode->children.size() != 0) {
       Node* no = findScope(search, m_lastScopeNode);
       if (no && no != m_lastScopeNode) {

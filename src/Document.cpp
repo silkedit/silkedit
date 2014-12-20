@@ -23,6 +23,11 @@ Document::Document(const QString& path, const QString& text) : QTextDocument(tex
   }
 }
 
+Document::~Document()
+{
+  qDebug("~Document");
+}
+
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
   QFile file(path);

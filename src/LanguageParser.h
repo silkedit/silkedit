@@ -9,6 +9,7 @@
 #include "macros.h"
 #include "Regexp.h"
 #include "stlSpecialization.h"
+#include "Region.h"
 
 struct Capture {
   int key;
@@ -31,7 +32,7 @@ struct Regex {
   Regex() : lastIndex(0), lastFound(0) {}
   explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
 
-  QVector<Region>* find(const QString& data, int pos);
+  QVector<Region>* find(const QString& data, int begin);
   QString toString() const;
 
   friend QDebug operator<<(QDebug dbg, const Regex& regex) {
@@ -71,6 +72,7 @@ struct Pattern {
                           Node* parent,
                           Captures captures);
   void tweak(Language* l);
+  void clearCache();
 
   virtual QString toString() const;
 
@@ -125,6 +127,7 @@ struct Language {
   void tweak();
   QString toString() const;
   QString name();
+  void clearCache();
 };
 
 class LanguageParser {
@@ -139,37 +142,13 @@ class LanguageParser {
   QVector<Node*> parse(const Region& region);
   QString getData(int start, int end);
   void setText(const QString& text) { m_text = text; }
+  void clearCache();
 
  private:
   std::unique_ptr<Language> m_lang;
   QString m_text;
 
   LanguageParser(Language* lang, const QString& str);
-};
-
-class Region {
-public:
-  Region() : m_begin(0), m_end(0) {}
-  Region(int begin, int end) {
-    m_begin = qMin(begin, end);
-    m_end = qMax(begin, end);
-  }
-
-  bool covers(const Region& r2);
-  bool contains(int point);
-  bool isEmpty() { return m_begin == m_end; }
-  // Adjusts the region in place for the given position and delta
-  void adjust(int pos, int delta);
-
-  int begin() const { return m_begin; }
-  void setBegin(int p);
-  int end() const { return m_end; }
-  void setEnd(int p);
-  int length() const;
-
-private:
-  int m_begin;
-  int m_end;
 };
 
 struct Node {
@@ -205,6 +184,5 @@ struct RootNode : public Node {
   RootNode(LanguageParser* parser, const QString& name);
 
   void adjust(int pos, int delta) override;
-  QVector<Node*> nodesCovering(const Region& region);
   void updateChildren(const Region& region, LanguageParser* parser);
 };
