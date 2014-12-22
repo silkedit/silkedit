@@ -591,7 +591,7 @@ Language* LanguageProvider::languageFromExtension(const QString& ext) {
 Language* LanguageProvider::languageFromFile(const QString& path) {
   QFile file(path);
   if (!file.open(QIODevice::ReadOnly)) {
-    qWarning("unable to open a file");
+    qWarning("unable to open a file %s", qPrintable(path));
     return nullptr;
   }
 

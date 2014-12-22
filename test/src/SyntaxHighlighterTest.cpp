@@ -25,7 +25,7 @@ class SyntaxHighlighterTest : public QObject {
 };
 
 void SyntaxHighlighterTest::scopeExtent() {
-  const QVector<QString> files({"testdata/Property List (XML).tmLanguage", "testdata/XML.plist"});
+  const QVector<QString> files({"testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage"});
 
   foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
 

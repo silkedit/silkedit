@@ -88,7 +88,7 @@ void LanguageParserTest::LanguageFromScope() {
 
 void LanguageParserTest::parseTmLanguage() {
   const QVector<QString> files(
-      {"testdata/C++.tmLanguage", "testdata/C.tmLanguage", "testdata/Property List (XML).tmLanguage", "testdata/XML.plist", "testdata/Go.tmLanguage"});
+      {"testdata/C++.tmLanguage", "testdata/C.tmLanguage", "testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage", "testdata/Go.tmLanguage"});
 
   foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
 
