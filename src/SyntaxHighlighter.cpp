@@ -30,6 +30,7 @@ void SyntaxHighlighter::setParser(LanguageParser* parser) {
   if (!parser)
     return;
 
+  m_parser.reset(parser);
   m_rootNode.reset(parser->parse());
   m_lastScopeNode = nullptr;
 }

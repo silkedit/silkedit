@@ -7,6 +7,10 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 
+namespace {
+  const QString DEFAULT_SCOPE = "text.plain";
+}
+
 TextEditView::TextEditView(QWidget* parent)
     : STextEdit(parent) {
   m_lineNumberArea = new LineNumberArea(this);
@@ -30,6 +34,7 @@ TextEditView::TextEditView(QWidget* parent)
 
   QApplication::setCursorFlashTime(0);
   installEventFilter(&KeyHandler::singleton());
+  setLanguage(DEFAULT_SCOPE);
 }
 
 TextEditView::~TextEditView() {
@@ -268,7 +273,7 @@ void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
 }
 
 TextEditView* TextEditView::clone() {
-  TextEditView* editView = new TextEditView();
+  TextEditView* editView = new TextEditView(this);
   editView->setDocument(m_document);
   return editView;
 }

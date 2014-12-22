@@ -21,7 +21,7 @@ class TextEditView : public STextEdit, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:
-  explicit TextEditView(QWidget* parent = 0);
+  explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
 
   QString path();

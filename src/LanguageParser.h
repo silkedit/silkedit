@@ -94,17 +94,18 @@ class RootPattern : public Pattern {
 
 class LanguageProvider {
  public:
+  static Language* defaultLanguage();
   static Language* languageFromScope(const QString& scopeName);
   static Language* languageFromExtension(const QString& ext);
   static Language* languageFromFile(const QString& path);
-  static QVector<QPair<QString, QString>> langNameAndScopePairs() {
-    return m_langNameAndScopePairs;
+  static QVector<QPair<QString, QString>> scopeAndLangNamePairs() {
+    return m_scopeAndLangNamePairs;
   }
 
   static void loadLanguages();
 
  private:
-  static QVector<QPair<QString, QString>> m_langNameAndScopePairs;
+  static QVector<QPair<QString, QString>> m_scopeAndLangNamePairs;
   static QMap<QString, QString> m_scopeLangFilePathMap;
   static QMap<QString, QString> m_extensionLangFilePathMap;
 
@@ -128,6 +129,10 @@ struct Language {
   QString toString() const;
   QString name();
   void clearCache();
+
+  bool operator==(const Language& other) {
+    return scopeName == other.scopeName;
+  }
 };
 
 class LanguageParser {

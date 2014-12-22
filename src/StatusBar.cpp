@@ -7,15 +7,10 @@ StatusBar::StatusBar(MainWindow* window)
     : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
   addPermanentWidget(m_langComboBox);
 
-  QObject::connect(m_langComboBox, static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), [this, window](int index) {
-    qDebug("currentIndexChanged. %d", index);
-    STabWidget* tabWidget = window->activeTabWidget();
-    if (tabWidget) {
-      if (TextEditView* editView = tabWidget->activeEditView()) {
-        editView->setLanguage(m_langComboBox->currentData().toString());
-      }
-    }
-  });
+  connect(m_langComboBox,
+          SIGNAL(currentIndexChanged(int)),
+          this,
+          SLOT(setActiveTextEditViewLanguage()));
 }
 
 void StatusBar::onActiveTextEditViewChanged(TextEditView* editView) {
@@ -31,5 +26,19 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView* editView) {
     }
   } else {
     qDebug("editView.lang() is null");
+  }
+}
+
+void StatusBar::setActiveTextEditViewLanguage() {
+  qDebug("currentIndexChanged. %d", m_langComboBox->currentIndex());
+  STabWidget* tabWidget = static_cast<MainWindow*>(window())->activeTabWidget();
+  if (tabWidget) {
+    if (TextEditView* editView = tabWidget->activeEditView()) {
+      editView->setLanguage(m_langComboBox->currentData().toString());
+    } else {
+      qDebug("active TextEditView is null");
+    }
+  } else {
+    qDebug("active tab widget is null");
   }
 }

@@ -119,7 +119,9 @@ int STabWidget::open(const QString& path) {
 }
 
 void STabWidget::addNew() {
-  TextEditView* view = new TextEditView();
+  TextEditView* view = new TextEditView(this);
+  std::shared_ptr<Document> newDoc(Document::createBlank());
+  view->setDocument(std::move(newDoc));
   addTab(view, DocumentService::DEFAULT_FILE_NAME);
 }
 

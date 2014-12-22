@@ -12,6 +12,7 @@
 namespace {
 
 const int MAX_ITER_COUNT = 10000;
+const QString DEFAULT_SCOPE = "text.plain";
 
 // Clamps v to be in the region of _min and _max
 int clamp(int min, int max, int v) {
@@ -152,7 +153,7 @@ RootNode* LanguageParser::parse() {
 
 // parse in [begin, end) (doensn't include end)
 QVector<Node*> LanguageParser::parse(const Region& region) {
-//  qDebug("parse. region: %s", qPrintable(region.toString()));
+  qDebug("parse. region: %s. lang: %s", qPrintable(region.toString()), qPrintable(m_lang->scopeName));
   QTime t;
   t.start();
 
@@ -562,9 +563,14 @@ QString Pattern::toString() const {
   return ret;
 }
 
-QVector<QPair<QString, QString>> LanguageProvider::m_langNameAndScopePairs(0);
+QVector<QPair<QString, QString>> LanguageProvider::m_scopeAndLangNamePairs(0);
 QMap<QString, QString> LanguageProvider::m_scopeLangFilePathMap;
 QMap<QString, QString> LanguageProvider::m_extensionLangFilePathMap;
+
+Language *LanguageProvider::defaultLanguage()
+{
+  return languageFromScope(DEFAULT_SCOPE);
+}
 
 Language* LanguageProvider::languageFromScope(const QString& scope) {
   if (m_scopeLangFilePathMap.contains(scope)) {
@@ -650,7 +656,7 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
   if (!m_scopeLangFilePathMap.contains(lang->scopeName)) {
     foreach (const QString& ext, lang->fileTypes) { m_extensionLangFilePathMap[ext] = path; }
     m_scopeLangFilePathMap[lang->scopeName] = path;
-    m_langNameAndScopePairs.append(QPair<QString, QString>(lang->name(), lang->scopeName));
+    m_scopeAndLangNamePairs.append(QPair<QString, QString>(lang->scopeName, lang->name()));
   }
 
   lang->tweak();
@@ -755,7 +761,7 @@ void RootNode::adjust(int pos, int delta) {
 }
 
 void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
-  //  qDebug("updateChildren. region: %s", qPrintable(region.toString()));
+    qDebug("updateChildren. region: %s", qPrintable(region.toString()));
   parser->clearCache();
 
   Region affectedRegion(region);
@@ -763,7 +769,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   Q_ASSERT(affectedRegion.end() == region.end());
 
   for (auto it = children.begin(); it != children.end();) {
-    //    qDebug("child region: %s", qPrintable((*it)->region.toString()));
+        qDebug("child region: %s", qPrintable((*it)->region.toString()));
     if ((*it)->region.intersects(region)) {
       //      qDebug() << "affected child:" << (*it)->region;
       // update affected region
@@ -777,7 +783,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
 
   QVector<Node*> newNodes = parser->parse(affectedRegion);
   foreach (Node* node, newNodes) {
-    //    qDebug("new node: %s", qPrintable(node->toString()));
+        qDebug("new node: %s", qPrintable(node->toString()));
     children.push_back(std::move(std::unique_ptr<Node>(node)));
   }
   std::sort(children.begin(),
@@ -785,6 +791,6 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
             [](const std::unique_ptr<Node>& x,
                const std::unique_ptr<Node>& y) { return x->region.begin() < y->region.begin(); });
 
-  //  qDebug("new children.size: %d", (int)children.size());
-  //  qDebug() << *this;
+    qDebug("new children.size: %d", (int)children.size());
+    qDebug() << *this;
 }

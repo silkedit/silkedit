@@ -22,6 +22,7 @@ class StatusBar: public QStatusBar {
 
   public slots:
   void onActiveTextEditViewChanged(TextEditView* editView);
+  void setActiveTextEditViewLanguage();
 
 private:
   LanguageComboBox* m_langComboBox;
