@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <QtTest/QtTest>
 
 #include "Theme.h"
@@ -6,6 +7,7 @@ class ThemeTest : public QObject {
   Q_OBJECT
  private slots:
   void loadTheme();
+  void fontStyle();
   void spice();
 };
 
@@ -37,6 +39,30 @@ void ThemeTest::loadTheme() {
   QCOMPARE(setting2->scopes, QStringList("comment"));
   QCOMPARE(setting2->settings->size(), 1);
   QCOMPARE(setting2->settings->value("foreground"), QColor("#75715E"));
+}
+
+void ThemeTest::fontStyle()
+{
+  Theme* theme = Theme::loadTheme("testdata/Test.tmTheme");
+
+  // name
+  QCOMPARE(theme->name, QString("All Hallow\'s Eve"));
+
+  // fontStyle
+  QVector<ScopeSetting*> settings = theme->settings;
+  auto it = std::find_if(settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
+    return setting->name == "Class inheritance";
+  });
+  QVERIFY(it != settings.constEnd());
+  ScopeSetting* setting = *it;
+  QCOMPARE((int)setting->fontWeight, (int)QFont::Bold);
+  QVERIFY(setting->isItalic);
+  QVERIFY(setting->isUnderline);
+
+  auto format = theme->spice("entity.other.inherited-class");
+  QCOMPARE(format->fontWeight(), (int)QFont::Bold);
+  QCOMPARE(format->fontItalic(), true);
+  QCOMPARE(format->fontUnderline(), true);
 }
 
 void ThemeTest::spice() {

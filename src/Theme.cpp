@@ -9,24 +9,34 @@ const QString uuidStr = "uuid";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
 
-Settings* toSettings(QVariant var) {
+void parseSettings(Settings* settings, QFont::Weight* fontWeight, bool* isItalic, bool* isUnderline, QVariant var) {
   if (!var.canConvert<QVariantMap>()) {
-    return nullptr;
+    return;
   }
 
-  Settings* settings = new Settings();
   QVariantMap map = var.toMap();
   QMapIterator<QString, QVariant> iter(map);
   while (iter.hasNext()) {
     iter.next();
     QString key = iter.key();
-    QColor color(iter.value().toString());
-    if (color.isValid()) {
-      (*settings)[key] = color;
+    if (key == "fontStyle") {
+      QStringList styles = iter.value().toString().split(' ');
+      foreach (const QString& style, styles) {
+        if (style == "bold") {
+          *fontWeight = QFont::Bold;
+        } else if (style == "italic") {
+          *isItalic = true;
+        } else if (style == "underline") {
+          *isUnderline = true;
+        }
+      }
+    } else {
+      QColor color(iter.value().toString());
+      if (color.isValid()) {
+        (*settings)[key] = color;
+      }
     }
   }
-
-  return settings;
 }
 
 ScopeSetting* toScopeSetting(QVariant var) {
@@ -53,7 +63,8 @@ ScopeSetting* toScopeSetting(QVariant var) {
 
   // settings
   if (map.contains(settingsStr)) {
-    scopeSetting->settings = toSettings(map.value(settingsStr));
+    scopeSetting->settings.reset(new Settings());
+    parseSettings(scopeSetting->settings.get(), &(scopeSetting->fontWeight), &(scopeSetting->isItalic), &(scopeSetting->isUnderline), map.value(settingsStr));
   }
 
   return scopeSetting;
@@ -79,7 +90,8 @@ Theme* Theme::loadTheme(const QString& filename) {
   // gutterSettings
   const QString gutterSettingsStr = "gutterSettings";
   if (rootMap.contains(gutterSettingsStr)) {
-    theme->gutterSettings = toSettings(rootMap.value(gutterSettingsStr));
+    theme->gutterSettings.reset(new Settings());
+    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic), &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
   }
 
   // name
@@ -136,13 +148,20 @@ std::unique_ptr<QTextCharFormat> Theme::spice(const QString& scope) {
   ScopeSetting* def = settings[0];
   ScopeSetting* s = closestMatchingSetting(scope);
   if (s) {
+    // foreground
     QColor fg = s->settings->value(foregroundStr, def->settings->value(foregroundStr));
     Q_ASSERT(fg.isValid());
     format->setForeground(fg);
 
+    // background
     QColor bg = s->settings->value(backgroundStr, def->settings->value(backgroundStr));
     Q_ASSERT(bg.isValid());
     format->setBackground(bg);
+
+    // font style
+    format->setFontWeight(s->fontWeight);
+    format->setFontItalic(s->isItalic);
+    format->setFontUnderline(s->isUnderline);
   }
 
   return std::unique_ptr<QTextCharFormat>(format);

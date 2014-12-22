@@ -16,9 +16,12 @@ typedef QMap<QString, QColor> Settings;
 struct ScopeSetting {
   QString name;
   QStringList scopes;
-  Settings* settings;
+  std::unique_ptr<Settings> settings;
+  QFont::Weight fontWeight;
+  bool isItalic;
+  bool isUnderline;
 
-  ScopeSetting():settings(nullptr){}
+  ScopeSetting():settings(nullptr), fontWeight(QFont::Normal), isItalic(false), isUnderline(false) {}
 };
 
 class Theme {
@@ -32,7 +35,10 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   std::unique_ptr<QTextCharFormat> spice(const QString& scope);
 
-  Settings* gutterSettings;
+  std::unique_ptr<Settings> gutterSettings;
+  QFont::Weight gutterFontWeight;
+  bool isGutterItalic;
+  bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> settings;
   QUuid uuid;
