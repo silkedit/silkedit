@@ -6,7 +6,7 @@
 #include "macros.h"
 
 class Region {
-public:
+ public:
   Region() : m_begin(0), m_end(0) {}
   Region(int begin, int end) {
     m_begin = qMin(begin, end);
@@ -31,7 +31,9 @@ public:
 
   QString toString() const;
 
-private:
+  bool operator==(const Region& other) const { return begin() == other.begin() && end() == other.end(); }
+
+ private:
   int m_begin;
   int m_end;
 

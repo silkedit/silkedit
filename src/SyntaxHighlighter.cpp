@@ -14,7 +14,10 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
       m_rootNode(parser->parse()),
       m_lastScopeNode(nullptr),
       m_parser(parser) {
-  connect(doc, SIGNAL(contentsChange(int,int,int)), this, SLOT(updateNode(int,int,int)));
+  // this connect causes crash when opening a file and editing it then closing it without save.
+//  auto conn = connect(doc, &QTextDocument::contentsChange, this, &SyntaxHighlighter::updateNode);
+  auto conn = connect(doc, SIGNAL(contentsChange(int,int,int)), this, SLOT(updateNode(int,int,int)));
+  Q_ASSERT(conn);
 
   setDocument(doc);
 }
@@ -34,7 +37,7 @@ void SyntaxHighlighter::setParser(LanguageParser* parser) {
 Region SyntaxHighlighter::scopeExtent(int point) {
   updateScope(point);
   if (m_lastScopeNode) {
-    return m_lastScopeNode->range;
+    return m_lastScopeNode->region;
   }
   return Region();
 }
@@ -49,7 +52,7 @@ void SyntaxHighlighter::setTheme(const QString& themeFileName) {
 }
 
 void SyntaxHighlighter::adjust(int pos, int delta) {
-  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
+//  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
   if (m_rootNode) {
     m_rootNode->adjust(pos, delta);
   }
@@ -101,7 +104,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
     }
 
     if (m_lastScopeNode->isLeaf()) {
-      Region region = m_lastScopeNode->range;
+      Region region = m_lastScopeNode->region;
       qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
       std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
       if (format) {
@@ -132,16 +135,16 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
   int idx = Util::binarySearch(node->children.size(), [search, node](int i) {
-    return node->children[i]->range.begin() >= search.begin() ||
-           node->children[i]->range.fullyCovers(search);
+    return node->children[i]->region.begin() >= search.begin() ||
+           node->children[i]->region.fullyCovers(search);
   });
 
   while (idx < (int)node->children.size()) {
     Node* child = node->children[idx].get();
-    if (child->range.begin() > search.end()) {
+    if (child->region.begin() > search.end()) {
       break;
     }
-    if (child->range.fullyCovers(search)) {
+    if (child->region.fullyCovers(search)) {
       if (!node->name.isEmpty() && node != m_lastScopeNode) {
         if (m_lastScopeBuf.length() > 0) {
           m_lastScopeBuf.append(' ');
@@ -153,7 +156,7 @@ Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
     idx++;
   }
 
-  if (node != m_lastScopeNode && node->range.fullyCovers(search)) {
+  if (node != m_lastScopeNode && node->region.fullyCovers(search)) {
     if (!node->name.isEmpty()) {
       if (m_lastScopeBuf.length() > 0) {
         m_lastScopeBuf.append(' ');
@@ -175,7 +178,7 @@ void SyntaxHighlighter::updateScope(int point) {
   }
 
   Region search(point, point + 1);
-  if (m_lastScopeNode && m_lastScopeNode->range.fullyCovers(search)) {
+  if (m_lastScopeNode && m_lastScopeNode->region.fullyCovers(search)) {
     if (m_lastScopeNode->children.size() != 0) {
       Node* no = findScope(search, m_lastScopeNode);
       if (no && no != m_lastScopeNode) {

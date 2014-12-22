@@ -154,7 +154,7 @@ class LanguageParser {
 struct Node {
   DISABLE_COPY(Node)
 
-  Region range;
+  Region region;
   QString name;
   std::vector<std::unique_ptr<Node>> children;
   LanguageParser* parser;
@@ -165,9 +165,9 @@ struct Node {
   DEFAULT_MOVE(Node)
 
   void append(Node* child);
-  Region updateRange();
+  Region updateRegion();
   QString toString() const;
-  bool isLeaf() { return children.size() == 0; }
+  bool isLeaf() const { return children.size() == 0; }
   virtual void adjust(int pos, int delta);
 
   friend QDebug operator<<(QDebug dbg, const Node& node) {

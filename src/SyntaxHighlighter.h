@@ -28,6 +28,9 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   ~SyntaxHighlighter();
   DEFAULT_MOVE(SyntaxHighlighter)
 
+  // accessor
+  RootNode* rootNode() { return m_rootNode.get(); }
+
   void setParser(LanguageParser* parser);
 
   // Returns the Region of the inner most Scope extent which contains "point".

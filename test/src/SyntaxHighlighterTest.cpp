@@ -4,10 +4,24 @@
 #include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 
+namespace {
+  void checkRegion(Node* node, Region region) {
+    if (!region.fullyCovers(node->region)) {
+      qWarning("%s doesn't fully cover %s", qPrintable(region.toString()), qPrintable(node->region.toString()));
+      QFAIL("");
+    }
+
+    for(auto& child : node->children) {
+      checkRegion(child.get(), region);
+    }
+  }
+}
+
 class SyntaxHighlighterTest : public QObject {
   Q_OBJECT
  private slots:
   void scopeExtent();
+  void updateNode();
 };
 
 void SyntaxHighlighterTest::scopeExtent() {
@@ -56,7 +70,37 @@ void SyntaxHighlighterTest::scopeExtent() {
   region = xmlHighlighter->scopeExtent(149);
   QCOMPARE(region.begin(), 149);
   QCOMPARE(region.end(), 156);
-  QCOMPARE(xmlHighlighter->scopeName(149), QString("text.xml meta.tag.xml entity.other.attribute-name.localname.xml"));
+  QCOMPARE(xmlHighlighter->scopeName(149),
+           QString("text.xml meta.tag.xml entity.other.attribute-name.localname.xml"));
+}
+
+void SyntaxHighlighterTest::updateNode() {
+  const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+  foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
+  QString text = QString(R"(
+class hoge {
+  void foo();
+};
+)").trimmed();
+  QTextDocument* doc = new QTextDocument(text);
+  LanguageParser* parser = LanguageParser::create("source.c++", doc->toPlainText());
+  auto plistHighlighter = new SyntaxHighlighter(doc, parser);
+//  qDebug() << (*plistHighlighter->rootNode());
+  QTextCursor cursor(plistHighlighter->document());
+  cursor.movePosition(QTextCursor::End);
+  cursor.insertText("\n");
+  plistHighlighter->updateNode(text.length(), 0, 1);
+  cursor.movePosition(QTextCursor::End);
+  QString str = "class aa {";
+  cursor.insertText(str);
+  plistHighlighter->updateNode(text.length() + 1, 0, str.length());
+  cursor.movePosition(QTextCursor::End);
+  cursor.insertText("\n");
+  plistHighlighter->updateNode(text.length() + 1 + str.length(), 0, 1);
+//  qDebug() << (*plistHighlighter->rootNode());
+
+  checkRegion(plistHighlighter->rootNode(), plistHighlighter->rootNode()->region);
 }
 
 QTEST_MAIN(SyntaxHighlighterTest)
