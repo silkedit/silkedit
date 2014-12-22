@@ -101,6 +101,18 @@ analyze() {
     scan-build -o ./build-analysis ninja
 }
 
+run_tests() {
+    cd test
+    ensure_dir build
+    cd build
+
+    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+    if [ -f build.ninja ]; then
+        ninja
+        CTEST_OUTPUT_ON_FAILURE=TRUE ninja test
+    fi
+}
+
 set -e
 
 case "$1" in
@@ -128,6 +140,10 @@ case "$1" in
         resolve
         echo
         ;;
+    test)
+        run_tests
+        echo
+        ;;
     *)
 
         cat << EOF
@@ -137,6 +153,7 @@ clean       clean build dir
 format      format sources
 pre-commit  run clang-format and clang-check
 resolve     resolve dependency
+test        run tests
 EOF
 
         exit 1

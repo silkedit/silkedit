@@ -27,32 +27,34 @@ link_directories(${Oniguruma_LIBRARY_DIRS})
 
 set(TEST_LIBRARIES ${Oniguruma_LIBRARIES})
 
+ENABLE_TESTING()
+
 set(LANGUAGE_PARSER_TEST_SRCS ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Region.cpp src/LanguageParserTest.cpp)
 add_executable(LanguageParserTest ${LANGUAGE_PARSER_TEST_SRCS} )
 target_link_libraries(LanguageParserTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
-add_test( name LanguageParserTest command LanguageParserTest)
+add_test( NAME LanguageParserTest COMMAND LanguageParserTest)
 
 set(THEME_TEST_SRCS ../src/Theme.cpp ../src/PListParser.cpp src/ThemeTest.cpp)
 add_executable(ThemeTest ${THEME_TEST_SRCS} )
 target_link_libraries(ThemeTest Qt5::Gui Qt5::Xml Qt5::Test )
-add_test( name ThemeTest command ThemeTest)
+add_test( NAME ThemeTest COMMAND ThemeTest)
 
 set(UTIL_TEST_SRCS ../src/Util.cpp src/UtilTest.cpp)
 add_executable(UtilTest ${UTIL_TEST_SRCS} )
 target_link_libraries(UtilTest Qt5::Gui Qt5::Xml Qt5::Test )
-add_test( name UtilTest command UtilTest)
+add_test( NAME UtilTest COMMAND UtilTest)
 
 set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Region.cpp ../src/Theme.cpp src/SyntaxHighlighterTest.cpp)
 add_executable(SyntaxHighlighterTest ${SYNTAX_HIGHLIGHTER_TEST_SRCS} )
 target_link_libraries(SyntaxHighlighterTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
-add_test( name SyntaxHighlighterTest command SyntaxHighlighterTest)
+add_test( NAME SyntaxHighlighterTest COMMAND SyntaxHighlighterTest)
 
 set(REGEXP_TEST_SRCS ../src/Regexp.cpp src/RegexpTest.cpp)
 add_executable(RegexpTest ${REGEXP_TEST_SRCS} )
 target_link_libraries(RegexpTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
-add_test( name RegexpTest command RegexpTest)
+add_test( NAME RegexpTest COMMAND RegexpTest)
 
 set(REGION_TEST_SRCS ../src/Region.cpp src/RegionTest.cpp)
 add_executable(RegionTest ${REGION_TEST_SRCS} )
 target_link_libraries(RegionTest Qt5::Gui Qt5::Xml Qt5::Test ${TEST_LIBRARIES})
-add_test( name RegionTest command RegionTest)
+add_test( NAME RegionTest COMMAND RegionTest)

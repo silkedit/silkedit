@@ -37,6 +37,3 @@ link_directories(lib stextedit/build ${Oniguruma_LIBRARY_DIRS})
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS})
 
 target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml yaml-cpp-0.5.1 stextedit ${Oniguruma_LIBRARIES} ${CoreFoundationLibrary})
-
-ENABLE_TESTING()
-add_subdirectory(test)
