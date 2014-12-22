@@ -2,7 +2,7 @@
 CMakeLists.txt.user
 *.autosave
 
-target/
+build/
 ruby_host/ruby_host
 lib/
 include/

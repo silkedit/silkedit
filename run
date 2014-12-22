@@ -18,8 +18,8 @@ pre_commit() {
 	      format
 
         # clang-check
-        ensure_dir target
-        cd target
+        ensure_dir build
+        cd build
 
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
         result=$(find ../src -name '*.cpp'|xargs clang-check -p . 2>&1)
@@ -46,7 +46,7 @@ ensure_dir() {
 }
 
 clean() {
-    rm -rf target lib include
+    rm -rf build lib include
 }
 
 # resolve dependency
@@ -75,8 +75,8 @@ resolve() {
 build() {
     resolve
 
-    ensure_dir target
-    cd target
+    ensure_dir build
+    cd build
 
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
 
@@ -94,8 +94,8 @@ build() {
 
 # static analysis
 analyze() {
-    ensure_dir target
-    cd target
+    ensure_dir build
+    cd build
 
     scan-build cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
     scan-build -o ./build-analysis ninja
@@ -133,7 +133,7 @@ case "$1" in
         cat << EOF
 analyze     static analysis
 build       create an app and an installer
-clean       clean target dir
+clean       clean build dir
 format      format sources
 pre-commit  run clang-format and clang-check
 resolve     resolve dependency
