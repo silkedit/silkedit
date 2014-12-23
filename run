@@ -114,7 +114,7 @@ run_tests() {
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
     if [ -f build.ninja ]; then
         ninja
-        CTEST_OUTPUT_ON_FAILURE=TRUE ninja test
+		ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
     fi
 }
 
