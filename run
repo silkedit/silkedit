@@ -75,7 +75,11 @@ resolve() {
 build() {
     resolve
 
-    ensure_dir build
+    if [ ! -d build ]; then
+        echo "build directory doesn't exist. Creating it..."
+        ensure_dir build
+    fi
+
     cd build
 
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
@@ -90,6 +94,12 @@ build() {
     cp -r SilkEdit.app dmg
     ln -s /Applications dmg/Applications
     hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
+
+}
+
+rebuild() {
+    ensure_dir build
+    build
 }
 
 # static analysis
@@ -136,6 +146,10 @@ case "$1" in
         pre_commit
         echo
         ;;
+    rebuild)
+        rebuild
+        echo
+        ;;
     resolve)
         resolve
         echo
@@ -148,10 +162,11 @@ case "$1" in
 
         cat << EOF
 analyze     static analysis
-build       create an app and an installer
+build       build an app and an installer
 clean       clean build dir
 format      format sources
 pre-commit  run clang-format and clang-check
+rebuild     build from scratch
 resolve     resolve dependency
 test        run tests
 EOF
