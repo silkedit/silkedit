@@ -85,7 +85,7 @@ build() {
 
     echo "Creating dmg..."
     macdeployqt SilkEdit.app
-    mkdir dmg
+    ensure_dir dmg
     cp -r SilkEdit.app dmg
     ln -s /Applications dmg/Applications
     hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
