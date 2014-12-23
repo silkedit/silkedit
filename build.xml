@@ -1,6 +1,6 @@
 <project name="silkedit" default="resolve" xmlns:ivy="antlib:org.apache.ivy.ant">
+	<ivy:settings file="ivysettings.xml"/>
   <target name="resolve" description="--> retrieve dependencies with ivy">
-    <property name="ivy.shared.default.root" value="${user.home}/Dropbox/ivy"/>
     <ivy:retrieve/>
   </target>
 </project>

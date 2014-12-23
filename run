@@ -51,7 +51,7 @@ clean() {
 
 # resolve dependency
 resolve() {
-    ant
+    ant -Duser=readonly -Dpassword=readonly
 
     for f in lib/include-*.zip
     do
