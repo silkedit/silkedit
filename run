@@ -62,12 +62,7 @@ resolve() {
     done
 
     # build stextedit
-    if [ ! -d stextedit ]; then
-        git submodule init && git submodule update
-    else
-        echo "Running: git submodule foreach git pull origin master"
-        git submodule foreach git pull origin master
-    fi
+    git submodule init && git submodule update
     (cd stextedit && ./run build)
 }
 
