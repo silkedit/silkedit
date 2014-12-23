@@ -6,9 +6,6 @@
 
 const QString CopyCommand::name = "copy";
 
-CopyCommand::CopyCommand() : ICommand(name) {
-}
+CopyCommand::CopyCommand() : ICommand(name) {}
 
-void CopyCommand::doRun(const CommandArgument&, int) {
-  API::activeEditView()->copy();
-}
+void CopyCommand::doRun(const CommandArgument&, int) { API::activeEditView()->copy(); }

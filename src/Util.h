@@ -10,7 +10,7 @@ class Util {
  public:
   static int binarySearch(int last, std::function<bool(int)> fn);
 
-private:
+ private:
   Util() = delete;
   ~Util() = delete;
 };

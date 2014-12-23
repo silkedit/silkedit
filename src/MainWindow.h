@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow {
   void splitTabHorizontally();
   void splitTabVertically();
 
-  signals:
+signals:
   void activeTextEditViewChanged(TextEditView* editView);
 
  private:

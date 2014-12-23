@@ -14,7 +14,7 @@ int Util::binarySearch(int last, std::function<bool(int)> fn) {
   int high = last;
   while (low < high) {
     int mid = (low + high) / 2;
-//    qDebug("low: %d, high: %d, mid: %d", low, high, mid);
+    //    qDebug("low: %d, high: %d, mid: %d", low, high, mid);
     if (fn(mid)) {
       high = mid - 1;
     } else {

@@ -8,7 +8,7 @@ class TextEditView;
 class LanguageComboBox;
 class MainWindow;
 
-class StatusBar: public QStatusBar {
+class StatusBar : public QStatusBar {
   Q_OBJECT
   DISABLE_COPY(StatusBar)
 
@@ -17,13 +17,13 @@ class StatusBar: public QStatusBar {
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
-  signals:
-    void languageChanged(const QString& scopeName);
+signals:
+  void languageChanged(const QString& scopeName);
 
-  public slots:
+ public slots:
   void onActiveTextEditViewChanged(TextEditView* editView);
   void setActiveTextEditViewLanguage();
 
-private:
+ private:
   LanguageComboBox* m_langComboBox;
 };

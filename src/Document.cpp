@@ -36,9 +36,7 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   }
 }
 
-Document::~Document() {
-  qDebug("~Document");
-}
+Document::~Document() { qDebug("~Document"); }
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
@@ -50,9 +48,7 @@ Document* Document::create(const QString& path) {
   return new Document(path, in.readAll());
 }
 
-Document* Document::createBlank() {
-  return new Document();
-}
+Document* Document::createBlank() { return new Document(); }
 
 void Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));

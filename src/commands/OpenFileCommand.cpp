@@ -7,8 +7,7 @@
 
 const QString OpenFileCommand::name = "open_file";
 
-OpenFileCommand::OpenFileCommand() : ICommand(OpenFileCommand::name) {
-}
+OpenFileCommand::OpenFileCommand() : ICommand(OpenFileCommand::name) {}
 
 void OpenFileCommand::doRun(const CommandArgument&, int) {
   QString filename = QFileDialog::getOpenFileName(0, tr("Open"), "");

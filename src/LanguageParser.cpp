@@ -15,9 +15,7 @@ const int MAX_ITER_COUNT = 10000;
 const QString DEFAULT_SCOPE = "text.plain";
 
 // Clamps v to be in the region of _min and _max
-int clamp(int min, int max, int v) {
-  return qMax(min, qMin(max, v));
-}
+int clamp(int min, int max, int v) { return qMax(min, qMin(max, v)); }
 
 Captures toCaptures(QVariantMap map) {
   Captures captures(0);
@@ -45,7 +43,7 @@ QVector<Pattern*>* toPatterns(QVariant patternsVar) {
   if (patternsVar.canConvert<QVariantList>()) {
     QVector<Pattern*>* patterns = new QVector<Pattern*>(0);
     QSequentialIterable iterable = patternsVar.value<QSequentialIterable>();
-    foreach (const QVariant& v, iterable) {
+    foreach(const QVariant & v, iterable) {
       if (v.canConvert<QVariantMap>()) {
         patterns->append(toPattern(v.toMap()));
       }
@@ -145,7 +143,7 @@ LanguageParser* LanguageParser::create(const QString& scopeName, const QString& 
 RootNode* LanguageParser::parse() {
   RootNode* rootNode = new RootNode(this, m_lang->scopeName);
   QVector<Node*> children = parse(Region(0, m_text.length()));
-  foreach (Node* child, children) { rootNode->append(child); }
+  foreach(Node * child, children) { rootNode->append(child); }
 
   rootNode->updateRegion();
   return rootNode;
@@ -153,7 +151,8 @@ RootNode* LanguageParser::parse() {
 
 // parse in [begin, end) (doensn't include end)
 QVector<Node*> LanguageParser::parse(const Region& region) {
-  qDebug("parse. region: %s. lang: %s", qPrintable(region.toString()), qPrintable(m_lang->scopeName));
+  qDebug(
+      "parse. region: %s. lang: %s", qPrintable(region.toString()), qPrintable(m_lang->scopeName));
   QTime t;
   t.start();
 
@@ -208,8 +207,7 @@ void LanguageParser::clearCache() {
   }
 }
 
-LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {
-}
+LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {}
 
 Node::Node(LanguageParser* p_p, const QString& p_name) {
   parser = p_p;
@@ -241,9 +239,7 @@ Region Node::updateRegion() {
   return region;
 }
 
-QString Node::toString() const {
-  return format("");
-}
+QString Node::toString() const { return format(""); }
 
 void Node::adjust(int pos, int delta) {
   region.adjust(pos, delta);
@@ -254,12 +250,11 @@ void Node::adjust(int pos, int delta) {
 
 QString Node::format(QString indent) const {
   if (isLeaf()) {
-    return indent +
-           QString("%1-%2: \"%3\" - Data: \"%4\"\n")
-               .arg(region.begin())
-               .arg(region.end())
-               .arg(name)
-               .arg(data());
+    return indent + QString("%1-%2: \"%3\" - Data: \"%4\"\n")
+                        .arg(region.begin())
+                        .arg(region.end())
+                        .arg(name)
+                        .arg(data());
   }
   QString ret;
   ret = ret % indent % QString("%1-%2: \"%3\"\n").arg(region.begin()).arg(region.end()).arg(name);
@@ -270,20 +265,16 @@ QString Node::format(QString indent) const {
   return ret;
 }
 
-QString Node::data() const {
-  return parser->getData(region.begin(), region.end());
-}
+QString Node::data() const { return parser->getData(region.begin(), region.end()); }
 
-Pattern::Pattern() : Pattern("") {
-}
+Pattern::Pattern() : Pattern("") {}
 
 Pattern::Pattern(const QString& p_include)
     : include(p_include),
       lang(nullptr),
       cachedPattern(nullptr),
       cachedPatterns(nullptr),
-      cachedRegions(nullptr) {
-}
+      cachedRegions(nullptr) {}
 
 std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos) {
   //  qDebug("firstMatch. pos: %d", pos);
@@ -498,7 +489,7 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
     }
   }
 
-  foreach (const Capture& v, captures) {
+  foreach(const Capture & v, captures) {
     int i = v.key;
     if (i >= parents.length() || regions[i].begin() == -1) {
       continue;
@@ -524,7 +515,7 @@ void Pattern::tweak(Language* l) {
   lang = l;
   name = name.trimmed();
   if (patterns) {
-    foreach (Pattern* p, *patterns) { p->tweak(l); }
+    foreach(Pattern * p, *patterns) { p->tweak(l); }
   }
 }
 
@@ -536,7 +527,7 @@ void Pattern::clearCache() {
   }
   cachedStr.clear();
   if (patterns) {
-    foreach (Pattern* pat, *patterns) { pat->clearCache(); }
+    foreach(Pattern * pat, *patterns) { pat->clearCache(); }
   }
 
   match.lastFound = 0;
@@ -555,7 +546,7 @@ QString Pattern::toString() const {
           include);
   ret = ret % QString("<Sub-Patterns>\n");
   if (patterns) {
-    foreach (Pattern* p, *patterns) {
+    foreach(Pattern * p, *patterns) {
       ret = ret % QString("\t%1\n").arg(p->toString().replace("\t", "\t\t").replace("\n", "\n\t"));
     }
   }
@@ -567,10 +558,7 @@ QVector<QPair<QString, QString>> LanguageProvider::m_scopeAndLangNamePairs(0);
 QMap<QString, QString> LanguageProvider::m_scopeLangFilePathMap;
 QMap<QString, QString> LanguageProvider::m_extensionLangFilePathMap;
 
-Language *LanguageProvider::defaultLanguage()
-{
-  return languageFromScope(DEFAULT_SCOPE);
-}
+Language* LanguageProvider::defaultLanguage() { return languageFromScope(DEFAULT_SCOPE); }
 
 Language* LanguageProvider::languageFromScope(const QString& scope) {
   if (m_scopeLangFilePathMap.contains(scope)) {
@@ -610,7 +598,7 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
     QVariant fileTypesVar = rootMap.value(fileTypes);
     if (fileTypesVar.canConvert<QVariantList>()) {
       QSequentialIterable iterable = fileTypesVar.value<QSequentialIterable>();
-      foreach (const QVariant& v, iterable) {
+      foreach(const QVariant & v, iterable) {
         if (v.canConvert<QString>()) {
           QString ext = v.toString();
           lang->fileTypes.append(ext);
@@ -654,7 +642,7 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
   }
 
   if (!m_scopeLangFilePathMap.contains(lang->scopeName)) {
-    foreach (const QString& ext, lang->fileTypes) { m_extensionLangFilePathMap[ext] = path; }
+    foreach(const QString & ext, lang->fileTypes) { m_extensionLangFilePathMap[ext] = path; }
     m_scopeLangFilePathMap[lang->scopeName] = path;
     m_scopeAndLangNamePairs.append(QPair<QString, QString>(lang->scopeName, lang->name()));
   }
@@ -666,7 +654,7 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
 void LanguageProvider::loadLanguages() {
   QDir dir("packages");
   Q_ASSERT(dir.exists());
-  foreach (const QString& fileName, dir.entryList(QStringList("*.tmLanguage"))) {
+  foreach(const QString & fileName, dir.entryList(QStringList("*.tmLanguage"))) {
     qDebug("loading %s", qPrintable(dir.filePath(fileName)));
     languageFromFile(dir.filePath(fileName));
   }
@@ -729,9 +717,7 @@ QString Language::toString() const {
   return QString("%1\n%2\n").arg(scopeName).arg(rootPattern->toString());
 }
 
-QString Language::name() {
-  return rootPattern ? rootPattern->name : "";
-}
+QString Language::name() { return rootPattern ? rootPattern->name : ""; }
 
 void Language::clearCache() {
   if (rootPattern) {
@@ -745,13 +731,12 @@ void Language::clearCache() {
 QString RootPattern::toString() const {
   QString ret;
   if (patterns) {
-    foreach (Pattern* pat, *patterns) { ret += QString("\t%1\n").arg(pat->toString()); }
+    foreach(Pattern * pat, *patterns) { ret += QString("\t%1\n").arg(pat->toString()); }
   }
   return ret;
 }
 
-RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {
-}
+RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {}
 
 void RootNode::adjust(int pos, int delta) {
   region.setEnd(region.end() + delta);
@@ -761,7 +746,7 @@ void RootNode::adjust(int pos, int delta) {
 }
 
 void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
-    qDebug("updateChildren. region: %s", qPrintable(region.toString()));
+  qDebug("updateChildren. region: %s", qPrintable(region.toString()));
   parser->clearCache();
 
   Region affectedRegion(region);
@@ -769,7 +754,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   Q_ASSERT(affectedRegion.end() == region.end());
 
   for (auto it = children.begin(); it != children.end();) {
-        qDebug("child region: %s", qPrintable((*it)->region.toString()));
+    qDebug("child region: %s", qPrintable((*it)->region.toString()));
     if ((*it)->region.intersects(region)) {
       //      qDebug() << "affected child:" << (*it)->region;
       // update affected region
@@ -782,8 +767,8 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   }
 
   QVector<Node*> newNodes = parser->parse(affectedRegion);
-  foreach (Node* node, newNodes) {
-        qDebug("new node: %s", qPrintable(node->toString()));
+  foreach(Node * node, newNodes) {
+    qDebug("new node: %s", qPrintable(node->toString()));
     children.push_back(std::move(std::unique_ptr<Node>(node)));
   }
   std::sort(children.begin(),
@@ -791,6 +776,6 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
             [](const std::unique_ptr<Node>& x,
                const std::unique_ptr<Node>& y) { return x->region.begin() < y->region.begin(); });
 
-    qDebug("new children.size: %d", (int)children.size());
-    qDebug() << *this;
+  qDebug("new children.size: %d", (int)children.size());
+  qDebug() << *this;
 }

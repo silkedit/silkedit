@@ -9,7 +9,11 @@ const QString uuidStr = "uuid";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
 
-void parseSettings(Settings* settings, QFont::Weight* fontWeight, bool* isItalic, bool* isUnderline, QVariant var) {
+void parseSettings(Settings* settings,
+                   QFont::Weight* fontWeight,
+                   bool* isItalic,
+                   bool* isUnderline,
+                   QVariant var) {
   if (!var.canConvert<QVariantMap>()) {
     return;
   }
@@ -21,7 +25,7 @@ void parseSettings(Settings* settings, QFont::Weight* fontWeight, bool* isItalic
     QString key = iter.key();
     if (key == "fontStyle") {
       QStringList styles = iter.value().toString().split(' ');
-      foreach (const QString& style, styles) {
+      foreach(const QString & style, styles) {
         if (style == "bold") {
           *fontWeight = QFont::Bold;
         } else if (style == "italic") {
@@ -64,7 +68,11 @@ ScopeSetting* toScopeSetting(QVariant var) {
   // settings
   if (map.contains(settingsStr)) {
     scopeSetting->settings.reset(new Settings());
-    parseSettings(scopeSetting->settings.get(), &(scopeSetting->fontWeight), &(scopeSetting->isItalic), &(scopeSetting->isUnderline), map.value(settingsStr));
+    parseSettings(scopeSetting->settings.get(),
+                  &(scopeSetting->fontWeight),
+                  &(scopeSetting->isItalic),
+                  &(scopeSetting->isUnderline),
+                  map.value(settingsStr));
   }
 
   return scopeSetting;
@@ -91,7 +99,11 @@ Theme* Theme::loadTheme(const QString& filename) {
   const QString gutterSettingsStr = "gutterSettings";
   if (rootMap.contains(gutterSettingsStr)) {
     theme->gutterSettings.reset(new Settings());
-    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic), &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
+    parseSettings(theme->gutterSettings.get(),
+                  &(theme->gutterFontWeight),
+                  &(theme->isGutterItalic),
+                  &(theme->isGutterUnderline),
+                  rootMap.value(gutterSettingsStr));
   }
 
   // name
@@ -102,7 +114,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   // settings
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach (const QVariant& var, settingList) { theme->settings.append(toScopeSetting(var)); }
+    foreach(const QVariant & var, settingList) { theme->settings.append(toScopeSetting(var)); }
   }
 
   // UUID
@@ -122,7 +134,7 @@ ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
       sn = sn.right(sn.length() - (i + 1));
     }
 
-    foreach (ScopeSetting* j, settings) {
+    foreach(ScopeSetting * j, settings) {
       if (j->scopes.contains(sn)) {
         return j;
       }

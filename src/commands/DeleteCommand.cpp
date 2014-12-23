@@ -4,8 +4,7 @@
 #include "API.h"
 #include "TextEditView.h"
 
-DeleteCommand::DeleteCommand() : ICommand("delete") {
-}
+DeleteCommand::DeleteCommand() : ICommand("delete") {}
 
 void DeleteCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto direction = args.find<QString>("direction")) {

@@ -34,6 +34,4 @@ MainWindow* API::activeWindow() {
   }
 }
 
-QList<MainWindow*> API::windows() {
-  return MainWindow::windows();
-}
+QList<MainWindow*> API::windows() { return MainWindow::windows(); }

@@ -30,7 +30,8 @@ struct Regex {
   int lastFound;
 
   Regex() : lastIndex(0), lastFound(0) {}
-  explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
+  explicit Regex(const QString& pattern)
+      : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
 
   QVector<Region>* find(const QString& data, int begin);
   QString toString() const;
@@ -130,9 +131,7 @@ struct Language {
   QString name();
   void clearCache();
 
-  bool operator==(const Language& other) {
-    return scopeName == other.scopeName;
-  }
+  bool operator==(const Language& other) { return scopeName == other.scopeName; }
 };
 
 class LanguageParser {

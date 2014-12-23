@@ -79,9 +79,7 @@ STabWidget::~STabWidget() {
              SLOT(detachTabFinished(const QPoint&)));
 }
 
-int STabWidget::addTab(QWidget* page, const QString& label) {
-  return insertTab(-1, page, label);
-}
+int STabWidget::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
 
 int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
@@ -134,9 +132,7 @@ void STabWidget::saveAllTabs() {
   }
 }
 
-void STabWidget::closeActiveTab() {
-  closeTab(currentWidget());
-}
+void STabWidget::closeActiveTab() { closeTab(currentWidget()); }
 
 void STabWidget::closeAllTabs() {
   std::list<QWidget*> widgets;
@@ -163,7 +159,7 @@ void STabWidget::closeOtherTabs() {
 }
 
 int STabWidget::indexOfPath(const QString& path) {
-//  qDebug("STabWidget::indexOfPath(%s)", qPrintable(path));
+  //  qDebug("STabWidget::indexOfPath(%s)", qPrintable(path));
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
     QString path2 = v->path();

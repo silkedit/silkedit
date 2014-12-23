@@ -25,10 +25,6 @@ FakeWindow::FakeWindow(STabBar* tabbar, const QPoint& pos) {
   m_offset = tabbar->mapToGlobal(pos) - tabbar->window()->pos();
 }
 
-FakeWindow::~FakeWindow() {
-  qDebug("~FakeWindow");
-}
+FakeWindow::~FakeWindow() { qDebug("~FakeWindow"); }
 
-void FakeWindow::moveWithOffset(const QPoint& pos) {
-  QWidget::move(pos - m_offset);
-}
+void FakeWindow::moveWithOffset(const QPoint& pos) { QWidget::move(pos - m_offset); }

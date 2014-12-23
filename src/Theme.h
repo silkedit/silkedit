@@ -21,14 +21,15 @@ struct ScopeSetting {
   bool isItalic;
   bool isUnderline;
 
-  ScopeSetting():settings(nullptr), fontWeight(QFont::Normal), isItalic(false), isUnderline(false) {}
+  ScopeSetting()
+      : settings(nullptr), fontWeight(QFont::Normal), isItalic(false), isUnderline(false) {}
 };
 
 class Theme {
   DISABLE_COPY(Theme)
 
  public:
-  Theme(): gutterSettings(nullptr), settings(QVector<ScopeSetting*>(0)){}
+  Theme() : gutterSettings(nullptr), settings(QVector<ScopeSetting*>(0)) {}
   ~Theme() = default;
   DEFAULT_MOVE(Theme)
 

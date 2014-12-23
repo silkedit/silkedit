@@ -5,12 +5,10 @@
 
 class Dummy : public QObject {
   Q_OBJECT
-public:
-  Dummy() {
-    QTimer::singleShot(500, this, SLOT(openFile()));
-  }
+ public:
+  Dummy() { QTimer::singleShot(500, this, SLOT(openFile())); }
 
-public slots:
+ public slots:
   void openFile() {
     DocumentService::singleton().open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
   }

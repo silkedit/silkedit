@@ -2,11 +2,7 @@
 
 #define USE_EVENT_FILTER 1
 
-enum class Mode {
-  CMD = 0,
-  INSERT,
-  CMDLINE,
-};
+enum class Mode { CMD = 0, INSERT, CMDLINE, };
 
 namespace ViMoveOperation {
 enum {

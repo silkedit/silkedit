@@ -5,8 +5,7 @@
 
 const QString NewFileCommand::name = "new_file";
 
-NewFileCommand::NewFileCommand() : ICommand(NewFileCommand::name) {
-}
+NewFileCommand::NewFileCommand() : ICommand(NewFileCommand::name) {}
 
 void NewFileCommand::doRun(const CommandArgument&, int) {
   if (MainWindow* window = API::activeWindow()) {

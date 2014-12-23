@@ -4,8 +4,7 @@
 #include "API.h"
 #include "MainWindow.h"
 
-SplitHorizontallyCommand::SplitHorizontallyCommand() : ICommand("split_horizontally") {
-}
+SplitHorizontallyCommand::SplitHorizontallyCommand() : ICommand("split_horizontally") {}
 
 void SplitHorizontallyCommand::doRun(const CommandArgument&, int) {
   API::activeWindow()->splitTabHorizontally();

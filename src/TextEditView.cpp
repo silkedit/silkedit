@@ -8,11 +8,10 @@
 #include "DocumentService.h"
 
 namespace {
-  const QString DEFAULT_SCOPE = "text.plain";
+const QString DEFAULT_SCOPE = "text.plain";
 }
 
-TextEditView::TextEditView(QWidget* parent)
-    : STextEdit(parent) {
+TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -42,10 +41,7 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path()
-{
-  return m_document ? m_document->path() : "";
-}
+QString TextEditView::path() { return m_document ? m_document->path() : ""; }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   m_document = document;
@@ -53,16 +49,14 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   updateLineNumberAreaWidth(blockCount());
 }
 
-Language *TextEditView::language()
-{
+Language* TextEditView::language() {
   if (m_document) {
     return m_document->language();
   }
   return nullptr;
 }
 
-void TextEditView::setLanguage(const QString &scopeName)
-{
+void TextEditView::setLanguage(const QString& scopeName) {
   if (m_document) {
     m_document->setLanguage(scopeName);
   }
@@ -259,9 +253,7 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) {
-  return ch == '\t' || ch == ' ';
-}
+inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

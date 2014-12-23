@@ -6,9 +6,6 @@
 
 const QString SelectAllCommand::name = "select_all";
 
-SelectAllCommand::SelectAllCommand() : ICommand(name) {
-}
+SelectAllCommand::SelectAllCommand() : ICommand(name) {}
 
-void SelectAllCommand::doRun(const CommandArgument&, int) {
-  API::activeEditView()->selectAll();
-}
+void SelectAllCommand::doRun(const CommandArgument&, int) { API::activeEditView()->selectAll(); }

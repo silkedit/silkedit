@@ -5,9 +5,7 @@
 class QVariant;
 class QString;
 
-enum class Operator {
-  EQUALS,
-};
+enum class Operator { EQUALS, };
 
 class IContext {
   DISABLE_COPY_AND_MOVE(IContext)

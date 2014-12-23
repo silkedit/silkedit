@@ -4,8 +4,7 @@
 
 template <typename T>
 IContextBase<T>::IContextBase(Operator op, const T& operand)
-    : m_op(op), m_operand(std::move(operand)) {
-}
+    : m_op(op), m_operand(std::move(operand)) {}
 
 template <typename T>
 bool IContextBase<T>::isSatisfied() {

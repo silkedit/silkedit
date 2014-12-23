@@ -5,11 +5,12 @@
 #include <QDomElement>
 
 class PListParser {
-public:
-	static QVariant parsePList(QIODevice *device);
-private:
-	static QVariant parseElement(const QDomElement &e);
-	static QVariantList parseArrayElement(const QDomElement& node);
-	static QVariantMap parseDictElement(const QDomElement& element);
+ public:
+  static QVariant parsePList(QIODevice* device);
+
+ private:
+  static QVariant parseElement(const QDomElement& e);
+  static QVariantList parseArrayElement(const QDomElement& node);
+  static QVariantMap parseDictElement(const QDomElement& element);
 };
 #endif

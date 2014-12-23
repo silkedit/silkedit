@@ -7,7 +7,7 @@
 //#include "Singleton.h"
 //#include "macros.h"
 
-//class RubyEvaluator : public Singleton<RubyEvaluator> {
+// class RubyEvaluator : public Singleton<RubyEvaluator> {
 // public:
 //  virtual ~RubyEvaluator();
 //  void eval(const QString& text);

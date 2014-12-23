@@ -6,9 +6,7 @@ void ContextService::add(const QString& key, std::unique_ptr<IContextCreator> cr
   m_contexts[key] = std::move(creationMethod);
 }
 
-void ContextService::remove(const QString& key) {
-  m_contexts.erase(key);
-}
+void ContextService::remove(const QString& key) { m_contexts.erase(key); }
 
 std::shared_ptr<IContext> ContextService::tryCreate(const QString& key,
                                                     Operator op,

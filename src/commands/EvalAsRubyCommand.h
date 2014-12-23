@@ -3,7 +3,7 @@
 //#include "ICommand.h"
 //#include "TextEditView.h"
 
-//class EvalAsRubyCommand : public ICommand {
+// class EvalAsRubyCommand : public ICommand {
 // public:
 //  explicit EvalAsRubyCommand();
 //  ~EvalAsRubyCommand() = default;

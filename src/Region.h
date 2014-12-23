@@ -31,7 +31,9 @@ class Region {
 
   QString toString() const;
 
-  bool operator==(const Region& other) const { return begin() == other.begin() && end() == other.end(); }
+  bool operator==(const Region& other) const {
+    return begin() == other.begin() && end() == other.end();
+  }
 
  private:
   int m_begin;

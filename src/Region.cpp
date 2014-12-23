@@ -4,9 +4,7 @@ bool Region::fullyCovers(const Region& other) const {
   return contains(other.begin()) && other.end() <= end();
 }
 
-bool Region::contains(int point) const {
-  return begin() <= point && point <= end();
-}
+bool Region::contains(int point) const { return begin() <= point && point <= end(); }
 
 void Region::adjust(int pos, int delta) {
   if (m_begin >= pos) {
@@ -28,14 +26,12 @@ void Region::adjust(int pos, int delta) {
   }
 }
 
-bool Region::intersects(const Region &other) const
-{
-//  return end() > other.begin() && begion() <= other.end();
+bool Region::intersects(const Region& other) const {
+  //  return end() > other.begin() && begion() <= other.end();
   return intersection(other).length() > 0;
 }
 
-Region Region::intersection(const Region &other) const
-{
+Region Region::intersection(const Region& other) const {
   if (!contains(other.begin()) && !other.contains(begin())) {
     return Region();
   }
@@ -61,10 +57,6 @@ void Region::setEnd(int p) {
   Q_ASSERT(m_begin <= m_end);
 }
 
-int Region::length() const {
-  return end() - begin();
-}
+int Region::length() const { return end() - begin(); }
 
-QString Region::toString() const {
-  return QString("[%1 - %2)").arg(m_begin).arg(m_end);
-}
+QString Region::toString() const { return QString("[%1 - %2)").arg(m_begin).arg(m_end); }

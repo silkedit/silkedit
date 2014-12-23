@@ -4,8 +4,7 @@
 #include "ViEngine.h"
 
 ToggleVimEmulationCommand::ToggleVimEmulationCommand(ViEngine* viEngine)
-    : ICommand(ToggleVimEmulationCommand::name), m_viEngine(viEngine) {
-}
+    : ICommand(ToggleVimEmulationCommand::name), m_viEngine(viEngine) {}
 
 const QString ToggleVimEmulationCommand::name = "toggle_vim_emulation";
 

@@ -24,7 +24,7 @@ bool DocumentService::open(const QString& filename) {
   }
 }
 
-void DocumentService::save(Document *doc) {
+void DocumentService::save(Document* doc) {
   if (doc->path().isEmpty()) {
     doc->setPath(DEFAULT_FILE_NAME);
     saveAs(doc);

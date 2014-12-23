@@ -15,16 +15,16 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
       m_lastScopeNode(nullptr),
       m_parser(parser) {
   // this connect causes crash when opening a file and editing it then closing it without save.
-//  auto conn = connect(doc, &QTextDocument::contentsChange, this, &SyntaxHighlighter::updateNode);
-  auto conn = connect(doc, SIGNAL(contentsChange(int,int,int)), this, SLOT(updateNode(int,int,int)));
+  //  auto conn = connect(doc, &QTextDocument::contentsChange, this,
+  // &SyntaxHighlighter::updateNode);
+  auto conn =
+      connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
   Q_ASSERT(conn);
 
   setDocument(doc);
 }
 
-SyntaxHighlighter::~SyntaxHighlighter() {
-  qDebug("~SyntaxHighlighter");
-}
+SyntaxHighlighter::~SyntaxHighlighter() { qDebug("~SyntaxHighlighter"); }
 
 void SyntaxHighlighter::setParser(LanguageParser* parser) {
   if (!parser)
@@ -53,7 +53,7 @@ void SyntaxHighlighter::setTheme(const QString& themeFileName) {
 }
 
 void SyntaxHighlighter::adjust(int pos, int delta) {
-//  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
+  //  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
   if (m_rootNode) {
     m_rootNode->adjust(pos, delta);
   }

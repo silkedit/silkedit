@@ -12,8 +12,7 @@
 #include "commands/ChangeModeCommand.h"
 
 ViEngine::ViEngine(QObject* parent)
-    : QObject(parent), m_mode(Mode::CMD), m_repeatCount(0), m_isEnabled(false) {
-}
+    : QObject(parent), m_mode(Mode::CMD), m_repeatCount(0), m_isEnabled(false) {}
 
 void ViEngine::enable() {
   qDebug("enabling ViEngine");
@@ -50,7 +49,7 @@ void ViEngine::disable() {
     view->setThinCursor(true);
   }
 
-  foreach (MainWindow* window, API::windows()) { window->statusBar()->clearMessage(); }
+  foreach(MainWindow * window, API::windows()) { window->statusBar()->clearMessage(); }
 
   KeymapService::singleton().load();
 

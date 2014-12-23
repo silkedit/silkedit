@@ -5,8 +5,7 @@
 
 const QString RedoCommand::name = "redo";
 
-RedoCommand::RedoCommand() : ICommand("redo") {
-}
+RedoCommand::RedoCommand() : ICommand("redo") {}
 
 void RedoCommand::doRun(const CommandArgument&, int repeat) {
   API::activeEditView()->doRedo(repeat);

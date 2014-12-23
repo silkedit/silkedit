@@ -22,9 +22,11 @@ void ConfigService::load(const QString& filename) {
       qDebug() << key << ":" << value;
       m_configs[key] = value;
     }
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
-  } catch (...) {
+  }
+  catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
 }

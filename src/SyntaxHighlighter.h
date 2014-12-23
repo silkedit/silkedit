@@ -48,7 +48,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   void setTheme(const QString& themeFileName);
   void adjust(int pos, int delta);
 
-public slots:
+ public slots:
   void updateNode(int position, int charsRemoved, int charsAdded);
 
  protected:

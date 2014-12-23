@@ -52,8 +52,8 @@ int main(int argv, char** args) {
   std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
   CommandService::singleton().add(std::move(redoCmd));
 
-//  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
-//  CommandService::singleton().add(std::move(evalAsRubyCmd));
+  //  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
+  //  CommandService::singleton().add(std::move(evalAsRubyCmd));
 
   std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
   CommandService::singleton().add(std::move(openFileCmd));
@@ -84,7 +84,8 @@ int main(int argv, char** args) {
   CommandService::singleton().add(std::move(std::unique_ptr<CutCommand>(new CutCommand)));
   CommandService::singleton().add(std::move(std::unique_ptr<CopyCommand>(new CopyCommand)));
   CommandService::singleton().add(std::move(std::unique_ptr<PasteCommand>(new PasteCommand)));
-  CommandService::singleton().add(std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
+  CommandService::singleton().add(
+      std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   CommandService::singleton().add(std::move(splitHorizontallyCmd));
@@ -158,7 +159,7 @@ int main(int argv, char** args) {
   editMenu->addAction(pasteAction);
   editMenu->addAction(selectAllAction);
 
-//  new Dummy();
+  //  new Dummy();
 
   return app.exec();
 }

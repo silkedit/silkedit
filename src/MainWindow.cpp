@@ -51,7 +51,8 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   m_activeTabWidget = tabWidget;
 
   StatusBar* sbar = new StatusBar(this);
-  connect(this, &MainWindow::activeTextEditViewChanged, sbar, &StatusBar::onActiveTextEditViewChanged);
+  connect(
+      this, &MainWindow::activeTextEditViewChanged, sbar, &StatusBar::onActiveTextEditViewChanged);
   setStatusBar(sbar);
 }
 
@@ -89,9 +90,7 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
   return window;
 }
 
-MainWindow::~MainWindow() {
-  qDebug("~MainWindow");
-}
+MainWindow::~MainWindow() { qDebug("~MainWindow"); }
 
 void MainWindow::show() {
   QMainWindow::show();
