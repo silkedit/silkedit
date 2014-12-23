@@ -2,12 +2,12 @@
 <ivy-settings>
   <settings defaultResolver="main" />
   <!--Authentication required for publishing (deployment). 'Artifactory Realm' is the realm used by Artifactory so don't change it.-->
-	<credentials host="192.168.0.3" realm="Artifactory Realm" username="${user}" passwd="${password}"/>
+	<credentials host="home.shinichy.com" realm="Artifactory Realm" username="${user}" passwd="${password}"/>
   <resolvers>
     <chain name="main">
       <url name="public" m2compatible="false">
-        <artifact pattern="http://192.168.0.3:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]" />
-        <ivy pattern="http://192.168.0.3:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/ivy-[revision].xml" />
+        <artifact pattern="http://home.shinichy.com:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]" />
+        <ivy pattern="http://home.shinichy.com:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/ivy-[revision].xml" />
       </url>
     </chain>
   </resolvers>
