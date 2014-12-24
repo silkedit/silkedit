@@ -5,6 +5,8 @@
 
 #include "ConfigService.h"
 
+std::unordered_map<QString, QString> ConfigService::m_configs;
+
 void ConfigService::load(const QString& filename) {
   qDebug("loading configuration");
 
@@ -37,4 +39,19 @@ bool ConfigService::isTrue(const QString& key) {
   }
 
   return false;
+}
+
+QString ConfigService::value(const QString &key, const QString &defaultValue)
+{
+  if (m_configs.count(key) != 0) {
+    return m_configs[key];
+  }
+
+  return defaultValue;
+
+}
+
+QString ConfigService::theme()
+{
+  return value("theme", "Solarized (light)");
 }

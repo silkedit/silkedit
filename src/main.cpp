@@ -9,13 +9,14 @@
 #include "Dummy.h"
 #include "MenuBar.h"
 #include "commands/ToggleVimEmulationCommand.h"
+#include "Session.h"
 
 int main(int argv, char** args) {
   SilkApp app(argv, args);
 
   PackageService::loadPackages();
 
-  ConfigService::singleton().load();
+  ConfigService::load();
 
   CommandService::init();
 
@@ -37,11 +38,13 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  if (ConfigService::singleton().isTrue("enable_vim_emulation")) {
+  if (ConfigService::isTrue("enable_vim_emulation")) {
     viEngine.enable();
   }
 
   MenuBar menuBar(nullptr);
+
+  Session::singleton().init();
 
   //  new Dummy();
 

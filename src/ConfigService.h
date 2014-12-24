@@ -8,18 +8,18 @@
 
 class QString;
 
-class ConfigService : public Singleton<ConfigService> {
+class ConfigService {
   DISABLE_COPY_AND_MOVE(ConfigService)
 
  public:
-  ~ConfigService() = default;
-
-  void load(const QString& filename = "config.yml");
-  bool isTrue(const QString& key);
+  static void load(const QString& filename = "config.yml");
+  static bool isTrue(const QString& key);
+  static QString value(const QString& key, const QString& defaultValue = "");
+  static QString theme();
 
  private:
-  friend class Singleton<ConfigService>;
-  ConfigService() = default;
+  ConfigService() = delete;
+  ~ConfigService() = delete;
 
-  std::unordered_map<QString, QString> m_configs;
+  static std::unordered_map<QString, QString> m_configs;
 };

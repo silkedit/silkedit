@@ -30,6 +30,7 @@ Theme *ThemeProvider::theme(const QString &name)
   if (m_nameThemeMap.find(name) != m_nameThemeMap.end()) {
     return m_nameThemeMap.at(name).get();
   } else {
+    qDebug("%s not found", qPrintable(name));
     return nullptr;
   }
 }

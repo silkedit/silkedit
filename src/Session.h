@@ -13,8 +13,11 @@ class Session : public QObject, public Singleton<Session> {
  public:
   ~Session() = default;
 
+  // accessor
   Theme* theme() { return m_theme; }
   void setTheme(Theme* theme);
+
+  void init();
 
 signals:
   void themeChanged(Theme* newTheme);

@@ -1,12 +1,15 @@
 #include "Session.h"
+#include "ThemeProvider.h"
+#include "ConfigService.h"
 
-void Session::setTheme(Theme *theme)
-{
+void Session::setTheme(Theme* theme) {
   m_theme = theme;
   emit themeChanged(theme);
 }
 
-Session::Session(): m_theme(nullptr)
-{
+void Session::init() {
+  setTheme(ThemeProvider::theme(ConfigService::theme()));
+}
 
+Session::Session() : m_theme(nullptr) {
 }
