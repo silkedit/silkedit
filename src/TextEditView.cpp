@@ -1,4 +1,5 @@
 #include <QtWidgets>
+#include <QStringBuilder>
 
 #include "vi.h"
 #include "TextEditView.h"
@@ -6,6 +7,7 @@
 #include "CommandService.h"
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
+#include "Session.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -22,18 +24,15 @@ TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
           SIGNAL(destroying(const QString&)),
           &OpenRecentItemService::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
+  connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
 
   updateLineNumberAreaWidth(0);
   highlightCurrentLine();
 
-  // Solarized Light
-  setStyleSheet(
-      "STextEdit{color: #657b83; background-color: #fdf6e3;"
-      " selection-background-color: #93a1a1; selection-color: #eee8d5;}");
-
   QApplication::setCursorFlashTime(0);
   installEventFilter(&KeyHandler::singleton());
   setLanguage(DEFAULT_SCOPE);
+  changeTheme(Session::singleton().theme());
 }
 
 TextEditView::~TextEditView() {
@@ -41,7 +40,9 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path() { return m_document ? m_document->path() : ""; }
+QString TextEditView::path() {
+  return m_document ? m_document->path() : "";
+}
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   m_document = document;
@@ -154,6 +155,41 @@ void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
     updateLineNumberAreaWidth(0);
 }
 
+void TextEditView::changeTheme(Theme* theme) {
+  qDebug("changeTheme");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  QString style;
+  if (!theme->settings.isEmpty()) {
+    Settings* settings = theme->settings.first()->settings.get();
+    if (settings->contains("foreground")) {
+      style = style % QString("color: %1;").arg(settings->value("foreground").name());
+      qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
+    }
+    if (settings->contains("background")) {
+      style = style % QString("background-color: %1;").arg(settings->value("background").name());
+      qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
+    }
+    if (settings->contains("selection")) {
+      style = style %
+              QString("selection-background-color: %1;").arg(settings->value("selection").name());
+      qDebug() << QString("selection-background-color: %1;")
+                      .arg(settings->value("selection").name());
+    }
+    if (settings->contains("selectionForeground")) {
+      style = style %
+              QString("selection-color: %1;").arg(settings->value("selectionForeground").name());
+      qDebug() << QString("selection-color: %1;")
+                      .arg(settings->value("selectionForeground").name());
+    }
+
+    setStyleSheet(QString("STextEdit{%1}").arg(style));
+  }
+}
+
 void TextEditView::resizeEvent(QResizeEvent* e) {
   STextEdit::resizeEvent(e);
 
@@ -253,7 +289,9 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
+inline bool TextEditView::isTabOrSpace(const QChar ch) {
+  return ch == '\t' || ch == ' ';
+}
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

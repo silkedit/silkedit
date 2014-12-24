@@ -45,7 +45,6 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   // fast as possible.
   QString scopeName(int point);
 
-  void setTheme(const QString& themeFileName);
   void adjust(int pos, int delta);
 
  public slots:
@@ -59,7 +58,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
-  std::unique_ptr<Theme> m_theme;
+  Theme* m_theme;
   std::unique_ptr<LanguageParser> m_parser;
 
   // Given a text region, returns the innermost node covering that region.
@@ -68,4 +67,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   // Caches the full concatenated nested scope name and the innermost node that covers "point".
   void updateScope(int point);
+
+private slots:
+  void changeTheme(Theme* theme);
 };

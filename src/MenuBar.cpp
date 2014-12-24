@@ -1,3 +1,4 @@
+#include <vector>
 #include <QAction>
 
 #include "commands/OpenFileCommand.h"
@@ -23,9 +24,10 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemService.h"
+#include "ThemeProvider.h"
+#include "Session.h"
 
-MenuBar::MenuBar(QWidget *parent): QMenuBar(parent)
-{
+MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu actions
   auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenFileCommand::name);
   auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
@@ -67,4 +69,25 @@ MenuBar::MenuBar(QWidget *parent): QMenuBar(parent)
   editMenu->addAction(copyAction);
   editMenu->addAction(pasteAction);
   editMenu->addAction(selectAllAction);
+
+  // View menu
+  auto viewMenu = addMenu(QObject::tr("&View"));
+  auto themeMenu = viewMenu->addMenu(QObject::tr("&Theme"));
+  QActionGroup* themeGroup = new QActionGroup(themeMenu);
+  for (const QString& name: ThemeProvider::sortedThemeNames()) {
+    ThemeAction* themeAction = new ThemeAction(name, themeMenu);
+    themeMenu->addAction(themeAction);
+    themeGroup->addAction(themeAction);
+  }
+}
+
+ThemeAction::ThemeAction(const QString& text, QObject* parent): QAction(text, parent) {
+  setCheckable(true);
+  connect(this, SIGNAL(triggered()), this, SLOT(themeSelected()));
+}
+
+void ThemeAction::themeSelected() {
+  qDebug("themeSelected");
+  Theme* theme = ThemeProvider::theme(text());
+  Session::singleton().setTheme(theme);
 }

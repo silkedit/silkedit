@@ -65,6 +65,7 @@ signals:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
+  void changeTheme(Theme* theme);
 };
 
 class LineNumberArea : public QWidget {

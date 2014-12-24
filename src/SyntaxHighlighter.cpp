@@ -4,6 +4,7 @@
 #include "SyntaxHighlighter.h"
 #include "PListParser.h"
 #include "Util.h"
+#include "Session.h"
 
 // fixme: memory leak of new QObject();
 // Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass
@@ -17,11 +18,11 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
   // this connect causes crash when opening a file and editing it then closing it without save.
   //  auto conn = connect(doc, &QTextDocument::contentsChange, this,
   // &SyntaxHighlighter::updateNode);
-  auto conn =
-      connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
-  Q_ASSERT(conn);
+  connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
+  connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
 
   setDocument(doc);
+  changeTheme(Session::singleton().theme());
 }
 
 SyntaxHighlighter::~SyntaxHighlighter() { qDebug("~SyntaxHighlighter"); }
@@ -46,10 +47,6 @@ Region SyntaxHighlighter::scopeExtent(int point) {
 QString SyntaxHighlighter::scopeName(int point) {
   updateScope(point);
   return m_lastScopeName;
-}
-
-void SyntaxHighlighter::setTheme(const QString& themeFileName) {
-  m_theme.reset(Theme::loadTheme(themeFileName));
 }
 
 void SyntaxHighlighter::adjust(int pos, int delta) {
@@ -194,4 +191,10 @@ void SyntaxHighlighter::updateScope(int point) {
   m_lastScopeBuf.clear();
   m_lastScopeNode = findScope(search, m_rootNode.get());
   m_lastScopeName = QString(m_lastScopeBuf);
+}
+
+void SyntaxHighlighter::changeTheme(Theme *theme)
+{
+  m_theme = theme;
+  rehighlight();
 }

@@ -30,9 +30,6 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   if (m_lang) {
     LanguageParser* parser = LanguageParser::create(m_lang->scopeName, text);
     m_syntaxHighlighter.reset(new SyntaxHighlighter(this, parser));
-    if (m_syntaxHighlighter) {
-      m_syntaxHighlighter->setTheme("packages/Solarized (Light).tmTheme");
-    }
   }
 }
 
