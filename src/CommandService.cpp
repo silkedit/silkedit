@@ -1,6 +1,29 @@
 #include <QDebug>
 
 #include "CommandService.h"
+#include "commands/ToggleVimEmulationCommand.h"
+#include "commands/OpenFileCommand.h"
+#include "commands/NewFileCommand.h"
+#include "commands/SaveFileCommand.h"
+#include "commands/SaveAsCommand.h"
+#include "commands/SaveAllCommand.h"
+#include "commands/CloseTabCommand.h"
+#include "commands/CloseAllTabsCommand.h"
+#include "commands/CloseOtherTabsCommand.h"
+#include "commands/ReopenLastClosedFileCommand.h"
+#include "commands/MoveCursorCommand.h"
+#include "commands/DeleteCommand.h"
+#include "commands/UndoCommand.h"
+#include "commands/RedoCommand.h"
+#include "commands/CutCommand.h"
+#include "commands/CopyCommand.h"
+#include "commands/PasteCommand.h"
+#include "commands/SelectAllCommand.h"
+//#include "commands/EvalAsRubyCommand.h"
+#include "commands/SplitHorizontallyCommand.h"
+#include "commands/SplitVerticallyCommand.h"
+
+std::unordered_map<QString, std::unique_ptr<ICommand>> CommandService::m_commands;
 
 void CommandService::runCommand(const QString& name, const CommandArgument& args, int repeat) {
   if (m_commands.find(name) != m_commands.end()) {
@@ -15,3 +38,60 @@ void CommandService::add(std::unique_ptr<ICommand> cmd) {
 }
 
 void CommandService::remove(const QString& name) { m_commands.erase(name); }
+
+void CommandService::init()
+{
+  // add commands
+  std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand);
+  add(std::move(moveCursorCmd));
+
+  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand);
+  add(std::move(deleteCmd));
+
+  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand);
+  add(std::move(undoCmd));
+
+  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
+  add(std::move(redoCmd));
+
+  //  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
+  //  add(std::move(evalAsRubyCmd));
+
+  std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
+  add(std::move(openFileCmd));
+
+  std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
+  add(std::move(newFileCmd));
+
+  std::unique_ptr<SaveFileCommand> saveFileCmd(new SaveFileCommand());
+  add(std::move(saveFileCmd));
+
+  std::unique_ptr<SaveAsCommand> saveAsCmd(new SaveAsCommand());
+  add(std::move(saveAsCmd));
+
+  std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
+  add(std::move(saveAllCmd));
+
+  add(std::move(std::unique_ptr<CloseTabCommand>(new CloseTabCommand)));
+
+  add(
+      std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
+
+  add(
+      std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
+
+  add(
+      std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
+
+  add(std::move(std::unique_ptr<CutCommand>(new CutCommand)));
+  add(std::move(std::unique_ptr<CopyCommand>(new CopyCommand)));
+  add(std::move(std::unique_ptr<PasteCommand>(new PasteCommand)));
+  add(
+      std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
+
+  std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
+  add(std::move(splitHorizontallyCmd));
+
+  std::unique_ptr<SplitVerticallyCommand> splitVerticallyCmd(new SplitVerticallyCommand());
+  add(std::move(splitVerticallyCmd));
+}

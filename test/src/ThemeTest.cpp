@@ -8,7 +8,7 @@ class ThemeTest : public QObject {
  private slots:
   void loadTheme();
   void fontStyle();
-  void spice();
+  void getFormat();
 };
 
 void ThemeTest::loadTheme() {
@@ -59,15 +59,15 @@ void ThemeTest::fontStyle()
   QVERIFY(setting->isItalic);
   QVERIFY(setting->isUnderline);
 
-  auto format = theme->spice("entity.other.inherited-class");
+  auto format = theme->getFormat("entity.other.inherited-class");
   QCOMPARE(format->fontWeight(), (int)QFont::Bold);
   QCOMPARE(format->fontItalic(), true);
   QCOMPARE(format->fontUnderline(), true);
 }
 
-void ThemeTest::spice() {
+void ThemeTest::getFormat() {
   Theme* theme = Theme::loadTheme("testdata/Monokai.tmTheme");
-  auto format = theme->spice("entity.name.tag.localname.xml");
+  auto format = theme->getFormat("entity.name.tag.localname.xml");
   QCOMPARE(format->foreground().color(), QColor("#F92672"));
 
   // scope has more than 1 selectors (13.4 Grouping).
@@ -83,9 +83,9 @@ void ThemeTest::spice() {
 //                  <string>#AE81FF</string>
 //          </dict>
 //  </dict>
-  format = theme->spice("constant.character.entity.xml");
+  format = theme->getFormat("constant.character.entity.xml");
   QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
-  format = theme->spice("constant.other.entity.xml");
+  format = theme->getFormat("constant.other.entity.xml");
   QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
 }
 

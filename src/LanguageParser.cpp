@@ -562,7 +562,7 @@ Language* LanguageProvider::defaultLanguage() { return languageFromScope(DEFAULT
 
 Language* LanguageProvider::languageFromScope(const QString& scope) {
   if (m_scopeLangFilePathMap.contains(scope)) {
-    return languageFromFile(m_scopeLangFilePathMap.value(scope));
+    return loadLanguage(m_scopeLangFilePathMap.value(scope));
   } else {
     return nullptr;
   }
@@ -570,13 +570,13 @@ Language* LanguageProvider::languageFromScope(const QString& scope) {
 
 Language* LanguageProvider::languageFromExtension(const QString& ext) {
   if (m_extensionLangFilePathMap.contains(ext)) {
-    return languageFromFile(m_extensionLangFilePathMap.value(ext));
+    return loadLanguage(m_extensionLangFilePathMap.value(ext));
   } else {
     return nullptr;
   }
 }
 
-Language* LanguageProvider::languageFromFile(const QString& path) {
+Language* LanguageProvider::loadLanguage(const QString& path) {
   QFile file(path);
   if (!file.open(QIODevice::ReadOnly)) {
     qWarning("unable to open a file %s", qPrintable(path));
@@ -649,15 +649,6 @@ Language* LanguageProvider::languageFromFile(const QString& path) {
 
   lang->tweak();
   return lang;
-}
-
-void LanguageProvider::loadLanguages() {
-  QDir dir("packages");
-  Q_ASSERT(dir.exists());
-  foreach(const QString & fileName, dir.entryList(QStringList("*.tmLanguage"))) {
-    qDebug("loading %s", qPrintable(dir.filePath(fileName)));
-    languageFromFile(dir.filePath(fileName));
-  }
 }
 
 QVector<Region>* Regex::find(const QString& str, int beginPos) {

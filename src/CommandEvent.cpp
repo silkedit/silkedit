@@ -16,7 +16,7 @@ CommandEvent::CommandEvent(const QString& name,
 
 bool CommandEvent::execute(int repeat) {
   if (!m_context || m_context->isSatisfied()) {
-    CommandService::singleton().runCommand(m_cmdName, m_args, repeat);
+    CommandService::runCommand(m_cmdName, m_args, repeat);
     return true;
   }
 

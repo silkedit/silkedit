@@ -107,7 +107,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
     if (m_lastScopeNode->isLeaf()) {
       Region region = m_lastScopeNode->region;
       qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
-      std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
+      std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
         //        qDebug("setFormat(%d, %d, %s",
         //               i,
@@ -119,7 +119,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       }
       i += region.length();
     } else {
-      std::unique_ptr<QTextCharFormat> format = m_theme->spice(m_lastScopeName);
+      std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
         //        qDebug("setFormat(%d, %d, %s",
         //               i,

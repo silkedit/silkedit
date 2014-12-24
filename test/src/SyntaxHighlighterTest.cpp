@@ -27,7 +27,7 @@ class SyntaxHighlighterTest : public QObject {
 void SyntaxHighlighterTest::scopeExtent() {
   const QVector<QString> files({"testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
+  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
   QFile file("testdata/plist2.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));
@@ -77,7 +77,7 @@ void SyntaxHighlighterTest::scopeExtent() {
 void SyntaxHighlighterTest::updateNode() {
   const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
+  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
   QString text = QString(R"(
 class hoge {
   void foo();

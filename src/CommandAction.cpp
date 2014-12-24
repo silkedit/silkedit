@@ -8,5 +8,5 @@ CommandAction::CommandAction(const QString& text, const QString& cmdName, QObjec
     setShortcut(*key);
   }
   QObject::connect(
-      this, &QAction::triggered, [this] { CommandService::singleton().runCommand(m_cmdName); });
+      this, &QAction::triggered, [this] { CommandService::runCommand(m_cmdName); });
 }

@@ -25,13 +25,13 @@ void compareLineByLine(const QString& str1, const QString& str2) {
 class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
-  void LanguageFromFile();
+  void loadLanguage();
   void LanguageFromScope();
   void parseTmLanguage();
 };
 
-void LanguageParserTest::LanguageFromFile() {
-  Language* lang = LanguageProvider::languageFromFile("testdata/C++.tmLanguage");
+void LanguageParserTest::loadLanguage() {
+  Language* lang = LanguageProvider::loadLanguage("testdata/C++.tmLanguage");
 
   // fileTypes
   QCOMPARE(lang->fileTypes.size(), 13);
@@ -80,7 +80,7 @@ void LanguageParserTest::LanguageFromFile() {
 }
 
 void LanguageParserTest::LanguageFromScope() {
-  Language* lang = LanguageProvider::languageFromFile("testdata/C++.tmLanguage");
+  Language* lang = LanguageProvider::loadLanguage("testdata/C++.tmLanguage");
   Language* langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
   QVERIFY(langFromScope);
   QVERIFY(!LanguageProvider::languageFromScope("missing scope"));
@@ -90,7 +90,7 @@ void LanguageParserTest::parseTmLanguage() {
   const QVector<QString> files(
       {"testdata/C++.tmLanguage", "testdata/C.tmLanguage", "testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage", "testdata/Go.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::languageFromFile(fn)); }
+  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
   QFile file("testdata/plist2.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));

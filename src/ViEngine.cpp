@@ -18,7 +18,7 @@ void ViEngine::enable() {
   qDebug("enabling ViEngine");
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
-  CommandService::singleton().add(std::move(changeModeCmd));
+  CommandService::add(std::move(changeModeCmd));
 
   ContextService::singleton().add(
       ModeContext::name,
@@ -41,7 +41,7 @@ void ViEngine::enable() {
 }
 
 void ViEngine::disable() {
-  CommandService::singleton().remove(ChangeModeCommand::name);
+  CommandService::remove(ChangeModeCommand::name);
   ContextService::singleton().remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);

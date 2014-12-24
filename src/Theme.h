@@ -34,7 +34,7 @@ class Theme {
   DEFAULT_MOVE(Theme)
 
   static Theme* loadTheme(const QString& filename);
-  std::unique_ptr<QTextCharFormat> spice(const QString& scope);
+  std::unique_ptr<QTextCharFormat> getFormat(const QString& scope);
 
   std::unique_ptr<Settings> gutterSettings;
   QFont::Weight gutterFontWeight;

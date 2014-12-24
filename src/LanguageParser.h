@@ -94,16 +94,15 @@ class RootPattern : public Pattern {
 };
 
 class LanguageProvider {
+  DISABLE_COPY_AND_MOVE(LanguageProvider)
  public:
   static Language* defaultLanguage();
   static Language* languageFromScope(const QString& scopeName);
   static Language* languageFromExtension(const QString& ext);
-  static Language* languageFromFile(const QString& path);
+  static Language* loadLanguage(const QString& path);
   static QVector<QPair<QString, QString>> scopeAndLangNamePairs() {
     return m_scopeAndLangNamePairs;
   }
-
-  static void loadLanguages();
 
  private:
   static QVector<QPair<QString, QString>> m_scopeAndLangNamePairs;

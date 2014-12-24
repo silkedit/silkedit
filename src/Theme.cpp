@@ -152,7 +152,7 @@ ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
   return settings[0];
 }
 
-std::unique_ptr<QTextCharFormat> Theme::spice(const QString& scope) {
+std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
   if (settings.isEmpty())
     return nullptr;
 
