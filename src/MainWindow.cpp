@@ -90,7 +90,9 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
   return window;
 }
 
-MainWindow::~MainWindow() { qDebug("~MainWindow"); }
+MainWindow::~MainWindow() {
+  qDebug("~MainWindow");
+}
 
 void MainWindow::show() {
   QMainWindow::show();
@@ -109,10 +111,14 @@ void MainWindow::saveAllTabs() {
   }
 }
 
-void MainWindow::closeAllTabs() {
-  for (auto tabWidget : m_tabWidgets) {
-    tabWidget->closeAllTabs();
+bool MainWindow::closeAllTabs() {
+  while (!m_tabWidgets.empty()) {
+    bool isSuccess = m_tabWidgets.front()->closeAllTabs();
+    if (!isSuccess)
+      return false;
   }
+
+  return true;
 }
 
 void MainWindow::splitTabHorizontally() {
@@ -167,3 +173,14 @@ void MainWindow::splitTab(std::function<void(QWidget*, const QString&)> func) {
 }
 
 QList<MainWindow*> MainWindow::s_windows;
+
+void MainWindow::closeEvent(QCloseEvent* event) {
+  qDebug("closeEvent");
+  bool isSuccess = closeAllTabs();
+  if (isSuccess) {
+    event->accept();
+  } else {
+    qDebug("closeEvent is ignored");
+    event->ignore();
+  }
+}

@@ -134,15 +134,18 @@ void STabWidget::saveAllTabs() {
 
 void STabWidget::closeActiveTab() { closeTab(currentWidget()); }
 
-void STabWidget::closeAllTabs() {
+bool STabWidget::closeAllTabs() {
   std::list<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
     widgets.push_back(widget(i));
   }
 
   for (auto w : widgets) {
-    closeTab(w);
+    bool isSuccess = closeTab(w);
+    if (!isSuccess) return false;
   }
+
+  return true;
 }
 
 void STabWidget::closeOtherTabs() {
@@ -219,7 +222,7 @@ void STabWidget::removeTabAndWidget(int index) {
   removeTab(index);
 }
 
-void STabWidget::closeTab(QWidget* w) {
+bool STabWidget::closeTab(QWidget* w) {
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView && editView->document()->isModified()) {
     QMessageBox msgBox;
@@ -237,16 +240,17 @@ void STabWidget::closeTab(QWidget* w) {
       case QMessageBox::Discard:
         break;
       case QMessageBox::Cancel:
-        return;
+        return false;
       default:
         qWarning("ret is invalid");
-        return;
+        return false;
     }
   } else {
     qDebug("widget is not TextEditView or not modified");
   }
 
   removeTabAndWidget(indexOf(w));
+  return true;
 }
 
 void STabWidget::updateTabTextBasedOn(bool changed) {

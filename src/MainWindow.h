@@ -29,9 +29,10 @@ class MainWindow : public QMainWindow {
   void show();
   void close();
   void saveAllTabs();
-  void closeAllTabs();
+  bool closeAllTabs();
   void splitTabHorizontally();
   void splitTabVertically();
+  void closeEvent(QCloseEvent *event) override;
 
 signals:
   void activeTextEditViewChanged(TextEditView* editView);
