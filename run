@@ -13,25 +13,6 @@ format() {
     fi
 }
 
-# run clang-format and clang-check
-pre_commit() {
-	      format
-
-        # clang-check
-        ensure_dir build
-        cd build
-
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-        result=$(find ../src -name '*.cpp'|xargs clang-check -p . 2>&1)
-        if [ $(echo ${result} | grep warning -c) -ne 0 ]
-            then
-            echo "${result}"
-            exit 1
-        fi
-
-        echo -e "${LIGHT_GREEN}Good to commit!${NC}"
-    }
-
 # Create a new directory with the specified name if it doesn't exist.
 # Recreate it if it already exists.
 ensure_dir() {
@@ -138,10 +119,6 @@ case "$1" in
         format $2
         echo
         ;;
-    pre-commit)
-        pre_commit
-        echo
-        ;;
     rebuild)
         rebuild
         echo
@@ -161,7 +138,6 @@ analyze     static analysis
 build       build an app and an installer
 clean       clean build dir
 format      format sources
-pre-commit  run clang-format and clang-check
 rebuild     build from scratch
 resolve     resolve dependency
 test        run tests
