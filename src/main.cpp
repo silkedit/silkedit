@@ -1,3 +1,4 @@
+#include <QStringList>
 
 #include "PackageService.h"
 #include "SilkApp.h"
@@ -6,7 +7,7 @@
 #include "KeymapService.h"
 #include "ConfigService.h"
 #include "CommandService.h"
-#include "Dummy.h"
+#include "DocumentService.h"
 #include "MenuBar.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "Session.h"
@@ -45,6 +46,11 @@ int main(int argv, char** args) {
   MenuBar menuBar(nullptr);
 
   Session::singleton().init();
+
+  QStringList arguments = app.arguments();
+  if (arguments.size() > 1) {
+    DocumentService::singleton().open(arguments.at(1));
+  }
 
   //  new Dummy();
 

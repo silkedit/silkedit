@@ -12,6 +12,7 @@
 
 class STabWidget;
 class QBoxLayout;
+class StatusBar;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -25,7 +26,7 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
   STabWidget* activeTabWidget() { return m_activeTabWidget; }
-  void setActiveTabWidget(STabWidget* tabWidget) { m_activeTabWidget = tabWidget; }
+  void setActiveTabWidget(STabWidget* tabWidget);
   void show();
   void close();
   void saveAllTabs();
@@ -34,9 +35,6 @@ class MainWindow : public QMainWindow {
   void splitTabVertically();
   void closeEvent(QCloseEvent *event) override;
 
-signals:
-  void activeTextEditViewChanged(TextEditView* editView);
-
  private:
   static QList<MainWindow*> s_windows;
 
@@ -44,6 +42,7 @@ signals:
   STabWidget* m_activeTabWidget;
   std::list<STabWidget*> m_tabWidgets;
   QBoxLayout* m_rootLayout;
+  StatusBar* m_statusBar;
 
   STabWidget* createTabWidget();
   void removeTabWidget(STabWidget* widget);

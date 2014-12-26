@@ -32,7 +32,8 @@ QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_activeTabWidget(nullptr),
-      m_rootLayout(new QBoxLayout(QBoxLayout::LeftToRight)) {
+      m_rootLayout(new QBoxLayout(QBoxLayout::LeftToRight)),
+      m_statusBar(nullptr) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
@@ -48,12 +49,11 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   // window becomes parent of this layout by setLayout
   window->setLayout(m_rootLayout);
   setCentralWidget(window);
-  m_activeTabWidget = tabWidget;
 
-  StatusBar* sbar = new StatusBar(this);
-  connect(
-      this, &MainWindow::activeTextEditViewChanged, sbar, &StatusBar::onActiveTextEditViewChanged);
-  setStatusBar(sbar);
+  m_statusBar = new StatusBar(this);
+  setStatusBar(m_statusBar);
+
+  setActiveTabWidget(tabWidget);
 }
 
 STabWidget* MainWindow::createTabWidget() {
@@ -92,6 +92,42 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
 
 MainWindow::~MainWindow() {
   qDebug("~MainWindow");
+}
+
+void MainWindow::setActiveTabWidget(STabWidget* tabWidget) {
+  qDebug("setActiveTabWidget");
+
+  if (m_activeTabWidget && m_activeTabWidget->activeEditView()) {
+    //    qDebug("disconnect previous active tab widget and TextEditView");
+    // disconnect from previous active TextEditView
+    disconnect(m_activeTabWidget,
+               SIGNAL(activeTextEditViewChanged(TextEditView*)),
+               m_statusBar,
+               SLOT(onActiveTextEditViewChanged(TextEditView*)));
+    if (m_activeTabWidget->activeEditView()) {
+      disconnect(m_activeTabWidget->activeEditView(),
+                 SIGNAL(languageChanged(QString)),
+                 m_statusBar,
+                 SLOT(setLanguage(QString)));
+    }
+  }
+
+  m_activeTabWidget = tabWidget;
+
+  if (tabWidget) {
+    // connect to new active TextEditView
+    //    qDebug("connect to new active tab widget and activeEditView");
+    connect(tabWidget,
+            SIGNAL(activeTextEditViewChanged(TextEditView*)),
+            m_statusBar,
+            SLOT(onActiveTextEditViewChanged(TextEditView*)));
+    if (tabWidget->activeEditView()) {
+      connect(tabWidget->activeEditView(),
+              SIGNAL(languageChanged(const QString&)),
+              m_statusBar,
+              SLOT(setLanguage(const QString&)));
+    }
+  }
 }
 
 void MainWindow::show() {

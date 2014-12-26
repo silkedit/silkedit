@@ -45,8 +45,21 @@ QString TextEditView::path() {
 }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
-  m_document = document;
   STextEdit::setDocument(document.get());
+  Language* prevLang = nullptr;
+  Language* newLang = nullptr;
+  if (m_document) {
+    prevLang = m_document->language();
+  }
+  if (document) {
+    newLang = document->language();
+  }
+  if (!((prevLang == newLang) || (prevLang && newLang && prevLang->scopeName == newLang->scopeName))) {
+    if (newLang) {
+      setLanguage(newLang->scopeName);
+    }
+  }
+  m_document = document;
   updateLineNumberAreaWidth(blockCount());
 }
 
@@ -59,7 +72,10 @@ Language* TextEditView::language() {
 
 void TextEditView::setLanguage(const QString& scopeName) {
   if (m_document) {
-    m_document->setLanguage(scopeName);
+    bool isSuccess = m_document->setLanguage(scopeName);
+    if (isSuccess) {
+      emit languageChanged(scopeName);
+    }
   }
 }
 

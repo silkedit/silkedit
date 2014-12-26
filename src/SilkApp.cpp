@@ -4,6 +4,7 @@
 #include "TextEditView.h"
 #include "MainWindow.h"
 #include "STabWidget.h"
+#include "DocumentService.h"
 
 namespace {
 template <typename T>
@@ -25,9 +26,7 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
     if (TextEditView* editView = qobject_cast<TextEditView*>(now)) {
       if (STabWidget* tabWidget = findParent<STabWidget*>(editView)) {
         if (MainWindow* window = qobject_cast<MainWindow*>(tabWidget->window())) {
-          qDebug("window->setActiveTabWidget");
           window->setActiveTabWidget(tabWidget);
-          emit window->activeTextEditViewChanged(editView);
         } else {
           qDebug("top window is not MainWindow");
         }
@@ -38,4 +37,15 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
       qDebug("now is not TextEditView");
     }
   });
+}
+
+bool SilkApp::event(QEvent* event) {
+  switch (event->type()) {
+    case QEvent::FileOpen:
+      qDebug("FileOpen event");
+      DocumentService::singleton().open(static_cast<QFileOpenEvent*>(event)->file());
+      return true;
+    default:
+      return QApplication::event(event);
+  }
 }

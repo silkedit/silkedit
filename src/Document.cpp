@@ -2,7 +2,7 @@
 
 #include "Document.h"
 
-Document::Document(const QString& path, const QString& text) : QTextDocument(text), m_path(path) {
+Document::Document(const QString& path, const QString& text) : QTextDocument(text), m_path(path), m_syntaxHighlighter(nullptr) {
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');
@@ -29,7 +29,9 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   m_lang.reset(lang);
   if (m_lang) {
     LanguageParser* parser = LanguageParser::create(m_lang->scopeName, text);
-    m_syntaxHighlighter.reset(new SyntaxHighlighter(this, parser));
+    m_syntaxHighlighter = new SyntaxHighlighter(this, parser);
+  } else {
+    qDebug("lang is null");
   }
 }
 
@@ -47,12 +49,12 @@ Document* Document::create(const QString& path) {
 
 Document* Document::createBlank() { return new Document(); }
 
-void Document::setLanguage(const QString& scopeName) {
+bool Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
   Language* newLang = LanguageProvider::languageFromScope(scopeName);
   if (m_lang.get() == newLang || (m_lang && newLang && *m_lang == *newLang)) {
     qDebug("lang is already %s", qPrintable(scopeName));
-    return;
+    return false;
   }
 
   m_lang.reset(newLang);
@@ -63,4 +65,5 @@ void Document::setLanguage(const QString& scopeName) {
       m_syntaxHighlighter->rehighlight();
     }
   }
+  return true;
 }

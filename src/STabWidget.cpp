@@ -20,7 +20,7 @@ QString getFileNameFrom(const QString& path) {
 }
 
 STabWidget::STabWidget(QWidget* parent)
-    : QTabWidget(parent), m_tabBar(new STabBar(this)), m_tabDragging(false) {
+    : QTabWidget(parent), m_activeEditView(nullptr), m_tabBar(new STabBar(this)), m_tabDragging(false) {
   connect(m_tabBar,
           SIGNAL(onDetachTabStarted(int, const QPoint&)),
           this,
@@ -48,10 +48,10 @@ STabWidget::STabWidget(QWidget* parent)
 
     qDebug("currentChanged. index: %i, tab count: %i", index, count());
     if (auto w = widget(index)) {
-      m_activeEditView = qobject_cast<TextEditView*>(w);
+      setActiveEditView(qobject_cast<TextEditView*>(w));
     } else {
       qDebug("active edit view is null");
-      m_activeEditView = nullptr;
+      setActiveEditView(nullptr);
     }
   });
 
@@ -79,7 +79,9 @@ STabWidget::~STabWidget() {
              SLOT(detachTabFinished(const QPoint&)));
 }
 
-int STabWidget::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
+int STabWidget::addTab(QWidget* page, const QString& label) {
+  return insertTab(-1, page, label);
+}
 
 int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
@@ -111,6 +113,16 @@ int STabWidget::open(const QString& path) {
   }
   newDoc->setModified(false);
 
+  if (count() == 1) {
+    TextEditView* editView = qobject_cast<TextEditView*>(currentWidget());
+    if (editView && !editView->document()->isModified() && editView->document()->isEmpty()) {
+      qDebug("trying to replace am empty doc with a new one");
+      editView->setDocument(std::move(newDoc));
+      editView->setPath(path);
+      return currentIndex();
+    }
+  }
+
   TextEditView* view = new TextEditView(this);
   view->setDocument(std::move(newDoc));
   return addTab(view, getFileNameFrom(path));
@@ -132,7 +144,9 @@ void STabWidget::saveAllTabs() {
   }
 }
 
-void STabWidget::closeActiveTab() { closeTab(currentWidget()); }
+void STabWidget::closeActiveTab() {
+  closeTab(currentWidget());
+}
 
 bool STabWidget::closeAllTabs() {
   std::list<QWidget*> widgets;
@@ -142,7 +156,8 @@ bool STabWidget::closeAllTabs() {
 
   for (auto w : widgets) {
     bool isSuccess = closeTab(w);
-    if (!isSuccess) return false;
+    if (!isSuccess)
+      return false;
   }
 
   return true;
@@ -213,6 +228,12 @@ void STabWidget::tabRemoved(int) {
 void STabWidget::mouseReleaseEvent(QMouseEvent* event) {
   qDebug("mouseReleaseEvent in STabWidget");
   QTabWidget::mouseReleaseEvent(event);
+}
+
+void STabWidget::setActiveEditView(TextEditView *editView)
+{
+  m_activeEditView = editView;
+  emit activeTextEditViewChanged(editView);
 }
 
 void STabWidget::removeTabAndWidget(int index) {

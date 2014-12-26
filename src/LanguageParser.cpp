@@ -572,7 +572,7 @@ Language* LanguageProvider::languageFromExtension(const QString& ext) {
   if (m_extensionLangFilePathMap.contains(ext)) {
     return loadLanguage(m_extensionLangFilePathMap.value(ext));
   } else {
-    return nullptr;
+    return defaultLanguage();
   }
 }
 
@@ -759,7 +759,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
 
   QVector<Node*> newNodes = parser->parse(affectedRegion);
   foreach(Node * node, newNodes) {
-    qDebug("new node: %s", qPrintable(node->toString()));
+//    qDebug("new node: %s", qPrintable(node->toString()));
     children.push_back(std::move(std::unique_ptr<Node>(node)));
   }
   std::sort(children.begin(),
@@ -768,5 +768,5 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
                const std::unique_ptr<Node>& y) { return x->region.begin() < y->region.begin(); });
 
   qDebug("new children.size: %d", (int)children.size());
-  qDebug() << *this;
+//  qDebug() << *this;
 }

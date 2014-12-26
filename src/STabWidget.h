@@ -33,6 +33,7 @@ class STabWidget : public QTabWidget {
 
 signals:
   void allTabRemoved();
+  void activeTextEditViewChanged(TextEditView* editView);
 
  public slots:
   // Detach Tab
@@ -49,6 +50,8 @@ signals:
   TextEditView* m_activeEditView;
   STabBar* m_tabBar;
   bool m_tabDragging;
+
+  void setActiveEditView(TextEditView* editView);
 
   void removeTabAndWidget(int index);
   bool closeTab(QWidget* w);

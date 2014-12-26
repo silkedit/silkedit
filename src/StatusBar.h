@@ -7,6 +7,7 @@
 class TextEditView;
 class LanguageComboBox;
 class MainWindow;
+struct Language;
 
 class StatusBar : public QStatusBar {
   Q_OBJECT
@@ -23,7 +24,10 @@ signals:
  public slots:
   void onActiveTextEditViewChanged(TextEditView* editView);
   void setActiveTextEditViewLanguage();
+  void setLanguage(const QString& scope);
 
  private:
   LanguageComboBox* m_langComboBox;
+
+  void setCurrentLanguage(Language* lang);
 };

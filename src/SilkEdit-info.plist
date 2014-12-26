@@ -1,0 +1,38 @@
+{
+	CFBundleName                         = "SilkEdit";
+	// CFBundleShortVersionString           = "2.0-beta.6";                   // shown in About window
+	// CFBundleVersion                      = "9800";                             // shown in About window in parenthesis (but this format is not well-formed)
+	CFBundleIdentifier                   = "com.silksmiths.SilkEdit"; //"com.macromates.TextMate.preview";
+
+	CFBundleDevelopmentRegion            = English;
+	CFBundleExecutable                   = "SilkEdit";
+	// CFBundleHelpBookFolder               = "TextMate Help";
+	// CFBundleHelpBookName                 = "TextMate 2 Help";
+	// CFBundleIconFile                     = "TextMate";
+	CFBundleInfoDictionaryVersion        = "6.0";
+	CFBundlePackageType                  = APPL;
+	// CFBundleSignature                    = avin; // we didn’t register this code with Apple
+	LSMinimumSystemVersion               = "10.7";
+	LSApplicationCategoryType            = "public.app-category.developer-tools"; // View-->Arrange by Application Category
+	// NSAppleScriptEnabled                 = YES;
+	// NSContactsUsageDescription           = 'Your email address is used as an identifier for crash report submission. It can be changed in Preferences.\n\nIt is also used as a default contact address if you create your own bundle. This can be changed in the bundle editor after you create a bundle.';
+	// NSSupportsAutomaticGraphicsSwitching = YES;
+
+	// CFBundleURLTypes = (
+	// 	{	CFBundleURLName    = "TextMate URL";
+	// 		CFBundleURLSchemes = ( txmt );
+	// 	}
+	// );
+
+	CFBundleDocumentTypes = (
+		{	CFBundleTypeName       = "Document";
+			LSItemContentTypes     = ( public.data );
+	        LSHandlerRank        = Alternate;
+			CFBundleTypeRole       = Editor;
+		},
+        {   LSItemContentTypes   = ( "public.xml" );
+	        LSHandlerRank        = Alternate;
+	        CFBundleTypeRole     = Editor;
+        },
+	);
+}

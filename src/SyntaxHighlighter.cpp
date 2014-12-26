@@ -22,6 +22,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
 
   setDocument(doc);
+  setParent(doc);
   changeTheme(Session::singleton().theme());
 }
 
@@ -92,7 +93,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
   }
 
   int pos = currentBlock().position();
-  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), pos);
+//  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), pos);
 
   for (int i = 0; i < text.length();) {
     updateScope(pos + i);
@@ -103,7 +104,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     if (m_lastScopeNode->isLeaf()) {
       Region region = m_lastScopeNode->region;
-      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
+//      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
       std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
         //        qDebug("setFormat(%d, %d, %s",
