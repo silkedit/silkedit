@@ -102,8 +102,9 @@ analyze() {
     ensure_dir build
     cd build
 
-    scan-build cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-    scan-build -o ./build-analysis ninja
+    cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=/usr/local/checker-276/libexec/c++-analyzer
+    scan-build -v -o ./build-analysis --use-analyzer=/usr/bin/clang++ ninja
+
 }
 
 run_tests() {
