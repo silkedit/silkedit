@@ -8,8 +8,15 @@ NC='\x1B[0m' # No Color
 
 format() {
     find src -name \*.cpp -or -name \*.h | xargs clang-format -i
-    if [ "$1" = '-commit' ]; then
+    if [ "$1" = '-commit' -o "$1" = '-push' ]; then
         git commit -am "clang-format"
+    fi
+
+    if [ "$1" = '-push' ]; then
+        if git status | grep -sq "Your branch is ahead of"; then
+            git push origin master
+        fi
+        exit 0
     fi
 }
 
@@ -100,7 +107,9 @@ run_tests() {
     fi
 }
 
-set -e
+# -e: stops if any command returns 0
+# -u: stops if trying to use undefined variable
+set -eu
 
 case "$1" in
     analyze)
@@ -116,6 +125,8 @@ case "$1" in
         echo
         ;;
     format)
+        # grep return 1 if it doesn't match anything, so disable -e here
+        set +e
         format $2
         echo
         ;;
