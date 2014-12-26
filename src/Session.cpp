@@ -7,9 +7,6 @@ void Session::setTheme(Theme* theme) {
   emit themeChanged(theme);
 }
 
-void Session::init() {
-  setTheme(ThemeProvider::theme(ConfigService::theme()));
-}
+void Session::init() { setTheme(ThemeProvider::theme(ConfigService::theme())); }
 
-Session::Session() : m_theme(nullptr) {
-}
+Session::Session() : m_theme(nullptr) {}

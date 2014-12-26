@@ -5,8 +5,7 @@
 
 std::unordered_map<QString, std::unique_ptr<Theme>> ThemeProvider::m_nameThemeMap;
 
-QVector<QString> ThemeProvider::sortedThemeNames()
-{
+QVector<QString> ThemeProvider::sortedThemeNames() {
   QVector<QString> names(0);
   for (auto& pair : m_nameThemeMap) {
     names.push_back(pair.first);
@@ -25,8 +24,7 @@ void ThemeProvider::loadTheme(const QString& fileName) {
   }
 }
 
-Theme *ThemeProvider::theme(const QString &name)
-{
+Theme* ThemeProvider::theme(const QString& name) {
   if (m_nameThemeMap.find(name) != m_nameThemeMap.end()) {
     return m_nameThemeMap.at(name).get();
   } else {

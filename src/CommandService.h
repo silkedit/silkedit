@@ -13,8 +13,8 @@ class CommandService {
 
  public:
   static void runCommand(const QString& name,
-                  const CommandArgument& args = CommandArgument(),
-                  int repeat = 1);
+                         const CommandArgument& args = CommandArgument(),
+                         int repeat = 1);
   static void add(std::unique_ptr<ICommand> cmd);
   static void remove(const QString& name);
   static void init();

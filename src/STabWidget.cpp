@@ -20,7 +20,10 @@ QString getFileNameFrom(const QString& path) {
 }
 
 STabWidget::STabWidget(QWidget* parent)
-    : QTabWidget(parent), m_activeEditView(nullptr), m_tabBar(new STabBar(this)), m_tabDragging(false) {
+    : QTabWidget(parent),
+      m_activeEditView(nullptr),
+      m_tabBar(new STabBar(this)),
+      m_tabDragging(false) {
   connect(m_tabBar,
           SIGNAL(onDetachTabStarted(int, const QPoint&)),
           this,
@@ -79,9 +82,7 @@ STabWidget::~STabWidget() {
              SLOT(detachTabFinished(const QPoint&)));
 }
 
-int STabWidget::addTab(QWidget* page, const QString& label) {
-  return insertTab(-1, page, label);
-}
+int STabWidget::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
 
 int STabWidget::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
@@ -144,9 +145,7 @@ void STabWidget::saveAllTabs() {
   }
 }
 
-void STabWidget::closeActiveTab() {
-  closeTab(currentWidget());
-}
+void STabWidget::closeActiveTab() { closeTab(currentWidget()); }
 
 bool STabWidget::closeAllTabs() {
   std::list<QWidget*> widgets;
@@ -230,8 +229,7 @@ void STabWidget::mouseReleaseEvent(QMouseEvent* event) {
   QTabWidget::mouseReleaseEvent(event);
 }
 
-void STabWidget::setActiveEditView(TextEditView *editView)
-{
+void STabWidget::setActiveEditView(TextEditView* editView) {
   m_activeEditView = editView;
   emit activeTextEditViewChanged(editView);
 }

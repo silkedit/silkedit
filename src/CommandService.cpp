@@ -39,8 +39,7 @@ void CommandService::add(std::unique_ptr<ICommand> cmd) {
 
 void CommandService::remove(const QString& name) { m_commands.erase(name); }
 
-void CommandService::init()
-{
+void CommandService::init() {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand);
   add(std::move(moveCursorCmd));
@@ -74,20 +73,16 @@ void CommandService::init()
 
   add(std::move(std::unique_ptr<CloseTabCommand>(new CloseTabCommand)));
 
-  add(
-      std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
+  add(std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
 
-  add(
-      std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
+  add(std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
 
-  add(
-      std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
+  add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
 
   add(std::move(std::unique_ptr<CutCommand>(new CutCommand)));
   add(std::move(std::unique_ptr<CopyCommand>(new CopyCommand)));
   add(std::move(std::unique_ptr<PasteCommand>(new PasteCommand)));
-  add(
-      std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
+  add(std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   add(std::move(splitHorizontallyCmd));

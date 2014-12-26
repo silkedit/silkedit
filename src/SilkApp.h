@@ -17,8 +17,8 @@ class SilkApp : public QApplication {
   // accessor
   QString initialFile() { return m_initialFile; }
 
-  bool event(QEvent *) override;
+  bool event(QEvent*) override;
 
-private:
+ private:
   QString m_initialFile;
 };

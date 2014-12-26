@@ -90,9 +90,7 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
   return window;
 }
 
-MainWindow::~MainWindow() {
-  qDebug("~MainWindow");
-}
+MainWindow::~MainWindow() { qDebug("~MainWindow"); }
 
 void MainWindow::setActiveTabWidget(STabWidget* tabWidget) {
   qDebug("setActiveTabWidget");

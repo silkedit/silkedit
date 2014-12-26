@@ -68,6 +68,6 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   // Caches the full concatenated nested scope name and the innermost node that covers "point".
   void updateScope(int point);
 
-private slots:
+ private slots:
   void changeTheme(Theme* theme);
 };

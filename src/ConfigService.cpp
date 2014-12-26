@@ -41,17 +41,12 @@ bool ConfigService::isTrue(const QString& key) {
   return false;
 }
 
-QString ConfigService::value(const QString &key, const QString &defaultValue)
-{
+QString ConfigService::value(const QString& key, const QString& defaultValue) {
   if (m_configs.count(key) != 0) {
     return m_configs[key];
   }
 
   return defaultValue;
-
 }
 
-QString ConfigService::theme()
-{
-  return value("theme", "Solarized (light)");
-}
+QString ConfigService::theme() { return value("theme", "Solarized (light)"); }

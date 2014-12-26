@@ -2,7 +2,8 @@
 
 #include "Document.h"
 
-Document::Document(const QString& path, const QString& text) : QTextDocument(text), m_path(path), m_syntaxHighlighter(nullptr) {
+Document::Document(const QString& path, const QString& text)
+    : QTextDocument(text), m_path(path), m_syntaxHighlighter(nullptr) {
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');

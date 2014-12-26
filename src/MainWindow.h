@@ -33,7 +33,7 @@ class MainWindow : public QMainWindow {
   bool closeAllTabs();
   void splitTabHorizontally();
   void splitTabVertically();
-  void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent* event) override;
 
  private:
   static QList<MainWindow*> s_windows;
