@@ -10,7 +10,7 @@ Document::Document(const QString& path, const QString& text)
   if (dotPos >= 0) {
     QString ext = path.mid(dotPos + 1);
     qDebug("ext: %s", qPrintable(ext));
-    setupSyntaxHighlighter(LanguageProvider::languageFromExtension(ext), text);
+    setupSyntaxHighlighter(LanguageProvider::languageFromExtension(ext), toPlainText());
   } else {
     qDebug("extension not found. path: %s", qPrintable(path));
   }
