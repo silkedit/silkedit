@@ -108,8 +108,7 @@ run_tests() {
 }
 
 # -e: stops if any command returns 0
-# -u: stops if trying to use undefined variable
-set -eu
+set -e
 
 case "$1" in
     analyze)
