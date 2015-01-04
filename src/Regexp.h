@@ -15,7 +15,7 @@ class Regexp {
   static Regexp* compile(const QString& expr);
 
   QString pattern() { return m_pattern; }
-  QVector<int>* findStringSubmatchIndex(const QString& s);
+  QVector<int>* findStringSubmatchIndex(const QStringRef& s);
 
  private:
   regex_t* m_reg;

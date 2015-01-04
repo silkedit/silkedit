@@ -659,7 +659,7 @@ QVector<Region>* Regex::find(const QString& str, int beginPos) {
 
   lastIndex = beginPos;
   while (lastFound < str.length()) {
-    std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.mid(lastFound)));
+    std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.midRef(lastFound)));
     if (!indices) {
       break;
     } else if (((*indices)[0] + lastFound) < beginPos) {
