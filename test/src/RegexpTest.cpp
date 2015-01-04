@@ -45,13 +45,15 @@ void RegexpTest::compile() {
 
 void RegexpTest::findStringSubmatchIndex() {
   Regexp* reg = Regexp::compile("(<\\?)\\s*([-_a-zA-Z0-9]+)");
-  QVector<int>* indices = reg->findStringSubmatchIndex(R"(<?xml version="1.0" encoding="UTF-8"?>)");
+  QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
+  QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
   QVERIFY(indices);
   QCOMPARE(indices->size(), 6);
   QCOMPARE(*indices, QVector<int>({0, 5, 0, 2, 2, 5}));
 
   // search fail
-  indices = reg->findStringSubmatchIndex("aaa");
+  str = "aaa";
+  indices = reg->findStringSubmatchIndex(QStringRef(&str));
   QVERIFY(!indices);
 }
 
