@@ -368,8 +368,11 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int beg
       //      qDebug("include %s", qPrintable(include));
       return lang->rootPattern->cache(str, beginPos);
       // external syntax definitions e.g. source.c++
+    } else if (cachedLanguage) {
+      return cachedLanguage->rootPattern->cache(str, beginPos);
     } else if (Language* anotherLang = LanguageProvider::languageFromScope(include)) {
-      return anotherLang->rootPattern->cache(str, beginPos);
+      cachedLanguage.reset(anotherLang);
+      return cachedLanguage->rootPattern->cache(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
@@ -522,6 +525,7 @@ void Pattern::tweak(Language* l) {
 void Pattern::clearCache() {
   cachedPattern = nullptr;
   cachedPatterns.reset(nullptr);
+  cachedLanguage.reset(nullptr);
   if (cachedRegions) {
     cachedRegions->clear();
   }

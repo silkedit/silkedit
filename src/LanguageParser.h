@@ -58,6 +58,7 @@ struct Pattern {
   Pattern* cachedPattern;
   std::unique_ptr<QVector<Pattern*>> cachedPatterns;
   QVector<Region>* cachedRegions;
+  std::unique_ptr<Language> cachedLanguage;
   int hits;
   int misses;
 
