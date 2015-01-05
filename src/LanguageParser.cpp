@@ -159,7 +159,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
   int iter = MAX_ITER_COUNT;
   QVector<Node*> nodes(0);
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
-    auto pair = m_lang->rootPattern->cache(m_text, pos);
+    auto pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     //    if (pat && ret) {
@@ -283,7 +283,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
   QVector<Region>* resultRegions = nullptr;
   int i = 0;
   while (i < cachedPatterns->length()) {
-    auto pair = (*cachedPatterns)[i]->cache(str, beginPos);
+    auto pair = (*cachedPatterns)[i]->find(str, beginPos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     if (regions) {
@@ -307,7 +307,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
   return std::make_pair(resultPattern, resultRegions);
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int beginPos) {
+std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
@@ -357,7 +357,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int beg
       if (lang->repository.find(key) != lang->repository.end()) {
         //        qDebug("include %s", qPrintable(include));
         Pattern* p2 = lang->repository.at(key).get();
-        auto pair = p2->cache(str, beginPos);
+        auto pair = p2->find(str, beginPos);
         pattern = pair.first;
         regions = pair.second;
       } else {
@@ -366,13 +366,13 @@ std::pair<Pattern*, QVector<Region>*> Pattern::cache(const QString& str, int beg
       // $self and $base means the current entire syntax definition
     } else if (include == "$self" || include == "$base") {
       //      qDebug("include %s", qPrintable(include));
-      return lang->rootPattern->cache(str, beginPos);
+      return lang->rootPattern->find(str, beginPos);
       // external syntax definitions e.g. source.c++
     } else if (cachedLanguage) {
-      return cachedLanguage->rootPattern->cache(str, beginPos);
+      return cachedLanguage->rootPattern->find(str, beginPos);
     } else if (Language* anotherLang = LanguageProvider::languageFromScope(include)) {
       cachedLanguage.reset(anotherLang);
-      return cachedLanguage->rootPattern->cache(str, beginPos);
+      return cachedLanguage->rootPattern->find(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }

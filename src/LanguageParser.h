@@ -67,7 +67,7 @@ struct Pattern {
   virtual ~Pattern() = default;
 
   std::pair<Pattern*, QVector<Region>*> searchInPatterns(const QString& data, int pos);
-  std::pair<Pattern*, QVector<Region>*> cache(const QString& data, int pos);
+  std::pair<Pattern*, QVector<Region>*> find(const QString& data, int pos);
   Node* createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
   void createCaptureNodes(LanguageParser* parser,
                           QVector<Region> regions,
