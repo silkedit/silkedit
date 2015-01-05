@@ -1,11 +1,12 @@
 #include <QDir>
+#include <QApplication>
 
 #include "PackageService.h"
 #include "LanguageParser.h"
 #include "ThemeProvider.h"
 
 void PackageService::loadPackages(const QString& dirName) {
-  QDir dir(dirName);
+  QDir dir(QApplication::applicationDirPath() + "/" + dirName);
   if (!dir.exists())
     return;
 

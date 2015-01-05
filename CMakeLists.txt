@@ -16,7 +16,6 @@ file(GLOB_RECURSE SILK_RESOURCES resources/*.qrc)
 
 configure_file("src/keymap.yml" "keymap.yml" COPYONLY)
 configure_file("src/config.yml" "config.yml" COPYONLY)
-file(COPY "packages" DESTINATION .)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
@@ -29,12 +28,18 @@ pkg_check_modules(Oniguruma REQUIRED oniguruma)
 
 IF (APPLE)
   find_library(CoreFoundationLibrary CoreFoundation)
+
   # icon files to copy in the bundle
   set( OSX_ICON_FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/silkEdit.icns )
   # set where in the bundle to put the icns files
   set_source_files_properties( ${OSX_ICON_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
+
+  # bundle default packages
+  file( GLOB_RECURSE PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/packages/* )
+  set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/packages )
+  set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
 ENDIF (APPLE)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
