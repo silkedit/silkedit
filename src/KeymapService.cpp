@@ -12,6 +12,7 @@
 #include "CommandEvent.h"
 #include "ModeContext.h"
 #include "Constants.h"
+#include "Util.h"
 
 namespace {
 
@@ -211,8 +212,7 @@ void KeymapService::load() {
 
   if (existingKeymapPaths.isEmpty()) {
     qDebug("copying default keymap.yml");
-    QFile defaultKeymap(":/keymap.yml");
-    if (defaultKeymap.copy(Constants::standardKeymapPath())) {
+    if (Util::copy(":/keymap.yml", Constants::standardKeymapPath())) {
       existingKeymapPaths.append(Constants::standardKeymapPath());
       if (!QFile(Constants::standardKeymapPath()).setPermissions(QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner | QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));

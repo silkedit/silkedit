@@ -6,6 +6,7 @@
 
 #include "ConfigService.h"
 #include "Constants.h"
+#include "Util.h"
 
 std::unordered_map<QString, QString> ConfigService::m_configs;
 
@@ -48,8 +49,7 @@ void ConfigService::load()
 
   if (existingConfigPaths.isEmpty()) {
     qDebug("copying default config.yml");
-    QFile defaultConfig(":/config.yml");
-    if (defaultConfig.copy(Constants::standardConfigPath())) {
+    if (Util::copy(":/config.yml", Constants::standardConfigPath())) {
       existingConfigPaths.append(Constants::standardConfigPath());
       if (!QFile(Constants::standardConfigPath()).setPermissions(QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner | QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));

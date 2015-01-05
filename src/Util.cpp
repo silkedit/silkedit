@@ -1,4 +1,6 @@
 #include <QDebug>
+#include <QFileInfo>
+#include <QDir>
 
 #include "Util.h"
 
@@ -22,4 +24,15 @@ int Util::binarySearch(int last, std::function<bool(int)> fn) {
     }
   }
   return low;
+}
+
+void Util::ensureDir(const QString &path)
+{
+  QDir::root().mkpath(QFileInfo(path).dir().path());
+}
+
+bool Util::copy(const QString &source, const QString &dist)
+{
+  ensureDir(dist);
+  return QFile(source).copy(dist);
 }
