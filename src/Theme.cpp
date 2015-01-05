@@ -25,7 +25,7 @@ void parseSettings(Settings* settings,
     QString key = iter.key();
     if (key == "fontStyle") {
       QStringList styles = iter.value().toString().split(' ');
-      foreach (const QString& style, styles) {
+      foreach(const QString & style, styles) {
         if (style == "bold") {
           *fontWeight = QFont::Bold;
         } else if (style == "italic") {
@@ -114,7 +114,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   // settings
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
+    foreach(const QVariant & var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
   }
 
   // UUID
@@ -134,7 +134,7 @@ ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
       sn = sn.right(sn.length() - (i + 1));
     }
 
-    foreach (ScopeSetting* j, scopeSettings) {
+    foreach(ScopeSetting * j, scopeSettings) {
       if (j->scopes.contains(sn)) {
         return j;
       }
@@ -157,22 +157,18 @@ std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
     return nullptr;
 
   QTextCharFormat* format = new QTextCharFormat();
-  ScopeSetting* defaultSetting = scopeSettings[0];
+  ScopeSetting* defaultScopeSetting = scopeSettings[0];
   ScopeSetting* scopeSetting = closestMatchingSetting(scope);
   if (scopeSetting) {
     // foreground
-    if (scopeSetting->settings->find(foregroundStr) != scopeSetting->settings->end()) {
-      format->setForeground(scopeSetting->settings->at(foregroundStr));
-    } else if (defaultSetting->settings->find(foregroundStr) != defaultSetting->settings->end()) {
-      format->setForeground(defaultSetting->settings->at(foregroundStr));
-    }
+    QColor fg = scopeSetting->settings->value(foregroundStr, defaultScopeSetting->settings->value(foregroundStr));
+    Q_ASSERT(fg.isValid());
+    format->setForeground(fg);
 
     // background
-    if (scopeSetting->settings->find(backgroundStr) != scopeSetting->settings->end()) {
-      format->setBackground(scopeSetting->settings->at(backgroundStr));
-    } else if (defaultSetting->settings->find(backgroundStr) != defaultSetting->settings->end()) {
-      format->setBackground(defaultSetting->settings->at(backgroundStr));
-    }
+    QColor bg = scopeSetting->settings->value(backgroundStr, defaultScopeSetting->settings->value(backgroundStr));
+    Q_ASSERT(bg.isValid());
+    format->setBackground(bg);
 
     // font style
     format->setFontWeight(scopeSetting->fontWeight);

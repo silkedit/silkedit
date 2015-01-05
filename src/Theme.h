@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <unordered_map>
+#include <QMap>
 #include <QString>
 #include <QColor>
 #include <QVector>
@@ -11,7 +11,7 @@
 #include "macros.h"
 #include "LanguageParser.h"
 
-typedef std::unordered_map<QString, QColor> Settings;
+typedef QMap<QString, QColor> Settings;
 
 struct ScopeSetting {
   QString name;

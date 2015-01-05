@@ -27,14 +27,14 @@ void ThemeTest::loadTheme() {
   QCOMPARE(theme->gutterSettings->value("foreground"), QColor("#75715E"));
 
   // settings
-  QCOMPARE(theme->settings.size(), 22);
-  ScopeSetting* setting1 = theme->settings.at(0);
+  QCOMPARE(theme->scopeSettings.size(), 22);
+  ScopeSetting* setting1 = theme->scopeSettings.at(0);
   QVERIFY(setting1->name.isEmpty());
   QVERIFY(setting1->scopes.isEmpty());
   QCOMPARE(setting1->settings->size(), 6);
   QCOMPARE(setting1->settings->value("background"), QColor("#272822"));
 
-  ScopeSetting* setting2 = theme->settings.at(1);
+  ScopeSetting* setting2 = theme->scopeSettings.at(1);
   QCOMPARE(setting2->name, QString("Comment"));
   QCOMPARE(setting2->scopes, QStringList("comment"));
   QCOMPARE(setting2->settings->size(), 1);
@@ -49,7 +49,7 @@ void ThemeTest::fontStyle()
   QCOMPARE(theme->name, QString("All Hallow\'s Eve"));
 
   // fontStyle
-  QVector<ScopeSetting*> settings = theme->settings;
+  QVector<ScopeSetting*> settings = theme->scopeSettings;
   auto it = std::find_if(settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
     return setting->name == "Class inheritance";
   });

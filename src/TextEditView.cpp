@@ -181,25 +181,25 @@ void TextEditView::changeTheme(Theme* theme) {
   QString style;
   if (!theme->scopeSettings.isEmpty()) {
     Settings* settings = theme->scopeSettings.first()->settings.get();
-    if (settings->find("foreground") != settings->end()) {
-      style = style % QString("color: %1;").arg(settings->at("foreground").name());
-      qDebug() << QString("color: %1;").arg(settings->at("foreground").name());
+    if (settings->contains("foreground")) {
+      style = style % QString("color: %1;").arg(settings->value("foreground").name());
+      qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
     }
-    if (settings->find("background") != settings->end()) {
-      style = style % QString("background-color: %1;").arg(settings->at("background").name());
-      qDebug() << QString("background-color: %1;").arg(settings->at("background").name());
+    if (settings->contains("background")) {
+      style = style % QString("background-color: %1;").arg(settings->value("background").name());
+      qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
     }
-    if (settings->find("selection") != settings->end()) {
+    if (settings->contains("selection")) {
       style = style %
-              QString("selection-background-color: %1;").arg(settings->at("selection").name());
+              QString("selection-background-color: %1;").arg(settings->value("selection").name());
       qDebug() << QString("selection-background-color: %1;")
-                      .arg(settings->at("selection").name());
+                      .arg(settings->value("selection").name());
     }
-    if (settings->find("selectionForeground") != settings->end()) {
+    if (settings->contains("selectionForeground")) {
       style = style %
-              QString("selection-color: %1;").arg(settings->at("selectionForeground").name());
+              QString("selection-color: %1;").arg(settings->value("selectionForeground").name());
       qDebug() << QString("selection-color: %1;")
-                      .arg(settings->at("selectionForeground").name());
+                      .arg(settings->value("selectionForeground").name());
     }
 
     setStyleSheet(QString("STextEdit{%1}").arg(style));
@@ -219,13 +219,13 @@ void TextEditView::highlightCurrentLine() {
   Theme* theme = Session::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
     Settings* settings = theme->scopeSettings.first()->settings.get();
-    if (settings->find("lineHighlight") != settings->end()) {
+    if (settings->contains("lineHighlight")) {
       QList<QTextEdit::ExtraSelection> extraSelections;
 
       if (!isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
-        QColor lineColor = QColor(settings->at("lineHighlight"));
+        QColor lineColor = QColor(settings->value("lineHighlight"));
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
