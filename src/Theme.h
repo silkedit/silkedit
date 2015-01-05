@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <QMap>
+#include <unordered_map>
 #include <QString>
 #include <QColor>
 #include <QVector>
@@ -11,7 +11,7 @@
 #include "macros.h"
 #include "LanguageParser.h"
 
-typedef QMap<QString, QColor> Settings;
+typedef std::unordered_map<QString, QColor> Settings;
 
 struct ScopeSetting {
   QString name;
@@ -29,7 +29,7 @@ class Theme {
   DISABLE_COPY(Theme)
 
  public:
-  Theme() : gutterSettings(nullptr), settings(QVector<ScopeSetting*>(0)) {}
+  Theme() : gutterSettings(nullptr), scopeSettings(QVector<ScopeSetting*>(0)) {}
   ~Theme() = default;
   DEFAULT_MOVE(Theme)
 
@@ -41,7 +41,7 @@ class Theme {
   bool isGutterItalic;
   bool isGutterUnderline;
   QString name;
-  QVector<ScopeSetting*> settings;
+  QVector<ScopeSetting*> scopeSettings;
   QUuid uuid;
 
  private:

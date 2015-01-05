@@ -27,7 +27,6 @@ TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
 
   updateLineNumberAreaWidth(0);
-  highlightCurrentLine();
 
   QApplication::setCursorFlashTime(0);
   installEventFilter(&KeyHandler::singleton());
@@ -40,7 +39,9 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path() { return m_document ? m_document->path() : ""; }
+QString TextEditView::path() {
+  return m_document ? m_document->path() : "";
+}
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   STextEdit::setDocument(document.get());
@@ -178,31 +179,33 @@ void TextEditView::changeTheme(Theme* theme) {
   }
 
   QString style;
-  if (!theme->settings.isEmpty()) {
-    Settings* settings = theme->settings.first()->settings.get();
-    if (settings->contains("foreground")) {
-      style = style % QString("color: %1;").arg(settings->value("foreground").name());
-      qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
+  if (!theme->scopeSettings.isEmpty()) {
+    Settings* settings = theme->scopeSettings.first()->settings.get();
+    if (settings->find("foreground") != settings->end()) {
+      style = style % QString("color: %1;").arg(settings->at("foreground").name());
+      qDebug() << QString("color: %1;").arg(settings->at("foreground").name());
     }
-    if (settings->contains("background")) {
-      style = style % QString("background-color: %1;").arg(settings->value("background").name());
-      qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
+    if (settings->find("background") != settings->end()) {
+      style = style % QString("background-color: %1;").arg(settings->at("background").name());
+      qDebug() << QString("background-color: %1;").arg(settings->at("background").name());
     }
-    if (settings->contains("selection")) {
+    if (settings->find("selection") != settings->end()) {
       style = style %
-              QString("selection-background-color: %1;").arg(settings->value("selection").name());
+              QString("selection-background-color: %1;").arg(settings->at("selection").name());
       qDebug() << QString("selection-background-color: %1;")
-                      .arg(settings->value("selection").name());
+                      .arg(settings->at("selection").name());
     }
-    if (settings->contains("selectionForeground")) {
+    if (settings->find("selectionForeground") != settings->end()) {
       style = style %
-              QString("selection-color: %1;").arg(settings->value("selectionForeground").name());
+              QString("selection-color: %1;").arg(settings->at("selectionForeground").name());
       qDebug() << QString("selection-color: %1;")
-                      .arg(settings->value("selectionForeground").name());
+                      .arg(settings->at("selectionForeground").name());
     }
 
     setStyleSheet(QString("STextEdit{%1}").arg(style));
   }
+
+  highlightCurrentLine();
 }
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
@@ -213,21 +216,31 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 }
 
 void TextEditView::highlightCurrentLine() {
-  //  QList<QTextEdit::ExtraSelection> extraSelections;
+  Theme* theme = Session::singleton().theme();
+  if (theme && !theme->scopeSettings.isEmpty()) {
+    Settings* settings = theme->scopeSettings.first()->settings.get();
+    if (settings->find("lineHighlight") != settings->end()) {
+      QList<QTextEdit::ExtraSelection> extraSelections;
 
-  //  if (!isReadOnly()) {
-  //    QTextEdit::ExtraSelection selection;
+      if (!isReadOnly()) {
+        QTextEdit::ExtraSelection selection;
 
-  //    QColor lineColor = QColor(Qt::yellow).lighter(160);
+        QColor lineColor = QColor(settings->at("lineHighlight"));
 
-  //    selection.format.setBackground(lineColor);
-  //    selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-  //    selection.cursor = textCursor();
-  //    selection.cursor.clearSelection();
-  //    extraSelections.append(selection);
-  //  }
+        selection.format.setBackground(lineColor);
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+      }
 
-  //  setExtraSelections(extraSelections);
+      setExtraSelections(extraSelections);
+    } else {
+      qDebug("lineHighlight not found");
+    }
+  } else {
+    qDebug("theme is null or theme->scopeSettings is empty");
+  }
 }
 
 void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
@@ -304,7 +317,9 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
+inline bool TextEditView::isTabOrSpace(const QChar ch) {
+  return ch == '\t' || ch == ' ';
+}
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

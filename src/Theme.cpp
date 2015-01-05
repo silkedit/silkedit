@@ -25,7 +25,7 @@ void parseSettings(Settings* settings,
     QString key = iter.key();
     if (key == "fontStyle") {
       QStringList styles = iter.value().toString().split(' ');
-      foreach(const QString & style, styles) {
+      foreach (const QString& style, styles) {
         if (style == "bold") {
           *fontWeight = QFont::Bold;
         } else if (style == "italic") {
@@ -114,7 +114,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   // settings
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach(const QVariant & var, settingList) { theme->settings.append(toScopeSetting(var)); }
+    foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
   }
 
   // UUID
@@ -134,7 +134,7 @@ ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
       sn = sn.right(sn.length() - (i + 1));
     }
 
-    foreach(ScopeSetting * j, settings) {
+    foreach (ScopeSetting* j, scopeSettings) {
       if (j->scopes.contains(sn)) {
         return j;
       }
@@ -149,31 +149,35 @@ ScopeSetting* Theme::closestMatchingSetting(const QString& scope) {
       na = na.left(i2).trimmed();
     }
   }
-  return settings[0];
+  return scopeSettings[0];
 }
 
 std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
-  if (settings.isEmpty())
+  if (scopeSettings.isEmpty())
     return nullptr;
 
   QTextCharFormat* format = new QTextCharFormat();
-  ScopeSetting* def = settings[0];
-  ScopeSetting* s = closestMatchingSetting(scope);
-  if (s) {
+  ScopeSetting* defaultSetting = scopeSettings[0];
+  ScopeSetting* scopeSetting = closestMatchingSetting(scope);
+  if (scopeSetting) {
     // foreground
-    QColor fg = s->settings->value(foregroundStr, def->settings->value(foregroundStr));
-    Q_ASSERT(fg.isValid());
-    format->setForeground(fg);
+    if (scopeSetting->settings->find(foregroundStr) != scopeSetting->settings->end()) {
+      format->setForeground(scopeSetting->settings->at(foregroundStr));
+    } else if (defaultSetting->settings->find(foregroundStr) != defaultSetting->settings->end()) {
+      format->setForeground(defaultSetting->settings->at(foregroundStr));
+    }
 
     // background
-    QColor bg = s->settings->value(backgroundStr, def->settings->value(backgroundStr));
-    Q_ASSERT(bg.isValid());
-    format->setBackground(bg);
+    if (scopeSetting->settings->find(backgroundStr) != scopeSetting->settings->end()) {
+      format->setBackground(scopeSetting->settings->at(backgroundStr));
+    } else if (defaultSetting->settings->find(backgroundStr) != defaultSetting->settings->end()) {
+      format->setBackground(defaultSetting->settings->at(backgroundStr));
+    }
 
     // font style
-    format->setFontWeight(s->fontWeight);
-    format->setFontItalic(s->isItalic);
-    format->setFontUnderline(s->isUnderline);
+    format->setFontWeight(scopeSetting->fontWeight);
+    format->setFontItalic(scopeSetting->isItalic);
+    format->setFontUnderline(scopeSetting->isUnderline);
   }
 
   return std::unique_ptr<QTextCharFormat>(format);
