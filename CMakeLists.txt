@@ -38,7 +38,7 @@ IF (APPLE)
 
   # bundle default packages
   file( GLOB_RECURSE PACKAGES ${CMAKE_CURRENT_SOURCE_DIR}/packages/* )
-  set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/packages )
+  set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/Packages )
   set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
 ENDIF (APPLE)
 

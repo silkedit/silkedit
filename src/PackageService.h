@@ -8,9 +8,11 @@ class PackageService {
   DISABLE_COPY_AND_MOVE(PackageService)
 
  public:
-  static void loadPackages(const QString& dirName = "packages");
+  static void loadPackages();
 
  private:
   PackageService() = delete;
   ~PackageService() = delete;
+
+  static void loadPackages(const QString& dirName);
 };
