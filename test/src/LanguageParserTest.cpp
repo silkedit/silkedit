@@ -19,7 +19,6 @@ void compareLineByLine(const QString& str1, const QString& str2) {
     QCOMPARE(list1.at(i), list2.at(i));
   }
 }
-
 }
 
 class LanguageParserTest : public QObject {
@@ -43,7 +42,7 @@ void LanguageParserTest::loadLanguage() {
   // rootPattern
   Pattern* rootPattern = std::move(lang->rootPattern.get());
   QVERIFY(!rootPattern->patterns->isEmpty());
-  foreach (Pattern* pat, *(rootPattern->patterns)) { QVERIFY(pat); }
+  foreach(Pattern * pat, *(rootPattern->patterns)) { QVERIFY(pat); }
 
   QCOMPARE(rootPattern->lang, lang);
 
@@ -87,10 +86,11 @@ void LanguageParserTest::LanguageFromScope() {
 }
 
 void LanguageParserTest::parseTmLanguage() {
-  const QVector<QString> files(
-      {"testdata/C++.tmLanguage", "testdata/C.tmLanguage", "testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage", "testdata/Go.tmLanguage"});
+  const QVector<QString> files({"testdata/C++.tmLanguage", "testdata/C.tmLanguage",
+                                "testdata/Property List (XML).tmLanguage",
+                                "testdata/XML.tmLanguage", "testdata/Go.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+  foreach(QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
   QFile file("testdata/plist2.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));

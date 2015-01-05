@@ -39,9 +39,7 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path() {
-  return m_document ? m_document->path() : "";
-}
+QString TextEditView::path() { return m_document ? m_document->path() : ""; }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   STextEdit::setDocument(document.get());
@@ -317,9 +315,7 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) {
-  return ch == '\t' || ch == ' ';
-}
+inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

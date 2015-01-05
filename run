@@ -8,13 +8,14 @@ NC='\x1B[0m' # No Color
 
 format() {
     find src -name \*.cpp -or -name \*.h | xargs clang-format -i
+    find test/src -name \*.cpp -or -name \*.h | xargs clang-format -i
     if [ "$1" = '-commit' -o "$1" = '-push' ]; then
         git commit -am "clang-format"
     fi
 
     if [ "$1" = '-push' ]; then
         if git status | grep -sq "Your branch is ahead of"; then
-            git push origin master
+            git push origin HEAD:master
         fi
         exit 0
     fi

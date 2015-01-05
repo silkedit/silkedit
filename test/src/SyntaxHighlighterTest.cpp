@@ -5,16 +5,18 @@
 #include "SyntaxHighlighter.h"
 
 namespace {
-  void checkRegion(Node* node, Region region) {
-    if (!region.fullyCovers(node->region)) {
-      qWarning("%s doesn't fully cover %s", qPrintable(region.toString()), qPrintable(node->region.toString()));
-      QFAIL("");
-    }
-
-    for(auto& child : node->children) {
-      checkRegion(child.get(), region);
-    }
+void checkRegion(Node* node, Region region) {
+  if (!region.fullyCovers(node->region)) {
+    qWarning("%s doesn't fully cover %s",
+             qPrintable(region.toString()),
+             qPrintable(node->region.toString()));
+    QFAIL("");
   }
+
+  for (auto& child : node->children) {
+    checkRegion(child.get(), region);
+  }
+}
 }
 
 class SyntaxHighlighterTest : public QObject {
@@ -25,9 +27,10 @@ class SyntaxHighlighterTest : public QObject {
 };
 
 void SyntaxHighlighterTest::scopeExtent() {
-  const QVector<QString> files({"testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage"});
+  const QVector<QString> files(
+      {"testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+  foreach(QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
   QFile file("testdata/plist2.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));
@@ -77,7 +80,7 @@ void SyntaxHighlighterTest::scopeExtent() {
 void SyntaxHighlighterTest::updateNode() {
   const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 
-  foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+  foreach(QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
   QString text = QString(R"(
 class hoge {
   void foo();
@@ -86,7 +89,7 @@ class hoge {
   QTextDocument* doc = new QTextDocument(text);
   LanguageParser* parser = LanguageParser::create("source.c++", doc->toPlainText());
   auto plistHighlighter = new SyntaxHighlighter(doc, parser);
-//  qDebug() << (*plistHighlighter->rootNode());
+  //  qDebug() << (*plistHighlighter->rootNode());
   QTextCursor cursor(plistHighlighter->document());
   cursor.movePosition(QTextCursor::End);
   cursor.insertText("\n");
@@ -98,7 +101,7 @@ class hoge {
   cursor.movePosition(QTextCursor::End);
   cursor.insertText("\n");
   plistHighlighter->updateNode(text.length() + 1 + str.length(), 0, 1);
-//  qDebug() << (*plistHighlighter->rootNode());
+  //  qDebug() << (*plistHighlighter->rootNode());
 
   checkRegion(plistHighlighter->rootNode(), plistHighlighter->rootNode()->region);
 }

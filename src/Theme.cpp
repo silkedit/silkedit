@@ -161,12 +161,14 @@ std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
   ScopeSetting* scopeSetting = closestMatchingSetting(scope);
   if (scopeSetting) {
     // foreground
-    QColor fg = scopeSetting->settings->value(foregroundStr, defaultScopeSetting->settings->value(foregroundStr));
+    QColor fg = scopeSetting->settings->value(foregroundStr,
+                                              defaultScopeSetting->settings->value(foregroundStr));
     Q_ASSERT(fg.isValid());
     format->setForeground(fg);
 
     // background
-    QColor bg = scopeSetting->settings->value(backgroundStr, defaultScopeSetting->settings->value(backgroundStr));
+    QColor bg = scopeSetting->settings->value(backgroundStr,
+                                              defaultScopeSetting->settings->value(backgroundStr));
     Q_ASSERT(bg.isValid());
     format->setBackground(bg);
 

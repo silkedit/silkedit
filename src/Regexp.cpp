@@ -36,8 +36,7 @@ Regexp* Regexp::compile(const QString& expr) {
   return new Regexp(reg, expr);
 }
 
-QVector<int> *Regexp::findStringSubmatchIndex(const QStringRef &s)
-{
+QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s) {
   Q_ASSERT(m_reg);
 
   unsigned char* start, *range, *end;
@@ -69,7 +68,6 @@ QVector<int> *Regexp::findStringSubmatchIndex(const QStringRef &s)
 
   onig_region_free(region, 1 /* 1:free self, 0:free contents only */);
   return indices;
-
 }
 
 Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {}

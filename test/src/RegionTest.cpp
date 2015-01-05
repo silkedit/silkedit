@@ -8,8 +8,7 @@ class RegionTest : public QObject {
   void intersects();
 };
 
-void RegionTest::intersects()
-{
+void RegionTest::intersects() {
   // if region is empty, it intersects nothing
   QVERIFY(!Region(0, 0).intersects(Region(0, 0)));
   QVERIFY(!Region(0, 0).intersects(Region(0, 1)));

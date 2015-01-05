@@ -41,8 +41,7 @@ void ThemeTest::loadTheme() {
   QCOMPARE(setting2->settings->value("foreground"), QColor("#75715E"));
 }
 
-void ThemeTest::fontStyle()
-{
+void ThemeTest::fontStyle() {
   Theme* theme = Theme::loadTheme("testdata/Test.tmTheme");
 
   // name
@@ -50,9 +49,10 @@ void ThemeTest::fontStyle()
 
   // fontStyle
   QVector<ScopeSetting*> settings = theme->scopeSettings;
-  auto it = std::find_if(settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
-    return setting->name == "Class inheritance";
-  });
+  auto it =
+      std::find_if(settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
+        return setting->name == "Class inheritance";
+      });
   QVERIFY(it != settings.constEnd());
   ScopeSetting* setting = *it;
   QCOMPARE((int)setting->fontWeight, (int)QFont::Bold);
@@ -72,17 +72,17 @@ void ThemeTest::getFormat() {
 
   // scope has more than 1 selectors (13.4 Grouping).
   // http://manual.macromates.com/en/scope_selectors
-//  <dict>
-//          <key>name</key>
-//          <string>User-defined constant</string>
-//          <key>scope</key>
-//          <string>constant.character, constant.other</string>
-//          <key>settings</key>
-//          <dict>
-//                  <key>foreground</key>
-//                  <string>#AE81FF</string>
-//          </dict>
-//  </dict>
+  //  <dict>
+  //          <key>name</key>
+  //          <string>User-defined constant</string>
+  //          <key>scope</key>
+  //          <string>constant.character, constant.other</string>
+  //          <key>settings</key>
+  //          <dict>
+  //                  <key>foreground</key>
+  //                  <string>#AE81FF</string>
+  //          </dict>
+  //  </dict>
   format = theme->getFormat("constant.character.entity.xml");
   QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
   format = theme->getFormat("constant.other.entity.xml");
