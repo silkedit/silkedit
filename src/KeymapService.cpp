@@ -153,9 +153,11 @@ void KeymapService::load(const QString& filename) {
         }
       }
     }
-  } catch (const std::exception& e) {
+  }
+  catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
-  } catch (...) {
+  }
+  catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
 }
@@ -213,9 +215,7 @@ boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
   return boost::none;
 }
 
-bool KeymapService::keyEventFilter(QKeyEvent* event) {
-  return dispatch(event);
-}
+bool KeymapService::keyEventFilter(QKeyEvent* event) { return dispatch(event); }
 
 void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
   m_cmdShortcuts.insert(std::make_pair(cmdEvent.cmdName(), key));
@@ -239,9 +239,7 @@ bool KeyHandler::eventFilter(QObject*, QEvent* event) {
   return false;
 }
 
-KeyHandler::KeyHandler() {
-  registerKeyEventFilter(&KeymapService::singleton());
-}
+KeyHandler::KeyHandler() { registerKeyEventFilter(&KeymapService::singleton()); }
 
 void KeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
   m_keyEventFilters.insert(filter);
