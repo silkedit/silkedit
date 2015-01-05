@@ -13,7 +13,8 @@ std::unordered_map<QString, QString> ConfigService::m_configs;
 void ConfigService::load(const QString& filename) {
   qDebug("loading configuration");
 
-  if (!QFile(filename).exists()) return;
+  if (!QFile(filename).exists())
+    return;
 
   m_configs.clear();
 
@@ -38,10 +39,9 @@ void ConfigService::load(const QString& filename) {
   }
 }
 
-void ConfigService::load()
-{
+void ConfigService::load() {
   QStringList existingConfigPaths;
-  foreach (const QString& path, Constants::configPaths()) {
+  foreach(const QString & path, Constants::configPaths()) {
     if (QFile(path).exists()) {
       existingConfigPaths.append(path);
     }
@@ -51,7 +51,9 @@ void ConfigService::load()
     qDebug("copying default config.yml");
     if (Util::copy(":/config.yml", Constants::standardConfigPath())) {
       existingConfigPaths.append(Constants::standardConfigPath());
-      if (!QFile(Constants::standardConfigPath()).setPermissions(QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner | QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardConfigPath()).setPermissions(
+              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {
@@ -59,7 +61,7 @@ void ConfigService::load()
     }
   }
 
-  foreach (const QString& path, existingConfigPaths) { load(path); }
+  foreach(const QString & path, existingConfigPaths) { load(path); }
 }
 
 bool ConfigService::isTrue(const QString& key) {

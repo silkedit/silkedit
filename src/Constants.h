@@ -20,4 +20,3 @@ class Constants {
 
   static QStringList dataDirectoryPaths();
 };
-

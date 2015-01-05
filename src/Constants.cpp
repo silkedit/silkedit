@@ -3,11 +3,10 @@
 
 #include "Constants.h"
 
-QStringList Constants::configPaths()
-{
+QStringList Constants::configPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
+  foreach(const QString & path, dataDirectoryPaths()) {
     configPaths.append(path + "/config.yml");
     configPaths.append(path + "/config.yaml");
   }
@@ -15,11 +14,10 @@ QStringList Constants::configPaths()
   return configPaths;
 }
 
-QStringList Constants::keymapPaths()
-{
+QStringList Constants::keymapPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
+  foreach(const QString & path, dataDirectoryPaths()) {
     configPaths.append(path + "/keymap.yml");
     configPaths.append(path + "/keymap.yaml");
   }
@@ -27,15 +25,13 @@ QStringList Constants::keymapPaths()
   return configPaths;
 }
 
-QStringList Constants::packagePaths()
-{
+QStringList Constants::packagePaths() {
   QStringList packagePaths;
-  foreach (const QString& path, dataDirectoryPaths()) { packagePaths.append(path + "/Packages"); }
+  foreach(const QString & path, dataDirectoryPaths()) { packagePaths.append(path + "/Packages"); }
   return packagePaths;
 }
 
-QString Constants::standardConfigPath()
-{
+QString Constants::standardConfigPath() {
   QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
   if (paths.isEmpty()) {
     qCritical("no standard data location!");
@@ -45,8 +41,7 @@ QString Constants::standardConfigPath()
   }
 }
 
-QString Constants::standardKeymapPath()
-{
+QString Constants::standardKeymapPath() {
   QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
   if (paths.isEmpty()) {
     qCritical("no standard data location!");
@@ -54,11 +49,9 @@ QString Constants::standardKeymapPath()
   } else {
     return paths.at(0) + "/keymap.yml";
   }
-
 }
 
-QStringList Constants::dataDirectoryPaths()
-{
+QStringList Constants::dataDirectoryPaths() {
   QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
   paths.prepend(QApplication::applicationDirPath());
   return paths;
