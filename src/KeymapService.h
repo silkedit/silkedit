@@ -34,7 +34,7 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
   void add(const QKeySequence& key, CommandEvent cmdEvent);
   void clear();
 
-  std::unordered_map<QKeySequence, CommandEvent> m_keymaps;
+  std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
   QString m_partiallyMatchedKeyString;
 };

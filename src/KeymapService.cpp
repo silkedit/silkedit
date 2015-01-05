@@ -153,11 +153,9 @@ void KeymapService::load(const QString& filename) {
         }
       }
     }
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
-  }
-  catch (...) {
+  } catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
 }
@@ -175,9 +173,12 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   // check exact match
   if (m_keymaps.find(key) != m_keymaps.end()) {
     m_partiallyMatchedKeyString.clear();
-    CommandEvent& ev = m_keymaps.at(key);
-    if (ev.execute(repeat)) {
-      return true;
+    auto range = m_keymaps.equal_range(key);
+    for (auto it = range.first; it != range.second; it++) {
+      CommandEvent& ev = it->second;
+      if (ev.execute(repeat)) {
+        return true;
+      }
     }
   }
 
@@ -201,14 +202,20 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
 
 boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
   auto foundIter = m_cmdShortcuts.find(cmdName);
-  if (foundIter != m_cmdShortcuts.end() && m_keymaps.at(foundIter->second).hasContext() == false) {
-    return m_cmdShortcuts.at(cmdName);
-  } else {
-    return boost::none;
+  if (foundIter != m_cmdShortcuts.end()) {
+    auto range = m_keymaps.equal_range(foundIter->second);
+    for (auto it = range.first; it != range.second; it++) {
+      if (!it->second.hasContext()) {
+        return m_cmdShortcuts.at(cmdName);
+      }
+    }
   }
+  return boost::none;
 }
 
-bool KeymapService::keyEventFilter(QKeyEvent* event) { return dispatch(event); }
+bool KeymapService::keyEventFilter(QKeyEvent* event) {
+  return dispatch(event);
+}
 
 void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
   m_cmdShortcuts.insert(std::make_pair(cmdEvent.cmdName(), key));
@@ -232,7 +239,9 @@ bool KeyHandler::eventFilter(QObject*, QEvent* event) {
   return false;
 }
 
-KeyHandler::KeyHandler() { registerKeyEventFilter(&KeymapService::singleton()); }
+KeyHandler::KeyHandler() {
+  registerKeyEventFilter(&KeymapService::singleton());
+}
 
 void KeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
   m_keyEventFilters.insert(filter);
