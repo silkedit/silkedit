@@ -13,7 +13,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon
 file(COPY "testdata" DESTINATION .)
 
 # Find the QtWidgets library
-find_package(Qt5Gui REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Test REQUIRED)
 
@@ -44,9 +44,9 @@ add_executable(UtilTest ${UTIL_TEST_SRCS} )
 target_link_libraries(UtilTest Qt5::Gui Qt5::Xml Qt5::Test )
 add_test( NAME UtilTest COMMAND UtilTest)
 
-set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Region.cpp ../src/Theme.cpp ../src/Session.cpp ../src/ThemeProvider.cpp ../src/ConfigService.cpp src/SyntaxHighlighterTest.cpp)
+set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Region.cpp ../src/Theme.cpp ../src/Session.cpp ../src/ThemeProvider.cpp ../src/ConfigService.cpp ../src/Constants.cpp src/SyntaxHighlighterTest.cpp)
 add_executable(SyntaxHighlighterTest ${SYNTAX_HIGHLIGHTER_TEST_SRCS} )
-target_link_libraries(SyntaxHighlighterTest Qt5::Gui Qt5::Xml Qt5::Test yaml-cpp-0.5.1 ${TEST_LIBRARIES})
+target_link_libraries(SyntaxHighlighterTest Qt5::Widgets Qt5::Xml Qt5::Test yaml-cpp-0.5.1 ${TEST_LIBRARIES})
 add_test( NAME SyntaxHighlighterTest COMMAND SyntaxHighlighterTest)
 
 set(REGEXP_TEST_SRCS ../src/Regexp.cpp src/RegexpTest.cpp)

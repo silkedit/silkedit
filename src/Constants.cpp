@@ -1,4 +1,3 @@
-#include <QStringList>
 #include <QStandardPaths>
 #include <QApplication>
 
