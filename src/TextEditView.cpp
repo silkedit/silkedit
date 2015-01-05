@@ -178,7 +178,7 @@ void TextEditView::changeTheme(Theme* theme) {
 
   QString style;
   if (!theme->scopeSettings.isEmpty()) {
-    Settings* settings = theme->scopeSettings.first()->settings.get();
+    ColorSettings* settings = theme->scopeSettings.first()->settings.get();
     if (settings->contains("foreground")) {
       style = style % QString("color: %1;").arg(settings->value("foreground").name());
       qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
@@ -216,7 +216,7 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 void TextEditView::highlightCurrentLine() {
   Theme* theme = Session::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
-    Settings* settings = theme->scopeSettings.first()->settings.get();
+    ColorSettings* settings = theme->scopeSettings.first()->settings.get();
     if (settings->contains("lineHighlight")) {
       QList<QTextEdit::ExtraSelection> extraSelections;
 

@@ -5,11 +5,10 @@
 #include "PackageService.h"
 #include "LanguageParser.h"
 #include "ThemeProvider.h"
+#include "Constants.h"
 
 void PackageService::loadPackages() {
-  QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
-  paths.prepend(QApplication::applicationDirPath());
-  foreach (const QString& path, paths) { loadPackages(path + "/Packages"); }
+  foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }
 }
 
 void PackageService::loadPackages(const QString& dirName) {

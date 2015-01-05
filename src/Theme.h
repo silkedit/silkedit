@@ -11,12 +11,12 @@
 #include "macros.h"
 #include "LanguageParser.h"
 
-typedef QMap<QString, QColor> Settings;
+typedef QMap<QString, QColor> ColorSettings;
 
 struct ScopeSetting {
   QString name;
   QStringList scopes;
-  std::unique_ptr<Settings> settings;
+  std::unique_ptr<ColorSettings> settings;
   QFont::Weight fontWeight;
   bool isItalic;
   bool isUnderline;
@@ -36,7 +36,7 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   std::unique_ptr<QTextCharFormat> getFormat(const QString& scope);
 
-  std::unique_ptr<Settings> gutterSettings;
+  std::unique_ptr<ColorSettings> gutterSettings;
   QFont::Weight gutterFontWeight;
   bool isGutterItalic;
   bool isGutterUnderline;

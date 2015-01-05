@@ -9,7 +9,7 @@ const QString uuidStr = "uuid";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
 
-void parseSettings(Settings* settings,
+void parseSettings(ColorSettings* settings,
                    QFont::Weight* fontWeight,
                    bool* isItalic,
                    bool* isUnderline,
@@ -67,7 +67,7 @@ ScopeSetting* toScopeSetting(QVariant var) {
 
   // settings
   if (map.contains(settingsStr)) {
-    scopeSetting->settings.reset(new Settings());
+    scopeSetting->settings.reset(new ColorSettings());
     parseSettings(scopeSetting->settings.get(),
                   &(scopeSetting->fontWeight),
                   &(scopeSetting->isItalic),
@@ -98,7 +98,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   // gutterSettings
   const QString gutterSettingsStr = "gutterSettings";
   if (rootMap.contains(gutterSettingsStr)) {
-    theme->gutterSettings.reset(new Settings());
+    theme->gutterSettings.reset(new ColorSettings());
     parseSettings(theme->gutterSettings.get(),
                   &(theme->gutterFontWeight),
                   &(theme->isGutterItalic),

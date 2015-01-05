@@ -2,13 +2,17 @@
 #include <string>
 #include <QDebug>
 #include <QString>
+#include <QFile>
 
 #include "ConfigService.h"
+#include "Constants.h"
 
 std::unordered_map<QString, QString> ConfigService::m_configs;
 
 void ConfigService::load(const QString& filename) {
   qDebug("loading configuration");
+
+  if (!QFile(filename).exists()) return;
 
   m_configs.clear();
 
@@ -31,6 +35,31 @@ void ConfigService::load(const QString& filename) {
   catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
+}
+
+void ConfigService::load()
+{
+  QStringList existingConfigPaths;
+  foreach (const QString& path, Constants::configPaths()) {
+    if (QFile(path).exists()) {
+      existingConfigPaths.append(path);
+    }
+  }
+
+  if (existingConfigPaths.isEmpty()) {
+    qDebug("copying default config.yml");
+    QFile defaultConfig(":/config.yml");
+    if (defaultConfig.copy(Constants::standardConfigPath())) {
+      existingConfigPaths.append(Constants::standardConfigPath());
+      if (!QFile(Constants::standardConfigPath()).setPermissions(QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner | QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+        qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
+      }
+    } else {
+      qDebug("failed to copy default config.yml");
+    }
+  }
+
+  foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
 bool ConfigService::isTrue(const QString& key) {

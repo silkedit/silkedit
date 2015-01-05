@@ -22,7 +22,7 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
  public:
   ~KeymapService() = default;
 
-  void load(const QString& filename = "keymap.yml");
+  void load();
   boost::optional<QKeySequence> findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
@@ -33,6 +33,7 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
   void clear();
+  void load(const QString& filename);
 
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;

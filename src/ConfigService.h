@@ -12,7 +12,7 @@ class ConfigService {
   DISABLE_COPY_AND_MOVE(ConfigService)
 
  public:
-  static void load(const QString& filename = "config.yml");
+  static void load();
   static bool isTrue(const QString& key);
   static QString value(const QString& key, const QString& defaultValue = "");
   static QString theme();
@@ -22,4 +22,6 @@ class ConfigService {
   ~ConfigService() = delete;
 
   static std::unordered_map<QString, QString> m_configs;
+
+  static void load(const QString& filename);
 };
