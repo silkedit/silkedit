@@ -250,7 +250,7 @@ bool STabWidget::closeTab(QWidget* w) {
     msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
-    msgBox.setIconPixmap(SilkApp::windowIcon().pixmap(64, 64));
+    msgBox.setIconPixmap(QIcon(":/app_icon_064.png").pixmap(64, 64));
     int ret = msgBox.exec();
     switch (ret) {
       case QMessageBox::Save:

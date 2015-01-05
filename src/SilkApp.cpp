@@ -37,8 +37,6 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
       qDebug("now is not TextEditView");
     }
   });
-
-  setWindowIcon(QIcon(":/app_icon_064.png"));
 }
 
 bool SilkApp::event(QEvent* event) {
