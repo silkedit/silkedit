@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <QObject>
-#include <stextedit.h>
+#include <QPlainTextEdit>
 
 #include "macros.h"
 #include "ICloneable.h"
@@ -17,7 +17,7 @@ class QElapsedTimer;
 
 class LineNumberArea;
 
-class TextEditView : public STextEdit, public ICloneable<TextEditView> {
+class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:

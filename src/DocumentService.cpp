@@ -1,5 +1,4 @@
 #include <memory>
-#include <stextedit.h>
 #include <QFile>
 #include <QTextStream>
 #include <QTextDocument>

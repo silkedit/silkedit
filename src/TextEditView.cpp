@@ -13,7 +13,7 @@ namespace {
 const QString DEFAULT_SCOPE = "text.plain";
 }
 
-TextEditView::TextEditView(QWidget* parent) : STextEdit(parent) {
+TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -42,7 +42,7 @@ TextEditView::~TextEditView() {
 QString TextEditView::path() { return m_document ? m_document->path() : ""; }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
-  STextEdit::setDocument(document.get());
+  QPlainTextEdit::setDocument(document.get());
   Language* prevLang = nullptr;
   Language* newLang = nullptr;
   if (m_document) {
@@ -200,14 +200,14 @@ void TextEditView::changeTheme(Theme* theme) {
                       .arg(settings->value("selectionForeground").name());
     }
 
-    setStyleSheet(QString("STextEdit{%1}").arg(style));
+    setStyleSheet(QString("QPlainTextEdit{%1}").arg(style));
   }
 
   highlightCurrentLine();
 }
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
-  STextEdit::resizeEvent(e);
+  QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
   m_lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
@@ -266,7 +266,7 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
 }
 
 void TextEditView::paintEvent(QPaintEvent* e) {
-  STextEdit::paintEvent(e);
+  QPlainTextEdit::paintEvent(e);
 
   const int bottom = viewport()->rect().height();
   QPainter painter(viewport());
@@ -392,6 +392,6 @@ void TextEditView::wheelEvent(QWheelEvent* e) {
   if ((mod & Qt::ControlModifier) != 0) {
     makeFontBigger(e->delta() > 0);
   } else {
-    STextEdit::wheelEvent(e);
+    QPlainTextEdit::wheelEvent(e);
   }
 }

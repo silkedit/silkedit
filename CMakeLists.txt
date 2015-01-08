@@ -41,13 +41,13 @@ ENDIF (APPLE)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
-include_directories(include src stextedit/mysrc ${Oniguruma_INCLUDE_DIRS})
+include_directories(include src ${Oniguruma_INCLUDE_DIRS})
 
-link_directories(lib stextedit/build ${Oniguruma_LIBRARY_DIRS})
+link_directories(lib ${Oniguruma_LIBRARY_DIRS})
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 
-target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml yaml-cpp-0.5.1 stextedit ${Oniguruma_LIBRARIES} ${CoreFoundationLibrary})
+target_link_libraries(SilkEdit Qt5::Widgets Qt5::Xml yaml-cpp-0.5.1 ${Oniguruma_LIBRARIES} ${CoreFoundationLibrary})
 
 if(APPLE)
   set_target_properties( SilkEdit PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )

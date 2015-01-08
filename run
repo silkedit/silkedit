@@ -49,10 +49,6 @@ resolve() {
         unzip -o $f
         rm $f
     done
-
-    # build stextedit
-    git submodule init && git submodule update
-    (cd stextedit && ./run build)
 }
 
 # release build

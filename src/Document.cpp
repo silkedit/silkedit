@@ -1,4 +1,4 @@
-#include <stextedit.h>
+#include <QPlainTextDocumentLayout>
 
 #include "Document.h"
 
@@ -22,7 +22,7 @@ Document::Document() {
 }
 
 void Document::setupLayout() {
-  STextDocumentLayout* layout = new STextDocumentLayout(this);
+  QPlainTextDocumentLayout* layout = new QPlainTextDocumentLayout(this);
   setDocumentLayout(layout);
 }
 
