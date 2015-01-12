@@ -30,8 +30,7 @@ int main(int argv, char** args) {
   //   Load keymap settings after registering commands
   KeymapService::singleton().load();
 
-  MainWindow* w = MainWindow::create();
-  w->activeTabWidget()->addNew();
+  MainWindow* w = MainWindow::createWithNewFile();
   w->show();
 
   //   Set focus to active edit view

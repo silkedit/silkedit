@@ -11,8 +11,10 @@ class ProjectTreeView : public QTreeView {
 
  public:
   ProjectTreeView(QWidget* parent = nullptr);
-  ~ProjectTreeView() = default;
+  ~ProjectTreeView();
   DEFAULT_MOVE(ProjectTreeView)
+
+  bool open(const QString& dirName);
 
  protected:
   void mousePressEvent(QMouseEvent*) override;
@@ -32,7 +34,7 @@ class MyFileSystemModel : public QFileSystemModel {
   DISABLE_COPY(MyFileSystemModel)
 
  public:
-  MyFileSystemModel() = default;
+  MyFileSystemModel(QObject* parent);
   ~MyFileSystemModel() = default;
   DEFAULT_MOVE(MyFileSystemModel)
 

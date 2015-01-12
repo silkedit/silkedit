@@ -1,7 +1,7 @@
 #include <vector>
 #include <QAction>
 
-#include "commands/OpenFileCommand.h"
+#include "commands/OpenCommand.h"
 #include "commands/NewFileCommand.h"
 #include "commands/SaveFileCommand.h"
 #include "commands/SaveAsCommand.h"
@@ -29,7 +29,7 @@
 
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu actions
-  auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenFileCommand::name);
+  auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenCommand::name);
   auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
   auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
   auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);

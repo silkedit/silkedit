@@ -4,14 +4,14 @@
 
 #include "ICommand.h"
 
-class OpenFileCommand : public QObject, public ICommand {
+class OpenCommand : public QObject, public ICommand {
   Q_OBJECT
  public:
   static const QString name;
 
-  OpenFileCommand();
-  ~OpenFileCommand() = default;
-  DEFAULT_COPY_AND_MOVE(OpenFileCommand)
+  OpenCommand();
+  ~OpenCommand() = default;
+  DEFAULT_COPY_AND_MOVE(OpenCommand)
 
  private:
   void doRun(const CommandArgument& args, int repeat = 1) override;

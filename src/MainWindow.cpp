@@ -33,15 +33,19 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_activeTabWidget(nullptr),
       m_rootSplitter(new SHSplitter(parent)),
-      m_statusBar(nullptr) {
+      m_statusBar(nullptr),
+      m_projectView(nullptr) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
+  setAttribute(Qt::WA_DeleteOnClose);
 
   m_rootSplitter->setContentsMargins(0, 0, 0, 0);
 
   // project tree view
-  m_rootSplitter->addWidget(new ProjectTreeView);
+  if (m_projectView) {
+    m_rootSplitter->addWidget(m_projectView);
+  }
 
   // Add tab widget
   auto tabWidget = createTabWidget();
@@ -89,13 +93,21 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
   return window;
 }
 
-MainWindow::~MainWindow() { qDebug("~MainWindow"); }
+MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
+  MainWindow* w = create(parent, flags);
+  w->activeTabWidget()->addNew();
+  return w;
+}
+
+MainWindow::~MainWindow() {
+  qDebug("~MainWindow");
+}
 
 void MainWindow::setActiveTabWidget(STabWidget* tabWidget) {
   qDebug("setActiveTabWidget");
 
-  if (m_activeTabWidget && m_activeTabWidget->activeEditView()) {
-    //    qDebug("disconnect previous active tab widget and TextEditView");
+  if (m_activeTabWidget && m_activeTabWidget->activeEditView() && m_statusBar) {
+//    qDebug("disconnect previous active tab widget and TextEditView");
     // disconnect from previous active TextEditView
     disconnect(m_activeTabWidget,
                SIGNAL(activeTextEditViewChanged(TextEditView*)),
@@ -111,7 +123,7 @@ void MainWindow::setActiveTabWidget(STabWidget* tabWidget) {
 
   m_activeTabWidget = tabWidget;
 
-  if (tabWidget) {
+  if (tabWidget && m_statusBar) {
     // connect to new active TextEditView
     //    qDebug("connect to new active tab widget and activeEditView");
     connect(tabWidget,
@@ -134,7 +146,7 @@ void MainWindow::show() {
 
 void MainWindow::close() {
   if (s_windows.removeOne(this)) {
-    deleteLater();
+    QMainWindow::close();
   }
 }
 
@@ -214,5 +226,19 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   } else {
     qDebug("closeEvent is ignored");
     event->ignore();
+  }
+}
+
+bool MainWindow::openDir(const QString& dirPath) {
+  if (!m_projectView) {
+    m_projectView = new ProjectTreeView(this);
+  }
+
+  if (m_projectView->open(dirPath)) {
+    // root splitter becomes the owner of a project view.
+    m_rootSplitter->insertWidget(0, m_projectView);
+    return true;
+  } else {
+    return false;
   }
 }

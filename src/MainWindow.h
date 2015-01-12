@@ -13,6 +13,7 @@ class STabWidget;
 class QBoxLayout;
 class StatusBar;
 class SSplitter;
+class ProjectTreeView;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -20,13 +21,16 @@ class MainWindow : public QMainWindow {
 
  public:
   static MainWindow* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+  static MainWindow* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<MainWindow*> windows() { return s_windows; }
 
   ~MainWindow();
   DEFAULT_MOVE(MainWindow)
 
+  // accessor
   STabWidget* activeTabWidget() { return m_activeTabWidget; }
   void setActiveTabWidget(STabWidget* tabWidget);
+
   void show();
   void close();
   void saveAllTabs();
@@ -34,15 +38,18 @@ class MainWindow : public QMainWindow {
   void splitTabHorizontally();
   void splitTabVertically();
   void closeEvent(QCloseEvent* event) override;
+  bool openDir(const QString& dirPath);
 
  private:
   static QList<MainWindow*> s_windows;
 
   explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+
   STabWidget* m_activeTabWidget;
   std::list<STabWidget*> m_tabWidgets;
   SSplitter* m_rootSplitter;
   StatusBar* m_statusBar;
+  ProjectTreeView* m_projectView;
 
   STabWidget* createTabWidget();
   void removeTabWidget(STabWidget* widget);

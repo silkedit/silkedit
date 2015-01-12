@@ -2,7 +2,7 @@
 
 #include "CommandService.h"
 #include "commands/ToggleVimEmulationCommand.h"
-#include "commands/OpenFileCommand.h"
+#include "commands/OpenCommand.h"
 #include "commands/NewFileCommand.h"
 #include "commands/SaveFileCommand.h"
 #include "commands/SaveAsCommand.h"
@@ -56,7 +56,7 @@ void CommandService::init() {
   //  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
   //  add(std::move(evalAsRubyCmd));
 
-  std::unique_ptr<OpenFileCommand> openFileCmd(new OpenFileCommand());
+  std::unique_ptr<OpenCommand> openFileCmd(new OpenCommand());
   add(std::move(openFileCmd));
 
   std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
