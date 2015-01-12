@@ -9,7 +9,7 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
-  connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open(QModelIndex)));
+  connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(open(QModelIndex)));
 }
 
 bool ProjectTreeView::open(const QString& dirPath) {
