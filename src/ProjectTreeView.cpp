@@ -7,6 +7,8 @@
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
   setHeaderHidden(true);
+  setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setAttribute(Qt::WA_MacShowFocusRect, false);
   connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open(QModelIndex)));
 }
 
@@ -37,20 +39,6 @@ bool ProjectTreeView::open(const QString& dirPath) {
     qWarning("%s doesn't exist", qPrintable(dirPath));
     return false;
   }
-}
-
-void ProjectTreeView::mousePressEvent(QMouseEvent* event) {
-  if (QApplication::focusWidget() == this) {
-    clearFocus();
-  }
-  QTreeView::mousePressEvent(event);
-}
-
-void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent* event) {
-  if (QApplication::focusWidget() == this) {
-    clearFocus();
-  }
-  QTreeView::mouseDoubleClickEvent(event);
 }
 
 void ProjectTreeView::open(QModelIndex index) {
