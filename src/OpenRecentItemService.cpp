@@ -89,7 +89,7 @@ void OpenRecentItemService::updateOpenRecentItems() {
 OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
   QObject::connect(this, &QAction::triggered, [this]() {
     if (data().isValid()) {
-      DocumentService::singleton().open(data().toString());
+      DocumentService::open(data().toString());
     }
   });
 }

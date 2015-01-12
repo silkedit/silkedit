@@ -1,40 +1,13 @@
 #include <QApplication>
 #include <QDebug>
-#include <QSortFilterProxyModel>
 
 #include "ProjectTreeView.h"
+#include "DocumentService.h"
 
-class FilterModel : public QSortFilterProxyModel {
- public:
-  FilterModel(QObject* parent, const QString& targetDir)
-      : QSortFilterProxyModel(parent), dir(targetDir) {
-    if (!dir.endsWith("/")) {
-      dir += "/";
-    }
-  }
-
- protected:
-  virtual bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const {
-    QString path;
-    QModelIndex pathIndex = source_parent.child(source_row, 0);
-    while (pathIndex.parent().isValid()) {
-      path = sourceModel()->data(pathIndex).toString() + "/" + path;
-      pathIndex = pathIndex.parent();
-    }
-    // Get the leading "/" on Linux. Drive on Windows?
-    path = sourceModel()->data(pathIndex).toString() + path;
-
-    // First test matches paths before we've reached the target directory.
-    // Second test matches paths after we've passed the target directory.
-    return dir.startsWith(path) || path.startsWith(dir);
-  }
-
- private:
-  QString dir;
-};
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
   setHeaderHidden(true);
+  connect(this, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(open(QModelIndex)));
 }
 
 bool ProjectTreeView::open(const QString& dirPath) {
@@ -78,6 +51,20 @@ void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent* event) {
     clearFocus();
   }
   QTreeView::mouseDoubleClickEvent(event);
+}
+
+void ProjectTreeView::open(QModelIndex index) {
+  if (!index.isValid()) {
+    qWarning("index is invalid");
+    return;
+  }
+
+  if (FilterModel* filter = qobject_cast<FilterModel*>(model())) {
+    if (MyFileSystemModel* fsModel = qobject_cast<MyFileSystemModel*>(filter->sourceModel())) {
+      QString filePath = fsModel->filePath(filter->mapToSource(index));
+      DocumentService::open(filePath);
+    }
+  }
 }
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {

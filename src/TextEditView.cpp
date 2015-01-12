@@ -333,12 +333,12 @@ TextEditView* TextEditView::clone() {
 }
 
 void TextEditView::save() {
-  DocumentService::singleton().save(m_document.get());
+  DocumentService::save(m_document.get());
   emit saved();
 }
 
 void TextEditView::saveAs() {
-  QString newFilePath = DocumentService::singleton().saveAs(m_document.get());
+  QString newFilePath = DocumentService::saveAs(m_document.get());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
   }

@@ -17,7 +17,7 @@ void OpenCommand::doRun(const CommandArgument&, int) {
       qDebug("opening %s", qPrintable(entry));
       QFileInfo info(entry);
       if (info.isFile()) {
-        DocumentService::singleton().open(entry);
+        DocumentService::open(entry);
       } else if (info.isDir()) {
         ProjectService::open(entry);
       } else {

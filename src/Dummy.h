@@ -10,6 +10,6 @@ class Dummy : public QObject {
 
  public slots:
   void openFile() {
-    DocumentService::singleton().open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
+    DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
   }
 };

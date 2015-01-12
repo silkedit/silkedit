@@ -43,7 +43,7 @@ bool SilkApp::event(QEvent* event) {
   switch (event->type()) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
-      DocumentService::singleton().open(static_cast<QFileOpenEvent*>(event)->file());
+      DocumentService::open(static_cast<QFileOpenEvent*>(event)->file());
       return true;
     default:
       return QApplication::event(event);

@@ -48,7 +48,7 @@ int main(int argv, char** args) {
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {
-    DocumentService::singleton().open(arguments.at(1));
+    DocumentService::open(arguments.at(1));
   }
 
   //  new Dummy();
