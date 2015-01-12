@@ -9,7 +9,5 @@ class Dummy : public QObject {
   Dummy() { QTimer::singleShot(500, this, SLOT(openFile())); }
 
  public slots:
-  void openFile() {
-    DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
-  }
+  void openFile() { DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp"); }
 };

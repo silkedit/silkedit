@@ -4,8 +4,7 @@
 #include "API.h"
 #include "TabWidget.h"
 
-bool ProjectService::open(const QString &dirName)
-{
+bool ProjectService::open(const QString& dirName) {
   if (!QDir(dirName).exists()) {
     qWarning("%s doesn't exist", qPrintable(dirName));
     return false;
@@ -19,5 +18,4 @@ bool ProjectService::open(const QString &dirName)
     qWarning("active window or its project view is null");
     return false;
   }
-
 }

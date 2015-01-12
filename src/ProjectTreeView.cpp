@@ -4,7 +4,6 @@
 #include "ProjectTreeView.h"
 #include "DocumentService.h"
 
-
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -59,9 +58,7 @@ MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent)
   removeColumns(1, 3);
 }
 
-int MyFileSystemModel::columnCount(const QModelIndex&) const {
-  return 1;
-}
+int MyFileSystemModel::columnCount(const QModelIndex&) const { return 1; }
 
 QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   if (index.column() == 0) {
@@ -71,6 +68,4 @@ QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   }
 }
 
-ProjectTreeView::~ProjectTreeView() {
-  qDebug("~ProjectTreeView");
-}
+ProjectTreeView::~ProjectTreeView() { qDebug("~ProjectTreeView"); }

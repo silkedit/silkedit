@@ -17,7 +17,7 @@ class Splitter : public QSplitter {
 class HSplitter : public Splitter {
   Q_OBJECT
 
-  public:
-   HSplitter(QWidget* parent): Splitter(Qt::Orientation::Horizontal, parent){}
-   ~HSplitter() = default;
+ public:
+  HSplitter(QWidget* parent) : Splitter(Qt::Orientation::Horizontal, parent) {}
+  ~HSplitter() = default;
 };

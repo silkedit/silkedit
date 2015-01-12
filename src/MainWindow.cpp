@@ -99,15 +99,13 @@ MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags
   return w;
 }
 
-MainWindow::~MainWindow() {
-  qDebug("~MainWindow");
-}
+MainWindow::~MainWindow() { qDebug("~MainWindow"); }
 
 void MainWindow::setActiveTabWidget(TabWidget* tabWidget) {
   qDebug("setActiveTabWidget");
 
   if (m_activeTabWidget && m_activeTabWidget->activeEditView() && m_statusBar) {
-//    qDebug("disconnect previous active tab widget and TextEditView");
+    //    qDebug("disconnect previous active tab widget and TextEditView");
     // disconnect from previous active TextEditView
     disconnect(m_activeTabWidget,
                SIGNAL(activeTextEditViewChanged(TextEditView*)),
