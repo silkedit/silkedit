@@ -1,5 +1,7 @@
 #include <QApplication>
 #include <QDebug>
+#include <QMenu>
+#include <QContextMenuEvent>
 
 #include "ProjectTreeView.h"
 #include "DocumentService.h"
@@ -40,6 +42,17 @@ bool ProjectTreeView::open(const QString& dirPath) {
   }
 }
 
+void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
+  QMenu menu(this);
+  menu.addAction(tr("Rename"), this, SLOT(rename()));
+  menu.exec(event->globalPos());
+}
+
+void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent *)
+{
+  emit activated(currentIndex());
+}
+
 void ProjectTreeView::open(QModelIndex index) {
   if (!index.isValid()) {
     qWarning("index is invalid");
@@ -54,7 +67,12 @@ void ProjectTreeView::open(QModelIndex index) {
   }
 }
 
+void ProjectTreeView::rename() {
+  edit(currentIndex());
+}
+
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {
+  setReadOnly(false);
   removeColumns(1, 3);
 }
 

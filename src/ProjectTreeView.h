@@ -17,8 +17,13 @@ class ProjectTreeView : public QTreeView {
 
   bool open(const QString& dirName);
 
+ protected:
+  void contextMenuEvent(QContextMenuEvent* event) override;
+  void mouseDoubleClickEvent(QMouseEvent * event) override;
+
  private slots:
   void open(QModelIndex index);
+  void rename();
 };
 
 /**
