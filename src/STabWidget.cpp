@@ -43,6 +43,7 @@ STabWidget::STabWidget(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
+  setTabShape(TabShape::Triangular);
 
   QObject::connect(this, &QTabWidget::currentChanged, [this](int index) {
     // This lambda is called after m_tabbar is deleted when shutdown.

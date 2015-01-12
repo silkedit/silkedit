@@ -4,7 +4,6 @@
 #include <memory>
 #include <list>
 #include <QMainWindow>
-#include <QBoxLayout>
 
 #include "macros.h"
 #include "TextEditView.h"
@@ -13,6 +12,7 @@
 class STabWidget;
 class QBoxLayout;
 class StatusBar;
+class SSplitter;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   STabWidget* m_activeTabWidget;
   std::list<STabWidget*> m_tabWidgets;
-  QBoxLayout* m_rootLayout;
+  SSplitter* m_rootSplitter;
   StatusBar* m_statusBar;
 
   STabWidget* createTabWidget();
@@ -50,7 +50,7 @@ class MainWindow : public QMainWindow {
   void addTabWidgetVertically(QWidget* widget, const QString& label);
   void addTabWidget(QWidget* widget,
                     const QString& label,
-                    QBoxLayout::Direction activeLayoutDirection,
-                    QBoxLayout::Direction newDirection);
+                    Qt::Orientation activeLayoutDirection,
+                    Qt::Orientation newDirection);
   void splitTab(std::function<void(QWidget*, const QString&)> func);
 };

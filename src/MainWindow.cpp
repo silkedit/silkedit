@@ -2,27 +2,27 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QDebug>
-#include <QBoxLayout>
-#include <QLayout>
 
 #include "API.h"
 #include "MainWindow.h"
 #include "STabWidget.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
+#include "ProjectTreeView.h"
+#include "SSplitter.h"
 
 namespace {
-QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
-  for (int i = 0; i < layout->count(); i++) {
-    QBoxLayout* subLayout = qobject_cast<QBoxLayout*>(layout->itemAt(i)->layout());
-    if (subLayout) {
-      QBoxLayout* foundLayout = findItemFromLayout(subLayout, item);
-      if (foundLayout)
-        return foundLayout;
+QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
+  for (int i = 0; i < splitter->count(); i++) {
+    QSplitter* subSplitter = qobject_cast<QSplitter*>(splitter->widget(i));
+    if (subSplitter) {
+      QSplitter* foundSplitter = findItemFromSplitter(subSplitter, item);
+      if (foundSplitter)
+        return foundSplitter;
     }
-    QWidget* widget = layout->itemAt(i)->widget();
+    QWidget* widget = splitter->widget(i);
     if (widget && widget == item)
-      return layout;
+      return splitter;
   }
 
   return nullptr;
@@ -32,23 +32,23 @@ QBoxLayout* findItemFromLayout(QBoxLayout* layout, QWidget* item) {
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_activeTabWidget(nullptr),
-      m_rootLayout(new QBoxLayout(QBoxLayout::LeftToRight)),
+      m_rootSplitter(new SHSplitter(parent)),
       m_statusBar(nullptr) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
 
+  m_rootSplitter->setContentsMargins(0, 0, 0, 0);
+
+  // project tree view
+  m_rootSplitter->addWidget(new ProjectTreeView);
+
+  // Add tab widget
   auto tabWidget = createTabWidget();
-  // Note: The ownership of tabWidget is transferred to the layout, and it's the layout's
+  // Note: The ownership of tabWidget is transferred to the splitter, and it's the splitter's
   // responsibility to delete it.
-  m_rootLayout->addWidget(tabWidget);
-  m_rootLayout->setContentsMargins(0, 0, 0, 0);
-  m_rootLayout->setSpacing(0);
-  m_rootLayout->setMargin(0);
-  QWidget* window = new QWidget(this);
-  // window becomes parent of this layout by setLayout
-  window->setLayout(m_rootLayout);
-  setCentralWidget(window);
+  m_rootSplitter->addWidget(tabWidget);
+  setCentralWidget(m_rootSplitter);
 
   m_statusBar = new StatusBar(this);
   setStatusBar(m_statusBar);
@@ -78,8 +78,7 @@ STabWidget* MainWindow::createTabWidget() {
 
 void MainWindow::removeTabWidget(STabWidget* widget) {
   m_tabWidgets.remove(widget);
-  // Note: The ownership of widget remains the same as when it was added.
-  m_rootLayout->removeWidget(widget);
+  widget->hide();
   widget->deleteLater();
 }
 
@@ -166,32 +165,31 @@ void MainWindow::splitTabVertically() {
 }
 
 void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, QBoxLayout::LeftToRight, QBoxLayout::TopToBottom);
+  addTabWidget(widget, label, Qt::Orientation::Horizontal, Qt::Orientation::Vertical);
 }
 
 void MainWindow::addTabWidgetVertically(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, QBoxLayout::TopToBottom, QBoxLayout::LeftToRight);
+  addTabWidget(widget, label, Qt::Orientation::Vertical, Qt::Orientation::Horizontal);
 }
 
 void MainWindow::addTabWidget(QWidget* widget,
                               const QString& label,
-                              QBoxLayout::Direction activeLayoutDirection,
-                              QBoxLayout::Direction newDirection) {
+                              Qt::Orientation activeSplitterDirection,
+                              Qt::Orientation newDirection) {
   auto tabWidget = createTabWidget();
   tabWidget->addTab(widget, label);
 
   STabWidget* activeTabWidget = API::activeTabWidget();
-  QBoxLayout* layoutInActiveEditView = findItemFromLayout(m_rootLayout, activeTabWidget);
-  if (layoutInActiveEditView->direction() == activeLayoutDirection) {
-    int index = layoutInActiveEditView->indexOf(activeTabWidget);
+  QSplitter* splitterInActiveEditView = findItemFromSplitter(m_rootSplitter, activeTabWidget);
+  if (splitterInActiveEditView->orientation() == activeSplitterDirection) {
+    int index = splitterInActiveEditView->indexOf(activeTabWidget);
     Q_ASSERT(index >= 0);
-    layoutInActiveEditView->removeWidget(activeTabWidget);
-    QBoxLayout* layout = new QBoxLayout(newDirection);
-    layout->addWidget(activeTabWidget);
-    layout->addWidget(tabWidget);
-    layoutInActiveEditView->insertLayout(index, layout);
+    SSplitter* splitter = new SSplitter(newDirection);
+    splitter->addWidget(activeTabWidget);
+    splitter->addWidget(tabWidget);
+    splitterInActiveEditView->insertWidget(index, splitter);
   } else {
-    layoutInActiveEditView->addWidget(tabWidget);
+    splitterInActiveEditView->addWidget(tabWidget);
   }
 }
 
