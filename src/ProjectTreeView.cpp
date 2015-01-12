@@ -48,10 +48,7 @@ void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   menu.exec(event->globalPos());
 }
 
-void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent *)
-{
-  emit activated(currentIndex());
-}
+void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent*) { emit activated(currentIndex()); }
 
 void ProjectTreeView::open(QModelIndex index) {
   if (!index.isValid()) {
@@ -67,9 +64,7 @@ void ProjectTreeView::open(QModelIndex index) {
   }
 }
 
-void ProjectTreeView::rename() {
-  edit(currentIndex());
-}
+void ProjectTreeView::rename() { edit(currentIndex()); }
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {
   setReadOnly(false);

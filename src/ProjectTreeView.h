@@ -19,7 +19,7 @@ class ProjectTreeView : public QTreeView {
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
-  void mouseDoubleClickEvent(QMouseEvent * event) override;
+  void mouseDoubleClickEvent(QMouseEvent* event) override;
 
  private slots:
   void open(QModelIndex index);
