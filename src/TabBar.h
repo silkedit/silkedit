@@ -8,14 +8,14 @@ class QMouseEvent;
 class QMainWindow;
 class FakeWindow;
 
-class STabBar : public QTabBar {
+class TabBar : public QTabBar {
   Q_OBJECT
-  DISABLE_COPY(STabBar)
+  DISABLE_COPY(TabBar)
 
  public:
-  STabBar(QWidget* parent);
-  ~STabBar() = default;
-  DEFAULT_MOVE(STabBar)
+  TabBar(QWidget* parent);
+  ~TabBar() = default;
+  DEFAULT_MOVE(TabBar)
 
   void startMovingTab(const QPoint& tabPos);
 

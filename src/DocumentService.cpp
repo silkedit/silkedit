@@ -9,7 +9,7 @@
 #include "DocumentService.h"
 #include "MainWindow.h"
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "Document.h"
 
 const QString DocumentService::DEFAULT_FILE_NAME = "untitled";

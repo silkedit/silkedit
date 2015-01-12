@@ -9,10 +9,10 @@
 #include "TextEditView.h"
 #include "ViEngine.h"
 
-class STabWidget;
+class TabWidget;
 class QBoxLayout;
 class StatusBar;
-class SSplitter;
+class Splitter;
 class ProjectTreeView;
 
 class MainWindow : public QMainWindow {
@@ -28,8 +28,8 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
   // accessor
-  STabWidget* activeTabWidget() { return m_activeTabWidget; }
-  void setActiveTabWidget(STabWidget* tabWidget);
+  TabWidget* activeTabWidget() { return m_activeTabWidget; }
+  void setActiveTabWidget(TabWidget* tabWidget);
 
   void show();
   void close();
@@ -45,14 +45,14 @@ class MainWindow : public QMainWindow {
 
   explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
-  STabWidget* m_activeTabWidget;
-  std::list<STabWidget*> m_tabWidgets;
-  SSplitter* m_rootSplitter;
+  TabWidget* m_activeTabWidget;
+  std::list<TabWidget*> m_tabWidgets;
+  Splitter* m_rootSplitter;
   StatusBar* m_statusBar;
   ProjectTreeView* m_projectView;
 
-  STabWidget* createTabWidget();
-  void removeTabWidget(STabWidget* widget);
+  TabWidget* createTabWidget();
+  void removeTabWidget(TabWidget* widget);
   void addTabWidgetHorizontally(QWidget* widget, const QString& label);
   void addTabWidgetVertically(QWidget* widget, const QString& label);
   void addTabWidget(QWidget* widget,

@@ -5,11 +5,11 @@
 
 #include "API.h"
 #include "MainWindow.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
 #include "ProjectTreeView.h"
-#include "SSplitter.h"
+#include "Splitter.h"
 
 namespace {
 QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
@@ -32,7 +32,7 @@ QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_activeTabWidget(nullptr),
-      m_rootSplitter(new SHSplitter(parent)),
+      m_rootSplitter(new HSplitter(parent)),
       m_statusBar(nullptr),
       m_projectView(nullptr) {
   qDebug("creating MainWindow");
@@ -60,9 +60,9 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   setActiveTabWidget(tabWidget);
 }
 
-STabWidget* MainWindow::createTabWidget() {
-  auto tabWidget = new STabWidget();
-  QObject::connect(tabWidget, &STabWidget::allTabRemoved, [this, tabWidget]() {
+TabWidget* MainWindow::createTabWidget() {
+  auto tabWidget = new TabWidget();
+  QObject::connect(tabWidget, &TabWidget::allTabRemoved, [this, tabWidget]() {
     qDebug() << "allTabRemoved";
     removeTabWidget(tabWidget);
 
@@ -80,7 +80,7 @@ STabWidget* MainWindow::createTabWidget() {
   return tabWidget;
 }
 
-void MainWindow::removeTabWidget(STabWidget* widget) {
+void MainWindow::removeTabWidget(TabWidget* widget) {
   m_tabWidgets.remove(widget);
   widget->hide();
   widget->deleteLater();
@@ -103,7 +103,7 @@ MainWindow::~MainWindow() {
   qDebug("~MainWindow");
 }
 
-void MainWindow::setActiveTabWidget(STabWidget* tabWidget) {
+void MainWindow::setActiveTabWidget(TabWidget* tabWidget) {
   qDebug("setActiveTabWidget");
 
   if (m_activeTabWidget && m_activeTabWidget->activeEditView() && m_statusBar) {
@@ -191,12 +191,12 @@ void MainWindow::addTabWidget(QWidget* widget,
   auto tabWidget = createTabWidget();
   tabWidget->addTab(widget, label);
 
-  STabWidget* activeTabWidget = API::activeTabWidget();
+  TabWidget* activeTabWidget = API::activeTabWidget();
   QSplitter* splitterInActiveEditView = findItemFromSplitter(m_rootSplitter, activeTabWidget);
   if (splitterInActiveEditView->orientation() == activeSplitterDirection) {
     int index = splitterInActiveEditView->indexOf(activeTabWidget);
     Q_ASSERT(index >= 0);
-    SSplitter* splitter = new SSplitter(newDirection);
+    Splitter* splitter = new Splitter(newDirection);
     splitter->addWidget(activeTabWidget);
     splitter->addWidget(tabWidget);
     splitterInActiveEditView->insertWidget(index, splitter);

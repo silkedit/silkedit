@@ -3,7 +3,7 @@
 #include "SilkApp.h"
 #include "TextEditView.h"
 #include "MainWindow.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "DocumentService.h"
 
 namespace {
@@ -20,18 +20,18 @@ T findParent(QWidget* widget) {
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
-  // Track active TextEditView and STabWidget
+  // Track active TextEditView and TabWidget
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* now) {
     qDebug("focusChanged");
     if (TextEditView* editView = qobject_cast<TextEditView*>(now)) {
-      if (STabWidget* tabWidget = findParent<STabWidget*>(editView)) {
+      if (TabWidget* tabWidget = findParent<TabWidget*>(editView)) {
         if (MainWindow* window = qobject_cast<MainWindow*>(tabWidget->window())) {
           window->setActiveTabWidget(tabWidget);
         } else {
           qDebug("top window is not MainWindow");
         }
       } else {
-        qDebug("can't find STabWidget in ancestor");
+        qDebug("can't find TabWidget in ancestor");
       }
     } else {
       qDebug("now is not TextEditView");

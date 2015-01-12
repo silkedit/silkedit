@@ -4,14 +4,14 @@
 
 #include "macros.h"
 
-class STabBar;
+class TabBar;
 
 class FakeWindow : public QWidget {
   Q_OBJECT
   DISABLE_COPY(FakeWindow)
 
  public:
-  FakeWindow(STabBar* tabbar, const QPoint& pos);
+  FakeWindow(TabBar* tabbar, const QPoint& pos);
   ~FakeWindow();
   DEFAULT_MOVE(FakeWindow)
 

@@ -1,7 +1,7 @@
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
 #include "MainWindow.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 
 StatusBar::StatusBar(MainWindow* window)
     : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
@@ -25,7 +25,7 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView* editView) {
 
 void StatusBar::setActiveTextEditViewLanguage() {
   qDebug("currentIndexChanged in langComboBox. %d", m_langComboBox->currentIndex());
-  STabWidget* tabWidget = static_cast<MainWindow*>(window())->activeTabWidget();
+  TabWidget* tabWidget = static_cast<MainWindow*>(window())->activeTabWidget();
   if (tabWidget) {
     if (TextEditView* editView = tabWidget->activeEditView()) {
       qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));

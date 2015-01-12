@@ -1,7 +1,7 @@
 #include <QApplication>
 
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "MainWindow.h"
 
 TextEditView* API::activeEditView() {
@@ -14,7 +14,7 @@ TextEditView* API::activeEditView() {
   }
 }
 
-STabWidget* API::activeTabWidget() {
+TabWidget* API::activeTabWidget() {
   MainWindow* window = activeWindow();
   if (window) {
     return window->activeTabWidget();

@@ -2,13 +2,13 @@
 #include <QMouseEvent>
 #include <QApplication>
 
-#include "STabBar.h"
-#include "STabWidget.h"
+#include "TabBar.h"
+#include "TabWidget.h"
 #include "FakeWindow.h"
 #include "API.h"
 #include "MainWindow.h"
 
-STabBar::STabBar(QWidget* parent)
+TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false) {
   setAcceptDrops(true);
 
@@ -20,7 +20,7 @@ STabBar::STabBar(QWidget* parent)
   setTabsClosable(true);
 }
 
-void STabBar::startMovingTab(const QPoint& tabPos) {
+void TabBar::startMovingTab(const QPoint& tabPos) {
   qDebug() << "startMovingTab. tabPos:" << tabPos;
 
   QMouseEvent pressEvent(
@@ -39,7 +39,7 @@ void STabBar::startMovingTab(const QPoint& tabPos) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void STabBar::mousePressEvent(QMouseEvent* event) {
+void TabBar::mousePressEvent(QMouseEvent* event) {
   qDebug() << "mousePressEvent."
            << "pos:" << event->pos();
   if (event->button() == Qt::LeftButton && tabAt(event->pos()) >= 0) {
@@ -52,7 +52,7 @@ void STabBar::mousePressEvent(QMouseEvent* event) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
-void STabBar::mouseMoveEvent(QMouseEvent* event) {
+void TabBar::mouseMoveEvent(QMouseEvent* event) {
   // If we call winId() here, drag no longer works.
   //  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
   //    qDebug() << "mouseMoveEvent" << event;
@@ -70,7 +70,7 @@ void STabBar::mouseMoveEvent(QMouseEvent* event) {
   // dragging tab is over an another tab bar.
   QWidget* widgetUnderMouse =
       QApplication::widgetAt(event->screenPos().x(), event->screenPos().y());
-  STabBar* anotherTabBar = qobject_cast<STabBar*>(widgetUnderMouse);
+  TabBar* anotherTabBar = qobject_cast<TabBar*>(widgetUnderMouse);
 
   if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
     qDebug("dragging tab is over an another tab bar.");
@@ -108,7 +108,7 @@ void STabBar::mouseMoveEvent(QMouseEvent* event) {
   }
 }
 
-void STabBar::mouseReleaseEvent(QMouseEvent* event) {
+void TabBar::mouseReleaseEvent(QMouseEvent* event) {
   qDebug() << "mouseReleaseEvent."
            << "m_dragInitiated:" << m_dragInitiated
            << ", left button:" << (event->button() == Qt::LeftButton);
@@ -128,7 +128,7 @@ void STabBar::mouseReleaseEvent(QMouseEvent* event) {
   QTabBar::mouseReleaseEvent(event);
 }
 
-void STabBar::finishDrag() {
+void TabBar::finishDrag() {
   m_dragInitiated = false;
   m_dragStartPos = QPoint();
   if (m_fakeWindow) {
@@ -137,7 +137,7 @@ void STabBar::finishDrag() {
   }
 }
 
-void STabBar::grabMouse() {
+void TabBar::grabMouse() {
   QTabBar::grabMouse();
   m_isGrabbingMouse = true;
 }

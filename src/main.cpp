@@ -2,7 +2,7 @@
 
 #include "PackageService.h"
 #include "SilkApp.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"

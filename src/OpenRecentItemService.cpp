@@ -3,7 +3,7 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 

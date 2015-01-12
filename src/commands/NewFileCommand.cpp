@@ -1,7 +1,7 @@
 #include "NewFileCommand.h"
 #include "MainWindow.h"
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 
 const QString NewFileCommand::name = "new_file";
 

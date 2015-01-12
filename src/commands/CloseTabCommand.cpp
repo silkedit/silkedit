@@ -2,7 +2,7 @@
 
 #include "CloseTabCommand.h"
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 
 const QString CloseTabCommand::name = "close_tab";
 

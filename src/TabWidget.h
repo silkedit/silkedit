@@ -8,16 +8,16 @@
 #include "set_unique_ptr.h"
 
 class TextEditView;
-class STabBar;
+class TabBar;
 
-class STabWidget : public QTabWidget {
+class TabWidget : public QTabWidget {
   Q_OBJECT
-  DISABLE_COPY(STabWidget)
+  DISABLE_COPY(TabWidget)
 
  public:
-  explicit STabWidget(QWidget* parent = nullptr);
-  ~STabWidget();
-  DEFAULT_MOVE(STabWidget)
+  explicit TabWidget(QWidget* parent = nullptr);
+  ~TabWidget();
+  DEFAULT_MOVE(TabWidget)
 
   int addTab(QWidget* page, const QString& label);
   int insertTab(int index, QWidget* w, const QString& label);
@@ -48,7 +48,7 @@ signals:
 
  private:
   TextEditView* m_activeEditView;
-  STabBar* m_tabBar;
+  TabBar* m_tabBar;
   bool m_tabDragging;
 
   void setActiveEditView(TextEditView* editView);

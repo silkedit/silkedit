@@ -1,9 +1,9 @@
 #include <QDebug>
 
 #include "FakeWindow.h"
-#include "STabBar.h"
+#include "TabBar.h"
 
-FakeWindow::FakeWindow(STabBar* tabbar, const QPoint& pos) {
+FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& pos) {
   qDebug() << "constructor of FakeWindow. pos:" << pos;
   setWindowFlags(Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
   setAttribute(Qt::WA_DeleteOnClose);

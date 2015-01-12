@@ -2,7 +2,7 @@
 #include "ProjectTreeView.h"
 #include "MainWindow.h"
 #include "API.h"
-#include "STabWidget.h"
+#include "TabWidget.h"
 
 bool ProjectService::open(const QString &dirName)
 {

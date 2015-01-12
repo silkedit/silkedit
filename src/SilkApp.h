@@ -4,7 +4,7 @@
 
 #include "macros.h"
 
-class STabWidget;
+class TabWidget;
 class TextEditView;
 
 class SilkApp : public QApplication {
