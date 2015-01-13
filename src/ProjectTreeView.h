@@ -6,6 +6,8 @@
 
 #include "macros.h"
 
+class MyFileSystemModel;
+
 class ProjectTreeView : public QTreeView {
   Q_OBJECT
   DISABLE_COPY(ProjectTreeView)
@@ -21,10 +23,14 @@ class ProjectTreeView : public QTreeView {
   void contextMenuEvent(QContextMenuEvent* event) override;
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
 
+private:
+  MyFileSystemModel* m_model;
+
  private slots:
   void open(QModelIndex index);
   void rename();
   void remove();
+  void showInFinder();
 };
 
 /**

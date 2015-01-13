@@ -5,8 +5,9 @@
 
 #include "ProjectTreeView.h"
 #include "DocumentService.h"
+#include "PlatformUtil.h"
 
-ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
+ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(nullptr) {
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -16,24 +17,24 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent) {
 bool ProjectTreeView::open(const QString& dirPath) {
   QDir targetDir(dirPath);
   if (targetDir.exists()) {
-    QAbstractItemModel* prevModel = model();
-    if (prevModel) {
-      prevModel->deleteLater();
+    if (m_model) {
+      m_model->deleteLater();
+      m_model = nullptr;
     }
 
-    MyFileSystemModel* model = new MyFileSystemModel(this);
-    model->setRootPath(dirPath);
+    m_model = new MyFileSystemModel(this);
+    m_model->setRootPath(dirPath);
 
     FilterModel* const filter = new FilterModel(this, dirPath);
-    filter->setSourceModel(model);
+    filter->setSourceModel(m_model);
 
     setModel(filter);
     if (targetDir.isRoot()) {
-      setRootIndex(model->index(dirPath));
+      setRootIndex(m_model->index(dirPath));
     } else {
       QDir parentDir(dirPath);
       parentDir.cdUp();
-      QModelIndex rootIndex = filter->mapFromSource(model->index(parentDir.absolutePath()));
+      QModelIndex rootIndex = filter->mapFromSource(m_model->index(parentDir.absolutePath()));
       setRootIndex(rootIndex);
     }
 
@@ -49,6 +50,7 @@ void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   QMenu menu(this);
   menu.addAction(tr("Rename"), this, SLOT(rename()));
   menu.addAction(tr("Delete"), this, SLOT(remove()));
+  menu.addAction(PlatformUtil::showInFinderText(), this, SLOT(showInFinder()));
   menu.exec(event->globalPos());
 }
 
@@ -67,11 +69,10 @@ void ProjectTreeView::open(QModelIndex index) {
     return;
   }
 
-  if (FilterModel* filter = qobject_cast<FilterModel*>(model())) {
-    if (MyFileSystemModel* fsModel = qobject_cast<MyFileSystemModel*>(filter->sourceModel())) {
-      QString filePath = fsModel->filePath(filter->mapToSource(index));
-      DocumentService::open(filePath);
-    }
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  if (filter && m_model) {
+    QString filePath = m_model->filePath(filter->mapToSource(index));
+    DocumentService::open(filePath);
   }
 }
 
@@ -82,20 +83,27 @@ void ProjectTreeView::rename() {
 void ProjectTreeView::remove() {
   QModelIndexList indices = selectedIndexes();
   foreach (const QModelIndex& filterIndex, indices) {
-    if (FilterModel* filter = qobject_cast<FilterModel*>(model())) {
-      if (MyFileSystemModel* fsModel = qobject_cast<MyFileSystemModel*>(filter->sourceModel())) {
-        QModelIndex index = filter->mapToSource(filterIndex);
-        QString filePath = fsModel->filePath(index);
-        QFileInfo info(filePath);
-        if (info.isFile()) {
-          fsModel->remove(index);
-        } else if (info.isDir()) {
-          fsModel->rmdir(index);
-        } else {
-          qWarning("%s is neither file nor directory", qPrintable(filePath));
-        }
+    FilterModel* filter = qobject_cast<FilterModel*>(model());
+    if (filter && m_model) {
+      QModelIndex index = filter->mapToSource(filterIndex);
+      QString filePath = m_model->filePath(index);
+      QFileInfo info(filePath);
+      if (info.isFile()) {
+        m_model->remove(index);
+      } else if (info.isDir()) {
+        m_model->rmdir(index);
+      } else {
+        qWarning("%s is neither file nor directory", qPrintable(filePath));
       }
     }
+  }
+}
+
+void ProjectTreeView::showInFinder() {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  if (filter && m_model) {
+    QString filePath = m_model->filePath(filter->mapToSource(currentIndex()));
+    PlatformUtil::showInFinder(filePath);
   }
 }
 
