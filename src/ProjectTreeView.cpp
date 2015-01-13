@@ -33,8 +33,11 @@ bool ProjectTreeView::open(const QString& dirPath) {
     } else {
       QDir parentDir(dirPath);
       parentDir.cdUp();
-      setRootIndex(filter->mapFromSource(model->index(parentDir.absolutePath())));
+      QModelIndex rootIndex = filter->mapFromSource(model->index(parentDir.absolutePath()));
+      setRootIndex(rootIndex);
     }
+
+    expandAll();
     return true;
   } else {
     qWarning("%s doesn't exist", qPrintable(dirPath));
