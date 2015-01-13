@@ -71,9 +71,7 @@ bool ProjectTreeView::open(const QString& dirPath) {
   }
 }
 
-void ProjectTreeView::edit(const QModelIndex& index) {
-  QTreeView::edit(index);
-}
+void ProjectTreeView::edit(const QModelIndex& index) { QTreeView::edit(index); }
 
 void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   QMenu menu(this);
@@ -107,13 +105,11 @@ void ProjectTreeView::open(QModelIndex index) {
   }
 }
 
-void ProjectTreeView::rename() {
-  QTreeView::edit(currentIndex());
-}
+void ProjectTreeView::rename() { QTreeView::edit(currentIndex()); }
 
 void ProjectTreeView::remove() {
   QModelIndexList indices = selectedIndexes();
-  foreach (const QModelIndex& filterIndex, indices) {
+  foreach(const QModelIndex & filterIndex, indices) {
     FilterModel* filter = qobject_cast<FilterModel*>(model());
     if (filter && m_model) {
       QModelIndex index = filter->mapToSource(filterIndex);
@@ -198,9 +194,7 @@ MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent)
   removeColumns(1, 3);
 }
 
-int MyFileSystemModel::columnCount(const QModelIndex&) const {
-  return 1;
-}
+int MyFileSystemModel::columnCount(const QModelIndex&) const { return 1; }
 
 QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   if (index.column() == 0) {
@@ -210,6 +204,4 @@ QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   }
 }
 
-ProjectTreeView::~ProjectTreeView() {
-  qDebug("~ProjectTreeView");
-}
+ProjectTreeView::~ProjectTreeView() { qDebug("~ProjectTreeView"); }

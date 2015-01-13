@@ -4,31 +4,28 @@
 
 #include "PlatformUtil.h"
 
-void PlatformUtil::showInFinder(const QString &filePath)
-{
+void PlatformUtil::showInFinder(const QString& filePath) {
 #ifdef Q_OS_MAC
-    QStringList args;
-    args << "-e";
-    args << "tell application \"Finder\"";
-    args << "-e";
-    args << "activate";
-    args << "-e";
-    args << "select POSIX file \""+filePath+"\"";
-    args << "-e";
-    args << "end tell";
-    QProcess::startDetached("osascript", args);
+  QStringList args;
+  args << "-e";
+  args << "tell application \"Finder\"";
+  args << "-e";
+  args << "activate";
+  args << "-e";
+  args << "select POSIX file \"" + filePath + "\"";
+  args << "-e";
+  args << "end tell";
+  QProcess::startDetached("osascript", args);
 #endif
 
 #ifdef Q_OS_WIN
-    QStringList args;
-    args << "/select," << QDir::toNativeSeparators(filePath);
-    QProcess::startDetached("explorer", args);
+  QStringList args;
+  args << "/select," << QDir::toNativeSeparators(filePath);
+  QProcess::startDetached("explorer", args);
 #endif
-
 }
 
-QString PlatformUtil::showInFinderText()
-{
+QString PlatformUtil::showInFinderText() {
 #ifdef Q_OS_MAC
   return QObject::tr("Show in Finder");
 #endif

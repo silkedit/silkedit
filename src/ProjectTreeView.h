@@ -18,13 +18,13 @@ class ProjectTreeView : public QTreeView {
   DEFAULT_MOVE(ProjectTreeView)
 
   bool open(const QString& dirName);
-  void edit(const QModelIndex &index);
+  void edit(const QModelIndex& index);
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
 
-private:
+ private:
   MyFileSystemModel* m_model;
 
   void createNewFile(const QDir& dir);
