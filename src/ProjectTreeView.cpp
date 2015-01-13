@@ -48,7 +48,14 @@ void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   menu.exec(event->globalPos());
 }
 
-void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent*) { emit activated(currentIndex()); }
+bool ProjectTreeView::edit(const QModelIndex& index,
+                           QAbstractItemView::EditTrigger trigger,
+                           QEvent* event) {
+  // disable renaming by double click
+  if (trigger == QAbstractItemView::DoubleClicked)
+    return false;
+  return QTreeView::edit(index, trigger, event);
+}
 
 void ProjectTreeView::open(QModelIndex index) {
   if (!index.isValid()) {
@@ -64,14 +71,18 @@ void ProjectTreeView::open(QModelIndex index) {
   }
 }
 
-void ProjectTreeView::rename() { edit(currentIndex()); }
+void ProjectTreeView::rename() {
+  QTreeView::edit(currentIndex());
+}
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {
   setReadOnly(false);
   removeColumns(1, 3);
 }
 
-int MyFileSystemModel::columnCount(const QModelIndex&) const { return 1; }
+int MyFileSystemModel::columnCount(const QModelIndex&) const {
+  return 1;
+}
 
 QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   if (index.column() == 0) {
@@ -81,4 +92,6 @@ QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
   }
 }
 
-ProjectTreeView::~ProjectTreeView() { qDebug("~ProjectTreeView"); }
+ProjectTreeView::~ProjectTreeView() {
+  qDebug("~ProjectTreeView");
+}
