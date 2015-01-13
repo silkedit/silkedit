@@ -1,11 +1,36 @@
+#include <functional>
 #include <QApplication>
 #include <QDebug>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include <QDir>
 
 #include "ProjectTreeView.h"
 #include "DocumentService.h"
 #include "PlatformUtil.h"
+
+namespace {
+
+QString getUniqueName(const QString& baseNewFilePath, std::function<bool(const QString&)> pred) {
+  QString newFilePath = baseNewFilePath;
+  int i = 2;
+  while (pred(newFilePath)) {
+    newFilePath = baseNewFilePath + QString::number(i);
+    i++;
+  }
+  return newFilePath;
+}
+
+QString getUniqueFileName(const QString& baseNewFilePath) {
+  return getUniqueName(baseNewFilePath,
+                       [](const QString& newFilePath) { return QFile(newFilePath).exists(); });
+}
+
+QString getUniqueDirName(const QString& baseNewDirPath) {
+  return getUniqueName(baseNewDirPath,
+                       [](const QString& newDirPath) { return QDir(newDirPath).exists(); });
+}
+}
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(nullptr) {
   setHeaderHidden(true);
@@ -55,6 +80,7 @@ void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   menu.addAction(tr("Rename"), this, SLOT(rename()));
   menu.addAction(tr("Delete"), this, SLOT(remove()));
   menu.addAction(tr("New File"), this, SLOT(createNewFile()));
+  menu.addAction(tr("New Folder"), this, SLOT(createNewDir()));
   menu.addAction(PlatformUtil::showInFinderText(), this, SLOT(showInFinder()));
   menu.exec(event->globalPos());
 }
@@ -131,22 +157,40 @@ void ProjectTreeView::createNewFile() {
   }
 }
 
+void ProjectTreeView::createNewDir() {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  if (filter && m_model) {
+    QString filePath = m_model->filePath(filter->mapToSource(currentIndex()));
+    QFileInfo info(filePath);
+    if (info.isDir()) {
+      createNewDir(QDir(filePath));
+    } else if (info.isFile()) {
+      createNewDir(info.dir());
+    } else {
+      qWarning("%s is neither file nor directory", qPrintable(filePath));
+    }
+  }
+}
+
 void ProjectTreeView::createNewFile(const QDir& dir) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
-  QString baseNewFilePath = dir.absoluteFilePath("untitled");
-  QString newFilePath = baseNewFilePath;
-  int i = 2;
-  while (QFile(newFilePath).exists()) {
-    newFilePath = baseNewFilePath + QString::number(i);
-    i++;
-  }
-  QFile newFile(newFilePath);
+  QFile newFile(getUniqueFileName(dir.absoluteFilePath("untitled")));
   if (!newFile.open(QIODevice::WriteOnly))
     return;
   newFile.close();
   expand(currentIndex());
   QModelIndex index = filter->mapFromSource(m_model->index(newFile.fileName()));
   edit(index);
+}
+
+void ProjectTreeView::createNewDir(const QDir& dir) {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  QDir newDir(getUniqueDirName(dir.absoluteFilePath("untitled folder")));
+  if (dir.mkdir(newDir.dirName())) {
+    expand(currentIndex());
+    QModelIndex index = filter->mapFromSource(m_model->index(newDir.absolutePath()));
+    edit(index);
+  }
 }
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {

@@ -28,6 +28,7 @@ private:
   MyFileSystemModel* m_model;
 
   void createNewFile(const QDir& dir);
+  void createNewDir(const QDir& dir);
 
  private slots:
   void open(QModelIndex index);
@@ -35,6 +36,7 @@ private:
   void remove();
   void showInFinder();
   void createNewFile();
+  void createNewDir();
 };
 
 /**
