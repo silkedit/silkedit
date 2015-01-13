@@ -46,10 +46,15 @@ bool ProjectTreeView::open(const QString& dirPath) {
   }
 }
 
+void ProjectTreeView::edit(const QModelIndex& index) {
+  QTreeView::edit(index);
+}
+
 void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   QMenu menu(this);
   menu.addAction(tr("Rename"), this, SLOT(rename()));
   menu.addAction(tr("Delete"), this, SLOT(remove()));
+  menu.addAction(tr("New File"), this, SLOT(createNewFile()));
   menu.addAction(PlatformUtil::showInFinderText(), this, SLOT(showInFinder()));
   menu.exec(event->globalPos());
 }
@@ -89,9 +94,13 @@ void ProjectTreeView::remove() {
       QString filePath = m_model->filePath(index);
       QFileInfo info(filePath);
       if (info.isFile()) {
-        m_model->remove(index);
+        if (!m_model->remove(index)) {
+          qDebug("failed to remove %s", qPrintable(filePath));
+        }
       } else if (info.isDir()) {
-        m_model->rmdir(index);
+        if (!QDir(filePath).removeRecursively()) {
+          qDebug("failed to remove %s", qPrintable(filePath));
+        }
       } else {
         qWarning("%s is neither file nor directory", qPrintable(filePath));
       }
@@ -105,6 +114,39 @@ void ProjectTreeView::showInFinder() {
     QString filePath = m_model->filePath(filter->mapToSource(currentIndex()));
     PlatformUtil::showInFinder(filePath);
   }
+}
+
+void ProjectTreeView::createNewFile() {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  if (filter && m_model) {
+    QString filePath = m_model->filePath(filter->mapToSource(currentIndex()));
+    QFileInfo info(filePath);
+    if (info.isDir()) {
+      createNewFile(QDir(filePath));
+    } else if (info.isFile()) {
+      createNewFile(info.dir());
+    } else {
+      qWarning("%s is neither file nor directory", qPrintable(filePath));
+    }
+  }
+}
+
+void ProjectTreeView::createNewFile(const QDir& dir) {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  QString baseNewFilePath = dir.absoluteFilePath("untitled");
+  QString newFilePath = baseNewFilePath;
+  int i = 2;
+  while (QFile(newFilePath).exists()) {
+    newFilePath = baseNewFilePath + QString::number(i);
+    i++;
+  }
+  QFile newFile(newFilePath);
+  if (!newFile.open(QIODevice::WriteOnly))
+    return;
+  newFile.close();
+  expand(currentIndex());
+  QModelIndex index = filter->mapFromSource(m_model->index(newFile.fileName()));
+  edit(index);
 }
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {

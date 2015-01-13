@@ -18,6 +18,7 @@ class ProjectTreeView : public QTreeView {
   DEFAULT_MOVE(ProjectTreeView)
 
   bool open(const QString& dirName);
+  void edit(const QModelIndex &index);
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
@@ -26,11 +27,14 @@ class ProjectTreeView : public QTreeView {
 private:
   MyFileSystemModel* m_model;
 
+  void createNewFile(const QDir& dir);
+
  private slots:
   void open(QModelIndex index);
   void rename();
   void remove();
   void showInFinder();
+  void createNewFile();
 };
 
 /**
