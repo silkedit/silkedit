@@ -24,6 +24,7 @@ class ProjectTreeView : public QTreeView {
  private slots:
   void open(QModelIndex index);
   void rename();
+  void remove();
 };
 
 /**

@@ -48,6 +48,7 @@ bool ProjectTreeView::open(const QString& dirPath) {
 void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
   QMenu menu(this);
   menu.addAction(tr("Rename"), this, SLOT(rename()));
+  menu.addAction(tr("Delete"), this, SLOT(remove()));
   menu.exec(event->globalPos());
 }
 
@@ -76,6 +77,26 @@ void ProjectTreeView::open(QModelIndex index) {
 
 void ProjectTreeView::rename() {
   QTreeView::edit(currentIndex());
+}
+
+void ProjectTreeView::remove() {
+  QModelIndexList indices = selectedIndexes();
+  foreach (const QModelIndex& filterIndex, indices) {
+    if (FilterModel* filter = qobject_cast<FilterModel*>(model())) {
+      if (MyFileSystemModel* fsModel = qobject_cast<MyFileSystemModel*>(filter->sourceModel())) {
+        QModelIndex index = filter->mapToSource(filterIndex);
+        QString filePath = fsModel->filePath(index);
+        QFileInfo info(filePath);
+        if (info.isFile()) {
+          fsModel->remove(index);
+        } else if (info.isDir()) {
+          fsModel->rmdir(index);
+        } else {
+          qWarning("%s is neither file nor directory", qPrintable(filePath));
+        }
+      }
+    }
+  }
 }
 
 MyFileSystemModel::MyFileSystemModel(QObject* parent) : QFileSystemModel(parent) {
