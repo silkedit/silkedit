@@ -4,6 +4,10 @@
 
 #include "PlatformUtil.h"
 
+#ifdef Q_OS_MAC
+extern void qt_set_sequence_auto_mnemonic(bool b);
+#endif
+
 void PlatformUtil::showInFinder(const QString& filePath) {
 #ifdef Q_OS_MAC
   QStringList args;
@@ -36,5 +40,12 @@ QString PlatformUtil::showInFinderText() {
 
 #ifdef Q_OS_LINUX
   return QObject::tr("Show in Finder");
+#endif
+}
+
+void PlatformUtil::enableMnemonicOnMac()
+{
+#ifdef Q_OS_MAC
+  qt_set_sequence_auto_mnemonic(true);
 #endif
 }

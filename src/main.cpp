@@ -13,8 +13,11 @@
 #include "Session.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
+#include "PlatformUtil.h"
 
 int main(int argv, char** args) {
+  PlatformUtil::enableMnemonicOnMac();
+
   SilkApp app(argv, args);
 
   PackageService::loadPackages();

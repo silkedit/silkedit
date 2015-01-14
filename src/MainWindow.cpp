@@ -2,6 +2,7 @@
 #include <QMainWindow>
 #include <QApplication>
 #include <QDebug>
+#include <QVBoxLayout>
 
 #include "API.h"
 #include "MainWindow.h"
@@ -11,6 +12,7 @@
 #include "ProjectTreeView.h"
 #include "Splitter.h"
 #include "TabView.h"
+#include "FindReplaceView.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -18,7 +20,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
       m_tabViewGroup(new TabViewGroup(this)),
       m_statusBar(new StatusBar(this)),
       m_projectView(nullptr),
-      m_findReplaceView(nullptr) {
+      m_findReplaceView(new FindReplaceView(this)) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
@@ -26,13 +28,17 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
 
   m_rootSplitter->setContentsMargins(0, 0, 0, 0);
 
-  // project tree view
-  if (m_projectView) {
-    m_rootSplitter->addWidget(m_projectView);
-  }
+  QVBoxLayout* layout = new QVBoxLayout(this);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(0);
+  layout->setMargin(0);
+  m_tabViewGroup->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
+  layout->addWidget(m_tabViewGroup);
+  layout->addWidget(m_findReplaceView);
+  QWidget* editorWidget = new QWidget(this);
+  editorWidget->setLayout(layout);
 
-  // edit view
-  m_rootSplitter->addWidget(m_tabViewGroup);
+  m_rootSplitter->addWidget(editorWidget);
   setCentralWidget(m_rootSplitter);
 
   setStatusBar(m_statusBar);

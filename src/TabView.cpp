@@ -102,6 +102,7 @@ int TabView::insertTab(int index, QWidget* w, const QString& label) {
   if (count() == 1 && result) {
     m_activeEditView = editView;
   }
+  return result;
 }
 
 int TabView::open(const QString& path) {
