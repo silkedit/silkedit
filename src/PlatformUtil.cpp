@@ -43,8 +43,7 @@ QString PlatformUtil::showInFinderText() {
 #endif
 }
 
-void PlatformUtil::enableMnemonicOnMac()
-{
+void PlatformUtil::enableMnemonicOnMac() {
 #ifdef Q_OS_MAC
   qt_set_sequence_auto_mnemonic(true);
 #endif

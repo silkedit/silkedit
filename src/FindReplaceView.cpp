@@ -68,6 +68,4 @@ FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent) {
   setLayout(layout);
 }
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
-  setClearButtonEnabled(true);
-}
+LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) { setClearButtonEnabled(true); }
