@@ -18,16 +18,16 @@ class StatusBar : public QStatusBar {
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
+  void setCurrentLanguage(Language* lang);
+
 signals:
   void languageChanged(const QString& scopeName);
 
  public slots:
-  void onActiveTextEditViewChanged(TextEditView* editView);
+  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
   void setActiveTextEditViewLanguage();
   void setLanguage(const QString& scope);
 
  private:
   LanguageComboBox* m_langComboBox;
-
-  void setCurrentLanguage(Language* lang);
 };

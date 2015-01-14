@@ -6,17 +6,20 @@
 
 class TextEditView;
 class MainWindow;
-class TabWidget;
+class TabView;
+class TabViewGroup;
 
 class API {
   DISABLE_COPY_AND_MOVE(API)
 
  public:
-  API() = default;
-  ~API() = default;
-
   static TextEditView* activeEditView();
-  static TabWidget* activeTabWidget();
+  static TabView* activeTabView();
+  static TabViewGroup* activeTabViewGroup();
   static MainWindow* activeWindow();
   static QList<MainWindow*> windows();
+
+ private:
+  API() = delete;
+  ~API() = delete;
 };

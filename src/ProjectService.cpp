@@ -2,7 +2,7 @@
 #include "ProjectTreeView.h"
 #include "MainWindow.h"
 #include "API.h"
-#include "TabWidget.h"
+#include "TabView.h"
 
 bool ProjectService::open(const QString& dirName) {
   if (!QDir(dirName).exists()) {

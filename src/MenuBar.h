@@ -5,6 +5,8 @@
 
 #include "macros.h"
 
+class Theme;
+
 class MenuBar : public QMenuBar {
   Q_OBJECT
   DISABLE_COPY(MenuBar)

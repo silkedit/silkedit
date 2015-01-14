@@ -4,7 +4,7 @@
 
 #include "macros.h"
 
-class TabWidget;
+class TabView;
 class Document;
 
 class DocumentService {

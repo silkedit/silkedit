@@ -3,7 +3,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 
-#include "TabWidget.h"
+#include "TabView.h"
 #include "TextEditView.h"
 #include "KeymapService.h"
 #include "TabBar.h"
@@ -19,7 +19,7 @@ QString getFileNameFrom(const QString& path) {
 }
 }
 
-TabWidget::TabWidget(QWidget* parent)
+TabView::TabView(QWidget* parent)
     : QTabWidget(parent),
       m_activeEditView(nullptr),
       m_tabBar(new TabBar(this)),
@@ -65,8 +65,8 @@ TabWidget::TabWidget(QWidget* parent)
   });
 }
 
-TabWidget::~TabWidget() {
-  qDebug("~TabWidget");
+TabView::~TabView() {
+  qDebug("~TabView");
   disconnect(m_tabBar,
              SIGNAL(onDetachTabStarted(int, const QPoint&)),
              this,
@@ -83,9 +83,11 @@ TabWidget::~TabWidget() {
              SLOT(detachTabFinished(const QPoint&)));
 }
 
-int TabWidget::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
+int TabView::addTab(QWidget* page, const QString& label) {
+  return insertTab(-1, page, label);
+}
 
-int TabWidget::insertTab(int index, QWidget* w, const QString& label) {
+int TabView::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView) {
@@ -98,11 +100,14 @@ int TabWidget::insertTab(int index, QWidget* w, const QString& label) {
   } else {
     qDebug("inserted widget is not TextEditView");
   }
-  return QTabWidget::insertTab(index, w, label);
+  bool result = QTabWidget::insertTab(index, w, label);
+  if (count() == 1 && result) {
+    m_activeEditView = editView;
+  }
 }
 
-int TabWidget::open(const QString& path) {
-  qDebug("TabWidget::open(%s)", qPrintable(path));
+int TabView::open(const QString& path) {
+  qDebug("TabView::open(%s)", qPrintable(path));
   int index = indexOfPath(path);
   if (index >= 0) {
     setCurrentIndex(index);
@@ -130,14 +135,14 @@ int TabWidget::open(const QString& path) {
   return addTab(view, getFileNameFrom(path));
 }
 
-void TabWidget::addNew() {
+void TabView::addNew() {
   TextEditView* view = new TextEditView(this);
   std::shared_ptr<Document> newDoc(Document::createBlank());
   view->setDocument(std::move(newDoc));
   addTab(view, DocumentService::DEFAULT_FILE_NAME);
 }
 
-void TabWidget::saveAllTabs() {
+void TabView::saveAllTabs() {
   for (int i = 0; i < count(); i++) {
     auto editView = qobject_cast<TextEditView*>(widget(i));
     if (editView) {
@@ -146,9 +151,11 @@ void TabWidget::saveAllTabs() {
   }
 }
 
-void TabWidget::closeActiveTab() { closeTab(currentWidget()); }
+void TabView::closeActiveTab() {
+  closeTab(currentWidget());
+}
 
-bool TabWidget::closeAllTabs() {
+bool TabView::closeAllTabs() {
   std::list<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
     widgets.push_back(widget(i));
@@ -163,7 +170,7 @@ bool TabWidget::closeAllTabs() {
   return true;
 }
 
-void TabWidget::closeOtherTabs() {
+void TabView::closeOtherTabs() {
   std::list<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
     if (i != currentIndex()) {
@@ -176,8 +183,8 @@ void TabWidget::closeOtherTabs() {
   }
 }
 
-int TabWidget::indexOfPath(const QString& path) {
-  //  qDebug("TabWidget::indexOfPath(%s)", qPrintable(path));
+int TabView::indexOfPath(const QString& path) {
+  //  qDebug("TabView::indexOfPath(%s)", qPrintable(path));
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
     QString path2 = v->path();
@@ -189,7 +196,7 @@ int TabWidget::indexOfPath(const QString& path) {
   return -1;
 }
 
-void TabWidget::detachTabStarted(int index, const QPoint&) {
+void TabView::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;
   DraggingTabInfo::setWidget(widget(index));
@@ -198,7 +205,7 @@ void TabWidget::detachTabStarted(int index, const QPoint&) {
   Q_ASSERT(DraggingTabInfo::widget());
 }
 
-void TabWidget::detachTabEntered(const QPoint& enterPoint) {
+void TabView::detachTabEntered(const QPoint& enterPoint) {
   qDebug("DetachTabEntered");
   qDebug() << "tabBar()->mapToGlobal(QPoint(0, 0)):" << tabBar()->mapToGlobal(QPoint(0, 0));
   QPoint relativeEnterPos = enterPoint - tabBar()->mapToGlobal(QPoint(0, 0));
@@ -214,35 +221,38 @@ void TabWidget::detachTabEntered(const QPoint& enterPoint) {
   m_tabBar->startMovingTab(tabCenterPos);
 }
 
-void TabWidget::tabInserted(int index) {
+void TabView::tabInserted(int index) {
   setCurrentIndex(index);
   QTabWidget::tabInserted(index);
 }
 
-void TabWidget::tabRemoved(int) {
+void TabView::tabRemoved(int) {
   if (count() == 0) {
     emit allTabRemoved();
   }
 }
 
-void TabWidget::mouseReleaseEvent(QMouseEvent* event) {
-  qDebug("mouseReleaseEvent in TabWidget");
+void TabView::mouseReleaseEvent(QMouseEvent* event) {
+  qDebug("mouseReleaseEvent in TabView");
   QTabWidget::mouseReleaseEvent(event);
 }
 
-void TabWidget::setActiveEditView(TextEditView* editView) {
-  m_activeEditView = editView;
-  emit activeTextEditViewChanged(editView);
+void TabView::setActiveEditView(TextEditView* editView) {
+  if (m_activeEditView != editView) {
+    TextEditView* oldEditView = m_activeEditView;
+    m_activeEditView = editView;
+    emit activeTextEditViewChanged(oldEditView, editView);
+  }
 }
 
-void TabWidget::removeTabAndWidget(int index) {
+void TabView::removeTabAndWidget(int index) {
   if (auto w = widget(index)) {
     w->deleteLater();
   }
   removeTab(index);
 }
 
-bool TabWidget::closeTab(QWidget* w) {
+bool TabView::closeTab(QWidget* w) {
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView && editView->document()->isModified()) {
     QMessageBox msgBox;
@@ -273,7 +283,7 @@ bool TabWidget::closeTab(QWidget* w) {
   return true;
 }
 
-void TabWidget::updateTabTextBasedOn(bool changed) {
+void TabView::updateTabTextBasedOn(bool changed) {
   qDebug() << "updateTabTextBasedOn. changed:" << changed;
   if (QWidget* w = qobject_cast<QWidget*>(QObject::sender())) {
     int index = indexOf(w);
@@ -289,14 +299,14 @@ void TabWidget::updateTabTextBasedOn(bool changed) {
   }
 }
 
-void TabWidget::detachTabFinished(const QPoint& dropPoint) {
+void TabView::detachTabFinished(const QPoint& dropPoint) {
   qDebug() << "DetachTab."
            << "dropPoint:" << dropPoint;
   MainWindow* window = MainWindow::create();
   window->move(dropPoint);
   window->show();
   if (DraggingTabInfo::widget()) {
-    window->activeTabWidget()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+    window->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
     DraggingTabInfo::setWidget(nullptr);
     m_tabDragging = false;
     tabRemoved(-1);

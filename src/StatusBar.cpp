@@ -1,7 +1,8 @@
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
 #include "MainWindow.h"
-#include "TabWidget.h"
+#include "TabView.h"
+#include "TextEditView.h"
 
 StatusBar::StatusBar(MainWindow* window)
     : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
@@ -13,21 +14,20 @@ StatusBar::StatusBar(MainWindow* window)
           SLOT(setActiveTextEditViewLanguage()));
 }
 
-void StatusBar::onActiveTextEditViewChanged(TextEditView* editView) {
+void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView *newEditView) {
   qDebug("onActiveTextEditViewChanged");
-  Q_ASSERT(editView);
-  if (editView) {
-    setCurrentLanguage(editView->language());
+  if (newEditView) {
+    setCurrentLanguage(newEditView->language());
   } else {
-    qDebug("editView is null");
+    qDebug("newEditView is null");
   }
 }
 
 void StatusBar::setActiveTextEditViewLanguage() {
   qDebug("currentIndexChanged in langComboBox. %d", m_langComboBox->currentIndex());
-  TabWidget* tabWidget = static_cast<MainWindow*>(window())->activeTabWidget();
-  if (tabWidget) {
-    if (TextEditView* editView = tabWidget->activeEditView()) {
+  TabView* tabView = static_cast<MainWindow*>(window())->activeTabView();
+  if (tabView) {
+    if (TextEditView* editView = tabView->activeEditView()) {
       qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));
       editView->setLanguage(m_langComboBox->currentData().toString());
     } else {

@@ -3,7 +3,7 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 #include "API.h"
-#include "TabWidget.h"
+#include "TabView.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 
@@ -14,9 +14,9 @@ void OpenRecentItemService::clear() {
 
 void OpenRecentItemService::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
-    auto tabWidget = API::activeTabWidget();
-    if (tabWidget->indexOfPath(path) < 0) {
-      tabWidget->open(path);
+    auto tabView = API::activeTabView();
+    if (tabView->indexOfPath(path) < 0) {
+      tabView->open(path);
       return;
     }
   }

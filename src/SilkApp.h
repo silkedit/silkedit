@@ -4,9 +4,6 @@
 
 #include "macros.h"
 
-class TabWidget;
-class TextEditView;
-
 class SilkApp : public QApplication {
   DISABLE_COPY_AND_MOVE(SilkApp)
 

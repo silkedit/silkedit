@@ -9,19 +9,13 @@
 #include "DocumentService.h"
 #include "MainWindow.h"
 #include "API.h"
-#include "TabWidget.h"
+#include "TabView.h"
 #include "Document.h"
 
 const QString DocumentService::DEFAULT_FILE_NAME = "untitled";
 
 bool DocumentService::open(const QString& filename) {
-  MainWindow* window = API::activeWindow();
-  if (window) {
-    return window->activeTabWidget()->open(filename) >= 0;
-  } else {
-    qWarning("m_tabWidget is null");
-    return false;
-  }
+  return API::activeTabView()->open(filename) >= 0;
 }
 
 void DocumentService::save(Document* doc) {

@@ -1,37 +1,44 @@
 #include <QApplication>
 
 #include "API.h"
-#include "TabWidget.h"
+#include "TabView.h"
+#include "TabViewGroup.h"
 #include "MainWindow.h"
 
 TextEditView* API::activeEditView() {
-  MainWindow* window = activeWindow();
-  if (window) {
-    return window->activeTabWidget()->activeEditView();
+  TabView* tabView = activeTabView();
+  if (tabView) {
+    return tabView->activeEditView();
   } else {
-    qDebug("active edit view is null");
+    qDebug("active tab view is null");
     return nullptr;
   }
 }
 
-TabWidget* API::activeTabWidget() {
+TabView* API::activeTabView() {
+  TabViewGroup* tabViewGroup = activeTabViewGroup();
+  if (tabViewGroup) {
+    return tabViewGroup->activeTab();
+  } else {
+    qDebug("active tab view group is null");
+    return nullptr;
+  }
+}
+
+TabViewGroup* API::activeTabViewGroup() {
   MainWindow* window = activeWindow();
   if (window) {
-    return window->activeTabWidget();
+    return window->activeTabViewGroup();
   } else {
-    qDebug("active tab widget is null");
+    qDebug("active window is null");
     return nullptr;
   }
 }
 
 MainWindow* API::activeWindow() {
-  MainWindow* window = qobject_cast<MainWindow*>(QApplication::activeWindow());
-  if (window) {
-    return window;
-  } else {
-    qWarning("active window is null");
-    return nullptr;
-  }
+  return qobject_cast<MainWindow*>(QApplication::activeWindow());
 }
 
-QList<MainWindow*> API::windows() { return MainWindow::windows(); }
+QList<MainWindow*> API::windows() {
+  return MainWindow::windows();
+}

@@ -1,10 +1,10 @@
 #include <QWidget>
 
 #include "SilkApp.h"
-#include "TextEditView.h"
-#include "MainWindow.h"
-#include "TabWidget.h"
+#include "TabViewGroup.h"
 #include "DocumentService.h"
+#include "TextEditView.h"
+#include "TabView.h"
 
 namespace {
 template <typename T>
@@ -20,21 +20,21 @@ T findParent(QWidget* widget) {
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
-  // Track active TextEditView and TabWidget
-  QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* now) {
+  // Track active TabView
+  QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
     qDebug("focusChanged");
-    if (TextEditView* editView = qobject_cast<TextEditView*>(now)) {
-      if (TabWidget* tabWidget = findParent<TabWidget*>(editView)) {
-        if (MainWindow* window = qobject_cast<MainWindow*>(tabWidget->window())) {
-          window->setActiveTabWidget(tabWidget);
+    if (TextEditView* editView = qobject_cast<TextEditView*>(focusedWidget)) {
+      if (TabView* tabView = findParent<TabView*>(editView)) {
+        if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
+          tabViewGroup->setActiveTab(tabView);
         } else {
-          qDebug("top window is not MainWindow");
+          qDebug("unable to find the parent TabViewGroup");
         }
       } else {
-        qDebug("can't find TabWidget in ancestor");
+        qDebug("can't find TabView in ancestor");
       }
     } else {
-      qDebug("now is not TextEditView");
+      qDebug("focused widget is not TextEditView");
     }
   });
 }

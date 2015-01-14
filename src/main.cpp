@@ -2,7 +2,7 @@
 
 #include "PackageService.h"
 #include "SilkApp.h"
-#include "TabWidget.h"
+#include "TabView.h"
 #include "MainWindow.h"
 #include "KeymapService.h"
 #include "ConfigService.h"
@@ -11,6 +11,8 @@
 #include "MenuBar.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "Session.h"
+#include "ViEngine.h"
+#include "TextEditView.h"
 
 int main(int argv, char** args) {
   SilkApp app(argv, args);
@@ -34,7 +36,7 @@ int main(int argv, char** args) {
   w->show();
 
   //   Set focus to active edit view
-  if (auto v = w->activeTabWidget()->activeEditView()) {
+  if (auto v = w->activeTabView()->activeEditView()) {
     v->setFocus();
   }
 

@@ -6,14 +6,15 @@
 #include <QMainWindow>
 
 #include "macros.h"
-#include "TextEditView.h"
-#include "ViEngine.h"
 
-class TabWidget;
+class TabView;
 class QBoxLayout;
 class StatusBar;
 class Splitter;
 class ProjectTreeView;
+class TabViewGroup;
+class FindReplaceView;
+class TextEditView;
 
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -28,36 +29,30 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
   // accessor
-  TabWidget* activeTabWidget() { return m_activeTabWidget; }
-  void setActiveTabWidget(TabWidget* tabWidget);
+  TabViewGroup* activeTabViewGroup() { return m_tabViewGroup; }
+  TabView* activeTabView();
 
   void show();
   void close();
-  void saveAllTabs();
-  bool closeAllTabs();
-  void splitTabHorizontally();
-  void splitTabVertically();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
+
+  signals:
+  void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  private:
   static QList<MainWindow*> s_windows;
 
   explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
-  TabWidget* m_activeTabWidget;
-  std::list<TabWidget*> m_tabWidgets;
   Splitter* m_rootSplitter;
+  TabViewGroup* m_tabViewGroup;
   StatusBar* m_statusBar;
   ProjectTreeView* m_projectView;
+  FindReplaceView* m_findReplaceView;
 
-  TabWidget* createTabWidget();
-  void removeTabWidget(TabWidget* widget);
-  void addTabWidgetHorizontally(QWidget* widget, const QString& label);
-  void addTabWidgetVertically(QWidget* widget, const QString& label);
-  void addTabWidget(QWidget* widget,
-                    const QString& label,
-                    Qt::Orientation activeLayoutDirection,
-                    Qt::Orientation newDirection);
-  void splitTab(std::function<void(QWidget*, const QString&)> func);
+private slots:
+  void updateConnection(TabView* oldTab, TabView* newTab);
+  void updateConnection(TextEditView* oldEditView, TextEditView* newEditView);
+  void emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView);
 };

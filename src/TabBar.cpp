@@ -3,7 +3,7 @@
 #include <QApplication>
 
 #include "TabBar.h"
-#include "TabWidget.h"
+#include "TabView.h"
 #include "FakeWindow.h"
 #include "API.h"
 #include "MainWindow.h"

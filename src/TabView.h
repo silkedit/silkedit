@@ -10,14 +10,14 @@
 class TextEditView;
 class TabBar;
 
-class TabWidget : public QTabWidget {
+class TabView : public QTabWidget {
   Q_OBJECT
-  DISABLE_COPY(TabWidget)
+  DISABLE_COPY(TabView)
 
  public:
-  explicit TabWidget(QWidget* parent = nullptr);
-  ~TabWidget();
-  DEFAULT_MOVE(TabWidget)
+  explicit TabView(QWidget* parent = nullptr);
+  ~TabView();
+  DEFAULT_MOVE(TabView)
 
   int addTab(QWidget* page, const QString& label);
   int insertTab(int index, QWidget* w, const QString& label);
@@ -33,7 +33,7 @@ class TabWidget : public QTabWidget {
 
 signals:
   void allTabRemoved();
-  void activeTextEditViewChanged(TextEditView* editView);
+  void activeTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  public slots:
   // Detach Tab

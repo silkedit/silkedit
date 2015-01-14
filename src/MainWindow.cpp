@@ -5,36 +5,20 @@
 
 #include "API.h"
 #include "MainWindow.h"
-#include "TabWidget.h"
+#include "TabViewGroup.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
 #include "ProjectTreeView.h"
 #include "Splitter.h"
-
-namespace {
-QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
-  for (int i = 0; i < splitter->count(); i++) {
-    QSplitter* subSplitter = qobject_cast<QSplitter*>(splitter->widget(i));
-    if (subSplitter) {
-      QSplitter* foundSplitter = findItemFromSplitter(subSplitter, item);
-      if (foundSplitter)
-        return foundSplitter;
-    }
-    QWidget* widget = splitter->widget(i);
-    if (widget && widget == item)
-      return splitter;
-  }
-
-  return nullptr;
-}
-}
+#include "TabView.h"
 
 MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
-      m_activeTabWidget(nullptr),
       m_rootSplitter(new HSplitter(parent)),
-      m_statusBar(nullptr),
-      m_projectView(nullptr) {
+      m_tabViewGroup(new TabViewGroup(this)),
+      m_statusBar(new StatusBar(this)),
+      m_projectView(nullptr),
+      m_findReplaceView(nullptr) {
   qDebug("creating MainWindow");
 
   setWindowTitle(QObject::tr("SilkEdit"));
@@ -47,43 +31,73 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
     m_rootSplitter->addWidget(m_projectView);
   }
 
-  // Add tab widget
-  auto tabWidget = createTabWidget();
-  // Note: The ownership of tabWidget is transferred to the splitter, and it's the splitter's
-  // responsibility to delete it.
-  m_rootSplitter->addWidget(tabWidget);
+  // edit view
+  m_rootSplitter->addWidget(m_tabViewGroup);
   setCentralWidget(m_rootSplitter);
 
-  m_statusBar = new StatusBar(this);
   setStatusBar(m_statusBar);
 
-  setActiveTabWidget(tabWidget);
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
+          static_cast<void (MainWindow::*)(TabView*, TabView*)>(&MainWindow::updateConnection));
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
+          &MainWindow::emitActiveEditViewChanged);
+  connect(this, &MainWindow::activeEditViewChanged, m_statusBar, &StatusBar::onActiveTextEditViewChanged);
+
+  updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
 
-TabWidget* MainWindow::createTabWidget() {
-  auto tabWidget = new TabWidget();
-  QObject::connect(tabWidget, &TabWidget::allTabRemoved, [this, tabWidget]() {
-    qDebug() << "allTabRemoved";
-    removeTabWidget(tabWidget);
+void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
+  qDebug("updateConnection for new active TabView");
 
-    if (m_tabWidgets.size() == 0) {
-      if (tabWidget->tabDragging()) {
-        hide();
-      } else {
-        close();
-      }
-    }
-  });
+  if (oldTabView && m_statusBar) {
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               m_statusBar,
+               &StatusBar::onActiveTextEditViewChanged);
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               this,
+               static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
+                   &MainWindow::updateConnection));
+  }
 
-  m_tabWidgets.push_back(tabWidget);
-
-  return tabWidget;
+  if (newTabView && m_statusBar) {
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            m_statusBar,
+            &StatusBar::onActiveTextEditViewChanged);
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            this,
+            static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
+                &MainWindow::updateConnection));
+  }
 }
 
-void MainWindow::removeTabWidget(TabWidget* widget) {
-  m_tabWidgets.remove(widget);
-  widget->hide();
-  widget->deleteLater();
+void MainWindow::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
+  qDebug("updateConnection for new active TextEditView");
+
+  if (oldEditView && m_statusBar) {
+    disconnect(
+        oldEditView, SIGNAL(languageChanged(QString)), m_statusBar, SLOT(setLanguage(QString)));
+  }
+
+  if (newEditView && m_statusBar) {
+    connect(newEditView,
+            SIGNAL(languageChanged(const QString&)),
+            m_statusBar,
+            SLOT(setLanguage(const QString&)));
+  }
+}
+
+void MainWindow::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView) {
+  TextEditView* oldEditView = oldTabView ? oldTabView->activeEditView() : nullptr;
+  TextEditView* newEditView = newTabView ? newTabView->activeEditView() : nullptr;
+  emit activeEditViewChanged(oldEditView, newEditView);
 }
 
 MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
@@ -95,45 +109,19 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
 
 MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   MainWindow* w = create(parent, flags);
-  w->activeTabWidget()->addNew();
+  w->activeTabView()->addNew();
   return w;
 }
 
-MainWindow::~MainWindow() { qDebug("~MainWindow"); }
+MainWindow::~MainWindow() {
+  qDebug("~MainWindow");
+}
 
-void MainWindow::setActiveTabWidget(TabWidget* tabWidget) {
-  qDebug("setActiveTabWidget");
-
-  if (m_activeTabWidget && m_activeTabWidget->activeEditView() && m_statusBar) {
-    //    qDebug("disconnect previous active tab widget and TextEditView");
-    // disconnect from previous active TextEditView
-    disconnect(m_activeTabWidget,
-               SIGNAL(activeTextEditViewChanged(TextEditView*)),
-               m_statusBar,
-               SLOT(onActiveTextEditViewChanged(TextEditView*)));
-    if (m_activeTabWidget->activeEditView()) {
-      disconnect(m_activeTabWidget->activeEditView(),
-                 SIGNAL(languageChanged(QString)),
-                 m_statusBar,
-                 SLOT(setLanguage(QString)));
-    }
-  }
-
-  m_activeTabWidget = tabWidget;
-
-  if (tabWidget && m_statusBar) {
-    // connect to new active TextEditView
-    //    qDebug("connect to new active tab widget and activeEditView");
-    connect(tabWidget,
-            SIGNAL(activeTextEditViewChanged(TextEditView*)),
-            m_statusBar,
-            SLOT(onActiveTextEditViewChanged(TextEditView*)));
-    if (tabWidget->activeEditView()) {
-      connect(tabWidget->activeEditView(),
-              SIGNAL(languageChanged(const QString&)),
-              m_statusBar,
-              SLOT(setLanguage(const QString&)));
-    }
+TabView* MainWindow::activeTabView() {
+  if (m_tabViewGroup) {
+    return m_tabViewGroup->activeTab();
+  } else {
+    return nullptr;
   }
 }
 
@@ -148,77 +136,11 @@ void MainWindow::close() {
   }
 }
 
-void MainWindow::saveAllTabs() {
-  for (auto tabWidget : m_tabWidgets) {
-    tabWidget->saveAllTabs();
-  }
-}
-
-bool MainWindow::closeAllTabs() {
-  while (!m_tabWidgets.empty()) {
-    bool isSuccess = m_tabWidgets.front()->closeAllTabs();
-    if (!isSuccess)
-      return false;
-  }
-
-  return true;
-}
-
-void MainWindow::splitTabHorizontally() {
-  splitTab(std::bind(
-      &MainWindow::addTabWidgetHorizontally, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-void MainWindow::splitTabVertically() {
-  splitTab(std::bind(
-      &MainWindow::addTabWidgetVertically, this, std::placeholders::_1, std::placeholders::_2));
-}
-
-void MainWindow::addTabWidgetHorizontally(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, Qt::Orientation::Horizontal, Qt::Orientation::Vertical);
-}
-
-void MainWindow::addTabWidgetVertically(QWidget* widget, const QString& label) {
-  addTabWidget(widget, label, Qt::Orientation::Vertical, Qt::Orientation::Horizontal);
-}
-
-void MainWindow::addTabWidget(QWidget* widget,
-                              const QString& label,
-                              Qt::Orientation activeSplitterDirection,
-                              Qt::Orientation newDirection) {
-  auto tabWidget = createTabWidget();
-  tabWidget->addTab(widget, label);
-
-  TabWidget* activeTabWidget = API::activeTabWidget();
-  QSplitter* splitterInActiveEditView = findItemFromSplitter(m_rootSplitter, activeTabWidget);
-  if (splitterInActiveEditView->orientation() == activeSplitterDirection) {
-    int index = splitterInActiveEditView->indexOf(activeTabWidget);
-    Q_ASSERT(index >= 0);
-    Splitter* splitter = new Splitter(newDirection);
-    splitter->addWidget(activeTabWidget);
-    splitter->addWidget(tabWidget);
-    splitterInActiveEditView->insertWidget(index, splitter);
-  } else {
-    splitterInActiveEditView->addWidget(tabWidget);
-  }
-}
-
-void MainWindow::splitTab(std::function<void(QWidget*, const QString&)> func) {
-  if (m_activeTabWidget) {
-    TextEditView* activeEditView = m_activeTabWidget->activeEditView();
-    QString label = m_activeTabWidget->tabText(m_activeTabWidget->currentIndex());
-    if (activeEditView) {
-      TextEditView* anotherEditView = activeEditView->clone();
-      func(anotherEditView, label);
-    }
-  }
-}
-
 QList<MainWindow*> MainWindow::s_windows;
 
 void MainWindow::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
-  bool isSuccess = closeAllTabs();
+  bool isSuccess = m_tabViewGroup->closeAllTabs();
   if (isSuccess) {
     event->accept();
   } else {
