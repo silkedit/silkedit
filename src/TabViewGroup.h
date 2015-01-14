@@ -39,8 +39,8 @@ signals:
   void addTabViewHorizontally(QWidget* widget, const QString& label);
   void addTabViewVertically(QWidget* widget, const QString& label);
   void addTabView(QWidget* widget,
-                    const QString& label,
-                    Qt::Orientation activeLayoutDirection,
-                    Qt::Orientation newDirection);
+                  const QString& label,
+                  Qt::Orientation activeLayoutDirection,
+                  Qt::Orientation newDirection);
   void splitTab(std::function<void(QWidget*, const QString&)> func);
 };

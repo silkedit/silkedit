@@ -83,9 +83,7 @@ TabView::~TabView() {
              SLOT(detachTabFinished(const QPoint&)));
 }
 
-int TabView::addTab(QWidget* page, const QString& label) {
-  return insertTab(-1, page, label);
-}
+int TabView::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
 
 int TabView::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
@@ -151,9 +149,7 @@ void TabView::saveAllTabs() {
   }
 }
 
-void TabView::closeActiveTab() {
-  closeTab(currentWidget());
-}
+void TabView::closeActiveTab() { closeTab(currentWidget()); }
 
 bool TabView::closeAllTabs() {
   std::list<QWidget*> widgets;

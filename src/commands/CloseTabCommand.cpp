@@ -8,6 +8,4 @@ const QString CloseTabCommand::name = "close_tab";
 
 CloseTabCommand::CloseTabCommand() : ICommand(CloseTabCommand::name) {}
 
-void CloseTabCommand::doRun(const CommandArgument&, int) {
-  API::activeTabView()->closeActiveTab();
-}
+void CloseTabCommand::doRun(const CommandArgument&, int) { API::activeTabView()->closeActiveTab(); }

@@ -37,7 +37,7 @@ class MainWindow : public QMainWindow {
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
 
-  signals:
+signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  private:
@@ -51,7 +51,7 @@ class MainWindow : public QMainWindow {
   ProjectTreeView* m_projectView;
   FindReplaceView* m_findReplaceView;
 
-private slots:
+ private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
   void updateConnection(TextEditView* oldEditView, TextEditView* newEditView);
   void emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView);

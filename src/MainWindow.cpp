@@ -45,7 +45,10 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
           &TabViewGroup::activeTabViewChanged,
           this,
           &MainWindow::emitActiveEditViewChanged);
-  connect(this, &MainWindow::activeEditViewChanged, m_statusBar, &StatusBar::onActiveTextEditViewChanged);
+  connect(this,
+          &MainWindow::activeEditViewChanged,
+          m_statusBar,
+          &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
@@ -113,9 +116,7 @@ MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags
   return w;
 }
 
-MainWindow::~MainWindow() {
-  qDebug("~MainWindow");
-}
+MainWindow::~MainWindow() { qDebug("~MainWindow"); }
 
 TabView* MainWindow::activeTabView() {
   if (m_tabViewGroup) {

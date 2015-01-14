@@ -14,7 +14,7 @@ StatusBar::StatusBar(MainWindow* window)
           SLOT(setActiveTextEditViewLanguage()));
 }
 
-void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView *newEditView) {
+void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
   qDebug("onActiveTextEditViewChanged");
   if (newEditView) {
     setCurrentLanguage(newEditView->language());

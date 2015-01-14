@@ -8,4 +8,6 @@ const QString SaveAllCommand::name = "save_all";
 
 SaveAllCommand::SaveAllCommand() : ICommand(SaveAllCommand::name) {}
 
-void SaveAllCommand::doRun(const CommandArgument&, int) { API::activeTabViewGroup()->saveAllTabs(); }
+void SaveAllCommand::doRun(const CommandArgument&, int) {
+  API::activeTabViewGroup()->saveAllTabs();
+}

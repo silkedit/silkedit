@@ -4,7 +4,7 @@
 
 #include "macros.h"
 
-class FindReplaceView: public QWidget {
+class FindReplaceView : public QWidget {
   DISABLE_COPY(FindReplaceView)
 
  public:

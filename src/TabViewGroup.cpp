@@ -24,7 +24,8 @@ QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
 }
 }
 
-TabViewGroup::TabViewGroup(QWidget* parent) : QWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
+TabViewGroup::TabViewGroup(QWidget* parent)
+    : QWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
   auto tabView = createTabView();
   // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
   // responsibility to delete it.

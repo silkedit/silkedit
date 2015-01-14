@@ -35,10 +35,6 @@ TabViewGroup* API::activeTabViewGroup() {
   }
 }
 
-MainWindow* API::activeWindow() {
-  return qobject_cast<MainWindow*>(QApplication::activeWindow());
-}
+MainWindow* API::activeWindow() { return qobject_cast<MainWindow*>(QApplication::activeWindow()); }
 
-QList<MainWindow*> API::windows() {
-  return MainWindow::windows();
-}
+QList<MainWindow*> API::windows() { return MainWindow::windows(); }
