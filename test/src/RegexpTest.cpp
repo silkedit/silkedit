@@ -1,4 +1,3 @@
-#include <oniguruma.h>
 #include <QtTest/QtTest>
 
 #include "Regexp.h"
@@ -6,14 +5,10 @@
 class RegexpTest : public QObject {
   Q_OBJECT
  private slots:
-  void compile();
-  void findStringSubmatchIndex();
-};
-
-void RegexpTest::compile() {
-  Regexp* reg;
-  for (int i = 0; i < 100; i++) {
-    reg = Regexp::compile(R"((?x)
+  void compile() {
+    Regexp* reg;
+    for (int i = 0; i < 100; i++) {
+      reg = Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -25,10 +20,10 @@ void RegexpTest::compile() {
                                         )
                                     (\))                         # a close parenthesis
                                 )?)");
-    QVERIFY(reg);
-  }
+      QVERIFY(reg);
+    }
 
-  reg = Regexp::compile(R"((?x)
+    reg = Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((\?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -40,22 +35,44 @@ void RegexpTest::compile() {
                                         )
                                     (\))                         # a close parenthesis
                                 )?)");
-  QVERIFY(!reg);
-}
+    QVERIFY(!reg);
+  }
 
-void RegexpTest::findStringSubmatchIndex() {
-  Regexp* reg = Regexp::compile("(<\\?)\\s*([-_a-zA-Z0-9]+)");
-  QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
-  QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
-  QVERIFY(indices);
-  QCOMPARE(indices->size(), 6);
-  QCOMPARE(*indices, QVector<int>({0, 5, 0, 2, 2, 5}));
+  void compileWithASISSyntax() {
+    Regexp* regexp = Regexp::compile("a.c", Regexp::ASIS);
+    QString str = "abc";
+    QVector<int>* indices = regexp->findStringSubmatchIndex(QStringRef(&str), true);
+    QVERIFY(!indices);
+  }
 
-  // search fail
-  str = "aaa";
-  indices = reg->findStringSubmatchIndex(QStringRef(&str));
-  QVERIFY(!indices);
-}
+  void findStringSubmatchIndex() {
+    Regexp* reg = Regexp::compile("(<\\?)\\s*([-_a-zA-Z0-9]+)");
+    QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
+    QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
+    QVERIFY(indices);
+    QCOMPARE(indices->size(), 6);
+    QCOMPARE(*indices, QVector<int>({0, 5, 0, 2, 2, 5}));
+
+    // search fail
+    str = "aaa";
+    indices = reg->findStringSubmatchIndex(QStringRef(&str));
+    QVERIFY(!indices);
+  }
+
+  void findStringSubmatchIndexBackward() {
+    Regexp* reg = Regexp::compile("ab");
+    QString str = "abcdabcd";
+    QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str), true);
+    QVERIFY(indices);
+    QCOMPARE(indices->size(), 2);
+    QCOMPARE(*indices, QVector<int>({4, 6}));
+
+    // search fail
+    str = "aaa";
+    indices = reg->findStringSubmatchIndex(QStringRef(&str));
+    QVERIFY(!indices);
+  }
+};
 
 QTEST_MAIN(RegexpTest)
 #include "RegexpTest.moc"

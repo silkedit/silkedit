@@ -19,7 +19,9 @@ constexpr int lineEditWidth = 500;
 }
 
 FindReplaceView::FindReplaceView(QWidget* parent)
-    : QWidget(parent), m_lineEditForFind(new LineEdit(this)) {
+    : QWidget(parent),
+      m_lineEditForFind(new LineEdit(this)),
+      m_regexChk(new QCheckBox(tr(REGEX_TEXT))) {
   QGridLayout* layout = new QGridLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
@@ -32,7 +34,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
   connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::hide);
-  connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::clearSearchHighlight);
+  connect(
+      m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::clearSearchHighlight);
   connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
   layout->addWidget(m_lineEditForFind, 0, 0);
   layout->addWidget(lineEditForReplace, 1, 0);
@@ -55,11 +58,10 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   layout->addWidget(nextButton, 1, 3);
 
   QCheckBox* matchCaseChk = new QCheckBox(tr(MATCH_CASE_TEXT));
-  QCheckBox* regexChk = new QCheckBox(tr(REGEX_TEXT));
   matchCaseChk->setToolTip(QKeySequence::mnemonic(MATCH_CASE_TEXT).toString());
-  regexChk->setToolTip(QKeySequence::mnemonic(REGEX_TEXT).toString());
+  m_regexChk->setToolTip(QKeySequence::mnemonic(REGEX_TEXT).toString());
   layout->addWidget(matchCaseChk, 0, 4);
-  layout->addWidget(regexChk, 1, 4);
+  layout->addWidget(m_regexChk, 1, 4);
 
   QCheckBox* wholeWordChk = new QCheckBox(tr(WHOLE_WORD_TEXT));
   QCheckBox* preserveCaseChk = new QCheckBox(tr(PRESERVE_CASE_TEXT));
@@ -77,8 +79,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   setLayout(layout);
 }
 
-void FindReplaceView::show()
-{
+void FindReplaceView::show() {
   if (isVisible()) {
     showEvent(nullptr);
   }
@@ -102,19 +103,21 @@ void FindReplaceView::findPrev() {
 
 void FindReplaceView::findText(const QString& text, QTextDocument::FindFlags flags) {
   if (TextEditView* editView = API::activeEditView()) {
-    editView->findText(text, flags);
+    if (m_regexChk->isChecked()) {
+      editView->find(*Regexp::compile(text), flags);
+    } else {
+      editView->find(text, flags);
+    }
   }
 }
 
-void FindReplaceView::highlightMatches()
-{
+void FindReplaceView::highlightMatches() {
   if (TextEditView* editView = API::activeEditView()) {
     editView->highlightSearchMatches(m_lineEditForFind->text());
   }
 }
 
-void FindReplaceView::clearSearchHighlight()
-{
+void FindReplaceView::clearSearchHighlight() {
   if (TextEditView* editView = API::activeEditView()) {
     editView->clearSearchHighlight();
   }

@@ -1,3 +1,4 @@
+#include <oniguruma.h>
 #include <QString>
 #include <QDebug>
 
@@ -8,7 +9,7 @@ Regexp::~Regexp() {
   //  onig_end();
 }
 
-Regexp* Regexp::compile(const QString& expr) {
+Regexp* Regexp::compile(const QString& expr, PatternSyntax syntax) {
   //  qDebug("compile Regexp: %s", qPrintable(expr));
   regex_t* reg = nullptr;
   OnigErrorInfo einfo;
@@ -17,13 +18,23 @@ Regexp* Regexp::compile(const QString& expr) {
   unsigned char* pattern = (unsigned char*)ba.constData();
   Q_ASSERT(pattern);
 
+  OnigSyntaxType* onigSyntax;
+  switch (syntax) {
+  case ASIS:
+    onigSyntax = ONIG_SYNTAX_ASIS;
+    break;
+  default:
+    onigSyntax = ONIG_SYNTAX_DEFAULT;
+    break;
+  }
+
   // todo: check encoding!
   int r = onig_new(&reg,
                    pattern,
                    pattern + strlen((char*)pattern),
                    ONIG_OPTION_CAPTURE_GROUP,
                    ONIG_ENCODING_UTF8,
-                   ONIG_SYNTAX_DEFAULT,
+                   onigSyntax,
                    &einfo);
   if (r != ONIG_NORMAL) {
     unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
@@ -36,7 +47,7 @@ Regexp* Regexp::compile(const QString& expr) {
   return new Regexp(reg, expr);
 }
 
-QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s) {
+QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward) const {
   Q_ASSERT(m_reg);
 
   unsigned char* start, *range, *end;
@@ -45,8 +56,13 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s) {
   QByteArray ba = s.toUtf8();
   unsigned char* str = (unsigned char*)ba.constData();
   end = str + strlen((char*)str);
-  start = str;
-  range = end;
+  if (backward) {
+    start = end;
+    range = str;
+  } else {
+    start = str;
+    range = end;
+  }
   int r = onig_search(m_reg, str, end, start, range, region, ONIG_OPTION_NONE);
 
   QVector<int>* indices = nullptr;
@@ -70,4 +86,5 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s) {
   return indices;
 }
 
-Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {}
+Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {
+}

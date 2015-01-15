@@ -36,7 +36,9 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   }
 }
 
-Document::~Document() { qDebug("~Document"); }
+Document::~Document() {
+  qDebug("~Document");
+}
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
@@ -48,7 +50,9 @@ Document* Document::create(const QString& path) {
   return new Document(path, in.readAll());
 }
 
-Document* Document::createBlank() { return new Document(); }
+Document* Document::createBlank() {
+  return new Document();
+}
 
 bool Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
@@ -67,4 +71,52 @@ bool Document::setLanguage(const QString& scopeName) {
     }
   }
   return true;
+}
+
+QTextCursor Document::find(const QString& subString,
+                           int from,
+                           QTextDocument::FindFlags options) const {
+  return QTextDocument::find(subString, from, options);
+}
+
+QTextCursor Document::find(const QString& subString,
+                           const QTextCursor& from,
+                           QTextDocument::FindFlags options) const {
+  return QTextDocument::find(subString, from, options);
+}
+
+QTextCursor Document::find(const Regexp& expr, int from, QTextDocument::FindFlags options) const {
+  bool backward = options & QTextDocument::FindBackward;
+  QStringRef text = backward ? toPlainText().midRef(0, from) : toPlainText().midRef(from);
+  QVector<int>* indices = expr.findStringSubmatchIndex(text, backward);
+  if (indices && indices->size() > 1) {
+    int startPos, endPos;
+    if (backward) {
+      startPos = indices->at(0);
+      endPos = indices->at(1);
+    } else {
+      startPos = from + indices->at(0);
+      endPos = from + indices->at(1);
+    }
+    QTextCursor resultCursor(docHandle(), startPos);
+    resultCursor.setPosition(endPos, QTextCursor::KeepAnchor);
+    return resultCursor;
+  } else {
+    return QTextCursor();
+  }
+}
+
+QTextCursor Document::find(const Regexp& expr,
+                           const QTextCursor& cursor,
+                           QTextDocument::FindFlags options) const {
+  if (cursor.isNull())
+    return QTextCursor();
+
+  int pos;
+  if (options & QTextDocument::FindBackward) {
+    pos = cursor.selectionStart();
+  } else {
+    pos = cursor.selectionEnd();
+  }
+  return find(expr, pos, options);
 }

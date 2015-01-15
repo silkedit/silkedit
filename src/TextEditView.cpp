@@ -87,13 +87,17 @@ void TextEditView::setPath(const QString& path) {
   emit pathUpdated(path);
 }
 
-void TextEditView::findText(const QString& text, QTextDocument::FindFlags flags) {
-  qDebug("findText: %s, %d", qPrintable(text), (int)(flags & QTextDocument::FindBackward));
+void TextEditView::find(const QString& text, QTextDocument::FindFlags flags) {
+  qDebug("find: %s, %d", qPrintable(text), (int)(flags & QTextDocument::FindBackward));
   if (text.isEmpty())
     return;
+  find(*Regexp::compile(text, Regexp::ASIS), flags);
+}
 
-  if (QTextDocument* doc = document()) {
-    QTextCursor cursor = doc->find(text, textCursor(), flags);
+void TextEditView::find(const Regexp &regexp, QTextDocument::FindFlags flags)
+{
+  if (Document* doc = document()) {
+    QTextCursor cursor = doc->find(regexp, textCursor(), flags);
     if (!cursor.isNull()) {
       setTextCursor(cursor);
     } else {
@@ -105,7 +109,7 @@ void TextEditView::findText(const QString& text, QTextDocument::FindFlags flags)
         nextFindCursor.movePosition(QTextCursor::Start);
         Q_ASSERT(nextFindCursor.atStart());
       }
-      cursor = doc->find(text, nextFindCursor, flags);
+      cursor = doc->find(regexp, nextFindCursor, flags);
       if (!cursor.isNull()) {
         setTextCursor(cursor);
       }

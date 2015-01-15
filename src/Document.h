@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
+#include "Regexp.h"
 
 class Document : public QTextDocument {
   Q_OBJECT
@@ -21,6 +22,10 @@ class Document : public QTextDocument {
   void setPath(const QString& path) { m_path = path; }
   Language* language() { return m_lang.get(); }
   bool setLanguage(const QString& scopeName);
+  QTextCursor find(const QString& subString, int from = 0, FindFlags options = 0) const;
+  QTextCursor find(const QString& subString, const QTextCursor& from, FindFlags options = 0) const;
+  QTextCursor find(const Regexp& expr, int from = 0, FindFlags options = 0) const;
+  QTextCursor find(const Regexp& expr, const QTextCursor& cursor, FindFlags options = 0) const;
 
  private:
   QString m_path;

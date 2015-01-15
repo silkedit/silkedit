@@ -7,6 +7,7 @@
 #include "macros.h"
 
 class LineEdit;
+class QCheckBox;
 
 class FindReplaceView : public QWidget {
   Q_OBJECT
@@ -24,6 +25,7 @@ class FindReplaceView : public QWidget {
 
  private:
   LineEdit* m_lineEditForFind;
+  QCheckBox* m_regexChk;
 
     void findNext();
     void findPrev();
