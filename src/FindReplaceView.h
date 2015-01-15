@@ -17,6 +17,8 @@ class FindReplaceView : public QWidget {
   ~FindReplaceView() = default;
   DEFAULT_MOVE(FindReplaceView)
 
+  void show();
+
   protected:
     void showEvent(QShowEvent * event) override;
 

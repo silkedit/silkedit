@@ -77,6 +77,14 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   setLayout(layout);
 }
 
+void FindReplaceView::show()
+{
+  if (isVisible()) {
+    showEvent(nullptr);
+  }
+  QWidget::show();
+}
+
 void FindReplaceView::showEvent(QShowEvent*) {
   m_lineEditForFind->setFocus();
   m_lineEditForFind->selectAll();
