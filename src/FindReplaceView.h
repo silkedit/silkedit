@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include <QTextDocument>
 
 #include "macros.h"
 
@@ -23,7 +24,8 @@ class FindReplaceView : public QWidget {
   LineEdit* m_lineEditForFind;
 
     void findNext();
-    void findNextText(const QString& text);
+    void findPrev();
+    void findText(const QString& text, QTextDocument::FindFlags flags = 0);
 };
 
 class LineEdit : public QLineEdit {
@@ -39,4 +41,5 @@ class LineEdit : public QLineEdit {
 
   signals:
     void escapePressed();
+    void shiftReturnPressed();
 };

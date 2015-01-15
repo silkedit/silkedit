@@ -29,7 +29,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   LineEdit* lineEditForReplace = new LineEdit(this);
   m_lineEditForFind->setFixedWidth(lineEditWidth);
   lineEditForReplace->setFixedWidth(lineEditWidth);
-  connect(m_lineEditForFind, &QLineEdit::returnPressed, this, &FindReplaceView::findNext);
+  connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
+  connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
   connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::hide);
   layout->addWidget(m_lineEditForFind, 0, 0);
   layout->addWidget(lineEditForReplace, 1, 0);
@@ -46,6 +47,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
 
   QPushButton* prevButton = new QPushButton("▲");
   QPushButton* nextButton = new QPushButton("▼");
+  connect(prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
+  connect(nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
   layout->addWidget(prevButton, 0, 3);
   layout->addWidget(nextButton, 1, 3);
 
@@ -78,23 +81,35 @@ void FindReplaceView::showEvent(QShowEvent*) {
 }
 
 void FindReplaceView::findNext() {
-  if (QLineEdit* findLineEdit = qobject_cast<QLineEdit*>(QObject::sender())) {
-    findNextText(findLineEdit->text());
-  }
+  Q_ASSERT(m_lineEditForFind);
+  findText(m_lineEditForFind->text());
 }
 
-void FindReplaceView::findNextText(const QString& text) {
-  qDebug("findNextText: %s", qPrintable(text));
+void FindReplaceView::findPrev() {
+  Q_ASSERT(m_lineEditForFind);
+  findText(m_lineEditForFind->text(), QTextDocument::FindBackward);
+}
+
+void FindReplaceView::findText(const QString& text, QTextDocument::FindFlags flags) {
+  qDebug("findText: %s, %d", qPrintable(text), (int)(flags & QTextDocument::FindBackward));
   if (text.isEmpty())
     return;
 
   if (TextEditView* editView = API::activeEditView()) {
     if (QTextDocument* doc = editView->document()) {
-      QTextCursor cursor = doc->find(text, editView->textCursor());
+      QTextCursor cursor = doc->find(text, editView->textCursor(), flags);
       if (!cursor.isNull()) {
         editView->setTextCursor(cursor);
       } else {
-        cursor = doc->find(text, 0);
+        QTextCursor nextFindCursor(doc);
+        if (flags & QTextDocument::FindBackward) {
+          nextFindCursor.movePosition(QTextCursor::End);
+          Q_ASSERT(nextFindCursor.atEnd());
+        } else {
+          nextFindCursor.movePosition(QTextCursor::Start);
+          Q_ASSERT(nextFindCursor.atStart());
+        }
+        cursor = doc->find(text, nextFindCursor, flags);
         if (!cursor.isNull()) {
           editView->setTextCursor(cursor);
         }
@@ -107,10 +122,16 @@ LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
   setClearButtonEnabled(true);
 }
 
-void LineEdit::keyPressEvent(QKeyEvent *event)
-{
-  if (event->key() == Qt::Key_Escape) {
-    emit escapePressed();
+void LineEdit::keyPressEvent(QKeyEvent* event) {
+  switch (event->key()) {
+    case Qt::Key_Escape:
+      emit escapePressed();
+    case Qt::Key_Return:
+      if (event->modifiers() & Qt::ShiftModifier) {
+        emit shiftReturnPressed();
+        return;
+      }
   }
+
   QLineEdit::keyPressEvent(event);
 }
