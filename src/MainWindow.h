@@ -36,6 +36,7 @@ class MainWindow : public QMainWindow {
   void close();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
+  void openFindAndReplacePanel();
 
 signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);

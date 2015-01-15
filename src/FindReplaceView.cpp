@@ -6,6 +6,8 @@
 #include <QSizePolicy>
 
 #include "FindReplaceView.h"
+#include "API.h"
+#include "TextEditView.h"
 
 namespace {
 constexpr auto MATCH_CASE_TEXT = "&Match Case";
@@ -16,18 +18,20 @@ constexpr auto IN_SELECTION_TEXT = "&In Selection";
 constexpr int lineEditWidth = 500;
 }
 
-FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent) {
+FindReplaceView::FindReplaceView(QWidget* parent)
+    : QWidget(parent), m_lineEditForFind(new LineEdit(this)) {
   QGridLayout* layout = new QGridLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
   // https://bugreports.qt.io/browse/QTBUG-14643?jql=text%20~%20%22QGridLayout%20QCheckBox%22
   //  layout->setSpacing(0);
 
-  LineEdit* lineEditForFind = new LineEdit(this);
   LineEdit* lineEditForReplace = new LineEdit(this);
-  lineEditForFind->setFixedWidth(lineEditWidth);
+  m_lineEditForFind->setFixedWidth(lineEditWidth);
   lineEditForReplace->setFixedWidth(lineEditWidth);
-  layout->addWidget(lineEditForFind, 0, 0);
+  connect(m_lineEditForFind, &QLineEdit::returnPressed, this, &FindReplaceView::findNext);
+  connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::hide);
+  layout->addWidget(m_lineEditForFind, 0, 0);
   layout->addWidget(lineEditForReplace, 1, 0);
 
   QPushButton* findButton = new QPushButton(tr("Find"));
@@ -68,4 +72,45 @@ FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent) {
   setLayout(layout);
 }
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) { setClearButtonEnabled(true); }
+void FindReplaceView::showEvent(QShowEvent*) {
+  m_lineEditForFind->setFocus();
+  m_lineEditForFind->selectAll();
+}
+
+void FindReplaceView::findNext() {
+  if (QLineEdit* findLineEdit = qobject_cast<QLineEdit*>(QObject::sender())) {
+    findNextText(findLineEdit->text());
+  }
+}
+
+void FindReplaceView::findNextText(const QString& text) {
+  qDebug("findNextText: %s", qPrintable(text));
+  if (text.isEmpty())
+    return;
+
+  if (TextEditView* editView = API::activeEditView()) {
+    if (QTextDocument* doc = editView->document()) {
+      QTextCursor cursor = doc->find(text, editView->textCursor());
+      if (!cursor.isNull()) {
+        editView->setTextCursor(cursor);
+      } else {
+        cursor = doc->find(text, 0);
+        if (!cursor.isNull()) {
+          editView->setTextCursor(cursor);
+        }
+      }
+    }
+  }
+}
+
+LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
+  setClearButtonEnabled(true);
+}
+
+void LineEdit::keyPressEvent(QKeyEvent *event)
+{
+  if (event->key() == Qt::Key_Escape) {
+    emit escapePressed();
+  }
+  QLineEdit::keyPressEvent(event);
+}

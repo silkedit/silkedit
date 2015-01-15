@@ -14,6 +14,7 @@
 #include "ViEngine.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
+#include "TestUtil.h"
 
 int main(int argv, char** args) {
   PlatformUtil::enableMnemonicOnMac();
@@ -56,7 +57,7 @@ int main(int argv, char** args) {
     DocumentService::open(arguments.at(1));
   }
 
-  //  new Dummy();
+//  new TestUtil();
 
   return app.exec();
 }

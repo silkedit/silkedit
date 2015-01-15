@@ -22,6 +22,7 @@
 //#include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
+#include "commands/OpenFindPanelCommand.h"
 
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandService::m_commands;
 
@@ -89,4 +90,6 @@ void CommandService::init() {
 
   std::unique_ptr<SplitVerticallyCommand> splitVerticallyCmd(new SplitVerticallyCommand());
   add(std::move(splitVerticallyCmd));
+
+  add(std::move(std::unique_ptr<OpenFindPanelCommand>(new OpenFindPanelCommand)));
 }

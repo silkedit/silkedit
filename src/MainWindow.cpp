@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   m_tabViewGroup->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
   layout->addWidget(m_tabViewGroup);
   layout->addWidget(m_findReplaceView);
+  m_findReplaceView->hide();
   QWidget* editorWidget = new QWidget(this);
   editorWidget->setLayout(layout);
 
@@ -168,4 +169,9 @@ bool MainWindow::openDir(const QString& dirPath) {
   } else {
     return false;
   }
+}
+
+void MainWindow::openFindAndReplacePanel()
+{
+  m_findReplaceView->show();
 }
