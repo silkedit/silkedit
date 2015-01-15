@@ -20,18 +20,18 @@ class FindReplaceView : public QWidget {
 
   void show();
 
-  protected:
-    void showEvent(QShowEvent * event) override;
+ protected:
+  void showEvent(QShowEvent* event) override;
 
  private:
   LineEdit* m_lineEditForFind;
   QCheckBox* m_regexChk;
 
-    void findNext();
-    void findPrev();
-    void findText(const QString& text, QTextDocument::FindFlags flags = 0);
-    void highlightMatches();
-    void clearSearchHighlight();
+  void findNext();
+  void findPrev();
+  void findText(const QString& text, QTextDocument::FindFlags flags = 0);
+  void highlightMatches();
+  void clearSearchHighlight();
 };
 
 class LineEdit : public QLineEdit {
@@ -42,10 +42,10 @@ class LineEdit : public QLineEdit {
   ~LineEdit() = default;
   DEFAULT_MOVE(LineEdit)
 
-  protected:
-    void keyPressEvent(QKeyEvent * event) override;
+ protected:
+  void keyPressEvent(QKeyEvent* event) override;
 
-  signals:
-    void escapePressed();
-    void shiftReturnPressed();
+signals:
+  void escapePressed();
+  void shiftReturnPressed();
 };

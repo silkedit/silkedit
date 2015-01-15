@@ -33,10 +33,7 @@ class Regexp {
       http://www.geocities.jp/kosako3/oniguruma/doc/API.txt
       http://www.geocities.jp/kosako3/oniguruma/doc/API.ja.txt
   */
-  enum PatternSyntax {
-    ASIS,
-    Default,
-  };
+  enum PatternSyntax { ASIS, Default, };
 
   ~Regexp();
   DEFAULT_MOVE(Regexp)

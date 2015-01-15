@@ -57,7 +57,7 @@ int main(int argv, char** args) {
     DocumentService::open(arguments.at(1));
   }
 
-//  new TestUtil();
+  //  new TestUtil();
 
   return app.exec();
 }

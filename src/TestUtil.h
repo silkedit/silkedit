@@ -8,9 +8,7 @@
 class TestUtil : public QObject {
   Q_OBJECT
  public:
-  TestUtil() {
-    QTimer::singleShot(500, this, SLOT(openFile()));
-  }
+  TestUtil() { QTimer::singleShot(500, this, SLOT(openFile())); }
 
  public slots:
   void openFile() {

@@ -20,12 +20,12 @@ Regexp* Regexp::compile(const QString& expr, PatternSyntax syntax) {
 
   OnigSyntaxType* onigSyntax;
   switch (syntax) {
-  case ASIS:
-    onigSyntax = ONIG_SYNTAX_ASIS;
-    break;
-  default:
-    onigSyntax = ONIG_SYNTAX_DEFAULT;
-    break;
+    case ASIS:
+      onigSyntax = ONIG_SYNTAX_ASIS;
+      break;
+    default:
+      onigSyntax = ONIG_SYNTAX_DEFAULT;
+      break;
   }
 
   // todo: check encoding!
@@ -86,5 +86,4 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward
   return indices;
 }
 
-Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {
-}
+Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {}
