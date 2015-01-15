@@ -26,6 +26,8 @@ class FindReplaceView : public QWidget {
     void findNext();
     void findPrev();
     void findText(const QString& text, QTextDocument::FindFlags flags = 0);
+    void highlightMatches();
+    void clearSearchHighlight();
 };
 
 class LineEdit : public QLineEdit {

@@ -40,6 +40,9 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   void save();
   void saveAs();
   void setPath(const QString& path);
+  void findText(const QString&, QTextDocument::FindFlags flags);
+  void highlightSearchMatches(const QString& text);
+  void clearSearchHighlight();
 
 signals:
   void destroying(const QString& path);
@@ -60,6 +63,8 @@ signals:
  private:
   QWidget* m_lineNumberArea;
   std::shared_ptr<Document> m_document;
+  QVector<Region> m_searchMatchedRegions;
+
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);

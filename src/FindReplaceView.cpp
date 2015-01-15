@@ -32,6 +32,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
   connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::hide);
+  connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::clearSearchHighlight);
+  connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
   layout->addWidget(m_lineEditForFind, 0, 0);
   layout->addWidget(lineEditForReplace, 1, 0);
 
@@ -91,30 +93,22 @@ void FindReplaceView::findPrev() {
 }
 
 void FindReplaceView::findText(const QString& text, QTextDocument::FindFlags flags) {
-  qDebug("findText: %s, %d", qPrintable(text), (int)(flags & QTextDocument::FindBackward));
-  if (text.isEmpty())
-    return;
-
   if (TextEditView* editView = API::activeEditView()) {
-    if (QTextDocument* doc = editView->document()) {
-      QTextCursor cursor = doc->find(text, editView->textCursor(), flags);
-      if (!cursor.isNull()) {
-        editView->setTextCursor(cursor);
-      } else {
-        QTextCursor nextFindCursor(doc);
-        if (flags & QTextDocument::FindBackward) {
-          nextFindCursor.movePosition(QTextCursor::End);
-          Q_ASSERT(nextFindCursor.atEnd());
-        } else {
-          nextFindCursor.movePosition(QTextCursor::Start);
-          Q_ASSERT(nextFindCursor.atStart());
-        }
-        cursor = doc->find(text, nextFindCursor, flags);
-        if (!cursor.isNull()) {
-          editView->setTextCursor(cursor);
-        }
-      }
-    }
+    editView->findText(text, flags);
+  }
+}
+
+void FindReplaceView::highlightMatches()
+{
+  if (TextEditView* editView = API::activeEditView()) {
+    editView->highlightSearchMatches(m_lineEditForFind->text());
+  }
+}
+
+void FindReplaceView::clearSearchHighlight()
+{
+  if (TextEditView* editView = API::activeEditView()) {
+    editView->clearSearchHighlight();
   }
 }
 
