@@ -16,7 +16,8 @@ class Document : public QTextDocument {
     FindBackward = 0x00001,
     FindCaseSensitively = 0x00002,
     FindWholeWords = 0x00004,
-    FindRegex = 0x00008
+    FindRegex = 0x00008,
+    FindInSelection = 0x00010,
   };
   Q_DECLARE_FLAGS(FindFlags, FindFlag)
 
@@ -30,10 +31,10 @@ class Document : public QTextDocument {
   void setPath(const QString& path) { m_path = path; }
   Language* language() { return m_lang.get(); }
   bool setLanguage(const QString& scopeName);
-  QTextCursor find(const QString& subString, int from = 0, FindFlags options = 0) const;
-  QTextCursor find(const QString& subString, const QTextCursor& from, FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr, int from = 0, FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr, const QTextCursor& cursor, FindFlags options = 0) const;
+  QTextCursor find(const QString& subString, int from = 0, int begin = 0, int end = -1, FindFlags options = 0) const;
+  QTextCursor find(const QString& subString, const QTextCursor& from, int begin = 0, int end = -1, FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr, int from = 0, int begin = 0, int end = -1, FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr, const QTextCursor& cursor, int begin = 0, int end = -1, FindFlags options = 0) const;
 
  private:
   QString m_path;

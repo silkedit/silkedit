@@ -28,6 +28,9 @@ class FindReplaceView : public QWidget {
   QCheckBox* m_regexChk;
   QCheckBox* m_matchCaseChk;
   QCheckBox* m_wholeWordChk;
+  QCheckBox* m_inSelectionChk;
+  int m_selectionStartPos;
+  int m_selectionEndPos;
 
   void findNext();
   void findPrev();
@@ -35,6 +38,7 @@ class FindReplaceView : public QWidget {
   void highlightMatches();
   void clearSearchHighlight();
   Document::FindFlags getFindFlags();
+  void updateSelectionRegion();
 };
 
 class LineEdit : public QLineEdit {
@@ -47,8 +51,10 @@ class LineEdit : public QLineEdit {
 
  protected:
   void keyPressEvent(QKeyEvent* event) override;
+  void focusInEvent(QFocusEvent* ev) override;
 
 signals:
   void escapePressed();
   void shiftReturnPressed();
+  void focusIn();
 };
