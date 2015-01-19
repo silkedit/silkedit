@@ -12,6 +12,9 @@ class Document : public QTextDocument {
   DISABLE_COPY(Document)
 
  public:
+  enum FindFlag { FindBackward = 0x00001, FindCaseSensitively = 0x00002, FindWholeWords = 0x00004, FindRegex = 0x00008 };
+  Q_DECLARE_FLAGS(FindFlags, FindFlag)
+
   ~Document();
   DEFAULT_MOVE(Document)
 
@@ -24,8 +27,8 @@ class Document : public QTextDocument {
   bool setLanguage(const QString& scopeName);
   QTextCursor find(const QString& subString, int from = 0, FindFlags options = 0) const;
   QTextCursor find(const QString& subString, const QTextCursor& from, FindFlags options = 0) const;
-  QTextCursor find(const Regexp& expr, int from = 0, FindFlags options = 0) const;
-  QTextCursor find(const Regexp& expr, const QTextCursor& cursor, FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr, int from = 0, FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr, const QTextCursor& cursor, FindFlags options = 0) const;
 
  private:
   QString m_path;

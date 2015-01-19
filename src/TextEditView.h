@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <QObject>
 #include <QPlainTextEdit>
@@ -41,9 +42,8 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   void save();
   void saveAs();
   void setPath(const QString& path);
-  void find(const QString& text, QTextDocument::FindFlags flags);
-  void find(const Regexp& regexp, QTextDocument::FindFlags flags);
-  void highlightSearchMatches(const QString& text);
+  void find(const QString& text, Document::FindFlags flags);
+  void highlightSearchMatches(const QString& text, Document::FindFlags flags);
   void clearSearchHighlight();
 
 signals:

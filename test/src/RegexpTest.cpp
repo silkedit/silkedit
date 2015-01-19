@@ -38,13 +38,6 @@ class RegexpTest : public QObject {
     QVERIFY(!reg);
   }
 
-  void compileWithASISSyntax() {
-    Regexp* regexp = Regexp::compile("a.c", Regexp::ASIS);
-    QString str = "abc";
-    QVector<int>* indices = regexp->findStringSubmatchIndex(QStringRef(&str), true);
-    QVERIFY(!indices);
-  }
-
   void findStringSubmatchIndex() {
     Regexp* reg = Regexp::compile("(<\\?)\\s*([-_a-zA-Z0-9]+)");
     QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
@@ -71,6 +64,13 @@ class RegexpTest : public QObject {
     str = "aaa";
     indices = reg->findStringSubmatchIndex(QStringRef(&str));
     QVERIFY(!indices);
+  }
+
+  void escape() {
+    QCOMPARE(Regexp::escape(R"(\$bc^)"), QString(R"(\$bc\^)"));
+    QCOMPARE(Regexp::escape(R"(\\$bc^)"), QString(R"(\\\$bc\^)"));
+    QCOMPARE(Regexp::escape(R"([]{}()|-*.\a?+^$# )"), QString(R"(\[\]\{\}\(\)\|\-\*\.\\a\?\+\^\$\#\ )"));
+    QCOMPARE(Regexp::escape("\t\n\r\f\v"), QString("\\\t\\\n\\\r\\\f\\\v"));
   }
 };
 

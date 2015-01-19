@@ -2,9 +2,9 @@
 
 #include <QWidget>
 #include <QLineEdit>
-#include <QTextDocument>
 
 #include "macros.h"
+#include "Document.h"
 
 class LineEdit;
 class QCheckBox;
@@ -26,12 +26,14 @@ class FindReplaceView : public QWidget {
  private:
   LineEdit* m_lineEditForFind;
   QCheckBox* m_regexChk;
+  QCheckBox* m_matchCaseChk;
 
   void findNext();
   void findPrev();
-  void findText(const QString& text, QTextDocument::FindFlags flags = 0);
+  void findText(const QString& text, Document::FindFlags flags = 0);
   void highlightMatches();
   void clearSearchHighlight();
+  Document::FindFlags getFindFlags();
 };
 
 class LineEdit : public QLineEdit {

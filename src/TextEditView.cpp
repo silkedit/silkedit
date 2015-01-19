@@ -39,7 +39,9 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path() { return m_document ? m_document->path() : ""; }
+QString TextEditView::path() {
+  return m_document ? m_document->path() : "";
+}
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
@@ -85,33 +87,30 @@ void TextEditView::setPath(const QString& path) {
   emit pathUpdated(path);
 }
 
-void TextEditView::find(const QString& text, QTextDocument::FindFlags flags) {
-  qDebug("find: %s, %d", qPrintable(text), (int)(flags & QTextDocument::FindBackward));
+void TextEditView::find(const QString& text, Document::FindFlags flags) {
+  qDebug("find: %s, %d", qPrintable(text), (int)(flags & Document::FindBackward));
   if (text.isEmpty())
     return;
-  find(*Regexp::compile(text, Regexp::ASIS), flags);
-}
-
-void TextEditView::find(const Regexp& regexp, QTextDocument::FindFlags flags) {
   if (Document* doc = document()) {
-    QTextCursor cursor = doc->find(regexp, textCursor(), flags);
+    const QTextCursor& cursor = doc->find(text, textCursor(), flags);
     if (!cursor.isNull()) {
       setTextCursor(cursor);
     } else {
       QTextCursor nextFindCursor(doc);
-      if (flags & QTextDocument::FindBackward) {
+      if (flags & Document::FindBackward) {
         nextFindCursor.movePosition(QTextCursor::End);
         Q_ASSERT(nextFindCursor.atEnd());
       } else {
         nextFindCursor.movePosition(QTextCursor::Start);
         Q_ASSERT(nextFindCursor.atStart());
       }
-      cursor = doc->find(regexp, nextFindCursor, flags);
-      if (!cursor.isNull()) {
-        setTextCursor(cursor);
+      const QTextCursor& cursor2 = doc->find(text, nextFindCursor, flags);
+      if (!cursor2.isNull()) {
+        setTextCursor(cursor2);
       }
     }
   }
+
 }
 
 int TextEditView::lineNumberAreaWidth() {
@@ -300,7 +299,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   QPainter painter(viewport());
 
   // highlight search matched texts
-  foreach(const Region & region, m_searchMatchedRegions) {
+  foreach (const Region& region, m_searchMatchedRegions) {
     QTextCursor beginCursor(document()->docHandle(), region.begin());
     QTextCursor endCursor(document()->docHandle(), region.end() - 1);
     int beginPos = beginCursor.positionInBlock();
@@ -362,7 +361,9 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
+inline bool TextEditView::isTabOrSpace(const QChar ch) {
+  return ch == '\t' || ch == ' ';
+}
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();
@@ -373,13 +374,13 @@ void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   }
 }
 
-void TextEditView::highlightSearchMatches(const QString& text) {
+void TextEditView::highlightSearchMatches(const QString& text, Document::FindFlags flags) {
   m_searchMatchedRegions.clear();
 
   QTextCursor cursor(document());
 
   while (!cursor.isNull() && !cursor.atEnd()) {
-    cursor = document()->find(text, cursor);
+    cursor = document()->find(text, cursor, flags);
     if (!cursor.isNull()) {
       m_searchMatchedRegions.append(Region(cursor.selectionStart(), cursor.selectionEnd() + 1));
     }

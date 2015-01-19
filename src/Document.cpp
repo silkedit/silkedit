@@ -36,7 +36,9 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   }
 }
 
-Document::~Document() { qDebug("~Document"); }
+Document::~Document() {
+  qDebug("~Document");
+}
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
@@ -48,7 +50,9 @@ Document* Document::create(const QString& path) {
   return new Document(path, in.readAll());
 }
 
-Document* Document::createBlank() { return new Document(); }
+Document* Document::createBlank() {
+  return new Document();
+}
 
 bool Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
@@ -71,20 +75,48 @@ bool Document::setLanguage(const QString& scopeName) {
 
 QTextCursor Document::find(const QString& subString,
                            int from,
-                           QTextDocument::FindFlags options) const {
-  return QTextDocument::find(subString, from, options);
+                           Document::FindFlags options) const {
+  if (subString.isEmpty()) {
+    return QTextCursor();
+  }
+
+  bool isCaseSensitive = options & Document::FindCaseSensitively;
+  bool isRegex = options & Document::FindRegex;
+
+  QString str = isRegex ? subString : Regexp::escape(subString);
+  if (isCaseSensitive) {
+    str = "(?-i)" + str;
+  } else {
+    str = "(?i)" + str;
+  }
+
+  std::unique_ptr<Regexp> regexp(Regexp::compile(str));
+  if (regexp) {
+    return find(regexp.get(), from, options);
+  } else {
+    return QTextCursor();
+  }
 }
 
 QTextCursor Document::find(const QString& subString,
-                           const QTextCursor& from,
-                           QTextDocument::FindFlags options) const {
-  return QTextDocument::find(subString, from, options);
+                           const QTextCursor& cursor,
+                           Document::FindFlags options) const {
+  if (cursor.isNull())
+    return QTextCursor();
+
+  int pos;
+  if (options & QTextDocument::FindBackward) {
+    pos = cursor.selectionStart();
+  } else {
+    pos = cursor.selectionEnd();
+  }
+  return find(subString, pos, options);
 }
 
-QTextCursor Document::find(const Regexp& expr, int from, QTextDocument::FindFlags options) const {
+QTextCursor Document::find(const Regexp *expr, int from, Document::FindFlags options) const {
   bool backward = options & QTextDocument::FindBackward;
   QStringRef text = backward ? toPlainText().midRef(0, from) : toPlainText().midRef(from);
-  QVector<int>* indices = expr.findStringSubmatchIndex(text, backward);
+  QVector<int>* indices = expr->findStringSubmatchIndex(text, backward);
   if (indices && indices->size() > 1) {
     int startPos, endPos;
     if (backward) {
@@ -102,9 +134,9 @@ QTextCursor Document::find(const Regexp& expr, int from, QTextDocument::FindFlag
   }
 }
 
-QTextCursor Document::find(const Regexp& expr,
+QTextCursor Document::find(const Regexp* expr,
                            const QTextCursor& cursor,
-                           QTextDocument::FindFlags options) const {
+                           Document::FindFlags options) const {
   if (cursor.isNull())
     return QTextCursor();
 
