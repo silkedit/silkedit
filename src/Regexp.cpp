@@ -7,28 +7,10 @@
 
 namespace {
 bool isMetaChar(const QChar& ch) {
-  return ch == '[' ||
-        ch == ']' ||
-        ch == '{' ||
-        ch == '}' ||
-        ch == '(' ||
-        ch == ')' ||
-        ch == '|' ||
-        ch == '-' ||
-        ch == '*' ||
-        ch == '.' ||
-        ch == '\\' ||
-        ch == '?' ||
-        ch == '+' ||
-        ch == '^' ||
-        ch == '$' ||
-        ch == '#' ||
-        ch == ' ' ||
-        ch == '\t' ||
-        ch == '\n' ||
-        ch == '\r' ||
-        ch == '\f' ||
-        ch == '\v';
+  return ch == '[' || ch == ']' || ch == '{' || ch == '}' || ch == '(' || ch == ')' || ch == '|' ||
+         ch == '-' || ch == '*' || ch == '.' || ch == '\\' || ch == '?' || ch == '+' || ch == '^' ||
+         ch == '$' || ch == '#' || ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' ||
+         ch == '\f' || ch == '\v';
 }
 }
 
@@ -37,8 +19,7 @@ Regexp::~Regexp() {
   //  onig_end();
 }
 
-QString Regexp::escape(const QString &expr)
-{
+QString Regexp::escape(const QString& expr) {
   QString escapedStr;
   for (int i = 0; i < expr.length();) {
     // skip consecutive backslashes (\\)
@@ -49,8 +30,8 @@ QString Regexp::escape(const QString &expr)
     }
 
     // single backslash. Check if it escapes a following meta char.
-    if (expr[i] == '\\' && i + 1 < expr.length() && isMetaChar(expr[i+1])) {
-      escapedStr = escapedStr % "\\" % expr[i+1];
+    if (expr[i] == '\\' && i + 1 < expr.length() && isMetaChar(expr[i + 1])) {
+      escapedStr = escapedStr % "\\" % expr[i + 1];
       i += 2;
       continue;
     }

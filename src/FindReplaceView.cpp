@@ -121,8 +121,7 @@ void FindReplaceView::clearSearchHighlight() {
   }
 }
 
-Document::FindFlags FindReplaceView::getFindFlags()
-{
+Document::FindFlags FindReplaceView::getFindFlags() {
   Document::FindFlags flags;
   if (m_regexChk->isChecked()) {
     flags |= Document::FindRegex;

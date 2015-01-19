@@ -39,9 +39,7 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-QString TextEditView::path() {
-  return m_document ? m_document->path() : "";
-}
+QString TextEditView::path() { return m_document ? m_document->path() : ""; }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
@@ -110,7 +108,6 @@ void TextEditView::find(const QString& text, Document::FindFlags flags) {
       }
     }
   }
-
 }
 
 int TextEditView::lineNumberAreaWidth() {
@@ -299,7 +296,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   QPainter painter(viewport());
 
   // highlight search matched texts
-  foreach (const Region& region, m_searchMatchedRegions) {
+  foreach(const Region & region, m_searchMatchedRegions) {
     QTextCursor beginCursor(document()->docHandle(), region.begin());
     QTextCursor endCursor(document()->docHandle(), region.end() - 1);
     int beginPos = beginCursor.positionInBlock();
@@ -361,9 +358,7 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) {
-  return ch == '\t' || ch == ' ';
-}
+inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

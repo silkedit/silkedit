@@ -69,7 +69,8 @@ class RegexpTest : public QObject {
   void escape() {
     QCOMPARE(Regexp::escape(R"(\$bc^)"), QString(R"(\$bc\^)"));
     QCOMPARE(Regexp::escape(R"(\\$bc^)"), QString(R"(\\\$bc\^)"));
-    QCOMPARE(Regexp::escape(R"([]{}()|-*.\a?+^$# )"), QString(R"(\[\]\{\}\(\)\|\-\*\.\\a\?\+\^\$\#\ )"));
+    QCOMPARE(Regexp::escape(R"([]{}()|-*.\a?+^$# )"),
+             QString(R"(\[\]\{\}\(\)\|\-\*\.\\a\?\+\^\$\#\ )"));
     QCOMPARE(Regexp::escape("\t\n\r\f\v"), QString("\\\t\\\n\\\r\\\f\\\v"));
   }
 };
