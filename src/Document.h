@@ -31,10 +31,26 @@ class Document : public QTextDocument {
   void setPath(const QString& path) { m_path = path; }
   Language* language() { return m_lang.get(); }
   bool setLanguage(const QString& scopeName);
-  QTextCursor find(const QString& subString, int from = 0, int begin = 0, int end = -1, FindFlags options = 0) const;
-  QTextCursor find(const QString& subString, const QTextCursor& from, int begin = 0, int end = -1, FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr, int from = 0, int begin = 0, int end = -1, FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr, const QTextCursor& cursor, int begin = 0, int end = -1, FindFlags options = 0) const;
+  QTextCursor find(const QString& subString,
+                   int from = 0,
+                   int begin = 0,
+                   int end = -1,
+                   FindFlags options = 0) const;
+  QTextCursor find(const QString& subString,
+                   const QTextCursor& from,
+                   int begin = 0,
+                   int end = -1,
+                   FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr,
+                   int from = 0,
+                   int begin = 0,
+                   int end = -1,
+                   FindFlags options = 0) const;
+  QTextCursor find(const Regexp* expr,
+                   const QTextCursor& cursor,
+                   int begin = 0,
+                   int end = -1,
+                   FindFlags options = 0) const;
 
  private:
   QString m_path;

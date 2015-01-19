@@ -43,7 +43,10 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   void saveAs();
   void setPath(const QString& path);
   void find(const QString& text, int begin = 0, int end = -1, Document::FindFlags flags = 0);
-  void highlightSearchMatches(const QString& text, int begin = 0, int end = -1, Document::FindFlags flags = 0);
+  void highlightSearchMatches(const QString& text,
+                              int begin = 0,
+                              int end = -1,
+                              Document::FindFlags flags = 0);
   void clearSearchHighlight();
 
 signals:

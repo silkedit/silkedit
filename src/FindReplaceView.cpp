@@ -159,9 +159,7 @@ void FindReplaceView::updateSelectionRegion() {
   }
 }
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
-  setClearButtonEnabled(true);
-}
+LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) { setClearButtonEnabled(true); }
 
 void LineEdit::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {

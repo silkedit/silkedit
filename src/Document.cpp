@@ -69,7 +69,11 @@ bool Document::setLanguage(const QString& scopeName) {
   return true;
 }
 
-QTextCursor Document::find(const QString& subString, int from, int begin, int end, Document::FindFlags options) const {
+QTextCursor Document::find(const QString& subString,
+                           int from,
+                           int begin,
+                           int end,
+                           Document::FindFlags options) const {
   if (subString.isEmpty()) {
     return QTextCursor();
   }
@@ -115,10 +119,20 @@ QTextCursor Document::find(const QString& subString,
   return find(subString, pos, begin, end, options);
 }
 
-QTextCursor Document::find(const Regexp* expr, int from, int begin, int end, Document::FindFlags options) const {
+QTextCursor Document::find(const Regexp* expr,
+                           int from,
+                           int begin,
+                           int end,
+                           Document::FindFlags options) const {
   bool isBackward = options.testFlag(Document::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()), (options.testFlag(Document::FindBackward)), from, begin, end);
-  QStringRef text = isBackward ? toPlainText().midRef(begin, from-begin) : toPlainText().midRef(from, end-from);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
+         qPrintable(expr->pattern()),
+         (options.testFlag(Document::FindBackward)),
+         from,
+         begin,
+         end);
+  QStringRef text = isBackward ? toPlainText().midRef(begin, from - begin)
+                               : toPlainText().midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);
   if (indices && indices->size() > 1) {
     int startPos, endPos;
