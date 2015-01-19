@@ -22,7 +22,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
     : QWidget(parent),
       m_lineEditForFind(new LineEdit(this)),
       m_regexChk(new QCheckBox(tr(REGEX_TEXT))),
-      m_matchCaseChk(new QCheckBox(tr(MATCH_CASE_TEXT))) {
+      m_matchCaseChk(new QCheckBox(tr(MATCH_CASE_TEXT))),
+      m_wholeWordChk(new QCheckBox(tr(WHOLE_WORD_TEXT))) {
   QGridLayout* layout = new QGridLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
@@ -63,11 +64,10 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   layout->addWidget(m_matchCaseChk, 0, 4);
   layout->addWidget(m_regexChk, 1, 4);
 
-  QCheckBox* wholeWordChk = new QCheckBox(tr(WHOLE_WORD_TEXT));
   QCheckBox* preserveCaseChk = new QCheckBox(tr(PRESERVE_CASE_TEXT));
-  wholeWordChk->setToolTip(QKeySequence::mnemonic(WHOLE_WORD_TEXT).toString());
+  m_wholeWordChk->setToolTip(QKeySequence::mnemonic(WHOLE_WORD_TEXT).toString());
   preserveCaseChk->setToolTip(QKeySequence::mnemonic(PRESERVE_CASE_TEXT).toString());
-  layout->addWidget(wholeWordChk, 1, 5);
+  layout->addWidget(m_wholeWordChk, 1, 5);
   layout->addWidget(preserveCaseChk, 0, 5);
 
   QCheckBox* inSelectionChk = new QCheckBox(tr(IN_SELECTION_TEXT));
@@ -128,6 +128,9 @@ Document::FindFlags FindReplaceView::getFindFlags() {
   }
   if (m_matchCaseChk->isChecked()) {
     flags |= Document::FindCaseSensitively;
+  }
+  if (m_wholeWordChk->isChecked()) {
+    flags |= Document::FindWholeWords;
   }
   return flags;
 }

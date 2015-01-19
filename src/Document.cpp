@@ -76,8 +76,14 @@ QTextCursor Document::find(const QString& subString, int from, Document::FindFla
 
   bool isCaseSensitive = options & Document::FindCaseSensitively;
   bool isRegex = options & Document::FindRegex;
+  bool isWholeWord = options & Document::FindWholeWords;
 
   QString str = isRegex ? subString : Regexp::escape(subString);
+
+  if (isWholeWord) {
+    str = "\\b" + str + "\\b";
+  }
+
   if (isCaseSensitive) {
     str = "(?-i)" + str;
   } else {

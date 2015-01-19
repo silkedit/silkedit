@@ -27,6 +27,7 @@ class FindReplaceView : public QWidget {
   LineEdit* m_lineEditForFind;
   QCheckBox* m_regexChk;
   QCheckBox* m_matchCaseChk;
+  QCheckBox* m_wholeWordChk;
 
   void findNext();
   void findPrev();
