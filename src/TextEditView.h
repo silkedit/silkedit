@@ -50,6 +50,7 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
                               int end = -1,
                               Document::FindFlags flags = 0);
   void clearSearchHighlight();
+  void replaceSelection(const QString& text);
 
 signals:
   void destroying(const QString& path);

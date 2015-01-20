@@ -406,6 +406,16 @@ void TextEditView::clearSearchHighlight() {
   update();
 }
 
+void TextEditView::replaceSelection(const QString &text)
+{
+  QTextCursor cursor = textCursor();
+  if (cursor.hasSelection()) {
+    // delete selection
+    cursor.deleteChar();
+    cursor.insertText(text);
+  }
+}
+
 TextEditView* TextEditView::clone() {
   TextEditView* editView = new TextEditView(this);
   editView->setDocument(m_document);

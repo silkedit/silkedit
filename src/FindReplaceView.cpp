@@ -21,6 +21,7 @@ constexpr int lineEditWidth = 500;
 FindReplaceView::FindReplaceView(QWidget* parent)
     : QWidget(parent),
       m_lineEditForFind(new LineEdit(this)),
+      m_lineEditForReplace(new LineEdit(this)),
       m_regexChk(new QCheckBox(tr(REGEX_TEXT))),
       m_matchCaseChk(new QCheckBox(tr(MATCH_CASE_TEXT))),
       m_wholeWordChk(new QCheckBox(tr(WHOLE_WORD_TEXT))),
@@ -31,26 +32,21 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   // https://bugreports.qt.io/browse/QTBUG-14643?jql=text%20~%20%22QGridLayout%20QCheckBox%22
   //  layout->setSpacing(0);
 
-  LineEdit* lineEditForReplace = new LineEdit(this);
   m_lineEditForFind->setFixedWidth(lineEditWidth);
-  lineEditForReplace->setFixedWidth(lineEditWidth);
+  m_lineEditForReplace->setFixedWidth(lineEditWidth);
 
   connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
-  connect(m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::hide);
-  connect(
-      m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::clearSearchHighlight);
   connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
-  connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::selectFirstMatch);
   connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateSelectionRegion);
   connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateActiveCursorPos);
+  connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::highlightMatches);
 
   layout->addWidget(m_lineEditForFind, 0, 0);
-  layout->addWidget(lineEditForReplace, 1, 0);
+  layout->addWidget(m_lineEditForReplace, 1, 0);
 
-  QPushButton* findButton = new QPushButton(tr("Find"));
   QPushButton* replaceButton = new QPushButton(tr("Replace"));
-  layout->addWidget(findButton, 0, 1);
+  connect(replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
   layout->addWidget(replaceButton, 1, 1);
 
   QPushButton* findAllButton = new QPushButton(tr("Find All"));
@@ -96,6 +92,15 @@ void FindReplaceView::showEvent(QShowEvent*) {
   m_lineEditForFind->selectAll();
 }
 
+void FindReplaceView::keyPressEvent(QKeyEvent* event) {
+  switch (event->key()) {
+    case Qt::Key_Escape:
+      hide();
+      break;
+  }
+  QWidget::keyPressEvent(event);
+}
+
 void FindReplaceView::findNext() {
   Q_ASSERT(m_lineEditForFind);
   findText(m_lineEditForFind->text());
@@ -126,14 +131,14 @@ void FindReplaceView::findText(const QString& text,
   }
 }
 
-void FindReplaceView::findText(const QString &text, Document::FindFlags flags)
-{
+void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
   findText(text, -1, flags);
 }
 
 void FindReplaceView::highlightMatches() {
   if (TextEditView* editView = API::activeEditView()) {
     editView->highlightSearchMatches(m_lineEditForFind->text(), getFindFlags());
+    selectFirstMatch();
   }
 }
 
@@ -175,7 +180,7 @@ void FindReplaceView::updateSelectionRegion() {
 
 void FindReplaceView::updateActiveCursorPos() {
   if (TextEditView* editView = API::activeEditView()) {
-    m_activeCursorPos = editView->textCursor().position();
+    m_activeCursorPos = editView->textCursor().selectionStart();
   }
 }
 
@@ -184,14 +189,26 @@ void FindReplaceView::selectFirstMatch() {
   findText(m_lineEditForFind->text(), m_activeCursorPos);
 }
 
+void FindReplaceView::replace() {
+  Q_ASSERT(m_lineEditForFind);
+  Q_ASSERT(m_lineEditForReplace);
+  if (TextEditView* editView = API::activeEditView()) {
+    editView->replaceSelection(m_lineEditForReplace->text());
+    highlightMatches();
+  }
+}
+
+void FindReplaceView::hide() {
+  clearSearchHighlight();
+  QWidget::hide();
+}
+
 LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
   setClearButtonEnabled(true);
 }
 
 void LineEdit::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
-    case Qt::Key_Escape:
-      emit escapePressed();
     case Qt::Key_Return:
       if (event->modifiers() & Qt::ShiftModifier) {
         emit shiftReturnPressed();
