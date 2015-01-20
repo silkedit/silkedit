@@ -41,7 +41,9 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(
       m_lineEditForFind, &LineEdit::escapePressed, this, &FindReplaceView::clearSearchHighlight);
   connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
+  connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::selectFirstMatch);
   connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateSelectionRegion);
+  connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateActiveCursorPos);
 
   layout->addWidget(m_lineEditForFind, 0, 0);
   layout->addWidget(lineEditForReplace, 1, 0);
@@ -101,20 +103,32 @@ void FindReplaceView::findNext() {
 
 void FindReplaceView::findPrev() {
   Q_ASSERT(m_lineEditForFind);
-  findText(m_lineEditForFind->text(), Document::FindBackward);
+  findText(m_lineEditForFind->text(), Document::FindFlag::FindBackward);
 }
 
-void FindReplaceView::findText(const QString& text, Document::FindFlags otherFlags) {
+void FindReplaceView::findText(const QString& text,
+                               int searchStartPos,
+                               Document::FindFlags otherFlags) {
   if (TextEditView* editView = API::activeEditView()) {
     Document::FindFlags flags = getFindFlags();
     flags |= otherFlags;
     int begin = 0, end = -1;
-    if (flags.testFlag(Document::FindInSelection)) {
+    if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+      qDebug("InSelection is on. begin: %d, end: %d", m_selectionStartPos, m_selectionEndPos);
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->find(text, begin, end, flags);
+    if (searchStartPos >= 0) {
+      editView->find(text, searchStartPos, begin, end, flags);
+    } else {
+      editView->find(text, begin, end, flags);
+    }
   }
+}
+
+void FindReplaceView::findText(const QString &text, Document::FindFlags flags)
+{
+  findText(text, -1, flags);
 }
 
 void FindReplaceView::highlightMatches() {
@@ -132,16 +146,16 @@ void FindReplaceView::clearSearchHighlight() {
 Document::FindFlags FindReplaceView::getFindFlags() {
   Document::FindFlags flags;
   if (m_regexChk->isChecked()) {
-    flags |= Document::FindRegex;
+    flags |= Document::FindFlag::FindRegex;
   }
   if (m_matchCaseChk->isChecked()) {
-    flags |= Document::FindCaseSensitively;
+    flags |= Document::FindFlag::FindCaseSensitively;
   }
   if (m_wholeWordChk->isChecked()) {
-    flags |= Document::FindWholeWords;
+    flags |= Document::FindFlag::FindWholeWords;
   }
   if (m_inSelectionChk->isChecked()) {
-    flags |= Document::FindInSelection;
+    flags |= Document::FindFlag::FindInSelection;
   }
   return flags;
 }
@@ -159,7 +173,20 @@ void FindReplaceView::updateSelectionRegion() {
   }
 }
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) { setClearButtonEnabled(true); }
+void FindReplaceView::updateActiveCursorPos() {
+  if (TextEditView* editView = API::activeEditView()) {
+    m_activeCursorPos = editView->textCursor().position();
+  }
+}
+
+void FindReplaceView::selectFirstMatch() {
+  Q_ASSERT(m_lineEditForFind);
+  findText(m_lineEditForFind->text(), m_activeCursorPos);
+}
+
+LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
+  setClearButtonEnabled(true);
+}
 
 void LineEdit::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {

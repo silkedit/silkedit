@@ -86,15 +86,28 @@ void TextEditView::setPath(const QString& path) {
 }
 
 void TextEditView::find(const QString& text, int begin, int end, Document::FindFlags flags) {
+  find(text, textCursor(), begin, end, flags);
+}
+
+void TextEditView::find(const QString &text, int searchStartPos, int begin, int end, Document::FindFlags flags)
+{
+  qDebug("find: searchStartPos: %d, begin: %d, end: %d", searchStartPos, begin, end);
+  QTextCursor cursor(document());
+  cursor.setPosition(searchStartPos);
+  find(text, cursor, begin, end, flags);
+}
+
+void TextEditView::find(const QString &text, const QTextCursor& cursor, int begin, int end, Document::FindFlags flags)
+{
   if (text.isEmpty())
     return;
   if (Document* doc = document()) {
-    const QTextCursor& cursor = doc->find(text, textCursor(), begin, end, flags);
-    if (!cursor.isNull()) {
-      setTextCursor(cursor);
+    const QTextCursor& resultCursor = doc->find(text, cursor, begin, end, flags);
+    if (!resultCursor.isNull()) {
+      setTextCursor(resultCursor);
     } else {
       QTextCursor nextFindCursor(doc);
-      if (flags.testFlag(Document::FindBackward)) {
+      if (flags.testFlag(Document::FindFlag::FindBackward)) {
         if (end < 0) {
           nextFindCursor.movePosition(QTextCursor::End);
         } else {
@@ -109,6 +122,7 @@ void TextEditView::find(const QString& text, int begin, int end, Document::FindF
       }
     }
   }
+
 }
 
 int TextEditView::lineNumberAreaWidth() {

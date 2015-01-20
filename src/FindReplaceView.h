@@ -31,14 +31,18 @@ class FindReplaceView : public QWidget {
   QCheckBox* m_inSelectionChk;
   int m_selectionStartPos;
   int m_selectionEndPos;
+  int m_activeCursorPos;
 
   void findNext();
   void findPrev();
-  void findText(const QString& text, Document::FindFlags flags = 0);
+  void findText(const QString& text, int searchStartPos = -1, Document::FindFlags flags = 0);
+  void findText(const QString& text, Document::FindFlags flags);
   void highlightMatches();
   void clearSearchHighlight();
   Document::FindFlags getFindFlags();
   void updateSelectionRegion();
+  void updateActiveCursorPos();
+  void selectFirstMatch();
 };
 
 class LineEdit : public QLineEdit {

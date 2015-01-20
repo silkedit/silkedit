@@ -78,9 +78,9 @@ QTextCursor Document::find(const QString& subString,
     return QTextCursor();
   }
 
-  bool isCaseSensitive = options & Document::FindCaseSensitively;
-  bool isRegex = options & Document::FindRegex;
-  bool isWholeWord = options & Document::FindWholeWords;
+  bool isCaseSensitive = options & FindFlag::FindCaseSensitively;
+  bool isRegex = options & FindFlag::FindRegex;
+  bool isWholeWord = options & FindFlag::FindWholeWords;
 
   QString str = isRegex ? subString : Regexp::escape(subString);
 
@@ -111,7 +111,7 @@ QTextCursor Document::find(const QString& subString,
     return QTextCursor();
 
   int pos;
-  if (options & QTextDocument::FindBackward) {
+  if (options & FindFlag::FindBackward) {
     pos = cursor.selectionStart();
   } else {
     pos = cursor.selectionEnd();
@@ -124,10 +124,10 @@ QTextCursor Document::find(const Regexp* expr,
                            int begin,
                            int end,
                            Document::FindFlags options) const {
-  bool isBackward = options.testFlag(Document::FindBackward);
+  bool isBackward = options.testFlag(FindFlag::FindBackward);
   qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
          qPrintable(expr->pattern()),
-         (options.testFlag(Document::FindBackward)),
+         (options.testFlag(FindFlag::FindBackward)),
          from,
          begin,
          end);

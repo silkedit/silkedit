@@ -12,7 +12,7 @@ class Document : public QTextDocument {
   DISABLE_COPY(Document)
 
  public:
-  enum FindFlag {
+  enum class FindFlag {
     FindBackward = 0x00001,
     FindCaseSensitively = 0x00002,
     FindWholeWords = 0x00004,
