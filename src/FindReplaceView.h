@@ -47,6 +47,7 @@ class FindReplaceView : public QWidget {
   void updateActiveCursorPos();
   void selectFirstMatch();
   void replace();
+  void replaceAll();
 };
 
 class LineEdit : public QLineEdit {

@@ -43,15 +43,27 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   void saveAs();
   void setPath(const QString& path);
   void find(const QString& text, int begin = 0, int end = -1, Document::FindFlags flags = 0);
-  void find(const QString& text, int searchStartPos = -1, int begin = 0, int end = -1, Document::FindFlags flags = 0);
-  void find(const QString& text, const QTextCursor& cursor, int begin = 0, int end = -1, Document::FindFlags flags = 0);
+  void find(const QString& text,
+            int searchStartPos = -1,
+            int begin = 0,
+            int end = -1,
+            Document::FindFlags flags = 0);
+  void find(const QString& text,
+            const QTextCursor& cursor,
+            int begin = 0,
+            int end = -1,
+            Document::FindFlags flags = 0);
   void highlightSearchMatches(const QString& text,
-                              int begin = 0,
-                              int end = -1,
+                              int begin,
+                              int end,
                               Document::FindFlags flags = 0);
   void clearSearchHighlight();
   void replaceSelection(const QString& text);
-
+  void replaceAllSelection(const QString& findText,
+                           const QString& replaceText,
+                           int begin,
+                           int end,
+                           Document::FindFlags flags = 0);
 signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);

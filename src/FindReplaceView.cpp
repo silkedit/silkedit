@@ -49,9 +49,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
   layout->addWidget(replaceButton, 1, 1);
 
-  QPushButton* findAllButton = new QPushButton(tr("Find All"));
   QPushButton* replaceAllButton = new QPushButton(tr("Replace All"));
-  layout->addWidget(findAllButton, 0, 2);
+  connect(replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
   layout->addWidget(replaceAllButton, 1, 2);
 
   QPushButton* prevButton = new QPushButton("▲");
@@ -137,7 +136,12 @@ void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
 
 void FindReplaceView::highlightMatches() {
   if (TextEditView* editView = API::activeEditView()) {
-    editView->highlightSearchMatches(m_lineEditForFind->text(), getFindFlags());
+    int begin = 0, end = -1;
+    if (m_inSelectionChk->isChecked()) {
+      begin = m_selectionStartPos;
+      end = m_selectionEndPos;
+    }
+    editView->highlightSearchMatches(m_lineEditForFind->text(), begin, end, getFindFlags());
     selectFirstMatch();
   }
 }
@@ -190,11 +194,21 @@ void FindReplaceView::selectFirstMatch() {
 }
 
 void FindReplaceView::replace() {
-  Q_ASSERT(m_lineEditForFind);
   Q_ASSERT(m_lineEditForReplace);
   if (TextEditView* editView = API::activeEditView()) {
     editView->replaceSelection(m_lineEditForReplace->text());
     highlightMatches();
+  }
+}
+
+void FindReplaceView::replaceAll() {
+  if (TextEditView* editView = API::activeEditView()) {
+    int begin = 0, end = -1;
+    if (m_inSelectionChk->isChecked()) {
+      begin = m_selectionStartPos;
+      end = m_selectionEndPos;
+    }
+    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin, end, getFindFlags());
   }
 }
 
