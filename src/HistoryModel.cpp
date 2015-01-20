@@ -1,8 +1,6 @@
 #include "HistoryModel.h"
 
-int HistoryModel::rowCount(const QModelIndex&) const {
-  return m_stringList.count();
-}
+int HistoryModel::rowCount(const QModelIndex&) const { return m_stringList.count(); }
 
 QVariant HistoryModel::data(const QModelIndex& index, int role) const {
   if (index.row() < 0 || index.row() >= m_stringList.size())
