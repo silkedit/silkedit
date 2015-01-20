@@ -11,6 +11,38 @@
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
+
+QString preservedCaseText(const QString& oldStr, const QString& newStr) {
+  if (oldStr.isEmpty()) {
+    return newStr;
+  }
+
+  QString resultStr;
+  int oldStrIndex;
+  for (int i = 0; i < newStr.size(); i++) {
+    if (i > oldStr.size() - 1) {
+      oldStrIndex = oldStr.size() - 1;
+    } else {
+      oldStrIndex = i;
+    }
+
+    if (oldStr[oldStrIndex].isUpper()) {
+      resultStr = resultStr % newStr[i].toUpper();
+    } else {
+      resultStr = resultStr % newStr[i].toLower();
+    }
+  }
+
+  return resultStr;
+}
+
+void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
+  if (preserveCase) {
+    cursor.insertText(preservedCaseText(cursor.selectedText(), text));
+  } else {
+    cursor.insertText(text);
+  }
+}
 }
 
 TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
@@ -416,11 +448,11 @@ void TextEditView::clearSearchHighlight() {
   update();
 }
 
-void TextEditView::replaceSelection(const QString& text) {
+void TextEditView::replaceSelection(const QString& text, bool preserveCase) {
   QTextCursor cursor = textCursor();
   if (cursor.hasSelection()) {
     cursor.beginEditBlock();
-    cursor.insertText(text);
+    insertText(cursor, text, preserveCase);
     cursor.endEditBlock();
   }
 }
@@ -428,7 +460,9 @@ void TextEditView::replaceSelection(const QString& text) {
 void TextEditView::replaceAllSelection(const QString& findText,
                                        const QString& replaceText,
                                        int begin,
-                                       int end, Document::FindFlags flags) {
+                                       int end,
+                                       Document::FindFlags flags,
+                                       bool preserveCase) {
   if (Document* doc = document()) {
     QTextCursor currentCursor = textCursor();
     currentCursor.beginEditBlock();
@@ -439,7 +473,7 @@ void TextEditView::replaceAllSelection(const QString& findText,
       cursor = doc->find(findText, cursor, begin, end, flags);
       if (!cursor.isNull()) {
         Q_ASSERT(cursor.hasSelection());
-        cursor.insertText(replaceText);
+        insertText(cursor, replaceText, preserveCase);
       }
     }
 

@@ -32,6 +32,7 @@ class FindReplaceView : public QWidget {
   QCheckBox* m_matchCaseChk;
   QCheckBox* m_wholeWordChk;
   QCheckBox* m_inSelectionChk;
+  QCheckBox* m_preserveCaseChk;
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;

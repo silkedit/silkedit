@@ -25,7 +25,8 @@ FindReplaceView::FindReplaceView(QWidget* parent)
       m_regexChk(new QCheckBox(tr(REGEX_TEXT))),
       m_matchCaseChk(new QCheckBox(tr(MATCH_CASE_TEXT))),
       m_wholeWordChk(new QCheckBox(tr(WHOLE_WORD_TEXT))),
-      m_inSelectionChk(new QCheckBox(tr(IN_SELECTION_TEXT))) {
+      m_inSelectionChk(new QCheckBox(tr(IN_SELECTION_TEXT))),
+      m_preserveCaseChk(new QCheckBox(tr(PRESERVE_CASE_TEXT))) {
   QGridLayout* layout = new QGridLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
@@ -65,11 +66,10 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   layout->addWidget(m_matchCaseChk, 0, 4);
   layout->addWidget(m_regexChk, 1, 4);
 
-  QCheckBox* preserveCaseChk = new QCheckBox(tr(PRESERVE_CASE_TEXT));
   m_wholeWordChk->setToolTip(QKeySequence::mnemonic(WHOLE_WORD_TEXT).toString());
-  preserveCaseChk->setToolTip(QKeySequence::mnemonic(PRESERVE_CASE_TEXT).toString());
+  m_preserveCaseChk->setToolTip(QKeySequence::mnemonic(PRESERVE_CASE_TEXT).toString());
   layout->addWidget(m_wholeWordChk, 1, 5);
-  layout->addWidget(preserveCaseChk, 0, 5);
+  layout->addWidget(m_preserveCaseChk, 0, 5);
 
   m_inSelectionChk->setToolTip(QKeySequence::mnemonic(IN_SELECTION_TEXT).toString());
   layout->addWidget(m_inSelectionChk, 1, 6);
@@ -196,7 +196,7 @@ void FindReplaceView::selectFirstMatch() {
 void FindReplaceView::replace() {
   Q_ASSERT(m_lineEditForReplace);
   if (TextEditView* editView = API::activeEditView()) {
-    editView->replaceSelection(m_lineEditForReplace->text());
+    editView->replaceSelection(m_lineEditForReplace->text(), m_preserveCaseChk->isChecked());
     highlightMatches();
   }
 }
@@ -208,7 +208,7 @@ void FindReplaceView::replaceAll() {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin, end, getFindFlags());
+    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin, end, getFindFlags(), m_preserveCaseChk->isChecked());
   }
 }
 
