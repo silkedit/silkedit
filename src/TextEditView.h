@@ -63,7 +63,8 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
                            const QString& replaceText,
                            int begin,
                            int end,
-                           Document::FindFlags flags = 0, bool preserveCase = false);
+                           Document::FindFlags flags = 0,
+                           bool preserveCase = false);
 signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
