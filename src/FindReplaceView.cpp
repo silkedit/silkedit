@@ -4,6 +4,7 @@
 #include <QCheckBox>
 #include <QKeySequence>
 #include <QSizePolicy>
+#include <QCompleter>
 
 #include "FindReplaceView.h"
 #include "API.h"
@@ -35,6 +36,12 @@ FindReplaceView::FindReplaceView(QWidget* parent)
 
   m_lineEditForFind->setFixedWidth(lineEditWidth);
   m_lineEditForReplace->setFixedWidth(lineEditWidth);
+  QCompleter* searchCompleter = new QCompleter(this);
+  searchCompleter->setModel(&m_searchHistoryModel);
+  m_lineEditForFind->setCompleter(searchCompleter);
+  QCompleter* replaceCompleter = new QCompleter(this);
+  replaceCompleter->setModel(&m_replaceHistoryModel);
+  m_lineEditForReplace->setCompleter(replaceCompleter);
 
   connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
@@ -103,11 +110,13 @@ void FindReplaceView::keyPressEvent(QKeyEvent* event) {
 void FindReplaceView::findNext() {
   Q_ASSERT(m_lineEditForFind);
   findText(m_lineEditForFind->text());
+  m_searchHistoryModel.prepend(m_lineEditForFind->text());
 }
 
 void FindReplaceView::findPrev() {
   Q_ASSERT(m_lineEditForFind);
   findText(m_lineEditForFind->text(), Document::FindFlag::FindBackward);
+  m_searchHistoryModel.prepend(m_lineEditForFind->text());
 }
 
 void FindReplaceView::findText(const QString& text,
@@ -198,6 +207,7 @@ void FindReplaceView::replace() {
   if (TextEditView* editView = API::activeEditView()) {
     editView->replaceSelection(m_lineEditForReplace->text(), m_preserveCaseChk->isChecked());
     highlightMatches();
+    m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
   }
 }
 
@@ -214,6 +224,7 @@ void FindReplaceView::replaceAll() {
                                   end,
                                   getFindFlags(),
                                   m_preserveCaseChk->isChecked());
+    m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
   }
 }
 
