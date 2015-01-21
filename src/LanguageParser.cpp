@@ -165,7 +165,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
     //    if (pat && ret) {
     //      qDebug() << "pat:" << *pat << "ret:" << *ret;
     //    }
-    int nl = m_text.mid(pos).indexOf(QRegularExpression("\n|\r"));
+    int nl = m_text.mid(pos).indexOf(QRegularExpression(R"(\n|\r)"));
     if (nl != -1) {
       nl += pos;
     }

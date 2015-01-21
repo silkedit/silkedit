@@ -92,18 +92,19 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
     return;
   }
 
-  int pos = currentBlock().position();
+  int posInDoc = currentBlock().position();
   //  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), pos);
 
-  for (int i = 0; i < text.length();) {
-    updateScope(pos + i);
+  for (int posInText = 0; posInText < text.length();) {
+    updateScope(posInDoc + posInText);
     if (!m_lastScopeNode) {
-      qDebug("lastScopeNode is null. after updateScope(%d)", pos + i);
+      qDebug("lastScopeNode is null. after updateScope(%d)", posInDoc + posInText);
       return;
     }
 
     if (m_lastScopeNode->isLeaf()) {
       Region region = m_lastScopeNode->region;
+      int length = region.end() - (posInDoc + posInText);
       //      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
       std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
@@ -111,11 +112,11 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         //               i,
         //               qMin(text.length(), region.length()),
         //               qPrintable(format->foreground().color().name()));
-        setFormat(i, qMin(text.length(), region.length()), *format);
+        setFormat(posInText, qMin(text.length(), length), *format);
       } else {
         qDebug("format not found for %s", qPrintable(m_lastScopeName));
       }
-      i += region.length();
+      posInText += length;
     } else {
       std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
@@ -123,11 +124,11 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         //               i,
         //               1,
         //               qPrintable(format->foreground().color().name()));
-        setFormat(i, 1, *format);
+        setFormat(posInText, 1, *format);
       } else {
         qDebug("format not found for %s", qPrintable(m_lastScopeName));
       }
-      i++;
+      posInText++;
     }
   }
 }
