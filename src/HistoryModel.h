@@ -10,6 +10,8 @@ class HistoryModel : public QAbstractListModel {
 
  public:
   explicit HistoryModel(QObject* parent = nullptr) : QAbstractListModel(parent) {}
+  ~HistoryModel() = default;
+  DEFAULT_MOVE(HistoryModel)
 
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 

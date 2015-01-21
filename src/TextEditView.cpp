@@ -8,6 +8,7 @@
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
 #include "Session.h"
+#include "API.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -547,4 +548,13 @@ void TextEditView::wheelEvent(QWheelEvent* e) {
   } else {
     QPlainTextEdit::wheelEvent(e);
   }
+}
+
+void TextEditView::keyPressEvent(QKeyEvent* event) {
+  switch (event->key()) {
+    case Qt::Key_Escape:
+      API::hideActiveFindReplacePanel();
+      break;
+  }
+  QPlainTextEdit::keyPressEvent(event);
 }

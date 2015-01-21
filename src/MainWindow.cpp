@@ -172,3 +172,9 @@ bool MainWindow::openDir(const QString& dirPath) {
 }
 
 void MainWindow::openFindAndReplacePanel() { m_findReplaceView->show(); }
+
+void MainWindow::hideFindReplacePanel() {
+  if (m_findReplaceView) {
+    m_findReplaceView->hide();
+  }
+}

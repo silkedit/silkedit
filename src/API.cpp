@@ -38,3 +38,10 @@ TabViewGroup* API::activeTabViewGroup() {
 MainWindow* API::activeWindow() { return qobject_cast<MainWindow*>(QApplication::activeWindow()); }
 
 QList<MainWindow*> API::windows() { return MainWindow::windows(); }
+
+void API::hideActiveFindReplacePanel()
+{
+  if (MainWindow* window = activeWindow()) {
+    window->hideFindReplacePanel();
+  }
+}

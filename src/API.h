@@ -18,6 +18,7 @@ class API {
   static TabViewGroup* activeTabViewGroup();
   static MainWindow* activeWindow();
   static QList<MainWindow*> windows();
+  static void hideActiveFindReplacePanel();
 
  private:
   API() = delete;

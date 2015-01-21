@@ -75,6 +75,7 @@ signals:
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   int firstNonBlankCharPos(const QString& text);
