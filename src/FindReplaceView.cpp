@@ -5,6 +5,7 @@
 #include <QKeySequence>
 #include <QSizePolicy>
 #include <QCompleter>
+#include <QCheckBox>
 
 #include "FindReplaceView.h"
 #include "API.h"
@@ -23,11 +24,11 @@ FindReplaceView::FindReplaceView(QWidget* parent)
     : QWidget(parent),
       m_lineEditForFind(new LineEdit(this)),
       m_lineEditForReplace(new LineEdit(this)),
-      m_regexChk(new QCheckBox(tr(REGEX_TEXT))),
-      m_matchCaseChk(new QCheckBox(tr(MATCH_CASE_TEXT))),
-      m_wholeWordChk(new QCheckBox(tr(WHOLE_WORD_TEXT))),
-      m_inSelectionChk(new QCheckBox(tr(IN_SELECTION_TEXT))),
-      m_preserveCaseChk(new QCheckBox(tr(PRESERVE_CASE_TEXT))) {
+      m_regexChk(new CheckBox(tr(REGEX_TEXT), this)),
+      m_matchCaseChk(new CheckBox(tr(MATCH_CASE_TEXT), this)),
+      m_wholeWordChk(new CheckBox(tr(WHOLE_WORD_TEXT), this)),
+      m_inSelectionChk(new CheckBox(tr(IN_SELECTION_TEXT), this)),
+      m_preserveCaseChk(new CheckBox(tr(PRESERVE_CASE_TEXT), this)) {
   QGridLayout* layout = new QGridLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
@@ -116,6 +117,12 @@ void FindReplaceView::findNext() {
 void FindReplaceView::findPrev() {
   Q_ASSERT(m_lineEditForFind);
   findText(m_lineEditForFind->text(), Document::FindFlag::FindBackward);
+  m_searchHistoryModel.prepend(m_lineEditForFind->text());
+}
+
+void FindReplaceView::findFromActiveCursor()
+{
+  findText(m_lineEditForFind->text(), m_activeCursorPos);
   m_searchHistoryModel.prepend(m_lineEditForFind->text());
 }
 
@@ -250,4 +257,10 @@ void LineEdit::keyPressEvent(QKeyEvent* event) {
 void LineEdit::focusInEvent(QFocusEvent* ev) {
   emit focusIn();
   QLineEdit::focusInEvent(ev);
+}
+
+FindReplaceView::CheckBox::CheckBox(const QString &text, FindReplaceView *parent): QCheckBox(text, parent)
+{
+  connect(this, &QCheckBox::stateChanged, parent, &FindReplaceView::highlightMatches);
+
 }

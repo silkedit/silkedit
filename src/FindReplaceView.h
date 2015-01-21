@@ -2,6 +2,7 @@
 
 #include <QWidget>
 #include <QLineEdit>
+#include <QCheckBox>
 
 #include "macros.h"
 #include "Document.h"
@@ -27,13 +28,18 @@ class FindReplaceView : public QWidget {
   void keyPressEvent(QKeyEvent* event) override;
 
  private:
+  class CheckBox : public QCheckBox {
+  public:
+    CheckBox(const QString &text, FindReplaceView *parent);
+  };
+
   LineEdit* m_lineEditForFind;
   LineEdit* m_lineEditForReplace;
-  QCheckBox* m_regexChk;
-  QCheckBox* m_matchCaseChk;
-  QCheckBox* m_wholeWordChk;
-  QCheckBox* m_inSelectionChk;
-  QCheckBox* m_preserveCaseChk;
+  CheckBox* m_regexChk;
+  CheckBox* m_matchCaseChk;
+  CheckBox* m_wholeWordChk;
+  CheckBox* m_inSelectionChk;
+  CheckBox* m_preserveCaseChk;
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;
@@ -42,6 +48,7 @@ class FindReplaceView : public QWidget {
 
   void findNext();
   void findPrev();
+  void findFromActiveCursor();
   void findText(const QString& text, int searchStartPos = -1, Document::FindFlags flags = 0);
   void findText(const QString& text, Document::FindFlags flags);
   void highlightMatches();
