@@ -39,8 +39,7 @@ MainWindow* API::activeWindow() { return qobject_cast<MainWindow*>(QApplication:
 
 QList<MainWindow*> API::windows() { return MainWindow::windows(); }
 
-void API::hideActiveFindReplacePanel()
-{
+void API::hideActiveFindReplacePanel() {
   if (MainWindow* window = activeWindow()) {
     window->hideFindReplacePanel();
   }

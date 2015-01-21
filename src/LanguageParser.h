@@ -29,8 +29,7 @@ struct Regex {
   int lastFound;
 
   Regex() : lastFound(0) {}
-  explicit Regex(const QString& pattern)
-      : regex(Regexp::compile(pattern)), lastFound(0) {}
+  explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastFound(0) {}
 
   QVector<Region>* find(const QString& data, int begin);
 };

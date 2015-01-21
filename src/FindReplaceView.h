@@ -29,8 +29,8 @@ class FindReplaceView : public QWidget {
 
  private:
   class CheckBox : public QCheckBox {
-  public:
-    CheckBox(const QString &text, FindReplaceView *parent);
+   public:
+    CheckBox(const QString& text, FindReplaceView* parent);
   };
 
   LineEdit* m_lineEditForFind;
