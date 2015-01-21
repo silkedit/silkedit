@@ -26,20 +26,13 @@ class Region;
 
 struct Regex {
   std::unique_ptr<Regexp> regex;
-  int lastIndex;
   int lastFound;
 
-  Regex() : lastIndex(0), lastFound(0) {}
+  Regex() : lastFound(0) {}
   explicit Regex(const QString& pattern)
-      : regex(Regexp::compile(pattern)), lastIndex(0), lastFound(0) {}
+      : regex(Regexp::compile(pattern)), lastFound(0) {}
 
   QVector<Region>* find(const QString& data, int begin);
-  QString toString() const;
-
-  friend QDebug operator<<(QDebug dbg, const Regex& regex) {
-    dbg.nospace() << regex.toString();
-    return dbg.space();
-  }
 };
 
 // This struct is mutable because it has cache
@@ -75,23 +68,10 @@ struct Pattern {
                           Captures captures);
   void tweak(Language* l);
   void clearCache();
-
-  virtual QString toString() const;
-
-  friend QDebug operator<<(QDebug dbg, const Pattern& pat) {
-    dbg.nospace() << pat.toString();
-    return dbg.space();
-  }
 };
 
 class RootPattern : public Pattern {
  public:
-  QString toString() const override;
-
-  friend QDebug operator<<(QDebug dbg, const RootPattern& pat) {
-    dbg.nospace() << pat.toString();
-    return dbg.space();
-  }
 };
 
 class LanguageProvider {
@@ -127,7 +107,6 @@ struct Language {
   Language() : rootPattern(nullptr) {}
 
   void tweak();
-  QString toString() const;
   QString name();
   void clearCache();
 

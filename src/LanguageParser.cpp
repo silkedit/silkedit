@@ -535,27 +535,8 @@ void Pattern::clearCache() {
   }
 
   match.lastFound = 0;
-  match.lastIndex = 0;
   begin.lastFound = 0;
-  begin.lastIndex = 0;
   end.lastFound = 0;
-  end.lastIndex = 0;
-}
-
-QString Pattern::toString() const {
-  QString formatStr = QString("---------------------------------------\n") % "Name:    %1\n" %
-                      "Match:   %2\n" % "Begin:   %3\n" % "End:     %4\n" % "Include: %5\n";
-  QString ret =
-      formatStr.arg(name).arg(match.toString()).arg(begin.toString()).arg(end.toString()).arg(
-          include);
-  ret = ret % QString("<Sub-Patterns>\n");
-  if (patterns) {
-    foreach(Pattern * p, *patterns) {
-      ret = ret % QString("\t%1\n").arg(p->toString().replace("\t", "\t\t").replace("\n", "\n\t"));
-    }
-  }
-  ret = ret % QString("</Sub-Patterns>\n---------------------------------------");
-  return ret;
 }
 
 QVector<QPair<QString, QString>> LanguageProvider::m_scopeAndLangNamePairs(0);
@@ -657,11 +638,7 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
 
 QVector<Region>* Regex::find(const QString& str, int beginPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
-  if (lastIndex > beginPos) {
-    lastFound = 0;
-  }
 
-  lastIndex = beginPos;
   while (lastFound < str.length()) {
     std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.midRef(lastFound)));
     if (!indices) {
@@ -693,23 +670,12 @@ QVector<Region>* Regex::find(const QString& str, int beginPos) {
   return nullptr;
 }
 
-QString Regex::toString() const {
-  if (regex == nullptr) {
-    return "null";
-  }
-  return QString("%1   // %2, %3").arg(regex->pattern()).arg(lastIndex).arg(lastFound);
-}
-
 void Language::tweak() {
   rootPattern->tweak(this);
   //  foreach (Pattern* p, repository) { p->tweak(this); }
   for (auto& pair : repository) {
     pair.second->tweak(this);
   }
-}
-
-QString Language::toString() const {
-  return QString("%1\n%2\n").arg(scopeName).arg(rootPattern->toString());
 }
 
 QString Language::name() { return rootPattern ? rootPattern->name : ""; }
@@ -721,14 +687,6 @@ void Language::clearCache() {
   for (auto& pair : repository) {
     pair.second->clearCache();
   }
-}
-
-QString RootPattern::toString() const {
-  QString ret;
-  if (patterns) {
-    foreach(Pattern * pat, *patterns) { ret += QString("\t%1\n").arg(pat->toString()); }
-  }
-  return ret;
 }
 
 RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {}
