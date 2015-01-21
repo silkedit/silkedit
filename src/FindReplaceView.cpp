@@ -12,11 +12,11 @@
 #include "TextEditView.h"
 
 namespace {
-constexpr auto MATCH_CASE_TEXT = "&Match Case";
-constexpr auto REGEX_TEXT = "&Regex";
+constexpr auto MATCH_CASE_TEXT = "Match &Case";
+constexpr auto REGEX_TEXT = "Re&gex";
 constexpr auto WHOLE_WORD_TEXT = "&Whole Word";
 constexpr auto PRESERVE_CASE_TEXT = "&Preserve Case";
-constexpr auto IN_SELECTION_TEXT = "&In Selection";
+constexpr auto IN_SELECTION_TEXT = "In &Selection";
 constexpr int lineEditWidth = 500;
 }
 
@@ -95,8 +95,20 @@ void FindReplaceView::show() {
 }
 
 void FindReplaceView::showEvent(QShowEvent*) {
+  m_inSelectionChk->setChecked(false);
+  if (TextEditView* editView = API::activeEditView()) {
+    QString selectedText = editView->textCursor().selectedText();
+    if (!selectedText.isEmpty()) {
+      // If the selection obtained from an editor spans a line break, the text will contain a
+      // Unicode U+2029 paragraph separator character instead of a newline \n character.
+      if (selectedText.contains(QChar::ParagraphSeparator)) {
+        m_inSelectionChk->setChecked(true);
+      } else {
+        m_lineEditForFind->setText(selectedText);
+      }
+    }
+  }
   m_lineEditForFind->setFocus();
-  m_lineEditForFind->selectAll();
 }
 
 void FindReplaceView::keyPressEvent(QKeyEvent* event) {
@@ -120,8 +132,7 @@ void FindReplaceView::findPrev() {
   m_searchHistoryModel.prepend(m_lineEditForFind->text());
 }
 
-void FindReplaceView::findFromActiveCursor()
-{
+void FindReplaceView::findFromActiveCursor() {
   findText(m_lineEditForFind->text(), m_activeCursorPos);
   m_searchHistoryModel.prepend(m_lineEditForFind->text());
 }
@@ -255,12 +266,12 @@ void LineEdit::keyPressEvent(QKeyEvent* event) {
 }
 
 void LineEdit::focusInEvent(QFocusEvent* ev) {
+  selectAll();
   emit focusIn();
   QLineEdit::focusInEvent(ev);
 }
 
-FindReplaceView::CheckBox::CheckBox(const QString &text, FindReplaceView *parent): QCheckBox(text, parent)
-{
+FindReplaceView::CheckBox::CheckBox(const QString& text, FindReplaceView* parent)
+    : QCheckBox(text, parent) {
   connect(this, &QCheckBox::stateChanged, parent, &FindReplaceView::highlightMatches);
-
 }
