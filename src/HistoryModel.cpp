@@ -1,5 +1,9 @@
 #include "HistoryModel.h"
 
+namespace {
+static constexpr int HISTORY_LIMIT = 10;
+}
+
 int HistoryModel::rowCount(const QModelIndex&) const { return m_stringList.count(); }
 
 QVariant HistoryModel::data(const QModelIndex& index, int role) const {
@@ -32,6 +36,10 @@ bool HistoryModel::insertRows(int row, int count, const QModelIndex& parent) {
     m_stringList.insert(row, QString());
 
   endInsertRows();
+
+  while (rowCount() > HISTORY_LIMIT) {
+    removeRow(rowCount() - 1, parent);
+  }
 
   return true;
 }

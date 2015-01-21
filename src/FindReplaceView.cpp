@@ -109,6 +109,7 @@ void FindReplaceView::showEvent(QShowEvent*) {
     }
   }
   m_lineEditForFind->setFocus();
+  m_lineEditForFind->selectAll();
 }
 
 void FindReplaceView::keyPressEvent(QKeyEvent* event) {
@@ -266,7 +267,6 @@ void LineEdit::keyPressEvent(QKeyEvent* event) {
 }
 
 void LineEdit::focusInEvent(QFocusEvent* ev) {
-  selectAll();
   emit focusIn();
   QLineEdit::focusInEvent(ev);
 }
