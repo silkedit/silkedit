@@ -55,7 +55,10 @@ signals:
 
   void removeTabAndWidget(int index);
   bool closeTab(QWidget* w);
+  void focusTabContent(int index);
 
  private slots:
   void updateTabTextBasedOn(bool changed);
+  void changeActiveEditView(int index);
+  void changeTabText(const QString& path);
 };

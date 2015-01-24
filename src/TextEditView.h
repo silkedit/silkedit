@@ -92,6 +92,7 @@ signals:
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
   void changeTheme(Theme* theme);
+  void clearDirtyMarker();
 };
 
 class LineNumberArea : public QWidget {

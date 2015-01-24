@@ -24,20 +24,6 @@ TabView::TabView(QWidget* parent)
       m_activeEditView(nullptr),
       m_tabBar(new TabBar(this)),
       m_tabDragging(false) {
-  connect(m_tabBar,
-          SIGNAL(onDetachTabStarted(int, const QPoint&)),
-          this,
-          SLOT(detachTabStarted(int, const QPoint&)));
-
-  connect(m_tabBar,
-          SIGNAL(onDetachTabEntered(const QPoint&)),
-          this,
-          SLOT(detachTabEntered(const QPoint&)));
-
-  connect(m_tabBar,
-          SIGNAL(onDetachTabFinished(const QPoint&)),
-          this,
-          SLOT(detachTabFinished(const QPoint&)));
 
   setTabBar(m_tabBar);
   setMovable(true);
@@ -45,43 +31,15 @@ TabView::TabView(QWidget* parent)
   setTabsClosable(true);
   setTabShape(TabShape::Triangular);
 
-  QObject::connect(this, &QTabWidget::currentChanged, [this](int index) {
-    // This lambda is called after m_tabbar is deleted when shutdown.
-    if (index < 0)
-      return;
-
-    qDebug("currentChanged. index: %i, tab count: %i", index, count());
-    if (auto w = widget(index)) {
-      setActiveEditView(qobject_cast<TextEditView*>(w));
-    } else {
-      qDebug("active edit view is null");
-      setActiveEditView(nullptr);
-    }
-  });
-
-  QObject::connect(this, &QTabWidget::tabCloseRequested, [this](int index) {
-    qDebug("tab widget (index %i) is deleted", index);
-    removeTabAndWidget(index);
-  });
+  connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
+  connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
+  connect(m_tabBar, &TabBar::onDetachTabFinished, this, &TabView::detachTabFinished);
+  connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
+  connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveEditView);
+  connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
 }
 
-TabView::~TabView() {
-  qDebug("~TabView");
-  disconnect(m_tabBar,
-             SIGNAL(onDetachTabStarted(int, const QPoint&)),
-             this,
-             SLOT(detachTabStarted(int, const QPoint&)));
-
-  disconnect(m_tabBar,
-             SIGNAL(onDetachTabEntered(const QPoint&)),
-             this,
-             SLOT(detachTabEntered(const QPoint&)));
-
-  disconnect(m_tabBar,
-             SIGNAL(onDetachTabFinished(const QPoint&)),
-             this,
-             SLOT(detachTabFinished(const QPoint&)));
-}
+TabView::~TabView() { qDebug("~TabView"); }
 
 int TabView::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
 
@@ -89,12 +47,8 @@ int TabView::insertTab(int index, QWidget* w, const QString& label) {
   w->setParent(this);
   TextEditView* editView = qobject_cast<TextEditView*>(w);
   if (editView) {
-    QObject::connect(editView, &TextEditView::pathUpdated, [this, editView](const QString& path) {
-      setTabText(indexOf(editView), getFileNameFrom(path));
-    });
-    QObject::connect(
-        editView, &TextEditView::saved, [editView]() { editView->document()->setModified(false); });
-    connect(editView, SIGNAL(modificationChanged(bool)), this, SLOT(updateTabTextBasedOn(bool)));
+    connect(editView, &TextEditView::pathUpdated, this, &TabView::changeTabText);
+    connect(editView, &TextEditView::modificationChanged, this, &TabView::updateTabTextBasedOn);
   } else {
     qDebug("inserted widget is not TextEditView");
   }
@@ -234,11 +188,31 @@ void TabView::mouseReleaseEvent(QMouseEvent* event) {
   QTabWidget::mouseReleaseEvent(event);
 }
 
+void TabView::changeActiveEditView(int index) {
+  // This lambda is called after m_tabbar is deleted when shutdown.
+  if (index < 0)
+    return;
+
+  qDebug("currentChanged. index: %i, tab count: %i", index, count());
+  if (auto w = widget(index)) {
+    setActiveEditView(qobject_cast<TextEditView*>(w));
+  } else {
+    qDebug("active edit view is null");
+    setActiveEditView(nullptr);
+  }
+}
+
 void TabView::setActiveEditView(TextEditView* editView) {
   if (m_activeEditView != editView) {
     TextEditView* oldEditView = m_activeEditView;
     m_activeEditView = editView;
     emit activeTextEditViewChanged(oldEditView, editView);
+  }
+}
+
+void TabView::changeTabText(const QString& path) {
+  if (TextEditView* editView = qobject_cast<TextEditView*>(QObject::sender())) {
+    setTabText(indexOf(editView), getFileNameFrom(path));
   }
 }
 
@@ -278,6 +252,12 @@ bool TabView::closeTab(QWidget* w) {
 
   removeTabAndWidget(indexOf(w));
   return true;
+}
+
+void TabView::focusTabContent(int index) {
+  if (QWidget* w = widget(index)) {
+    w->setFocus();
+  }
 }
 
 void TabView::updateTabTextBasedOn(bool changed) {

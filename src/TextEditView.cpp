@@ -58,6 +58,7 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
           &OpenRecentItemService::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
+  connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
 
   updateLineNumberAreaWidth(0);
 
@@ -282,6 +283,11 @@ void TextEditView::changeTheme(Theme* theme) {
   }
 
   highlightCurrentLine();
+}
+
+void TextEditView::clearDirtyMarker()
+{
+  document()->setModified(false);
 }
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
