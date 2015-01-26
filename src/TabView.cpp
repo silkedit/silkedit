@@ -177,14 +177,12 @@ void TabView::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void TabView::tabRemoved(int index) {tabRemoved(index, false);}
+void TabView::tabRemoved(int index) { tabRemoved(index, false); }
 
-void TabView::tabRemoved(int , bool afterDrag)
-{
+void TabView::tabRemoved(int, bool afterDrag) {
   if (count() == 0 && !m_tabDragging) {
     emit allTabRemoved(afterDrag);
   }
-
 }
 
 void TabView::mouseReleaseEvent(QMouseEvent* event) {

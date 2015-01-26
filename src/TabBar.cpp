@@ -8,7 +8,8 @@
 #include "API.h"
 #include "MainWindow.h"
 
-TabBar::TabBar(QWidget* parent) : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
+TabBar::TabBar(QWidget* parent)
+    : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
   setAcceptDrops(true);
 
   setElideMode(Qt::ElideRight);

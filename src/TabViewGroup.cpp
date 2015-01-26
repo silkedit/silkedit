@@ -33,8 +33,7 @@ TabViewGroup::TabViewGroup(QWidget* parent)
   setLayout(layout);
 }
 
-TabView *TabViewGroup::activeTab()
-{
+TabView* TabViewGroup::activeTab() {
   if (m_activeTabView) {
     return m_activeTabView;
   } else {
@@ -92,8 +91,7 @@ TabView* TabViewGroup::createTabView() {
   return tabView;
 }
 
-TabView *TabViewGroup::createInitialTabView()
-{
+TabView* TabViewGroup::createInitialTabView() {
   auto tabView = createTabView();
   // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
   // responsibility to delete it.

@@ -13,6 +13,6 @@ class TestUtil : public QObject {
  public slots:
   void openFile() {
     DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
-//    API::activeWindow()->openFindAndReplacePanel();
+    //    API::activeWindow()->openFindAndReplacePanel();
   }
 };

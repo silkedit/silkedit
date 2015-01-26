@@ -285,10 +285,7 @@ void TextEditView::changeTheme(Theme* theme) {
   highlightCurrentLine();
 }
 
-void TextEditView::clearDirtyMarker()
-{
-  document()->setModified(false);
-}
+void TextEditView::clearDirtyMarker() { document()->setModified(false); }
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
