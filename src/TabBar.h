@@ -28,13 +28,14 @@ signals:
   // Detach Tab
   void onDetachTabStarted(int index, const QPoint& startPoint);
   void onDetachTabEntered(const QPoint& enterPoint);
-  void onDetachTabFinished(const QPoint& dropPoint);
+  void onDetachTabFinished(const QPoint& dropPoint, bool isFloating);
 
  private:
   QPoint m_dragStartPos;
   bool m_dragInitiated;
   FakeWindow* m_fakeWindow;
   bool m_isGrabbingMouse;
+  TabBar* m_sourceTabBar;
 
   void finishDrag();
   void grabMouse();

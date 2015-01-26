@@ -30,6 +30,9 @@ signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
 
  private:
+  /**
+   * @brief TabView children. This always has at least one TabView
+   */
   TabView* m_activeTabView;
   std::list<TabView*> m_tabViews;
   Splitter* m_rootSplitter;

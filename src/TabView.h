@@ -32,18 +32,19 @@ class TabView : public QTabWidget {
   int indexOfPath(const QString& path);
 
 signals:
-  void allTabRemoved();
+  void allTabRemoved(bool afterDrag);
   void activeTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  public slots:
   // Detach Tab
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
-  void detachTabFinished(const QPoint&);
+  void detachTabFinished(const QPoint&, bool isFloating);
 
  protected:
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
+  void tabRemoved(int index, bool afterDrag);
   void mouseReleaseEvent(QMouseEvent* event) override;
 
  private:

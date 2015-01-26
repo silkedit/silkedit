@@ -8,7 +8,7 @@
 #include "API.h"
 #include "MainWindow.h"
 
-TabBar::TabBar(QWidget* parent) : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false) {
+TabBar::TabBar(QWidget* parent) : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
   setAcceptDrops(true);
 
   setElideMode(Qt::ElideRight);
@@ -76,6 +76,7 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
 
     finishDrag();
     emit anotherTabBar->onDetachTabEntered(event->screenPos().toPoint());
+    anotherTabBar->m_sourceTabBar = this;
     anotherTabBar->grabMouse();
     return;
   }
@@ -117,13 +118,21 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event) {
     releaseMouse();
   }
 
+  if (m_sourceTabBar) {
+    qDebug("emit onDetachTabFinished from a source TabBar");
+    emit m_sourceTabBar->onDetachTabFinished(event->screenPos().toPoint(), false);
+    m_sourceTabBar = nullptr;
+  } else {
+    qDebug("m_sourceTabBar is null");
+  }
+
   if (!m_dragInitiated || event->button() != Qt::LeftButton) {
     QTabBar::mouseReleaseEvent(event);
     return;
   }
 
   finishDrag();
-  emit onDetachTabFinished(event->screenPos().toPoint());
+  emit onDetachTabFinished(event->screenPos().toPoint(), true);
   QTabBar::mouseReleaseEvent(event);
 }
 

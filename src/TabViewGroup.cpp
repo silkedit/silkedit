@@ -73,16 +73,12 @@ void TabViewGroup::splitTabVertically() {
 
 TabView* TabViewGroup::createTabView() {
   auto tabView = new TabView();
-  QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView]() {
+  QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView](bool afterDrag) {
     qDebug() << "allTabRemoved";
     removeTabView(tabView);
 
-    if (m_tabViews.size() == 0) {
-      if (tabView->tabDragging()) {
-        hide();
-      } else {
-        close();
-      }
+    if (afterDrag && m_tabViews.empty()) {
+      window()->close();
     }
   });
 
@@ -92,6 +88,10 @@ TabView* TabViewGroup::createTabView() {
 }
 
 void TabViewGroup::removeTabView(TabView* widget) {
+  if (widget == m_activeTabView) {
+    m_activeTabView = nullptr;
+  }
+
   m_tabViews.remove(widget);
   widget->hide();
   widget->deleteLater();

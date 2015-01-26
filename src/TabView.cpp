@@ -177,10 +177,18 @@ void TabView::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void TabView::tabRemoved(int) {
-  if (count() == 0) {
-    emit allTabRemoved();
+void TabView::tabRemoved(int index) {tabRemoved(index, false);}
+
+void TabView::tabRemoved(int index, bool afterDrag)
+{
+  if (widget(index) == m_activeEditView) {
+    m_activeEditView = nullptr;
   }
+
+  if (count() == 0 && !m_tabDragging) {
+    emit allTabRemoved(afterDrag);
+  }
+
 }
 
 void TabView::mouseReleaseEvent(QMouseEvent* event) {
@@ -247,7 +255,7 @@ bool TabView::closeTab(QWidget* w) {
         return false;
     }
   } else {
-    qDebug("widget is not TextEditView or not modified");
+    qDebug("widget is neither TextEditView nor modified");
   }
 
   removeTabAndWidget(indexOf(w));
@@ -276,18 +284,23 @@ void TabView::updateTabTextBasedOn(bool changed) {
   }
 }
 
-void TabView::detachTabFinished(const QPoint& dropPoint) {
+void TabView::detachTabFinished(const QPoint& dropPoint, bool isFloating) {
   qDebug() << "DetachTab."
-           << "dropPoint:" << dropPoint;
-  MainWindow* window = MainWindow::create();
-  window->move(dropPoint);
-  window->show();
-  if (DraggingTabInfo::widget()) {
-    window->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
-    DraggingTabInfo::setWidget(nullptr);
-    m_tabDragging = false;
-    tabRemoved(-1);
-  } else {
-    qWarning("draggign widget is null");
+           << "dropPoint:" << dropPoint << "isFloating:" << isFloating;
+
+  if (isFloating) {
+    MainWindow* newWindow = MainWindow::create();
+    newWindow->move(dropPoint);
+    newWindow->show();
+    if (DraggingTabInfo::widget()) {
+      newWindow->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+      DraggingTabInfo::setWidget(nullptr);
+    } else {
+      qWarning("draggign widget is null");
+    }
   }
+
+  m_tabDragging = false;
+  // call tabRemoved to emit allTabRemoved if this had only one tab before drag (it's empty now)
+  tabRemoved(-1, true);
 }
