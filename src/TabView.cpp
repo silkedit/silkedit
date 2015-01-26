@@ -285,13 +285,13 @@ void TabView::updateTabTextBasedOn(bool changed) {
   }
 }
 
-void TabView::detachTabFinished(const QPoint& dropPoint, bool isFloating) {
+void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   qDebug() << "DetachTab."
-           << "dropPoint:" << dropPoint << "isFloating:" << isFloating;
+           << "newWindowPos:" << newWindowPos << "isFloating:" << isFloating;
 
   if (isFloating) {
     MainWindow* newWindow = MainWindow::create();
-    newWindow->move(dropPoint);
+    newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {
       newWindow->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());

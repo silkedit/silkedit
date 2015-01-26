@@ -39,7 +39,7 @@ signals:
   // Detach Tab
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
-  void detachTabFinished(const QPoint&, bool isFloating);
+  void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
 
  protected:
   void tabInserted(int index) override;
