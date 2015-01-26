@@ -25,8 +25,7 @@ FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& dragStartPos) {
   this->setWindowOpacity(0.5);
   this->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-  qDebug() << "pos:" << dragStartPos
-           << "rect.topLeft:" << rect.topLeft();
+  qDebug() << "pos:" << dragStartPos << "rect.topLeft:" << rect.topLeft();
   m_offset = dragStartPos - rect.topLeft();
 }
 
