@@ -14,7 +14,7 @@ class API {
 
  public:
   static TextEditView* activeEditView();
-  static TabView* activeTabView();
+  static TabView* activeTabView(bool createIfNull = false);
   static TabViewGroup* activeTabViewGroup();
   static MainWindow* activeWindow();
   static QList<MainWindow*> windows();

@@ -15,10 +15,10 @@ TextEditView* API::activeEditView() {
   }
 }
 
-TabView* API::activeTabView() {
+TabView* API::activeTabView(bool createIfNull) {
   TabViewGroup* tabViewGroup = activeTabViewGroup();
   if (tabViewGroup) {
-    return tabViewGroup->activeTab();
+    return tabViewGroup->activeTab(createIfNull);
   } else {
     qDebug("active tab view group is null");
     return nullptr;

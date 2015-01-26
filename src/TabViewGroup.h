@@ -18,7 +18,7 @@ class TabViewGroup : public QWidget {
   DEFAULT_MOVE(TabViewGroup)
 
   // accessor
-  TabView* activeTab();
+  TabView* activeTab(bool createIfNull = false);
   void setActiveTab(TabView* tab);
 
   void saveAllTabs();
