@@ -19,4 +19,5 @@ class FakeWindow : public QWidget {
 
  private:
   QPoint m_offset;
+  QPoint m_offsetFromWindow;
 };

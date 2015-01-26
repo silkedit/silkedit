@@ -45,6 +45,8 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton && tabAt(event->pos()) >= 0) {
     qDebug() << "m_dragStartPos is set at:" << event->pos();
     m_dragStartPos = event->pos();
+    QPoint offset = m_dragStartPos - tabRect(tabAt(event->pos())).topLeft();
+    m_offsetFromWindow = offset + mapToGlobal(tabRect(0).topLeft()) - window()->pos();
   }
   m_dragInitiated = false;
 
@@ -132,14 +134,16 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event) {
     return;
   }
 
+  QPoint posOfNewWindow = event->screenPos().toPoint() - m_offsetFromWindow;
   finishDrag();
-  emit onDetachTabFinished(event->screenPos().toPoint(), true);
+  emit onDetachTabFinished(posOfNewWindow, true);
   QTabBar::mouseReleaseEvent(event);
 }
 
 void TabBar::finishDrag() {
   m_dragInitiated = false;
   m_dragStartPos = QPoint();
+  m_offsetFromWindow = QPoint();
   if (m_fakeWindow) {
     m_fakeWindow->close();
     m_fakeWindow = nullptr;

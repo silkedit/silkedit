@@ -36,6 +36,7 @@ signals:
   FakeWindow* m_fakeWindow;
   bool m_isGrabbingMouse;
   TabBar* m_sourceTabBar;
+  QPoint m_offsetFromWindow;
 
   void finishDrag();
   void grabMouse();

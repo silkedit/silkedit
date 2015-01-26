@@ -3,8 +3,13 @@
 #include "FakeWindow.h"
 #include "TabBar.h"
 
-FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& pos) {
-  qDebug() << "constructor of FakeWindow. pos:" << pos;
+/**
+ * @brief FakeWindow::FakeWindow
+ * @param tabbar
+ * @param pos drag start position (tabbar relative)
+ */
+FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& dragStartPos) {
+  qDebug() << "constructor of FakeWindow. pos:" << dragStartPos;
   setWindowFlags(Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
   setAttribute(Qt::WA_DeleteOnClose);
   setAttribute(Qt::WA_ShowWithoutActivating);
@@ -20,9 +25,9 @@ FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& pos) {
   this->setWindowOpacity(0.5);
   this->setAttribute(Qt::WA_TransparentForMouseEvents);
 
-  qDebug() << "mapToGlobal(pos):" << tabbar->mapToGlobal(pos)
-           << "tabbar->window()->pos():" << tabbar->window()->pos();
-  m_offset = tabbar->mapToGlobal(pos) - tabbar->window()->pos();
+  qDebug() << "pos:" << dragStartPos
+           << "rect.topLeft:" << rect.topLeft();
+  m_offset = dragStartPos - rect.topLeft();
 }
 
 FakeWindow::~FakeWindow() { qDebug("~FakeWindow"); }
