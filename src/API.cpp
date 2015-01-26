@@ -28,7 +28,7 @@ TabView* API::activeTabView(bool createIfNull) {
 TabViewGroup* API::activeTabViewGroup() {
   MainWindow* window = activeWindow();
   if (window) {
-    return window->activeTabViewGroup();
+    return window->tabViewGroup();
   } else {
     qDebug("active window is null");
     return nullptr;

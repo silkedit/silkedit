@@ -1,10 +1,12 @@
 #include <QDebug>
 #include <QVBoxLayout>
+#include <QTabBar>
 
 #include "TabViewGroup.h"
 #include "TabView.h"
 #include "Splitter.h"
 #include "TextEditView.h"
+#include "TabBar.h"
 
 namespace {
 QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
@@ -74,7 +76,19 @@ void TabViewGroup::splitTabHorizontally() {
 
 void TabViewGroup::splitTabVertically() {
   splitTab(std::bind(
-      &TabViewGroup::addTabViewVertically, this, std::placeholders::_1, std::placeholders::_2));
+             &TabViewGroup::addTabViewVertically, this, std::placeholders::_1, std::placeholders::_2));
+}
+
+TabBar *TabViewGroup::tabBarAt(int screenX, int screenY)
+{
+  for (TabView* tabView : m_tabViews) {
+    QRegion region = tabView->tabBar()->visibleRegion();
+    if (region.contains(tabView->tabBar()->mapFromGlobal(QPoint(screenX, screenY)))) {
+      return qobject_cast<TabBar*>(tabView->tabBar());
+    }
+  }
+
+  return nullptr;
 }
 
 TabView* TabViewGroup::createTabView() {

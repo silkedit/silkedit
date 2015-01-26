@@ -6,6 +6,7 @@
 #include "macros.h"
 
 class TabView;
+class TabBar;
 class Splitter;
 
 class TabViewGroup : public QWidget {
@@ -25,6 +26,7 @@ class TabViewGroup : public QWidget {
   bool closeAllTabs();
   void splitTabHorizontally();
   void splitTabVertically();
+  TabBar* tabBarAt(int screenX, int screenY);
 
 signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);

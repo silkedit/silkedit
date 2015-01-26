@@ -29,7 +29,7 @@ class MainWindow : public QMainWindow {
   DEFAULT_MOVE(MainWindow)
 
   // accessor
-  TabViewGroup* activeTabViewGroup() { return m_tabViewGroup; }
+  TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
   TabView* activeTabView();
 
   void show();

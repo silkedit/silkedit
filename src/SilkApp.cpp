@@ -5,6 +5,7 @@
 #include "DocumentService.h"
 #include "TextEditView.h"
 #include "TabView.h"
+#include "MainWindow.h"
 
 namespace {
 template <typename T>
@@ -17,6 +18,17 @@ T findParent(QWidget* widget) {
     return desiredWidget;
   return findParent<T>(widget->parentWidget());
 }
+}
+
+TabBar *SilkApp::tabBarAt(int x, int y)
+{
+  foreach (MainWindow* window, MainWindow::windows()) {
+    if (TabBar* tabBar = window->tabViewGroup()->tabBarAt(x, y)) {
+      return tabBar;
+    }
+  }
+
+  return nullptr;
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
