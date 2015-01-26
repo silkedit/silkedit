@@ -71,7 +71,7 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
   }
 
   // dragging tab is over an another tab bar.
-  TabBar* anotherTabBar = SilkApp::tabBatAt(event->screenPos().x(), event->screenPos().y());
+  TabBar* anotherTabBar = SilkApp::tabBarAt(event->screenPos().x(), event->screenPos().y());
 
   if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
     qDebug("dragging tab is over an another tab bar.");

@@ -10,7 +10,7 @@ class SilkApp : public QApplication {
   DISABLE_COPY_AND_MOVE(SilkApp)
 
  public:
-  static TabBar* tabBatAt(int x, int y);
+  static TabBar* tabBarAt(int x, int y);
 
   SilkApp(int& argc, char** argv);
   ~SilkApp() = default;
