@@ -13,7 +13,8 @@ FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& dragStartPos) {
   setWindowFlags(Qt::Widget | Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint);
   setAttribute(Qt::WA_DeleteOnClose);
   setAttribute(Qt::WA_ShowWithoutActivating);
-  // WA_TransparentForMouseEvents should pass through mouse event but it doens't work as expected on Mac
+  // WA_TransparentForMouseEvents should pass through mouse event but it doens't work as expected on
+  // Mac
   // https://bugreports.qt.io/browse/QTBUG-41696
   setAttribute(Qt::WA_TransparentForMouseEvents);
 

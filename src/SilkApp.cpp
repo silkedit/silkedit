@@ -20,9 +20,8 @@ T findParent(QWidget* widget) {
 }
 }
 
-TabBar *SilkApp::tabBarAt(int x, int y)
-{
-  foreach (MainWindow* window, MainWindow::windows()) {
+TabBar* SilkApp::tabBarAt(int x, int y) {
+  foreach(MainWindow * window, MainWindow::windows()) {
     if (TabBar* tabBar = window->tabViewGroup()->tabBarAt(x, y)) {
       return tabBar;
     }
