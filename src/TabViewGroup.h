@@ -18,7 +18,7 @@ class TabViewGroup : public QWidget {
   DEFAULT_MOVE(TabViewGroup)
 
   // accessor
-  TabView* activeTab() { return m_activeTabView; }
+  TabView* activeTab();
   void setActiveTab(TabView* tab);
 
   void saveAllTabs();
@@ -38,6 +38,7 @@ signals:
   Splitter* m_rootSplitter;
 
   TabView* createTabView();
+  TabView* createInitialTabView();
   void removeTabView(TabView* tab);
   void addTabViewHorizontally(QWidget* widget, const QString& label);
   void addTabViewVertically(QWidget* widget, const QString& label);

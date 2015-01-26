@@ -26,15 +26,20 @@ QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
 
 TabViewGroup::TabViewGroup(QWidget* parent)
     : QWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
-  auto tabView = createTabView();
-  // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
-  // responsibility to delete it.
-  m_rootSplitter->addWidget(tabView);
-  setActiveTab(tabView);
+  createInitialTabView();
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(m_rootSplitter);
   setLayout(layout);
+}
+
+TabView *TabViewGroup::activeTab()
+{
+  if (m_activeTabView) {
+    return m_activeTabView;
+  } else {
+    return createInitialTabView();
+  }
 }
 
 void TabViewGroup::setActiveTab(TabView* tabView) {
@@ -84,6 +89,16 @@ TabView* TabViewGroup::createTabView() {
 
   m_tabViews.push_back(tabView);
 
+  return tabView;
+}
+
+TabView *TabViewGroup::createInitialTabView()
+{
+  auto tabView = createTabView();
+  // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
+  // responsibility to delete it.
+  m_rootSplitter->addWidget(tabView);
+  setActiveTab(tabView);
   return tabView;
 }
 

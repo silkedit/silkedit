@@ -179,12 +179,8 @@ void TabView::tabInserted(int index) {
 
 void TabView::tabRemoved(int index) {tabRemoved(index, false);}
 
-void TabView::tabRemoved(int index, bool afterDrag)
+void TabView::tabRemoved(int , bool afterDrag)
 {
-  if (widget(index) == m_activeEditView) {
-    m_activeEditView = nullptr;
-  }
-
   if (count() == 0 && !m_tabDragging) {
     emit allTabRemoved(afterDrag);
   }
@@ -226,6 +222,9 @@ void TabView::changeTabText(const QString& path) {
 
 void TabView::removeTabAndWidget(int index) {
   if (auto w = widget(index)) {
+    if (w == m_activeEditView) {
+      m_activeEditView = nullptr;
+    }
     w->deleteLater();
   }
   removeTab(index);

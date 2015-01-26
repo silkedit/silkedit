@@ -15,7 +15,12 @@
 const QString DocumentService::DEFAULT_FILE_NAME = "untitled";
 
 bool DocumentService::open(const QString& filename) {
-  return API::activeTabView()->open(filename) >= 0;
+  if (TabView* tabView = API::activeTabView()) {
+    return tabView->open(filename) >= 0;
+  } else {
+    qWarning("active tab view is null");
+    return false;
+  }
 }
 
 void DocumentService::save(Document* doc) {
