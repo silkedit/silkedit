@@ -23,7 +23,7 @@ class PluginService : public QObject, public Singleton<PluginService> {
   QProcess* m_pluginProcess;
   QLocalSocket* m_socket;
 
-private slots:
+ private slots:
   void readStdout();
   void started();
   void error(QProcess::ProcessError error);

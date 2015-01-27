@@ -25,8 +25,7 @@ void PluginService::init() {
   m_pluginProcess->start(Constants::pluginServerPath(), Constants::pluginServerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr) {
-}
+PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr) {}
 
 void PluginService::readStdout() {
   qDebug() << "readyOut";
@@ -48,9 +47,7 @@ void PluginService::started() {
   m_socket->connectToServer(Constants::pluginServerSocketPath());
 }
 
-void PluginService::error(QProcess::ProcessError error) {
-  qDebug() << "Error: " << error;
-}
+void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " << error; }
 
 void PluginService::readRequest() {
   QTextStream in(m_socket);
