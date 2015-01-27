@@ -15,6 +15,7 @@
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
+#include "plugin_service/PluginService.h"
 
 int main(int argv, char** args) {
   PlatformUtil::enableMnemonicOnMac();
@@ -51,6 +52,8 @@ int main(int argv, char** args) {
   MenuBar menuBar(nullptr);
 
   Session::singleton().init();
+
+  PluginService::singleton().init();
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {

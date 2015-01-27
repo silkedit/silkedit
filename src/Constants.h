@@ -13,10 +13,14 @@ class Constants {
   static QStringList packagePaths();
   static QString standardConfigPath();
   static QString standardKeymapPath();
+  static QString pluginServerPath();
+  static QStringList pluginServerArgs();
+  static QString pluginServerSocketPath();
 
  private:
   Constants() = delete;
   ~Constants() = delete;
 
   static QStringList dataDirectoryPaths();
+  static QString pluginServerDir();
 };

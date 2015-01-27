@@ -1,5 +1,6 @@
 #include <QStandardPaths>
 #include <QApplication>
+#include <QDir>
 
 #include "Constants.h"
 
@@ -51,8 +52,25 @@ QString Constants::standardKeymapPath() {
   }
 }
 
+QString Constants::pluginServerPath() { return pluginServerDir() + "/node"; }
+
+QStringList Constants::pluginServerArgs()
+{
+  return QStringList() << pluginServerDir() + "/main.js" << pluginServerSocketPath();
+}
+
+QString Constants::pluginServerSocketPath()
+{
+  return QDir::tempPath() + QDir::separator() + "silk_plugin.sock";
+}
+
 QStringList Constants::dataDirectoryPaths() {
   QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
   paths.prepend(QApplication::applicationDirPath());
   return paths;
+}
+
+QString Constants::pluginServerDir()
+{
+  return QApplication::applicationDirPath() + "/plugin_server";
 }

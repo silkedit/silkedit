@@ -6,7 +6,7 @@
   <resolvers>
     <chain name="main">
       <url name="public" m2compatible="false">
-        <artifact pattern="http://home.shinichy.com:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]" />
+        <artifact pattern="http://home.shinichy.com:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].([ext])" />
         <ivy pattern="http://home.shinichy.com:8081/artifactory/libs-release-local/[organization]/[module]/[revision]/[type]s/ivy-[revision].xml" />
       </url>
     </chain>
