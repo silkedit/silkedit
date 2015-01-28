@@ -36,14 +36,6 @@ IF (APPLE)
   file( GLOB_RECURSE PACKAGES packages/* )
   set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/Packages )
   set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
-
-  # bundle plugin server (node.js)
-  file( COPY lib/node-0.10.36.bin DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/plugin_server FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-  file( RENAME plugin_server/node-0.10.36.bin plugin_server/node )
-  file( GLOB_RECURSE PLUGIN_SERVER plugin_server/* )
-  set_source_files_properties( ${PLUGIN_SERVER} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/plugin_server )
-  set( SILK_SOURCES ${SILK_SOURCES} ${PLUGIN_SERVER} )
-
 ENDIF (APPLE)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
@@ -57,5 +49,8 @@ add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOU
 target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp-0.5.1 ${Oniguruma_LIBRARIES} )
 
 if(APPLE)
+  # bundle plugin server (node.js)
+  # we need to use custom_command to copy directory.
+  ADD_CUSTOM_COMMAND(TARGET SilkEdit POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/plugin_server SilkEdit.app/Contents/MacOS)
   set_target_properties( SilkEdit PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
 ENDIF(APPLE)

@@ -52,7 +52,7 @@ QString Constants::standardKeymapPath() {
   }
 }
 
-QString Constants::pluginServerPath() { return pluginServerDir() + "/node"; }
+QString Constants::pluginServerPath() { return pluginServerDir() + "/bin/node"; }
 
 QStringList Constants::pluginServerArgs() {
   return QStringList() << pluginServerDir() + "/main.js" << pluginServerSocketPath();

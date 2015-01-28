@@ -50,6 +50,11 @@ resolve() {
         unzip -o $f
         rm $f
     done
+
+    node_file=node-0.10.36.zip
+    mv lib/$node_file plugin_server
+    unzip -o plugin_server/$node_file -d plugin_server
+    rm plugin_server/$node_file
 }
 
 # release build

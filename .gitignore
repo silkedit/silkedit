@@ -4,5 +4,7 @@ CMakeLists.txt.user
 
 build/
 ruby_host/ruby_host
-lib/
+/lib/
 include/
+plugin_server/bin
+plugin_server/lib
