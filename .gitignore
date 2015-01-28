@@ -2,9 +2,9 @@
 CMakeLists.txt.user
 *.autosave
 
-build/
-ruby_host/ruby_host
+/build/
 /lib/
-include/
-plugin_server/bin
-plugin_server/lib
+/include/
+/plugin_runner/bin
+/plugin_runner/lib
+/plugin_runner/node_modules

@@ -3,5 +3,6 @@
   <dependencies>
     <dependency org="com.silksmiths" name="yaml-cpp" rev="0.5.1"/>
     <dependency org="com.silksmiths" name="node" rev="0.10.36"/>
+    <dependency org="com.silksmiths" name="msgpack" rev="0.5.9"/>
   </dependencies>
 </ivy-module>

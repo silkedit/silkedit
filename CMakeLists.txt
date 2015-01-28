@@ -49,8 +49,8 @@ add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOU
 target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp-0.5.1 ${Oniguruma_LIBRARIES} )
 
 if(APPLE)
-  # bundle plugin server (node.js)
+  # bundle plugin runner (node.js)
   # we need to use custom_command to copy directory.
-  ADD_CUSTOM_COMMAND(TARGET SilkEdit POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/plugin_server SilkEdit.app/Contents/MacOS)
+  ADD_CUSTOM_COMMAND(TARGET SilkEdit POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/plugin_runner SilkEdit.app/Contents/MacOS)
   set_target_properties( SilkEdit PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
 ENDIF(APPLE)

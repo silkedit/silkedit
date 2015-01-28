@@ -6,6 +6,7 @@
 #include "TextEditView.h"
 #include "TabView.h"
 #include "MainWindow.h"
+#include "plugin_service/PluginService.h"
 
 namespace {
 template <typename T>

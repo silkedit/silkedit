@@ -52,14 +52,14 @@ QString Constants::standardKeymapPath() {
   }
 }
 
-QString Constants::pluginServerPath() { return pluginServerDir() + "/bin/node"; }
+QString Constants::pluginRunnerPath() { return pluginServerDir() + "/bin/node"; }
 
-QStringList Constants::pluginServerArgs() {
+QStringList Constants::pluginRunnerArgs() {
   return QStringList() << pluginServerDir() + "/main.js" << pluginServerSocketPath();
 }
 
 QString Constants::pluginServerSocketPath() {
-  return QDir::tempPath() + QDir::separator() + "silk_plugin.sock";
+  return QDir::tempPath() + QDir::separator() + "silk.sock";
 }
 
 QStringList Constants::dataDirectoryPaths() {
@@ -69,5 +69,5 @@ QStringList Constants::dataDirectoryPaths() {
 }
 
 QString Constants::pluginServerDir() {
-  return QApplication::applicationDirPath() + "/plugin_server";
+  return QApplication::applicationDirPath() + "/plugin_runner";
 }
