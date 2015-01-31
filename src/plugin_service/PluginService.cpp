@@ -1,6 +1,7 @@
 #include <msgpack.hpp>
 #include <QProcess>
 #include <QDebug>
+#include <QFile>
 
 #include "PluginService.h"
 #include "SilkApp.h"
@@ -8,7 +9,6 @@
 
 PluginService::~PluginService() {
   qDebug("~PluginService");
-  m_socket->flush();
   m_socket->disconnectFromServer();
   m_socket->close();
   m_pluginProcess->terminate();
@@ -18,6 +18,11 @@ void PluginService::init() {
   Q_ASSERT(!m_pluginProcess);
 
   m_server = new QLocalServer(this);
+  QFile socketFile(Constants::pluginServerSocketPath());
+  if (socketFile.exists()) {
+    socketFile.remove();
+  }
+
   if (!m_server->listen(Constants::pluginServerSocketPath())) {
     qCritical("Unable to start the server: %s", qPrintable(m_server->errorString()));
     return;
