@@ -41,7 +41,8 @@ void PluginService::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
+PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
+}
 
 void PluginService::readStdout() {
   qDebug() << "readyOut";
@@ -63,12 +64,46 @@ void PluginService::pluginRunnerConnected() {
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 
-void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " << error; }
+void PluginService::error(QProcess::ProcessError error) {
+  qDebug() << "Error: " << error;
+}
 
 void PluginService::readRequest() {
   qDebug("readRequest");
-  QByteArray bytes = m_socket->readAll();
-  unpack(bytes.constData(), bytes.size());
+
+  // The size may decided by receive performance, transmit layer's protocol and so on.
+  std::size_t const try_read_size = 100;
+
+  msgpack::unpacker unp;
+
+  // Message receive loop
+  while (true) {
+    unp.reserve_buffer(try_read_size);
+    // unp has at least try_read_size buffer on this point.
+
+    // input is a kind of I/O library object.
+    // read message to msgpack::unpacker's internal buffer directly.
+    //      std::size_t actual_read_size = input.readsome(unp.buffer(), try_read_size);
+    qint64 actual_read_size = m_socket->read(unp.buffer(), try_read_size);
+    qDebug() << actual_read_size;
+    if (actual_read_size == 0) {
+      break;
+    } else if (actual_read_size == -1) {
+      qCritical("unable to read a socket. %s", qPrintable(m_socket->errorString()));
+      break;
+    }
+
+    // tell msgpack::unpacker actual consumed size.
+    unp.buffer_consumed(actual_read_size);
+
+    msgpack::unpacked result;
+    // Message pack data loop
+    while (unp.next(result)) {
+      msgpack::object obj(result.get());
+      std::string str = obj.as<std::string>();
+      qDebug() << qPrintable(QString::fromUtf8(str.c_str()));
+    }
+  }
 }
 
 void PluginService::displayError(QLocalSocket::LocalSocketError socketError) {
@@ -84,16 +119,5 @@ void PluginService::displayError(QLocalSocket::LocalSocketError socketError) {
     default:
       qWarning("The following error occurred: %s.", qPrintable(m_socket->errorString()));
       break;
-  }
-}
-
-void PluginService::unpack(const char* buffer, std::size_t len) {
-  std::size_t off = 0;
-
-  while (off != len) {
-    msgpack::unpacked result = msgpack::unpack(buffer, len, off);
-    msgpack::object obj(result.get());
-    std::string str = obj.as<std::string>();
-    qDebug() << qPrintable(QString::fromUtf8(str.c_str()));
   }
 }
