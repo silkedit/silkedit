@@ -41,8 +41,7 @@ void PluginService::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
-}
+PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
 
 void PluginService::readStdout() {
   qDebug() << "readyOut";
@@ -64,9 +63,7 @@ void PluginService::pluginRunnerConnected() {
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 
-void PluginService::error(QProcess::ProcessError error) {
-  qDebug() << "Error: " << error;
-}
+void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " << error; }
 
 void PluginService::readRequest() {
   qDebug("readRequest");
