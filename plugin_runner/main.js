@@ -1,18 +1,19 @@
-var net = require('net');
-var msgpack = require('msgpack5')() // namespace our extensions
-  , encode  = msgpack.encode
-  , decode  = msgpack.decode
+var rpc = require('msgpack-rpc');
+var assert = require('assert');
 
 if (process.argv.length < 3) {
-    console.log('missing argument.');
-    return;
+  console.log('missing argument.');
+  return;
 }
 
 var socketFile = process.argv[2];
 
-var client = net.connect(socketFile, function() {
-    console.log('connected to server!');
-    var data = encode('hello');
-    // console.log(data.toString('hex'));
-    client.write(data);
+var c = rpc.createClient(socketFile, function () {
+  var start = Date.now();
+  c.invoke('add', 5, 4, function (err, response) {
+    var end = Date.now();
+    console.log('time', end - start)
+    assert.equal(9, response);
+    c.close();
+  });
 });

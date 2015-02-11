@@ -1,3 +1,4 @@
+#include <msgpack/rpc/protocol.h>
 #include <msgpack.hpp>
 #include <QProcess>
 #include <QDebug>
@@ -9,9 +10,9 @@
 
 PluginService::~PluginService() {
   qDebug("~PluginService");
-  m_socket->disconnectFromServer();
-  m_socket->close();
-  m_pluginProcess->terminate();
+  if (m_pluginProcess) {
+    m_pluginProcess->terminate();
+  }
 }
 
 void PluginService::init() {
@@ -30,15 +31,16 @@ void PluginService::init() {
 
   connect(m_server, &QLocalServer::newConnection, this, &PluginService::pluginRunnerConnected);
 
-  m_pluginProcess = new QProcess(this);
-  connect(m_pluginProcess,
-          SIGNAL(error(QProcess::ProcessError)),
-          this,
-          SLOT(error(QProcess::ProcessError)));
-  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginService::readStdout);
+  //  m_pluginProcess = new QProcess(this);
+  //  connect(m_pluginProcess,
+  //          SIGNAL(error(QProcess::ProcessError)),
+  //          this,
+  //          SLOT(error(QProcess::ProcessError)));
+  //  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this,
+  // &PluginService::readStdout);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
   qDebug() << "args:" << Constants::pluginRunnerArgs();
-  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
+  //  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
 PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
@@ -68,20 +70,16 @@ void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " 
 void PluginService::readRequest() {
   qDebug("readRequest");
 
-  // The size may decided by receive performance, transmit layer's protocol and so on.
-  std::size_t const try_read_size = 100;
-
   msgpack::unpacker unp;
+  std::size_t readSize = m_socket->bytesAvailable();
 
   // Message receive loop
   while (true) {
-    unp.reserve_buffer(try_read_size);
-    // unp has at least try_read_size buffer on this point.
+    unp.reserve_buffer(readSize);
+    // unp has at least readSize buffer on this point.
 
-    // input is a kind of I/O library object.
     // read message to msgpack::unpacker's internal buffer directly.
-    //      std::size_t actual_read_size = input.readsome(unp.buffer(), try_read_size);
-    qint64 actual_read_size = m_socket->read(unp.buffer(), try_read_size);
+    qint64 actual_read_size = m_socket->read(unp.buffer(), readSize);
     qDebug() << actual_read_size;
     if (actual_read_size == 0) {
       break;
@@ -97,10 +95,86 @@ void PluginService::readRequest() {
     // Message pack data loop
     while (unp.next(result)) {
       msgpack::object obj(result.get());
-      std::string str = obj.as<std::string>();
-      qDebug() << qPrintable(QString::fromUtf8(str.c_str()));
+      msgpack::rpc::msg_rpc rpc;
+      try {
+        obj.convert(&rpc);
+      }
+      catch (msgpack::v1::type_error e) {
+        qCritical() << "type error. bad cast.";
+        continue;
+      }
+
+      switch (rpc.type) {
+        case ::msgpack::rpc::REQUEST: {
+          msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
+          obj.convert(&req);
+          std::string methodName = req.method.as<std::string>();
+          if (methodName == "add") {
+            qDebug() << qPrintable(QString::fromUtf8(methodName.c_str()));
+            msgpack::type::tuple<int, int> params;
+            req.param.convert(&params);
+            if (req.param.type == msgpack::type::ARRAY) {
+              qDebug("array type");
+              qDebug() << req.param.via.array.size;
+            }
+            int a = std::get<0>(params);
+            int b = std::get<1>(params);
+            qDebug() << a;
+            qDebug() << b;
+            msgpack::type::nil err = msgpack::type::nil();
+            //            msgpack::type::nil res = msgpack::type::nil();
+            int res = a + b;
+
+            call(res, err, req.msgid);
+          } else {
+            qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
+          }
+        } break;
+
+        case ::msgpack::rpc::RESPONSE: {
+          //          ::msgpack::rpc::msg_response<object, object> res;
+          //          msg.convert(&res);
+          //          auto found = m_request_map.find(res.msgid);
+          //          if (found != m_request_map.end()) {
+          //            if (res.error.type == msgpack::type::NIL) {
+          //              found->second->set_result(res.result);
+          //            } else if (res.error.type == msgpack::type::BOOLEAN) {
+          //              bool isError;
+          //              res.error.convert(&isError);
+          //              if (isError) {
+          //                found->second->set_error(res.result);
+          //              } else {
+          //                found->second->set_result(res.result);
+          //              }
+          //            }
+          //          } else {
+          //            throw client_error("no request for response");
+          //          }
+        } break;
+
+        case msgpack::rpc::NOTIFY: {
+          msgpack::rpc::msg_notify<msgpack::object, msgpack::object> req;
+          obj.convert(&req);
+        } break;
+
+        default:
+          qCritical("invalid rpc type");
+      }
     }
   }
+}
+
+template <typename Result, typename Error>
+void PluginService::call(Result& res, Error& err, msgpack::rpc::msgid_t id) {
+  msgpack::sbuffer sbuf;
+  msgpack::type::tuple<msgpack::rpc::message_type_t, msgpack::rpc::msgid_t, Error, Result> response;
+  std::get<0>(response) = msgpack::rpc::RESPONSE;
+  std::get<1>(response) = id;
+  std::get<2>(response) = err;
+  std::get<3>(response) = res;
+  msgpack::pack(sbuf, response);
+
+  m_socket->write(sbuf.data(), sbuf.size());
 }
 
 void PluginService::displayError(QLocalSocket::LocalSocketError socketError) {

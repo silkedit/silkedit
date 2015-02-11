@@ -1,5 +1,6 @@
 #pragma once
 
+#include <msgpack/rpc/protocol.h>
 #include <QObject>
 #include <QProcess>
 #include <QLocalSocket>
@@ -26,7 +27,8 @@ class PluginService : public QObject, public Singleton<PluginService> {
   QLocalServer* m_server;
 
  private:
-  void unpack(const char* buffer, std::size_t len);
+  template <typename Result, typename Error>
+  void call(Result& res, Error& err, msgpack::rpc::msgid_t id);
 
  private slots:
   void readStdout();

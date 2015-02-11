@@ -1,6 +1,7 @@
 .DS_Store
 CMakeLists.txt.user
 *.autosave
+.idea/
 
 /build/
 /lib/
