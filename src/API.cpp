@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QMessageBox>
 
 #include "API.h"
 #include "TabView.h"
@@ -43,4 +44,11 @@ void API::hideActiveFindReplacePanel() {
   if (MainWindow* window = activeWindow()) {
     window->hideFindReplacePanel();
   }
+}
+
+void API::showDialog(QString msg)
+{
+  QMessageBox msgBox;
+  msgBox.setText(msg);
+  msgBox.exec();
 }

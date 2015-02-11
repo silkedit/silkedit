@@ -7,6 +7,7 @@
 #include "PluginService.h"
 #include "SilkApp.h"
 #include "Constants.h"
+#include "API.h"
 
 PluginService::~PluginService() {
   qDebug("~PluginService");
@@ -43,7 +44,8 @@ void PluginService::init() {
   //  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
+PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
+}
 
 void PluginService::readStdout() {
   qDebug() << "readyOut";
@@ -65,7 +67,9 @@ void PluginService::pluginRunnerConnected() {
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 
-void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " << error; }
+void PluginService::error(QProcess::ProcessError error) {
+  qDebug() << "Error: " << error;
+}
 
 void PluginService::readRequest() {
   qDebug("readRequest");
@@ -98,8 +102,7 @@ void PluginService::readRequest() {
       msgpack::rpc::msg_rpc rpc;
       try {
         obj.convert(&rpc);
-      }
-      catch (msgpack::v1::type_error e) {
+      } catch (msgpack::v1::type_error e) {
         qCritical() << "type error. bad cast.";
         continue;
       }
@@ -109,8 +112,8 @@ void PluginService::readRequest() {
           msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
           obj.convert(&req);
           std::string methodName = req.method.as<std::string>();
+          qDebug() << qPrintable(QString::fromUtf8(methodName.c_str()));
           if (methodName == "add") {
-            qDebug() << qPrintable(QString::fromUtf8(methodName.c_str()));
             msgpack::type::tuple<int, int> params;
             req.param.convert(&params);
             if (req.param.type == msgpack::type::ARRAY) {
@@ -122,10 +125,16 @@ void PluginService::readRequest() {
             qDebug() << a;
             qDebug() << b;
             msgpack::type::nil err = msgpack::type::nil();
-            //            msgpack::type::nil res = msgpack::type::nil();
             int res = a + b;
 
             call(res, err, req.msgid);
+          } else if (methodName == "alert") {
+            msgpack::type::tuple<std::string> params;
+            req.param.convert(&params);
+            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+              std::string msg = std::get<0>(params);
+              API::showDialog(QString::fromUtf8(msg.c_str()));
+            }
           } else {
             qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
           }

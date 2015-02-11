@@ -19,6 +19,7 @@ class API {
   static MainWindow* activeWindow();
   static QList<MainWindow*> windows();
   static void hideActiveFindReplacePanel();
+  static void showDialog(QString msg);
 
  private:
   API() = delete;
