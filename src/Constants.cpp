@@ -5,7 +5,8 @@
 #include "Constants.h"
 
 namespace {
-  static QString silkHomePath = QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
+static QString silkHomePath =
+    QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }
 
 QStringList Constants::configPaths() {
@@ -36,13 +37,9 @@ QStringList Constants::packagePaths() {
   return packagePaths;
 }
 
-QString Constants::standardConfigPath() {
-  return silkHomePath + "/config.yml";
-}
+QString Constants::standardConfigPath() { return silkHomePath + "/config.yml"; }
 
-QString Constants::standardKeymapPath() {
-  return silkHomePath + "/keymap.yml";
-}
+QString Constants::standardKeymapPath() { return silkHomePath + "/keymap.yml"; }
 
 QString Constants::pluginRunnerPath() { return pluginServerDir() + "/bin/node"; }
 
