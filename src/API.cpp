@@ -46,8 +46,7 @@ void API::hideActiveFindReplacePanel() {
   }
 }
 
-void API::showDialog(QString msg)
-{
+void API::showDialog(QString msg) {
   QMessageBox msgBox;
   msgBox.setText(msg);
   msgBox.exec();
