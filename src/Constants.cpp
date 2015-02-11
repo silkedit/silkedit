@@ -4,6 +4,10 @@
 
 #include "Constants.h"
 
+namespace {
+  static QString silkHomePath = QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
+}
+
 QStringList Constants::configPaths() {
   QStringList configPaths;
 
@@ -33,23 +37,11 @@ QStringList Constants::packagePaths() {
 }
 
 QString Constants::standardConfigPath() {
-  QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
-  if (paths.isEmpty()) {
-    qCritical("no standard data location!");
-    return "";
-  } else {
-    return paths.at(0) + "/config.yml";
-  }
+  return silkHomePath + "/config.yml";
 }
 
 QString Constants::standardKeymapPath() {
-  QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
-  if (paths.isEmpty()) {
-    qCritical("no standard data location!");
-    return "";
-  } else {
-    return paths.at(0) + "/keymap.yml";
-  }
+  return silkHomePath + "/keymap.yml";
 }
 
 QString Constants::pluginRunnerPath() { return pluginServerDir() + "/bin/node"; }
@@ -63,7 +55,7 @@ QString Constants::pluginServerSocketPath() {
 }
 
 QStringList Constants::dataDirectoryPaths() {
-  QStringList paths = QStandardPaths::standardLocations(QStandardPaths::DataLocation);
+  QStringList paths(silkHomePath);
   paths.prepend(QApplication::applicationDirPath());
   return paths;
 }
