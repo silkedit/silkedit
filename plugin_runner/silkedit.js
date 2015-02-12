@@ -8,9 +8,7 @@ module.exports = function(client) {
       //  console.log('time:', end - start)
       //  console.log(response)
       //});
-      client.invoke('alert', msg, function (err, response) {
-        console.log(response)
-      });
+      client.notify('alert', msg);
     }
   }
 }

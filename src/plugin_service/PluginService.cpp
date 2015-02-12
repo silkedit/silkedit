@@ -81,7 +81,7 @@ void PluginService::readRequest() {
 
     // read message to msgpack::unpacker's internal buffer directly.
     qint64 actual_read_size = m_socket->read(unp.buffer(), readSize);
-    qDebug() << actual_read_size;
+    //    qDebug() << actual_read_size;
     if (actual_read_size == 0) {
       break;
     } else if (actual_read_size == -1) {
@@ -110,7 +110,7 @@ void PluginService::readRequest() {
           msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
           obj.convert(&req);
           std::string methodName = req.method.as<std::string>();
-          qDebug() << qPrintable(QString::fromUtf8(methodName.c_str()));
+          qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
           if (methodName == "add") {
             msgpack::type::tuple<int, int> params;
             req.param.convert(&params);
@@ -126,13 +126,6 @@ void PluginService::readRequest() {
             int res = a + b;
 
             call(res, err, req.msgid);
-          } else if (methodName == "alert") {
-            msgpack::type::tuple<std::string> params;
-            req.param.convert(&params);
-            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
-              std::string msg = std::get<0>(params);
-              API::showDialog(QString::fromUtf8(msg.c_str()));
-            }
           } else {
             qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
           }
@@ -162,6 +155,19 @@ void PluginService::readRequest() {
         case msgpack::rpc::NOTIFY: {
           msgpack::rpc::msg_notify<msgpack::object, msgpack::object> req;
           obj.convert(&req);
+          std::string methodName = req.method.as<std::string>();
+          qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
+          if (methodName == "alert") {
+            msgpack::type::tuple<std::string> params;
+            req.param.convert(&params);
+            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+              std::string msg = std::get<0>(params);
+              API::showDialog(QString::fromUtf8(msg.c_str()));
+            }
+          } else {
+            qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
+          }
+
         } break;
 
         default:
