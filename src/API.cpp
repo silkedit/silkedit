@@ -53,7 +53,4 @@ void API::showDialog(const QString& msg) {
   msgBox.exec();
 }
 
-void API::loadMenu(const std::string &ymlPath)
-{
-  MenuService::loadMenu(ymlPath);
-}
+void API::loadMenu(const std::string& ymlPath) { MenuService::loadMenu(ymlPath); }
