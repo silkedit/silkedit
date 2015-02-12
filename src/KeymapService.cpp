@@ -1,3 +1,4 @@
+#include <yaml-cpp/yaml.h>
 #include <string>
 #include <QDebug>
 #include <QShortcut>

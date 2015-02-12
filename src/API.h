@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <QList>
 
 #include "macros.h"
@@ -19,7 +20,8 @@ class API {
   static MainWindow* activeWindow();
   static QList<MainWindow*> windows();
   static void hideActiveFindReplacePanel();
-  static void showDialog(QString msg);
+  static void showDialog(const QString& msg);
+  static void loadMenu(const std::string& ymlPath);
 
  private:
   API() = delete;

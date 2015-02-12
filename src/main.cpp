@@ -8,7 +8,6 @@
 #include "ConfigService.h"
 #include "CommandService.h"
 #include "DocumentService.h"
-#include "MenuBar.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "Session.h"
 #include "ViEngine.h"
@@ -16,6 +15,7 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "plugin_service/PluginService.h"
+#include "MenuService.h"
 
 int main(int argv, char** args) {
   PlatformUtil::enableMnemonicOnMac();
@@ -49,7 +49,7 @@ int main(int argv, char** args) {
     viEngine.enable();
   }
 
-  MenuBar menuBar(nullptr);
+  MenuService::init();
 
   Session::singleton().init();
 

@@ -164,6 +164,13 @@ void PluginService::readRequest() {
               std::string msg = std::get<0>(params);
               API::showDialog(QString::fromUtf8(msg.c_str()));
             }
+          } else if (methodName == "loadMenu") {
+            msgpack::type::tuple<std::string> params;
+            req.param.convert(&params);
+            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+              std::string ymlPath = std::get<0>(params);
+              API::loadMenu(ymlPath);
+            }
           } else {
             qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
           }

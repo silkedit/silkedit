@@ -5,6 +5,7 @@
 #include "TabView.h"
 #include "TabViewGroup.h"
 #include "MainWindow.h"
+#include "MenuService.h"
 
 TextEditView* API::activeEditView() {
   TabView* tabView = activeTabView();
@@ -46,8 +47,13 @@ void API::hideActiveFindReplacePanel() {
   }
 }
 
-void API::showDialog(QString msg) {
+void API::showDialog(const QString& msg) {
   QMessageBox msgBox;
   msgBox.setText(msg);
   msgBox.exec();
+}
+
+void API::loadMenu(const std::string &ymlPath)
+{
+  MenuService::loadMenu(ymlPath);
 }

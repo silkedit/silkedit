@@ -9,6 +9,10 @@ module.exports = function(client) {
       //  console.log(response)
       //});
       client.notify('alert', msg);
+    },
+
+    loadMenu: function(ymlPath) {
+      client.notify('loadMenu', ymlPath)
     }
   }
 }

@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <yaml-cpp/yaml.h>
 #include <boost/optional.hpp>
 #include <QObject>
 

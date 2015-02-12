@@ -18,7 +18,6 @@
 #include "commands/CopyCommand.h"
 #include "commands/PasteCommand.h"
 #include "commands/SelectAllCommand.h"
-//#include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "MenuBar.h"
