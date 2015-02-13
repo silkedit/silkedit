@@ -49,10 +49,14 @@ void parseMenuNode(QWidget* parent, YAML::Node menuNode) {
       } else if (commandNode.IsDefined()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         auto commandAction = new CommandAction(label, command);
-        if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
-          menuBar->addAction(commandAction);
-        } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
-          parentMenu->addAction(commandAction);
+        if (!findAction(parent->actions(), label)) {
+          if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
+            menuBar->addAction(commandAction);
+          } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
+            parentMenu->addAction(commandAction);
+          }
+        } else {
+          qWarning("%s already exists", qPrintable(label));
         }
       }
     }
