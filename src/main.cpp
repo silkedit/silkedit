@@ -53,6 +53,7 @@ int main(int argv, char** args) {
 
   Session::singleton().init();
 
+  API::init();
   PluginService::singleton().init();
 
   QStringList arguments = app.arguments();

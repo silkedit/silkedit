@@ -1,3 +1,5 @@
+#include <tuple>
+#include <string>
 #include <QtWidgets>
 #include <QStringBuilder>
 
@@ -9,6 +11,7 @@
 #include "DocumentService.h"
 #include "Session.h"
 #include "API.h"
+#include "plugin_service/PluginService.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -93,6 +96,23 @@ TextEditView* TextEditView::find(int id) {
   }
 
   return nullptr;
+}
+
+void TextEditView::call(msgpack::rpc::msgid_t msgId,
+                        const std::string& method,
+                        const msgpack::object obj) {
+  std::tuple<int> params;
+  obj.convert(&params);
+  int id = std::get<0>(params);
+
+  if (TextEditView* view = find(id)) {
+    if (method == "getText") {
+      PluginService::singleton().sendResponse(
+          view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+    }
+  } else {
+    qWarning("id: %d not found", id);
+  }
 }
 
 QString TextEditView::path() { return m_document ? m_document->path() : ""; }
