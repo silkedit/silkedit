@@ -46,9 +46,9 @@ void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
 }
 }
 
-  int TextEditView::count = 0;
-  QHash<int, TextEditView*> TextEditView::objects;
-  QMutex TextEditView::mutex;
+int TextEditView::count = 0;
+QHash<int, TextEditView*> TextEditView::objects;
+QMutex TextEditView::mutex;
 
 TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
   m_lineNumberArea = new LineNumberArea(this);
@@ -81,8 +81,7 @@ TextEditView::~TextEditView() {
   }
 }
 
-TextEditView *TextEditView::find(int id)
-{
+TextEditView* TextEditView::find(int id) {
   if (id < 0) {
     qWarning("id must be positive");
     return nullptr;
@@ -506,8 +505,7 @@ void TextEditView::replaceAllSelection(const QString& findText,
   }
 }
 
-int TextEditView::id()
-{
+int TextEditView::id() {
   QMutexLocker locker(&mutex);
   objects.insert(count, this);
   m_id = count;
