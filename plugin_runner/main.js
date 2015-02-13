@@ -1,5 +1,6 @@
 var rpc = require('msgpack-rpc');
 var fs = require('fs')
+var sync = require('synchronize')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -8,12 +9,13 @@ if (process.argv.length < 3) {
 
 var socketFile = process.argv[2];
 var moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
+var commands = {}
 
 function getDirs(dir) {
   var files = fs.readdirSync(dir);
   var dirs = []
 
-  files.forEach(function(file) {
+  files.forEach(function (file) {
     var stat = fs.statSync(dir + "/" + file);
     if (stat.isDirectory()) {
       dirs.push(file);
@@ -25,6 +27,8 @@ function getDirs(dir) {
 
 var c = rpc.createClient(socketFile, function () {
   GLOBAL.silk = require('./silkedit')(c);
+
+  sync(c, 'invoke');
 
   var home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
   var packageDirPath = home + "/.silk/Packages";
@@ -51,18 +55,38 @@ var c = rpc.createClient(socketFile, function () {
                 var pjson = require(filePath);
                 if (pjson.main) {
                   var module = require(dir)
-                  module.activate()
+                  if (module.commands) {
+                    for (var prop in module.commands) {
+                      commands[prop] = module.commands[prop];
+                    }
+                    silk.registerCommands(Object.keys(module.commands));
+                  }
+
+                  if (module.activate) {
+                    module.activate()
+                  }
                 }
                 break;
             }
-          });
-        });
-      });
+          })
+        })
+      })
     })
-  };
+  }
 
   var dirs = getDirs(packageDirPath);
-  dirs.forEach(function(dir) {
+  dirs.forEach(function (dir) {
     loadPackage(packageDirPath + '/' + dir);
   });
 });
+
+var handler = {
+  "runCommand": function(cmd) {
+    if (commands[cmd]) {
+      sync.fiber(function(){
+        commands[cmd]()
+      })
+    }
+  }
+}
+c.setHandler(handler);

@@ -1,3 +1,5 @@
+#include <vector>
+#include <tuple>
 #include <msgpack/rpc/protocol.h>
 #include <msgpack.hpp>
 #include <QProcess>
@@ -8,6 +10,8 @@
 #include "SilkApp.h"
 #include "Constants.h"
 #include "API.h"
+#include "CommandService.h"
+#include "TextEditView.h"
 
 PluginService::~PluginService() {
   qDebug("~PluginService");
@@ -45,6 +49,17 @@ void PluginService::init() {
 }
 
 PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
+
+void PluginService::callExternalCommand(const QString& cmd) {
+  msgpack::sbuffer sbuf;
+  msgpack::rpc::msg_notify<std::string, std::vector<std::string>> notify;
+  notify.method = "runCommand";
+  std::vector<std::string> params = {cmd.toUtf8().constData()};
+  notify.param = params;
+  msgpack::pack(sbuf, notify);
+
+  m_socket->write(sbuf.data(), sbuf.size());
+}
 
 void PluginService::readStdout() {
   qDebug() << "readyOut";
@@ -99,99 +114,123 @@ void PluginService::readRequest() {
       msgpack::rpc::msg_rpc rpc;
       try {
         obj.convert(&rpc);
+
+        switch (rpc.type) {
+          case ::msgpack::rpc::REQUEST: {
+            msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
+            obj.convert(&req);
+            std::string methodName = req.method.as<std::string>();
+            qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
+            int dotIndex = methodName.find_first_of(".");
+            if (dotIndex >= 0) {
+              std::string type = methodName.substr(0, dotIndex);
+              std::string method = methodName.substr(dotIndex + 1);
+              if (type.empty() || method.empty()) {
+                return;
+              }
+
+              qDebug("type: %s, method: %s", type.c_str(), method.c_str());
+              if (type == "TextEditView") {
+                msgpack::type::tuple<int> params;
+                req.param.convert(&params);
+                int id = std::get<0>(params);
+                if (TextEditView* view = TextEditView::find(id)) {
+                  if (method == "getText") {
+                    sendResponse(
+                        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), req.msgid);
+                  }
+                } else {
+                  qWarning("id: %d not found", id);
+                }
+              }
+            } else if (methodName == "getActiveView") {
+              TextEditView* editView = API::activeEditView();
+              if (editView) {
+                sendResponse(editView->id(), msgpack::type::nil(), req.msgid);
+              } else {
+                sendResponse(
+                    msgpack::type::nil(), std::string("active edit view is null"), req.msgid);
+              }
+            } else {
+              qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
+            }
+          } break;
+
+          case ::msgpack::rpc::RESPONSE: {
+            //          ::msgpack::rpc::msg_response<object, object> res;
+            //          msg.convert(&res);
+            //          auto found = m_request_map.find(res.msgid);
+            //          if (found != m_request_map.end()) {
+            //            if (res.error.type == msgpack::type::NIL) {
+            //              found->second->set_result(res.result);
+            //            } else if (res.error.type == msgpack::type::BOOLEAN) {
+            //              bool isError;
+            //              res.error.convert(&isError);
+            //              if (isError) {
+            //                found->second->set_error(res.result);
+            //              } else {
+            //                found->second->set_result(res.result);
+            //              }
+            //            }
+            //          } else {
+            //            throw client_error("no request for response");
+            //          }
+          } break;
+
+          case msgpack::rpc::NOTIFY: {
+            msgpack::rpc::msg_notify<msgpack::object, msgpack::object> req;
+            obj.convert(&req);
+            std::string methodName = req.method.as<std::string>();
+            qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
+            if (methodName == "alert") {
+              msgpack::type::tuple<std::string> params;
+              req.param.convert(&params);
+              if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+                std::string msg = std::get<0>(params);
+                API::showDialog(QString::fromUtf8(msg.c_str()));
+              }
+            } else if (methodName == "loadMenu") {
+              msgpack::type::tuple<std::string> params;
+              req.param.convert(&params);
+              if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+                std::string ymlPath = std::get<0>(params);
+                API::loadMenu(ymlPath);
+              }
+            } else if (methodName == "registerCommands") {
+              msgpack::type::tuple<std::vector<std::string>> params;
+              req.param.convert(&params);
+              if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
+                std::vector<std::string> commands = std::get<0>(params);
+                for (std::string& cmd : commands) {
+                  qDebug("command: %s", cmd.c_str());
+                  CommandService::add(
+                      std::unique_ptr<ICommand>(new PluginCommand(QString::fromUtf8(cmd.c_str()))));
+                }
+              }
+            } else {
+              qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
+            }
+          } break;
+          default:
+            qCritical("invalid rpc type");
+        }
       }
       catch (msgpack::v1::type_error e) {
         qCritical() << "type error. bad cast.";
         continue;
-      }
-
-      switch (rpc.type) {
-        case ::msgpack::rpc::REQUEST: {
-          msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
-          obj.convert(&req);
-          std::string methodName = req.method.as<std::string>();
-          qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
-          if (methodName == "add") {
-            msgpack::type::tuple<int, int> params;
-            req.param.convert(&params);
-            if (req.param.type == msgpack::type::ARRAY) {
-              qDebug("array type");
-              qDebug() << req.param.via.array.size;
-            }
-            int a = std::get<0>(params);
-            int b = std::get<1>(params);
-            qDebug() << a;
-            qDebug() << b;
-            msgpack::type::nil err = msgpack::type::nil();
-            int res = a + b;
-
-            call(res, err, req.msgid);
-          } else {
-            qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
-          }
-        } break;
-
-        case ::msgpack::rpc::RESPONSE: {
-          //          ::msgpack::rpc::msg_response<object, object> res;
-          //          msg.convert(&res);
-          //          auto found = m_request_map.find(res.msgid);
-          //          if (found != m_request_map.end()) {
-          //            if (res.error.type == msgpack::type::NIL) {
-          //              found->second->set_result(res.result);
-          //            } else if (res.error.type == msgpack::type::BOOLEAN) {
-          //              bool isError;
-          //              res.error.convert(&isError);
-          //              if (isError) {
-          //                found->second->set_error(res.result);
-          //              } else {
-          //                found->second->set_result(res.result);
-          //              }
-          //            }
-          //          } else {
-          //            throw client_error("no request for response");
-          //          }
-        } break;
-
-        case msgpack::rpc::NOTIFY: {
-          msgpack::rpc::msg_notify<msgpack::object, msgpack::object> req;
-          obj.convert(&req);
-          std::string methodName = req.method.as<std::string>();
-          qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
-          if (methodName == "alert") {
-            msgpack::type::tuple<std::string> params;
-            req.param.convert(&params);
-            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
-              std::string msg = std::get<0>(params);
-              API::showDialog(QString::fromUtf8(msg.c_str()));
-            }
-          } else if (methodName == "loadMenu") {
-            msgpack::type::tuple<std::string> params;
-            req.param.convert(&params);
-            if (req.param.type == msgpack::type::ARRAY && req.param.via.array.size > 0) {
-              std::string ymlPath = std::get<0>(params);
-              API::loadMenu(ymlPath);
-            }
-          } else {
-            qWarning("%s is not supported", qPrintable(QString::fromUtf8(methodName.c_str())));
-          }
-
-        } break;
-
-        default:
-          qCritical("invalid rpc type");
       }
     }
   }
 }
 
 template <typename Result, typename Error>
-void PluginService::call(Result& res, Error& err, msgpack::rpc::msgid_t id) {
+void PluginService::sendResponse(const Result& res, const Error& err, msgpack::rpc::msgid_t id) {
   msgpack::sbuffer sbuf;
-  msgpack::type::tuple<msgpack::rpc::message_type_t, msgpack::rpc::msgid_t, Error, Result> response;
-  std::get<0>(response) = msgpack::rpc::RESPONSE;
-  std::get<1>(response) = id;
-  std::get<2>(response) = err;
-  std::get<3>(response) = res;
+  msgpack::rpc::msg_response<Result, Error> response;
+  response.msgid = id;
+  response.error = err;
+  response.result = res;
+
   msgpack::pack(sbuf, response);
 
   m_socket->write(sbuf.data(), sbuf.size());
@@ -211,4 +250,10 @@ void PluginService::displayError(QLocalSocket::LocalSocketError socketError) {
       qWarning("The following error occurred: %s.", qPrintable(m_socket->errorString()));
       break;
   }
+}
+
+PluginCommand::PluginCommand(const QString& name) : ICommand(name) {}
+
+void PluginCommand::doRun(const CommandArgument&, int) {
+  PluginService::singleton().callExternalCommand(name());
 }

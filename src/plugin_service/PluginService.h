@@ -8,6 +8,7 @@
 
 #include "macros.h"
 #include "Singleton.h"
+#include "ICommand.h"
 
 class PluginService : public QObject, public Singleton<PluginService> {
   Q_OBJECT
@@ -17,6 +18,7 @@ class PluginService : public QObject, public Singleton<PluginService> {
   ~PluginService();
 
   void init();
+  void callExternalCommand(const QString& cmd);
 
  private:
   friend class Singleton<PluginService>;
@@ -28,7 +30,7 @@ class PluginService : public QObject, public Singleton<PluginService> {
 
  private:
   template <typename Result, typename Error>
-  void call(Result& res, Error& err, msgpack::rpc::msgid_t id);
+  void sendResponse(const Result& res, const Error& err, msgpack::rpc::msgid_t id);
 
  private slots:
   void readStdout();
@@ -36,4 +38,14 @@ class PluginService : public QObject, public Singleton<PluginService> {
   void error(QProcess::ProcessError error);
   void readRequest();
   void displayError(QLocalSocket::LocalSocketError);
+};
+
+class PluginCommand : public ICommand {
+ public:
+  PluginCommand(const QString& name);
+  ~PluginCommand() = default;
+  DEFAULT_COPY_AND_MOVE(PluginCommand)
+
+ private:
+  void doRun(const CommandArgument& args, int repeat = 1) override;
 };

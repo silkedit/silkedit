@@ -4,6 +4,8 @@
 #include <memory>
 #include <QObject>
 #include <QPlainTextEdit>
+#include <QHash>
+#include <QMutex>
 
 #include "macros.h"
 #include "ICloneable.h"
@@ -24,6 +26,8 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
+
+  static TextEditView* find(int id);
 
   QString path();
   Document* document() { return m_document.get(); }
@@ -65,6 +69,9 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
                            int end,
                            Document::FindFlags flags = 0,
                            bool preserveCase = false);
+
+  int id();
+
 signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
@@ -83,9 +90,14 @@ signals:
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
+  static int count;
+  static QHash<int, TextEditView*> objects;
+  static QMutex mutex;
+
   QWidget* m_lineNumberArea;
   std::shared_ptr<Document> m_document;
   QVector<Region> m_searchMatchedRegions;
+  int m_id;
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
