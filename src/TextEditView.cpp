@@ -106,7 +106,7 @@ void TextEditView::call(msgpack::rpc::msgid_t msgId,
   int id = std::get<0>(params);
 
   if (TextEditView* view = find(id)) {
-    if (method == "getText") {
+    if (method == "text") {
       PluginService::singleton().sendResponse(
           view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
     }

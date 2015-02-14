@@ -20,7 +20,7 @@ void API::init() {
   notifyFunctions.insert(std::make_pair("load_menu", &loadMenu));
   notifyFunctions.insert(std::make_pair("register_commands", &registerCommands));
 
-  requestFunctions.insert(std::make_pair("getActiveView", &getActiveView));
+  requestFunctions.insert(std::make_pair("active_view", &getActiveView));
 }
 
 TextEditView* API::activeEditView() {

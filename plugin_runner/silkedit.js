@@ -4,8 +4,8 @@ module.exports = function (client) {
     this.id = id;
   }
 
-  TextEditView.prototype.getText = function () {
-    return client.invoke('TextEditView.getText', this.id)
+  TextEditView.prototype.text = function () {
+    return client.invoke('TextEditView.text', this.id)
   }
 
   return {
@@ -14,15 +14,15 @@ module.exports = function (client) {
     },
 
     loadMenu: function (ymlPath) {
-      client.notify('loadMenu', ymlPath)
+      client.notify('load_menu', ymlPath)
     },
 
     registerCommands: function (commands) {
-      client.notify('registerCommands', commands)
+      client.notify('register_commands', commands)
     },
 
     activeView: function () {
-      return new TextEditView(client.invoke('getActiveView'))
+      return new TextEditView(client.invoke('active_view'))
     }
   }
 }
