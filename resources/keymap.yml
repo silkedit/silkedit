@@ -21,6 +21,7 @@
     cmd+c: copy
     cmd+v: paste
     cmd+a: select_all
+    cmd+f: open_find_pane
 
 # Normal mode keymap
 
