@@ -1,7 +1,7 @@
 #include <memory>
 #include <QStatusBar>
 
-#include "API.h"
+#include "SilkApp.h"
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
@@ -25,7 +25,7 @@ void ViEngine::enable() {
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = API::activeEditView()) {
+  if (auto view = SilkApp::activeEditView()) {
     view->setThinCursor(false);
   }
 
@@ -45,11 +45,11 @@ void ViEngine::disable() {
   ContextService::singleton().remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  if (auto view = API::activeEditView()) {
+  if (auto view = SilkApp::activeEditView()) {
     view->setThinCursor(true);
   }
 
-  foreach(MainWindow * window, API::windows()) { window->statusBar()->clearMessage(); }
+  foreach(MainWindow * window, MainWindow::windows()) { window->statusBar()->clearMessage(); }
 
   KeymapService::singleton().load();
 
@@ -76,8 +76,8 @@ bool ViEngine::keyEventFilter(QKeyEvent* event) {
 
 void ViEngine::setMode(Mode mode) {
   if (mode != m_mode) {
-    if (m_mode == Mode::INSERT && API::activeEditView()) {
-      API::activeEditView()->moveCursor(QTextCursor::Left);
+    if (m_mode == Mode::INSERT && SilkApp::activeEditView()) {
+      SilkApp::activeEditView()->moveCursor(QTextCursor::Left);
     }
     m_mode = mode;
     onModeChanged(mode);
@@ -99,7 +99,7 @@ void ViEngine::onModeChanged(Mode mode) {
       return;
   }
 
-  if (MainWindow* window = API::activeWindow()) {
+  if (MainWindow* window = SilkApp::activeWindow()) {
     Q_ASSERT(window->statusBar());
     window->statusBar()->showMessage(text);
   }
@@ -109,11 +109,11 @@ void ViEngine::onModeChanged(Mode mode) {
 
 void ViEngine::updateCursor() {
   if (mode() == Mode::CMD) {
-    if (auto view = API::activeEditView()) {
+    if (auto view = SilkApp::activeEditView()) {
       view->setThinCursor(false);
     }
   } else {
-    if (auto view = API::activeEditView()) {
+    if (auto view = SilkApp::activeEditView()) {
       view->setThinCursor(true);
     }
   }

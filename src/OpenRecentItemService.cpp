@@ -2,7 +2,7 @@
 
 #include "OpenRecentItemService.h"
 #include "DocumentService.h"
-#include "API.h"
+#include "SilkApp.h"
 #include "TabView.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
@@ -14,7 +14,7 @@ void OpenRecentItemService::clear() {
 
 void OpenRecentItemService::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
-    auto tabView = API::activeTabView();
+    auto tabView = SilkApp::activeTabView();
     if (tabView->indexOfPath(path) < 0) {
       tabView->open(path);
       return;

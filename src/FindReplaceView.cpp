@@ -8,7 +8,7 @@
 #include <QCheckBox>
 
 #include "FindReplaceView.h"
-#include "API.h"
+#include "SilkApp.h"
 #include "TextEditView.h"
 
 namespace {
@@ -96,7 +96,7 @@ void FindReplaceView::show() {
 
 void FindReplaceView::showEvent(QShowEvent*) {
   m_inSelectionChk->setChecked(false);
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     QString selectedText = editView->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
       // If the selection obtained from an editor spans a line break, the text will contain a
@@ -141,7 +141,7 @@ void FindReplaceView::findFromActiveCursor() {
 void FindReplaceView::findText(const QString& text,
                                int searchStartPos,
                                Document::FindFlags otherFlags) {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     Document::FindFlags flags = getFindFlags();
     flags |= otherFlags;
     int begin = 0, end = -1;
@@ -163,7 +163,7 @@ void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
 }
 
 void FindReplaceView::highlightMatches() {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     int begin = 0, end = -1;
     if (m_inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;
@@ -175,7 +175,7 @@ void FindReplaceView::highlightMatches() {
 }
 
 void FindReplaceView::clearSearchHighlight() {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     editView->clearSearchHighlight();
   }
 }
@@ -198,7 +198,7 @@ Document::FindFlags FindReplaceView::getFindFlags() {
 }
 
 void FindReplaceView::updateSelectionRegion() {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     QTextCursor cursor = editView->textCursor();
     if (cursor.hasSelection()) {
       m_selectionStartPos = cursor.selectionStart();
@@ -211,7 +211,7 @@ void FindReplaceView::updateSelectionRegion() {
 }
 
 void FindReplaceView::updateActiveCursorPos() {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     m_activeCursorPos = editView->textCursor().selectionStart();
   }
 }
@@ -223,7 +223,7 @@ void FindReplaceView::selectFirstMatch() {
 
 void FindReplaceView::replace() {
   Q_ASSERT(m_lineEditForReplace);
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     editView->replaceSelection(m_lineEditForReplace->text(), m_preserveCaseChk->isChecked());
     highlightMatches();
     m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
@@ -231,7 +231,7 @@ void FindReplaceView::replace() {
 }
 
 void FindReplaceView::replaceAll() {
-  if (TextEditView* editView = API::activeEditView()) {
+  if (TextEditView* editView = SilkApp::activeEditView()) {
     int begin = 0, end = -1;
     if (m_inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;

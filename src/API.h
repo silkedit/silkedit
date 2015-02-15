@@ -4,25 +4,14 @@
 #include <functional>
 #include <unordered_map>
 #include <string>
-#include <QList>
 
 #include "macros.h"
-
-class TextEditView;
-class MainWindow;
-class TabView;
-class TabViewGroup;
 
 class API {
   DISABLE_COPY_AND_MOVE(API)
 
  public:
   static void init();
-  static TextEditView* activeEditView();
-  static TabView* activeTabView(bool createIfNull = false);
-  static TabViewGroup* activeTabViewGroup();
-  static MainWindow* activeWindow();
-  static QList<MainWindow*> windows();
   static void hideActiveFindReplacePanel();
   static void call(const std::string& method, const msgpack::object& obj);
   static void call(const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);

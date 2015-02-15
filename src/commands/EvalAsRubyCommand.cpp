@@ -8,5 +8,5 @@
 //}
 
 // void EvalAsRubyCommand::doRun(const CommandArgument&, int) {
-//  RubyEvaluator::singleton().eval(API::activeEditView()->toPlainText());
+//  RubyEvaluator::singleton().eval(SilkApp::activeEditView()->toPlainText());
 //}

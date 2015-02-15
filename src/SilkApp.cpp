@@ -61,3 +61,37 @@ bool SilkApp::event(QEvent* event) {
       return QApplication::event(event);
   }
 }
+
+TextEditView* SilkApp::activeEditView() {
+  TabView* tabView = activeTabView();
+  if (tabView) {
+    return tabView->activeEditView();
+  } else {
+    qDebug("active tab view is null");
+    return nullptr;
+  }
+}
+
+TabView* SilkApp::activeTabView(bool createIfNull) {
+  TabViewGroup* tabViewGroup = activeTabViewGroup();
+  if (tabViewGroup) {
+    return tabViewGroup->activeTab(createIfNull);
+  } else {
+    qDebug("active tab view group is null");
+    return nullptr;
+  }
+}
+
+TabViewGroup* SilkApp::activeTabViewGroup() {
+  MainWindow* window = activeWindow();
+  if (window) {
+    return window->tabViewGroup();
+  } else {
+    qDebug("active window is null");
+    return nullptr;
+  }
+}
+
+MainWindow* SilkApp::activeWindow() {
+  return qobject_cast<MainWindow*>(QApplication::activeWindow());
+}

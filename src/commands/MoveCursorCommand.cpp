@@ -4,7 +4,7 @@
 #include "MoveCursorCommand.h"
 #include "vi.h"
 #include "stlSpecialization.h"
-#include "API.h"
+#include "SilkApp.h"
 
 namespace {
 
@@ -38,6 +38,6 @@ MoveCursorCommand::MoveCursorCommand() : ICommand("move_cursor") {}
 void MoveCursorCommand::doRun(const CommandArgument& args, int repeat) {
   if (auto operationStr = args.find<QString>("operation")) {
     int operation = toMoveOperation(*operationStr);
-    API::activeEditView()->moveCursor(operation, repeat);
+    SilkApp::activeEditView()->moveCursor(operation, repeat);
   }
 }

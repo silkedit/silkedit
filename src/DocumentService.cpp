@@ -8,14 +8,14 @@
 
 #include "DocumentService.h"
 #include "MainWindow.h"
-#include "API.h"
+#include "SilkApp.h"
 #include "TabView.h"
 #include "Document.h"
 
 const QString DocumentService::DEFAULT_FILE_NAME = "untitled";
 
 bool DocumentService::open(const QString& filename) {
-  if (TabView* tabView = API::activeTabView(true)) {
+  if (TabView* tabView = SilkApp::activeTabView(true)) {
     return tabView->open(filename) >= 0;
   } else {
     qWarning("active tab view is null");

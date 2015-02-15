@@ -2,14 +2,13 @@
 #include <QMessageBox>
 
 #include "API.h"
-#include "TabView.h"
-#include "TabViewGroup.h"
 #include "MainWindow.h"
 #include "MenuService.h"
 #include "CommandService.h"
 #include "commands/PluginCommand.h"
 #include "plugin_service/PluginService.h"
 #include "TextEditView.h"
+#include "SilkApp.h"
 
 std::unordered_map<std::string, std::function<void(msgpack::object)>> API::notifyFunctions;
 std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -23,46 +22,8 @@ void API::init() {
   requestFunctions.insert(std::make_pair("active_view", &getActiveView));
 }
 
-TextEditView* API::activeEditView() {
-  TabView* tabView = activeTabView();
-  if (tabView) {
-    return tabView->activeEditView();
-  } else {
-    qDebug("active tab view is null");
-    return nullptr;
-  }
-}
-
-TabView* API::activeTabView(bool createIfNull) {
-  TabViewGroup* tabViewGroup = activeTabViewGroup();
-  if (tabViewGroup) {
-    return tabViewGroup->activeTab(createIfNull);
-  } else {
-    qDebug("active tab view group is null");
-    return nullptr;
-  }
-}
-
-TabViewGroup* API::activeTabViewGroup() {
-  MainWindow* window = activeWindow();
-  if (window) {
-    return window->tabViewGroup();
-  } else {
-    qDebug("active window is null");
-    return nullptr;
-  }
-}
-
-MainWindow* API::activeWindow() {
-  return qobject_cast<MainWindow*>(QApplication::activeWindow());
-}
-
-QList<MainWindow*> API::windows() {
-  return MainWindow::windows();
-}
-
 void API::hideActiveFindReplacePanel() {
-  if (MainWindow* window = activeWindow()) {
+  if (MainWindow* window = SilkApp::activeWindow()) {
     window->hideFindReplacePanel();
   }
 }
@@ -111,7 +72,7 @@ void API::registerCommands(msgpack::object obj) {
 }
 
 void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object ) {
-  TextEditView* editView = activeEditView();
+  TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
     PluginService::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {

@@ -1,11 +1,11 @@
 #include <QDebug>
 
 #include "OpenFindPanelCommand.h"
-#include "API.h"
+#include "SilkApp.h"
 #include "MainWindow.h"
 
 void OpenFindPanelCommand::doRun(const CommandArgument&, int) {
-  if (MainWindow* window = API::activeWindow()) {
+  if (MainWindow* window = SilkApp::activeWindow()) {
     window->openFindAndReplacePanel();
   }
 }
