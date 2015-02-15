@@ -131,8 +131,9 @@ QTextCursor Document::find(const Regexp* expr,
          from,
          begin,
          end);
-  QStringRef text = isBackward ? toPlainText().midRef(begin, from - begin)
-                               : toPlainText().midRef(from, end - from);
+  QString str = toPlainText();
+  QStringRef text = isBackward ? str.midRef(begin, from - begin)
+                               : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);
   if (indices && indices->size() > 1) {
     int startPos, endPos;
