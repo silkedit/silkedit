@@ -29,7 +29,9 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
   virtual ~TextEditView();
 
   static TextEditView* find(int id);
-  static void call(msgpack::rpc::msgid_t msgId, const std::string& method, const msgpack::object obj);
+  static void call(msgpack::rpc::msgid_t msgId,
+                   const std::string& method,
+                   const msgpack::object obj);
 
   QString path();
   Document* document() { return m_document.get(); }

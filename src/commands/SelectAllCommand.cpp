@@ -8,4 +8,6 @@ const QString SelectAllCommand::name = "select_all";
 
 SelectAllCommand::SelectAllCommand() : ICommand(name) {}
 
-void SelectAllCommand::doRun(const CommandArgument&, int) { SilkApp::activeEditView()->selectAll(); }
+void SelectAllCommand::doRun(const CommandArgument&, int) {
+  SilkApp::activeEditView()->selectAll();
+}

@@ -107,7 +107,9 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward
       // Convert from byte offset to char offset in utf-8 string
       int begCharPos = onigenc_strlen(ONIG_ENCODING_UTF8, str, (str + region->beg[i]));
       indices->append(begCharPos);
-      int endCharPos = begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i], str + region->end[i]);
+      int endCharPos =
+          begCharPos +
+          onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i], str + region->end[i]);
       indices->append(endCharPos);
     }
   } else if (r == ONIG_MISMATCH) {

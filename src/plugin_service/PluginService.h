@@ -48,4 +48,3 @@ class PluginService : public QObject, public Singleton<PluginService> {
   void readRequest();
   void displayError(QLocalSocket::LocalSocketError);
 };
-

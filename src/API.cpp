@@ -71,7 +71,7 @@ void API::registerCommands(msgpack::object obj) {
   }
 }
 
-void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object ) {
+void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
     PluginService::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
