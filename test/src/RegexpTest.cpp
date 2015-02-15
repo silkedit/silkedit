@@ -66,6 +66,15 @@ class RegexpTest : public QObject {
     QVERIFY(!indices);
   }
 
+  void findJapaneseChar() {
+    Regexp* reg = Regexp::compile("い");
+    QString str = "あいうえお";
+    QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str), true);
+    QVERIFY(indices);
+    QCOMPARE(indices->size(), 2);
+    QCOMPARE(*indices, QVector<int>({1, 2}));
+  }
+
   void escape() {
     QCOMPARE(Regexp::escape(R"(\$bc^)"), QString(R"(\$bc\^)"));
     QCOMPARE(Regexp::escape(R"(\\$bc^)"), QString(R"(\\\$bc\^)"));
