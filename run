@@ -41,26 +41,36 @@ clean() {
 
 # resolve dependency
 resolve() {
-    ant -Duser=readonly -Dpassword=readonly
+    if [ "$(uname)" == 'Darwin' ]; then
+      # yaml-cpp
+      brew install yaml-cpp --c++11 --with-static-lib
 
-    for f in lib/include-*.zip
-    do
-        echo "Unzipping $f"
-        # -o: overwrite  existing  files  without  prompting
-        unzip -o $f
-        rm $f
-    done
+      # node
+      if [ ! -d plugin_runner/bin ]; then
+        node=node-v0.12.0-darwin-x64
+        echo "Downloading $node"
+        curl -O http://nodejs.org/dist/v0.12.0/$node.tar.gz
+        tar zxf $node.tar.gz
+        # -R keeps symlink intact
+        cp -R $node/bin $node/lib plugin_runner
+        rm -rf $node $node.tar.gz
+      fi
+    elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
+      OS='Linux'
+    elif [ "$(expr substr $(uname -s) 1 10)" == 'MINGW32_NT' ]; then                                                                                           
+      OS='Cygwin'
+    else
+      echo "Your platform ($(uname -a)) is not supported."
+      exit 1
+    fi
 
-    # unzip node
-    node_file=node-0.10.36.zip
-    mv lib/$node_file plugin_runner
-    unzip -o plugin_runner/$node_file -d plugin_runner
-    rm plugin_runner/$node_file
-
-    # npm install
     cd plugin_runner
     bin/npm install
     cd ..
+
+    # msgpack-c
+    git submodule init
+    git submodule update
 }
 
 # release build
@@ -112,7 +122,7 @@ run_tests() {
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
     if [ -f build.ninja ]; then
         ninja
-		ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+        ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
     fi
 }
 

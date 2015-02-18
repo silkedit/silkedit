@@ -40,13 +40,13 @@ ENDIF (APPLE)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
-include_directories(include src ${Oniguruma_INCLUDE_DIRS})
+include_directories(msgpack-c/include src ${Oniguruma_INCLUDE_DIRS})
 
-link_directories(lib ${Oniguruma_LIBRARY_DIRS})
+link_directories(${Oniguruma_LIBRARY_DIRS})
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 
-target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp-0.5.1 ${Oniguruma_LIBRARIES} )
+target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp ${Oniguruma_LIBRARIES} )
 
 if(APPLE)
   # bundle plugin runner (node.js)
