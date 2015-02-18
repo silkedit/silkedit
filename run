@@ -4,9 +4,6 @@ export CMAKE_PREFIX_PATH=/usr/local/Qt-5.4.0
 
 env | grep -i cmake
 
-LIGHT_GREEN='\x1B[0;32m'
-NC='\x1B[0m' # No Color
-
 format() {
     find src -name \*.cpp -or -name \*.h | xargs clang-format -i
     find test/src -name \*.cpp -or -name \*.h | xargs clang-format -i
@@ -36,7 +33,7 @@ ensure_dir() {
 }
 
 clean() {
-    rm -rf build lib include
+    rm -rf build
 }
 
 # resolve dependency
@@ -96,7 +93,6 @@ build() {
     cp -r SilkEdit.app dmg
     ln -s /Applications dmg/Applications
     hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
-
 }
 
 rebuild() {

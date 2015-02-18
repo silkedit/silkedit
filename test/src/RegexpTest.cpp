@@ -39,12 +39,26 @@ class RegexpTest : public QObject {
   }
 
   void findStringSubmatchIndex() {
-    Regexp* reg = Regexp::compile("(<\\?)\\s*([-_a-zA-Z0-9]+)");
+    Regexp* reg = Regexp::compile(R"((<\?)\s*([-_a-zA-Z0-9]+))");
     QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
     QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
     QVERIFY(indices);
     QCOMPARE(indices->size(), 6);
     QCOMPARE(*indices, QVector<int>({0, 5, 0, 2, 2, 5}));
+
+    // search fail
+    str = "aaa";
+    indices = reg->findStringSubmatchIndex(QStringRef(&str));
+    QVERIFY(!indices);
+  }
+
+  void findStringSubmatchIndexInJapanese() {
+    Regexp* reg = Regexp::compile(R"((いう(?:(a))?)\s*([あいうえお]+))");
+    QString str = R"(あいうあいうえおかきくけこ)";
+    QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
+    QVERIFY(indices);
+    QCOMPARE(indices->size(), 8);
+    QCOMPARE(*indices, QVector<int>({1, 8, 1, 3, -1, -1, 3, 8}));
 
     // search fail
     str = "aaa";

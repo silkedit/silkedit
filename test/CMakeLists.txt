@@ -21,7 +21,7 @@ find_package(Qt5Test REQUIRED)
 INCLUDE(FindPkgConfig)
 pkg_check_modules(Oniguruma REQUIRED oniguruma)
 
-include_directories(../src ../include src ${Oniguruma_INCLUDE_DIRS})
+include_directories(../src ../msgpack-c/include src ${Oniguruma_INCLUDE_DIRS})
 
 link_directories(${Oniguruma_LIBRARY_DIRS} ../lib)
 
@@ -46,7 +46,7 @@ add_test( NAME UtilTest COMMAND UtilTest)
 
 set(SYNTAX_HIGHLIGHTER_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Region.cpp ../src/Theme.cpp ../src/Session.cpp ../src/ThemeProvider.cpp ../src/ConfigService.cpp ../src/Constants.cpp src/SyntaxHighlighterTest.cpp)
 add_executable(SyntaxHighlighterTest ${SYNTAX_HIGHLIGHTER_TEST_SRCS} )
-target_link_libraries(SyntaxHighlighterTest Qt5::Widgets Qt5::Xml Qt5::Test yaml-cpp-0.5.1 ${TEST_LIBRARIES})
+target_link_libraries(SyntaxHighlighterTest Qt5::Widgets Qt5::Xml Qt5::Test yaml-cpp ${TEST_LIBRARIES})
 add_test( NAME SyntaxHighlighterTest COMMAND SyntaxHighlighterTest)
 
 set(REGEXP_TEST_SRCS ../src/Regexp.cpp src/RegexpTest.cpp)
