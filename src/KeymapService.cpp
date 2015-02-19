@@ -230,7 +230,7 @@ void KeymapService::load() {
   foreach(const QString & path, existingKeymapPaths) { load(path); }
 }
 
-boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
+QKeySequence KeymapService::findShortcut(QString cmdName) {
   auto foundIter = m_cmdShortcuts.find(cmdName);
   if (foundIter != m_cmdShortcuts.end()) {
     auto range = m_keymaps.equal_range(foundIter->second);
@@ -240,7 +240,7 @@ boost::optional<QKeySequence> KeymapService::findShortcut(QString cmdName) {
       }
     }
   }
-  return boost::none;
+  return QKeySequence();
 }
 
 bool KeymapService::keyEventFilter(QKeyEvent* event) { return dispatch(event); }

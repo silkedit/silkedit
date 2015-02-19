@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <unordered_set>
-#include <boost/optional.hpp>
 #include <QObject>
 
 #include "IKeyEventFilter.h"
@@ -22,7 +21,7 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
   ~KeymapService() = default;
 
   void load();
-  boost::optional<QKeySequence> findShortcut(QString cmdName);
+  QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 

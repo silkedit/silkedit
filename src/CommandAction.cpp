@@ -4,8 +4,9 @@
 
 CommandAction::CommandAction(const QString& text, const QString& cmdName, QObject* parent)
     : QAction(text, parent), m_cmdName(cmdName) {
-  if (auto key = KeymapService::singleton().findShortcut(cmdName)) {
-    setShortcut(*key);
+  QKeySequence key = KeymapService::singleton().findShortcut(cmdName);
+  if (!key.isEmpty()) {
+    setShortcut(key);
   }
   QObject::connect(this, &QAction::triggered, [this] { CommandService::runCommand(m_cmdName); });
 }
