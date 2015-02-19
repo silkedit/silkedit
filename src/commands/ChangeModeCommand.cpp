@@ -12,7 +12,7 @@ const QString ChangeModeCommand::name = "change_mode";
 
 void ChangeModeCommand::doRun(const CommandArgument& args, int) {
   if (args.contains<QString>("mode")) {
-   auto mode = args.value<QString>("mode");
+    auto mode = args.value<QString>("mode");
     if (mode == "insert") {
       m_viEngine->setMode(Mode::INSERT);
     } else if (mode == "normal") {
