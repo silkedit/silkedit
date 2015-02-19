@@ -20,10 +20,6 @@ find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
 
-# Find oniguruma using pkg-config
-INCLUDE(FindPkgConfig)
-pkg_check_modules(Oniguruma REQUIRED oniguruma)
-
 IF (APPLE)
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkEdit.icns )
@@ -40,13 +36,11 @@ ENDIF (APPLE)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
-include_directories(msgpack-c/include src ${Oniguruma_INCLUDE_DIRS})
-
-link_directories(${Oniguruma_LIBRARY_DIRS})
+include_directories(msgpack-c/include src)
 
 add_executable(SilkEdit MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 
-target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp ${Oniguruma_LIBRARIES} )
+target_link_libraries(SilkEdit Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig )
 
 if(APPLE)
   # bundle plugin runner (node.js)

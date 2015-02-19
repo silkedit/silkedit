@@ -41,6 +41,7 @@ resolve() {
     if [ "$(uname)" == 'Darwin' ]; then
       # yaml-cpp
       brew install yaml-cpp --c++11 --with-static-lib
+      brew install oniguruma cmake ninja
 
       # node
       if [ ! -d plugin_runner/bin ]; then
