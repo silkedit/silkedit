@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/optional.hpp>
 #include <unordered_map>
 #include <QVariant>
 #include <QDebug>
@@ -20,16 +19,22 @@ class CommandArgument {
   DEFAULT_COPY_AND_MOVE(CommandArgument)
 
   template <typename T>
-  inline boost::optional<T> find(const QString& key) const {
+  bool contains(const QString& key) const {
     if (m_args.find(key) == m_args.end()) {
-      return boost::none;
+      return false;
     }
 
     QVariant argVar = m_args.at(key);
     if (!argVar.canConvert<T>()) {
-      return boost::none;
+      return false;
     }
 
+    return true;
+  }
+
+  template <typename T>
+  inline T value(const QString& key) const {
+    QVariant argVar = m_args.at(key);
     return argVar.value<T>();
   }
 

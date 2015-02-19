@@ -11,15 +11,16 @@ ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
 const QString ChangeModeCommand::name = "change_mode";
 
 void ChangeModeCommand::doRun(const CommandArgument& args, int) {
-  if (auto mode = args.find<QString>("mode")) {
-    if (*mode == "insert") {
+  if (args.contains<QString>("mode")) {
+   auto mode = args.value<QString>("mode");
+    if (mode == "insert") {
       m_viEngine->setMode(Mode::INSERT);
-    } else if (*mode == "normal") {
+    } else if (mode == "normal") {
       m_viEngine->setMode(Mode::CMD);
-    } else if (*mode == "commandline") {
+    } else if (mode == "commandline") {
       m_viEngine->setMode(Mode::CMDLINE);
     } else {
-      qWarning() << "invalid mode: " << *mode;
+      qWarning() << "invalid mode: " << mode;
     }
   }
 }

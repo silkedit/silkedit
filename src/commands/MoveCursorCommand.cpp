@@ -36,8 +36,9 @@ int toMoveOperation(const QString& str) {
 MoveCursorCommand::MoveCursorCommand() : ICommand("move_cursor") {}
 
 void MoveCursorCommand::doRun(const CommandArgument& args, int repeat) {
-  if (auto operationStr = args.find<QString>("operation")) {
-    int operation = toMoveOperation(*operationStr);
+  if (args.contains<QString>("operation")) {
+    auto operationStr = args.value<QString>("operation");
+    int operation = toMoveOperation(operationStr);
     SilkApp::activeEditView()->moveCursor(operation, repeat);
   }
 }
