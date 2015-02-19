@@ -39,9 +39,10 @@ clean() {
 # resolve dependency
 resolve() {
     if [ "$(uname)" == 'Darwin' ]; then
-      # yaml-cpp
-      brew install yaml-cpp --c++11 --with-static-lib
-      brew install oniguruma cmake ninja
+      brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
+      brew list oniguruma || brew install oniguruma
+      brew list cmake || brew install cmake
+      brew list ninja || brew install ninja
 
       # node
       if [ ! -d plugin_runner/bin ]; then
