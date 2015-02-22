@@ -1,3 +1,4 @@
+#include <string>
 #include <QApplication>
 #include <QMessageBox>
 

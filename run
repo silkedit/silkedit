@@ -1,8 +1,15 @@
 #!/bin/bash
 
-export CMAKE_PREFIX_PATH=/usr/local/Qt-5.4.0
-
-env | grep -i cmake
+if [ "$(uname)" == 'Darwin' ]; then
+  OS='Mac'
+elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
+  OS='Linux'
+elif [ "$(expr substr $(uname -s) 1 7)" == 'MSYS_NT' ]; then
+  OS='Win32'
+else
+  echo "Your platform ($(uname -a)) is not supported."
+  exit 1
+fi
 
 format() {
     find src -name \*.cpp -or -name \*.h | xargs clang-format -i
@@ -38,7 +45,8 @@ clean() {
 
 # resolve dependency
 resolve() {
-    if [ "$(uname)" == 'Darwin' ]; then
+    if [ $OS == 'Mac' ]; then
+      # yaml-cpp
       brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
       brew list oniguruma || brew install oniguruma
       brew list cmake || brew install cmake
@@ -53,20 +61,50 @@ resolve() {
         # -R keeps symlink intact
         cp -R $node/bin $node/lib plugin_runner
         rm -rf $node $node.tar.gz
+
+        cd plugin_runner
+        bin/npm install
+        cd ..
       fi
-    elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
-      OS='Linux'
-    elif [ "$(expr substr $(uname -s) 1 10)" == 'MINGW32_NT' ]; then                                                                                           
-      OS='Cygwin'
+    elif [ $OS == 'Linux' ]; then
+      OS = 'Linux'
     else
-      echo "Your platform ($(uname -a)) is not supported."
-      exit 1
+        # oniguruma
+        pacman -S mingw-w64-i686-oniguruma
+
+        # yaml-cpp (If you install it from pacman, it doesn't work somehow)
+        wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
+        tar zxf yaml-cpp-0.5.1.tar.gz
+        cd yaml-cpp-0.5.1
+
+        # apply a patch to fix an issue of CMakeLists.txt
+        wget http://home.shinichy.com/files/yaml-cpp/CMakeLists.txt.patch
+        patch < CMakeLists.txt.patch
+
+        # apply a patch to fix a compile error https://code.google.com/p/yaml-cpp/issues/detail?id=276&colspec=ID%20Type%20Status%20Priority%20Milestone%20Component%20Owner%20Summary
+        cd src
+        wget http://home.shinichy.com/files/yaml-cpp/ostream_wrapper.patch
+        patch < ostream_wrapper.patch
+        cd ..
+
+        mkdir build
+        cd build
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        ninja
+        ninja install
+        cd ../..
+        rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar yaml-cpp-0.5.1.tar.gz
+
+        # node
+        if [ ! -d plugin_runner/nodejs ]; then
+            cp -r "C:\Program Files\nodejs" plugin_runner
+            cd plugin_runner
+            node nodejs/node_modules/npm/bin/npm-cli.js install
+            cd ..
+        fi
     fi
 
-    cd plugin_runner
-    bin/npm install
-    cd ..
-
+    
     # msgpack-c
     git submodule init
     git submodule update
@@ -74,7 +112,7 @@ resolve() {
 
 # release build
 build() {
-    resolve
+    # resolve
 
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
@@ -85,16 +123,18 @@ build() {
 
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
 
-    if [ -f build.ninja ]; then
-        ninja
-    fi
+    ninja
 
-    echo "Creating dmg..."
-    macdeployqt SilkEdit.app
-    ensure_dir dmg
-    cp -r SilkEdit.app dmg
-    ln -s /Applications dmg/Applications
-    hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
+    if [ $OS == 'Mac' ]; then
+        echo "Creating dmg..."
+        macdeployqt SilkEdit.app
+        ensure_dir dmg
+        cp -r SilkEdit.app dmg
+        ln -s /Applications dmg/Applications
+        hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
+    elif [ $OS == 'Win32' ]; then
+        windeployqt --release silkedit.exe
+    fi
 }
 
 rebuild() {

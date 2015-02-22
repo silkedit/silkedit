@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <functional>
 #include <QWidget>
 
 #include "macros.h"
