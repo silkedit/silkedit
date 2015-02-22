@@ -8,7 +8,16 @@ set(CMAKE_AUTOMOC ON)
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
+if (APPLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
+  include_directories(../src ../msgpack-c/include src)
+elseif (MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
+  set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
+  include_directories(msgpack-c/include src c:/msys32/mingw32/include c:/include)
+  link_directories(c:/msys32/mingw32/lib c:/lib)
+endif (APPLE)
 
 file(COPY "testdata" DESTINATION .)
 
@@ -16,8 +25,6 @@ file(COPY "testdata" DESTINATION .)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Test REQUIRED)
-
-include_directories(../src ../msgpack-c/include src)
 
 set(TEST_LIBRARIES yaml-cpp onig)
 

@@ -8,14 +8,6 @@ set(CMAKE_AUTOMOC ON)
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-if (APPLE)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
-elseif (MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
-endif (APPLE)
-
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 file(GLOB_RECURSE SILK_RESOURCES resources/*.qrc)
@@ -25,6 +17,8 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5Test REQUIRED)
+
+qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 IF (APPLE)
   # icon files to copy in the bundle
@@ -40,18 +34,16 @@ IF (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
 ENDIF (APPLE)
 
-qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
-
 if (APPLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
   include_directories(msgpack-c/include src)
-elseif (MINGW)
-  include_directories(msgpack-c/include src c:/msys32/mingw32/include c:/include)
-  link_directories(c:/msys32/mingw32/lib c:/lib)
-endif (APPLE)
-
-if (APPLE)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 elseif (MINGW)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
+  set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
+  include_directories(msgpack-c/include src c:/msys32/mingw32/include c:/include)
+  link_directories(c:/msys32/mingw32/lib c:/lib)
   add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 endif (APPLE)
 
