@@ -12,6 +12,12 @@ file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 file(GLOB_RECURSE SILK_RESOURCES resources/*.qrc)
 
+if (APPLE)
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
+elseif (MINGW)
+  set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
+endif (APPLE)
+
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
@@ -20,7 +26,7 @@ find_package(Qt5Test REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
-IF (APPLE)
+if (APPLE)
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkEdit.icns )
   # set where in the bundle to put the icns files
@@ -32,16 +38,12 @@ IF (APPLE)
   file( GLOB_RECURSE PACKAGES packages/* )
   set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/Packages )
   set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
-ENDIF (APPLE)
 
-if (APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
   include_directories(msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 elseif (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
   include_directories(msgpack-c/include src c:/msys32/mingw32/include c:/include)
   link_directories(c:/msys32/mingw32/lib c:/lib)
   add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
