@@ -10,7 +10,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 if (APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  set(CMAKE_PREFIX_PATH "/usr/local/Qt-5.4.0")
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.0)
 elseif (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   set(CMAKE_PREFIX_PATH "C:/Qt5.4/5.4/mingw491_32")
