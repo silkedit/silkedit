@@ -89,11 +89,11 @@ resolve() {
 
         mkdir build
         cd build
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
         ninja
         ninja install
         cd ../..
-        rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar yaml-cpp-0.5.1.tar.gz
+        rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar.gz
 
         # node
         if [ ! -d plugin_runner/nodejs ]; then
