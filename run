@@ -69,9 +69,6 @@ resolve() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        # oniguruma
-        pacman -S mingw-w64-i686-oniguruma
-
         # yaml-cpp (If you install it from pacman, it doesn't work somehow)
         wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
         tar zxf yaml-cpp-0.5.1.tar.gz
@@ -133,7 +130,7 @@ build() {
         ln -s /Applications dmg/Applications
         hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
     elif [ $OS == 'Win32' ]; then
-        windeployqt --release silkedit.exe
+        windeployqt --release-with-debug-info silkedit.exe
     fi
 }
 
