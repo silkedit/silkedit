@@ -59,7 +59,7 @@ elseif (MINGW)
   # SYSTEM tells the compiler to skip warning for these header files.
   include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include)
   link_directories(${MSYS_LIB} lib)
-  add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
 
   # Copy packages directory to the same directory of exe
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
