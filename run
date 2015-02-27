@@ -93,10 +93,11 @@ resolve() {
         rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar.gz
 
         # node
-        if [ ! -d plugin_runner/nodejs ]; then
+        if [ ! -d plugin_runner/bin ]; then
             cp -r "C:\Program Files\nodejs" plugin_runner
             cd plugin_runner
-            node nodejs/node_modules/npm/bin/npm-cli.js install
+            mv nodejs bin
+            node bin/node_modules/npm/bin/npm-cli.js install
             cd ..
         fi
     fi

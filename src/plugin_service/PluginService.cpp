@@ -35,16 +35,15 @@ void PluginService::init() {
 
   connect(m_server, &QLocalServer::newConnection, this, &PluginService::pluginRunnerConnected);
 
-  //  m_pluginProcess = new QProcess(this);
-  //  connect(m_pluginProcess,
-  //          SIGNAL(error(QProcess::ProcessError)),
-  //          this,
-  //          SLOT(error(QProcess::ProcessError)));
-  //  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this,
-  // &PluginService::readStdout);
+  m_pluginProcess = new QProcess(this);
+  connect(m_pluginProcess,
+          SIGNAL(error(QProcess::ProcessError)),
+          this,
+          SLOT(error(QProcess::ProcessError)));
+  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginService::readStdout);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
   qDebug() << "args:" << Constants::pluginRunnerArgs();
-  //  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
+  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
 PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
@@ -62,7 +61,7 @@ void PluginService::callExternalCommand(const QString& cmd) {
 }
 
 void PluginService::readStdout() {
-  qDebug() << "readyOut";
+//  qDebug() << "readyOut";
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardOutput();
 
@@ -75,7 +74,9 @@ void PluginService::pluginRunnerConnected() {
   m_socket = m_server->nextPendingConnection();
   connect(m_socket, SIGNAL(disconnected()), m_socket, SLOT(deleteLater()));
   connect(m_socket, &QLocalSocket::readyRead, this, &PluginService::readRequest);
-  connect(m_socket, SIGNAL(error(QLocalSocket::LocalSocketError)), this,
+  connect(m_socket,
+          SIGNAL(error(QLocalSocket::LocalSocketError)),
+          this,
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 

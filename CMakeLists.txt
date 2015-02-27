@@ -60,19 +60,24 @@ elseif (MINGW)
   include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include)
   link_directories(${MSYS_LIB} lib)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
-
-  # Copy packages directory to the same directory of exe
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/packages"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/packages)
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig )
 
 if(APPLE)
   # bundle plugin runner (node.js)
-  # we need to use custom_command to copy directory.
   ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/plugin_runner ${PROJECT_NAME}.app/Contents/MacOS)
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
+elseif (MINGW)
+  # Copy packages directory to the same directory of exe
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/packages"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/packages)
+
+  # Copy plugin_runner (node.js)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/plugin_runner"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/plugin_runner)
 ENDIF(APPLE)
