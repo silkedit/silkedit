@@ -57,7 +57,7 @@ elseif (MINGW)
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
   include_directories(msgpack-c/include src ${MSYS_INCLUDE} include)
   link_directories(${MSYS_LIB} lib)
-  add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
+  add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig )
