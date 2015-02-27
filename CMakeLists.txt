@@ -55,9 +55,16 @@ elseif (MINGW)
     set( MSYS_INCLUDE c:/msys32/mingw32/include )
     set( MSYS_LIB c:/msys32/mingw32/lib )
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+
   include_directories(msgpack-c/include src ${MSYS_INCLUDE} include)
   link_directories(${MSYS_LIB} lib)
   add_executable(${PROJECT_NAME} ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
+
+  # Copy packages directory to the same directory of exe
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${PROJECT_SOURCE_DIR}/packages"
+        $<TARGET_FILE_DIR:${PROJECT_NAME}>/packages)
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig )
