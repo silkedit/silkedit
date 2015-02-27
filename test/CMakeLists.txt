@@ -27,7 +27,7 @@ find_package(Qt5Test REQUIRED)
 
 if (APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(msgpack-c/include src)
+  include_directories(../msgpack-c/include ../src)
 elseif (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -static -static-libgcc -static-libstdc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
