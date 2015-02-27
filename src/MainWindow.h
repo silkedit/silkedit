@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <functional>
 #include <memory>
 #include <list>
@@ -24,6 +25,7 @@ class MainWindow : public QMainWindow {
   static MainWindow* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static MainWindow* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<MainWindow*> windows() { return s_windows; }
+  static void loadMenu(const std::string& ymlPath);
 
   ~MainWindow();
   DEFAULT_MOVE(MainWindow)

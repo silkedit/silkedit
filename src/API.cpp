@@ -4,7 +4,6 @@
 
 #include "API.h"
 #include "MainWindow.h"
-#include "MenuService.h"
 #include "CommandService.h"
 #include "commands/PluginCommand.h"
 #include "plugin_service/PluginService.h"
@@ -58,7 +57,7 @@ void API::loadMenu(msgpack::object obj) {
   msgpack::type::tuple<std::string> params;
   obj.convert(&params);
   std::string ymlPath = std::get<0>(params);
-  MenuService::loadMenu(ymlPath);
+  MainWindow::loadMenu(ymlPath);
 }
 
 void API::registerCommands(msgpack::object obj) {

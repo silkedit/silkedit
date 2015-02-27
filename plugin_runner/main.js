@@ -1,4 +1,4 @@
-var rpc = require('msgpack-rpc');
+var rpc = require('silk-msgpack-rpc');
 var fs = require('fs')
 var sync = require('synchronize')
 

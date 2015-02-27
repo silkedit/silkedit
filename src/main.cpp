@@ -15,7 +15,6 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "plugin_service/PluginService.h"
-#include "MenuService.h"
 
 int main(int argv, char** args) {
   PlatformUtil::enableMnemonicOnMac();
@@ -48,8 +47,6 @@ int main(int argv, char** args) {
   if (ConfigService::isTrue("enable_vim_emulation")) {
     viEngine.enable();
   }
-
-  MenuService::init();
 
   Session::singleton().init();
 
