@@ -11,9 +11,8 @@ bool IContextBase<T>::isSatisfied() {
   switch (m_op) {
     case Operator::EQUALS:
       return key() == m_operand;
-      break;
     default:
-      break;
+      return false;
   }
 }
 
