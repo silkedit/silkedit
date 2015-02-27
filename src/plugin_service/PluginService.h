@@ -43,6 +43,7 @@ class PluginService : public QObject, public Singleton<PluginService> {
  private:
  private slots:
   void readStdout();
+  void readStderr();
   void pluginRunnerConnected();
   void error(QProcess::ProcessError error);
   void readRequest();

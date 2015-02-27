@@ -41,8 +41,11 @@ void PluginService::init() {
           this,
           SLOT(error(QProcess::ProcessError)));
   connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginService::readStdout);
+  connect(m_pluginProcess, &QProcess::readyReadStandardError, this, &PluginService::readStderr);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
   qDebug() << "args:" << Constants::pluginRunnerArgs();
+  // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
+  m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
@@ -61,11 +64,15 @@ void PluginService::callExternalCommand(const QString& cmd) {
 }
 
 void PluginService::readStdout() {
-//  qDebug() << "readyOut";
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardOutput();
-
   qDebug() << buf;
+}
+
+void PluginService::readStderr() {
+  QProcess* p = (QProcess*)sender();
+  QByteArray buf = p->readAllStandardError();
+  qWarning() << buf;
 }
 
 void PluginService::pluginRunnerConnected() {

@@ -1,6 +1,7 @@
 var rpc = require('silk-msgpack-rpc');
 var fs = require('fs')
 var sync = require('synchronize')
+var path = require('path')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -16,7 +17,7 @@ function getDirs(dir) {
   var dirs = []
 
   files.forEach(function (file) {
-    var stat = fs.statSync(dir + "/" + file);
+    var stat = fs.statSync(path.join(dir, file));
     if (stat.isDirectory()) {
       dirs.push(file);
     }
@@ -31,7 +32,7 @@ var c = rpc.createClient(socketFile, function () {
   sync(c, 'invoke');
 
   var home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-  var packageDirPath = home + "/.silk/Packages";
+  var packageDirPath = path.join(home, ".silk", "Packages");
 
   var loadPackage = function (dir) {
     fs.readdir(dir, function (err, files) {
@@ -41,7 +42,7 @@ var c = rpc.createClient(socketFile, function () {
       }
 
       moduleFiles.forEach(function (filename) {
-        var filePath = dir + '/' + filename;
+        var filePath = path.join(dir, filename);
         console.log(filePath);
         // check if filePath exists by opening it. fs.exists is deprecated.
         fs.open(filePath, 'r', function (err, fd) {
@@ -78,7 +79,7 @@ var c = rpc.createClient(socketFile, function () {
     fd && fs.close(fd, function(err) {
       var dirs = getDirs(packageDirPath);
       dirs.forEach(function (dir) {
-        loadPackage(packageDirPath + '/' + dir);
+        loadPackage(path.join(packageDirPath, dir));
       });    
     })
   })
