@@ -36,7 +36,9 @@ void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   }
 }
 
-Document::~Document() { qDebug("~Document"); }
+Document::~Document() {
+  qDebug("~Document");
+}
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
@@ -48,7 +50,9 @@ Document* Document::create(const QString& path) {
   return new Document(path, in.readAll());
 }
 
-Document* Document::createBlank() { return new Document(); }
+Document* Document::createBlank() {
+  return new Document();
+}
 
 bool Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
@@ -125,12 +129,8 @@ QTextCursor Document::find(const Regexp* expr,
                            int end,
                            Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
-         qPrintable(expr->pattern()),
-         (options.testFlag(FindFlag::FindBackward)),
-         from,
-         begin,
-         end);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
+         (options.testFlag(FindFlag::FindBackward)), from, begin, end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);

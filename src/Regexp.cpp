@@ -62,13 +62,8 @@ Regexp* Regexp::compile(const QString& expr) {
   Q_ASSERT(pattern);
 
   // todo: check encoding!
-  int r = onig_new(&reg,
-                   pattern,
-                   pattern + strlen((char*)pattern),
-                   ONIG_OPTION_CAPTURE_GROUP,
-                   ONIG_ENCODING_UTF8,
-                   ONIG_SYNTAX_DEFAULT,
-                   &einfo);
+  int r = onig_new(&reg, pattern, pattern + strlen((char*)pattern), ONIG_OPTION_CAPTURE_GROUP,
+                   ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
   if (r != ONIG_NORMAL) {
     unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
     onig_error_code_to_str(s, r, &einfo);
@@ -105,14 +100,13 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward
 
     for (i = 0; i < region->num_regs; i++) {
       // Convert from byte offset to char offset in utf-8 string
-      int begCharPos = region->beg[i] < 0
-                           ? region->beg[i]
-                           : onigenc_strlen(ONIG_ENCODING_UTF8, str, (str + region->beg[i]));
+      int begCharPos = region->beg[i] < 0 ? region->beg[i] : onigenc_strlen(ONIG_ENCODING_UTF8, str,
+                                                                            (str + region->beg[i]));
       indices->append(begCharPos);
-      int endCharPos =
-          region->end[i] < 0 ? region->end[i] : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8,
-                                                                            str + region->beg[i],
-                                                                            str + region->end[i]);
+      int endCharPos = region->end[i] < 0
+                           ? region->end[i]
+                           : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i],
+                                                         str + region->end[i]);
       indices->append(endCharPos);
     }
   } else if (r == ONIG_MISMATCH) {
@@ -127,4 +121,5 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward
   return indices;
 }
 
-Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {}
+Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {
+}

@@ -6,7 +6,8 @@
 
 const QString CloseAllTabsCommand::name = "close_all_tabs";
 
-CloseAllTabsCommand::CloseAllTabsCommand() : ICommand(CloseAllTabsCommand::name) {}
+CloseAllTabsCommand::CloseAllTabsCommand() : ICommand(CloseAllTabsCommand::name) {
+}
 
 void CloseAllTabsCommand::doRun(const CommandArgument&, int) {
   SilkApp::activeTabView()->closeAllTabs();

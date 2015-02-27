@@ -12,7 +12,7 @@ static QString silkHomePath =
 QStringList Constants::configPaths() {
   QStringList configPaths;
 
-  foreach(const QString & path, dataDirectoryPaths()) {
+  foreach (const QString& path, dataDirectoryPaths()) {
     configPaths.append(path + "/config.yml");
     configPaths.append(path + "/config.yaml");
   }
@@ -23,7 +23,7 @@ QStringList Constants::configPaths() {
 QStringList Constants::keymapPaths() {
   QStringList configPaths;
 
-  foreach(const QString & path, dataDirectoryPaths()) {
+  foreach (const QString& path, dataDirectoryPaths()) {
     configPaths.append(path + "/keymap.yml");
     configPaths.append(path + "/keymap.yaml");
   }
@@ -33,15 +33,21 @@ QStringList Constants::keymapPaths() {
 
 QStringList Constants::packagePaths() {
   QStringList packagePaths;
-  foreach(const QString & path, dataDirectoryPaths()) { packagePaths.append(path + "/Packages"); }
+  foreach (const QString& path, dataDirectoryPaths()) { packagePaths.append(path + "/Packages"); }
   return packagePaths;
 }
 
-QString Constants::standardConfigPath() { return silkHomePath + "/config.yml"; }
+QString Constants::standardConfigPath() {
+  return silkHomePath + "/config.yml";
+}
 
-QString Constants::standardKeymapPath() { return silkHomePath + "/keymap.yml"; }
+QString Constants::standardKeymapPath() {
+  return silkHomePath + "/keymap.yml";
+}
 
-QString Constants::pluginRunnerPath() { return pluginServerDir() + "/bin/node"; }
+QString Constants::pluginRunnerPath() {
+  return pluginServerDir() + "/bin/node";
+}
 
 QStringList Constants::pluginRunnerArgs() {
   return QStringList() << pluginServerDir() + "/main.js" << pluginServerSocketPath();

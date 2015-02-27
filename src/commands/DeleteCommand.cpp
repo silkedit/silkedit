@@ -4,7 +4,8 @@
 #include "SilkApp.h"
 #include "TextEditView.h"
 
-DeleteCommand::DeleteCommand() : ICommand("delete") {}
+DeleteCommand::DeleteCommand() : ICommand("delete") {
+}
 
 void DeleteCommand::doRun(const CommandArgument& args, int repeat) {
   if (args.contains<QString>("direction")) {

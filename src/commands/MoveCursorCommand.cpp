@@ -33,7 +33,8 @@ int toMoveOperation(const QString& str) {
 }
 }
 
-MoveCursorCommand::MoveCursorCommand() : ICommand("move_cursor") {}
+MoveCursorCommand::MoveCursorCommand() : ICommand("move_cursor") {
+}
 
 void MoveCursorCommand::doRun(const CommandArgument& args, int repeat) {
   if (args.contains<QString>("operation")) {

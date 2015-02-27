@@ -6,6 +6,9 @@
 
 const QString SaveFileCommand::name = "save";
 
-SaveFileCommand::SaveFileCommand() : ICommand(SaveFileCommand::name) {}
+SaveFileCommand::SaveFileCommand() : ICommand(SaveFileCommand::name) {
+}
 
-void SaveFileCommand::doRun(const CommandArgument&, int) { SilkApp::activeEditView()->save(); }
+void SaveFileCommand::doRun(const CommandArgument&, int) {
+  SilkApp::activeEditView()->save();
+}

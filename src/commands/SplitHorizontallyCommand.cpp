@@ -4,7 +4,8 @@
 #include "SilkApp.h"
 #include "TabViewGroup.h"
 
-SplitHorizontallyCommand::SplitHorizontallyCommand() : ICommand("split_horizontally") {}
+SplitHorizontallyCommand::SplitHorizontallyCommand() : ICommand("split_horizontally") {
+}
 
 void SplitHorizontallyCommand::doRun(const CommandArgument&, int) {
   SilkApp::activeTabViewGroup()->splitTabHorizontally();

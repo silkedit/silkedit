@@ -47,7 +47,8 @@ void PluginService::init() {
   //  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {}
+PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
+}
 
 void PluginService::callExternalCommand(const QString& cmd) {
   msgpack::sbuffer sbuf;
@@ -74,13 +75,13 @@ void PluginService::pluginRunnerConnected() {
   m_socket = m_server->nextPendingConnection();
   connect(m_socket, SIGNAL(disconnected()), m_socket, SLOT(deleteLater()));
   connect(m_socket, &QLocalSocket::readyRead, this, &PluginService::readRequest);
-  connect(m_socket,
-          SIGNAL(error(QLocalSocket::LocalSocketError)),
-          this,
+  connect(m_socket, SIGNAL(error(QLocalSocket::LocalSocketError)), this,
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 
-void PluginService::error(QProcess::ProcessError error) { qDebug() << "Error: " << error; }
+void PluginService::error(QProcess::ProcessError error) {
+  qDebug() << "Error: " << error;
+}
 
 void PluginService::readRequest() {
   qDebug("readRequest");
@@ -173,8 +174,7 @@ void PluginService::readRequest() {
           default:
             qCritical("invalid rpc type");
         }
-      }
-      catch (msgpack::v1::type_error e) {
+      } catch (msgpack::v1::type_error e) {
         qCritical() << "type error. bad cast.";
         continue;
       }

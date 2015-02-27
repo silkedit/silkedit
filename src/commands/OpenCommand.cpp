@@ -8,12 +8,13 @@
 
 const QString OpenCommand::name = "open_file";
 
-OpenCommand::OpenCommand() : ICommand(OpenCommand::name) {}
+OpenCommand::OpenCommand() : ICommand(OpenCommand::name) {
+}
 
 void OpenCommand::doRun(const CommandArgument&, int) {
   QFileDialog dialog(nullptr, tr("Open"), "");
   if (dialog.exec()) {
-    foreach(const QString & entry, dialog.selectedFiles()) {
+    foreach (const QString& entry, dialog.selectedFiles()) {
       qDebug("opening %s", qPrintable(entry));
       QFileInfo info(entry);
       if (info.isFile()) {

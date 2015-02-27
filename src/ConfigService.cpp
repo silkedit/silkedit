@@ -30,18 +30,16 @@ void ConfigService::load(const QString& filename) {
       qDebug() << key << ":" << value;
       m_configs[key] = value;
     }
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
-  }
-  catch (...) {
+  } catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
 }
 
 void ConfigService::load() {
   QStringList existingConfigPaths;
-  foreach(const QString & path, Constants::configPaths()) {
+  foreach (const QString& path, Constants::configPaths()) {
     if (QFile(path).exists()) {
       existingConfigPaths.append(path);
     }
@@ -51,9 +49,10 @@ void ConfigService::load() {
     qDebug("copying default config.yml");
     if (Util::copy(":/config.yml", Constants::standardConfigPath())) {
       existingConfigPaths.append(Constants::standardConfigPath());
-      if (!QFile(Constants::standardConfigPath()).setPermissions(
-              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardConfigPath())
+               .setPermissions(
+                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {
@@ -61,7 +60,7 @@ void ConfigService::load() {
     }
   }
 
-  foreach(const QString & path, existingConfigPaths) { load(path); }
+  foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
 bool ConfigService::isTrue(const QString& key) {
@@ -80,4 +79,6 @@ QString ConfigService::value(const QString& key, const QString& defaultValue) {
   return defaultValue;
 }
 
-QString ConfigService::theme() { return value("theme", "Solarized (light)"); }
+QString ConfigService::theme() {
+  return value("theme", "Solarized (light)");
+}

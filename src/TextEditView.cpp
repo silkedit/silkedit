@@ -60,9 +60,7 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
-  connect(this,
-          SIGNAL(destroying(const QString&)),
-          &OpenRecentItemService::singleton(),
+  connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemService::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
@@ -107,15 +105,17 @@ void TextEditView::call(msgpack::rpc::msgid_t msgId,
 
   if (TextEditView* view = find(id)) {
     if (method == "text") {
-      PluginService::singleton().sendResponse(
-          view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+      PluginService::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
+                                              msgpack::type::nil(), msgId);
     }
   } else {
     qWarning("id: %d not found", id);
   }
 }
 
-QString TextEditView::path() { return m_document ? m_document->path() : ""; }
+QString TextEditView::path() {
+  return m_document ? m_document->path() : "";
+}
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
@@ -327,7 +327,9 @@ void TextEditView::changeTheme(Theme* theme) {
   highlightCurrentLine();
 }
 
-void TextEditView::clearDirtyMarker() { document()->setModified(false); }
+void TextEditView::clearDirtyMarker() {
+  document()->setModified(false);
+}
 
 void TextEditView::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
@@ -377,8 +379,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(
-          0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
+      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
+                       number);
     }
 
     block = block.next();
@@ -394,7 +396,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   QPainter painter(viewport());
 
   // highlight search matched texts
-  foreach(const Region & region, m_searchMatchedRegions) {
+  foreach (const Region& region, m_searchMatchedRegions) {
     QTextCursor beginCursor(document()->docHandle(), region.begin());
     QTextCursor endCursor(document()->docHandle(), region.end() - 1);
     int beginPos = beginCursor.positionInBlock();
@@ -456,7 +458,9 @@ int TextEditView::firstNonBlankCharPos(const QString& text) {
   return ix;
 }
 
-inline bool TextEditView::isTabOrSpace(const QChar ch) { return ch == '\t' || ch == ' '; }
+inline bool TextEditView::isTabOrSpace(const QChar ch) {
+  return ch == '\t' || ch == ' ';
+}
 
 void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
   QTextBlock block = cur.block();

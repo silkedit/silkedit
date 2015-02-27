@@ -8,9 +8,7 @@ StatusBar::StatusBar(MainWindow* window)
     : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
   addPermanentWidget(m_langComboBox);
 
-  connect(m_langComboBox,
-          SIGNAL(currentIndexChanged(int)),
-          this,
+  connect(m_langComboBox, SIGNAL(currentIndexChanged(int)), this,
           SLOT(setActiveTextEditViewLanguage()));
 }
 

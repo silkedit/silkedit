@@ -49,10 +49,9 @@ void ThemeTest::fontStyle() {
 
   // fontStyle
   QVector<ScopeSetting*> settings = theme->scopeSettings;
-  auto it =
-      std::find_if(settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
-        return setting->name == "Class inheritance";
-      });
+  auto it = std::find_if(
+      settings.constBegin(), settings.constEnd(),
+      [this](const ScopeSetting* setting) { return setting->name == "Class inheritance"; });
   QVERIFY(it != settings.constEnd());
   ScopeSetting* setting = *it;
   QCOMPARE((int)setting->fontWeight, (int)QFont::Bold);

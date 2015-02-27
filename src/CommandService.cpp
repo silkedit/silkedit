@@ -38,7 +38,9 @@ void CommandService::add(std::unique_ptr<ICommand> cmd) {
   m_commands[cmd->name()] = std::move(cmd);
 }
 
-void CommandService::remove(const QString& name) { m_commands.erase(name); }
+void CommandService::remove(const QString& name) {
+  m_commands.erase(name);
+}
 
 void CommandService::init() {
   // add commands

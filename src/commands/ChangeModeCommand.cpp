@@ -6,7 +6,8 @@
 #include "ViEngine.h"
 
 ChangeModeCommand::ChangeModeCommand(ViEngine* viEngine)
-    : ICommand(ChangeModeCommand::name), m_viEngine(viEngine) {}
+    : ICommand(ChangeModeCommand::name), m_viEngine(viEngine) {
+}
 
 const QString ChangeModeCommand::name = "change_mode";
 

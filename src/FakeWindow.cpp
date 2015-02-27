@@ -33,6 +33,10 @@ FakeWindow::FakeWindow(TabBar* tabbar, const QPoint& dragStartPos) {
   m_offset = dragStartPos - rect.topLeft();
 }
 
-FakeWindow::~FakeWindow() { qDebug("~FakeWindow"); }
+FakeWindow::~FakeWindow() {
+  qDebug("~FakeWindow");
+}
 
-void FakeWindow::moveWithOffset(const QPoint& pos) { QWidget::move(pos - m_offset); }
+void FakeWindow::moveWithOffset(const QPoint& pos) {
+  QWidget::move(pos - m_offset);
+}

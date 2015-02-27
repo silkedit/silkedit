@@ -7,7 +7,8 @@
 
 const QString CloseTabCommand::name = "close_tab";
 
-CloseTabCommand::CloseTabCommand() : ICommand(CloseTabCommand::name) {}
+CloseTabCommand::CloseTabCommand() : ICommand(CloseTabCommand::name) {
+}
 
 void CloseTabCommand::doRun(const CommandArgument&, int) {
   if (TabView* tabView = SilkApp::activeTabView()) {

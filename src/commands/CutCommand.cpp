@@ -6,6 +6,9 @@
 
 const QString CutCommand::name = "cut";
 
-CutCommand::CutCommand() : ICommand(name) {}
+CutCommand::CutCommand() : ICommand(name) {
+}
 
-void CutCommand::doRun(const CommandArgument&, int) { SilkApp::activeEditView()->cut(); }
+void CutCommand::doRun(const CommandArgument&, int) {
+  SilkApp::activeEditView()->cut();
+}

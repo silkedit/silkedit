@@ -24,7 +24,6 @@ TabView::TabView(QWidget* parent)
       m_activeEditView(nullptr),
       m_tabBar(new TabBar(this)),
       m_tabDragging(false) {
-
   setTabBar(m_tabBar);
   setMovable(true);
   setDocumentMode(true);
@@ -39,9 +38,13 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
 }
 
-TabView::~TabView() { qDebug("~TabView"); }
+TabView::~TabView() {
+  qDebug("~TabView");
+}
 
-int TabView::addTab(QWidget* page, const QString& label) { return insertTab(-1, page, label); }
+int TabView::addTab(QWidget* page, const QString& label) {
+  return insertTab(-1, page, label);
+}
 
 int TabView::insertTab(int index, QWidget* w, const QString& label) {
   if (!w) {
@@ -108,7 +111,9 @@ void TabView::saveAllTabs() {
   }
 }
 
-void TabView::closeActiveTab() { closeTab(currentWidget()); }
+void TabView::closeActiveTab() {
+  closeTab(currentWidget());
+}
 
 bool TabView::closeAllTabs() {
   std::list<QWidget*> widgets;
@@ -181,7 +186,9 @@ void TabView::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void TabView::tabRemoved(int index) { tabRemoved(index, false); }
+void TabView::tabRemoved(int index) {
+  tabRemoved(index, false);
+}
 
 void TabView::tabRemoved(int, bool afterDrag) {
   if (count() == 0 && !m_tabDragging) {
