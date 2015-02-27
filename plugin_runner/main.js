@@ -74,10 +74,14 @@ var c = rpc.createClient(socketFile, function () {
     })
   }
 
-  var dirs = getDirs(packageDirPath);
-  dirs.forEach(function (dir) {
-    loadPackage(packageDirPath + '/' + dir);
-  });
+  fs.open(packageDirPath, 'r', function(err, fd) {
+    fd && fs.close(fd, function(err) {
+      var dirs = getDirs(packageDirPath);
+      dirs.forEach(function (dir) {
+        loadPackage(packageDirPath + '/' + dir);
+      });    
+    })
+  })
 });
 
 var handler = {

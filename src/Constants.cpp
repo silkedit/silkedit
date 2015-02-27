@@ -48,7 +48,11 @@ QStringList Constants::pluginRunnerArgs() {
 }
 
 QString Constants::pluginServerSocketPath() {
-  return QDir::tempPath() + QDir::separator() + "silk.sock";
+#ifndef Q_OS_WIN32
+  return QDir::tempPath() + "/silkedit.sock";
+#else
+  return R"(\\.\pipe\silkedit)";
+#endif
 }
 
 QStringList Constants::dataDirectoryPaths() {
