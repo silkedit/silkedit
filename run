@@ -102,7 +102,7 @@ resolve() {
         fi
     fi
 
-    
+
     # msgpack-c
     git submodule init
     git submodule update
@@ -142,12 +142,13 @@ rebuild() {
 
 # static analysis
 analyze() {
-    ensure_dir build
-    cd build
-
-    cmake -G Ninja .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_COMPILER=/usr/local/checker-276/libexec/c++-analyzer
-    scan-build -v -o ./build-analysis --use-analyzer=/usr/bin/clang++ --status-bugs ninja
-
+	tmpFile=/tmp/clang-check-err
+	find src -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
+	if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
+	  rm -rf $tmpFile
+		exit 1
+	fi
+	rm -rf $tmpFile
 }
 
 run_tests() {
