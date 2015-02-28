@@ -142,6 +142,11 @@ rebuild() {
 
 # static analysis
 analyze() {
+    if [ $OS == 'Win32' ]; then
+        echo "gcc is used on Windows so clang-check doesn't work"
+        exit
+    fi
+
 	tmpFile=/tmp/clang-check-err
 	find src -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
 	if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
