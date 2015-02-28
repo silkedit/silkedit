@@ -78,7 +78,9 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
-  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)",
+         position,
+         charsRemoved,
          charsAdded);
   if (document()) {
     m_parser->setText(document()->toPlainText());

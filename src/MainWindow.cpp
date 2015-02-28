@@ -110,11 +110,17 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
 
   setStatusBar(m_statusBar);
 
-  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
           static_cast<void (MainWindow::*)(TabView*, TabView*)>(&MainWindow::updateConnection));
-  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
           &MainWindow::emitActiveEditViewChanged);
-  connect(this, &MainWindow::activeEditViewChanged, m_statusBar,
+  connect(this,
+          &MainWindow::activeEditViewChanged,
+          m_statusBar,
           &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
@@ -124,17 +130,25 @@ void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
   qDebug("updateConnection for new active TabView");
 
   if (oldTabView && m_statusBar) {
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               m_statusBar,
                &StatusBar::onActiveTextEditViewChanged);
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, this,
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               this,
                static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
                    &MainWindow::updateConnection));
   }
 
   if (newTabView && m_statusBar) {
-    connect(newTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            m_statusBar,
             &StatusBar::onActiveTextEditViewChanged);
-    connect(newTabView, &TabView::activeTextEditViewChanged, this,
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            this,
             static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
                 &MainWindow::updateConnection));
   }
@@ -144,12 +158,14 @@ void MainWindow::updateConnection(TextEditView* oldEditView, TextEditView* newEd
   qDebug("updateConnection for new active TextEditView");
 
   if (oldEditView && m_statusBar) {
-    disconnect(oldEditView, SIGNAL(languageChanged(QString)), m_statusBar,
-               SLOT(setLanguage(QString)));
+    disconnect(
+        oldEditView, SIGNAL(languageChanged(QString)), m_statusBar, SLOT(setLanguage(QString)));
   }
 
   if (newEditView && m_statusBar) {
-    connect(newEditView, SIGNAL(languageChanged(const QString&)), m_statusBar,
+    connect(newEditView,
+            SIGNAL(languageChanged(const QString&)),
+            m_statusBar,
             SLOT(setLanguage(const QString&)));
   }
 }

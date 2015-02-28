@@ -24,12 +24,15 @@ TabBar::TabBar(QWidget* parent)
 void TabBar::startMovingTab(const QPoint& tabPos) {
   qDebug() << "startMovingTab. tabPos:" << tabPos;
 
-  QMouseEvent pressEvent(QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton,
-                         Qt::NoModifier);
+  QMouseEvent pressEvent(
+      QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
   QTabBar::mousePressEvent(&pressEvent);
 
-  QMouseEvent startMoveEvent(QEvent::MouseMove, QPoint(tabPos.x(), tabPos.y()), Qt::NoButton,
-                             Qt::LeftButton, Qt::NoModifier);
+  QMouseEvent startMoveEvent(QEvent::MouseMove,
+                             QPoint(tabPos.x(), tabPos.y()),
+                             Qt::NoButton,
+                             Qt::LeftButton,
+                             Qt::NoModifier);
   QTabBar::mouseMoveEvent(&startMoveEvent);
 
   m_isGrabbingMouse = true;
@@ -93,8 +96,8 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
       (!geometry().contains(event->pos()))) {
     m_dragInitiated = true;
     // Stop the move to be able to convert to a drag
-    QMouseEvent finishMoveEvent(QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton,
-                                Qt::NoModifier);
+    QMouseEvent finishMoveEvent(
+        QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
     QTabBar::mouseMoveEvent(&finishMoveEvent);
 
     // Initiate Drag

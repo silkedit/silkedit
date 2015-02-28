@@ -80,8 +80,8 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
     themeActionGroup->addAction(themeAction);
   }
 
-  connect(themeActionGroup, SIGNAL(triggered(QAction*)), this,
-          SLOT(themeActionTriggered(QAction*)));
+  connect(
+      themeActionGroup, SIGNAL(triggered(QAction*)), this, SLOT(themeActionTriggered(QAction*)));
 }
 
 void MenuBar::themeActionTriggered(QAction* action) {

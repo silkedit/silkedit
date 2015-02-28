@@ -76,7 +76,7 @@ void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   if (editView) {
     PluginService::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginService::singleton().sendResponse(msgpack::type::nil(),
-                                            std::string("active edit view is null"), msgId);
+    PluginService::singleton().sendResponse(
+        msgpack::type::nil(), std::string("active edit view is null"), msgId);
   }
 }

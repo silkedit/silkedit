@@ -237,8 +237,12 @@ void FindReplaceView::replaceAll() {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin,
-                                  end, getFindFlags(), m_preserveCaseChk->isChecked());
+    editView->replaceAllSelection(m_lineEditForFind->text(),
+                                  m_lineEditForReplace->text(),
+                                  begin,
+                                  end,
+                                  getFindFlags(),
+                                  m_preserveCaseChk->isChecked());
     m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
   }
 }

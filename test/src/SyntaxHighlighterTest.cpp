@@ -7,7 +7,8 @@
 namespace {
 void checkRegion(Node* node, Region region) {
   if (!region.fullyCovers(node->region)) {
-    qWarning("%s doesn't fully cover %s", qPrintable(region.toString()),
+    qWarning("%s doesn't fully cover %s",
+             qPrintable(region.toString()),
              qPrintable(node->region.toString()));
     QFAIL("");
   }

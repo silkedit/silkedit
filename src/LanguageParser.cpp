@@ -153,8 +153,8 @@ RootNode* LanguageParser::parse() {
 
 // parse in [begin, end) (doensn't include end)
 QVector<Node*> LanguageParser::parse(const Region& region) {
-  qDebug("parse. region: %s. lang: %s", qPrintable(region.toString()),
-         qPrintable(m_lang->scopeName));
+  qDebug(
+      "parse. region: %s. lang: %s", qPrintable(region.toString()), qPrintable(m_lang->scopeName));
   QTime t;
   t.start();
 
@@ -739,10 +739,10 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
     //    qDebug("new node: %s", qPrintable(node->toString()));
     children.push_back(std::move(std::unique_ptr<Node>(node)));
   }
-  std::sort(children.begin(), children.end(),
-            [](const std::unique_ptr<Node>& x, const std::unique_ptr<Node>& y) {
-    return x->region.begin() < y->region.begin();
-  });
+  std::sort(children.begin(),
+            children.end(),
+            [](const std::unique_ptr<Node>& x,
+               const std::unique_ptr<Node>& y) { return x->region.begin() < y->region.begin(); });
 
   qDebug("new children.size: %d", (int)children.size());
   //  qDebug() << *this;

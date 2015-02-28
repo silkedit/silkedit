@@ -60,7 +60,9 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
-  connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemService::singleton(),
+  connect(this,
+          SIGNAL(destroying(const QString&)),
+          &OpenRecentItemService::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
@@ -105,8 +107,8 @@ void TextEditView::call(msgpack::rpc::msgid_t msgId,
 
   if (TextEditView* view = find(id)) {
     if (method == "text") {
-      PluginService::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
-                                              msgpack::type::nil(), msgId);
+      PluginService::singleton().sendResponse(
+          view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
     }
   } else {
     qWarning("id: %d not found", id);
@@ -379,8 +381,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
-                       number);
+      painter.drawText(
+          0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();

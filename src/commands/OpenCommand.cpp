@@ -9,7 +9,8 @@
 
 const QString OpenCommand::name = "open_file";
 
-OpenCommand::OpenCommand() : ICommand(OpenCommand::name) {}
+OpenCommand::OpenCommand() : ICommand(OpenCommand::name) {
+}
 
 void OpenCommand::doRun(const CommandArgument&, int) {
   // On Windows, native dialog sets QApplication::activeWindow() to NULL. We need to store and

@@ -129,8 +129,12 @@ QTextCursor Document::find(const Regexp* expr,
                            int end,
                            Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
-         (options.testFlag(FindFlag::FindBackward)), from, begin, end);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
+         qPrintable(expr->pattern()),
+         (options.testFlag(FindFlag::FindBackward)),
+         from,
+         begin,
+         end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);

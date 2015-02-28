@@ -49,10 +49,9 @@ void ConfigService::load() {
     qDebug("copying default config.yml");
     if (Util::copy(":/config.yml", Constants::standardConfigPath())) {
       existingConfigPaths.append(Constants::standardConfigPath());
-      if (!QFile(Constants::standardConfigPath())
-               .setPermissions(
-                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardConfigPath()).setPermissions(
+              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {

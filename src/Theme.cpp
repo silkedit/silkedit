@@ -68,8 +68,11 @@ ScopeSetting* toScopeSetting(QVariant var) {
   // settings
   if (map.contains(settingsStr)) {
     scopeSetting->settings.reset(new ColorSettings());
-    parseSettings(scopeSetting->settings.get(), &(scopeSetting->fontWeight),
-                  &(scopeSetting->isItalic), &(scopeSetting->isUnderline), map.value(settingsStr));
+    parseSettings(scopeSetting->settings.get(),
+                  &(scopeSetting->fontWeight),
+                  &(scopeSetting->isItalic),
+                  &(scopeSetting->isUnderline),
+                  map.value(settingsStr));
   }
 
   return scopeSetting;
@@ -96,8 +99,11 @@ Theme* Theme::loadTheme(const QString& filename) {
   const QString gutterSettingsStr = "gutterSettings";
   if (rootMap.contains(gutterSettingsStr)) {
     theme->gutterSettings.reset(new ColorSettings());
-    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
-                  &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
+    parseSettings(theme->gutterSettings.get(),
+                  &(theme->gutterFontWeight),
+                  &(theme->isGutterItalic),
+                  &(theme->isGutterUnderline),
+                  rootMap.value(gutterSettingsStr));
   }
 
   // name

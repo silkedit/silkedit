@@ -70,13 +70,13 @@ bool TabViewGroup::closeAllTabs() {
 }
 
 void TabViewGroup::splitTabHorizontally() {
-  splitTab(std::bind(&TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1,
-                     std::placeholders::_2));
+  splitTab(std::bind(
+      &TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void TabViewGroup::splitTabVertically() {
-  splitTab(std::bind(&TabViewGroup::addTabViewVertically, this, std::placeholders::_1,
-                     std::placeholders::_2));
+  splitTab(std::bind(
+      &TabViewGroup::addTabViewVertically, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
