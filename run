@@ -6,6 +6,9 @@ elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
   OS='Linux'
 elif [ "$(expr substr $(uname -s) 1 7)" == 'MSYS_NT' ]; then
   OS='Win32'
+elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
+  echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
+  exit 1
 else
   echo "Your platform ($(uname -a)) is not supported."
   exit 1
