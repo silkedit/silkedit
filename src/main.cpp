@@ -1,4 +1,5 @@
 #include <QStringList>
+#include <QTime>
 
 #include "PackageService.h"
 #include "SilkApp.h"
@@ -17,6 +18,7 @@
 #include "plugin_service/PluginService.h"
 
 int main(int argv, char** args) {
+  QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
 
   SilkApp app(argv, args);
@@ -60,5 +62,7 @@ int main(int argv, char** args) {
 
   //  new TestUtil();
 
+  int passed = startTime.msecsTo(QTime::currentTime());
+  qDebug("startup time: %d [ms]", passed);
   return app.exec();
 }
