@@ -136,7 +136,7 @@ build() {
         fi
         cp -r silkedit.exe packages plugin_runner Release
         cd Release
-        windeployqt --release-with-debug-info --no-compiler-runtime silkedit.exe
+        windeployqt --release-with-debug-info silkedit.exe
         iscc ../../silkedit.iss
     fi
 }
