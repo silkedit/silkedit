@@ -131,7 +131,13 @@ build() {
         ln -s /Applications dmg/Applications
         hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
     elif [ $OS == 'Win32' ]; then
+        if [ ! -d Release ]; then
+            mkdir Release
+        fi
+        cp -r silkedit.exe packages plugin_runner Release
+        cd Release
         windeployqt --release-with-debug-info --no-compiler-runtime silkedit.exe
+        iscc ../../silkedit.iss
     fi
 }
 

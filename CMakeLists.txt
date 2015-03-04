@@ -70,14 +70,8 @@ if(APPLE)
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
 elseif (MINGW)
   # Copy packages directory to the same directory of exe
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/packages"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/packages)
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
 
   # Copy plugin_runner (node.js)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${PROJECT_SOURCE_DIR}/plugin_runner"
-        $<TARGET_FILE_DIR:${PROJECT_NAME}>/plugin_runner)
+  file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION .)
 ENDIF(APPLE)
