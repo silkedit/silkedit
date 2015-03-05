@@ -154,9 +154,9 @@ build() {
         windeployqt --release-with-debug-info silkedit.exe
         if [ $OS == 'Win32' ]; then
             # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
-            cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > silkedit_x86.iss
-            iscc silkedit_x86.iss
-            rm silkedit_x86.iss
+            cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ../../silkedit_x86.iss
+            iscc ../../silkedit_x86.iss
+            rm ../../silkedit_x86.iss
         else
             iscc ../../silkedit.iss
         fi
