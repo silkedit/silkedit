@@ -6,6 +6,7 @@
 #define MyAppPublisher "SilkEdit dev team"
 #define MyAppURL ""
 #define MyAppExeName "silkedit.exe"
+#define Arch "x64"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -22,7 +23,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=SilkEdit_Setup_x64
+OutputBaseFilename=SilkEdit_Setup_{#Arch}
 OutputDir=build\Release
 Compression=lzma
 SolidCompression=yes

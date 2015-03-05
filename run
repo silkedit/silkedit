@@ -4,8 +4,12 @@ if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
   OS='Linux'
-elif [ "$(expr substr $(uname -s) 1 7)" == 'MSYS_NT' ]; then
-  OS='Win32'
+elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
+  if [ "$(uname -m)" == "x86_64" ]; then
+    OS='Win64'
+  else
+    OS='Win32'
+  fi
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -139,14 +143,23 @@ build() {
         cp -r SilkEdit.app dmg
         ln -s /Applications dmg/Applications
         hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg
-    elif [ $OS == 'Win32' ]; then
+    elif [ $OS == 'Linux' ]; then
+      OS = 'Linux'
+    else
         if [ ! -d Release ]; then
             mkdir Release
         fi
         cp -r silkedit.exe packages plugin_runner Release
         cd Release
         windeployqt --release-with-debug-info silkedit.exe
-        iscc ../../silkedit.iss
+        if [ $OS == 'Win32' ]; then
+            # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
+            cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > silkedit_x86.iss
+            iscc silkedit_x86.iss
+            rm silkedit_x86.iss
+        else
+            iscc ../../silkedit.iss
+        fi
     fi
 }
 
@@ -173,7 +186,7 @@ analyze() {
 
 run_tests() {
     resolve
-    
+
     cd test
     ensure_dir build
     cd build
