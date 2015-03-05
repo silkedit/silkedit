@@ -37,7 +37,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 Name: "contextmenu"; Description: "Add ""Open with SilkEdit"" &context menu"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Shinichi\Code\silkedit\build\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "build\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{userprograms}\{#MyAppName} {#MyAppVersion}"; Filename: "{app}\{#MyAppExeName}"
