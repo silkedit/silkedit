@@ -73,28 +73,30 @@ resolve() {
       OS = 'Linux'
     else
         # yaml-cpp (If you install it from pacman, it doesn't work somehow)
-        wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
-        tar zxf yaml-cpp-0.5.1.tar.gz
-        cd yaml-cpp-0.5.1
+        if [ ! -f lib/libyaml-cpp.a ]; then
+            wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
+            tar zxf yaml-cpp-0.5.1.tar.gz
+            cd yaml-cpp-0.5.1
 
-        # apply a patch to fix an issue of CMakeLists.txt
-        wget http://home.shinichy.com/files/yaml-cpp/CMakeLists.txt.patch
-        patch < CMakeLists.txt.patch
+            # apply a patch to fix an issue of CMakeLists.txt
+            wget http://home.shinichy.com/files/yaml-cpp/CMakeLists.txt.patch
+            patch < CMakeLists.txt.patch
 
-        # apply a patch to fix a compile error https://code.google.com/p/yaml-cpp/issues/detail?id=276&colspec=ID%20Type%20Status%20Priority%20Milestone%20Component%20Owner%20Summary
-        cd src
-        wget http://home.shinichy.com/files/yaml-cpp/ostream_wrapper.patch
-        patch < ostream_wrapper.patch
-        cd ..
+            # apply a patch to fix a compile error https://code.google.com/p/yaml-cpp/issues/detail?id=276&colspec=ID%20Type%20Status%20Priority%20Milestone%20Component%20Owner%20Summary
+            cd src
+            wget http://home.shinichy.com/files/yaml-cpp/ostream_wrapper.patch
+            patch < ostream_wrapper.patch
+            cd ..
 
-        mkdir build
-        cd build
-        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
-        ninja
-        ninja install
-        cd ../..
-        rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar.gz
-
+            mkdir build
+            cd build
+            cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
+            ninja
+            ninja install
+            cd ../..
+            rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar.gz
+        fi
+        
         # node
         if [ ! -d plugin_runner/bin ]; then
             cp -r "C:\Program Files\nodejs" plugin_runner
@@ -113,7 +115,7 @@ resolve() {
 
 # release build
 build() {
-    # resolve
+    resolve
 
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
