@@ -172,6 +172,8 @@ analyze() {
 }
 
 run_tests() {
+    resolve
+    
     cd test
     ensure_dir build
     cd build

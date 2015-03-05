@@ -95,21 +95,21 @@ void LanguageParserTest::parseTmLanguage() {
   foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
   QFile file("testdata/plist2.tmlang");
-  QVERIFY(file.open(QIODevice::ReadOnly));
+  QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
   QTextStream in(&file);
   LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
   Node* root = parser->parse();
 
   QFile resFile("testdata/plist2.tmlang.res");
-  QVERIFY(resFile.open(QIODevice::ReadOnly));
+  QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
   QTextStream resIn(&resFile);
   compareLineByLine(root->toString(), resIn.readAll());
 
   // $base(=$self)
   QFile cppFile("testdata/test.cpp");
-  QVERIFY(cppFile.open(QIODevice::ReadOnly));
+  QVERIFY(cppFile.open(QIODevice::ReadOnly | QIODevice::Text));
   parser = LanguageParser::create("source.c++", QTextStream(&cppFile).readAll());
   root = parser->parse();
 }
