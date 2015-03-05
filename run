@@ -43,7 +43,11 @@ ensure_dir() {
 }
 
 clean() {
-    rm -rf build
+    # Somehow git clean fails to remove these directories, so remove them manually
+    rm -rf build plugin_runner/bin
+
+    # remove everything not tracked in git
+    git clean -xdf
 }
 
 # resolve dependency
@@ -88,13 +92,13 @@ resolve() {
             patch < ostream_wrapper.patch
             cd ..
 
-            mkdir build
+            ensure_dir build
             cd build
             cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
             ninja
             ninja install
             cd ../..
-            rm -rf yaml-cpp-0.5.1 yaml-cpp-0.5.1.tar.gz
+            rm -rf yaml-cpp-0.5.1*
         fi
         
         # node
