@@ -208,6 +208,7 @@ void MainWindow::loadMenu(const std::string& ymlPath) {
 
 MainWindow::~MainWindow() {
   qDebug("~MainWindow");
+  s_windows.removeOne(this);
 }
 
 TabView* MainWindow::activeTabView() {
@@ -223,19 +224,12 @@ void MainWindow::show() {
   QApplication::setActiveWindow(this);
 }
 
-void MainWindow::close() {
-  if (s_windows.removeOne(this)) {
-    QMainWindow::close();
-  }
-}
-
 QList<MainWindow*> MainWindow::s_windows;
 
 void MainWindow::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
   bool isSuccess = m_tabViewGroup->closeAllTabs();
   if (isSuccess) {
-    s_windows.removeOne(this);
     event->accept();
   } else {
     qDebug("closeEvent is ignored");

@@ -35,7 +35,6 @@ class MainWindow : public QMainWindow {
   TabView* activeTabView();
 
   void show();
-  void close();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
   void openFindAndReplacePanel();
