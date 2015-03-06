@@ -60,8 +60,7 @@ void parseMenuNode(QWidget* parent, YAML::Node menuNode) {
         }
         parseMenuNode(currentMenu, submenuNode);
       } else if (commandNode.IsDefined()) {
-        QString command =
-            QString::fromUtf8(commandNode.as<std::string>().c_str());
+        QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         auto commandAction = new CommandAction(label, command);
         if (!findAction(parent->actions(), label)) {
           if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
@@ -100,8 +99,7 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   layout->setMargin(0);
-  m_tabViewGroup->setSizePolicy(QSizePolicy::Policy::Expanding,
-                                QSizePolicy::Policy::Expanding);
+  m_tabViewGroup->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
   layout->addWidget(m_tabViewGroup);
   layout->addWidget(m_findReplaceView);
   m_findReplaceView->hide();
@@ -113,12 +111,17 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
 
   setStatusBar(m_statusBar);
 
-  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
-          static_cast<void (MainWindow::*)(TabView*, TabView*)>(
-              &MainWindow::updateConnection));
-  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
+          static_cast<void (MainWindow::*)(TabView*, TabView*)>(&MainWindow::updateConnection));
+  connect(m_tabViewGroup,
+          &TabViewGroup::activeTabViewChanged,
+          this,
           &MainWindow::emitActiveEditViewChanged);
-  connect(this, &MainWindow::activeEditViewChanged, m_statusBar,
+  connect(this,
+          &MainWindow::activeEditViewChanged,
+          m_statusBar,
           &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
@@ -128,43 +131,49 @@ void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
   qDebug("updateConnection for new active TabView");
 
   if (oldTabView && m_statusBar) {
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               m_statusBar,
                &StatusBar::onActiveTextEditViewChanged);
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, this,
+    disconnect(oldTabView,
+               &TabView::activeTextEditViewChanged,
+               this,
                static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
                    &MainWindow::updateConnection));
   }
 
   if (newTabView && m_statusBar) {
-    connect(newTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            m_statusBar,
             &StatusBar::onActiveTextEditViewChanged);
-    connect(newTabView, &TabView::activeTextEditViewChanged, this,
+    connect(newTabView,
+            &TabView::activeTextEditViewChanged,
+            this,
             static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
                 &MainWindow::updateConnection));
   }
 }
 
-void MainWindow::updateConnection(TextEditView* oldEditView,
-                                  TextEditView* newEditView) {
+void MainWindow::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
   qDebug("updateConnection for new active TextEditView");
 
   if (oldEditView && m_statusBar) {
-    disconnect(oldEditView, SIGNAL(languageChanged(QString)), m_statusBar,
-               SLOT(setLanguage(QString)));
+    disconnect(
+        oldEditView, SIGNAL(languageChanged(QString)), m_statusBar, SLOT(setLanguage(QString)));
   }
 
   if (newEditView && m_statusBar) {
-    connect(newEditView, SIGNAL(languageChanged(const QString&)), m_statusBar,
+    connect(newEditView,
+            SIGNAL(languageChanged(const QString&)),
+            m_statusBar,
             SLOT(setLanguage(const QString&)));
   }
 }
 
-void MainWindow::emitActiveEditViewChanged(TabView* oldTabView,
-                                           TabView* newTabView) {
-  TextEditView* oldEditView =
-      oldTabView ? oldTabView->activeEditView() : nullptr;
-  TextEditView* newEditView =
-      newTabView ? newTabView->activeEditView() : nullptr;
+void MainWindow::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView) {
+  TextEditView* oldEditView = oldTabView ? oldTabView->activeEditView() : nullptr;
+  TextEditView* newEditView = newTabView ? newTabView->activeEditView() : nullptr;
   emit activeEditViewChanged(oldEditView, newEditView);
 }
 
@@ -175,8 +184,7 @@ MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
   return window;
 }
 
-MainWindow* MainWindow::createWithNewFile(QWidget* parent,
-                                          Qt::WindowFlags flags) {
+MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   MainWindow* w = create(parent, flags);
   w->activeTabView()->addNew();
   return w;
@@ -192,15 +200,15 @@ void MainWindow::loadMenu(const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    foreach (MainWindow* win, s_windows) {
-      parseMenuNode(win->menuBar(), menuNode);
-    }
+    foreach (MainWindow* win, s_windows) { parseMenuNode(win->menuBar(), menuNode); }
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }
 }
 
-MainWindow::~MainWindow() { qDebug("~MainWindow"); }
+MainWindow::~MainWindow() {
+  qDebug("~MainWindow");
+}
 
 TabView* MainWindow::activeTabView() {
   if (m_tabViewGroup) {
@@ -249,7 +257,9 @@ bool MainWindow::openDir(const QString& dirPath) {
   }
 }
 
-void MainWindow::openFindAndReplacePanel() { m_findReplaceView->show(); }
+void MainWindow::openFindAndReplacePanel() {
+  m_findReplaceView->show();
+}
 
 void MainWindow::hideFindReplacePanel() {
   if (m_findReplaceView) {
