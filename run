@@ -74,6 +74,7 @@ resolve() {
         rm -rf $node $node.tar.gz
 
         cd plugin_runner
+        PATH=$(pwd)/bin:$PATH
         bin/npm install
         cd ..
       fi
