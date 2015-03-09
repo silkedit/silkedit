@@ -28,7 +28,7 @@ class Document : public QTextDocument {
   static Document* createBlank();
 
   QString path() { return m_path; }
-  void setPath(const QString& path) { m_path = path; }
+  void setPath(const QString& path);
   Language* language() { return m_lang.get(); }
   bool setLanguage(const QString& scopeName);
   QTextCursor find(const QString& subString,
@@ -51,6 +51,9 @@ class Document : public QTextDocument {
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
+
+signals:
+  void pathUpdated(const QString& path);
 
  private:
   QString m_path;

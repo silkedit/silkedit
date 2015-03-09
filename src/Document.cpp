@@ -54,6 +54,13 @@ Document* Document::createBlank() {
   return new Document();
 }
 
+void Document::setPath(const QString& path) {
+  if (m_path != path) {
+    m_path = path;
+    emit pathUpdated(path);
+  }
+}
+
 bool Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
   Language* newLang = LanguageProvider::languageFromScope(scopeName);

@@ -14,7 +14,7 @@ class DocumentService {
   static const QString DEFAULT_FILE_NAME;
 
   static bool open(const QString& filename);
-  static void save(Document* doc);
+  static bool save(Document* doc);
   static QString saveAs(Document* doc);
 
  private:

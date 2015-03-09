@@ -23,14 +23,15 @@ bool DocumentService::open(const QString& filename) {
   }
 }
 
-void DocumentService::save(Document* doc) {
+bool DocumentService::save(Document* doc) {
+  if (!doc) {
+    qWarning("doc is null");
+    return false;
+  }
+
   if (doc->path().isEmpty()) {
-    doc->setPath(DEFAULT_FILE_NAME);
-    saveAs(doc);
-    return;
-  } else if (!doc) {
-    qWarning("document is null");
-    return;
+    QString newFilePath = saveAs(doc);
+    return !newFilePath.isEmpty();
   }
 
   QFile outFile(doc->path());
@@ -44,7 +45,10 @@ void DocumentService::save(Document* doc) {
         out << doc->findBlockByNumber(i).text();
       }
     }
+    return true;
   }
+
+  return false;
 }
 
 QString DocumentService::saveAs(Document* doc) {

@@ -137,6 +137,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   }
   m_document = document;
   updateLineNumberAreaWidth(blockCount());
+  connect(m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
 }
 
 Language* TextEditView::language() {
@@ -160,7 +161,6 @@ void TextEditView::setPath(const QString& path) {
     return;
 
   m_document->setPath(path);
-  emit pathUpdated(path);
 }
 
 void TextEditView::find(const QString& text, int begin, int end, Document::FindFlags flags) {
@@ -545,16 +545,17 @@ TextEditView* TextEditView::clone() {
 }
 
 void TextEditView::save() {
-  DocumentService::save(m_document.get());
-  emit saved();
+  if (DocumentService::save(m_document.get())) {
+    emit saved();
+  }
 }
 
 void TextEditView::saveAs() {
   QString newFilePath = DocumentService::saveAs(m_document.get());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
+    emit saved();
   }
-  emit saved();
 }
 
 void TextEditView::doDelete(int n) {
