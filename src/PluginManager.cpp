@@ -6,20 +6,20 @@
 #include <QDebug>
 #include <QFile>
 
-#include "PluginService.h"
+#include "PluginManager.h"
 #include "SilkApp.h"
 #include "Constants.h"
 #include "API.h"
 #include "TextEditView.h"
 
-PluginService::~PluginService() {
-  qDebug("~PluginService");
+PluginManager::~PluginManager() {
+  qDebug("~PluginManager");
   if (m_pluginProcess) {
     m_pluginProcess->terminate();
   }
 }
 
-void PluginService::init() {
+void PluginManager::init() {
   Q_ASSERT(!m_pluginProcess);
 
   m_server = new QLocalServer(this);
@@ -33,15 +33,15 @@ void PluginService::init() {
     return;
   }
 
-  connect(m_server, &QLocalServer::newConnection, this, &PluginService::pluginRunnerConnected);
+  connect(m_server, &QLocalServer::newConnection, this, &PluginManager::pluginRunnerConnected);
 
   m_pluginProcess = new QProcess(this);
   connect(m_pluginProcess,
           SIGNAL(error(QProcess::ProcessError)),
           this,
           SLOT(error(QProcess::ProcessError)));
-  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginService::readStdout);
-  connect(m_pluginProcess, &QProcess::readyReadStandardError, this, &PluginService::readStderr);
+  connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginManager::readStdout);
+  connect(m_pluginProcess, &QProcess::readyReadStandardError, this, &PluginManager::readStderr);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
   qDebug() << "args:" << Constants::pluginRunnerArgs();
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
@@ -49,10 +49,10 @@ void PluginService::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-PluginService::PluginService() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
+PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
 }
 
-void PluginService::callExternalCommand(const QString& cmd) {
+void PluginManager::callExternalCommand(const QString& cmd) {
   msgpack::sbuffer sbuf;
   msgpack::rpc::msg_notify<std::string, std::vector<std::string>> notify;
   notify.method = "runCommand";
@@ -63,35 +63,35 @@ void PluginService::callExternalCommand(const QString& cmd) {
   m_socket->write(sbuf.data(), sbuf.size());
 }
 
-void PluginService::readStdout() {
+void PluginManager::readStdout() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardOutput();
   qDebug() << buf;
 }
 
-void PluginService::readStderr() {
+void PluginManager::readStderr() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardError();
   qWarning() << buf;
 }
 
-void PluginService::pluginRunnerConnected() {
+void PluginManager::pluginRunnerConnected() {
   qDebug() << "new Plugin runner connected";
 
   m_socket = m_server->nextPendingConnection();
   connect(m_socket, SIGNAL(disconnected()), m_socket, SLOT(deleteLater()));
-  connect(m_socket, &QLocalSocket::readyRead, this, &PluginService::readRequest);
+  connect(m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest);
   connect(m_socket,
           SIGNAL(error(QLocalSocket::LocalSocketError)),
           this,
           SLOT(displayError(QLocalSocket::LocalSocketError)));
 }
 
-void PluginService::error(QProcess::ProcessError error) {
+void PluginManager::error(QProcess::ProcessError error) {
   qDebug() << "Error: " << error;
 }
 
-void PluginService::readRequest() {
+void PluginManager::readRequest() {
   qDebug("readRequest");
 
   msgpack::unpacker unp;
@@ -190,7 +190,7 @@ void PluginService::readRequest() {
   }
 }
 
-void PluginService::displayError(QLocalSocket::LocalSocketError socketError) {
+void PluginManager::displayError(QLocalSocket::LocalSocketError socketError) {
   switch (socketError) {
     case QLocalSocket::ServerNotFoundError:
       qWarning("The host was not found.");

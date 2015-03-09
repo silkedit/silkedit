@@ -9,12 +9,12 @@
 #include "macros.h"
 #include "Singleton.h"
 
-class PluginService : public QObject, public Singleton<PluginService> {
+class PluginManager : public QObject, public Singleton<PluginManager> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(PluginService)
+  DISABLE_COPY_AND_MOVE(PluginManager)
 
  public:
-  ~PluginService();
+  ~PluginManager();
 
   void init();
   void callExternalCommand(const QString& cmd);
@@ -33,8 +33,8 @@ class PluginService : public QObject, public Singleton<PluginService> {
   }
 
  private:
-  friend class Singleton<PluginService>;
-  PluginService();
+  friend class Singleton<PluginManager>;
+  PluginManager();
 
   QProcess* m_pluginProcess;
   QLocalSocket* m_socket;

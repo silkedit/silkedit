@@ -11,7 +11,7 @@
 #include "DocumentManager.h"
 #include "Session.h"
 #include "API.h"
-#include "plugin_service/PluginService.h"
+#include "PluginManager.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -107,7 +107,7 @@ void TextEditView::call(msgpack::rpc::msgid_t msgId,
 
   if (TextEditView* view = find(id)) {
     if (method == "text") {
-      PluginService::singleton().sendResponse(
+      PluginManager::singleton().sendResponse(
           view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
     }
   } else {

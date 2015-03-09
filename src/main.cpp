@@ -15,7 +15,7 @@
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
-#include "plugin_service/PluginService.h"
+#include "PluginManager.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -53,7 +53,7 @@ int main(int argv, char** args) {
   Session::singleton().init();
 
   API::init();
-  PluginService::singleton().init();
+  PluginManager::singleton().init();
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {

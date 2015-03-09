@@ -6,7 +6,7 @@
 #include "MainWindow.h"
 #include "CommandManager.h"
 #include "commands/PluginCommand.h"
-#include "plugin_service/PluginService.h"
+#include "PluginManager.h"
 #include "TextEditView.h"
 #include "SilkApp.h"
 
@@ -74,9 +74,9 @@ void API::registerCommands(msgpack::object obj) {
 void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
-    PluginService::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginService::singleton().sendResponse(
+    PluginManager::singleton().sendResponse(
         msgpack::type::nil(), std::string("active edit view is null"), msgId);
   }
 }
