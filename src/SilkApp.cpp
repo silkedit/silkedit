@@ -2,7 +2,7 @@
 
 #include "SilkApp.h"
 #include "TabViewGroup.h"
-#include "DocumentService.h"
+#include "DocumentManager.h"
 #include "TextEditView.h"
 #include "TabView.h"
 #include "MainWindow.h"
@@ -55,7 +55,7 @@ bool SilkApp::event(QEvent* event) {
   switch (event->type()) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
-      DocumentService::open(static_cast<QFileOpenEvent*>(event)->file());
+      DocumentManager::open(static_cast<QFileOpenEvent*>(event)->file());
       return true;
     default:
       return QApplication::event(event);

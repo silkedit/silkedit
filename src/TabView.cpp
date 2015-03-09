@@ -5,12 +5,12 @@
 
 #include "TabView.h"
 #include "TextEditView.h"
-#include "KeymapService.h"
+#include "KeymapManager.h"
 #include "TabBar.h"
 #include "MainWindow.h"
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
-#include "DocumentService.h"
+#include "DocumentManager.h"
 
 namespace {
 QString getFileNameFrom(const QString& path) {
@@ -99,7 +99,7 @@ void TabView::addNew() {
   TextEditView* view = new TextEditView(this);
   std::shared_ptr<Document> newDoc(Document::createBlank());
   view->setDocument(std::move(newDoc));
-  addTab(view, DocumentService::DEFAULT_FILE_NAME);
+  addTab(view, DocumentManager::DEFAULT_FILE_NAME);
 }
 
 void TabView::saveAllTabs() {

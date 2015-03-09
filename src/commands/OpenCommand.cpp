@@ -3,8 +3,8 @@
 #include <QApplication>
 
 #include "OpenCommand.h"
-#include "DocumentService.h"
-#include "ProjectService.h"
+#include "DocumentManager.h"
+#include "ProjectManager.h"
 #include "vi.h"
 
 const QString OpenCommand::name = "open_file";
@@ -24,9 +24,9 @@ void OpenCommand::doRun(const CommandArgument&, int) {
       qDebug("opening %s", qPrintable(entry));
       QFileInfo info(entry);
       if (info.isFile()) {
-        DocumentService::open(entry);
+        DocumentManager::open(entry);
       } else if (info.isDir()) {
-        ProjectService::open(entry);
+        ProjectManager::open(entry);
       } else {
         qWarning("%s is neither file nor directory.", qPrintable(entry));
       }

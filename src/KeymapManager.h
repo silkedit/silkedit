@@ -14,11 +14,11 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
-  DISABLE_COPY_AND_MOVE(KeymapService)
+class KeymapManager : public Singleton<KeymapManager>, public IKeyEventFilter {
+  DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
-  ~KeymapService() = default;
+  ~KeymapManager() = default;
 
   void load();
   QKeySequence findShortcut(QString cmdName);
@@ -26,8 +26,8 @@ class KeymapService : public Singleton<KeymapService>, public IKeyEventFilter {
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:
-  friend class Singleton<KeymapService>;
-  KeymapService() = default;
+  friend class Singleton<KeymapManager>;
+  KeymapManager() = default;
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
   void clear();

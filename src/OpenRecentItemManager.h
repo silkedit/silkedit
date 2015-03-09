@@ -7,18 +7,18 @@
 #include <QObject>
 #include <QMenu>
 
-#include "OpenRecentItemService.h"
+#include "OpenRecentItemManager.h"
 #include "macros.h"
 #include "Singleton.h"
 
 class ClearRecentItemListAction;
 
-class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemService> {
+class OpenRecentItemManager : public QObject, public Singleton<OpenRecentItemManager> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(OpenRecentItemService)
+  DISABLE_COPY_AND_MOVE(OpenRecentItemManager)
 
  public:
-  ~OpenRecentItemService() = default;
+  ~OpenRecentItemManager() = default;
 
   QMenu* openRecentMenu() { return m_openRecentMenu.get(); }
   void clear();
@@ -30,8 +30,8 @@ class OpenRecentItemService : public QObject, public Singleton<OpenRecentItemSer
  private:
   static const int MAX_RECENT_ITEMS = 5;
 
-  friend class Singleton<OpenRecentItemService>;
-  OpenRecentItemService();
+  friend class Singleton<OpenRecentItemManager>;
+  OpenRecentItemManager();
 
   std::array<QAction*, MAX_RECENT_ITEMS> m_recentItemActions;
   std::list<QString> m_recentItems;

@@ -4,13 +4,13 @@
 #include <QString>
 #include <QFile>
 
-#include "ConfigService.h"
+#include "ConfigManager.h"
 #include "Constants.h"
 #include "Util.h"
 
-std::unordered_map<QString, QString> ConfigService::m_configs;
+std::unordered_map<QString, QString> ConfigManager::m_configs;
 
-void ConfigService::load(const QString& filename) {
+void ConfigManager::load(const QString& filename) {
   qDebug("loading configuration");
 
   if (!QFile(filename).exists())
@@ -37,7 +37,7 @@ void ConfigService::load(const QString& filename) {
   }
 }
 
-void ConfigService::load() {
+void ConfigManager::load() {
   QStringList existingConfigPaths;
   foreach (const QString& path, Constants::configPaths()) {
     if (QFile(path).exists()) {
@@ -62,7 +62,7 @@ void ConfigService::load() {
   foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
-bool ConfigService::isTrue(const QString& key) {
+bool ConfigManager::isTrue(const QString& key) {
   if (m_configs.count(key) != 0) {
     return m_configs[key] == "true";
   }
@@ -70,7 +70,7 @@ bool ConfigService::isTrue(const QString& key) {
   return false;
 }
 
-QString ConfigService::value(const QString& key, const QString& defaultValue) {
+QString ConfigManager::value(const QString& key, const QString& defaultValue) {
   if (m_configs.count(key) != 0) {
     return m_configs[key];
   }
@@ -78,6 +78,6 @@ QString ConfigService::value(const QString& key, const QString& defaultValue) {
   return defaultValue;
 }
 
-QString ConfigService::theme() {
+QString ConfigManager::theme() {
   return value("theme", "Solarized (light)");
 }

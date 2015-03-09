@@ -6,7 +6,7 @@
 #include <QDir>
 
 #include "ProjectTreeView.h"
-#include "DocumentService.h"
+#include "DocumentManager.h"
 #include "PlatformUtil.h"
 
 namespace {
@@ -103,7 +103,7 @@ void ProjectTreeView::open(QModelIndex index) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   if (filter && m_model) {
     QString filePath = m_model->filePath(filter->mapToSource(index));
-    DocumentService::open(filePath);
+    DocumentManager::open(filePath);
   }
 }
 

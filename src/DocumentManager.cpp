@@ -6,15 +6,15 @@
 #include <QFileDialog>
 #include <QDebug>
 
-#include "DocumentService.h"
+#include "DocumentManager.h"
 #include "MainWindow.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "Document.h"
 
-const QString DocumentService::DEFAULT_FILE_NAME = "untitled";
+const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
-bool DocumentService::open(const QString& filename) {
+bool DocumentManager::open(const QString& filename) {
   if (TabView* tabView = SilkApp::activeTabView(true)) {
     return tabView->open(filename) >= 0;
   } else {
@@ -23,7 +23,7 @@ bool DocumentService::open(const QString& filename) {
   }
 }
 
-bool DocumentService::save(Document* doc) {
+bool DocumentManager::save(Document* doc) {
   if (!doc) {
     qWarning("doc is null");
     return false;
@@ -51,7 +51,7 @@ bool DocumentService::save(Document* doc) {
   return false;
 }
 
-QString DocumentService::saveAs(Document* doc) {
+QString DocumentManager::saveAs(Document* doc) {
   QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path());
   if (!filePath.isEmpty()) {
     doc->setPath(filePath);

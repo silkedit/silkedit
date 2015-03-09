@@ -1,18 +1,18 @@
 #include <qDebug>
 
-#include "OpenRecentItemService.h"
-#include "DocumentService.h"
+#include "OpenRecentItemManager.h"
+#include "DocumentManager.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 
-void OpenRecentItemService::clear() {
+void OpenRecentItemManager::clear() {
   m_recentItems.clear();
   updateOpenRecentItems();
 }
 
-void OpenRecentItemService::reopenLastClosedFile() {
+void OpenRecentItemManager::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
     auto tabView = SilkApp::activeTabView();
     if (tabView->indexOfPath(path) < 0) {
@@ -22,7 +22,7 @@ void OpenRecentItemService::reopenLastClosedFile() {
   }
 }
 
-void OpenRecentItemService::addOpenRecentItem(const QString& path) {
+void OpenRecentItemManager::addOpenRecentItem(const QString& path) {
   if (path.isEmpty()) {
     qDebug("path is empty");
     return;
@@ -40,7 +40,7 @@ void OpenRecentItemService::addOpenRecentItem(const QString& path) {
   updateOpenRecentItems();
 }
 
-OpenRecentItemService::OpenRecentItemService() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
+OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
   m_reopenLastClosedFileAction = new CommandAction(QObject::tr("&Reopen Last Closed File"),
                                                    ReopenLastClosedFileCommand::name,
                                                    m_openRecentMenu.get());
@@ -61,7 +61,7 @@ OpenRecentItemService::OpenRecentItemService() : m_openRecentMenu(new QMenu(tr("
   updateOpenRecentItems();
 }
 
-void OpenRecentItemService::updateOpenRecentItems() {
+void OpenRecentItemManager::updateOpenRecentItems() {
   // delete extra recent items
   while (m_recentItems.size() > MAX_RECENT_ITEMS) {
     m_recentItems.pop_back();
@@ -89,7 +89,7 @@ void OpenRecentItemService::updateOpenRecentItems() {
 OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
   QObject::connect(this, &QAction::triggered, [this]() {
     if (data().isValid()) {
-      DocumentService::open(data().toString());
+      DocumentManager::open(data().toString());
     }
   });
 }
@@ -99,5 +99,5 @@ OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
 ClearRecentItemListAction::ClearRecentItemListAction(QObject* parent)
     : QAction(tr("Clear List"), parent) {
   QObject::connect(
-      this, &QAction::triggered, [this]() { OpenRecentItemService::singleton().clear(); });
+      this, &QAction::triggered, [this]() { OpenRecentItemManager::singleton().clear(); });
 }

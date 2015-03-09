@@ -7,8 +7,8 @@
 class TabView;
 class Document;
 
-class DocumentService {
-  DISABLE_COPY_AND_MOVE(DocumentService)
+class DocumentManager {
+  DISABLE_COPY_AND_MOVE(DocumentManager)
 
  public:
   static const QString DEFAULT_FILE_NAME;
@@ -18,6 +18,6 @@ class DocumentService {
   static QString saveAs(Document* doc);
 
  private:
-  DocumentService() = delete;
-  ~DocumentService() = delete;
+  DocumentManager() = delete;
+  ~DocumentManager() = delete;
 };

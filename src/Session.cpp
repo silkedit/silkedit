@@ -1,6 +1,6 @@
 #include "Session.h"
 #include "ThemeProvider.h"
-#include "ConfigService.h"
+#include "ConfigManager.h"
 
 void Session::setTheme(Theme* theme) {
   m_theme = theme;
@@ -8,7 +8,7 @@ void Session::setTheme(Theme* theme) {
 }
 
 void Session::init() {
-  setTheme(ThemeProvider::theme(ConfigService::theme()));
+  setTheme(ThemeProvider::theme(ConfigManager::theme()));
 }
 
 Session::Session() : m_theme(nullptr) {

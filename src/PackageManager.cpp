@@ -2,16 +2,16 @@
 #include <QApplication>
 #include <QStandardPaths>
 
-#include "PackageService.h"
+#include "PackageManager.h"
 #include "LanguageParser.h"
 #include "ThemeProvider.h"
 #include "Constants.h"
 
-void PackageService::loadPackages() {
+void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }
 }
 
-void PackageService::loadPackages(const QString& dirName) {
+void PackageManager::loadPackages(const QString& dirName) {
   QDir dir(dirName);
   if (!dir.exists())
     return;

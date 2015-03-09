@@ -22,7 +22,7 @@
 #include "commands/SplitVerticallyCommand.h"
 #include "MenuBar.h"
 #include "CommandAction.h"
-#include "OpenRecentItemService.h"
+#include "OpenRecentItemManager.h"
 #include "ThemeProvider.h"
 #include "Session.h"
 
@@ -43,7 +43,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   auto fileMenu = addMenu(QObject::tr("&File"));
   fileMenu->addAction(newFileAction);
   fileMenu->addAction(openFileAction);
-  fileMenu->addMenu(OpenRecentItemService::singleton().openRecentMenu());
+  fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
   fileMenu->addAction(saveFileAction);
   fileMenu->addAction(saveAsAction);
   fileMenu->addAction(saveAllAction);

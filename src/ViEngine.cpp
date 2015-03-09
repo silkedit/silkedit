@@ -5,9 +5,9 @@
 #include "MainWindow.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
-#include "CommandService.h"
-#include "ContextService.h"
-#include "KeymapService.h"
+#include "CommandManager.h"
+#include "ContextManager.h"
+#include "KeymapManager.h"
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
 
@@ -19,9 +19,9 @@ void ViEngine::enable() {
   qDebug("enabling ViEngine");
 
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
-  CommandService::add(std::move(changeModeCmd));
+  CommandManager::add(std::move(changeModeCmd));
 
-  ContextService::singleton().add(
+  ContextManager::singleton().add(
       ModeContext::name,
       std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
 
@@ -34,7 +34,7 @@ void ViEngine::enable() {
   onModeChanged(m_mode);
   m_repeatCount = 0;
 
-  KeymapService::singleton().load();
+  KeymapManager::singleton().load();
 
   m_isEnabled = true;
 
@@ -42,8 +42,8 @@ void ViEngine::enable() {
 }
 
 void ViEngine::disable() {
-  CommandService::remove(ChangeModeCommand::name);
-  ContextService::singleton().remove(ModeContext::name);
+  CommandManager::remove(ChangeModeCommand::name);
+  ContextManager::singleton().remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {
@@ -52,7 +52,7 @@ void ViEngine::disable() {
 
   foreach (MainWindow* window, MainWindow::windows()) { window->statusBar()->clearMessage(); }
 
-  KeymapService::singleton().load();
+  KeymapManager::singleton().load();
 
   m_isEnabled = false;
   emit disabled();
@@ -132,9 +132,9 @@ void ViEngine::cmdModeKeyPressEvent(QKeyEvent* event) {
   }
 
   if (m_repeatCount > 0) {
-    KeymapService::singleton().dispatch(event, m_repeatCount);
+    KeymapManager::singleton().dispatch(event, m_repeatCount);
     m_repeatCount = 0;
   } else {
-    KeymapService::singleton().dispatch(event);
+    KeymapManager::singleton().dispatch(event);
   }
 }

@@ -8,8 +8,8 @@
 
 class QString;
 
-class ConfigService {
-  DISABLE_COPY_AND_MOVE(ConfigService)
+class ConfigManager {
+  DISABLE_COPY_AND_MOVE(ConfigManager)
 
  public:
   static void load();
@@ -18,8 +18,8 @@ class ConfigService {
   static QString theme();
 
  private:
-  ConfigService() = delete;
-  ~ConfigService() = delete;
+  ConfigManager() = delete;
+  ~ConfigManager() = delete;
 
   static std::unordered_map<QString, QString> m_configs;
 

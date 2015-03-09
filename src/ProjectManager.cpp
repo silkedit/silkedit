@@ -1,10 +1,10 @@
-#include "ProjectService.h"
+#include "ProjectManager.h"
 #include "ProjectTreeView.h"
 #include "MainWindow.h"
 #include "API.h"
 #include "TabView.h"
 
-bool ProjectService::open(const QString& dirName) {
+bool ProjectManager::open(const QString& dirName) {
   if (!QDir(dirName).exists()) {
     qWarning("%s doesn't exist", qPrintable(dirName));
     return false;

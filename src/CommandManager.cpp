@@ -1,6 +1,6 @@
 #include <QDebug>
 
-#include "CommandService.h"
+#include "CommandManager.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/OpenCommand.h"
 #include "commands/NewFileCommand.h"
@@ -24,9 +24,9 @@
 #include "commands/SplitVerticallyCommand.h"
 #include "commands/OpenFindPanelCommand.h"
 
-std::unordered_map<QString, std::unique_ptr<ICommand>> CommandService::m_commands;
+std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::m_commands;
 
-void CommandService::runCommand(const QString& name, const CommandArgument& args, int repeat) {
+void CommandManager::runCommand(const QString& name, const CommandArgument& args, int repeat) {
   if (m_commands.find(name) != m_commands.end()) {
     m_commands[name]->run(args, repeat);
   } else {
@@ -34,15 +34,15 @@ void CommandService::runCommand(const QString& name, const CommandArgument& args
   }
 }
 
-void CommandService::add(std::unique_ptr<ICommand> cmd) {
+void CommandManager::add(std::unique_ptr<ICommand> cmd) {
   m_commands[cmd->name()] = std::move(cmd);
 }
 
-void CommandService::remove(const QString& name) {
+void CommandManager::remove(const QString& name) {
   m_commands.erase(name);
 }
 
-void CommandService::init() {
+void CommandManager::init() {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand);
   add(std::move(moveCursorCmd));

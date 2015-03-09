@@ -9,8 +9,8 @@
 #include "ICommand.h"
 #include "stlSpecialization.h"
 
-class CommandService {
-  DISABLE_COPY_AND_MOVE(CommandService)
+class CommandManager {
+  DISABLE_COPY_AND_MOVE(CommandManager)
 
  public:
   static void runCommand(const QString& name,
@@ -21,8 +21,8 @@ class CommandService {
   static void init();
 
  private:
-  CommandService() = delete;
-  ~CommandService() = delete;
+  CommandManager() = delete;
+  ~CommandManager() = delete;
 
   // QHash doesn't like unique_ptr (probably lack of move semantics),
   // so use an unordered_map here instead

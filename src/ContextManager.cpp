@@ -1,16 +1,16 @@
 #include <QDebug>
 
-#include "ContextService.h"
+#include "ContextManager.h"
 
-void ContextService::add(const QString& key, std::unique_ptr<IContextCreator> creationMethod) {
+void ContextManager::add(const QString& key, std::unique_ptr<IContextCreator> creationMethod) {
   m_contexts[key] = std::move(creationMethod);
 }
 
-void ContextService::remove(const QString& key) {
+void ContextManager::remove(const QString& key) {
   m_contexts.erase(key);
 }
 
-std::shared_ptr<IContext> ContextService::tryCreate(const QString& key,
+std::shared_ptr<IContext> ContextManager::tryCreate(const QString& key,
                                                     Operator op,
                                                     const QString& operand) {
   if (m_contexts.find(key) == m_contexts.end())

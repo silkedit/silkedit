@@ -1,7 +1,7 @@
 #include <QObject>
 #include <QTimer>
 
-#include "DocumentService.h"
+#include "DocumentManager.h"
 #include "API.h"
 #include "MainWindow.h"
 
@@ -12,8 +12,8 @@ class TestUtil : public QObject {
 
  public slots:
   void openFile() {
-    DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
-    DocumentService::open("/Users/shinichi/Code/silkedit/test/testdata/test.txt");
+    DocumentManager::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
+    DocumentManager::open("/Users/shinichi/Code/silkedit/test/testdata/test.txt");
     //    API::activeWindow()->openFindAndReplacePanel();
   }
 };

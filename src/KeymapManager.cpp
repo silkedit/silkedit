@@ -8,8 +8,8 @@
 #include <QKeyEvent>
 #include <QApplication>
 
-#include "ContextService.h"
-#include "KeymapService.h"
+#include "ContextManager.h"
+#include "KeymapManager.h"
 #include "CommandEvent.h"
 #include "ModeContext.h"
 #include "Constants.h"
@@ -34,7 +34,7 @@ std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
 
     QString operand = list[2];
 
-    std::shared_ptr<IContext> context = ContextService::singleton().tryCreate(key, op, operand);
+    std::shared_ptr<IContext> context = ContextManager::singleton().tryCreate(key, op, operand);
     if (context) {
       return context;
     }
@@ -97,7 +97,7 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 }
 
-void KeymapService::load(const QString& filename) {
+void KeymapManager::load(const QString& filename) {
   clear();
 
   std::string name = filename.toUtf8().constData();
@@ -163,7 +163,7 @@ void KeymapService::load(const QString& filename) {
   }
 }
 
-bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
+bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   QKeySequence key = toSequence(*event);
   qDebug() << "key: " << key;
 
@@ -203,7 +203,7 @@ bool KeymapService::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
-void KeymapService::load() {
+void KeymapManager::load() {
   QStringList existingKeymapPaths;
   foreach (const QString& path, Constants::keymapPaths()) {
     if (QFile(path).exists()) {
@@ -228,7 +228,7 @@ void KeymapService::load() {
   foreach (const QString& path, existingKeymapPaths) { load(path); }
 }
 
-QKeySequence KeymapService::findShortcut(QString cmdName) {
+QKeySequence KeymapManager::findShortcut(QString cmdName) {
   auto foundIter = m_cmdShortcuts.find(cmdName);
   if (foundIter != m_cmdShortcuts.end()) {
     auto range = m_keymaps.equal_range(foundIter->second);
@@ -241,16 +241,16 @@ QKeySequence KeymapService::findShortcut(QString cmdName) {
   return QKeySequence();
 }
 
-bool KeymapService::keyEventFilter(QKeyEvent* event) {
+bool KeymapManager::keyEventFilter(QKeyEvent* event) {
   return dispatch(event);
 }
 
-void KeymapService::add(const QKeySequence& key, CommandEvent cmdEvent) {
+void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   m_cmdShortcuts.insert(std::make_pair(cmdEvent.cmdName(), key));
   m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
 }
 
-void KeymapService::clear() {
+void KeymapManager::clear() {
   m_keymaps.clear();
   m_cmdShortcuts.clear();
 }
@@ -268,7 +268,7 @@ bool KeyHandler::eventFilter(QObject*, QEvent* event) {
 }
 
 KeyHandler::KeyHandler() {
-  registerKeyEventFilter(&KeymapService::singleton());
+  registerKeyEventFilter(&KeymapManager::singleton());
 }
 
 void KeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {

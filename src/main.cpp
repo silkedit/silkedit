@@ -1,14 +1,14 @@
 #include <QStringList>
 #include <QTime>
 
-#include "PackageService.h"
+#include "PackageManager.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "MainWindow.h"
-#include "KeymapService.h"
-#include "ConfigService.h"
-#include "CommandService.h"
-#include "DocumentService.h"
+#include "KeymapManager.h"
+#include "ConfigManager.h"
+#include "CommandManager.h"
+#include "DocumentManager.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "Session.h"
 #include "ViEngine.h"
@@ -23,20 +23,20 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
-  PackageService::loadPackages();
+  PackageManager::loadPackages();
 
-  ConfigService::load();
+  ConfigManager::load();
 
-  CommandService::init();
+  CommandManager::init();
 
   ViEngine viEngine;
 
   std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
       new ToggleVimEmulationCommand(&viEngine));
-  CommandService::add(std::move(toggleVimEmulationCmd));
+  CommandManager::add(std::move(toggleVimEmulationCmd));
 
   //   Load keymap settings after registering commands
-  KeymapService::singleton().load();
+  KeymapManager::singleton().load();
 
   MainWindow* w = MainWindow::createWithNewFile();
   w->show();
@@ -46,7 +46,7 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  if (ConfigService::isTrue("enable_vim_emulation")) {
+  if (ConfigManager::isTrue("enable_vim_emulation")) {
     viEngine.enable();
   }
 
@@ -57,7 +57,7 @@ int main(int argv, char** args) {
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {
-    DocumentService::open(arguments.at(1));
+    DocumentManager::open(arguments.at(1));
   }
 
   //  new TestUtil();

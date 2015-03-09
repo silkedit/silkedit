@@ -5,10 +5,10 @@
 
 #include "vi.h"
 #include "TextEditView.h"
-#include "KeymapService.h"
-#include "CommandService.h"
-#include "OpenRecentItemService.h"
-#include "DocumentService.h"
+#include "KeymapManager.h"
+#include "CommandManager.h"
+#include "OpenRecentItemManager.h"
+#include "DocumentManager.h"
 #include "Session.h"
 #include "API.h"
 #include "plugin_service/PluginService.h"
@@ -62,7 +62,7 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
 
   connect(this,
           SIGNAL(destroying(const QString&)),
-          &OpenRecentItemService::singleton(),
+          &OpenRecentItemManager::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
@@ -545,13 +545,13 @@ TextEditView* TextEditView::clone() {
 }
 
 void TextEditView::save() {
-  if (DocumentService::save(m_document.get())) {
+  if (DocumentManager::save(m_document.get())) {
     emit saved();
   }
 }
 
 void TextEditView::saveAs() {
-  QString newFilePath = DocumentService::saveAs(m_document.get());
+  QString newFilePath = DocumentManager::saveAs(m_document.get());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
     emit saved();

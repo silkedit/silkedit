@@ -4,15 +4,15 @@
 
 #include "macros.h"
 
-class PackageService {
-  DISABLE_COPY_AND_MOVE(PackageService)
+class PackageManager {
+  DISABLE_COPY_AND_MOVE(PackageManager)
 
  public:
   static void loadPackages();
 
  private:
-  PackageService() = delete;
-  ~PackageService() = delete;
+  PackageManager() = delete;
+  ~PackageManager() = delete;
 
   static void loadPackages(const QString& dirName);
 };

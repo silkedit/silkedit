@@ -1,5 +1,5 @@
 #include "CommandEvent.h"
-#include "CommandService.h"
+#include "CommandManager.h"
 
 CommandEvent::CommandEvent(const QString& name) : CommandEvent(name, CommandArgument(), nullptr) {
 }
@@ -20,7 +20,7 @@ CommandEvent::CommandEvent(const QString& name,
 
 bool CommandEvent::execute(int repeat) {
   if (!m_context || m_context->isSatisfied()) {
-    CommandService::runCommand(m_cmdName, m_args, repeat);
+    CommandManager::runCommand(m_cmdName, m_args, repeat);
     return true;
   }
 

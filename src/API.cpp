@@ -4,7 +4,7 @@
 
 #include "API.h"
 #include "MainWindow.h"
-#include "CommandService.h"
+#include "CommandManager.h"
 #include "commands/PluginCommand.h"
 #include "plugin_service/PluginService.h"
 #include "TextEditView.h"
@@ -66,7 +66,7 @@ void API::registerCommands(msgpack::object obj) {
   std::vector<std::string> commands = std::get<0>(params);
   for (std::string& cmd : commands) {
     qDebug("command: %s", cmd.c_str());
-    CommandService::add(
+    CommandManager::add(
         std::unique_ptr<ICommand>(new PluginCommand(QString::fromUtf8(cmd.c_str()))));
   }
 }
