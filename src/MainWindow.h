@@ -7,6 +7,7 @@
 #include <QMainWindow>
 
 #include "macros.h"
+#include "UniqueObject.h"
 
 class TabView;
 class QBoxLayout;
@@ -17,7 +18,7 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow, public UniqueObject<MainWindow> {
   Q_OBJECT
   DISABLE_COPY(MainWindow)
 
@@ -42,6 +43,12 @@ class MainWindow : public QMainWindow {
 
 signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+
+protected:
+  friend struct UniqueObject<MainWindow>;
+
+  static void response(const std::string& method, msgpack::rpc::msgid_t msgId, MainWindow* window);
+  static void notify(const std::string& method, MainWindow* window);
 
  private:
   static QList<MainWindow*> s_windows;

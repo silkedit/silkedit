@@ -11,6 +11,8 @@
 #include "Constants.h"
 #include "API.h"
 #include "TextEditView.h"
+#include "TabView.h"
+#include "MainWindow.h"
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
@@ -46,6 +48,7 @@ void PluginManager::init() {
   qDebug() << "args:" << Constants::pluginRunnerArgs();
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
   m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
+  m_pluginProcess->setArguments(QStringList("--harmony"));
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
@@ -140,6 +143,8 @@ void PluginManager::readRequest() {
               qDebug("type: %s, method: %s", type.c_str(), method.c_str());
               if (type == "TextEditView") {
                 TextEditView::call(req.msgid, method, req.param);
+              } else {
+                qWarning("type: %s not supported", type.c_str());
               }
             } else {
               API::call(methodName, req.msgid, req.param);
@@ -177,7 +182,26 @@ void PluginManager::readRequest() {
               return;
             }
 
-            API::call(methodName, notify.param);
+            int dotIndex = methodName.find_first_of(".");
+            if (dotIndex >= 0) {
+              std::string type = methodName.substr(0, dotIndex);
+              std::string method = methodName.substr(dotIndex + 1);
+              if (type.empty() || method.empty()) {
+                return;
+              }
+
+              qDebug("type: %s, method: %s", type.c_str(), method.c_str());
+              if (type == "TabView") {
+                TabView::call(method, notify.param);
+              } else if (type == "Window") {
+                MainWindow::call(method, notify.param);
+              } else {
+                qWarning("type: %s not supported", type.c_str());
+              }
+            } else {
+              API::call(methodName, notify.param);
+            }
+
           } break;
           default:
             qCritical("invalid rpc type");

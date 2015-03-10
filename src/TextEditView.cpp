@@ -49,11 +49,7 @@ void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
 }
 }
 
-int TextEditView::count = 0;
-QHash<int, TextEditView*> TextEditView::objects;
-QMutex TextEditView::mutex;
-
-TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
+TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -78,41 +74,18 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent), m_id(-1) {
 TextEditView::~TextEditView() {
   emit destroying(m_document->path());
   qDebug("~TextEditView");
-  if (m_id >= 0) {
-    QMutexLocker locker(&mutex);
-    objects.remove(m_id);
+}
+
+void TextEditView::response(const std::string& method,
+                            msgpack::rpc::msgid_t msgId,
+                            TextEditView* view) {
+  if (method == "text") {
+    PluginManager::singleton().sendResponse(
+        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   }
 }
 
-TextEditView* TextEditView::find(int id) {
-  if (id < 0) {
-    qWarning("id must be positive");
-    return nullptr;
-  }
-
-  QMutexLocker locker(&mutex);
-  if (objects.contains(id)) {
-    return objects.value(id);
-  }
-
-  return nullptr;
-}
-
-void TextEditView::call(msgpack::rpc::msgid_t msgId,
-                        const std::string& method,
-                        const msgpack::object obj) {
-  std::tuple<int> params;
-  obj.convert(&params);
-  int id = std::get<0>(params);
-
-  if (TextEditView* view = find(id)) {
-    if (method == "text") {
-      PluginManager::singleton().sendResponse(
-          view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
-    }
-  } else {
-    qWarning("id: %d not found", id);
-  }
+void TextEditView::notify(const std::string&, TextEditView*) {
 }
 
 QString TextEditView::path() {
@@ -529,13 +502,6 @@ void TextEditView::replaceAllSelection(const QString& findText,
     update();
     clearSearchHighlight();
   }
-}
-
-int TextEditView::id() {
-  QMutexLocker locker(&mutex);
-  objects.insert(count, this);
-  m_id = count;
-  return count++;
 }
 
 TextEditView* TextEditView::clone() {

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <msgpack/rpc/protocol.h>
 #include <functional>
 #include <memory>
 #include <QObject>
@@ -12,6 +11,7 @@
 #include "ICloneable.h"
 #include "SyntaxHighlighter.h"
 #include "Document.h"
+#include "UniqueObject.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -21,17 +21,12 @@ class QElapsedTimer;
 
 class LineNumberArea;
 
-class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
+class TextEditView : public QPlainTextEdit, public UniqueObject<TextEditView>, public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
-
-  static TextEditView* find(int id);
-  static void call(msgpack::rpc::msgid_t msgId,
-                   const std::string& method,
-                   const msgpack::object obj);
 
   QString path();
   Document* document() { return m_document.get(); }
@@ -74,8 +69,6 @@ class TextEditView : public QPlainTextEdit, public ICloneable<TextEditView> {
                            Document::FindFlags flags = 0,
                            bool preserveCase = false);
 
-  int id();
-
 signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
@@ -83,6 +76,11 @@ signals:
   void languageChanged(const QString& scope);
 
  protected:
+  friend struct UniqueObject<TextEditView>;
+
+  static void response(const std::string& method, msgpack::rpc::msgid_t msgId, TextEditView* view);
+  static void notify(const std::string& method, TextEditView* view);
+
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
@@ -94,14 +92,9 @@ signals:
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
-  static int count;
-  static QHash<int, TextEditView*> objects;
-  static QMutex mutex;
-
   QWidget* m_lineNumberArea;
   std::shared_ptr<Document> m_document;
   QVector<Region> m_searchMatchedRegions;
-  int m_id;
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);

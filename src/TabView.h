@@ -6,11 +6,12 @@
 
 #include "macros.h"
 #include "set_unique_ptr.h"
+#include "UniqueObject.h"
 
 class TextEditView;
 class TabBar;
 
-class TabView : public QTabWidget {
+class TabView : public QTabWidget, public UniqueObject<TabView> {
   Q_OBJECT
   DISABLE_COPY(TabView)
 
@@ -42,6 +43,11 @@ signals:
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
 
  protected:
+  friend struct UniqueObject<TabView>;
+
+  static void response(const std::string& method, msgpack::rpc::msgid_t msgId, TabView* view);
+  static void notify(const std::string& method, TabView* view);
+
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
   void tabRemoved(int index, bool afterDrag);

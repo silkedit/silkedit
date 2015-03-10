@@ -7,8 +7,6 @@
 #include "commands/SaveFileCommand.h"
 #include "commands/SaveAsCommand.h"
 #include "commands/SaveAllCommand.h"
-#include "commands/CloseTabCommand.h"
-#include "commands/CloseAllTabsCommand.h"
 #include "commands/CloseOtherTabsCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
@@ -73,10 +71,6 @@ void CommandManager::init() {
 
   std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
   add(std::move(saveAllCmd));
-
-  add(std::move(std::unique_ptr<CloseTabCommand>(new CloseTabCommand)));
-
-  add(std::move(std::unique_ptr<CloseAllTabsCommand>(new CloseAllTabsCommand)));
 
   add(std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
 

@@ -6,8 +6,6 @@
 #include "commands/SaveFileCommand.h"
 #include "commands/SaveAsCommand.h"
 #include "commands/SaveAllCommand.h"
-#include "commands/CloseTabCommand.h"
-#include "commands/CloseAllTabsCommand.h"
 #include "commands/CloseOtherTabsCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
@@ -33,9 +31,6 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
   auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
   auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
-  auto closeTabAction = new CommandAction(QObject::tr("&Close"), CloseTabCommand::name);
-  auto closeAllTabsAction =
-      new CommandAction(QObject::tr("&Close All Tabs"), CloseAllTabsCommand::name);
   auto closeOtherTabsAction =
       new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
 
@@ -47,8 +42,6 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   fileMenu->addAction(saveFileAction);
   fileMenu->addAction(saveAsAction);
   fileMenu->addAction(saveAllAction);
-  fileMenu->addAction(closeTabAction);
-  fileMenu->addAction(closeAllTabsAction);
   fileMenu->addAction(closeOtherTabsAction);
 
   // Edit Menu actions

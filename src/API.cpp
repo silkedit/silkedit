@@ -9,6 +9,7 @@
 #include "PluginManager.h"
 #include "TextEditView.h"
 #include "SilkApp.h"
+#include "TabView.h"
 
 std::unordered_map<std::string, std::function<void(msgpack::object)>> API::notifyFunctions;
 std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -19,7 +20,9 @@ void API::init() {
   notifyFunctions.insert(std::make_pair("load_menu", &loadMenu));
   notifyFunctions.insert(std::make_pair("register_commands", &registerCommands));
 
-  requestFunctions.insert(std::make_pair("active_view", &getActiveView));
+  requestFunctions.insert(std::make_pair("active_view", &activeView));
+  requestFunctions.insert(std::make_pair("active_tab_view", &activeTabView));
+  requestFunctions.insert(std::make_pair("active_window", &activeWindow));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -71,12 +74,34 @@ void API::registerCommands(msgpack::object obj) {
   }
 }
 
-void API::getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object) {
+void API::activeView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
     PluginManager::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {
     PluginManager::singleton().sendResponse(
-        msgpack::type::nil(), std::string("active edit view is null"), msgId);
+        msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
+}
+
+void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
+  TabView* tabView = SilkApp::activeTabView();
+  if (tabView) {
+    PluginManager::singleton().sendResponse(tabView->id(), msgpack::type::nil(), msgId);
+  } else {
+    PluginManager::singleton().sendResponse(
+        msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+}
+
+void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object)
+{
+  MainWindow* window = SilkApp::activeWindow();
+  if (window) {
+    PluginManager::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
+  } else {
+    PluginManager::singleton().sendResponse(
+        msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+
 }

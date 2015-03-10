@@ -1,0 +1,7 @@
+menu:
+  - label: File
+    submenu:
+    - label: 'Close All Tabs'
+      command: close_all_tabs
+    - label: 'Close Tab'
+      command: close_active_tab

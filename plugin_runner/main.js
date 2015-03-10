@@ -31,9 +31,6 @@ var c = rpc.createClient(socketFile, function () {
 
   sync(c, 'invoke');
 
-  var home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'];
-  var packageDirPath = path.join(home, ".silk", "Packages");
-
   var loadPackage = function (dir) {
     fs.readdir(dir, function (err, files) {
       if (err) {
@@ -75,13 +72,16 @@ var c = rpc.createClient(socketFile, function () {
     })
   }
 
-  fs.open(packageDirPath, 'r', function(err, fd) {
-    fd && fs.close(fd, function(err) {
-      var dirs = getDirs(packageDirPath);
-      dirs.forEach(function (dir) {
-        loadPackage(path.join(packageDirPath, dir));
-      });    
+  process.argv.slice(3).forEach(function(dirPath) {
+    fs.open(dirPath, 'r', function(err, fd) {
+      fd && fs.close(fd, function(err) {
+        var dirs = getDirs(dirPath);
+        dirs.forEach(function (dir) {
+          loadPackage(path.join(dirPath, dir));
+        });    
+      })
     })
+
   })
 });
 

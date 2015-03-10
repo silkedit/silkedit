@@ -38,11 +38,6 @@ if (APPLE)
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
-  # bundle default packages
-  file( GLOB_RECURSE PACKAGES packages/* )
-  set_source_files_properties( ${PACKAGES} PROPERTIES MACOSX_PACKAGE_LOCATION MacOS/Packages )
-  set( SILK_SOURCES ${SILK_SOURCES} ${PACKAGES} )
-
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   include_directories(msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
@@ -65,8 +60,12 @@ endif (APPLE)
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig.a )
 
 if(APPLE)
+  # bundle packages
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+
   # bundle plugin runner (node.js)
-  ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/plugin_runner ${PROJECT_NAME}.app/Contents/MacOS)
+  file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
 elseif (MINGW)
   # Copy packages directory to the same directory of exe

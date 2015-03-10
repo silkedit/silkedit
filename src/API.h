@@ -30,5 +30,7 @@ class API {
   static void alert(msgpack::object obj);
   static void loadMenu(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
-  static void getActiveView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void activeView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };

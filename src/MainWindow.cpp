@@ -264,3 +264,12 @@ void MainWindow::hideFindReplacePanel() {
     m_findReplaceView->hide();
   }
 }
+
+void MainWindow::response(const std::string&, msgpack::rpc::msgid_t, MainWindow*) {
+}
+
+void MainWindow::notify(const std::string& method, MainWindow* window) {
+  if (method == "close") {
+    window->close();
+  }
+}

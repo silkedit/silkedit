@@ -1,0 +1,8 @@
+{
+  "name": "silkedit",
+  "version": "0.1",
+  "description": "SilkEdit default packages",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC"
+}

@@ -11,7 +11,7 @@
     cmd+s: save
     shift+cmd+s: save_as
     opt+cmd+s: save_all
-    cmd+w: close_tab
+    cmd+w: close_active_tab
     shift+cmd+t: reopen_last_closed_file
     ctrl+w, s: split_horizontally
     ctrl+w, v: split_vertically

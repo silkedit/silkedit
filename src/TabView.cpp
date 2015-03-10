@@ -312,3 +312,16 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   // call tabRemoved to emit allTabRemoved if this had only one tab before drag (it's empty now)
   tabRemoved(-1, true);
 }
+
+void TabView::response(const std::string& method,
+                       msgpack::rpc::msgid_t msgId,
+                       TabView* view) {
+}
+
+void TabView::notify(const std::string& method, TabView* view) {
+  if (method == "close_all_tabs") {
+    view->closeAllTabs();
+  } else if (method == "close_active_tab") {
+    view->closeActiveTab();
+  }
+}

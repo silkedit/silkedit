@@ -33,7 +33,7 @@ QStringList Constants::keymapPaths() {
 
 QStringList Constants::packagePaths() {
   QStringList packagePaths;
-  foreach (const QString& path, dataDirectoryPaths()) { packagePaths.append(path + "/Packages"); }
+  foreach (const QString& path, dataDirectoryPaths()) { packagePaths.append(path + "/packages"); }
   return packagePaths;
 }
 
@@ -50,7 +50,15 @@ QString Constants::pluginRunnerPath() {
 }
 
 QStringList Constants::pluginRunnerArgs() {
-  return QStringList() << pluginServerDir() + "/main.js" << pluginServerSocketPath();
+  QStringList args;
+  // first argument is main script
+  args << pluginServerDir() + "/main.js";
+  // second argument is a socket path
+  args << pluginServerSocketPath();
+  // remaining arguments are paths to be loaded in a plugin server
+  args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
+  args << QDir::toNativeSeparators(silkHomePath + "/packages");
+  return args;
 }
 
 QString Constants::pluginServerSocketPath() {
