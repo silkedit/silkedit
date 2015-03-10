@@ -44,7 +44,7 @@ class MainWindow : public QMainWindow, public UniqueObject<MainWindow> {
 signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
-protected:
+ protected:
   friend struct UniqueObject<MainWindow>;
 
   static void response(const std::string& method, msgpack::rpc::msgid_t msgId, MainWindow* window);

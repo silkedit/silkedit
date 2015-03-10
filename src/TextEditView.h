@@ -21,7 +21,9 @@ class QElapsedTimer;
 
 class LineNumberArea;
 
-class TextEditView : public QPlainTextEdit, public UniqueObject<TextEditView>, public ICloneable<TextEditView> {
+class TextEditView : public QPlainTextEdit,
+                     public UniqueObject<TextEditView>,
+                     public ICloneable<TextEditView> {
   Q_OBJECT
 
  public:

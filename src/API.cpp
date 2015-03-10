@@ -79,8 +79,7 @@ void API::activeView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   if (editView) {
     PluginManager::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(
-        msgpack::type::nil(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
@@ -89,19 +88,15 @@ void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   if (tabView) {
     PluginManager::singleton().sendResponse(tabView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(
-        msgpack::type::nil(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
-void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object)
-{
+void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
   MainWindow* window = SilkApp::activeWindow();
   if (window) {
     PluginManager::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(
-        msgpack::type::nil(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
-
 }
