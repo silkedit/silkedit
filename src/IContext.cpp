@@ -2,19 +2,15 @@
 
 #include "IContext.h"
 
-template <typename T>
-IContextBase<T>::IContextBase(Operator op, const T& operand)
-    : m_op(op), m_operand(std::move(operand)) {
-}
-
-template <typename T>
-bool IContextBase<T>::isSatisfied() {
-  switch (m_op) {
+bool IContext::isSatisfied(Operator op, const QString &operand)
+{
+  switch (op) {
     case Operator::EQUALS:
-      return key() == m_operand;
+      return key() == operand;
+    case Operator::NOT_EQUALS:
+      return key() != operand;
     default:
       return false;
   }
-}
 
-template class IContextBase<QString>;
+}

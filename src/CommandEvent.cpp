@@ -8,14 +8,14 @@ CommandEvent::CommandEvent(const QString& name, const CommandArgument& args)
     : CommandEvent(name, args, nullptr) {
 }
 
-CommandEvent::CommandEvent(const QString& name, std::shared_ptr<IContext> context)
-    : CommandEvent(name, CommandArgument(), context) {
+CommandEvent::CommandEvent(const QString& name, std::unique_ptr<Context> context)
+    : CommandEvent(name, CommandArgument(), std::move(context)) {
 }
 
 CommandEvent::CommandEvent(const QString& name,
                            const CommandArgument& args,
-                           std::shared_ptr<IContext> context)
-    : m_cmdName(name), m_args(std::move(args)), m_context(context) {
+                           std::unique_ptr<Context> context)
+    : m_cmdName(name), m_args(std::move(args)), m_context(std::move(context)) {
 }
 
 bool CommandEvent::execute(int repeat) {

@@ -7,7 +7,7 @@
 
 #include "stlSpecialization.h"
 #include "macros.h"
-#include "IContext.h"
+#include "Context.h"
 #include "CommandArgument.h"
 
 class CommandEvent {
@@ -15,8 +15,8 @@ class CommandEvent {
  public:
   explicit CommandEvent(const QString& name);
   CommandEvent(const QString& name, const CommandArgument& args);
-  CommandEvent(const QString& name, std::shared_ptr<IContext> context);
-  CommandEvent(const QString& name, const CommandArgument& args, std::shared_ptr<IContext> context);
+  CommandEvent(const QString& name, std::unique_ptr<Context> context);
+  CommandEvent(const QString& name, const CommandArgument& args, std::unique_ptr<Context> context);
   ~CommandEvent() = default;
   DEFAULT_MOVE(CommandEvent)
 
@@ -28,5 +28,5 @@ class CommandEvent {
  private:
   QString m_cmdName;
   CommandArgument m_args;
-  std::shared_ptr<IContext> m_context;
+  std::unique_ptr<Context> m_context;
 };

@@ -14,34 +14,9 @@
 #include "ModeContext.h"
 #include "Constants.h"
 #include "Util.h"
+#include "util/YamlUtils.h"
 
 namespace {
-
-std::shared_ptr<IContext> parseContext(const YAML::Node& contextNode) {
-  QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
-  QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
-  if (list.size() != 3) {
-    qWarning() << "context must be \"key operator operand\". size: " << list.size();
-  } else {
-    QString key = list[0];
-
-    // Parse operator expression
-    QString opStr = list[1];
-    Operator op = Operator::EQUALS;
-    if (opStr == "==") {
-      op = Operator::EQUALS;
-    }
-
-    QString operand = list[2];
-
-    std::shared_ptr<IContext> context = ContextManager::singleton().tryCreate(key, op, operand);
-    if (context) {
-      return context;
-    }
-  }
-
-  return nullptr;
-}
 
 QKeySequence toSequence(const QKeyEvent& ev) {
   int keyInt = ev.key();
@@ -111,9 +86,9 @@ void KeymapManager::load(const QString& filename) {
       assert(node.IsMap());
 
       YAML::Node contextNode = node["context"];
-      std::shared_ptr<IContext> context = nullptr;
+      std::unique_ptr<Context> context;
       if (contextNode.IsDefined()) {
-        context = parseContext(contextNode);
+        context.reset(YamlUtils::parseContext(contextNode));
         if (!context) {
           qWarning() << "can't find a context: "
                      << QString::fromUtf8(contextNode.as<std::string>().c_str());
@@ -132,7 +107,7 @@ void KeymapManager::load(const QString& filename) {
           case YAML::NodeType::Scalar: {
             QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
             qDebug() << "key: " << key << ", cmd: " << cmd;
-            add(key, CommandEvent(cmd, context));
+            add(key, CommandEvent(cmd, std::move(context)));
             break;
           }
           case YAML::NodeType::Map: {
@@ -144,9 +119,9 @@ void KeymapManager::load(const QString& filename) {
             if (argsNode.IsMap()) {
               assert(argsNode.IsMap());
               CommandArgument args = parseArgs(argsNode);
-              add(key, CommandEvent(cmd, args, context));
+              add(key, CommandEvent(cmd, args, std::move(context)));
             } else {
-              add(key, CommandEvent(cmd, context));
+              add(key, CommandEvent(cmd, std::move(context)));
             }
 
             break;

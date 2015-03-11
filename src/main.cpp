@@ -16,12 +16,15 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
+#include "Context.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
 
   SilkApp app(argv, args);
+
+  Context::init();
 
   PackageManager::loadPackages();
 

@@ -3,10 +3,22 @@ module.exports = {
 	},
 
 	commands: {
-		"close_all_tabs": function() {
+		"new_file": function() {
+			var tabView = silk.activeTabView()
+			if (tabView != null) {
+				tabView.addNew();
+			}
+		}
+		,"close_all_tabs": function() {
 			var tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.closeAllTabs();
+			}
+		}
+		,"close_other_tabs": function() {
+			var tabView = silk.activeTabView()
+			if (tabView != null) {
+				tabView.closeOtherTabs();
 			}
 		}
 		,"close_active_tab": function() {

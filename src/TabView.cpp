@@ -321,5 +321,9 @@ void TabView::notify(const std::string& method, TabView* view) {
     view->closeAllTabs();
   } else if (method == "close_active_tab") {
     view->closeActiveTab();
+  } else if (method == "close_other_tabs") {
+    view->closeOtherTabs();
+  } else if (method == "add_new") {
+    view->addNew();
   }
 }

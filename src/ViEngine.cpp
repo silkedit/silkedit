@@ -6,13 +6,14 @@
 #include "ViEngine.h"
 #include "TextEditView.h"
 #include "CommandManager.h"
-#include "ContextManager.h"
 #include "KeymapManager.h"
 #include "ModeContext.h"
 #include "commands/ChangeModeCommand.h"
+#include "Context.h"
 
 ViEngine::ViEngine(QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_repeatCount(0), m_isEnabled(false) {
+  ModeContext::singleton().init(this);
 }
 
 void ViEngine::enable() {
@@ -21,9 +22,7 @@ void ViEngine::enable() {
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandManager::add(std::move(changeModeCmd));
 
-  ContextManager::singleton().add(
-      ModeContext::name,
-      std::move(std::unique_ptr<ModeContextCreator>(new ModeContextCreator(this))));
+  Context::add(ModeContext::name, &ModeContext::singleton());
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {
@@ -43,7 +42,7 @@ void ViEngine::enable() {
 
 void ViEngine::disable() {
   CommandManager::remove(ChangeModeCommand::name);
-  ContextManager::singleton().remove(ModeContext::name);
+  Context::remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {

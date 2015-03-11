@@ -1,7 +1,14 @@
 menu:
   - label: File
     submenu:
+    - label: 'New File'
+      command: new_file
+    - label: 'Open...'
+      command: open_file
+      context: os != win
     - label: 'Close All Tabs'
       command: close_all_tabs
+    - label: 'Close Other Tabs'
+      command: close_other_tabs
     - label: 'Close Tab'
       command: close_active_tab

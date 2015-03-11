@@ -9,8 +9,16 @@ module.exports = function (client) {
     client.notify('TabView.close_all_tabs', this.id)
   }
 
+  TabView.prototype.closeOtherTabs = function() {
+    client.notify('TabView.close_other_tabs', this.id)
+  }
+
   TabView.prototype.closeActiveTab = function() {
     client.notify('TabView.close_active_tab', this.id)
+  }
+
+  TabView.prototype.addNew = function() {
+    client.notify('TabView.add_new', this.id)
   }
 
   // class TextEditView

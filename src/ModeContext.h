@@ -2,31 +2,23 @@
 
 #include "IContext.h"
 #include "ViEngine.h"
+#include "Singleton.h"
 
-class ModeContext : public IContextBase<QString> {
-  DISABLE_COPY(ModeContext)
+class ModeContext : public Singleton<ModeContext>, public IContext {
+  DISABLE_COPY_AND_MOVE(ModeContext)
+
  public:
   static const QString name;
 
-  ModeContext(ViEngine* viEngine, Operator op, const QString& operand);
+  void init(ViEngine* viEngine) { m_viEngine = viEngine; }
+
   ~ModeContext() = default;
-  DEFAULT_MOVE(ModeContext)
 
  private:
+  friend class Singleton<ModeContext>;
+
   ViEngine* m_viEngine;
 
+  ModeContext() = default;
   QString key() override;
-};
-
-class ModeContextCreator : public IContextCreator {
-  DISABLE_COPY(ModeContextCreator)
- public:
-  ModeContextCreator(ViEngine* viEngine);
-  ~ModeContextCreator() = default;
-  DEFAULT_MOVE(ModeContextCreator)
-
-  std::shared_ptr<IContext> create(Operator op, const QString& operand) override;
-
- private:
-  ViEngine* m_viEngine;
 };
