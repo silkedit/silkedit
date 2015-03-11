@@ -6,6 +6,7 @@ menu:
     - label: 'Open...'
       command: open
       context: os != win
+      before: 'Open Recent'
     - label: 'Save'
       command: save
     - label: 'Save As'
