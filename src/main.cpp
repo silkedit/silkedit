@@ -4,7 +4,7 @@
 #include "PackageManager.h"
 #include "SilkApp.h"
 #include "TabView.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "KeymapManager.h"
 #include "ConfigManager.h"
 #include "CommandManager.h"
@@ -41,7 +41,7 @@ int main(int argv, char** args) {
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
 
-  MainWindow* w = MainWindow::createWithNewFile();
+  Window* w = Window::createWithNewFile();
   w->show();
 
   //   Set focus to active edit view

@@ -6,7 +6,7 @@
 
 class TextEditView;
 class LanguageComboBox;
-class MainWindow;
+class Window;
 struct Language;
 
 class StatusBar : public QStatusBar {
@@ -14,7 +14,7 @@ class StatusBar : public QStatusBar {
   DISABLE_COPY(StatusBar)
 
  public:
-  StatusBar(MainWindow* window);
+  StatusBar(Window* window);
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 

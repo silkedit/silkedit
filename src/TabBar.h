@@ -5,7 +5,7 @@
 #include "macros.h"
 
 class QMouseEvent;
-class QMainWindow;
+class QWindow;
 class FakeWindow;
 
 class TabBar : public QTabBar {

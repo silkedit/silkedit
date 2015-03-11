@@ -175,6 +175,6 @@ void TabViewGroup::notify(const std::string &method, TabViewGroup *view)
   if (method == "saveAllTabs") {
     view->saveAllTabs();
   } else {
-    qWarning("%s not supportd", method);
+    qWarning("%s not supportd", method.c_str());
   }
 }

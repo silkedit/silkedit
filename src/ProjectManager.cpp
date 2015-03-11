@@ -1,6 +1,6 @@
 #include "ProjectManager.h"
 #include "ProjectTreeView.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "API.h"
 #include "TabView.h"
 
@@ -10,7 +10,7 @@ bool ProjectManager::open(const QString& dirName) {
     return false;
   }
 
-  MainWindow* window = MainWindow::createWithNewFile();
+  Window* window = Window::createWithNewFile();
   if (window) {
     window->show();
     return window->openDir(dirName);

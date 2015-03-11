@@ -3,7 +3,7 @@
 
 #include "DocumentManager.h"
 #include "API.h"
-#include "MainWindow.h"
+#include "Window.h"
 
 class TestUtil : public QObject {
   Q_OBJECT

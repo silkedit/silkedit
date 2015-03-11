@@ -6,7 +6,7 @@
 #include "TabView.h"
 #include "FakeWindow.h"
 #include "API.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "SilkApp.h"
 
 TabBar::TabBar(QWidget* parent)

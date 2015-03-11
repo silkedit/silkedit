@@ -12,7 +12,7 @@
 #include "API.h"
 #include "TextEditView.h"
 #include "TabView.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "TabViewGroup.h"
 
 #define REGISTER_FUNC(type) s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc));\
@@ -67,7 +67,7 @@ PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_
   REGISTER_FUNC(TextEditView)
   REGISTER_FUNC(TabView)
   REGISTER_FUNC(TabViewGroup)
-  REGISTER_FUNC(MainWindow)
+  REGISTER_FUNC(Window)
 }
 
 void PluginManager::callExternalCommand(const QString& cmd) {

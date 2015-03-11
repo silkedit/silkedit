@@ -18,18 +18,18 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 
-class MainWindow : public QMainWindow, public UniqueObject<MainWindow> {
+class Window : public QMainWindow, public UniqueObject<Window> {
   Q_OBJECT
-  DISABLE_COPY(MainWindow)
+  DISABLE_COPY(Window)
 
  public:
-  static MainWindow* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
-  static MainWindow* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
-  static QList<MainWindow*> windows() { return s_windows; }
+  static Window* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+  static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+  static QList<Window*> windows() { return s_windows; }
   static void loadMenu(const std::string& ymlPath);
 
-  ~MainWindow();
-  DEFAULT_MOVE(MainWindow)
+  ~Window();
+  DEFAULT_MOVE(Window)
 
   // accessor
   TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
@@ -45,15 +45,15 @@ signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  protected:
-  friend struct UniqueObject<MainWindow>;
+  friend struct UniqueObject<Window>;
 
-  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, MainWindow* window);
-  static void notify(const std::string& method, MainWindow* window);
+  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, Window* window);
+  static void notify(const std::string& method, Window* window);
 
  private:
-  static QList<MainWindow*> s_windows;
+  static QList<Window*> s_windows;
 
-  explicit MainWindow(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
+  explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
   Splitter* m_rootSplitter;
   TabViewGroup* m_tabViewGroup;

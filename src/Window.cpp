@@ -1,12 +1,11 @@
 #include <yaml-cpp/yaml.h>
 #include <QFileDialog>
-#include <QMainWindow>
 #include <QApplication>
 #include <QDebug>
 #include <QVBoxLayout>
 
 #include "API.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "TabViewGroup.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
@@ -19,19 +18,19 @@
 #include "util/YamlUtils.h"
 #include "Context.h"
 
-MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
+Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       m_rootSplitter(new HSplitter(parent)),
       m_tabViewGroup(new TabViewGroup(this)),
       m_statusBar(new StatusBar(this)),
       m_projectView(nullptr),
       m_findReplaceView(new FindReplaceView(this)) {
-  qDebug("creating MainWindow");
+  qDebug("creating Window");
 
   setWindowTitle(QObject::tr("SilkEdit"));
   setAttribute(Qt::WA_DeleteOnClose);
 
-  // MainWindow takes ownership of the menuBar pointer and deletes it at the
+  // Window takes ownership of the menuBar pointer and deletes it at the
   // appropriate time.
   setMenuBar(new MenuBar);
 
@@ -56,20 +55,20 @@ MainWindow::MainWindow(QWidget* parent, Qt::WindowFlags flags)
   connect(m_tabViewGroup,
           &TabViewGroup::activeTabViewChanged,
           this,
-          static_cast<void (MainWindow::*)(TabView*, TabView*)>(&MainWindow::updateConnection));
+          static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
   connect(m_tabViewGroup,
           &TabViewGroup::activeTabViewChanged,
           this,
-          &MainWindow::emitActiveEditViewChanged);
+          &Window::emitActiveEditViewChanged);
   connect(this,
-          &MainWindow::activeEditViewChanged,
+          &Window::activeEditViewChanged,
           m_statusBar,
           &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
 
-void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
+void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
   qDebug("updateConnection for new active TabView");
 
   if (oldTabView && m_statusBar) {
@@ -80,8 +79,8 @@ void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
     disconnect(oldTabView,
                &TabView::activeTextEditViewChanged,
                this,
-               static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
-                   &MainWindow::updateConnection));
+               static_cast<void (Window::*)(TextEditView*, TextEditView*)>(
+                   &Window::updateConnection));
   }
 
   if (newTabView && m_statusBar) {
@@ -92,12 +91,12 @@ void MainWindow::updateConnection(TabView* oldTabView, TabView* newTabView) {
     connect(newTabView,
             &TabView::activeTextEditViewChanged,
             this,
-            static_cast<void (MainWindow::*)(TextEditView*, TextEditView*)>(
-                &MainWindow::updateConnection));
+            static_cast<void (Window::*)(TextEditView*, TextEditView*)>(
+                &Window::updateConnection));
   }
 }
 
-void MainWindow::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
+void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
   qDebug("updateConnection for new active TextEditView");
 
   if (oldEditView && m_statusBar) {
@@ -113,26 +112,26 @@ void MainWindow::updateConnection(TextEditView* oldEditView, TextEditView* newEd
   }
 }
 
-void MainWindow::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView) {
+void Window::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView) {
   TextEditView* oldEditView = oldTabView ? oldTabView->activeEditView() : nullptr;
   TextEditView* newEditView = newTabView ? newTabView->activeEditView() : nullptr;
   emit activeEditViewChanged(oldEditView, newEditView);
 }
 
-MainWindow* MainWindow::create(QWidget* parent, Qt::WindowFlags flags) {
-  MainWindow* window = new MainWindow(parent, flags);
+Window* Window::create(QWidget* parent, Qt::WindowFlags flags) {
+  Window* window = new Window(parent, flags);
   window->resize(1280, 720);
   s_windows.append(window);
   return window;
 }
 
-MainWindow* MainWindow::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
-  MainWindow* w = create(parent, flags);
+Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
+  Window* w = create(parent, flags);
   w->activeTabView()->addNew();
   return w;
 }
 
-void MainWindow::loadMenu(const std::string& ymlPath) {
+void Window::loadMenu(const std::string& ymlPath) {
   qDebug("Start loading: %s", ymlPath.c_str());
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
@@ -142,18 +141,18 @@ void MainWindow::loadMenu(const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    foreach (MainWindow* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
+    foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }
 }
 
-MainWindow::~MainWindow() {
-  qDebug("~MainWindow");
+Window::~Window() {
+  qDebug("~Window");
   s_windows.removeOne(this);
 }
 
-TabView* MainWindow::activeTabView() {
+TabView* Window::activeTabView() {
   if (m_tabViewGroup) {
     return m_tabViewGroup->activeTab();
   } else {
@@ -161,14 +160,14 @@ TabView* MainWindow::activeTabView() {
   }
 }
 
-void MainWindow::show() {
+void Window::show() {
   QMainWindow::show();
   QApplication::setActiveWindow(this);
 }
 
-QList<MainWindow*> MainWindow::s_windows;
+QList<Window*> Window::s_windows;
 
-void MainWindow::closeEvent(QCloseEvent* event) {
+void Window::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
   bool isSuccess = m_tabViewGroup->closeAllTabs();
   if (isSuccess) {
@@ -179,7 +178,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
   }
 }
 
-bool MainWindow::openDir(const QString& dirPath) {
+bool Window::openDir(const QString& dirPath) {
   if (!m_projectView) {
     m_projectView = new ProjectTreeView(this);
   }
@@ -197,20 +196,20 @@ bool MainWindow::openDir(const QString& dirPath) {
   }
 }
 
-void MainWindow::openFindAndReplacePanel() {
+void Window::openFindAndReplacePanel() {
   m_findReplaceView->show();
 }
 
-void MainWindow::hideFindReplacePanel() {
+void Window::hideFindReplacePanel() {
   if (m_findReplaceView) {
     m_findReplaceView->hide();
   }
 }
 
-void MainWindow::request(const std::string&, msgpack::rpc::msgid_t, MainWindow*) {
+void Window::request(const std::string&, msgpack::rpc::msgid_t, Window*) {
 }
 
-void MainWindow::notify(const std::string& method, MainWindow* window) {
+void Window::notify(const std::string& method, Window* window) {
   if (method == "close") {
     window->close();
   }

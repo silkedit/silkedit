@@ -1,10 +1,10 @@
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "TabView.h"
 #include "TextEditView.h"
 
-StatusBar::StatusBar(MainWindow* window)
+StatusBar::StatusBar(Window* window)
     : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
   addPermanentWidget(m_langComboBox);
 
@@ -25,7 +25,7 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEdit
 
 void StatusBar::setActiveTextEditViewLanguage() {
   qDebug("currentIndexChanged in langComboBox. %d", m_langComboBox->currentIndex());
-  TabView* tabView = static_cast<MainWindow*>(window())->activeTabView();
+  TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
     if (TextEditView* editView = tabView->activeEditView()) {
       qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));

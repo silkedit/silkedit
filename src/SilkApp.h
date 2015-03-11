@@ -6,7 +6,7 @@
 
 class TabBar;
 class TextEditView;
-class MainWindow;
+class Window;
 class TabView;
 class TabViewGroup;
 
@@ -18,7 +18,7 @@ class SilkApp : public QApplication {
   static TextEditView* activeEditView();
   static TabView* activeTabView(bool createIfNull = false);
   static TabViewGroup* activeTabViewGroup();
-  static MainWindow* activeWindow();
+  static Window* activeWindow();
 
   SilkApp(int& argc, char** argv);
   ~SilkApp() = default;

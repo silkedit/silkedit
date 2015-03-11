@@ -5,7 +5,7 @@
 #include <QFileInfo>
 
 #include "API.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "CommandManager.h"
 #include "commands/PluginCommand.h"
 #include "PluginManager.h"
@@ -35,7 +35,7 @@ void API::init() {
 }
 
 void API::hideActiveFindReplacePanel() {
-  if (MainWindow* window = SilkApp::activeWindow()) {
+  if (Window* window = SilkApp::activeWindow()) {
     window->hideFindReplacePanel();
   }
 }
@@ -69,7 +69,7 @@ void API::loadMenu(msgpack::object obj) {
   msgpack::type::tuple<std::string> params;
   obj.convert(&params);
   std::string ymlPath = std::get<0>(params);
-  MainWindow::loadMenu(ymlPath);
+  Window::loadMenu(ymlPath);
 }
 
 void API::registerCommands(msgpack::object obj) {
@@ -113,7 +113,7 @@ void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj)
 }
 
 void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
-  MainWindow* window = SilkApp::activeWindow();
+  Window* window = SilkApp::activeWindow();
   if (window) {
     PluginManager::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
   } else {

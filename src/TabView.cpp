@@ -7,7 +7,7 @@
 #include "TextEditView.h"
 #include "KeymapManager.h"
 #include "TabBar.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
 #include "DocumentManager.h"
@@ -297,7 +297,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
            << "newWindowPos:" << newWindowPos << "isFloating:" << isFloating;
 
   if (isFloating) {
-    MainWindow* newWindow = MainWindow::create();
+    Window* newWindow = Window::create();
     newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {

@@ -5,7 +5,7 @@
 #include "DocumentManager.h"
 #include "TextEditView.h"
 #include "TabView.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "PluginManager.h"
 
 namespace {
@@ -22,7 +22,7 @@ T findParent(QWidget* widget) {
 }
 
 TabBar* SilkApp::tabBarAt(int x, int y) {
-  foreach (MainWindow* window, MainWindow::windows()) {
+  foreach (Window* window, Window::windows()) {
     if (TabBar* tabBar = window->tabViewGroup()->tabBarAt(x, y)) {
       return tabBar;
     }
@@ -83,7 +83,7 @@ TabView* SilkApp::activeTabView(bool createIfNull) {
 }
 
 TabViewGroup* SilkApp::activeTabViewGroup() {
-  MainWindow* window = activeWindow();
+  Window* window = activeWindow();
   if (window) {
     return window->tabViewGroup();
   } else {
@@ -92,6 +92,6 @@ TabViewGroup* SilkApp::activeTabViewGroup() {
   }
 }
 
-MainWindow* SilkApp::activeWindow() {
-  return qobject_cast<MainWindow*>(QApplication::activeWindow());
+Window* SilkApp::activeWindow() {
+  return qobject_cast<Window*>(QApplication::activeWindow());
 }

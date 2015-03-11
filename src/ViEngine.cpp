@@ -2,7 +2,7 @@
 #include <QStatusBar>
 
 #include "SilkApp.h"
-#include "MainWindow.h"
+#include "Window.h"
 #include "ViEngine.h"
 #include "TextEditView.h"
 #include "CommandManager.h"
@@ -49,7 +49,7 @@ void ViEngine::disable() {
     view->setThinCursor(true);
   }
 
-  foreach (MainWindow* window, MainWindow::windows()) { window->statusBar()->clearMessage(); }
+  foreach (Window* window, Window::windows()) { window->statusBar()->clearMessage(); }
 
   KeymapManager::singleton().load();
 
@@ -99,7 +99,7 @@ void ViEngine::onModeChanged(Mode mode) {
       return;
   }
 
-  if (MainWindow* window = SilkApp::activeWindow()) {
+  if (Window* window = SilkApp::activeWindow()) {
     Q_ASSERT(window->statusBar());
     window->statusBar()->showMessage(text);
   }
