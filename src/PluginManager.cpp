@@ -13,6 +13,17 @@
 #include "TextEditView.h"
 #include "TabView.h"
 #include "MainWindow.h"
+#include "TabViewGroup.h"
+
+#define REGISTER_FUNC(type) s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc));\
+  s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
+
+  std::unordered_map<std::string, std::function<void(const std::string&, msgpack::object)>>
+      PluginManager::s_notifyFunctions;
+  std::unordered_map<
+      std::string,
+      std::function<void(msgpack::rpc::msgid_t, const std::string, msgpack::object)>>
+      PluginManager::s_requestFunctions;
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
@@ -53,6 +64,10 @@ void PluginManager::init() {
 }
 
 PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
+  REGISTER_FUNC(TextEditView)
+  REGISTER_FUNC(TabView)
+  REGISTER_FUNC(TabViewGroup)
+  REGISTER_FUNC(MainWindow)
 }
 
 void PluginManager::callExternalCommand(const QString& cmd) {
@@ -141,8 +156,8 @@ void PluginManager::readRequest() {
               }
 
               qDebug("type: %s, method: %s", type.c_str(), method.c_str());
-              if (type == "TextEditView") {
-                TextEditView::call(req.msgid, method, req.param);
+              if (s_requestFunctions.count(type) != 0) {
+                s_requestFunctions.at(type)(req.msgid, method, req.param);
               } else {
                 qWarning("type: %s not supported", type.c_str());
               }
@@ -191,10 +206,8 @@ void PluginManager::readRequest() {
               }
 
               qDebug("type: %s, method: %s", type.c_str(), method.c_str());
-              if (type == "TabView") {
-                TabView::call(method, notify.param);
-              } else if (type == "Window") {
-                MainWindow::call(method, notify.param);
+              if (s_notifyFunctions.count(type) != 0) {
+                s_notifyFunctions.at(type)(method, notify.param);
               } else {
                 qWarning("type: %s not supported", type.c_str());
               }

@@ -28,9 +28,9 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu actions
   //  auto openFileAction = new CommandAction(QObject::tr("&Open..."), OpenCommand::name);
   //  auto newFileAction = new CommandAction(QObject::tr("&New File"), NewFileCommand::name);
-  auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
-  auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
-  auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
+//  auto saveFileAction = new CommandAction(QObject::tr("&Save"), SaveFileCommand::name);
+//  auto saveAsAction = new CommandAction(QObject::tr("&Save AS..."), SaveAsCommand::name);
+//  auto saveAllAction = new CommandAction(QObject::tr("&Save All"), SaveAllCommand::name);
   //  auto closeOtherTabsAction =
   //      new CommandAction(QObject::tr("&Close Other Tabs"), CloseOtherTabsCommand::name);
 
@@ -39,9 +39,9 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   //  fileMenu->addAction(newFileAction);
   //  fileMenu->addAction(openFileAction);
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
-  fileMenu->addAction(saveFileAction);
-  fileMenu->addAction(saveAsAction);
-  fileMenu->addAction(saveAllAction);
+//  fileMenu->addAction(saveFileAction);
+//  fileMenu->addAction(saveAsAction);
+//  fileMenu->addAction(saveAllAction);
   //  fileMenu->addAction(closeOtherTabsAction);
 
   // Edit Menu actions

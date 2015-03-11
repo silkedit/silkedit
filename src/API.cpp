@@ -12,25 +12,26 @@
 #include "TextEditView.h"
 #include "SilkApp.h"
 #include "TabView.h"
+#include "TabViewGroup.h"
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "util.h"
 
-std::unordered_map<std::string, std::function<void(msgpack::object)>> API::notifyFunctions;
+std::unordered_map<std::string, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
-    API::requestFunctions;
+    API::s_requestFunctions;
 
 void API::init() {
-  notifyFunctions.insert(std::make_pair("alert", &alert));
-  notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
-  notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
-  notifyFunctions.insert(std::make_pair("open", &open));
+  s_notifyFunctions.insert(std::make_pair("alert", &alert));
+  s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
+  s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
+  s_notifyFunctions.insert(std::make_pair("open", &open));
 
-  requestFunctions.insert(std::make_pair("activeView", &activeView));
-  requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
-  requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
-  requestFunctions.insert(
-      std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  s_requestFunctions.insert(std::make_pair("activeView", &activeView));
+  s_requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
+  s_requestFunctions.insert(std::make_pair("activeTabViewGroup", &activeTabViewGroup));
+  s_requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
+  s_requestFunctions.insert(std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -40,16 +41,16 @@ void API::hideActiveFindReplacePanel() {
 }
 
 void API::call(const std::string& method, const msgpack::object& obj) {
-  if (notifyFunctions.count(method) != 0) {
-    notifyFunctions.at(method)(obj);
+  if (s_notifyFunctions.count(method) != 0) {
+    s_notifyFunctions.at(method)(obj);
   } else {
     qWarning("%s is not supported", method.c_str());
   }
 }
 
 void API::call(const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj) {
-  if (requestFunctions.count(method) != 0) {
-    requestFunctions.at(method)(msgId, obj);
+  if (s_requestFunctions.count(method) != 0) {
+    s_requestFunctions.at(method)(msgId, obj);
   } else {
     qWarning("%s is not supported", method.c_str());
   }
@@ -98,6 +99,17 @@ void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   } else {
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
+}
+
+void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj)
+{
+  TabViewGroup* tabViewGroup = SilkApp::activeTabViewGroup();
+  if (tabViewGroup) {
+    PluginManager::singleton().sendResponse(tabViewGroup->id(), msgpack::type::nil(), msgId);
+  } else {
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+
 }
 
 void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {

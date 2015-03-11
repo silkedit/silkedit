@@ -6,6 +6,12 @@ menu:
     - label: 'Open...'
       command: open
       context: os != win
+    - label: 'Save'
+      command: save
+    - label: 'Save As'
+      command: save_as
+    - label: 'Save All'
+      command: save_all
     - label: 'Close All Tabs'
       command: close_all_tabs
     - label: 'Close Other Tabs'

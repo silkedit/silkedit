@@ -5,12 +5,13 @@
 #include <QWidget>
 
 #include "macros.h"
+#include "UniqueObject.h"
 
 class TabView;
 class TabBar;
 class Splitter;
 
-class TabViewGroup : public QWidget {
+class TabViewGroup : public QWidget, public UniqueObject<TabViewGroup> {
   Q_OBJECT
   DISABLE_COPY(TabViewGroup)
 
@@ -31,6 +32,12 @@ class TabViewGroup : public QWidget {
 
 signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
+
+ protected:
+  friend struct UniqueObject<TabViewGroup>;
+
+  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, TabViewGroup* view);
+  static void notify(const std::string& method, TabViewGroup* view);
 
  private:
   /**

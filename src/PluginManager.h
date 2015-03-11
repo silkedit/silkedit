@@ -33,6 +33,13 @@ class PluginManager : public QObject, public Singleton<PluginManager> {
   }
 
  private:
+  static std::unordered_map<std::string, std::function<void(const std::string&, msgpack::object)>>
+      s_notifyFunctions;
+  static std::unordered_map<
+      std::string,
+      std::function<void(msgpack::rpc::msgid_t, const std::string, msgpack::object)>>
+      s_requestFunctions;
+
   friend class Singleton<PluginManager>;
   PluginManager();
 

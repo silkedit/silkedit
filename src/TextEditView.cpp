@@ -82,10 +82,19 @@ void TextEditView::request(const std::string& method,
   if (method == "text") {
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+  } else {
+    qWarning("%s is not support");
   }
 }
 
-void TextEditView::notify(const std::string&, TextEditView*) {
+void TextEditView::notify(const std::string& method, TextEditView* view) {
+  if (method == "save") {
+    view->save();
+  } else if (method == "saveAs") {
+    view->saveAs();
+  } else {
+    qWarning("%s is not support");
+  }
 }
 
 QString TextEditView::path() {

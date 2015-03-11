@@ -21,6 +21,17 @@ module.exports = function (client) {
     client.notify('TabView.addNew', this.id)
   }
 
+
+  // class TabViewGroup
+  var TabViewGroup = function(id) {
+    this.id = id
+  }
+
+  TabViewGroup.prototype.saveAll = function() {
+    client.notify('TabViewGroup.saveAllTabs', this.id)
+  }
+
+
   // class TextEditView
   var TextEditView = function (id) {
     this.id = id;
@@ -28,6 +39,14 @@ module.exports = function (client) {
 
   TextEditView.prototype.text = function () {
     return client.invoke('TextEditView.text', this.id)
+  }
+
+  TextEditView.prototype.save = function () {
+    client.notify('TextEditView.save', this.id)
+  }
+
+  TextEditView.prototype.saveAs = function () {
+    client.notify('TextEditView.saveAs', this.id)
   }
 
   // class Window
@@ -62,6 +81,11 @@ module.exports = function (client) {
     ,activeTabView: function () {
       var id = client.invoke('activeTabView')
       return id != null ? new TabView(id) : null
+    }
+
+    ,activeTabViewGroup: function () {
+      var id = client.invoke('activeTabViewGroup')
+      return id != null ? new TabViewGroup(id) : null
     }
 
     ,activeWindow: function () {

@@ -163,3 +163,18 @@ void TabViewGroup::splitTab(std::function<void(QWidget*, const QString&)> func) 
     }
   }
 }
+
+
+void TabViewGroup::request(const std::string &, msgpack::rpc::msgid_t , TabViewGroup *)
+{
+
+}
+
+void TabViewGroup::notify(const std::string &method, TabViewGroup *view)
+{
+  if (method == "saveAllTabs") {
+    view->saveAllTabs();
+  } else {
+    qWarning("%s not supportd", method);
+  }
+}

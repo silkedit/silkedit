@@ -15,6 +15,24 @@ module.exports = {
 				silk.open(path)
 			})
 		}
+		,"save": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.save()
+			}
+		}
+		,"save_as": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.saveAs()
+			}
+		}
+		,"save_all": function() {
+			var tabViewGroup = silk.activeTabViewGroup()
+			if (tabViewGroup != null) {
+				tabViewGroup.saveAll()
+			}
+		}
 		,"close_all_tabs": function() {
 			var tabView = silk.activeTabView()
 			if (tabView != null) {

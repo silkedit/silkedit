@@ -24,7 +24,7 @@ struct UniqueObject {
     return nullptr;
   }
 
-  static void call(const std::string& method, const msgpack::object obj) {
+  static void callNotifyFunc(const std::string& method, const msgpack::object obj) {
     std::tuple<int> params;
     obj.convert(&params);
     int id = std::get<0>(params);
@@ -36,7 +36,7 @@ struct UniqueObject {
     }
   }
 
-  static void call(msgpack::rpc::msgid_t msgId,
+  static void callRequestFunc(msgpack::rpc::msgid_t msgId,
                    const std::string& method,
                    const msgpack::object obj) {
     std::tuple<int> params;
@@ -60,7 +60,7 @@ struct UniqueObject {
  protected:
   virtual ~UniqueObject()  // objects should never be removed through pointers of this type
   {
-    qDebug("~UniqueId");
+    qDebug("~UniqueObject");
     if (m_id >= 0) {
       QMutexLocker locker(&mutex);
       objects.remove(m_id);

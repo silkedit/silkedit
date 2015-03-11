@@ -2,12 +2,6 @@
 
 #include "CommandManager.h"
 #include "commands/ToggleVimEmulationCommand.h"
-#include "commands/OpenCommand.h"
-#include "commands/NewFileCommand.h"
-#include "commands/SaveFileCommand.h"
-#include "commands/SaveAsCommand.h"
-#include "commands/SaveAllCommand.h"
-#include "commands/CloseOtherTabsCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
@@ -17,7 +11,6 @@
 #include "commands/CopyCommand.h"
 #include "commands/PasteCommand.h"
 #include "commands/SelectAllCommand.h"
-//#include "commands/EvalAsRubyCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "commands/OpenFindPanelCommand.h"
@@ -53,26 +46,6 @@ void CommandManager::init() {
 
   std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
   add(std::move(redoCmd));
-
-  //  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
-  //  add(std::move(evalAsRubyCmd));
-
-  //  std::unique_ptr<OpenCommand> openFileCmd(new OpenCommand());
-  //  add(std::move(openFileCmd));
-
-  //  std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
-  //  add(std::move(newFileCmd));
-
-  std::unique_ptr<SaveFileCommand> saveFileCmd(new SaveFileCommand());
-  add(std::move(saveFileCmd));
-
-  std::unique_ptr<SaveAsCommand> saveAsCmd(new SaveAsCommand());
-  add(std::move(saveAsCmd));
-
-  std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
-  add(std::move(saveAllCmd));
-
-  //  add(std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
 
   add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
 
