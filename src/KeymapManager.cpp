@@ -8,7 +8,6 @@
 #include <QKeyEvent>
 #include <QApplication>
 
-#include "ContextManager.h"
 #include "KeymapManager.h"
 #include "CommandEvent.h"
 #include "ModeContext.h"
