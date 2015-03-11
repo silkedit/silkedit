@@ -2,8 +2,7 @@
 
 #include "IContext.h"
 
-bool IContext::isSatisfied(Operator op, const QString &operand)
-{
+bool IContext::isSatisfied(Operator op, const QString& operand) {
   switch (op) {
     case Operator::EQUALS:
       return key() == operand;
@@ -12,5 +11,4 @@ bool IContext::isSatisfied(Operator op, const QString &operand)
     default:
       return false;
   }
-
 }

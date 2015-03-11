@@ -49,8 +49,7 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
   return nullptr;
 }
 
-void YamlUtils::parseMenuNode(QWidget *parent, YAML::Node menuNode)
-{
+void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
   if (!menuNode.IsSequence()) {
     qWarning("menuNode must be a sequence.");
     return;
@@ -105,5 +104,4 @@ void YamlUtils::parseMenuNode(QWidget *parent, YAML::Node menuNode)
       }
     }
   }
-
 }

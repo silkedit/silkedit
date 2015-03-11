@@ -19,6 +19,6 @@ class IContext {
  protected:
   IContext() = default;
 
-private:
+ private:
   virtual QString key() = 0;
 };

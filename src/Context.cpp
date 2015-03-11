@@ -3,8 +3,7 @@
 
 std::unordered_map<QString, IContext*> Context::s_contexts;
 
-void Context::init()
-{
+void Context::init() {
   // register default contexts
   add(OSContext::name, &OSContext::singleton());
 }
@@ -17,8 +16,8 @@ void Context::remove(const QString& key) {
   s_contexts.erase(key);
 }
 
-Context::Context(const QString &key, Operator op, const QString &value): m_key(key), m_op(op), m_value(value)
-{
+Context::Context(const QString& key, Operator op, const QString& value)
+    : m_key(key), m_op(op), m_value(value) {
 }
 
 bool Context::isSatisfied() {
