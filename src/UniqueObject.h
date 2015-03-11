@@ -37,8 +37,8 @@ struct UniqueObject {
   }
 
   static void callRequestFunc(msgpack::rpc::msgid_t msgId,
-                   const std::string& method,
-                   const msgpack::object obj) {
+                              const std::string& method,
+                              const msgpack::object obj) {
     std::tuple<int> params;
     obj.convert(&params);
     int id = std::get<0>(params);

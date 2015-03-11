@@ -15,15 +15,15 @@
 #include "Window.h"
 #include "TabViewGroup.h"
 
-#define REGISTER_FUNC(type) s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc));\
+#define REGISTER_FUNC(type)                                                 \
+  s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
 
-  std::unordered_map<std::string, std::function<void(const std::string&, msgpack::object)>>
-      PluginManager::s_notifyFunctions;
-  std::unordered_map<
-      std::string,
-      std::function<void(msgpack::rpc::msgid_t, const std::string, msgpack::object)>>
-      PluginManager::s_requestFunctions;
+std::unordered_map<std::string, std::function<void(const std::string&, msgpack::object)>>
+    PluginManager::s_notifyFunctions;
+std::unordered_map<std::string,
+                   std::function<void(msgpack::rpc::msgid_t, const std::string, msgpack::object)>>
+    PluginManager::s_requestFunctions;
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");

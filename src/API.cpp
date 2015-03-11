@@ -31,7 +31,8 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
   s_requestFunctions.insert(std::make_pair("activeTabViewGroup", &activeTabViewGroup));
   s_requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
-  s_requestFunctions.insert(std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  s_requestFunctions.insert(
+      std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -101,15 +102,13 @@ void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   }
 }
 
-void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj)
-{
+void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
   TabViewGroup* tabViewGroup = SilkApp::activeTabViewGroup();
   if (tabViewGroup) {
     PluginManager::singleton().sendResponse(tabViewGroup->id(), msgpack::type::nil(), msgId);
   } else {
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
-
 }
 
 void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {

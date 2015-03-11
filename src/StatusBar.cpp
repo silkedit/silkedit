@@ -4,8 +4,7 @@
 #include "TabView.h"
 #include "TextEditView.h"
 
-StatusBar::StatusBar(Window* window)
-    : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
+StatusBar::StatusBar(Window* window) : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
   addPermanentWidget(m_langComboBox);
 
   connect(m_langComboBox,

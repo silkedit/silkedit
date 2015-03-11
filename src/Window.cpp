@@ -60,10 +60,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           &TabViewGroup::activeTabViewChanged,
           this,
           &Window::emitActiveEditViewChanged);
-  connect(this,
-          &Window::activeEditViewChanged,
-          m_statusBar,
-          &StatusBar::onActiveTextEditViewChanged);
+  connect(
+      this, &Window::activeEditViewChanged, m_statusBar, &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
@@ -76,11 +74,11 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
                &TabView::activeTextEditViewChanged,
                m_statusBar,
                &StatusBar::onActiveTextEditViewChanged);
-    disconnect(oldTabView,
-               &TabView::activeTextEditViewChanged,
-               this,
-               static_cast<void (Window::*)(TextEditView*, TextEditView*)>(
-                   &Window::updateConnection));
+    disconnect(
+        oldTabView,
+        &TabView::activeTextEditViewChanged,
+        this,
+        static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
   }
 
   if (newTabView && m_statusBar) {
@@ -91,8 +89,7 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
     connect(newTabView,
             &TabView::activeTextEditViewChanged,
             this,
-            static_cast<void (Window::*)(TextEditView*, TextEditView*)>(
-                &Window::updateConnection));
+            static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
   }
 }
 
