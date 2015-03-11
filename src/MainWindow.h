@@ -47,7 +47,7 @@ signals:
  protected:
   friend struct UniqueObject<MainWindow>;
 
-  static void response(const std::string& method, msgpack::rpc::msgid_t msgId, MainWindow* window);
+  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, MainWindow* window);
   static void notify(const std::string& method, MainWindow* window);
 
  private:

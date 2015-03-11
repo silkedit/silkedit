@@ -1,6 +1,9 @@
 #pragma once
 
+#include <list>
+#include <string>
 #include <functional>
+#include <QStringList>
 
 #include "macros.h"
 
@@ -21,6 +24,8 @@ class Util {
    * @return
    */
   static bool copy(const QString& source, const QString& dist);
+
+  static std::list<std::string> toStdStringList(const QStringList& qStrList);
 
  private:
   Util() = delete;

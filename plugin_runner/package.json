@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
-    "silk-msgpack-rpc": "0.0.1",
+    "silk-msgpack-rpc": "0.0.2",
     "synchronize": "^0.9.9"
   },
   "devDependencies": {},

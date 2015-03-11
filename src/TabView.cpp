@@ -313,17 +313,17 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1, true);
 }
 
-void TabView::response(const std::string& method, msgpack::rpc::msgid_t msgId, TabView* view) {
+void TabView::request(const std::string& , msgpack::rpc::msgid_t , TabView* ) {
 }
 
 void TabView::notify(const std::string& method, TabView* view) {
-  if (method == "close_all_tabs") {
+  if (method == "closeAllTabs") {
     view->closeAllTabs();
-  } else if (method == "close_active_tab") {
+  } else if (method == "closeActiveTab") {
     view->closeActiveTab();
-  } else if (method == "close_other_tabs") {
+  } else if (method == "closeOtherTabs") {
     view->closeOtherTabs();
-  } else if (method == "add_new") {
+  } else if (method == "addNew") {
     view->addNew();
   }
 }

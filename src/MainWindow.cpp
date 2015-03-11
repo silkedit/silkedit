@@ -207,7 +207,7 @@ void MainWindow::hideFindReplacePanel() {
   }
 }
 
-void MainWindow::response(const std::string&, msgpack::rpc::msgid_t, MainWindow*) {
+void MainWindow::request(const std::string&, msgpack::rpc::msgid_t, MainWindow*) {
 }
 
 void MainWindow::notify(const std::string& method, MainWindow* window) {

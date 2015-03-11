@@ -6,19 +6,19 @@ module.exports = function (client) {
   }
 
   TabView.prototype.closeAllTabs = function() {
-    client.notify('TabView.close_all_tabs', this.id)
+    client.notify('TabView.closeAllTabs', this.id)
   }
 
   TabView.prototype.closeOtherTabs = function() {
-    client.notify('TabView.close_other_tabs', this.id)
+    client.notify('TabView.closeOtherTabs', this.id)
   }
 
   TabView.prototype.closeActiveTab = function() {
-    client.notify('TabView.close_active_tab', this.id)
+    client.notify('TabView.closeActiveTab', this.id)
   }
 
   TabView.prototype.addNew = function() {
-    client.notify('TabView.add_new', this.id)
+    client.notify('TabView.addNew', this.id)
   }
 
   // class TextEditView
@@ -47,26 +47,37 @@ module.exports = function (client) {
     }
 
     ,loadMenu: function (ymlPath) {
-      client.notify('load_menu', ymlPath)
+      client.notify('loadMenu', ymlPath)
     }
 
     ,registerCommands: function (commands) {
-      client.notify('register_commands', commands)
+      client.notify('registerCommands', commands)
     }
 
     ,activeView: function () {
-      var id = client.invoke('active_view')
+      var id = client.invoke('activeView')
       return id != null ? new TextEditView(id) : null
     }
 
     ,activeTabView: function () {
-      var id = client.invoke('active_tab_view')
+      var id = client.invoke('activeTabView')
       return id != null ? new TabView(id) : null
     }
 
     ,activeWindow: function () {
-      var id = client.invoke('active_window')
+      var id = client.invoke('activeWindow')
       return id != null ? new Window(id) : null
+    }
+
+    ,showFileAndDirectoryDialog: function(caption) {
+      caption = caption == null ? 'Open' : caption
+      return client.invoke('showFileAndDirectoryDialog', caption)
+    }
+
+    ,open: function (path) {
+      if (path != null) {
+        client.notify('open', path)
+      }
     }
   }
 }

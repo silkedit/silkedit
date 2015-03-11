@@ -27,10 +27,15 @@ class API {
                             std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
       requestFunctions;
 
+  // notify functions
   static void alert(msgpack::object obj);
   static void loadMenu(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
+  static void open(msgpack::object obj);
+
+  // request functions
   static void activeView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };

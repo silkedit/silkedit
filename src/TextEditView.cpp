@@ -76,7 +76,7 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-void TextEditView::response(const std::string& method,
+void TextEditView::request(const std::string& method,
                             msgpack::rpc::msgid_t msgId,
                             TextEditView* view) {
   if (method == "text") {

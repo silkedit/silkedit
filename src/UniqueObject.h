@@ -44,7 +44,7 @@ struct UniqueObject {
     int id = std::get<0>(params);
 
     if (T* view = UniqueObject::find(id)) {
-      T::response(method, msgId, view);
+      T::request(method, msgId, view);
     } else {
       qWarning("id: %d not found", id);
     }

@@ -1,6 +1,8 @@
 #include <string>
 #include <QApplication>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFileInfo>
 
 #include "API.h"
 #include "MainWindow.h"
@@ -10,6 +12,9 @@
 #include "TextEditView.h"
 #include "SilkApp.h"
 #include "TabView.h"
+#include "DocumentManager.h"
+#include "ProjectManager.h"
+#include "util.h"
 
 std::unordered_map<std::string, std::function<void(msgpack::object)>> API::notifyFunctions;
 std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -17,12 +22,14 @@ std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpac
 
 void API::init() {
   notifyFunctions.insert(std::make_pair("alert", &alert));
-  notifyFunctions.insert(std::make_pair("load_menu", &loadMenu));
-  notifyFunctions.insert(std::make_pair("register_commands", &registerCommands));
+  notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
+  notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
+  notifyFunctions.insert(std::make_pair("open", &open));
 
-  requestFunctions.insert(std::make_pair("active_view", &activeView));
-  requestFunctions.insert(std::make_pair("active_tab_view", &activeTabView));
-  requestFunctions.insert(std::make_pair("active_window", &activeWindow));
+  requestFunctions.insert(std::make_pair("activeView", &activeView));
+  requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
+  requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
+  requestFunctions.insert(std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -98,5 +105,38 @@ void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
     PluginManager::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
   } else {
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+}
+
+void API::showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+  // On Windows, native dialog sets QApplication::activeWindow() to NULL. We need to store and
+  // restore it after closing the dialog.
+  // https://bugreports.qt.io/browse/QTBUG-38414
+  msgpack::type::tuple<std::string> params;
+  obj.convert(&params);
+  QString caption = QString::fromUtf8(std::get<0>(params).c_str());
+  QWidget* activeWindow = QApplication::activeWindow();
+  QFileDialog dialog(nullptr, caption);
+  if (dialog.exec()) {
+    QApplication::setActiveWindow(activeWindow);
+    std::list<std::string> paths = Util::toStdStringList(dialog.selectedFiles());
+    for (std::string& path : paths) {
+      qDebug() << path.c_str();
+    }
+    PluginManager::singleton().sendResponse(paths, msgpack::type::nil(), msgId);
+  }
+}
+
+void API::open(msgpack::object obj) {
+  msgpack::type::tuple<std::string> params;
+  obj.convert(&params);
+  QString path = QString::fromUtf8(std::get<0>(params).c_str());
+  QFileInfo info(path);
+  if (info.isFile()) {
+    DocumentManager::open(path);
+  } else if (info.isDir()) {
+    ProjectManager::open(path);
+  } else {
+    qWarning("%s is neither file nor directory.", qPrintable(path));
   }
 }

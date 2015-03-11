@@ -55,10 +55,8 @@ Document* Document::createBlank() {
 }
 
 void Document::setPath(const QString& path) {
-  if (m_path != path) {
-    m_path = path;
-    emit pathUpdated(path);
-  }
+  m_path = path;
+  emit pathUpdated(path);
 }
 
 bool Document::setLanguage(const QString& scopeName) {

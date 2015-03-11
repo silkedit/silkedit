@@ -45,7 +45,7 @@ signals:
  protected:
   friend struct UniqueObject<TabView>;
 
-  static void response(const std::string& method, msgpack::rpc::msgid_t msgId, TabView* view);
+  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, TabView* view);
   static void notify(const std::string& method, TabView* view);
 
   void tabInserted(int index) override;

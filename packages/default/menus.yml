@@ -4,7 +4,7 @@ menu:
     - label: 'New File'
       command: new_file
     - label: 'Open...'
-      command: open_file
+      command: open
       context: os != win
     - label: 'Close All Tabs'
       command: close_all_tabs

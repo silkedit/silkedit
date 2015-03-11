@@ -7,7 +7,7 @@
     ctrl+n: { cmd: move_cursor, args: { operation: down }}
     ctrl+cmd+i: toggle_vim_emulation
     cmd+n: new_file
-    cmd+o: open_file
+    cmd+o: open
     cmd+s: save
     shift+cmd+s: save_as
     opt+cmd+s: save_all
