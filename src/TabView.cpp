@@ -313,7 +313,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1, true);
 }
 
-void TabView::request(const std::string& , msgpack::rpc::msgid_t , TabView* ) {
+void TabView::request(const std::string&, msgpack::rpc::msgid_t, TabView*) {
 }
 
 void TabView::notify(const std::string& method, TabView* view) {

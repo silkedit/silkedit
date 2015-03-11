@@ -29,7 +29,8 @@ void API::init() {
   requestFunctions.insert(std::make_pair("activeView", &activeView));
   requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
   requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
-  requestFunctions.insert(std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  requestFunctions.insert(
+      std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
 }
 
 void API::hideActiveFindReplacePanel() {

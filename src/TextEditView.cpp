@@ -77,8 +77,8 @@ TextEditView::~TextEditView() {
 }
 
 void TextEditView::request(const std::string& method,
-                            msgpack::rpc::msgid_t msgId,
-                            TextEditView* view) {
+                           msgpack::rpc::msgid_t msgId,
+                           TextEditView* view) {
   if (method == "text") {
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);

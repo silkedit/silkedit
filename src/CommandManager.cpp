@@ -57,11 +57,11 @@ void CommandManager::init() {
   //  std::unique_ptr<EvalAsRubyCommand> evalAsRubyCmd(new EvalAsRubyCommand);
   //  add(std::move(evalAsRubyCmd));
 
-//  std::unique_ptr<OpenCommand> openFileCmd(new OpenCommand());
-//  add(std::move(openFileCmd));
+  //  std::unique_ptr<OpenCommand> openFileCmd(new OpenCommand());
+  //  add(std::move(openFileCmd));
 
-//  std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
-//  add(std::move(newFileCmd));
+  //  std::unique_ptr<NewFileCommand> newFileCmd(new NewFileCommand());
+  //  add(std::move(newFileCmd));
 
   std::unique_ptr<SaveFileCommand> saveFileCmd(new SaveFileCommand());
   add(std::move(saveFileCmd));
@@ -72,7 +72,7 @@ void CommandManager::init() {
   std::unique_ptr<SaveAllCommand> saveAllCmd(new SaveAllCommand());
   add(std::move(saveAllCmd));
 
-//  add(std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
+  //  add(std::move(std::unique_ptr<CloseOtherTabsCommand>(new CloseOtherTabsCommand)));
 
   add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
 

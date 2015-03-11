@@ -35,10 +35,9 @@ bool Util::copy(const QString& source, const QString& dist) {
   return QFile(source).copy(dist);
 }
 
-std::list<std::string> Util::toStdStringList(const QStringList &qStrList)
-{
+std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
   std::list<std::string> list;
-  foreach(QString str, qStrList) {
+  foreach (QString str, qStrList) {
     std::string path = str.toUtf8().constData();
     list.push_back(path);
   }
