@@ -1,12 +1,6 @@
 #include <vector>
 #include <QAction>
 
-#include "commands/OpenCommand.h"
-#include "commands/NewFileCommand.h"
-#include "commands/SaveFileCommand.h"
-#include "commands/SaveAsCommand.h"
-#include "commands/SaveAllCommand.h"
-#include "commands/CloseOtherTabsCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
