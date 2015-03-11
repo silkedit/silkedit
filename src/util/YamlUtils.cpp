@@ -54,7 +54,8 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @brief YamlUtils::parseMenuNode
  *
  * 'context' decides whether the menu item is shown or not.
- * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted above 'Open...', 'Open...' is inserted above 'Open Recent', 'Save' is inserted below 'Open Recent'
+ * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted
+ above 'Open...', 'Open...' is inserted above 'Open Recent', 'Save' is inserted below 'Open Recent'
  *
  *  - label: 'New File'
       command: new_file
@@ -105,14 +106,16 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
         } else {
           currentMenu = new QMenu(label, parent);
           if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
-            QAction* beforeAction = before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
+            QAction* beforeAction =
+                before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
             if (beforeAction) {
               menuBar->insertMenu(beforeAction, currentMenu);
             } else {
               menuBar->addMenu(currentMenu);
             }
           } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
-            QAction* beforeAction = before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
+            QAction* beforeAction =
+                before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
             if (beforeAction) {
               parentMenu->insertMenu(beforeAction, currentMenu);
             } else {
@@ -135,14 +138,16 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
         auto commandAction = new CommandAction(label, command);
         if (!findAction(parent->actions(), label)) {
           if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
-            QAction* beforeAction = before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
+            QAction* beforeAction =
+                before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
             if (beforeAction) {
               menuBar->insertAction(beforeAction, commandAction);
             } else {
               menuBar->addAction(commandAction);
             }
           } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
-            QAction* beforeAction = before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
+            QAction* beforeAction =
+                before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
             if (beforeAction) {
               parentMenu->insertAction(beforeAction, commandAction);
             } else {
