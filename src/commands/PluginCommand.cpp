@@ -4,6 +4,6 @@
 PluginCommand::PluginCommand(const QString& name) : ICommand(name) {
 }
 
-void PluginCommand::doRun(const CommandArgument&, int) {
-  PluginManager::singleton().callExternalCommand(name());
+void PluginCommand::doRun(const CommandArgument& args, int) {
+  PluginManager::singleton().callExternalCommand(name(), std::move(args.args()));
 }

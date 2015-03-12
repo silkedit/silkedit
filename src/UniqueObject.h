@@ -24,13 +24,13 @@ struct UniqueObject {
     return nullptr;
   }
 
-  static void callNotifyFunc(const std::string& method, const msgpack::object obj) {
+  static void callNotifyFunc(const std::string& method, const msgpack::object& obj) {
     std::tuple<int> params;
     obj.convert(&params);
     int id = std::get<0>(params);
 
     if (T* view = UniqueObject::find(id)) {
-      T::notify(method, view);
+      T::notify(view, method, obj);
     } else {
       qWarning("id: %d not found", id);
     }
@@ -38,13 +38,13 @@ struct UniqueObject {
 
   static void callRequestFunc(msgpack::rpc::msgid_t msgId,
                               const std::string& method,
-                              const msgpack::object obj) {
+                              const msgpack::object& obj) {
     std::tuple<int> params;
     obj.convert(&params);
     int id = std::get<0>(params);
 
     if (T* view = UniqueObject::find(id)) {
-      T::request(method, msgId, view);
+      T::request(view, method, msgId, obj);
     } else {
       qWarning("id: %d not found", id);
     }

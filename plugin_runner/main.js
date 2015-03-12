@@ -86,10 +86,10 @@ var c = rpc.createClient(socketFile, function () {
 });
 
 var handler = {
-  "runCommand": function(cmd) {
+  "runCommand": function(cmd, args) {
     if (commands[cmd]) {
       sync.fiber(function(){
-        commands[cmd]()
+        commands[cmd](args)
       })
     }
   }

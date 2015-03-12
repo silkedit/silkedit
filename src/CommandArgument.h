@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 #include <QVariant>
 #include <QDebug>
 
@@ -17,6 +18,8 @@ class CommandArgument {
   explicit CommandArgument(ARGS args);
   ~CommandArgument() = default;
   DEFAULT_COPY_AND_MOVE(CommandArgument)
+
+  std::unordered_map<std::string, std::string> args() const;
 
   template <typename T>
   bool contains(const QString& key) const {

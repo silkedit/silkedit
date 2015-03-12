@@ -203,10 +203,10 @@ void Window::hideFindReplacePanel() {
   }
 }
 
-void Window::request(const std::string&, msgpack::rpc::msgid_t, Window*) {
+void Window::request(Window*, const std::string&, msgpack::rpc::msgid_t, const msgpack::object&) {
 }
 
-void Window::notify(const std::string& method, Window* window) {
+void Window::notify(Window* window, const std::string& method, const msgpack::object&) {
   if (method == "close") {
     window->close();
   }

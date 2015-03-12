@@ -90,6 +90,22 @@ TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
   return nullptr;
 }
 
+void TabViewGroup::request(TabViewGroup*,
+                           const std::string&,
+                           msgpack::rpc::msgid_t,
+                           const msgpack::object&) {
+}
+
+void TabViewGroup::notify(TabViewGroup* view,
+                          const std::string& method,
+                          const msgpack::object&) {
+  if (method == "saveAllTabs") {
+    view->saveAllTabs();
+  } else {
+    qWarning("%s not supportd", method.c_str());
+  }
+}
+
 TabView* TabViewGroup::createTabView() {
   auto tabView = new TabView();
   QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView](bool afterDrag) {
@@ -161,16 +177,5 @@ void TabViewGroup::splitTab(std::function<void(QWidget*, const QString&)> func) 
       TextEditView* anotherEditView = activeEditView->clone();
       func(anotherEditView, label);
     }
-  }
-}
-
-void TabViewGroup::request(const std::string&, msgpack::rpc::msgid_t, TabViewGroup*) {
-}
-
-void TabViewGroup::notify(const std::string& method, TabViewGroup* view) {
-  if (method == "saveAllTabs") {
-    view->saveAllTabs();
-  } else {
-    qWarning("%s not supportd", method.c_str());
   }
 }

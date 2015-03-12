@@ -47,8 +47,8 @@ signals:
  protected:
   friend struct UniqueObject<Window>;
 
-  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, Window* window);
-  static void notify(const std::string& method, Window* window);
+  static void request(Window* window, const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
+  static void notify(Window* window, const std::string& method, const msgpack::object& obj);
 
  private:
   static QList<Window*> s_windows;

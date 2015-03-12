@@ -17,7 +17,8 @@ class PluginManager : public QObject, public Singleton<PluginManager> {
   ~PluginManager();
 
   void init();
-  void callExternalCommand(const QString& cmd);
+
+  void callExternalCommand(const QString& cmd, std::unordered_map<std::string, std::string> args);
 
   template <typename Result, typename Error>
   void sendResponse(const Result& res, const Error& err, msgpack::rpc::msgid_t id) {

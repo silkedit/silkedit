@@ -92,5 +92,15 @@ module.exports = {
 				editView.selectAll()
 			}
 		}
+		,"delete": function(args) {
+			var editView = silk.activeView()
+			if (editView != null) {
+				if (args['direction'] == 'backward') {
+					editView.delete(-1)
+				} else {
+					editView.delete(1)
+				}
+			}
+		}
 	}
 }

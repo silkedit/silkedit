@@ -63,22 +63,25 @@ void PluginManager::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
+void PluginManager::callExternalCommand(const QString& cmd,
+                                        std::unordered_map<std::string, std::string> args) {
+  msgpack::sbuffer sbuf;
+  msgpack::rpc::msg_notify<std::string, std::tuple<std::string, std::unordered_map<std::string, std::string>>> notify;
+  notify.method = "runCommand";
+  std::string methodName = cmd.toUtf8().constData();
+  std::tuple<std::string, std::unordered_map<std::string, std::string>> params =
+      std::make_tuple(methodName, args);
+  notify.param = params;
+  msgpack::pack(sbuf, notify);
+
+  m_socket->write(sbuf.data(), sbuf.size());
+}
+
 PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
   REGISTER_FUNC(TextEditView)
   REGISTER_FUNC(TabView)
   REGISTER_FUNC(TabViewGroup)
   REGISTER_FUNC(Window)
-}
-
-void PluginManager::callExternalCommand(const QString& cmd) {
-  msgpack::sbuffer sbuf;
-  msgpack::rpc::msg_notify<std::string, std::vector<std::string>> notify;
-  notify.method = "runCommand";
-  std::vector<std::string> params = {cmd.toUtf8().constData()};
-  notify.param = params;
-  msgpack::pack(sbuf, notify);
-
-  m_socket->write(sbuf.data(), sbuf.size());
 }
 
 void PluginManager::readStdout() {

@@ -80,8 +80,8 @@ signals:
  protected:
   friend struct UniqueObject<TextEditView>;
 
-  static void request(const std::string& method, msgpack::rpc::msgid_t msgId, TextEditView* view);
-  static void notify(const std::string& method, TextEditView* view);
+  static void request(TextEditView* view, const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
+  static void notify(TextEditView* view, const std::string& method, const msgpack::object& obj);
 
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;

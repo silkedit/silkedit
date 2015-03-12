@@ -76,39 +76,6 @@ TextEditView::~TextEditView() {
   qDebug("~TextEditView");
 }
 
-void TextEditView::request(const std::string& method,
-                           msgpack::rpc::msgid_t msgId,
-                           TextEditView* view) {
-  if (method == "text") {
-    PluginManager::singleton().sendResponse(
-        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
-  } else {
-    qWarning("%s is not support", method.c_str());
-  }
-}
-
-void TextEditView::notify(const std::string& method, TextEditView* view) {
-  if (method == "save") {
-    view->save();
-  } else if (method == "saveAs") {
-    view->saveAs();
-  } else if (method == "undo") {
-    view->undo();
-  } else if (method == "redo") {
-    view->redo();
-  } else if (method == "cut") {
-    view->cut();
-  } else if (method == "copy") {
-    view->copy();
-  } else if (method == "paste") {
-    view->paste();
-  } else if (method == "selectAll") {
-    view->selectAll();
-  } else {
-    qWarning("%s is not support", method.c_str());
-  }
-}
-
 QString TextEditView::path() {
   return m_document ? m_document->path() : "";
 }
@@ -522,6 +489,49 @@ void TextEditView::replaceAllSelection(const QString& findText,
     currentCursor.endEditBlock();
     update();
     clearSearchHighlight();
+  }
+}
+
+void TextEditView::request(TextEditView* view,
+                           const std::string& method,
+                           msgpack::rpc::msgid_t msgId,
+                           const msgpack::object& ) {
+  if (method == "text") {
+    PluginManager::singleton().sendResponse(
+        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+  } else {
+    qWarning("%s is not support", method.c_str());
+  }
+
+}
+
+void TextEditView::notify(TextEditView* view,
+                          const std::string& method,
+                          const msgpack::object& obj) {
+  if (method == "save") {
+    view->save();
+  } else if (method == "saveAs") {
+    view->saveAs();
+  } else if (method == "undo") {
+    view->undo();
+  } else if (method == "redo") {
+    view->redo();
+  } else if (method == "cut") {
+    view->cut();
+  } else if (method == "copy") {
+    view->copy();
+  } else if (method == "paste") {
+    view->paste();
+  } else if (method == "selectAll") {
+    view->selectAll();
+  } else if (method == "delete") {
+    std::tuple<int, int> params;
+    obj.convert(&params);
+    int repeat = std::get<1>(params);
+    qDebug("repeat: %d", repeat);
+    view->doDelete(repeat);
+  } else {
+    qWarning("%s is not support", method.c_str());
   }
 }
 

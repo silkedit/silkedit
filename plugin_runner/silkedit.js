@@ -72,7 +72,12 @@ module.exports = function (client) {
   TextEditView.prototype.selectAll = function () {
     client.notify('TextEditView.selectAll', this.id)
   }
-  
+
+  TextEditView.prototype.delete = function (repeat) {
+    repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
+    client.notify('TextEditView.delete', this.id, repeat)
+  }
+
 
   // class Window
   var Window = function(id) {
