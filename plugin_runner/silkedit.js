@@ -49,6 +49,31 @@ module.exports = function (client) {
     client.notify('TextEditView.saveAs', this.id)
   }
 
+  TextEditView.prototype.undo = function () {
+    client.notify('TextEditView.undo', this.id)
+  }
+
+  TextEditView.prototype.redo = function () {
+    client.notify('TextEditView.redo', this.id)
+  }
+
+  TextEditView.prototype.cut = function () {
+    client.notify('TextEditView.cut', this.id)
+  }
+
+  TextEditView.prototype.copy = function () {
+    client.notify('TextEditView.copy', this.id)
+  }
+
+  TextEditView.prototype.paste = function () {
+    client.notify('TextEditView.paste', this.id)
+  }
+
+  TextEditView.prototype.selectAll = function () {
+    client.notify('TextEditView.selectAll', this.id)
+  }
+  
+
   // class Window
   var Window = function(id) {
     this.id = id

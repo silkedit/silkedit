@@ -22,8 +22,6 @@ void ViEngine::enable() {
   std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
   CommandManager::add(std::move(changeModeCmd));
 
-  Context::add(ModeContext::name, &ModeContext::singleton());
-
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {
     view->setThinCursor(false);
@@ -42,7 +40,6 @@ void ViEngine::enable() {
 
 void ViEngine::disable() {
   CommandManager::remove(ChangeModeCommand::name);
-  Context::remove(ModeContext::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {

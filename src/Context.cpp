@@ -1,11 +1,13 @@
 #include "Context.h"
 #include "OSContext.h"
+#include "ModeContext.h"
 
 std::unordered_map<QString, IContext*> Context::s_contexts;
 
 void Context::init() {
   // register default contexts
   add(OSContext::name, &OSContext::singleton());
+  add(ModeContext::name, &ModeContext::singleton());
 }
 
 void Context::add(const QString& key, IContext* context) {

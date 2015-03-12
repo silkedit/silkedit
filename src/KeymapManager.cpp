@@ -85,7 +85,7 @@ void KeymapManager::load(const QString& filename) {
       assert(node.IsMap());
 
       YAML::Node contextNode = node["context"];
-      std::unique_ptr<Context> context;
+      std::shared_ptr<Context> context;
       if (contextNode.IsDefined()) {
         context.reset(YamlUtils::parseContext(contextNode));
         if (!context) {
@@ -106,7 +106,7 @@ void KeymapManager::load(const QString& filename) {
           case YAML::NodeType::Scalar: {
             QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
             qDebug() << "key: " << key << ", cmd: " << cmd;
-            add(key, CommandEvent(cmd, std::move(context)));
+            add(key, CommandEvent(cmd, context));
             break;
           }
           case YAML::NodeType::Map: {
@@ -118,9 +118,9 @@ void KeymapManager::load(const QString& filename) {
             if (argsNode.IsMap()) {
               assert(argsNode.IsMap());
               CommandArgument args = parseArgs(argsNode);
-              add(key, CommandEvent(cmd, args, std::move(context)));
+              add(key, CommandEvent(cmd, args, context));
             } else {
-              add(key, CommandEvent(cmd, std::move(context)));
+              add(key, CommandEvent(cmd, context));
             }
 
             break;

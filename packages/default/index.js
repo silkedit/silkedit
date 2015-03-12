@@ -56,5 +56,41 @@ module.exports = {
 				}
 			}
 		}
+		,"undo": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.undo()
+			}
+		}
+		,"redo": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.redo()
+			}
+		}
+		,"cut": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.cut()
+			}
+		}
+		,"copy": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.copy()
+			}
+		}
+		,"paste": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.paste()
+			}
+		}
+		,"select_all": function() {
+			var editView = silk.activeView()
+			if (editView != null) {
+				editView.selectAll()
+			}
+		}
 	}
 }

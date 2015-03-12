@@ -19,3 +19,21 @@ menu:
       command: close_other_tabs
     - label: 'Close Tab'
       command: close_active_tab
+
+  - label: Edit
+    submenu:
+    - type: separator
+      context: os == mac
+    - label: 'Undo'
+      command: undo
+    - label: 'Redo'
+      command: redo
+    - type: separator
+    - label: 'Cut'
+      command: cut
+    - label: 'Copy'
+      command: copy
+    - label: 'Paste'
+      command: paste
+    - label: 'Select All'
+      command: select_all

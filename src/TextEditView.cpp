@@ -83,7 +83,7 @@ void TextEditView::request(const std::string& method,
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
-    qWarning("%s is not support");
+    qWarning("%s is not support", method.c_str());
   }
 }
 
@@ -92,8 +92,20 @@ void TextEditView::notify(const std::string& method, TextEditView* view) {
     view->save();
   } else if (method == "saveAs") {
     view->saveAs();
+  } else if (method == "undo") {
+    view->undo();
+  } else if (method == "redo") {
+    view->redo();
+  } else if (method == "cut") {
+    view->cut();
+  } else if (method == "copy") {
+    view->copy();
+  } else if (method == "paste") {
+    view->paste();
+  } else if (method == "selectAll") {
+    view->selectAll();
   } else {
-    qWarning("%s is not support");
+    qWarning("%s is not support", method.c_str());
   }
 }
 

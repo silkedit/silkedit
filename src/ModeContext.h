@@ -11,6 +11,7 @@ class ModeContext : public Singleton<ModeContext>, public IContext {
   static const QString name;
 
   void init(ViEngine* viEngine) { m_viEngine = viEngine; }
+  bool isSatisfied(Operator op, const QString& operand) override;
 
   ~ModeContext() = default;
 

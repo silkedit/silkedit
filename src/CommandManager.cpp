@@ -5,12 +5,6 @@
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
 #include "commands/DeleteCommand.h"
-#include "commands/UndoCommand.h"
-#include "commands/RedoCommand.h"
-#include "commands/CutCommand.h"
-#include "commands/CopyCommand.h"
-#include "commands/PasteCommand.h"
-#include "commands/SelectAllCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "commands/OpenFindPanelCommand.h"
@@ -40,19 +34,6 @@ void CommandManager::init() {
 
   std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand);
   add(std::move(deleteCmd));
-
-  std::unique_ptr<UndoCommand> undoCmd(new UndoCommand);
-  add(std::move(undoCmd));
-
-  std::unique_ptr<RedoCommand> redoCmd(new RedoCommand);
-  add(std::move(redoCmd));
-
-  add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
-
-  add(std::move(std::unique_ptr<CutCommand>(new CutCommand)));
-  add(std::move(std::unique_ptr<CopyCommand>(new CopyCommand)));
-  add(std::move(std::unique_ptr<PasteCommand>(new PasteCommand)));
-  add(std::move(std::unique_ptr<SelectAllCommand>(new SelectAllCommand)));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   add(std::move(splitHorizontallyCmd));

@@ -14,7 +14,7 @@ class IContext {
  public:
   virtual ~IContext() = default;
 
-  bool isSatisfied(Operator op, const QString& operand);
+  virtual bool isSatisfied(Operator op, const QString& operand);
 
  protected:
   IContext() = default;
