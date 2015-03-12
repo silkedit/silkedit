@@ -36,7 +36,10 @@ signals:
  protected:
   friend struct UniqueObject<TabViewGroup>;
 
-  static void request(TabViewGroup* view, const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
+  static void request(TabViewGroup* view,
+                      const std::string& method,
+                      msgpack::rpc::msgid_t msgId,
+                      const msgpack::object& obj);
   static void notify(TabViewGroup* view, const std::string& method, const msgpack::object& obj);
 
  private:

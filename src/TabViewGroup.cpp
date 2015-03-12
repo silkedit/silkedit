@@ -96,9 +96,7 @@ void TabViewGroup::request(TabViewGroup*,
                            const msgpack::object&) {
 }
 
-void TabViewGroup::notify(TabViewGroup* view,
-                          const std::string& method,
-                          const msgpack::object&) {
+void TabViewGroup::notify(TabViewGroup* view, const std::string& method, const msgpack::object&) {
   if (method == "saveAllTabs") {
     view->saveAllTabs();
   } else {

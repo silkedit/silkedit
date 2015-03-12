@@ -4,8 +4,7 @@
 
 const QString ModeContext::name = "mode";
 
-bool ModeContext::isSatisfied(Operator op, const QString &operand)
-{
+bool ModeContext::isSatisfied(Operator op, const QString& operand) {
   return m_viEngine->isEnabled() && IContext::isSatisfied(op, operand);
 }
 

@@ -495,14 +495,13 @@ void TextEditView::replaceAllSelection(const QString& findText,
 void TextEditView::request(TextEditView* view,
                            const std::string& method,
                            msgpack::rpc::msgid_t msgId,
-                           const msgpack::object& ) {
+                           const msgpack::object&) {
   if (method == "text") {
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
     qWarning("%s is not support", method.c_str());
   }
-
 }
 
 void TextEditView::notify(TextEditView* view,

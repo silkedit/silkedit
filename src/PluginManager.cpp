@@ -66,7 +66,9 @@ void PluginManager::init() {
 void PluginManager::callExternalCommand(const QString& cmd,
                                         std::unordered_map<std::string, std::string> args) {
   msgpack::sbuffer sbuf;
-  msgpack::rpc::msg_notify<std::string, std::tuple<std::string, std::unordered_map<std::string, std::string>>> notify;
+  msgpack::rpc::msg_notify<std::string,
+                           std::tuple<std::string, std::unordered_map<std::string, std::string>>>
+      notify;
   notify.method = "runCommand";
   std::string methodName = cmd.toUtf8().constData();
   std::tuple<std::string, std::unordered_map<std::string, std::string>> params =
