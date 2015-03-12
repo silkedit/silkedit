@@ -17,7 +17,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
 
   // Edit Menu (Without this, Edit menu doesn't appear in Mac)
-  auto editMenu = addMenu(QObject::tr("&Edit"));
+  addMenu(QObject::tr("&Edit"));
 
   // View menu
   auto viewMenu = addMenu(QObject::tr("&View"));
