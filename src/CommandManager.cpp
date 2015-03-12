@@ -4,7 +4,6 @@
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/MoveCursorCommand.h"
-#include "commands/DeleteCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "commands/OpenFindPanelCommand.h"
@@ -31,9 +30,6 @@ void CommandManager::init() {
   // add commands
   std::unique_ptr<MoveCursorCommand> moveCursorCmd(new MoveCursorCommand);
   add(std::move(moveCursorCmd));
-
-  std::unique_ptr<DeleteCommand> deleteCmd(new DeleteCommand);
-  add(std::move(deleteCmd));
 
   std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
   add(std::move(splitHorizontallyCmd));
