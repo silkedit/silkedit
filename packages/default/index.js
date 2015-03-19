@@ -109,5 +109,11 @@ module.exports = {
 				editView.moveCursor(args['operation'], args['repeat'])
 			}
 		}
+		,"open_find_panel": function() {
+			var win = silk.activeWindow()
+			if (win != null) {
+				win.openFindPanel()
+			}
+		}
 	}
 }

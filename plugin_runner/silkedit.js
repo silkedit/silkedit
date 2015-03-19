@@ -95,6 +95,10 @@ module.exports = function (client) {
     client.notify('Window.close', this.id)
   }
 
+  Window.prototype.openFindPanel = function() {
+    client.notify('Window.openFindPanel', this.id)
+  }
+
 
   // API
   return {

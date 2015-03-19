@@ -209,5 +209,7 @@ void Window::request(Window*, const std::string&, msgpack::rpc::msgid_t, const m
 void Window::notify(Window* window, const std::string& method, const msgpack::object&) {
   if (method == "close") {
     window->close();
+  } else if (method == "openFindPanel") {
+    window->openFindAndReplacePanel();
   }
 }
