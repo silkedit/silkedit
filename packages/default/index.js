@@ -115,5 +115,17 @@ module.exports = {
 				win.openFindPanel()
 			}
 		}
+		,"split_horizontally": function() {
+			var tabViewGroup = silk.activeTabViewGroup()
+			if (tabViewGroup != null) {
+				tabViewGroup.splitHorizontally();
+			}
+		}
+		,"split_vertically": function() {
+			var tabViewGroup = silk.activeTabViewGroup()
+			if (tabViewGroup != null) {
+				tabViewGroup.splitVertically();
+			}
+		}
 	}
 }

@@ -3,8 +3,6 @@
 #include "CommandManager.h"
 #include "commands/ToggleVimEmulationCommand.h"
 #include "commands/ReopenLastClosedFileCommand.h"
-#include "commands/SplitHorizontallyCommand.h"
-#include "commands/SplitVerticallyCommand.h"
 
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::m_commands;
 
@@ -26,9 +24,4 @@ void CommandManager::remove(const QString& name) {
 
 void CommandManager::init() {
   // add commands
-  std::unique_ptr<SplitHorizontallyCommand> splitHorizontallyCmd(new SplitHorizontallyCommand());
-  add(std::move(splitHorizontallyCmd));
-
-  std::unique_ptr<SplitVerticallyCommand> splitVerticallyCmd(new SplitVerticallyCommand());
-  add(std::move(splitVerticallyCmd));
 }

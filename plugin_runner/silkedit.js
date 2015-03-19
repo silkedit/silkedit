@@ -31,6 +31,14 @@ module.exports = function (client) {
     client.notify('TabViewGroup.saveAllTabs', this.id)
   }
 
+  TabViewGroup.prototype.splitHorizontally = function() {
+    client.notify('TabViewGroup.splitHorizontally', this.id)
+  }
+
+  TabViewGroup.prototype.splitVertically = function() {
+    client.notify('TabViewGroup.splitVertically', this.id)
+  }
+
 
   // class TextEditView
   var TextEditView = function (id) {

@@ -99,6 +99,10 @@ void TabViewGroup::request(TabViewGroup*,
 void TabViewGroup::notify(TabViewGroup* view, const std::string& method, const msgpack::object&) {
   if (method == "saveAllTabs") {
     view->saveAllTabs();
+  } else if (method == "splitHorizontally") {
+    view->splitTabHorizontally();
+  } else if (method == "splitVertically") {
+    view->splitTabVertically();
   } else {
     qWarning("%s not supportd", method.c_str());
   }
