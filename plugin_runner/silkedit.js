@@ -78,6 +78,13 @@ module.exports = function (client) {
     client.notify('TextEditView.delete', this.id, repeat)
   }
 
+  TextEditView.prototype.moveCursor = function (operation, repeat) {
+    repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
+    if (operation != null && typeof(operation) == 'string') {
+      client.notify('TextEditView.moveCursor', this.id, operation, repeat)
+    }
+  }
+
 
   // class Window
   var Window = function(id) {

@@ -95,11 +95,18 @@ module.exports = {
 		,"delete": function(args) {
 			var editView = silk.activeView()
 			if (editView != null) {
+				var repeat = 'repeat' in args && typeof[args['repeat']] == 'number' ? args['repeat'] : 1
 				if (args['direction'] == 'backward') {
-					editView.delete(-1)
+					editView.delete(-1 * repeat)
 				} else {
-					editView.delete(1)
+					editView.delete(repeat)
 				}
+			}
+		}
+		,"move_cursor": function(args) {
+			var editView = silk.activeView()
+			if (editView != null && 'operation' in args) {
+				editView.moveCursor(args['operation'], args['repeat'])
 			}
 		}
 	}

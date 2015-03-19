@@ -1,5 +1,6 @@
 #include <tuple>
 #include <string>
+#include <algorithm>
 #include <QtWidgets>
 #include <QStringBuilder>
 
@@ -45,6 +46,31 @@ void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
     cursor.insertText(preservedCaseText(cursor.selectedText(), text));
   } else {
     cursor.insertText(text);
+  }
+}
+
+int toMoveOperation(std::string str) {
+  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+  if (str == "up") {
+    return QTextCursor::Up;
+  } else if (str == "down") {
+    return QTextCursor::Down;
+  } else if (str == "left") {
+    return QTextCursor::Left;
+  } else if (str == "right") {
+    return QTextCursor::Right;
+  } else if (str == "start_of_block") {
+    return QTextCursor::StartOfBlock;
+  } else if (str == "first_non_blank_char") {
+    return ViMoveOperation::FirstNonBlankChar;
+  } else if (str == "last_char") {
+    return ViMoveOperation::LastChar;
+  } else if (str == "next_line") {
+    return ViMoveOperation::NextLine;
+  } else if (str == "prev_line") {
+    return ViMoveOperation::PrevLine;
+  } else {
+    return QTextCursor::NoMove;
   }
 }
 }
@@ -529,6 +555,19 @@ void TextEditView::notify(TextEditView* view,
     int repeat = std::get<1>(params);
     qDebug("repeat: %d", repeat);
     view->doDelete(repeat);
+  } else if (method == "moveCursor") {
+    int numArgs = obj.via.array.size;
+    if (numArgs == 3) {
+      std::tuple<int, std::string, int> params;
+      obj.convert(&params);
+      std::string operation = std::get<1>(params);
+      int repeat = std::get<2>(params);
+      qDebug("operation: %s", operation.c_str());
+      qDebug("repeat: %d", repeat);
+      view->moveCursor(toMoveOperation(std::move(operation)), repeat);
+    } else {
+      qWarning("invalid numArgs: %d", numArgs);
+    }
   } else {
     qWarning("%s is not support", method.c_str());
   }

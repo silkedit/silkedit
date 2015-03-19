@@ -2,7 +2,6 @@
 #include <QAction>
 
 #include "commands/ReopenLastClosedFileCommand.h"
-#include "commands/MoveCursorCommand.h"
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "MenuBar.h"
