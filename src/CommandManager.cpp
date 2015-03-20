@@ -42,4 +42,6 @@ void CommandManager::init() {
   add(std::move(splitVerticallyCmd));
 
   add(std::move(std::unique_ptr<OpenFindPanelCommand>(new OpenFindPanelCommand)));
+
+  add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
 }
