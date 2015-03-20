@@ -20,12 +20,12 @@ menu:
     - label: 'Close Tab'
       command: close_tab
 
-  - label: Edit
+  - label: Text
     submenu:
-    - type: separator
-      context: os == mac
-    - label: 'Undo'
-      command: undo
+    # - type: separator
+    #   context: os == mac
+    # - label: 'Undo'
+    #   command: undo
     - label: 'Redo'
       command: redo
     - type: separator

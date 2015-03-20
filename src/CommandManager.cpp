@@ -8,6 +8,7 @@
 #include "commands/SplitHorizontallyCommand.h"
 #include "commands/SplitVerticallyCommand.h"
 #include "commands/OpenFindPanelCommand.h"
+#include "commands/UndoCommand.h"
 
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::m_commands;
 
@@ -44,4 +45,6 @@ void CommandManager::init() {
   add(std::move(std::unique_ptr<OpenFindPanelCommand>(new OpenFindPanelCommand)));
 
   add(std::move(std::unique_ptr<ReopenLastClosedFileCommand>(new ReopenLastClosedFileCommand)));
+
+  add(std::move(std::unique_ptr<UndoCommand>(new UndoCommand)));
 }
