@@ -1,5 +1,5 @@
 menu:
-  - label: Edit
+  - label: Text
     submenu:
     - label: 'Word Count'
       command: word_count.word_count
