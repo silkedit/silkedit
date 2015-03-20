@@ -150,7 +150,7 @@ build() {
         if [ ! -d Release ]; then
             mkdir Release
         fi
-        cp -r silkedit.exe packages plugin_runner Release
+        mv silkedit.exe packages plugin_runner Release
         cd Release
         windeployqt --release-with-debug-info silkedit.exe
         if [ $OS == 'Win32' ]; then
