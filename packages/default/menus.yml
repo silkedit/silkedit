@@ -18,7 +18,7 @@ menu:
     - label: 'Close Other Tabs'
       command: close_other_tabs
     - label: 'Close Tab'
-      command: close_active_tab
+      command: close_tab
 
   - label: Edit
     submenu:

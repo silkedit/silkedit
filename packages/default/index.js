@@ -45,7 +45,7 @@ module.exports = {
 				tabView.closeOtherTabs();
 			}
 		}
-		,"close_active_tab": function() {
+		,"close_tab": function() {
 			var tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.closeActiveTab();
