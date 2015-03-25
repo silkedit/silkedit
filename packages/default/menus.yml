@@ -18,14 +18,14 @@ menu:
     - label: 'Close Other Tabs'
       command: close_other_tabs
     - label: 'Close Tab'
-      command: close_active_tab
+      command: close_tab
 
-  - label: Edit
+  - label: Text
     submenu:
-    - type: separator
-      context: os == mac
-    - label: 'Undo'
-      command: undo
+    # - type: separator
+    #   context: os == mac
+    # - label: 'Undo'
+    #   command: undo
     - label: 'Redo'
       command: redo
     - type: separator

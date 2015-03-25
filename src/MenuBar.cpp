@@ -13,8 +13,11 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   auto fileMenu = addMenu(QObject::tr("&File"));
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
 
-  // Edit Menu (Without this, Edit menu doesn't appear in Mac)
-  addMenu(QObject::tr("&Edit"));
+  // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)
+  auto editMenu = addMenu(QObject::tr("&Text"));
+  // we need at least one sub menu to show the Text menu correctly because of this bug.
+  // https://bugreports.qt.io/browse/QTBUG-44412?jql=text%20~%20%22qmenubar%20mac%22
+  editMenu->addAction(new CommandAction(QObject::tr("&Undo"), UndoCommand::name));
 
   // View menu
   auto viewMenu = addMenu(QObject::tr("&View"));
