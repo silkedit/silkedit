@@ -6,6 +6,7 @@
 #include <string>
 
 #include "macros.h"
+#include "stlSpecialization.h"
 
 class API {
   DISABLE_COPY_AND_MOVE(API)
@@ -13,8 +14,8 @@ class API {
  public:
   static void init();
   static void hideActiveFindReplacePanel();
-  static void call(const std::string& method, const msgpack::object& obj);
-  static void call(const std::string& method,
+  static void call(const QString& method, const msgpack::object& obj);
+  static void call(const QString& method,
                    msgpack::rpc::msgid_t msgId,
                    const msgpack::object& obj);
 
@@ -22,8 +23,8 @@ class API {
   API() = delete;
   ~API() = delete;
 
-  static std::unordered_map<std::string, std::function<void(msgpack::object)>> s_notifyFunctions;
-  static std::unordered_map<std::string,
+  static std::unordered_map<QString, std::function<void(msgpack::object)>> s_notifyFunctions;
+  static std::unordered_map<QString,
                             std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
       s_requestFunctions;
 
@@ -31,7 +32,10 @@ class API {
   static void alert(msgpack::object obj);
   static void loadMenu(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
+  static void registerContext(msgpack::object obj);
+  static void unregisterContext(msgpack::object obj);
   static void open(msgpack::object obj);
+  static void dispatchCommand(msgpack::object obj);
 
   // request functions
   static void activeView(msgpack::rpc::msgid_t msgId, msgpack::object obj);

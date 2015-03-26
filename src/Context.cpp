@@ -1,17 +1,16 @@
 #include "Context.h"
 #include "OSContext.h"
-#include "ModeContext.h"
+#include "PluginContext.h"
 
-std::unordered_map<QString, IContext*> Context::s_contexts;
+std::unordered_map<QString, std::unique_ptr<IContext>> Context::s_contexts;
 
 void Context::init() {
   // register default contexts
-  add(OSContext::name, &OSContext::singleton());
-  add(ModeContext::name, &ModeContext::singleton());
+  add(OSContext::name, std::move(std::unique_ptr<IContext>(new OSContext())));
 }
 
-void Context::add(const QString& key, IContext* context) {
-  s_contexts[key] = context;
+void Context::add(const QString& key, std::unique_ptr<IContext> context) {
+  s_contexts[key] = std::move(context);
 }
 
 void Context::remove(const QString& key) {

@@ -17,6 +17,7 @@
 #include "TestUtil.h"
 #include "PluginManager.h"
 #include "Context.h"
+#include "msgpackHelper.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -24,19 +25,16 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
+  // register object_with_zone to make it avaialble for queued signal-slot communication
+  qRegisterMetaType<object_with_zone>();
+
   Context::init();
 
   PackageManager::loadPackages();
 
   ConfigManager::load();
 
-  CommandManager::init();
-
-  ViEngine viEngine;
-
-  std::unique_ptr<ToggleVimEmulationCommand> toggleVimEmulationCmd(
-      new ToggleVimEmulationCommand(&viEngine));
-  CommandManager::add(std::move(toggleVimEmulationCmd));
+//  ViEngine viEngine;
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
@@ -49,9 +47,10 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  if (ConfigManager::isTrue("enable_vim_emulation")) {
-    viEngine.enable();
-  }
+  // todo: replace with js version
+//  if (ConfigManager::isTrue("enable_vim_emulation")) {
+//    viEngine.enable();
+//  }
 
   Session::singleton().init();
 

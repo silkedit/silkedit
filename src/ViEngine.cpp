@@ -7,20 +7,19 @@
 #include "TextEditView.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
-#include "ModeContext.h"
-#include "commands/ChangeModeCommand.h"
 #include "Context.h"
+#include "StatusBar.h"
 
 ViEngine::ViEngine(QObject* parent)
     : QObject(parent), m_mode(Mode::CMD), m_repeatCount(0), m_isEnabled(false) {
-  ModeContext::singleton().init(this);
+//  ModeContext::singleton().init(this);
 }
 
 void ViEngine::enable() {
   qDebug("enabling ViEngine");
 
-  std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
-  CommandManager::add(std::move(changeModeCmd));
+//  std::unique_ptr<ChangeModeCommand> changeModeCmd(new ChangeModeCommand(this));
+//  CommandManager::add(std::move(changeModeCmd));
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {
@@ -39,7 +38,7 @@ void ViEngine::enable() {
 }
 
 void ViEngine::disable() {
-  CommandManager::remove(ChangeModeCommand::name);
+//  CommandManager::remove(ChangeModeCommand::name);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
   if (auto view = SilkApp::activeEditView()) {
@@ -55,18 +54,18 @@ void ViEngine::disable() {
 }
 
 bool ViEngine::keyEventFilter(QKeyEvent* event) {
-  if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
-    cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
-    return true;
-  }
+//  if (event->type() == QEvent::KeyPress && mode() == Mode::CMD) {
+//    cmdModeKeyPressEvent(static_cast<QKeyEvent*>(event));
+//    return true;
+//  }
 
-  if (event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    if (keyEvent->key() == Qt::Key_Escape) {
-      setMode(Mode::CMD);
-      return true;
-    }
-  }
+//  if (event->type() == QEvent::KeyPress && mode() == Mode::CMDLINE) {
+//    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+//    if (keyEvent->key() == Qt::Key_Escape) {
+//      setMode(Mode::CMD);
+//      return true;
+//    }
+//  }
 
   return false;
 }

@@ -519,20 +519,21 @@ void TextEditView::replaceAllSelection(const QString& findText,
 }
 
 void TextEditView::request(TextEditView* view,
-                           const std::string& method,
+                           const QString& method,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
-    qWarning("%s is not support", method.c_str());
+    qWarning("%s is not support", qPrintable(method));
   }
 }
 
 void TextEditView::notify(TextEditView* view,
-                          const std::string& method,
+                          const QString& method,
                           const msgpack::object& obj) {
+  int numArgs = obj.via.array.size;
   if (method == "save") {
     view->save();
   } else if (method == "saveAs") {
@@ -556,7 +557,6 @@ void TextEditView::notify(TextEditView* view,
     qDebug("repeat: %d", repeat);
     view->doDelete(repeat);
   } else if (method == "moveCursor") {
-    int numArgs = obj.via.array.size;
     if (numArgs == 3) {
       std::tuple<int, std::string, int> params;
       obj.convert(&params);
@@ -568,8 +568,17 @@ void TextEditView::notify(TextEditView* view,
     } else {
       qWarning("invalid numArgs: %d", numArgs);
     }
+  } else if (method == "setThinCursor") {
+    if (numArgs == 2) {
+      std::tuple<int, bool> params;
+      obj.convert(&params);
+      bool isThin = std::get<1>(params);
+      view->setThinCursor(isThin);
+    } else {
+      qWarning("invalid numArgs: %d", numArgs);
+    }
   } else {
-    qWarning("%s is not support", method.c_str());
+    qWarning("%s is not support", qPrintable(method));
   }
 }
 

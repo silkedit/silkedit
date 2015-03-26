@@ -1,5 +1,9 @@
 #pragma once
 
+#include <vector>
+#include <string>
+#include <tuple>
+#include <functional>
 #include <memory>
 #include <unordered_map>
 #include <QString>
@@ -12,13 +16,15 @@
 class CommandManager {
   DISABLE_COPY_AND_MOVE(CommandManager)
 
+  typedef std::function<
+      std::tuple<bool, std::string, CommandArgument>(const std::string&, const CommandArgument&)> CmdEventHandler;
+
  public:
-  static void runCommand(const QString& name,
-                         const CommandArgument& args = CommandArgument(),
+  static void runCommand(const QString& name, const CommandArgument& args = CommandArgument(),
                          int repeat = 1);
   static void add(std::unique_ptr<ICommand> cmd);
   static void remove(const QString& name);
-  static void init();
+  static void addEventFilter(CmdEventHandler handler);
 
  private:
   CommandManager() = delete;
@@ -26,5 +32,7 @@ class CommandManager {
 
   // QHash doesn't like unique_ptr (probably lack of move semantics),
   // so use an unordered_map here instead
-  static std::unordered_map<QString, std::unique_ptr<ICommand>> m_commands;
+  static std::unordered_map<QString, std::unique_ptr<ICommand>> s_commands;
+
+  static std::vector<CmdEventHandler> s_cmdEventFilters;
 };

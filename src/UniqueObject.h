@@ -24,7 +24,7 @@ struct UniqueObject {
     return nullptr;
   }
 
-  static void callNotifyFunc(const std::string& method, const msgpack::object& obj) {
+  static void callNotifyFunc(const QString& method, const msgpack::object& obj) {
     std::tuple<int> params;
     obj.convert(&params);
     int id = std::get<0>(params);
@@ -37,7 +37,7 @@ struct UniqueObject {
   }
 
   static void callRequestFunc(msgpack::rpc::msgid_t msgId,
-                              const std::string& method,
+                              const QString& method,
                               const msgpack::object& obj) {
     std::tuple<int> params;
     obj.convert(&params);

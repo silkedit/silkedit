@@ -91,12 +91,12 @@ TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
 }
 
 void TabViewGroup::request(TabViewGroup*,
-                           const std::string&,
+                           const QString&,
                            msgpack::rpc::msgid_t,
                            const msgpack::object&) {
 }
 
-void TabViewGroup::notify(TabViewGroup* view, const std::string& method, const msgpack::object&) {
+void TabViewGroup::notify(TabViewGroup* view, const QString& method, const msgpack::object&) {
   if (method == "saveAllTabs") {
     view->saveAllTabs();
   } else if (method == "splitHorizontally") {
@@ -104,7 +104,7 @@ void TabViewGroup::notify(TabViewGroup* view, const std::string& method, const m
   } else if (method == "splitVertically") {
     view->splitTabVertically();
   } else {
-    qWarning("%s not supportd", method.c_str());
+    qWarning("%s not supportd", qPrintable(method));
   }
 }
 

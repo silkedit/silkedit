@@ -11,6 +11,8 @@ if (process.argv.length < 3) {
 var socketFile = process.argv[2];
 var moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
 var commands = {}
+var contexts = {}
+var eventFilters = {}
 
 function getDirs(dir) {
   var files = fs.readdirSync(dir);
@@ -27,7 +29,7 @@ function getDirs(dir) {
 }
 
 var c = rpc.createClient(socketFile, function () {
-  GLOBAL.silk = require('./silkedit')(c);
+  GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters);
 
   sync(c, 'invoke');
 
@@ -58,6 +60,8 @@ var c = rpc.createClient(socketFile, function () {
                       commands[prop] = module.commands[prop];
                     }
                     silk.registerCommands(Object.keys(module.commands));
+                  } else {
+                    console.log("no commands")
                   }
 
                   if (module.activate) {
@@ -86,11 +90,50 @@ var c = rpc.createClient(socketFile, function () {
 });
 
 var handler = {
+  // notify
   "runCommand": function(cmd, args) {
-    if (commands[cmd]) {
+    if (cmd in commands) {
       sync.fiber(function(){
         commands[cmd](args)
       })
+    }
+  }
+
+  // request
+  ,"askContext": function(name, operator, value, response) {
+      if (name in contexts) {
+      sync.fiber(function(){
+        response.result(contexts[name](operator, value))
+      })
+    } else {
+      response.result(false)
+    }
+  }
+  ,"eventFilter": function(type, event, response) {
+    // console.log('eventFilter. type: %s', type)
+    if (type in eventFilters) {
+      sync.fiber(function(){
+        response.result(eventFilters[type].some(function(fn){ return fn(event)}))
+      })
+    } else {
+      response.result(false)
+    }
+  }
+  ,"cmdEventFilter": function(name, args, response) {
+    var event = {
+      "name": name,
+      "args": args
+    }
+    var type = "runCommand"
+    if (type in eventFilters) {
+      sync.fiber(function(){
+        var result = eventFilters[type].some(function(fn){
+          return fn(event)
+        })
+        response.result([result, event.name, event.args])
+      })
+    } else {
+      response.result([false, event.name, event.args])
     }
   }
 }

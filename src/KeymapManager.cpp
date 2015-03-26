@@ -10,7 +10,6 @@
 
 #include "KeymapManager.h"
 #include "CommandEvent.h"
-#include "ModeContext.h"
 #include "Constants.h"
 #include "Util.h"
 #include "util/YamlUtils.h"
@@ -60,14 +59,14 @@ QKeySequence toSequence(QString str) {
 }
 
 CommandArgument parseArgs(const YAML::Node& argsNode) {
-  std::unordered_map<QString, QVariant> args;
+  CommandArgument args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
-    QString arg = QString::fromUtf8(argsIter->first.as<std::string>().c_str());
-    QString value = QString::fromUtf8(argsIter->second.as<std::string>().c_str());
-    args.insert(std::make_pair(std::move(arg), QVariant(value)));
+    std::string arg = argsIter->first.as<std::string>();
+    std::string value = argsIter->second.as<std::string>();
+    args.insert(std::make_pair(std::move(arg), std::move(value)));
   }
 
-  return std::move(CommandArgument(args));
+  return std::move(args);
 }
 }
 

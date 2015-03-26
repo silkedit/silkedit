@@ -313,10 +313,10 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1, true);
 }
 
-void TabView::request(TabView*, const std::string&, msgpack::rpc::msgid_t, const msgpack::object&) {
+void TabView::request(TabView*, const QString&, msgpack::rpc::msgid_t, const msgpack::object&) {
 }
 
-void TabView::notify(TabView* view, const std::string& method, const msgpack::object&) {
+void TabView::notify(TabView* view, const QString& method, const msgpack::object&) {
   if (method == "closeAllTabs") {
     view->closeAllTabs();
   } else if (method == "closeActiveTab") {

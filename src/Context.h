@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <unordered_map>
 #include <QString>
 
@@ -9,7 +10,7 @@
 class Context {
  public:
   static void init();
-  static void add(const QString& key, IContext* context);
+  static void add(const QString& key, std::unique_ptr<IContext> context);
   static void remove(const QString& key);
 
   QString m_key;
@@ -20,5 +21,5 @@ class Context {
   bool isSatisfied();
 
  private:
-  static std::unordered_map<QString, IContext*> s_contexts;
+  static std::unordered_map<QString, std::unique_ptr<IContext>> s_contexts;
 };

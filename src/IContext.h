@@ -12,6 +12,8 @@ enum class Operator {
 class IContext {
   DISABLE_COPY_AND_MOVE(IContext)
  public:
+  static QString operatorString(Operator op);
+
   virtual ~IContext() = default;
 
   virtual bool isSatisfied(Operator op, const QString& operand);

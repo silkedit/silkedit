@@ -1,10 +1,11 @@
+#include <unordered_map>
+#include <string>
 #include <vector>
 #include <tuple>
-#include <msgpack/rpc/protocol.h>
-#include <msgpack.hpp>
 #include <QProcess>
 #include <QDebug>
 #include <QFile>
+#include <QKeyEvent>
 
 #include "PluginManager.h"
 #include "SilkApp.h"
@@ -13,17 +14,22 @@
 #include "TextEditView.h"
 #include "TabView.h"
 #include "Window.h"
+#include "StatusBar.h"
 #include "TabViewGroup.h"
+#include "KeymapManager.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
 
-std::unordered_map<std::string, std::function<void(const std::string&, msgpack::object)>>
+std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
     PluginManager::s_notifyFunctions;
-std::unordered_map<std::string,
-                   std::function<void(msgpack::rpc::msgid_t, const std::string, msgpack::object)>>
+std::unordered_map<
+    QString,
+    std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
     PluginManager::s_requestFunctions;
+msgpack::rpc::msgid_t PluginManager::s_msgId = 0;
+std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> PluginManager::s_eventLoopMap;
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
@@ -34,6 +40,21 @@ PluginManager::~PluginManager() {
 
 void PluginManager::init() {
   Q_ASSERT(!m_pluginProcess);
+
+  KeyHandler::singleton().registerKeyEventFilter(this);
+  CommandManager::addEventFilter(std::bind(
+      &PluginManager::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
+
+  connect(this,
+          &PluginManager::readyRequest,
+          this,
+          &PluginManager::callRequestFunc,
+          Qt::QueuedConnection);
+  connect(this,
+          &PluginManager::readyNotify,
+          this,
+          &PluginManager::callNotifyFunc,
+          Qt::QueuedConnection);
 
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::pluginServerSocketPath());
@@ -63,20 +84,34 @@ void PluginManager::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
-void PluginManager::callExternalCommand(const QString& cmd,
-                                        std::unordered_map<std::string, std::string> args) {
+void PluginManager::callExternalCommand(const QString& cmd, CommandArgument args) {
   msgpack::sbuffer sbuf;
   msgpack::rpc::msg_notify<std::string,
                            std::tuple<std::string, std::unordered_map<std::string, std::string>>>
       notify;
   notify.method = "runCommand";
   std::string methodName = cmd.toUtf8().constData();
-  std::tuple<std::string, std::unordered_map<std::string, std::string>> params =
-      std::make_tuple(methodName, args);
+  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
   notify.param = params;
   msgpack::pack(sbuf, notify);
 
   m_socket->write(sbuf.data(), sbuf.size());
+}
+
+bool PluginManager::askExternalContext(const QString& name, Operator op, const QString& value) {
+  qDebug("askExternalContext");
+  std::tuple<std::string, std::string, std::string> params =
+      std::make_tuple(name.toUtf8().constData(),
+                      IContext::operatorString(op).toUtf8().constData(),
+                      value.toUtf8().constData());
+
+  try {
+    return sendRequest<std::tuple<std::string, std::string, std::string>, bool>(
+        "askContext", params, msgpack::type::BOOLEAN);
+  } catch (const std::exception& e) {
+    qWarning() << e.what();
+    return false;
+  }
 }
 
 PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr) {
@@ -84,6 +119,7 @@ PluginManager::PluginManager() : m_pluginProcess(nullptr), m_socket(nullptr), m_
   REGISTER_FUNC(TabView)
   REGISTER_FUNC(TabViewGroup)
   REGISTER_FUNC(Window)
+  REGISTER_FUNC(StatusBar)
 }
 
 void PluginManager::readStdout() {
@@ -102,32 +138,42 @@ void PluginManager::pluginRunnerConnected() {
   qDebug() << "new Plugin runner connected";
 
   m_socket = m_server->nextPendingConnection();
-  connect(m_socket, SIGNAL(disconnected()), m_socket, SLOT(deleteLater()));
+  connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
   connect(m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest);
   connect(m_socket,
-          SIGNAL(error(QLocalSocket::LocalSocketError)),
+          static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
           this,
-          SLOT(displayError(QLocalSocket::LocalSocketError)));
+          &PluginManager::displayError);
 }
 
 void PluginManager::error(QProcess::ProcessError error) {
   qDebug() << "Error: " << error;
 }
 
+/**
+ * @brief PluginManager::readRequest
+ *
+ * from Qt doc
+ * > readyRead() is not emitted recursively; if you reenter the event loop or call
+ *waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
+ *reemitted (although waitForReadyRead() may still return true).
+ */
 void PluginManager::readRequest() {
   qDebug("readRequest");
 
-  msgpack::unpacker unp;
+  msgpack::unpacker unpacker;
   std::size_t readSize = m_socket->bytesAvailable();
 
   // Message receive loop
   while (true) {
-    unp.reserve_buffer(readSize);
+    unpacker.reserve_buffer(readSize);
     // unp has at least readSize buffer on this point.
 
     // read message to msgpack::unpacker's internal buffer directly.
-    qint64 actual_read_size = m_socket->read(unp.buffer(), readSize);
+    qint64 actual_read_size = m_socket->read(unpacker.buffer(), readSize);
     //    qDebug() << actual_read_size;
+    QByteArray array(unpacker.buffer(), actual_read_size);
+    qDebug() << QString(array.toHex());
     if (actual_read_size == 0) {
       break;
     } else if (actual_read_size == -1) {
@@ -136,90 +182,46 @@ void PluginManager::readRequest() {
     }
 
     // tell msgpack::unpacker actual consumed size.
-    unp.buffer_consumed(actual_read_size);
+    unpacker.buffer_consumed(actual_read_size);
 
     msgpack::unpacked result;
     // Message pack data loop
-    while (unp.next(result)) {
+    while (unpacker.next(result)) {
       msgpack::object obj(result.get());
+      std::shared_ptr<msgpack::zone> zone(result.zone().release());
       msgpack::rpc::msg_rpc rpc;
       try {
         obj.convert(&rpc);
 
         switch (rpc.type) {
-          case ::msgpack::rpc::REQUEST: {
+          case msgpack::rpc::REQUEST: {
             msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
             obj.convert(&req);
-            std::string methodName = req.method.as<std::string>();
-            qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
-            int dotIndex = methodName.find_first_of(".");
-            if (dotIndex >= 0) {
-              std::string type = methodName.substr(0, dotIndex);
-              std::string method = methodName.substr(dotIndex + 1);
-              if (type.empty() || method.empty()) {
-                return;
-              }
-
-              qDebug("type: %s, method: %s", type.c_str(), method.c_str());
-              if (s_requestFunctions.count(type) != 0) {
-                s_requestFunctions.at(type)(req.msgid, method, req.param);
-              } else {
-                qWarning("type: %s not supported", type.c_str());
-              }
-            } else {
-              API::call(methodName, req.msgid, req.param);
-            }
+            QString methodName = QString::fromUtf8(req.method.as<std::string>().c_str());
+            emit readyRequest(methodName, req.msgid, object_with_zone(req.param, zone));
           } break;
 
-          case ::msgpack::rpc::RESPONSE: {
-            //          ::msgpack::rpc::msg_response<object, object> res;
-            //          msg.convert(&res);
-            //          auto found = m_request_map.find(res.msgid);
-            //          if (found != m_request_map.end()) {
-            //            if (res.error.type == msgpack::type::NIL) {
-            //              found->second->set_result(res.result);
-            //            } else if (res.error.type == msgpack::type::BOOLEAN) {
-            //              bool isError;
-            //              res.error.convert(&isError);
-            //              if (isError) {
-            //                found->second->set_error(res.result);
-            //              } else {
-            //                found->second->set_result(res.result);
-            //              }
-            //            }
-            //          } else {
-            //            throw client_error("no request for response");
-            //          }
+          case msgpack::rpc::RESPONSE: {
+            msgpack::rpc::msg_response<msgpack::object, msgpack::object> res;
+            obj.convert(&res);
+            auto found = s_eventLoopMap.find(res.msgid);
+            if (found != s_eventLoopMap.end()) {
+              qDebug("result of %d arrived", res.msgid);
+              if (res.error.type == msgpack::type::NIL) {
+                found->second->setResult(object_with_zone(res.result, zone));
+              } else {
+                found->second->setError(object_with_zone(res.error, zone));
+              }
+            } else {
+              qWarning("no matched response result for %d", res.msgid);
+            }
           } break;
 
           case msgpack::rpc::NOTIFY: {
             msgpack::rpc::msg_notify<msgpack::object, msgpack::object> notify;
             obj.convert(&notify);
-            std::string methodName = notify.method.as<std::string>();
-            qDebug() << "method:" << qPrintable(QString::fromUtf8(methodName.c_str()));
-            if (obj.type != msgpack::type::ARRAY) {
-              qWarning("params must be an array");
-              return;
-            }
-
-            int dotIndex = methodName.find_first_of(".");
-            if (dotIndex >= 0) {
-              std::string type = methodName.substr(0, dotIndex);
-              std::string method = methodName.substr(dotIndex + 1);
-              if (type.empty() || method.empty()) {
-                return;
-              }
-
-              qDebug("type: %s, method: %s", type.c_str(), method.c_str());
-              if (s_notifyFunctions.count(type) != 0) {
-                s_notifyFunctions.at(type)(method, notify.param);
-              } else {
-                qWarning("type: %s not supported", type.c_str());
-              }
-            } else {
-              API::call(methodName, notify.param);
-            }
-
+            QString methodName = QString::fromUtf8(notify.method.as<std::string>().c_str());
+            emit readyNotify(methodName, object_with_zone(notify.param, zone));
           } break;
           default:
             qCritical("invalid rpc type");
@@ -246,4 +248,99 @@ void PluginManager::displayError(QLocalSocket::LocalSocketError socketError) {
       qWarning("The following error occurred: %s.", qPrintable(m_socket->errorString()));
       break;
   }
+}
+
+std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
+    const std::string& name,
+    const CommandArgument& arg) {
+  qDebug("cmdEventFilter");
+  std::tuple<std::string, CommandArgument> event = std::make_tuple(name, arg);
+  try {
+    return std::move(sendRequest<std::tuple<std::string, CommandArgument>,
+                                 std::tuple<bool, std::string, CommandArgument>>(
+        "cmdEventFilter", event, msgpack::type::ARRAY));
+  } catch (const std::exception& e) {
+    qCritical() << e.what();
+    return std::make_tuple(false, "", CommandArgument());
+  }
+}
+
+void PluginManager::callRequestFunc(const QString& methodName,
+                                    msgpack::rpc::msgid_t msgId,
+                                    object_with_zone args) {
+  qDebug() << "method:" << qPrintable(methodName);
+  int dotIndex = methodName.indexOf(".");
+  if (dotIndex >= 0) {
+    QString type = methodName.mid(0, dotIndex);
+    QString method = methodName.mid(dotIndex + 1);
+    if (type.isEmpty() || method.isEmpty()) {
+      return;
+    }
+
+    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
+    if (s_requestFunctions.count(type) != 0) {
+      s_requestFunctions.at(type)(msgId, method, args.object);
+    } else {
+      qWarning("type: %s not supported", qPrintable(type));
+    }
+  } else {
+    API::call(methodName, msgId, args.object);
+  }
+}
+
+void PluginManager::callNotifyFunc(const QString& methodName, object_with_zone args) {
+  qDebug() << "method:" << qPrintable(methodName);
+  if (args.object.type != msgpack::type::ARRAY) {
+    qWarning("params must be an array");
+    return;
+  }
+
+  int dotIndex = methodName.indexOf(".");
+  if (dotIndex >= 0) {
+    QString type = methodName.mid(0, dotIndex);
+    QString method = methodName.mid(dotIndex + 1);
+    if (type.isEmpty() || method.isEmpty()) {
+      return;
+    }
+
+    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
+    if (s_notifyFunctions.count(type) != 0) {
+      s_notifyFunctions.at(type)(method, args.object);
+    } else {
+      qWarning("type: %s not supported", qPrintable(type));
+    }
+  } else {
+    API::call(methodName, args.object);
+  }
+}
+
+bool PluginManager::keyEventFilter(QKeyEvent* event) {
+  qDebug("keyEventFilter");
+  std::unordered_map<std::string, std::string> map;
+  map.insert(std::make_pair("key", event->text().toUtf8().constData()));
+  std::tuple<std::string, std::unordered_map<std::string, std::string>> params =
+      std::make_tuple("keypress", map);
+  try {
+    return sendRequest<std::tuple<std::string, std::unordered_map<std::string, std::string>>, bool>(
+        "eventFilter", params, msgpack::type::BOOLEAN);
+  } catch (const std::exception& e) {
+    qCritical() << e.what();
+    return false;
+  }
+}
+
+void ResponseResult::setResult(const object_with_zone& obj) {
+  qDebug("setResult");
+  m_isReady = true;
+  m_isSuccess = true;
+  m_result = obj;
+  emit ready();
+}
+
+void ResponseResult::setError(const object_with_zone& obj) {
+  qDebug("setError");
+  m_isReady = true;
+  m_isSuccess = false;
+  m_result = obj;
+  emit ready();
 }

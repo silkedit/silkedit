@@ -15,10 +15,13 @@
 #include "TabViewGroup.h"
 #include "DocumentManager.h"
 #include "ProjectManager.h"
+#include "KeymapManager.h"
 #include "util.h"
+#include "Context.h"
+#include "PluginContext.h"
 
-std::unordered_map<std::string, std::function<void(msgpack::object)>> API::s_notifyFunctions;
-std::unordered_map<std::string, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
+std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
+std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
     API::s_requestFunctions;
 
 void API::init() {
@@ -26,6 +29,9 @@ void API::init() {
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
+  s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
+  s_notifyFunctions.insert(std::make_pair("unregisterContext", &unregisterContext));
+  s_notifyFunctions.insert(std::make_pair("dispatchCommand", &dispatchCommand));
 
   s_requestFunctions.insert(std::make_pair("activeView", &activeView));
   s_requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
@@ -41,19 +47,19 @@ void API::hideActiveFindReplacePanel() {
   }
 }
 
-void API::call(const std::string& method, const msgpack::object& obj) {
+void API::call(const QString& method, const msgpack::object& obj) {
   if (s_notifyFunctions.count(method) != 0) {
     s_notifyFunctions.at(method)(obj);
   } else {
-    qWarning("%s is not supported", method.c_str());
+    qWarning("%s is not supported", qPrintable(method));
   }
 }
 
-void API::call(const std::string& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj) {
+void API::call(const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj) {
   if (s_requestFunctions.count(method) != 0) {
     s_requestFunctions.at(method)(msgId, obj);
   } else {
-    qWarning("%s is not supported", method.c_str());
+    qWarning("%s is not supported", qPrintable(method));
   }
 }
 
@@ -84,6 +90,26 @@ void API::registerCommands(msgpack::object obj) {
   }
 }
 
+void API::registerContext(msgpack::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    msgpack::type::tuple<std::string> params;
+    obj.convert(&params);
+    QString context = QString::fromUtf8(std::get<0>(params).c_str());
+    Context::add(context, std::move(std::unique_ptr<IContext>(new PluginContext(context))));
+  }
+}
+
+void API::unregisterContext(msgpack::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    msgpack::type::tuple<std::string> params;
+    obj.convert(&params);
+    QString context = QString::fromUtf8(std::get<0>(params).c_str());
+    Context::remove(context);
+  }
+}
+
 void API::activeView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
@@ -102,7 +128,7 @@ void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   }
 }
 
-void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TabViewGroup* tabViewGroup = SilkApp::activeTabViewGroup();
   if (tabViewGroup) {
     PluginManager::singleton().sendResponse(tabViewGroup->id(), msgpack::type::nil(), msgId);
@@ -150,5 +176,16 @@ void API::open(msgpack::object obj) {
     ProjectManager::open(path);
   } else {
     qWarning("%s is neither file nor directory.", qPrintable(path));
+  }
+}
+
+// todo: handle modifiers
+void API::dispatchCommand(msgpack::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    msgpack::type::tuple<std::string> params;
+    obj.convert(&params);
+    QString key = QString::fromUtf8(std::get<0>(params).c_str());
+    KeymapManager::singleton().dispatch(new QKeyEvent(QEvent::KeyPress, QKeySequence(key)[0], Qt::NoModifier, key));
   }
 }

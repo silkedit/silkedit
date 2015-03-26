@@ -17,6 +17,7 @@
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
 #include "Context.h"
+#include "PluginManager.h"
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -157,6 +158,11 @@ TabView* Window::activeTabView() {
   }
 }
 
+void Window::setStatusBar(StatusBar* statusBar) {
+  m_statusBar = statusBar;
+  QMainWindow::setStatusBar(statusBar);
+}
+
 void Window::show() {
   QMainWindow::show();
   QApplication::setActiveWindow(this);
@@ -203,10 +209,16 @@ void Window::hideFindReplacePanel() {
   }
 }
 
-void Window::request(Window*, const std::string&, msgpack::rpc::msgid_t, const msgpack::object&) {
+void Window::request(Window* window,
+                     const QString& method,
+                     msgpack::rpc::msgid_t msgId,
+                     const msgpack::object&) {
+  if (method == "statusBar") {
+    PluginManager::singleton().sendResponse(window->statusBar()->id(), msgpack::type::nil(), msgId);
+  }
 }
 
-void Window::notify(Window* window, const std::string& method, const msgpack::object&) {
+void Window::notify(Window* window, const QString& method, const msgpack::object&) {
   if (method == "close") {
     window->close();
   } else if (method == "openFindPanel") {

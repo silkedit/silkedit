@@ -34,6 +34,8 @@ class Window : public QMainWindow, public UniqueObject<Window> {
   // accessor
   TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
   TabView* activeTabView();
+  StatusBar* statusBar() { return m_statusBar; }
+  void setStatusBar(StatusBar* statusBar);
 
   void show();
   void closeEvent(QCloseEvent* event) override;
@@ -48,10 +50,10 @@ signals:
   friend struct UniqueObject<Window>;
 
   static void request(Window* window,
-                      const std::string& method,
+                      const QString& method,
                       msgpack::rpc::msgid_t msgId,
                       const msgpack::object& obj);
-  static void notify(Window* window, const std::string& method, const msgpack::object& obj);
+  static void notify(Window* window, const QString& method, const msgpack::object& obj);
 
  private:
   static QList<Window*> s_windows;

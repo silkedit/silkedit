@@ -95,7 +95,7 @@ module.exports = {
 		,"delete": function(args) {
 			var editView = silk.activeView()
 			if (editView != null) {
-				var repeat = 'repeat' in args && typeof[args['repeat']] == 'number' ? args['repeat'] : 1
+				var repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 				if (args['direction'] == 'backward') {
 					editView.delete(-1 * repeat)
 				} else {
@@ -105,8 +105,9 @@ module.exports = {
 		}
 		,"move_cursor": function(args) {
 			var editView = silk.activeView()
+			var repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 			if (editView != null && 'operation' in args) {
-				editView.moveCursor(args['operation'], args['repeat'])
+				editView.moveCursor(args['operation'], repeat)
 			}
 		}
 		,"open_find_panel": function() {

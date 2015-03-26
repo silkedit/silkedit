@@ -1,4 +1,4 @@
-module.exports = function (client) {
+module.exports = function (client, contexts, eventFilters) {
 
   // class TabView
   var TabView = function(id) {
@@ -93,6 +93,10 @@ module.exports = function (client) {
     }
   }
 
+  TextEditView.prototype.setThinCursor = function (isThin) {
+    client.notify('TextEditView.setThinCursor', this.id, isThin)
+  }
+
 
   // class Window
   var Window = function(id) {
@@ -105,6 +109,23 @@ module.exports = function (client) {
 
   Window.prototype.openFindPanel = function() {
     client.notify('Window.openFindPanel', this.id)
+  }
+
+  Window.prototype.statusBar = function() {
+    var id = client.invoke('Window.statusBar', this.id)
+    return id != null ? new StatusBar(id) : null
+  }
+
+
+  // class StatusBar
+  var StatusBar = function(id) {
+    this.id = id
+  }
+
+  StatusBar.prototype.showMessage = function(message) {
+    if (message != null) {
+      client.notify('StatusBar.showMessage', this.id, message)
+    }
   }
 
 
@@ -120,6 +141,16 @@ module.exports = function (client) {
 
     ,registerCommands: function (commands) {
       client.notify('registerCommands', commands)
+    }
+
+    ,registerContext: function(name, func) {
+      contexts[name] = func
+      client.notify('registerContext', name)
+    }
+
+    ,unregisterContext: function(name) {
+      delete contexts[name]
+      client.notify('unregisterContext', name)
     }
 
     ,activeView: function () {
@@ -150,6 +181,50 @@ module.exports = function (client) {
     ,open: function (path) {
       if (path != null) {
         client.notify('open', path)
+      }
+    }
+
+    ,dispatchCommand: function (key) {
+      if (key != null) {
+        client.notify('dispatchCommand', key)
+      }
+    }
+
+    ,contextUtils: {
+      isSatisfied: function(key, operator, value) {
+        switch(operator) {
+          case '==':
+          return key === value
+          case '!=':
+          return key !== value
+          case '>':
+          return key > value
+          case '>=':
+          return key >= value
+          case '<':
+          return key < value
+          case '<=':
+          return key <= value
+          default:
+          return false
+        }
+      }
+    }
+
+    ,on: function(type, fn) {
+      if (type in eventFilters) {
+        eventFilters[type].push(fn)
+      } else {
+        eventFilters[type] = [fn]
+      }
+    }
+
+    ,removeListener: function(type, fn) {
+      if (type in eventFilters) {
+        var index = eventFilters[type].indexOf(fn)
+        if (index !== -1) {
+          eventFilters[type].splice(index, 1)
+        }
       }
     }
   }

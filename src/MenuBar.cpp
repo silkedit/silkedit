@@ -2,6 +2,7 @@
 #include <QAction>
 
 #include "commands/ReopenLastClosedFileCommand.h"
+#include "commands/UndoCommand.h"
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
