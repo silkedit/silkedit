@@ -99,9 +99,8 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
           throw std::runtime_error("unexpected result type");
         }
       } else {
-        std::ostringstream out;
-        out << "error." << result.result().as<std::string>();
-        throw std::runtime_error(out.str());
+        std::string errMsg = result.result().as<std::string>();
+        throw std::runtime_error(errMsg);
       }
     } else {
       throw std::runtime_error("timeout for waiting the result");
