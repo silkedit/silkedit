@@ -45,17 +45,6 @@ void PluginManager::init() {
   CommandManager::addEventFilter(std::bind(
       &PluginManager::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
-  connect(this,
-          &PluginManager::readyRequest,
-          this,
-          &PluginManager::callRequestFunc,
-          Qt::QueuedConnection);
-  connect(this,
-          &PluginManager::readyNotify,
-          this,
-          &PluginManager::callNotifyFunc,
-          Qt::QueuedConnection);
-
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::pluginServerSocketPath());
   if (socketFile.exists()) {
@@ -139,7 +128,13 @@ void PluginManager::pluginRunnerConnected() {
 
   m_socket = m_server->nextPendingConnection();
   connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
-  connect(m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest);
+
+  // QueuedConnection is necessary to emit readyRead() recursively.
+  // > readyRead() is not emitted recursively; if you reenter the event loop or call
+  // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
+  // reemitted (although waitForReadyRead() may still return true).
+  connect(
+      m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest, Qt::QueuedConnection);
   connect(m_socket,
           static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
           this,
@@ -150,14 +145,6 @@ void PluginManager::error(QProcess::ProcessError error) {
   qDebug() << "Error: " << error;
 }
 
-/**
- * @brief PluginManager::readRequest
- *
- * from Qt doc
- * > readyRead() is not emitted recursively; if you reenter the event loop or call
- *waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
- *reemitted (although waitForReadyRead() may still return true).
- */
 void PluginManager::readRequest() {
   qDebug("readRequest");
 
@@ -188,7 +175,6 @@ void PluginManager::readRequest() {
     // Message pack data loop
     while (unpacker.next(result)) {
       msgpack::object obj(result.get());
-      std::shared_ptr<msgpack::zone> zone(result.zone().release());
       msgpack::rpc::msg_rpc rpc;
       try {
         obj.convert(&rpc);
@@ -198,7 +184,7 @@ void PluginManager::readRequest() {
             msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
             obj.convert(&req);
             QString methodName = QString::fromUtf8(req.method.as<std::string>().c_str());
-            emit readyRequest(methodName, req.msgid, object_with_zone(req.param, zone));
+            callRequestFunc(methodName, req.msgid, req.param);
           } break;
 
           case msgpack::rpc::RESPONSE: {
@@ -208,9 +194,9 @@ void PluginManager::readRequest() {
             if (found != s_eventLoopMap.end()) {
               qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
-                found->second->setResult(object_with_zone(res.result, zone));
+                found->second->setResult(std::move(std::unique_ptr<object_with_zone>(new object_with_zone(res.result, std::move(result.zone())))));
               } else {
-                found->second->setError(object_with_zone(res.error, zone));
+                found->second->setError(std::move(std::unique_ptr<object_with_zone>(new object_with_zone(res.error, std::move(result.zone())))));
               }
             } else {
               qWarning("no matched response result for %d", res.msgid);
@@ -221,7 +207,7 @@ void PluginManager::readRequest() {
             msgpack::rpc::msg_notify<msgpack::object, msgpack::object> notify;
             obj.convert(&notify);
             QString methodName = QString::fromUtf8(notify.method.as<std::string>().c_str());
-            emit readyNotify(methodName, object_with_zone(notify.param, zone));
+            callNotifyFunc(methodName, notify.param);
           } break;
           default:
             qCritical("invalid rpc type");
@@ -267,7 +253,7 @@ std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
 
 void PluginManager::callRequestFunc(const QString& methodName,
                                     msgpack::rpc::msgid_t msgId,
-                                    object_with_zone args) {
+                                    const msgpack::object& obj) {
   qDebug() << "method:" << qPrintable(methodName);
   int dotIndex = methodName.indexOf(".");
   if (dotIndex >= 0) {
@@ -279,18 +265,18 @@ void PluginManager::callRequestFunc(const QString& methodName,
 
     qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
     if (s_requestFunctions.count(type) != 0) {
-      s_requestFunctions.at(type)(msgId, method, args.object);
+      s_requestFunctions.at(type)(msgId, method, obj);
     } else {
       qWarning("type: %s not supported", qPrintable(type));
     }
   } else {
-    API::call(methodName, msgId, args.object);
+    API::call(methodName, msgId, obj);
   }
 }
 
-void PluginManager::callNotifyFunc(const QString& methodName, object_with_zone args) {
+void PluginManager::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
   qDebug() << "method:" << qPrintable(methodName);
-  if (args.object.type != msgpack::type::ARRAY) {
+  if (obj.type != msgpack::type::ARRAY) {
     qWarning("params must be an array");
     return;
   }
@@ -305,12 +291,12 @@ void PluginManager::callNotifyFunc(const QString& methodName, object_with_zone a
 
     qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
     if (s_notifyFunctions.count(type) != 0) {
-      s_notifyFunctions.at(type)(method, args.object);
+      s_notifyFunctions.at(type)(method, obj);
     } else {
       qWarning("type: %s not supported", qPrintable(type));
     }
   } else {
-    API::call(methodName, args.object);
+    API::call(methodName, obj);
   }
 }
 
@@ -329,18 +315,18 @@ bool PluginManager::keyEventFilter(QKeyEvent* event) {
   }
 }
 
-void ResponseResult::setResult(const object_with_zone& obj) {
+void ResponseResult::setResult(std::unique_ptr<object_with_zone> obj) {
   qDebug("setResult");
   m_isReady = true;
   m_isSuccess = true;
-  m_result = obj;
+  m_result = std::move(obj);
   emit ready();
 }
 
-void ResponseResult::setError(const object_with_zone& obj) {
+void ResponseResult::setError(std::unique_ptr<object_with_zone> obj) {
   qDebug("setError");
   m_isReady = true;
   m_isSuccess = false;
-  m_result = obj;
+  m_result = std::move(obj);
   emit ready();
 }

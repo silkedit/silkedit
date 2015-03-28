@@ -5,16 +5,14 @@
 #include "macros.h"
 
 struct object_with_zone {
-  DEFAULT_COPY_AND_MOVE(object_with_zone)
+  DEFAULT_MOVE(object_with_zone)
+  DISABLE_COPY(object_with_zone)
 
-  object_with_zone() = default;
-  object_with_zone(const msgpack::object& obj, std::shared_ptr<msgpack::zone> z)
-      : object(obj), zone(z) {}
+  object_with_zone(const msgpack::object& obj, std::unique_ptr<msgpack::zone> z)
+      : object(obj), zone(std::move(z)) {}
 
   ~object_with_zone() = default;
 
   msgpack::object object;
-  std::shared_ptr<msgpack::zone> zone;
+  std::unique_ptr<msgpack::zone> zone;
 };
-
-Q_DECLARE_METATYPE(object_with_zone);

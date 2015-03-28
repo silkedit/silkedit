@@ -25,9 +25,6 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
-  // register object_with_zone to make it avaialble for queued signal-slot communication
-  qRegisterMetaType<object_with_zone>();
-
   Context::init();
 
   PackageManager::loadPackages();

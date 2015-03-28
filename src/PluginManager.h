@@ -34,10 +34,10 @@ class ResponseResult : public QObject {
 
   bool isReady() { return m_isReady; }
   bool isSuccess() { return m_isSuccess; }
-  msgpack::object result() { return m_result.object; }
+  msgpack::object result() { return m_result->object; }
 
-  void setResult(const object_with_zone& obj);
-  void setError(const object_with_zone& obj);
+  void setResult(std::unique_ptr<object_with_zone> obj);
+  void setError(std::unique_ptr<object_with_zone> obj);
 
 signals:
   void ready();
@@ -45,7 +45,7 @@ signals:
  private:
   bool m_isReady;
   bool m_isSuccess;
-  object_with_zone m_result;
+  std::unique_ptr<object_with_zone> m_result;
 };
 
 class PluginManager : public QObject, public Singleton<PluginManager>, public IKeyEventFilter {
@@ -120,12 +120,6 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
     m_socket->write(sbuf.data(), sbuf.size());
   }
 
-signals:
-  void readyRequest(const QString& method,
-                    msgpack::rpc::msgid_t msgId,
-                    const object_with_zone& args);
-  void readyNotify(const QString& method, const object_with_zone& args);
-
  private:
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
       s_notifyFunctions;
@@ -154,6 +148,6 @@ signals:
   void displayError(QLocalSocket::LocalSocketError);
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,
                                                                 const CommandArgument& arg);
-  void callRequestFunc(const QString& method, msgpack::rpc::msgid_t msgId, object_with_zone args);
-  void callNotifyFunc(const QString& method, object_with_zone args);
+  void callRequestFunc(const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
+  void callNotifyFunc(const QString& method, const msgpack::object& obj);
 };
