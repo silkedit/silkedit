@@ -194,9 +194,11 @@ void PluginManager::readRequest() {
             if (found != s_eventLoopMap.end()) {
               qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
-                found->second->setResult(std::move(std::unique_ptr<object_with_zone>(new object_with_zone(res.result, std::move(result.zone())))));
+                found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
+                    new object_with_zone(res.result, std::move(result.zone())))));
               } else {
-                found->second->setError(std::move(std::unique_ptr<object_with_zone>(new object_with_zone(res.error, std::move(result.zone())))));
+                found->second->setError(std::move(std::unique_ptr<object_with_zone>(
+                    new object_with_zone(res.error, std::move(result.zone())))));
               }
             } else {
               qWarning("no matched response result for %d", res.msgid);

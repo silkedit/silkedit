@@ -148,6 +148,8 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void displayError(QLocalSocket::LocalSocketError);
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,
                                                                 const CommandArgument& arg);
-  void callRequestFunc(const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
+  void callRequestFunc(const QString& method,
+                       msgpack::rpc::msgid_t msgId,
+                       const msgpack::object& obj);
   void callNotifyFunc(const QString& method, const msgpack::object& obj);
 };
