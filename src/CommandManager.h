@@ -17,10 +17,12 @@ class CommandManager {
   DISABLE_COPY_AND_MOVE(CommandManager)
 
   typedef std::function<
-      std::tuple<bool, std::string, CommandArgument>(const std::string&, const CommandArgument&)> CmdEventHandler;
+      std::tuple<bool, std::string, CommandArgument>(const std::string&, const CommandArgument&)>
+      CmdEventHandler;
 
  public:
-  static void runCommand(const QString& name, const CommandArgument& args = CommandArgument(),
+  static void runCommand(const QString& name,
+                         const CommandArgument& args = CommandArgument(),
                          int repeat = 1);
   static void add(std::unique_ptr<ICommand> cmd);
   static void remove(const QString& name);

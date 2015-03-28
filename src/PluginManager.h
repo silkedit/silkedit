@@ -121,7 +121,9 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   }
 
 signals:
-  void readyRequest(const QString& method, msgpack::rpc::msgid_t msgId, const object_with_zone& args);
+  void readyRequest(const QString& method,
+                    msgpack::rpc::msgid_t msgId,
+                    const object_with_zone& args);
   void readyNotify(const QString& method, const object_with_zone& args);
 
  private:

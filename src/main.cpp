@@ -34,7 +34,7 @@ int main(int argv, char** args) {
 
   ConfigManager::load();
 
-//  ViEngine viEngine;
+  //  ViEngine viEngine;
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
@@ -48,9 +48,9 @@ int main(int argv, char** args) {
   }
 
   // todo: replace with js version
-//  if (ConfigManager::isTrue("enable_vim_emulation")) {
-//    viEngine.enable();
-//  }
+  //  if (ConfigManager::isTrue("enable_vim_emulation")) {
+  //    viEngine.enable();
+  //  }
 
   Session::singleton().init();
 

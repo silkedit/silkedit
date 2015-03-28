@@ -43,10 +43,7 @@ void StatusBar::setLanguage(const QString& scope) {
   setCurrentLanguage(lang);
 }
 
-void StatusBar::request(StatusBar* ,
-                        const QString& ,
-                        msgpack::rpc::msgid_t ,
-                        const msgpack::object& ) {
+void StatusBar::request(StatusBar*, const QString&, msgpack::rpc::msgid_t, const msgpack::object&) {
 }
 
 void StatusBar::notify(StatusBar* view, const QString& method, const msgpack::object& obj) {

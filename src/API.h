@@ -15,17 +15,14 @@ class API {
   static void init();
   static void hideActiveFindReplacePanel();
   static void call(const QString& method, const msgpack::object& obj);
-  static void call(const QString& method,
-                   msgpack::rpc::msgid_t msgId,
-                   const msgpack::object& obj);
+  static void call(const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
 
  private:
   API() = delete;
   ~API() = delete;
 
   static std::unordered_map<QString, std::function<void(msgpack::object)>> s_notifyFunctions;
-  static std::unordered_map<QString,
-                            std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
+  static std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
       s_requestFunctions;
 
   // notify functions

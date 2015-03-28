@@ -530,9 +530,7 @@ void TextEditView::request(TextEditView* view,
   }
 }
 
-void TextEditView::notify(TextEditView* view,
-                          const QString& method,
-                          const msgpack::object& obj) {
+void TextEditView::notify(TextEditView* view, const QString& method, const msgpack::object& obj) {
   int numArgs = obj.via.array.size;
   if (method == "save") {
     view->save();

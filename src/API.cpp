@@ -186,6 +186,7 @@ void API::dispatchCommand(msgpack::object obj) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
     QString key = QString::fromUtf8(std::get<0>(params).c_str());
-    KeymapManager::singleton().dispatch(new QKeyEvent(QEvent::KeyPress, QKeySequence(key)[0], Qt::NoModifier, key));
+    KeymapManager::singleton().dispatch(
+        new QKeyEvent(QEvent::KeyPress, QKeySequence(key)[0], Qt::NoModifier, key));
   }
 }

@@ -20,7 +20,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   }
 
   QString qCmdName = QString::fromUtf8(cmdName.c_str());
-//  qDebug("qCmdName: %s", qPrintable(qCmdName));
+  //  qDebug("qCmdName: %s", qPrintable(qCmdName));
   if (s_commands.find(qCmdName) != s_commands.end()) {
     s_commands[qCmdName]->run(cmdArg, repeat);
   } else {
