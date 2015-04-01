@@ -27,16 +27,16 @@ QKeySequence toSequence(const QKeyEvent& ev) {
 
   http://qt-project.org/doc/qt-5.3/qt.html#KeyboardModifier-enum
   */
-  if (modifiers & Qt::ShiftModifier)
+  if (modifiers & Qt::ShiftModifier && keyInt != Qt::Key_Shift)
     keyInt += Qt::SHIFT;
-  if (modifiers & Qt::AltModifier)
+  if (modifiers & Qt::AltModifier && keyInt != Qt::Key_Alt)
     keyInt += Qt::ALT;
-  if (modifiers & Qt::ControlModifier)  // Cmd key on Mac
+  if (modifiers & Qt::ControlModifier && keyInt != Qt::Key_Control)  // Cmd key on Mac
     keyInt += Qt::CTRL;
-  if (modifiers & Qt::MetaModifier)  // Ctrl key on Mac
+  if (modifiers & Qt::MetaModifier && keyInt != Qt::Key_Meta)  // Ctrl key on Mac
     keyInt += Qt::META;
 
-  return std::move(QKeySequence(keyInt));
+  return QKeySequence(keyInt);
 }
 
 QString replace(QString str, const QString& regex, const QString& after) {

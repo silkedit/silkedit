@@ -17,6 +17,7 @@
 #include "StatusBar.h"
 #include "TabViewGroup.h"
 #include "KeymapManager.h"
+#include "modifiers.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
@@ -60,9 +61,9 @@ void PluginManager::init() {
 
   m_pluginProcess = new QProcess(this);
   connect(m_pluginProcess,
-          SIGNAL(error(QProcess::ProcessError)),
+          static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
           this,
-          SLOT(error(QProcess::ProcessError)));
+          &PluginManager::error);
   connect(m_pluginProcess, &QProcess::readyReadStandardOutput, this, &PluginManager::readStdout);
   connect(m_pluginProcess, &QProcess::readyReadStandardError, this, &PluginManager::readStderr);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
@@ -304,13 +305,46 @@ void PluginManager::callNotifyFunc(const QString& methodName, const msgpack::obj
 
 bool PluginManager::keyEventFilter(QKeyEvent* event) {
   qDebug("keyEventFilter");
-  std::unordered_map<std::string, std::string> map;
-  map.insert(std::make_pair("key", event->text().toUtf8().constData()));
-  std::tuple<std::string, std::unordered_map<std::string, std::string>> params =
-      std::make_tuple("keypress", map);
+  std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
+  bool isModifierKey = false;
+  std::string key;
+  switch (event->key()) {
+    case Silk::Key_Alt:
+      isModifierKey = true;
+      key = "Alt";
+      break;
+    case Silk::Key_Control:
+      isModifierKey = true;
+      key = "Control";
+      break;
+    case Silk::Key_Meta:
+      isModifierKey = true;
+      key = "Meta";
+      break;
+    case Silk::Key_Shift:
+      isModifierKey = true;
+      key = "Shift";
+      break;
+    default:
+      key = QKeySequence(event->key()).toString().toLower().toUtf8().constData();
+      break;
+  }
+
+  // don't send keypress/up event if only a modifier key is pressed
+  if (isModifierKey) {
+    return false;
+  }
+
+  bool altKey = event->modifiers() & Silk::AltModifier;
+  bool ctrlKey = event->modifiers() & Silk::ControlModifier;
+  bool metaKey = event->modifiers() & Silk::MetaModifier;
+  bool shiftKey = event->modifiers() & Silk::ShiftModifier;
+
+  std::tuple<std::string, std::string, bool, bool, bool, bool, bool> params =
+      std::make_tuple(type, key, event->isAutoRepeat(), altKey, ctrlKey, metaKey, shiftKey);
   try {
-    return sendRequest<std::tuple<std::string, std::unordered_map<std::string, std::string>>, bool>(
-        "eventFilter", params, msgpack::type::BOOLEAN);
+    return sendRequest<std::tuple<std::string, std::string, bool, bool, bool, bool, bool>, bool>(
+        "keyEventFilter", params, msgpack::type::BOOLEAN);
   } catch (const std::exception& e) {
     qCritical() << e.what();
     return false;

@@ -22,7 +22,7 @@ var keyPressHandler = function(event) {
 
 			}
 			console.log('dispatchCommand')
-			silk.dispatchCommand(event.key)
+			silk.dispatchCommand(event)
 			return true
 		case MODE.CMDLINE:
 			if (event.key == "Escape") {

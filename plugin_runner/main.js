@@ -119,6 +119,25 @@ var handler = {
       response.result(false)
     }
   }
+  ,"keyEventFilter": function(type, key, repeat, altKey, ctrlKey, metaKey, shiftKey, response) {
+    console.log('keyEventFilter. type: %s, key: %s, repeat: %s, altKey: %s, ctrlKey: %s, metaKey: %s, shiftKey: %s', type, key, repeat, altKey, ctrlKey, metaKey, shiftKey)
+    var event = {
+      "type": type
+      ,"key": key
+      ,"repeat": repeat
+      ,"altKey": altKey
+      ,"ctrlKey": ctrlKey
+      ,"metaKey": metaKey
+      ,"shiftKey": shiftKey
+    }
+    if (type in eventFilters) {
+      sync.fiber(function(){
+        response.result(eventFilters[type].some(function(fn){ return fn(event)}))
+      })
+    } else {
+      response.result(false)
+    }
+  }
   ,"cmdEventFilter": function(name, args, response) {
     var event = {
       "name": name,

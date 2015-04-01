@@ -184,9 +184,9 @@ module.exports = function (client, contexts, eventFilters) {
       }
     }
 
-    ,dispatchCommand: function (key) {
-      if (key != null) {
-        client.notify('dispatchCommand', key)
+    ,dispatchCommand: function (keyEvent) {
+      if (keyEvent != null) {
+        client.notify('dispatchCommand', keyEvent.type, keyEvent.key, keyEvent.repeat, keyEvent.altKey, keyEvent.ctrlKey, keyEvent.metaKey, keyEvent.shiftKey)
       }
     }
 

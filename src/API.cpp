@@ -19,6 +19,7 @@
 #include "util.h"
 #include "Context.h"
 #include "PluginContext.h"
+#include "modifiers.h"
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -179,14 +180,45 @@ void API::open(msgpack::object obj) {
   }
 }
 
-// todo: handle modifiers
 void API::dispatchCommand(msgpack::object obj) {
   int numArgs = obj.via.array.size;
-  if (numArgs == 1) {
-    msgpack::type::tuple<std::string> params;
+  if (numArgs == 7) {
+    msgpack::type::tuple<std::string, std::string, bool, bool, bool, bool, bool> params;
     obj.convert(&params);
-    QString key = QString::fromUtf8(std::get<0>(params).c_str());
+    std::string typeStr = std::get<0>(params);
+    QEvent::Type type;
+    if (typeStr == "keypress") {
+      type = QEvent::KeyPress;
+    } else if (typeStr == "keyup") {
+      type = QEvent::KeyRelease;
+    } else {
+      qWarning("invalid key event type: %s", typeStr.c_str());
+      return;
+    }
+
+    QString key = QString::fromUtf8(std::get<1>(params).c_str());
+    bool autorep = std::get<2>(params);
+    bool altKey = std::get<3>(params);
+    bool ctrlKey = std::get<4>(params);
+    bool metaKey = std::get<5>(params);
+    bool shiftKey = std::get<6>(params);
+    Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+    if (altKey) {
+      modifiers |= Silk::AltModifier;
+    }
+    if (ctrlKey) {
+      modifiers |= Silk::ControlModifier;
+    }
+    if (metaKey) {
+      modifiers |= Silk::MetaModifier;
+    }
+    if (shiftKey) {
+      modifiers |= Silk::ShiftModifier;
+    }
+
     KeymapManager::singleton().dispatch(
-        new QKeyEvent(QEvent::KeyPress, QKeySequence(key)[0], Qt::NoModifier, key));
+        new QKeyEvent(type, QKeySequence(key)[0], modifiers, key, autorep));
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
   }
 }
