@@ -9,15 +9,12 @@
 #include "ConfigManager.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
-#include "commands/ToggleVimEmulationCommand.h"
 #include "Session.h"
-#include "ViEngine.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
 #include "Context.h"
-#include "msgpackHelper.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -30,8 +27,6 @@ int main(int argv, char** args) {
   PackageManager::loadPackages();
 
   ConfigManager::load();
-
-  //  ViEngine viEngine;
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
