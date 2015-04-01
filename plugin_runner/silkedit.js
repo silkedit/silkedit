@@ -1,197 +1,203 @@
-module.exports = function (client, contexts, eventFilters) {
+'use strict';
+
+module.exports = (client, contexts, eventFilters) => {
 
   // class TabView
-  var TabView = function(id) {
+  const TabView = (id) => {
     this.id = id;
   }
 
-  TabView.prototype.closeAllTabs = function() {
+  TabView.prototype.closeAllTabs = () => {
     client.notify('TabView.closeAllTabs', this.id)
   }
 
-  TabView.prototype.closeOtherTabs = function() {
+  TabView.prototype.closeOtherTabs = () => {
     client.notify('TabView.closeOtherTabs', this.id)
   }
 
-  TabView.prototype.closeActiveTab = function() {
+  TabView.prototype.closeActiveTab = () => {
     client.notify('TabView.closeActiveTab', this.id)
   }
 
-  TabView.prototype.addNew = function() {
+  TabView.prototype.addNew = () => {
     client.notify('TabView.addNew', this.id)
   }
 
 
   // class TabViewGroup
-  var TabViewGroup = function(id) {
+  const TabViewGroup = (id) => {
     this.id = id
   }
 
-  TabViewGroup.prototype.saveAll = function() {
+  TabViewGroup.prototype.saveAll = () => {
     client.notify('TabViewGroup.saveAllTabs', this.id)
   }
 
-  TabViewGroup.prototype.splitHorizontally = function() {
+  TabViewGroup.prototype.splitHorizontally = () => {
     client.notify('TabViewGroup.splitHorizontally', this.id)
   }
 
-  TabViewGroup.prototype.splitVertically = function() {
+  TabViewGroup.prototype.splitVertically = () => {
     client.notify('TabViewGroup.splitVertically', this.id)
   }
 
 
   // class TextEditView
-  var TextEditView = function (id) {
+  const TextEditView = function (id) {
     this.id = id;
   }
 
-  TextEditView.prototype.text = function () {
+  TextEditView.prototype.text = () => {
     return client.invoke('TextEditView.text', this.id)
   }
 
-  TextEditView.prototype.save = function () {
+  TextEditView.prototype.save = () => {
     client.notify('TextEditView.save', this.id)
   }
 
-  TextEditView.prototype.saveAs = function () {
+  TextEditView.prototype.saveAs = () => {
     client.notify('TextEditView.saveAs', this.id)
   }
 
-  TextEditView.prototype.undo = function () {
+  TextEditView.prototype.undo = () => {
     client.notify('TextEditView.undo', this.id)
   }
 
-  TextEditView.prototype.redo = function () {
+  TextEditView.prototype.redo = () => {
     client.notify('TextEditView.redo', this.id)
   }
 
-  TextEditView.prototype.cut = function () {
+  TextEditView.prototype.cut = () => {
     client.notify('TextEditView.cut', this.id)
   }
 
-  TextEditView.prototype.copy = function () {
+  TextEditView.prototype.copy = () => {
     client.notify('TextEditView.copy', this.id)
   }
 
-  TextEditView.prototype.paste = function () {
+  TextEditView.prototype.paste = () => {
     client.notify('TextEditView.paste', this.id)
   }
 
-  TextEditView.prototype.selectAll = function () {
+  TextEditView.prototype.selectAll = () => {
     client.notify('TextEditView.selectAll', this.id)
   }
 
-  TextEditView.prototype.delete = function (repeat) {
+  TextEditView.prototype.delete =  (repeat) => {
     repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
     client.notify('TextEditView.delete', this.id, repeat)
   }
 
-  TextEditView.prototype.moveCursor = function (operation, repeat) {
+  TextEditView.prototype.moveCursor =  (operation, repeat) => {
     repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
     if (operation != null && typeof(operation) == 'string') {
       client.notify('TextEditView.moveCursor', this.id, operation, repeat)
     }
   }
 
-  TextEditView.prototype.setThinCursor = function (isThin) {
+  TextEditView.prototype.setThinCursor = (isThin) => {
     client.notify('TextEditView.setThinCursor', this.id, isThin)
   }
 
 
   // class Window
-  var Window = function(id) {
+  const Window = (id) => {
     this.id = id
   }
 
-  Window.prototype.close = function() {
+  Window.prototype.close = () => {
     client.notify('Window.close', this.id)
   }
 
-  Window.prototype.openFindPanel = function() {
+  Window.prototype.openFindPanel = () => {
     client.notify('Window.openFindPanel', this.id)
   }
 
-  Window.prototype.statusBar = function() {
-    var id = client.invoke('Window.statusBar', this.id)
+  Window.prototype.statusBar = () => {
+    const id = client.invoke('Window.statusBar', this.id)
     return id != null ? new StatusBar(id) : null
   }
 
 
   // class StatusBar
-  var StatusBar = function(id) {
+  const StatusBar = (id) => {
     this.id = id
   }
 
-  StatusBar.prototype.showMessage = function(message) {
+  StatusBar.prototype.showMessage = (message) => {
     if (message != null) {
       client.notify('StatusBar.showMessage', this.id, message)
     }
   }
 
+  StatusBar.prototype.clearMessage = () => {
+    client.notify('StatusBar.clearMessage', this.id)
+  }
+
 
   // API
   return {
-    alert: function (msg) {
+    alert: (msg) => {
       client.notify('alert', msg);
     }
 
-    ,loadMenu: function (ymlPath) {
+    ,loadMenu: (ymlPath) => {
       client.notify('loadMenu', ymlPath)
     }
 
-    ,registerCommands: function (commands) {
+    ,registerCommands: (commands) => {
       client.notify('registerCommands', commands)
     }
 
-    ,registerContext: function(name, func) {
+    ,registerContext: (name, func) => {
       contexts[name] = func
       client.notify('registerContext', name)
     }
 
-    ,unregisterContext: function(name) {
+    ,unregisterContext: (name) => {
       delete contexts[name]
       client.notify('unregisterContext', name)
     }
 
-    ,activeView: function () {
-      var id = client.invoke('activeView')
+    ,activeView: () => {
+      const id = client.invoke('activeView')
       return id != null ? new TextEditView(id) : null
     }
 
-    ,activeTabView: function () {
-      var id = client.invoke('activeTabView')
+    ,activeTabView: () => {
+      const id = client.invoke('activeTabView')
       return id != null ? new TabView(id) : null
     }
 
-    ,activeTabViewGroup: function () {
-      var id = client.invoke('activeTabViewGroup')
+    ,activeTabViewGroup: () => {
+      const id = client.invoke('activeTabViewGroup')
       return id != null ? new TabViewGroup(id) : null
     }
 
-    ,activeWindow: function () {
-      var id = client.invoke('activeWindow')
+    ,activeWindow: () => {
+      const id = client.invoke('activeWindow')
       return id != null ? new Window(id) : null
     }
 
-    ,showFileAndDirectoryDialog: function(caption) {
+    ,showFileAndDirectoryDialog: (caption) => {
       caption = caption == null ? 'Open' : caption
       return client.invoke('showFileAndDirectoryDialog', caption)
     }
 
-    ,open: function (path) {
+    ,open: (path) => {
       if (path != null) {
         client.notify('open', path)
       }
     }
 
-    ,dispatchCommand: function (keyEvent) {
+    ,dispatchCommand: (keyEvent) => {
       if (keyEvent != null) {
         client.notify('dispatchCommand', keyEvent.type, keyEvent.key, keyEvent.repeat, keyEvent.altKey, keyEvent.ctrlKey, keyEvent.metaKey, keyEvent.shiftKey)
       }
     }
 
     ,contextUtils: {
-      isSatisfied: function(key, operator, value) {
+      isSatisfied: (key, operator, value) => {
         switch(operator) {
           case '==':
           return key === value
@@ -211,7 +217,7 @@ module.exports = function (client, contexts, eventFilters) {
       }
     }
 
-    ,on: function(type, fn) {
+    ,on: (type, fn) => {
       if (type in eventFilters) {
         eventFilters[type].push(fn)
       } else {
@@ -219,13 +225,17 @@ module.exports = function (client, contexts, eventFilters) {
       }
     }
 
-    ,removeListener: function(type, fn) {
+    ,removeListener: (type, fn) => {
       if (type in eventFilters) {
-        var index = eventFilters[type].indexOf(fn)
+        const index = eventFilters[type].indexOf(fn)
         if (index !== -1) {
           eventFilters[type].splice(index, 1)
         }
       }
+    }
+    ,windows: () => {
+      const ids = client.invoke('windows')
+      return ids != null ? ids.map(id => new Window(id)) : []
     }
   }
 }

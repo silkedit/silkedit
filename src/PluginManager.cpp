@@ -70,7 +70,6 @@ void PluginManager::init() {
   qDebug() << "args:" << Constants::pluginRunnerArgs();
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
   m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
-  m_pluginProcess->setArguments(QStringList("--harmony"));
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 

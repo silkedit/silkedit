@@ -38,6 +38,7 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
   s_requestFunctions.insert(std::make_pair("activeTabViewGroup", &activeTabViewGroup));
   s_requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
+  s_requestFunctions.insert(std::make_pair("windows", &windows));
   s_requestFunctions.insert(
       std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
 }
@@ -164,6 +165,14 @@ void API::showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::objec
     }
     PluginManager::singleton().sendResponse(paths, msgpack::type::nil(), msgId);
   }
+}
+
+void API::windows(msgpack::rpc::msgid_t msgId, msgpack::object) {
+  std::vector<int> ids(Window::windows().size());
+  for (Window* w : Window::windows()) {
+    ids.push_back(w->id());
+  }
+  PluginManager::singleton().sendResponse(ids, msgpack::type::nil(), msgId);
 }
 
 void API::open(msgpack::object obj) {

@@ -55,6 +55,8 @@ void StatusBar::notify(StatusBar* view, const QString& method, const msgpack::ob
       std::string message = std::get<1>(params);
       view->showMessage(QString::fromUtf8(message.c_str()));
     }
+  } else if (method == "clearMessage") {
+    view->clearMessage();
   }
 }
 

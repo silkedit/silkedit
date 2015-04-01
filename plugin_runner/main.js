@@ -1,25 +1,25 @@
-var rpc = require('silk-msgpack-rpc');
-var fs = require('fs')
-var sync = require('synchronize')
-var path = require('path')
+const rpc = require('silk-msgpack-rpc');
+const fs = require('fs')
+const sync = require('synchronize')
+const path = require('path')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
   return;
 }
 
-var socketFile = process.argv[2];
-var moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
+const socketFile = process.argv[2];
+const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
 var commands = {}
 var contexts = {}
 var eventFilters = {}
 
 function getDirs(dir) {
-  var files = fs.readdirSync(dir);
+  const files = fs.readdirSync(dir)
   var dirs = []
 
   files.forEach(function (file) {
-    var stat = fs.statSync(path.join(dir, file));
+    const stat = fs.statSync(path.join(dir, file));
     if (stat.isDirectory()) {
       dirs.push(file);
     }
@@ -28,12 +28,12 @@ function getDirs(dir) {
   return dirs;
 }
 
-var c = rpc.createClient(socketFile, function () {
+const c = rpc.createClient(socketFile, function () {
   GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters);
 
   sync(c, 'invoke');
 
-  var loadPackage = function (dir) {
+  const loadPackage = function (dir) {
     fs.readdir(dir, function (err, files) {
       if (err) {
         console.log(err.message);
@@ -41,7 +41,7 @@ var c = rpc.createClient(socketFile, function () {
       }
 
       moduleFiles.forEach(function (filename) {
-        var filePath = path.join(dir, filename);
+        const filePath = path.join(dir, filename);
         console.log(filePath);
         // check if filePath exists by opening it. fs.exists is deprecated.
         fs.open(filePath, 'r', function (err, fd) {
@@ -52,9 +52,9 @@ var c = rpc.createClient(socketFile, function () {
                 silk.loadMenu(filePath);
                 break;
               case "package.json":
-                var pjson = require(filePath);
+                const pjson = require(filePath);
                 if (pjson.main) {
-                  var module = require(dir)
+                  const module = require(dir)
                   if (module.commands) {
                     for (var prop in module.commands) {
                       commands[prop] = module.commands[prop];
@@ -79,7 +79,7 @@ var c = rpc.createClient(socketFile, function () {
   process.argv.slice(3).forEach(function(dirPath) {
     fs.open(dirPath, 'r', function(err, fd) {
       fd && fs.close(fd, function(err) {
-        var dirs = getDirs(dirPath);
+        const dirs = getDirs(dirPath);
         dirs.forEach(function (dir) {
           loadPackage(path.join(dirPath, dir));
         });    
@@ -89,7 +89,7 @@ var c = rpc.createClient(socketFile, function () {
   })
 });
 
-var handler = {
+const handler = {
   // notify
   "runCommand": function(cmd, args) {
     if (cmd in commands) {
@@ -143,10 +143,10 @@ var handler = {
       "name": name,
       "args": args
     }
-    var type = "runCommand"
+    const type = "runCommand"
     if (type in eventFilters) {
       sync.fiber(function(){
-        var result = eventFilters[type].some(function(fn){
+        const result = eventFilters[type].some(function(fn){
           return fn(event)
         })
         response.result([result, event.name, event.args])

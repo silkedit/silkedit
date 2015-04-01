@@ -51,6 +51,8 @@ QString Constants::pluginRunnerPath() {
 
 QStringList Constants::pluginRunnerArgs() {
   QStringList args;
+  // add --harmony option first
+  args << "--harmony";
   // first argument is main script
   args << pluginServerDir() + "/main.js";
   // second argument is a socket path

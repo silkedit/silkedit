@@ -1,101 +1,104 @@
+'use strict'
+
 module.exports = {
-	activate: function() {
+
+	activate: () => {
 	},
 
 	commands: {
-		"new_file": function() {
-			var tabView = silk.activeTabView()
+		"new_file": () => {
+			const tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.addNew();
 			}
 		}
-		,"open": function() {
-			var paths = silk.showFileAndDirectoryDialog('Open')
+		,"open": () => {
+			const paths = silk.showFileAndDirectoryDialog('Open')
 			paths.forEach(function(path) {
 				silk.open(path)
 			})
 		}
-		,"save": function() {
-			var editView = silk.activeView()
+		,"save": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.save()
 			}
 		}
-		,"save_as": function() {
-			var editView = silk.activeView()
+		,"save_as": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.saveAs()
 			}
 		}
-		,"save_all": function() {
-			var tabViewGroup = silk.activeTabViewGroup()
+		,"save_all": () => {
+			const tabViewGroup = silk.activeTabViewGroup()
 			if (tabViewGroup != null) {
 				tabViewGroup.saveAll()
 			}
 		}
-		,"close_all_tabs": function() {
-			var tabView = silk.activeTabView()
+		,"close_all_tabs": () => {
+			const tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.closeAllTabs();
 			}
 		}
-		,"close_other_tabs": function() {
-			var tabView = silk.activeTabView()
+		,"close_other_tabs": () => {
+			const tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.closeOtherTabs();
 			}
 		}
-		,"close_tab": function() {
-			var tabView = silk.activeTabView()
+		,"close_tab": () => {
+			const tabView = silk.activeTabView()
 			if (tabView != null) {
 				tabView.closeActiveTab();
 			} else {
-				var win = silk.activeWindow()
+				const win = silk.activeWindow()
 				if (win != null) {
 					win.close()
 				}
 			}
 		}
-		,"undo": function() {
-			var editView = silk.activeView()
+		,"undo": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.undo()
 			}
 		}
-		,"redo": function() {
-			var editView = silk.activeView()
+		,"redo": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.redo()
 			}
 		}
-		,"cut": function() {
-			var editView = silk.activeView()
+		,"cut": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.cut()
 			}
 		}
-		,"copy": function() {
-			var editView = silk.activeView()
+		,"copy": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.copy()
 			}
 		}
-		,"paste": function() {
-			var editView = silk.activeView()
+		,"paste": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.paste()
 			}
 		}
-		,"select_all": function() {
-			var editView = silk.activeView()
+		,"select_all": () => {
+			const editView = silk.activeView()
 			if (editView != null) {
 				editView.selectAll()
 			}
 		}
-		,"delete": function(args) {
-			var editView = silk.activeView()
+		,"delete": (args) => {
+			const editView = silk.activeView()
 			if (editView != null) {
-				var repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
+				const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 				if (args['direction'] == 'backward') {
 					editView.delete(-1 * repeat)
 				} else {
@@ -103,27 +106,27 @@ module.exports = {
 				}
 			}
 		}
-		,"move_cursor": function(args) {
-			var editView = silk.activeView()
-			var repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
+		,"move_cursor": (args) => {
+			const editView = silk.activeView()
+			const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 			if (editView != null && 'operation' in args) {
 				editView.moveCursor(args['operation'], repeat)
 			}
 		}
-		,"open_find_panel": function() {
-			var win = silk.activeWindow()
+		,"open_find_panel": () => {
+			const win = silk.activeWindow()
 			if (win != null) {
 				win.openFindPanel()
 			}
 		}
-		,"split_horizontally": function() {
-			var tabViewGroup = silk.activeTabViewGroup()
+		,"split_horizontally": () => {
+			const tabViewGroup = silk.activeTabViewGroup()
 			if (tabViewGroup != null) {
 				tabViewGroup.splitHorizontally();
 			}
 		}
-		,"split_vertically": function() {
-			var tabViewGroup = silk.activeTabViewGroup()
+		,"split_vertically": () => {
+			const tabViewGroup = silk.activeTabViewGroup()
 			if (tabViewGroup != null) {
 				tabViewGroup.splitVertically();
 			}

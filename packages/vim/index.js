@@ -1,4 +1,6 @@
-var MODE = {
+'use strict'
+
+const MODE = {
 	CMD: Symbol(),
 	INSERT: Symbol(),
 	CMDLINE: Symbol()
@@ -8,12 +10,12 @@ var isEnabled = false
 var mode = MODE.CMD
 var repeatCount = 0
 
-var keyPressHandler = function(event) {
+const keyPressHandler = (event) => {
 	console.log('keyPressHandler')
 	switch (mode) {
 		case MODE.CMD:
 			if (event.key) {
-				var ch = event.key.charCodeAt(0)
+				const ch = event.key.charCodeAt(0)
 				if ((ch == "0".charCodeAt(0) && repeatCount != 0) || (ch >= "1".charCodeAt(0) && ch <= "9".charCodeAt(0))) {
 					repeatCount = repeatCount * 10 + (ch - "0".charCodeAt(0))
 					console.log('repeatCount: %d', repeatCount)
@@ -35,7 +37,7 @@ var keyPressHandler = function(event) {
 	return false
 }
 
-var runCommandHandler = function(event) {
+const runCommandHandler = (event) => {
 	console.log('runCommandHandler')
 	if (repeatCount > 0) {
 		event.args.repeat = repeatCount.toString()
@@ -61,7 +63,7 @@ function toModeText(mode) {
 function enable() {
 	silk.on('keypress', keyPressHandler)
 	silk.on('runCommand', runCommandHandler)
-	silk.registerContext("mode", function(operator, value) {
+	silk.registerContext("mode", (operator, value) => {
 		console.log('checking mode context')
 		return isEnabled && silk.contextUtils.isSatisfied(toModeText(mode), operator, value)
 	})
@@ -74,18 +76,18 @@ function enable() {
 function disable() {
 	silk.removeListener('keypress', keyPressHandler)
 	silk.unregisterContext("mode")
-	var view = silk.activeView();
+	const view = silk.activeView();
 	if (view != null) {
 		view.setThinCursor(true)
 	}
 
-	// todo: clear message in status bar
+	silk.windows().forEach(w => w.statusBar().clearMessage())
 
 	isEnabled = false
 }
 
 function onModeChanged(newMode) {
-	var text;
+	let text;
 	switch (mode) {
 		case MODE.CMD:
 			text = "CMD"
@@ -97,7 +99,7 @@ function onModeChanged(newMode) {
 			return
 	}
 
-	var win = silk.activeWindow()
+	let win = silk.activeWindow()
 	if (win != null) {
 		win.statusBar().showMessage(text)
 	}
@@ -106,40 +108,38 @@ function onModeChanged(newMode) {
 }
 
 function updateCursor() {
-	var view = silk.activeView();
+	const view = silk.activeView();
 	if (view != null) {
-		var isThin = mode !== MODE.CMD
+		const isThin = mode !== MODE.CMD
 		view.setThinCursor(isThin)
 	}
 }
 
 function setMode(newMode) {
 	if (mode !== newMode) {
-		var view = silk.activeView()
+		const view = silk.activeView()
 		if (newMode == MODE.INSERT && view != null) {
 			view.moveCursor('left')
 		}
 
 		mode = newMode
 		onModeChanged(newMode)
-
-		// todo: emit modeChanged(mode)
 	}
 }
 
 module.exports = {
-	activate: function() {
+	activate: () => {
 	},
 
 	commands: {
-		"toggle_vim_emulation": function(args) {
+		"toggle_vim_emulation": (args) => {
 			if (isEnabled) {
 				disable()
 			} else {
 				enable()
 			}
 		}
-		,"change_mode": function(args) {
+		,"change_mode": (args) => {
 			if (!isEnabled) return
 
 			switch(args['mode']) {

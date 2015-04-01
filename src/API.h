@@ -40,4 +40,5 @@ class API {
   static void activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void windows(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };
