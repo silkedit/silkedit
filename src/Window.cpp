@@ -215,6 +215,9 @@ void Window::request(Window* window,
                      const msgpack::object&) {
   if (method == "statusBar") {
     PluginManager::singleton().sendResponse(window->statusBar()->id(), msgpack::type::nil(), msgId);
+  } else {
+    qWarning("%s is not supported", qPrintable(method));
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 

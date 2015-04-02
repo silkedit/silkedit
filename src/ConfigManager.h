@@ -15,6 +15,7 @@ class ConfigManager {
   static void load();
   static bool isTrue(const QString& key);
   static QString value(const QString& key, const QString& defaultValue = "");
+  static bool contains(const QString& key);
   static QString theme();
 
  private:

@@ -120,6 +120,18 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
     m_socket->write(sbuf.data(), sbuf.size());
   }
 
+  void sendError(const std::string& err, msgpack::rpc::msgid_t id) {
+    msgpack::sbuffer sbuf;
+    msgpack::rpc::msg_response<msgpack::type::nil, std::string> response;
+    response.msgid = id;
+    response.error = err;
+    response.result = msgpack::type::nil();
+
+    msgpack::pack(sbuf, response);
+
+    m_socket->write(sbuf.data(), sbuf.size());
+  }
+
  private:
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
       s_notifyFunctions;

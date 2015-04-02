@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (client, contexts, eventFilters) => {
+module.exports = (client, contexts, eventFilters, configs) => {
 
   // class TabView
   const TabView = (id) => {
@@ -236,6 +236,29 @@ module.exports = (client, contexts, eventFilters) => {
     ,windows: () => {
       const ids = client.invoke('windows')
       return ids != null ? ids.map(id => new Window(id)) : []
+    }
+
+    ,config: {
+      get: (name) => {
+        if (name in configs) {
+          const value = client.invoke('getConfig',name)
+          const type = configs[name].type
+          switch(type) {
+            case 'boolean':
+              console.log('value: %s', value)
+              if (value != null) {
+                return value === 'true'
+              } else {
+                return 'default' in configs[name] ? configs[name].default : false
+              }
+              break
+            default:
+              return null
+          }
+        } else {
+          return null
+        }
+      }
     }
   }
 }

@@ -129,6 +129,9 @@ function setMode(newMode) {
 
 module.exports = {
 	activate: () => {
+		if (silk.config.get('vim.enable_vim_emulation')) {
+			enable()
+		}
 	},
 
 	commands: {

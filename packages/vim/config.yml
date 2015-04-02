@@ -1,0 +1,6 @@
+config:
+  enable_vim_emulation:
+    title: 'Enable Vim Emulation'
+    description: 'Enable vim emulation on startup'
+    type: 'boolean'
+    default: false

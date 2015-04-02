@@ -78,6 +78,11 @@ QString ConfigManager::value(const QString& key, const QString& defaultValue) {
   return defaultValue;
 }
 
+bool ConfigManager::contains(const QString &key)
+{
+  return m_configs.count(key) != 0;
+}
+
 QString ConfigManager::theme() {
   return value("theme", "Solarized (light)");
 }

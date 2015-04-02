@@ -39,11 +39,6 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  // todo: replace with js version
-  //  if (ConfigManager::isTrue("enable_vim_emulation")) {
-  //    viEngine.enable();
-  //  }
-
   Session::singleton().init();
 
   API::init();

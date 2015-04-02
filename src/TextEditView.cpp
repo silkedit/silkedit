@@ -526,7 +526,8 @@ void TextEditView::request(TextEditView* view,
     PluginManager::singleton().sendResponse(
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
-    qWarning("%s is not support", qPrintable(method));
+    qWarning("%s is not supported", qPrintable(method));
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 

@@ -4,6 +4,7 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "js-yaml": "^3.2.7",
     "silk-msgpack-rpc": "0.0.3",
     "synchronize": "^0.9.9"
   },

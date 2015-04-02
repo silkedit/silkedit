@@ -20,6 +20,7 @@
 #include "Context.h"
 #include "PluginContext.h"
 #include "modifiers.h"
+#include "ConfigManager.h"
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -41,6 +42,7 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("windows", &windows));
   s_requestFunctions.insert(
       std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -173,6 +175,26 @@ void API::windows(msgpack::rpc::msgid_t msgId, msgpack::object) {
     ids.push_back(w->id());
   }
   PluginManager::singleton().sendResponse(ids, msgpack::type::nil(), msgId);
+}
+
+void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    std::tuple<std::string> params;
+    obj.convert(&params);
+    std::string nameStr = std::get<0>(params);
+    QString name = QString::fromUtf8(nameStr.c_str());
+    if (ConfigManager::contains(name)) {
+      QString value = ConfigManager::value(name);
+      std::string valueStr = value.toUtf8().constData();
+      PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
+    } else {
+      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    }
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
 }
 
 void API::open(msgpack::object obj) {
