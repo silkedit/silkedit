@@ -198,8 +198,7 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
   }
 }
 
-void API::version(msgpack::rpc::msgid_t msgId, msgpack::object)
-{
+void API::version(msgpack::rpc::msgid_t msgId, msgpack::object) {
   std::string version = SilkApp::applicationVersion().toUtf8().constData();
   PluginManager::singleton().sendResponse(version, msgpack::type::nil(), msgId);
 }
