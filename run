@@ -138,7 +138,11 @@ build() {
 
     cd build
 
-    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    if [ "$1" = '-edge' ]; then
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    else
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+    fi
 
     ninja
 
@@ -184,7 +188,7 @@ build() {
 
 rebuild() {
     ensure_dir build
-    build
+    build $1
 }
 
 # static analysis
@@ -226,7 +230,7 @@ case "$1" in
         echo
         ;;
     build)
-        build
+        build $2
         echo
         ;;
     clean)
@@ -240,7 +244,7 @@ case "$1" in
         echo
         ;;
     rebuild)
-        rebuild
+        rebuild $2
         echo
         ;;
     resolve)

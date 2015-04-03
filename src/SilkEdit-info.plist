@@ -7,7 +7,7 @@
 	CFBundlePackageType = APPL;
 	"LSMinimumSystemVersion" = "10.7";
 	"LSApplicationCategoryType" = "public.app-category.developer-tools";
-	CFBundleIconFile = "silkEdit.icns";
+	CFBundleIconFile = "silkedit.icns";
 	"CFBundleDocumentTypes" = (
 		{
 			CFBundleTypeName = Document;

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(SilkEdit)
 
+option (BUILD_EDGE "Build edge version" OFF)
+
 # Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
 
@@ -32,7 +34,8 @@ qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 if (APPLE)
   # icon files to copy in the bundle
-  set( OSX_ICON_FILES resources/silkEdit.icns )
+  set( OSX_ICON_FILES resources/silkedit.icns )
+
   # set where in the bundle to put the icns files
   set_source_files_properties( ${OSX_ICON_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
   # include the icns files in the target
@@ -54,7 +57,14 @@ elseif (MINGW)
   # SYSTEM tells the compiler to skip warning for these header files.
   include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include)
   link_directories(${MSYS_LIB} lib)
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} resources/silkedit.rc)
+
+  if (BUILD_EDGE)
+    set( SILK_ICON resources/silkedit_edge.rc)
+  else (BUILD_EDGE)
+    set( SILK_ICON resources/silkedit.rc)
+  endif (BUILD_EDGE)
+
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON})
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig.a )
@@ -67,6 +77,11 @@ if(APPLE)
   file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
+
+  # Use special icon for edge build
+  if (BUILD_EDGE)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_SOURCE_DIR}/resources/silkedit_edge.icns ${PROJECT_NAME}.app/Contents/Resources/silkedit.icns)
+  endif (BUILD_EDGE)
 elseif (MINGW)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
