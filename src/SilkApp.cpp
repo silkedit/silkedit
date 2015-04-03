@@ -7,6 +7,7 @@
 #include "TabView.h"
 #include "Window.h"
 #include "PluginManager.h"
+#include "version.h"
 
 namespace {
 template <typename T>
@@ -32,6 +33,8 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
+  setApplicationVersion(VERSION);
+
   // Track active TabView
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
     qDebug("focusChanged");

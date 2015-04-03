@@ -43,6 +43,7 @@ void API::init() {
   s_requestFunctions.insert(
       std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
   s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
+  s_requestFunctions.insert(std::make_pair("version", &version));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -195,6 +196,12 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     qWarning("invalid arguments. numArgs: %d", numArgs);
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
+}
+
+void API::version(msgpack::rpc::msgid_t msgId, msgpack::object)
+{
+  std::string version = SilkApp::applicationVersion().toUtf8().constData();
+  PluginManager::singleton().sendResponse(version, msgpack::type::nil(), msgId);
 }
 
 void API::open(msgpack::object obj) {

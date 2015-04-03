@@ -16,8 +16,9 @@ class MenuBar : public QMenuBar {
   ~MenuBar() = default;
   DEFAULT_MOVE(MenuBar)
 
- private slots:
+ private:
   void themeActionTriggered(QAction* action);
+  void showAboutDialog();
 };
 
 class ThemeMenu : public QMenu {

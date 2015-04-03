@@ -42,4 +42,5 @@ class API {
   static void showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void windows(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void version(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };

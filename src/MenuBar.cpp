@@ -1,5 +1,6 @@
 #include <vector>
 #include <QAction>
+#include <QMessageBox>
 
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/UndoCommand.h"
@@ -8,6 +9,7 @@
 #include "OpenRecentItemManager.h"
 #include "ThemeProvider.h"
 #include "Session.h"
+#include "SilkApp.h"
 
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu
@@ -31,14 +33,23 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
     themeActionGroup->addAction(themeAction);
   }
 
-  connect(
-      themeActionGroup, SIGNAL(triggered(QAction*)), this, SLOT(themeActionTriggered(QAction*)));
+  connect(themeActionGroup, &QActionGroup::triggered, this, &MenuBar::themeActionTriggered);
+
+  // Help menu
+  auto helpMenu = addMenu(QObject::tr("&Help"));
+  QAction* aboutAction = new QAction(QObject::tr("&About"), helpMenu);
+  connect(aboutAction, &QAction::triggered, this, &MenuBar::showAboutDialog);
+  helpMenu->addAction(aboutAction);
 }
 
 void MenuBar::themeActionTriggered(QAction* action) {
   qDebug("themeSelected: %s", qPrintable(action->text()));
   Theme* theme = ThemeProvider::theme(action->text());
   Session::singleton().setTheme(theme);
+}
+
+void MenuBar::showAboutDialog() {
+  QMessageBox::about(this, SilkApp::applicationName(), "version " + SilkApp::applicationVersion());
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {
