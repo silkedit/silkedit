@@ -72,12 +72,13 @@ resolve() {
         # -R keeps symlink intact
         cp -R $node/bin $node/lib plugin_runner
         rm -rf $node $node.tar.gz
-
-        cd plugin_runner
-        PATH=$(pwd)/bin:$PATH
-        bin/npm install
-        cd ..
       fi
+
+      # npm install
+      cd plugin_runner
+      PATH=$(pwd)/bin:$PATH
+      bin/npm install
+      cd ..
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
@@ -111,9 +112,13 @@ resolve() {
             cp -r "C:\Program Files\nodejs" plugin_runner
             cd plugin_runner
             mv nodejs bin
-            node bin/node_modules/npm/bin/npm-cli.js install
             cd ..
         fi
+
+        # npm install
+        cd plugin_runner
+        node plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
+        cd ..
     fi
 
 
