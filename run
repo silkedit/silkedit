@@ -117,7 +117,7 @@ resolve() {
 
         # npm install
         cd plugin_runner
-        node plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
+        node bin/node_modules/npm/bin/npm-cli.js install
         cd ..
     fi
 
