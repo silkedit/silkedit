@@ -31,9 +31,9 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   setWindowTitle(QObject::tr("SilkEdit"));
   setAttribute(Qt::WA_DeleteOnClose);
 
-  // Window takes ownership of the menuBar pointer and deletes it at the
-  // appropriate time.
-  setMenuBar(new MenuBar);
+  // Copy global menu bar
+  QList<QAction*> actions = MenuBar::globalMenuBar()->actions();
+  menuBar()->insertActions(nullptr, actions);
 
   m_rootSplitter->setContentsMargins(0, 0, 0, 0);
 
@@ -140,6 +140,7 @@ void Window::loadMenu(const std::string& ymlPath) {
 
     YAML::Node menuNode = rootNode["menu"];
     foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
+    YamlUtils::parseMenuNode(MenuBar::globalMenuBar(), menuNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }

@@ -15,6 +15,7 @@
 #include "TestUtil.h"
 #include "PluginManager.h"
 #include "Context.h"
+#include "MenuBar.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -30,6 +31,9 @@ int main(int argv, char** args) {
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
+
+  // Create default menu bar before creating any new window
+  MenuBar::init();
 
   Window* w = Window::createWithNewFile();
   w->show();

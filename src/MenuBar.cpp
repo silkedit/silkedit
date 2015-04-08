@@ -11,6 +11,13 @@
 #include "Session.h"
 #include "SilkApp.h"
 
+MenuBar* MenuBar::s_globalMenuBar;
+
+void MenuBar::init()
+{
+  s_globalMenuBar = new MenuBar();
+}
+
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu
   auto fileMenu = addMenu(QObject::tr("&File"));

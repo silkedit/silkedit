@@ -12,11 +12,16 @@ class MenuBar : public QMenuBar {
   DISABLE_COPY(MenuBar)
 
  public:
+  static void init();
+  static MenuBar* globalMenuBar() { return s_globalMenuBar; }
+
   MenuBar(QWidget* parent = nullptr);
   ~MenuBar() = default;
   DEFAULT_MOVE(MenuBar)
 
  private:
+  static MenuBar* s_globalMenuBar;
+
   void themeActionTriggered(QAction* action);
   void showAboutDialog();
 };
