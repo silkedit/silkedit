@@ -13,8 +13,7 @@
 
 MenuBar* MenuBar::s_globalMenuBar;
 
-void MenuBar::init()
-{
+void MenuBar::init() {
   s_globalMenuBar = new MenuBar();
 }
 
