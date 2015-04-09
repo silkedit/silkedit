@@ -377,7 +377,8 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
     } else if (include == "$self") {
       return lang->rootPattern->find(str, beginPos);
       // $base equals $self if it doesn't have a parent. When it does, $base means parent syntax
-      // e.g. When source.c++ includes source.c, "include $base" in source.c means including source.c++
+      // e.g. When source.c++ includes source.c, "include $base" in source.c means including
+      // source.c++
     } else if (include == "$base" && lang->baseLanguage) {
       return lang->baseLanguage->rootPattern->find(str, beginPos);
     } else if (includedLanguage) {
