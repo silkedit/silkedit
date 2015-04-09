@@ -298,7 +298,7 @@
 						</dict>
 					</dict>
 					<key>name</key>
-					<string>meta.function.const	ructor.c++</string>
+					<string>meta.function.constructor.c++</string>
 					<key>patterns</key>
 					<array>
 						<dict>
