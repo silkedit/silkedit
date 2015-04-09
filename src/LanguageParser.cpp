@@ -376,15 +376,15 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
       // $self means the current syntax definition
     } else if (include == "$self") {
       return lang->rootPattern->find(str, beginPos);
-      // $self means the base(parent) syntax definition
-      // When source.c++ includes source.c, "include $base" in source.c means including source.c++
+      // $base equals $self if it doesn't have a parent. When it does, $base means parent syntax
+      // e.g. When source.c++ includes source.c, "include $base" in source.c means including source.c++
     } else if (include == "$base" && lang->baseLanguage) {
       return lang->baseLanguage->rootPattern->find(str, beginPos);
-      // external syntax definitions e.g. source.c++
     } else if (includedLanguage) {
       return includedLanguage->rootPattern->find(str, beginPos);
-    } else if (Language* childLang = LanguageProvider::languageFromScope(include)) {
-      includedLanguage.reset(childLang);
+      // external syntax definitions e.g. source.c++
+    } else if (Language* includedLang = LanguageProvider::languageFromScope(include)) {
+      includedLanguage.reset(includedLang);
       includedLanguage->baseLanguage = lang;
       return includedLanguage->rootPattern->find(str, beginPos);
     } else {

@@ -105,7 +105,7 @@ struct Language {
   QString scopeName;
   Language* baseLanguage;
 
-  Language() : rootPattern(nullptr), baseLanguage(nullptr) {}
+  Language() : rootPattern(nullptr), baseLanguage(this) {}
 
   void tweak();
   QString name();

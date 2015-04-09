@@ -103,21 +103,41 @@ class LanguageParserTest : public QObject {
     compareLineByLine(root->toString(), resIn.readAll());
   }
 
-  // Test for include $base
+  // Test for $base when it has a parent syntax.
   // When source.c++ includes source.c, "include $base" in source.c means including source.c++
-  void includeBaseTest() {
+  void baseWithParentTest() {
     const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QFile file("testdata/includeBaseTest.cpp");
+    QFile file("testdata/includeBaseWithParent.cpp");
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
     LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
     Node* root = parser->parse();
 
-    QFile resFile("testdata/includeBaseTest.cpp.res");
+    QFile resFile("testdata/includeBaseWithParent.cpp.res");
+    QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream resIn(&resFile);
+    compareLineByLine(root->toString(), resIn.readAll());
+  }
+
+  // Test for $base when it doesn't have a parent syntax.
+  void baseWithoutParentTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QFile file("testdata/includeBaseWithoutParent.cpp");
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+    LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
+    Node* root = parser->parse();
+
+    QFile resFile("testdata/includeBaseWithoutParent.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
