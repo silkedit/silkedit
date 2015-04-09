@@ -186,7 +186,7 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     std::string nameStr = std::get<0>(params);
     QString name = QString::fromUtf8(nameStr.c_str());
     if (ConfigManager::contains(name)) {
-      QString value = ConfigManager::value(name);
+      QString value = ConfigManager::strValue(name);
       std::string valueStr = value.toUtf8().constData();
       PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {

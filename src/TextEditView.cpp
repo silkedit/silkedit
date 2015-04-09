@@ -13,6 +13,7 @@
 #include "Session.h"
 #include "API.h"
 #include "PluginManager.h"
+#include "ConfigManager.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -400,9 +401,11 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     painter.drawRoundedRect(lineRect, 0.0, 0.0);
   }
 
-  // draw EOF
+  // draw an end of line string
   const int bottom = viewport()->rect().height();
-  painter.setPen(Qt::blue);
+  if (ConfigManager::endOfLineColor().isValid()) {
+    painter.setPen(ConfigManager::endOfLineColor());
+  }
   QTextCursor cur = textCursor();
   cur.movePosition(QTextCursor::End);
   const int posEOF = cur.position();
@@ -416,12 +419,21 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     QRect r = cursorRect(cur);
     if (r.top() >= bottom)
       break;
-    painter.drawText(QPointF(r.left(), r.bottom()), "←");
+    if (!ConfigManager::endOfLineStr().isEmpty()) {
+      painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfLineStr());
+    }
     block = block.next();
   }
   cur.movePosition(QTextCursor::End);
   QRect r = cursorRect(cur);
-  painter.drawText(QPointF(r.left(), r.bottom()), "[EOF]");
+
+  // draw an end of file string
+  if (!ConfigManager::endOfFileStr().isEmpty()) {
+    if (ConfigManager::endOfFileColor().isValid()) {
+      painter.setPen(ConfigManager::endOfFileColor());
+    }
+    painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfFileStr());
+  }
 }
 
 void TextEditView::setFontPointSize(int sz) {

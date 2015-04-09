@@ -1,2 +1,7 @@
-enable_vim_emulation: false
 theme: Solarized (light)
+# end_of_line_str:
+#   str: '←'
+#   color: '#0000ff'
+# end_of_file_str:
+#   str: '[EOF]'
+#   color: '#ff0000'

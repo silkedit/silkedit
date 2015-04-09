@@ -8,7 +8,14 @@
 #include "Constants.h"
 #include "Util.h"
 
-std::unordered_map<QString, QString> ConfigManager::m_configs;
+namespace {
+  const QString END_OF_LINE_STR = "end_of_line_str";
+  const QString END_OF_FILE_STR = "end_of_file_str";
+}
+
+std::unordered_map<QString, QString> ConfigManager::m_strConfigs;
+std::unordered_map<QString, std::unordered_map<std::string, std::string>>
+    ConfigManager::m_mapConfigs;
 
 void ConfigManager::load(const QString& filename) {
   qDebug("loading configuration");
@@ -16,7 +23,8 @@ void ConfigManager::load(const QString& filename) {
   if (!QFile(filename).exists())
     return;
 
-  m_configs.clear();
+  m_strConfigs.clear();
+  m_mapConfigs.clear();
 
   std::string name = filename.toUtf8().constData();
   try {
@@ -26,12 +34,25 @@ void ConfigManager::load(const QString& filename) {
 
     for (auto it = rootNode.begin(); it != rootNode.end(); ++it) {
       QString key = QString::fromUtf8(it->first.as<std::string>().c_str()).trimmed();
-      QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
-      qDebug() << key << ":" << value;
-      m_configs[key] = value;
+      if (it->second.IsScalar()) {
+        QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
+        qDebug() << key << ":" << value;
+        m_strConfigs[key] = value;
+      } else if (it->second.IsMap()) {
+        YAML::Node mapNode = it->second;
+        std::unordered_map<std::string, std::string> map;
+        for (auto mapIt = mapNode.begin(); mapIt != mapNode.end(); mapIt++) {
+          if (mapIt->first.IsScalar() && mapIt->second.IsScalar()) {
+            std::string mapKey = mapIt->first.as<std::string>();
+            std::string mapValue = mapIt->second.as<std::string>();
+            map.insert(std::make_pair(mapKey, mapValue));
+          }
+        }
+        m_mapConfigs[key] = map;
+      }
     }
   } catch (const std::exception& e) {
-    qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
+    qWarning() << "can't load yaml file:" << filename << ", reason: " << e.what();
   } catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
@@ -62,26 +83,74 @@ void ConfigManager::load() {
   foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
-bool ConfigManager::isTrue(const QString& key) {
-  if (m_configs.count(key) != 0) {
-    return m_configs[key] == "true";
-  }
-
-  return false;
-}
-
-QString ConfigManager::value(const QString& key, const QString& defaultValue) {
-  if (m_configs.count(key) != 0) {
-    return m_configs[key];
+QString ConfigManager::strValue(const QString& key, const QString& defaultValue) {
+  if (m_strConfigs.count(key) != 0) {
+    return m_strConfigs[key];
   }
 
   return defaultValue;
 }
 
+std::unordered_map<std::string, std::string> ConfigManager::mapValue(const QString& key) {
+  if (m_mapConfigs.count(key) != 0) {
+    return m_mapConfigs[key];
+  }
+
+  return std::unordered_map<std::string, std::string>();
+}
+
 bool ConfigManager::contains(const QString& key) {
-  return m_configs.count(key) != 0;
+  return m_strConfigs.count(key) != 0;
 }
 
 QString ConfigManager::theme() {
-  return value("theme", "Solarized (light)");
+  return strValue("theme", "Solarized (light)");
+}
+
+QString ConfigManager::endOfLineStr()
+{
+  if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
+    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
+    if (map.count("str") != 0) {
+      return QString::fromUtf8(map["str"].c_str());
+    }
+  }
+
+  return "";
+}
+
+QColor ConfigManager::endOfLineColor()
+{
+  if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
+    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
+    if (map.count("color") != 0) {
+      return QColor(QString::fromUtf8(map["color"].c_str()));
+    }
+  }
+
+  return QColor();
+}
+
+QString ConfigManager::endOfFileStr()
+{
+  if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
+    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
+    if (map.count("str") != 0) {
+      return QString::fromUtf8(map["str"].c_str());
+    }
+  }
+
+  return "";
+}
+
+QColor ConfigManager::endOfFileColor()
+{
+  if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
+    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
+    if (map.count("color") != 0) {
+      return QColor(QString::fromUtf8(map["color"].c_str()));
+    }
+  }
+
+  return QColor();
 }
