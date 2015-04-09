@@ -32,7 +32,7 @@ void SyntaxHighlighterTest::scopeExtent() {
 
   foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-  QFile file("testdata/plist2.tmlang");
+  QFile file("testdata/plist.tmlang");
   QVERIFY(file.open(QIODevice::ReadOnly));
 
   QTextStream in(&file);

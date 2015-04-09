@@ -85,19 +85,18 @@ class LanguageParserTest : public QObject {
     const QVector<QString> files({"testdata/C++.tmLanguage",
                                   "testdata/C.tmLanguage",
                                   "testdata/Property List (XML).tmLanguage",
-                                  "testdata/XML.tmLanguage",
-                                  "testdata/Go.tmLanguage"});
+                                  "testdata/XML.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QFile file("testdata/plist2.tmlang");
+    QFile file("testdata/plist.tmlang");
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
     LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
     Node* root = parser->parse();
 
-    QFile resFile("testdata/plist2.tmlang.res");
+    QFile resFile("testdata/plist.tmlang.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
