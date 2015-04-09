@@ -51,7 +51,7 @@ struct Pattern {
   Pattern* cachedPattern;
   std::unique_ptr<QVector<Pattern*>> cachedPatterns;
   QVector<Region>* cachedRegions;
-  std::unique_ptr<Language> cachedLanguage;
+  std::unique_ptr<Language> includedLanguage;
   int hits;
   int misses;
 
@@ -103,8 +103,9 @@ struct Language {
   std::unique_ptr<RootPattern> rootPattern;  // patterns
   std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   QString scopeName;
+  Language* baseLanguage;
 
-  Language() : rootPattern(nullptr) {}
+  Language() : rootPattern(nullptr), baseLanguage(nullptr) {}
 
   void tweak();
   QString name();

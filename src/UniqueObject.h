@@ -51,6 +51,10 @@ struct UniqueObject {
   }
 
   int id() {
+    if (m_id >= 0) {
+      return m_id;
+    }
+
     QMutexLocker locker(&mutex);
     objects.insert(s_count, static_cast<T*>(this));
     m_id = s_count;
@@ -68,7 +72,7 @@ struct UniqueObject {
   }
 
  private:
-  static int s_count;
+  static uint s_count;
   static QHash<int, T*> objects;
   static QMutex mutex;
 
@@ -76,7 +80,7 @@ struct UniqueObject {
 };
 
 template <typename T>
-int UniqueObject<T>::s_count(0);
+uint UniqueObject<T>::s_count(0);
 template <typename T>
 QHash<int, T*> UniqueObject<T>::objects;
 template <typename T>

@@ -51,6 +51,7 @@ class Document : public QTextDocument {
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
+  QString scopeName(int pos);
 
 signals:
   void pathUpdated(const QString& path);

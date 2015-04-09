@@ -37,3 +37,8 @@ menu:
       command: paste
     - label: 'Select All'
       command: select_all
+
+  - label: Tools
+    submenu:
+    - label: 'Show Scope'
+      command: show_scope

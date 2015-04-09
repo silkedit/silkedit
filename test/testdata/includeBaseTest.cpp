@@ -1,0 +1,3 @@
+int hoge() {
+  nullptr;
+}

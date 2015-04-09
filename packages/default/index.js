@@ -131,5 +131,12 @@ module.exports = {
 				tabViewGroup.splitVertically();
 			}
 		}
+		,"show_scope": () => {
+			const win = silk.activeWindow()
+			const editView = silk.activeView()
+			if (win != null && editView != null) {
+				win.statusBar().showMessage(editView.scopeName())
+			}
+		}
 	}
 }

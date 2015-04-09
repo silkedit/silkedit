@@ -373,16 +373,20 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
       } else {
         qWarning() << "Not found in repository:" << include;
       }
-      // $self and $base means the current entire syntax definition
-    } else if (include == "$self" || include == "$base") {
-      //      qDebug("include %s", qPrintable(include));
+      // $self means the current syntax definition
+    } else if (include == "$self") {
       return lang->rootPattern->find(str, beginPos);
+      // $self means the base(parent) syntax definition
+      // When source.c++ includes source.c, "include $base" in source.c means including source.c++
+    } else if (include == "$base" && lang->baseLanguage) {
+      return lang->baseLanguage->rootPattern->find(str, beginPos);
       // external syntax definitions e.g. source.c++
-    } else if (cachedLanguage) {
-      return cachedLanguage->rootPattern->find(str, beginPos);
-    } else if (Language* anotherLang = LanguageProvider::languageFromScope(include)) {
-      cachedLanguage.reset(anotherLang);
-      return cachedLanguage->rootPattern->find(str, beginPos);
+    } else if (includedLanguage) {
+      return includedLanguage->rootPattern->find(str, beginPos);
+    } else if (Language* childLang = LanguageProvider::languageFromScope(include)) {
+      includedLanguage.reset(childLang);
+      includedLanguage->baseLanguage = lang;
+      return includedLanguage->rootPattern->find(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
@@ -535,7 +539,7 @@ void Pattern::tweak(Language* l) {
 void Pattern::clearCache() {
   cachedPattern = nullptr;
   cachedPatterns.reset(nullptr);
-  cachedLanguage.reset(nullptr);
+  includedLanguage.reset(nullptr);
   if (cachedRegions) {
     cachedRegions->clear();
   }

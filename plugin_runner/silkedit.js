@@ -99,6 +99,10 @@ module.exports = (client, contexts, eventFilters, configs) => {
     client.notify('TextEditView.setThinCursor', this.id, isThin)
   }
 
+  TextEditView.prototype.scopeName = () => {
+    return client.invoke('TextEditView.scopeName', this.id)
+  }
+
 
   // class Window
   const Window = (id) => {

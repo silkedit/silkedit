@@ -9,7 +9,6 @@
 
 #include "macros.h"
 #include "ICloneable.h"
-#include "SyntaxHighlighter.h"
 #include "Document.h"
 #include "UniqueObject.h"
 

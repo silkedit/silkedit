@@ -176,3 +176,8 @@ QTextCursor Document::find(const Regexp* expr,
   }
   return find(expr, pos, begin, end, options);
 }
+
+QString Document::scopeName(int pos)
+{
+  return m_syntaxHighlighter->scopeName(pos);
+}
