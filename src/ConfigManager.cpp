@@ -9,8 +9,8 @@
 #include "Util.h"
 
 namespace {
-  const QString END_OF_LINE_STR = "end_of_line_str";
-  const QString END_OF_FILE_STR = "end_of_file_str";
+const QString END_OF_LINE_STR = "end_of_line_str";
+const QString END_OF_FILE_STR = "end_of_file_str";
 }
 
 std::unordered_map<QString, QString> ConfigManager::m_strConfigs;
@@ -107,8 +107,7 @@ QString ConfigManager::theme() {
   return strValue("theme", "Solarized (light)");
 }
 
-QString ConfigManager::endOfLineStr()
-{
+QString ConfigManager::endOfLineStr() {
   if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
     if (map.count("str") != 0) {
@@ -119,8 +118,7 @@ QString ConfigManager::endOfLineStr()
   return "";
 }
 
-QColor ConfigManager::endOfLineColor()
-{
+QColor ConfigManager::endOfLineColor() {
   if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
     if (map.count("color") != 0) {
@@ -131,8 +129,7 @@ QColor ConfigManager::endOfLineColor()
   return QColor();
 }
 
-QString ConfigManager::endOfFileStr()
-{
+QString ConfigManager::endOfFileStr() {
   if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
     if (map.count("str") != 0) {
@@ -143,8 +140,7 @@ QString ConfigManager::endOfFileStr()
   return "";
 }
 
-QColor ConfigManager::endOfFileColor()
-{
+QColor ConfigManager::endOfFileColor() {
   if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
     if (map.count("color") != 0) {
