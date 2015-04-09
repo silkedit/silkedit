@@ -539,7 +539,8 @@ void TextEditView::request(TextEditView* view,
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(
+        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
