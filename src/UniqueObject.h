@@ -1,6 +1,7 @@
 #pragma once
 
 #include <msgpack/rpc/protocol.h>
+#include <limits>
 #include <QHash>
 #include <QMutex>
 
@@ -16,9 +17,9 @@ struct UniqueObject {
       return nullptr;
     }
 
-    QMutexLocker locker(&mutex);
-    if (objects.contains(id)) {
-      return objects.value(id);
+    QMutexLocker locker(&s_mutex);
+    if (s_objects.contains(id)) {
+      return s_objects.value(id);
     }
 
     return nullptr;
@@ -55,10 +56,10 @@ struct UniqueObject {
       return m_id;
     }
 
-    QMutexLocker locker(&mutex);
-    objects.insert(s_count, static_cast<T*>(this));
-    m_id = s_count;
-    return s_count++;
+    m_id = nextId();
+    QMutexLocker locker(&s_mutex);
+    s_objects.insert(m_id, static_cast<T*>(this));
+    return m_id;
   }
 
  protected:
@@ -66,15 +67,27 @@ struct UniqueObject {
   {
     qDebug("~UniqueObject");
     if (m_id >= 0) {
-      QMutexLocker locker(&mutex);
-      objects.remove(m_id);
+      QMutexLocker locker(&s_mutex);
+      s_objects.remove(m_id);
     }
   }
 
  private:
   static uint s_count;
-  static QHash<int, T*> objects;
-  static QMutex mutex;
+  static QHash<int, T*> s_objects;
+  static QMutex s_mutex;
+
+  static int nextId() {
+    if (s_objects.keys().size() == std::numeric_limits<int>::max()) {
+      throw std::runtime_error("s_objects has no capacity to store a new id");
+    }
+
+    while (s_objects.count(s_count) != 0) {
+      s_count++;
+    }
+
+    return s_count;
+  }
 
   int m_id;
 };
@@ -82,6 +95,6 @@ struct UniqueObject {
 template <typename T>
 uint UniqueObject<T>::s_count(0);
 template <typename T>
-QHash<int, T*> UniqueObject<T>::objects;
+QHash<int, T*> UniqueObject<T>::s_objects;
 template <typename T>
-QMutex UniqueObject<T>::mutex;
+QMutex UniqueObject<T>::s_mutex;
