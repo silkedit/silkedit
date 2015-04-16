@@ -28,7 +28,6 @@ endif (APPLE)
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
-find_package(Qt5Test REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
