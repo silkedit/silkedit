@@ -289,7 +289,7 @@ void TextEditView::changeTheme(Theme* theme) {
 
   QString style;
   if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->settings.get();
+    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("foreground")) {
       style = style % QString("color: %1;").arg(settings->value("foreground").name());
       qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
@@ -331,7 +331,7 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 void TextEditView::highlightCurrentLine() {
   Theme* theme = Session::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->settings.get();
+    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("lineHighlight")) {
       QList<QTextEdit::ExtraSelection> extraSelections;
 
@@ -539,8 +539,7 @@ void TextEditView::request(TextEditView* view,
         view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(
-        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);

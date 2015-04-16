@@ -8,6 +8,7 @@
 
 #include "LanguageParser.h"
 #include "PListParser.h"
+#include "Regexp.h"
 
 namespace {
 
@@ -230,7 +231,6 @@ void Node::append(Node* child) {
 
 Region Node::updateRegion() {
   for (auto& child : children) {
-    //  foreach (Node* child, children) {
     Region curr = child.get()->updateRegion();
     if (curr.begin() < region.begin()) {
       region.setBegin(curr.begin());
@@ -264,7 +264,7 @@ QString Node::format(QString indent) const {
   }
   QString ret;
   ret = ret % indent % QString("%1-%2: \"%3\"\n").arg(region.begin()).arg(region.end()).arg(name);
-  indent += "\t";
+  indent += "  ";
   for (auto& child : children) {
     ret = ret % child.get()->format(indent);
   }
@@ -448,17 +448,17 @@ Node* Pattern::createNode(const QString& str,
         } else {
           endPos = str.length();
         }
-        break;
       } else {
         endPos = i;
-        break;
       }
+
+      break;
     }
 
     Q_ASSERT(endMatchedRegions);
 
+    // Search patterns between begin and end
     if (cachedPatterns->length() > 0) {
-      // Might be more recursive patterns to apply BEFORE the end is reached
       auto pair = searchInPatterns(str, i);
       Pattern* patternBeforeEnd = pair.first;
       QVector<Region>* regionsBeforeEnd = pair.second;
@@ -470,7 +470,19 @@ Node* Pattern::createNode(const QString& str,
         Node* r = patternBeforeEnd->createNode(str, parser, *regionsBeforeEnd);
         node->append(r);
         i = r->region.end();
-        continue;
+        // This condition may be wrong. This is added to stop searching $ end pattern below
+        // endlessly.
+        // Without this condition, $ end pattern matches every line at "end.find(str, i)" above
+        //
+        // from C.tmLanguage
+        //
+        // <key>end</key>
+        // <string>(?=(?://|/\*))|$</string>
+        // <key>name</key>
+        // <string>meta.preprocessor.macro.c</string>
+        if (i != endPos + 1 || !end.regex->pattern().contains("$") || str.mid(endPos, 1) != "\n") {
+          continue;
+        }
       }
     }
 

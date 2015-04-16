@@ -110,34 +110,95 @@ class LanguageParserTest : public QObject {
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QFile file("testdata/includeBaseWithParent.cpp");
-    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
-
-    QTextStream in(&file);
-    LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
+    QString in = R"(int hoge() {
+  nullptr;
+}
+)";
+    LanguageParser* parser = LanguageParser::create("source.c++", in);
     Node* root = parser->parse();
 
-    QFile resFile("testdata/includeBaseWithParent.cpp.res");
-    QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
-
-    QTextStream resIn(&resFile);
-    compareLineByLine(root->toString(), resIn.readAll());
+    QString out = R"r(0-25: "source.c++"
+  0-3: "storage.type.c" - Data: "int"
+  3-25: "meta.function.c"
+    3-4: "punctuation.whitespace.function.leading.c" - Data: " "
+    4-8: "entity.name.function.c" - Data: "hoge"
+    8-10: "meta.parens.c" - Data: "()"
+    11-25: "meta.block.c"
+      15-22: "constant.language.c++" - Data: "nullptr"
+)r";
+    compareLineByLine(root->toString(), out);
   }
 
-  // Test for $base when it doesn't have a parent syntax.
+  //  // Test for $base when it doesn't have a parent syntax.
   void baseWithoutParentTest() {
     const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QFile file("testdata/includeBaseWithoutParent.cpp");
+    QString in = R"(namespace {
+  int hoge = "foo";
+})";
+    LanguageParser* parser = LanguageParser::create("source.c++", in);
+    Node* root = parser->parse();
+
+    QString out = R"r(0-33: "source.c++"
+  0-33: "meta.namespace-block.c++"
+    0-9: "keyword.control.c++" - Data: "namespace"
+    10-33: ""
+      14-17: "storage.type.c" - Data: "int"
+      25-30: "string.quoted.double.c"
+        25-26: "punctuation.definition.string.begin.c" - Data: """
+        29-30: "punctuation.definition.string.end.c" - Data: """)r";
+    compareLineByLine(root->toString(), out);
+  }
+
+  // Test to check if $ end pattern doesn't match every line
+  //
+  // <key>end</key>
+  // <string>(?=(?://|/\*))|$</string>
+  // <key>name</key>
+  // <string>meta.preprocessor.macro.c</string>
+  void endOfLineMatchTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(#define foo(a) \
+    bar(a)
+)";
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    Node* root = parser->parse();
+
+    QString result = R"r(0-27: "source.c++"
+  0-17: "meta.preprocessor.macro.c"
+    1-7: "keyword.control.import.define.c" - Data: "define"
+    8-11: "entity.name.function.preprocessor.c" - Data: "foo"
+    11-12: "punctuation.definition.parameters.c" - Data: "("
+    12-13: "variable.parameter.preprocessor.c" - Data: "a"
+    13-14: "punctuation.definition.parameters.c" - Data: ")"
+    15-17: "punctuation.separator.continuation.c" - Data: "\
+"
+  17-27: "meta.function.c"
+    17-21: "punctuation.whitespace.function.leading.c" - Data: "    "
+    21-24: "entity.name.function.c" - Data: "bar")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+  void cppFunctionTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QFile file("testdata/cppFunctionTest.cpp");
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
+
     LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
     Node* root = parser->parse();
 
-    QFile resFile("testdata/includeBaseWithoutParent.cpp.res");
+    QFile resFile("testdata/cppFunctionTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);

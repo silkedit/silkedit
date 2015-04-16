@@ -1,8 +1,0 @@
-0-33: "source.c++"
-	0-33: "meta.namespace-block.c++"
-		0-9: "keyword.control.c++" - Data: "namespace"
-		10-33: ""
-			14-17: "storage.type.c" - Data: "int"
-			25-30: "string.quoted.double.c"
-				25-26: "punctuation.definition.string.begin.c" - Data: """
-				29-30: "punctuation.definition.string.end.c" - Data: """

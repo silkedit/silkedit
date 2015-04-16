@@ -32,7 +32,7 @@ struct Regex {
   Regex() : lastFound(0) {}
   explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastFound(0) {}
 
-  QVector<Region>* find(const QString& data, int begin);
+  QVector<Region>* find(const QString& str, int beginPos);
 };
 
 // This struct is mutable because it has cache
