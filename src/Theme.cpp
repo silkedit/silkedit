@@ -217,8 +217,8 @@ Rank::Rank(const QString& scopeSelector, const QString& scope) {
   if (scopeSelector.isEmpty()) {
     m_state = State::Empty;
   } else {
-    QStringList selectors = scopeSelector.simplified().split(" ");
-    QStringList scopes = scope.simplified().split(" ");
+    QVector<QStringRef> selectors = scopeSelector.splitRef(" ");
+    QVector<QStringRef> scopes = scope.splitRef(" ");
     QVector<int> scores(scopes.size(), 0);
 
     if (selectors.size() > scopes.size()) {
@@ -318,7 +318,7 @@ bool Rank::operator<(Rank& r2) {
 }
 
 // singleScopeSelector and singleScope must NOT have a space
-int Rank::calcRank(const QString& singleScopeSelector, const QString& singleScope) {
+int Rank::calcRank(const QStringRef& singleScopeSelector, const QStringRef& singleScope) {
   if (singleScopeSelector.size() > singleScope.size()) {
     return 0;
   }
@@ -328,8 +328,8 @@ int Rank::calcRank(const QString& singleScopeSelector, const QString& singleScop
   int dotIndex = singleScope.indexOf('.', from);
 
   while (dotIndex != -1 && from < singleScopeSelector.size()) {
-    if (singleScope.midRef(from, dotIndex - from) ==
-        singleScopeSelector.midRef(from, dotIndex - from)) {
+    if (singleScope.mid(from, dotIndex - from) ==
+        singleScopeSelector.mid(from, dotIndex - from)) {
       score++;
     } else {
       return 0;
@@ -339,7 +339,7 @@ int Rank::calcRank(const QString& singleScopeSelector, const QString& singleScop
   }
 
   if (from < singleScope.size() && from < singleScopeSelector.size()) {
-    if (singleScope.midRef(from) == singleScopeSelector.midRef(from)) {
+    if (singleScope.mid(from) == singleScopeSelector.mid(from)) {
       score++;
     } else {
       return 0;

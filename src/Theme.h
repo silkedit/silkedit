@@ -76,7 +76,7 @@ class Rank {
   bool operator!= (Rank& ) { throw std::runtime_error("operator != not implemented"); }
 
  private:
-  static int calcRank(const QString& scopeSelector, const QString& singleScope);
+  static int calcRank(const QStringRef& scopeSelector, const QStringRef& singleScope);
 
   QVector<int> m_scores;
   State m_state;

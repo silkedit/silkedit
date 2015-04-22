@@ -160,10 +160,6 @@ class ThemeTest : public QObject {
     Rank rankEmpty("", "source.php string.quoted");
     QVERIFY(rankEmpty.isEmpty());
 
-    // Ignore consecutive spaces
-    Rank rankSpaces("text   source", "text    source         string");
-    QVERIFY(rankSpaces.isValid());
-
     Rank rankValid("entity.name.tag", "entity.name.tag.localname.xml");
     QVERIFY(rankValid.isValid());
   }
