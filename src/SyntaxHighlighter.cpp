@@ -95,7 +95,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
   }
 
   int posInDoc = currentBlock().position();
-//  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), posInDoc);
+  //  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), posInDoc);
 
   for (int posInText = 0; posInText < text.length();) {
     updateScope(posInDoc + posInText);

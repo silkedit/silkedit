@@ -55,10 +55,7 @@ class Theme {
 };
 
 class Rank {
-
-  enum class State {
-    Valid, Invalid, Empty
-  };
+  enum class State { Valid, Invalid, Empty };
 
  public:
   Rank(const QString& scopeSelector, const QString& scope);
@@ -68,12 +65,12 @@ class Rank {
   bool isInvalid() { return m_state == State::Invalid; }
   bool isEmpty() { return m_state == State::Empty; }
 
-  bool operator> (Rank& r);
-  bool operator< (Rank& r);
-  bool operator== (Rank& r);
-  bool operator>= (Rank& ) { throw std::runtime_error("operator >= not implemented"); }
-  bool operator<= (Rank& ) { throw std::runtime_error("operator <= not implemented"); }
-  bool operator!= (Rank& ) { throw std::runtime_error("operator != not implemented"); }
+  bool operator>(Rank& r);
+  bool operator<(Rank& r);
+  bool operator==(Rank& r);
+  bool operator>=(Rank&) { throw std::runtime_error("operator >= not implemented"); }
+  bool operator<=(Rank&) { throw std::runtime_error("operator <= not implemented"); }
+  bool operator!=(Rank&) { throw std::runtime_error("operator != not implemented"); }
 
  private:
   static int calcRank(const QStringRef& scopeSelector, const QStringRef& singleScope);

@@ -328,8 +328,7 @@ int Rank::calcRank(const QStringRef& singleScopeSelector, const QStringRef& sing
   int dotIndex = singleScope.indexOf('.', from);
 
   while (dotIndex != -1 && from < singleScopeSelector.size()) {
-    if (singleScope.mid(from, dotIndex - from) ==
-        singleScopeSelector.mid(from, dotIndex - from)) {
+    if (singleScope.mid(from, dotIndex - from) == singleScopeSelector.mid(from, dotIndex - from)) {
       score++;
     } else {
       return 0;
