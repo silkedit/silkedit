@@ -442,7 +442,7 @@ Node* Pattern::createNode(const QString& str,
     } else {
       if (!found) {
         // oops.. no end found at all, set it to the next line
-        int e2 = str.mid(i).indexOf('\n');
+        int e2 = str.midRef(i).indexOf('\n');
         if (e2 != -1) {
           endPos = i + e2;
         } else {

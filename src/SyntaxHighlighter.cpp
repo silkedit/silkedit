@@ -108,7 +108,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       Region region = m_lastScopeNode->region;
       int length = region.end() - (posInDoc + posInText);
       //      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
-      std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
+      std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
         //        qDebug("setFormat(%d, %d, %s",
         //               i,
@@ -120,7 +120,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       }
       posInText += length;
     } else {
-      std::unique_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
+      std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
       if (format) {
         //        qDebug("setFormat(%d, %d, %s",
         //               i,

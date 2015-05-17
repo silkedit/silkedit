@@ -38,7 +38,7 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   static int rank(const QString& scope, const QString& scope2);
 
-  std::unique_ptr<QTextCharFormat> getFormat(const QString& scope);
+  std::shared_ptr<QTextCharFormat> getFormat(const QString& scope);
 
   std::unique_ptr<ColorSettings> gutterSettings;
   QFont::Weight gutterFontWeight;
@@ -51,7 +51,9 @@ class Theme {
  private:
   static ScopeSetting* matchedSetting(const QString& scope);
 
-  QVector<ScopeSetting*> getMatchedSettings(QString scope);
+  QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
+
+  QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
 };
 
 class Rank {

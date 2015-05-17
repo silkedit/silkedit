@@ -148,7 +148,7 @@ int Theme::rank(const QString& scopeSelector, const QString& scope) {
   return score;
 }
 
-QVector<ScopeSetting*> Theme::getMatchedSettings(QString scope) {
+QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
   std::vector<std::tuple<Rank, ScopeSetting*>> settingsWithRank;
   foreach (ScopeSetting* setting, scopeSettings) {
     foreach (const QString& selector, setting->scopeSelectors) {
@@ -172,9 +172,14 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(QString scope) {
   return matchedSettings;
 }
 
-std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
+std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
   if (scopeSettings.isEmpty())
     return nullptr;
+
+  // check cache
+  if (m_cachedFormats.contains(scope)) {
+    return m_cachedFormats.value(scope);
+  }
 
   QTextCharFormat* format = new QTextCharFormat();
   QVector<ScopeSetting*> matchedSettings = getMatchedSettings(scope);
@@ -210,7 +215,9 @@ std::unique_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
     }
   }
 
-  return std::unique_ptr<QTextCharFormat>(format);
+  auto formatPtr = std::shared_ptr<QTextCharFormat>(format);
+  m_cachedFormats.insert(scope, formatPtr);
+  return formatPtr;
 }
 
 Rank::Rank(const QString& scopeSelector, const QString& scope) {
