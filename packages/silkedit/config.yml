@@ -1,0 +1,11 @@
+config:
+  font_family:
+    title: 'Font Family'
+    description: 'Font Family'
+    type: 'string'
+    default: ''
+  font_size:
+    title: 'Font Size'
+    description: 'Font Size'
+    type: 'int'
+    default: 12

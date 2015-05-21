@@ -3,6 +3,11 @@
 module.exports = {
 
 	activate: () => {
+		const fontFamily = silk.config.get('font_family')
+		const fontSize = silk.config.get('font_size')
+		if (fontFamily || fontSize) {
+			silk.setFont(fontFamily, fontSize)
+		}
 	},
 
 	commands: {

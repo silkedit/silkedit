@@ -68,7 +68,14 @@ const c = rpc.createClient(socketFile, () => {
                       // console.log(doc)
                       if ('config' in doc) {
                         Object.keys(doc.config).forEach(c => {
-                          configs[pjson.name + '.' + c] = doc.config[c]
+                          var configName
+                          // don't prepend package name for default package
+                          if (pjson.name != 'silkedit') {
+                            configName = pjson.name + '.' + c
+                          } else {
+                            configName = c
+                          }
+                          configs[configName] = doc.config[c]
                         })
                       }
                     } catch(e) {

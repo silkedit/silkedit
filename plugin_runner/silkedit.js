@@ -138,6 +138,16 @@ module.exports = (client, contexts, eventFilters, configs) => {
     client.notify('StatusBar.clearMessage', this.id)
   }
 
+  // private utility functions
+
+  function convert(value, name, defaultValue, convertFn) {
+    // console.log('value: %s', value)
+    if (value != null && convertFn != null) {
+      return convertFn(value)
+    } else {
+      return 'default' in configs[name] ? configs[name].default : defaultValue
+    }
+  }
 
   // API
   return {
@@ -242,20 +252,22 @@ module.exports = (client, contexts, eventFilters, configs) => {
       return ids != null ? ids.map(id => new Window(id)) : []
     }
 
-    ,config: {
+    ,config:  {
       get: (name) => {
         if (name in configs) {
           const value = client.invoke('getConfig',name)
           const type = configs[name].type
           switch(type) {
+            case 'bool':
             case 'boolean':
-              console.log('value: %s', value)
-              if (value != null) {
-                return value === 'true'
-              } else {
-                return 'default' in configs[name] ? configs[name].default : false
-              }
-              break
+              return convert(value, name, false, (v) => v === 'true')
+            case 'string':
+              return convert(value, name, null, (v) => v)
+            case 'int':
+            case 'integer':
+              return convert(value, name, 0, (v) => parseInt(v, 10))
+            case 'float':
+              return convert(value, name, 0, (v) => parseFloat(v))
             default:
               return null
           }
@@ -278,6 +290,8 @@ module.exports = (client, contexts, eventFilters, configs) => {
     }
 
     ,setFont: (family, size) => {
+      family = family == null ? '' : family
+      size = size == null ? 0 : size
       client.notify('setFont', family, size)
     }
   }
