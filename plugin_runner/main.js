@@ -133,8 +133,9 @@ const c = rpc.createClient(socketFile, () => {
   })
 });
 
+// Call user's package code in sync.fiber!!
 const handler = {
-  // notify
+  // notify handlers
   "runCommand": (cmd, args) => {
     if (cmd in commands) {
       sync.fiber(() =>{
@@ -143,7 +144,20 @@ const handler = {
     }
   }
 
-  // request
+  ,"focusChanged": (viewType) => {
+    var event = {
+      "type": viewType
+    }
+    const type = "focusChanged"
+    if (type in eventFilters) {
+      sync.fiber(() =>{
+        eventFilters[type].forEach(fn => fn(event))
+      })
+    }
+  }
+
+
+  // request handlers
   ,"askContext": (name, operator, value, response) => {
       if (name in contexts) {
       sync.fiber(() => {

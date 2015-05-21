@@ -38,12 +38,18 @@ const keyPressHandler = (event) => {
 }
 
 const runCommandHandler = (event) => {
-	console.log('runCommandHandler')
 	if (repeatCount > 0) {
 		event.args.repeat = repeatCount.toString()
 		repeatCount = 0
 	}
 	return false
+}
+
+const focusChangedHandler = (event) => {
+	if (event.type === 'TextEditView') {
+		mode = MODE.CMD
+		updateCursor()
+	}
 }
 
 function toModeText(mode) {
@@ -63,6 +69,7 @@ function toModeText(mode) {
 function enable() {
 	silk.on('keypress', keyPressHandler)
 	silk.on('runCommand', runCommandHandler)
+	silk.on('focusChanged', focusChangedHandler)
 	silk.registerContext("mode", (operator, value) => {
 		console.log('checking mode context')
 		return isEnabled && silk.contextUtils.isSatisfied(toModeText(mode), operator, value)

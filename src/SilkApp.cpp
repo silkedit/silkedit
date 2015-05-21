@@ -42,6 +42,9 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
       if (TabView* tabView = findParent<TabView*>(editView)) {
         if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
           tabViewGroup->setActiveTab(tabView);
+
+          // send focusChangedEvent to plugin runner
+          PluginManager::singleton().sendFocusChangedEvent("TextEditView");
         } else {
           qDebug("unable to find the parent TabViewGroup");
         }

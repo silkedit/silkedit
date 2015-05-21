@@ -57,11 +57,25 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
 
   void init();
 
+  void sendFocusChangedEvent(const QString& viewType);
   void callExternalCommand(const QString& cmd, CommandArgument args);
   bool askExternalContext(const QString& name, Operator op, const QString& value);
 
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
+
+  template <typename Parameter>
+  void sendNotification(const std::string& method, const Parameter& params) {
+    if (m_socket) {
+      msgpack::sbuffer sbuf;
+      msgpack::rpc::msg_notify<std::string, Parameter> notify;
+      notify.method = method;
+      notify.param = params;
+      msgpack::pack(sbuf, notify);
+
+      m_socket->write(sbuf.data(), sbuf.size());
+    }
+  }
 
   template <typename Parameter, typename Result>
   Result sendRequest(const std::string& method,

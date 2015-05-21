@@ -73,18 +73,17 @@ void PluginManager::init() {
   m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
 }
 
+void PluginManager::sendFocusChangedEvent(const QString &viewType)
+{
+  std::string type = viewType.toUtf8().constData();
+  std::tuple<std::string> params = std::make_tuple(type);
+  sendNotification("focusChanged", params);
+}
+
 void PluginManager::callExternalCommand(const QString& cmd, CommandArgument args) {
-  msgpack::sbuffer sbuf;
-  msgpack::rpc::msg_notify<std::string,
-                           std::tuple<std::string, std::unordered_map<std::string, std::string>>>
-      notify;
-  notify.method = "runCommand";
   std::string methodName = cmd.toUtf8().constData();
   std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  notify.param = params;
-  msgpack::pack(sbuf, notify);
-
-  m_socket->write(sbuf.data(), sbuf.size());
+  sendNotification("runCommand", params);
 }
 
 bool PluginManager::askExternalContext(const QString& name, Operator op, const QString& value) {
