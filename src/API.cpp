@@ -3,6 +3,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QFontDialog>
 
 #include "API.h"
 #include "Window.h"
@@ -21,6 +22,7 @@
 #include "PluginContext.h"
 #include "modifiers.h"
 #include "ConfigManager.h"
+#include "Session.h"
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -34,6 +36,7 @@ void API::init() {
   s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
   s_notifyFunctions.insert(std::make_pair("unregisterContext", &unregisterContext));
   s_notifyFunctions.insert(std::make_pair("dispatchCommand", &dispatchCommand));
+  s_notifyFunctions.insert(std::make_pair("setFont", &setFont));
 
   s_requestFunctions.insert(std::make_pair("activeView", &activeView));
   s_requestFunctions.insert(std::make_pair("activeTabView", &activeTabView));
@@ -44,6 +47,7 @@ void API::init() {
       std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
   s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
   s_requestFunctions.insert(std::make_pair("version", &version));
+  s_requestFunctions.insert(std::make_pair("showFontDialog", &showFontDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -203,6 +207,19 @@ void API::version(msgpack::rpc::msgid_t msgId, msgpack::object) {
   PluginManager::singleton().sendResponse(version, msgpack::type::nil(), msgId);
 }
 
+void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
+  bool ok;
+  // If the user clicks OK, the selected font is returned. If the user clicks Cancel, the initial
+  // font is returned.
+  QFont font = QFontDialog::getFont(&ok, Session::singleton().font());
+  auto fontParams = std::make_tuple(font.family().toUtf8().constData(), font.pointSize());
+  if (ok) {
+    PluginManager::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
+  } else {
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+}
+
 void API::open(msgpack::object obj) {
   msgpack::type::tuple<std::string> params;
   obj.convert(&params);
@@ -255,6 +272,20 @@ void API::dispatchCommand(msgpack::object obj) {
 
     KeymapManager::singleton().dispatch(
         new QKeyEvent(type, QKeySequence(key)[0], modifiers, key, autorep));
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
+}
+
+void API::setFont(msgpack::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, int> params;
+    obj.convert(&params);
+    std::string family = std::get<0>(params);
+    int size = std::get<1>(params);
+    QFont font(QString::fromUtf8(family.c_str()), size);
+    Session::singleton().setFont(font);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }

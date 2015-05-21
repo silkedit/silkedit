@@ -33,6 +33,7 @@ class API {
   static void unregisterContext(msgpack::object obj);
   static void open(msgpack::object obj);
   static void dispatchCommand(msgpack::object obj);
+  static void setFont(msgpack::object obj);
 
   // request functions
   static void activeView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
@@ -43,4 +44,5 @@ class API {
   static void windows(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void version(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };

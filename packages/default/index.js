@@ -131,6 +131,12 @@ module.exports = {
 				tabViewGroup.splitVertically();
 			}
 		}
+		,"show_fonts": () => {
+			const font = silk.showFontDialog()
+			if (font != null) {
+				silk.setFont(font.family, font.size)
+			}
+		}
 		,"show_scope": () => {
 			const win = silk.activeWindow()
 			const editView = silk.activeView()

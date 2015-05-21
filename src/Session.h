@@ -17,14 +17,19 @@ class Session : public QObject, public Singleton<Session> {
   Theme* theme() { return m_theme; }
   void setTheme(Theme* theme);
 
+  QFont font() { return m_font; }
+  void setFont(const QFont& font);
+
   void init();
 
 signals:
   void themeChanged(Theme* newTheme);
+  void fontChanged(QFont font);
 
  private:
   friend class Singleton<Session>;
   Session();
 
   Theme* m_theme;
+  QFont m_font;
 };

@@ -38,6 +38,13 @@ menu:
     - label: 'Select All'
       command: select_all
 
+  - label: View
+    submenu:
+    - label: 'Font'
+      submenu:
+      - label: 'Show Fonts'
+        command: show_fonts
+
   - label: Tools
     submenu:
     - label: 'Show Scope'

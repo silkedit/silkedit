@@ -7,6 +7,12 @@ void Session::setTheme(Theme* theme) {
   emit themeChanged(theme);
 }
 
+void Session::setFont(const QFont &font)
+{
+  m_font = font;
+  emit fontChanged(font);
+}
+
 void Session::init() {
   setTheme(ThemeProvider::theme(ConfigManager::theme()));
 }

@@ -42,6 +42,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   QString m_lastScopeName;
   Theme* m_theme;
   std::unique_ptr<LanguageParser> m_parser;
+  QFont m_font;
 
   // Given a text region, returns the innermost node covering that region.
   // Side-effects: Writes to m_lastScopeBuf...
@@ -52,4 +53,5 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
  private slots:
   void changeTheme(Theme* theme);
+  void changeFont(const QFont& font);
 };

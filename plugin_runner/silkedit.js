@@ -264,5 +264,21 @@ module.exports = (client, contexts, eventFilters, configs) => {
         }
       }
     }
+
+    ,showFontDialog: () => {
+      const fontParams = client.invoke('showFontDialog')
+      if (fontParams != null) {
+        return {
+          "family": fontParams[0],
+          "size": fontParams[1]
+        }
+      } else {
+        return null
+      }
+    }
+
+    ,setFont: (family, size) => {
+      client.notify('setFont', family, size)
+    }
   }
 }

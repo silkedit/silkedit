@@ -20,6 +20,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
   // &SyntaxHighlighter::updateNode);
   connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
+  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this, SLOT(changeFont(QFont)));
 
   setDocument(doc);
   setParent(doc);
@@ -78,9 +79,7 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
-  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)",
-         position,
-         charsRemoved,
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
          charsAdded);
   if (document()) {
     m_parser->setText(document()->toPlainText());
@@ -104,33 +103,29 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       return;
     }
 
-    if (m_lastScopeNode->isLeaf()) {
-      Region region = m_lastScopeNode->region;
-      int length = region.end() - (posInDoc + posInText);
-      //      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
-      std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
-      if (format) {
+    std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
+    if (format) {
+      format->setFont(m_font);
+      if (m_lastScopeNode->isLeaf()) {
+        Region region = m_lastScopeNode->region;
+        int length = region.end() - (posInDoc + posInText);
+        //      qDebug("%d - %d  %s", region.begin(), region.end(), qPrintable(m_lastScopeName));
         //        qDebug("setFormat(%d, %d, %s",
         //               i,
         //               qMin(text.length(), region.length()),
         //               qPrintable(format->foreground().color().name()));
         setFormat(posInText, qMin(text.length(), length), *format);
+        posInText += length;
       } else {
-        qDebug("format not found for %s", qPrintable(m_lastScopeName));
-      }
-      posInText += length;
-    } else {
-      std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
-      if (format) {
         //        qDebug("setFormat(%d, %d, %s",
         //               i,
         //               1,
         //               qPrintable(format->foreground().color().name()));
         setFormat(posInText, 1, *format);
-      } else {
-        qDebug("format not found for %s", qPrintable(m_lastScopeName));
+        posInText++;
       }
-      posInText++;
+    } else {
+      qDebug("format not found for %s", qPrintable(m_lastScopeName));
     }
   }
 }
@@ -199,5 +194,11 @@ void SyntaxHighlighter::updateScope(int point) {
 
 void SyntaxHighlighter::changeTheme(Theme* theme) {
   m_theme = theme;
+  rehighlight();
+}
+
+void SyntaxHighlighter::changeFont(const QFont &font)
+{
+  m_font = font;
   rehighlight();
 }
