@@ -314,7 +314,10 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1);
 }
 
-void TabView::request(TabView* view, const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object&) {
+void TabView::request(TabView* view,
+                      const QString& method,
+                      msgpack::rpc::msgid_t msgId,
+                      const msgpack::object&) {
   if (method == "count") {
     PluginManager::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
   } else {

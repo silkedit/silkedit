@@ -48,8 +48,8 @@ void PluginManager::init() {
   Q_ASSERT(!m_pluginProcess);
 
   KeyHandler::singleton().registerKeyEventFilter(this);
-  CommandManager::addEventFilter(std::bind(&PluginManager::cmdEventFilter, this,
-                                           std::placeholders::_1, std::placeholders::_2));
+  CommandManager::addEventFilter(std::bind(
+      &PluginManager::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::pluginServerSocketPath());
@@ -65,11 +65,13 @@ void PluginManager::init() {
   connect(m_server, &QLocalServer::newConnection, this, &PluginManager::pluginRunnerConnected);
 
   m_pluginProcess.reset(new QProcess(this));
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardOutput, this,
-          &PluginManager::readStdout);
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardError, this,
-          &PluginManager::readStderr);
-  connect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
+  connect(
+      m_pluginProcess.get(), &QProcess::readyReadStandardOutput, this, &PluginManager::readStdout);
+  connect(
+      m_pluginProcess.get(), &QProcess::readyReadStandardError, this, &PluginManager::readStderr);
+  connect(m_pluginProcess.get(),
+          static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+          this,
           &PluginManager::onFinished);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
   qDebug() << "args:" << Constants::pluginRunnerArgs();
@@ -108,7 +110,8 @@ void PluginManager::callExternalCommand(const QString& cmd, CommandArgument args
 bool PluginManager::askExternalContext(const QString& name, Operator op, const QString& value) {
   qDebug("askExternalContext");
   std::tuple<std::string, std::string, std::string> params =
-      std::make_tuple(name.toUtf8().constData(), IContext::operatorString(op).toUtf8().constData(),
+      std::make_tuple(name.toUtf8().constData(),
+                      IContext::operatorString(op).toUtf8().constData(),
                       value.toUtf8().constData());
 
   try {
@@ -151,18 +154,20 @@ void PluginManager::pluginRunnerConnected() {
   // > readyRead() is not emitted recursively; if you reenter the event loop or call
   // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
   // reemitted (although waitForReadyRead() may still return true).
-  connect(m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest,
-          Qt::QueuedConnection);
+  connect(
+      m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest, Qt::QueuedConnection);
   connect(m_socket,
           static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
-          this, &PluginManager::displayError);
+          this,
+          &PluginManager::displayError);
 }
 
 void PluginManager::onFinished(int exitCode) {
   qWarning("plugin runner has stopped working. exit code: %d", exitCode);
   m_isStopped = true;
   auto reply =
-      QMessageBox::question(nullptr, "Error",
+      QMessageBox::question(nullptr,
+                            "Error",
                             "Plugin runner has stopped working. SilkEdit can continue to run but "
                             "you can't use any plugins. Do you want to restart the plugin runner?");
   if (reply == QMessageBox::Yes) {

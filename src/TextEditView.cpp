@@ -83,7 +83,9 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
 
-  connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemManager::singleton(),
+  connect(this,
+          SIGNAL(destroying(const QString&)),
+          &OpenRecentItemManager::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
@@ -306,7 +308,8 @@ void TextEditView::changeTheme(Theme* theme) {
     }
 
     // for selection foreground color, we use foreground color if selectionForeground is not found.
-    // The reason is that Qt ignores syntax highlighted color for a selected text and sets selection foreground color something.
+    // The reason is that Qt ignores syntax highlighted color for a selected text and sets selection
+    // foreground color something.
     // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
     // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
     QString selectionColor = "";
@@ -380,8 +383,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
-                       number);
+      painter.drawText(
+          0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();
@@ -546,12 +549,12 @@ void TextEditView::request(TextEditView* view,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
-    PluginManager::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
-                                            msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(
+        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
-                                            msgId);
+    PluginManager::singleton().sendResponse(
+        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);

@@ -79,7 +79,9 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
-  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)",
+         position,
+         charsRemoved,
          charsAdded);
   if (document()) {
     m_parser->setText(document()->toPlainText());
@@ -197,8 +199,7 @@ void SyntaxHighlighter::changeTheme(Theme* theme) {
   rehighlight();
 }
 
-void SyntaxHighlighter::changeFont(const QFont &font)
-{
+void SyntaxHighlighter::changeFont(const QFont& font) {
   m_font = font;
   rehighlight();
 }
