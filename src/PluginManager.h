@@ -66,21 +66,32 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {
-    if (m_socket) {
-      msgpack::sbuffer sbuf;
-      msgpack::rpc::msg_notify<std::string, Parameter> notify;
-      notify.method = method;
-      notify.param = params;
-      msgpack::pack(sbuf, notify);
-
-      m_socket->write(sbuf.data(), sbuf.size());
+    if (m_isStopped) {
+      return;
     }
+
+    if (!m_socket) {
+      qWarning("socket has not been initialized yet");
+      return;
+    }
+
+    msgpack::sbuffer sbuf;
+    msgpack::rpc::msg_notify<std::string, Parameter> notify;
+    notify.method = method;
+    notify.param = params;
+    msgpack::pack(sbuf, notify);
+
+    m_socket->write(sbuf.data(), sbuf.size());
   }
 
   template <typename Parameter, typename Result>
   Result sendRequest(const std::string& method,
                      const Parameter& params,
                      msgpack::type::object_type type) {
+    if (m_isStopped) {
+      throw std::runtime_error("plugin runner is not running");
+    }
+
     qDebug("sendRequest. method: %s", method.c_str());
     msgpack::sbuffer sbuf;
     msgpack::rpc::msg_request<std::string, Parameter> request;
@@ -123,6 +134,10 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
 
   template <typename Result, typename Error>
   void sendResponse(const Result& res, const Error& err, msgpack::rpc::msgid_t id) {
+    if (m_isStopped) {
+      return;
+    }
+
     msgpack::sbuffer sbuf;
     msgpack::rpc::msg_response<Result, Error> response;
     response.msgid = id;
@@ -134,17 +149,9 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
     m_socket->write(sbuf.data(), sbuf.size());
   }
 
-  void sendError(const std::string& err, msgpack::rpc::msgid_t id) {
-    msgpack::sbuffer sbuf;
-    msgpack::rpc::msg_response<msgpack::type::nil, std::string> response;
-    response.msgid = id;
-    response.error = err;
-    response.result = msgpack::type::nil();
+  void sendError(const std::string& err, msgpack::rpc::msgid_t id);
 
-    msgpack::pack(sbuf, response);
-
-    m_socket->write(sbuf.data(), sbuf.size());
-  }
+  void startPluginRunnerProcess();
 
  private:
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
@@ -159,9 +166,10 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   friend class Singleton<PluginManager>;
   PluginManager();
 
-  QProcess* m_pluginProcess;
+  std::unique_ptr<QProcess> m_pluginProcess;
   QLocalSocket* m_socket;
   QLocalServer* m_server;
+  bool m_isStopped;
 
  private:
   static constexpr auto TIMEOUT_IN_MS = 1000;
@@ -169,7 +177,7 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void readStdout();
   void readStderr();
   void pluginRunnerConnected();
-  void error(QProcess::ProcessError error);
+  void onFinished(int exitCode);
   void readRequest();
   void displayError(QLocalSocket::LocalSocketError);
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,
