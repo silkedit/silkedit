@@ -16,7 +16,7 @@ class SilkApp : public QApplication {
  public:
   static TabBar* tabBarAt(int x, int y);
   static TextEditView* activeEditView();
-  static TabView* activeTabView(bool createIfNull = false);
+  static TabView* activeTabView();
   static TabViewGroup* activeTabViewGroup();
   static Window* activeWindow();
 

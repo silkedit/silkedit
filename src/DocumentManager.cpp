@@ -15,7 +15,7 @@
 const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
 bool DocumentManager::open(const QString& filename) {
-  if (TabView* tabView = SilkApp::activeTabView(true)) {
+  if (TabView* tabView = SilkApp::activeTabView()) {
     return tabView->open(filename) >= 0;
   } else {
     qWarning("active tab view is null");

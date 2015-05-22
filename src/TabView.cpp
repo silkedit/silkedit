@@ -11,6 +11,7 @@
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
 #include "DocumentManager.h"
+#include "PluginManager.h"
 
 namespace {
 QString getFileNameFrom(const QString& path) {
@@ -313,7 +314,12 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1);
 }
 
-void TabView::request(TabView*, const QString&, msgpack::rpc::msgid_t, const msgpack::object&) {
+void TabView::request(TabView* view, const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object&) {
+  if (method == "count") {
+    PluginManager::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
+  } else {
+    qDebug("method: %s not found", qPrintable(method));
+  }
 }
 
 void TabView::notify(TabView* view, const QString& method, const msgpack::object&) {

@@ -14,7 +14,7 @@ void OpenRecentItemManager::clear() {
 
 void OpenRecentItemManager::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
-    auto tabView = SilkApp::activeTabView(true);
+    auto tabView = SilkApp::activeTabView();
     if (tabView->indexOfPath(path) < 0) {
       tabView->open(path);
       return;

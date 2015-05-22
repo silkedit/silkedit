@@ -78,10 +78,10 @@ TextEditView* SilkApp::activeEditView() {
   }
 }
 
-TabView* SilkApp::activeTabView(bool createIfNull) {
+TabView* SilkApp::activeTabView() {
   TabViewGroup* tabViewGroup = activeTabViewGroup();
   if (tabViewGroup) {
-    return tabViewGroup->activeTab(createIfNull);
+    return tabViewGroup->activeTab();
   } else {
     qDebug("active tab view group is null");
     return nullptr;

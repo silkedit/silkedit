@@ -36,14 +36,11 @@ TabViewGroup::TabViewGroup(QWidget* parent)
   setLayout(layout);
 }
 
-TabView* TabViewGroup::activeTab(bool createIfNull) {
+TabView* TabViewGroup::activeTab() {
   if (m_activeTabView) {
     return m_activeTabView;
-  } else if (createIfNull) {
-    return createInitialTabView();
-  } else {
-    return nullptr;
   }
+  return createInitialTabView();
 }
 
 void TabViewGroup::setActiveTab(TabView* tabView) {

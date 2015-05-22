@@ -23,6 +23,10 @@ module.exports = (client, contexts, eventFilters, configs) => {
     client.notify('TabView.addNew', this.id)
   }
 
+  TabView.prototype.count = () => {
+    client.invoke('TabView.count1', this.id)
+  }
+
 
   // class TabViewGroup
   const TabViewGroup = (id) => {

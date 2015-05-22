@@ -56,11 +56,13 @@ module.exports = {
 		,"close_tab": () => {
 			const tabView = silk.activeTabView()
 			if (tabView != null) {
-				tabView.closeActiveTab();
-			} else {
-				const win = silk.activeWindow()
-				if (win != null) {
-					win.close()
+				if (tabView.count() > 0) {
+					tabView.closeActiveTab();
+				} else {
+					const win = silk.activeWindow()
+					if (win != null) {
+						win.close()
+					}
 				}
 			}
 		}
