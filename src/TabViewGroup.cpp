@@ -7,6 +7,7 @@
 #include "Splitter.h"
 #include "TextEditView.h"
 #include "TabBar.h"
+#include "Window.h"
 
 namespace {
 QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
@@ -62,8 +63,9 @@ void TabViewGroup::saveAllTabs() {
 bool TabViewGroup::closeAllTabs() {
   while (!m_tabViews.empty()) {
     bool isSuccess = m_tabViews.front()->closeAllTabs();
-    if (!isSuccess)
+    if (!isSuccess) {
       return false;
+    }
   }
 
   return true;
@@ -110,12 +112,13 @@ void TabViewGroup::notify(TabViewGroup* view, const QString& method, const msgpa
 
 TabView* TabViewGroup::createTabView() {
   auto tabView = new TabView();
-  QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView](bool afterDrag) {
+  QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView]() {
     qDebug() << "allTabRemoved";
     removeTabView(tabView);
 
-    if (afterDrag && m_tabViews.empty()) {
-      window()->close();
+    Window* win = qobject_cast<Window*>(window());
+    if (win && m_tabViews.empty() && !win->isProjectOpend()) {
+      win->close();
     }
   });
 

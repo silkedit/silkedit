@@ -36,6 +36,7 @@ class Window : public QMainWindow, public UniqueObject<Window> {
   TabView* activeTabView();
   StatusBar* statusBar() { return m_statusBar; }
   void setStatusBar(StatusBar* statusBar);
+  bool isProjectOpend() { return m_projectView != nullptr; }
 
   void show();
   void closeEvent(QCloseEvent* event) override;

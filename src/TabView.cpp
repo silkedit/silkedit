@@ -116,15 +116,19 @@ void TabView::closeActiveTab() {
 }
 
 bool TabView::closeAllTabs() {
-  std::list<QWidget*> widgets;
-  for (int i = 0; i < count(); i++) {
-    widgets.push_back(widget(i));
-  }
+  if (count() == 0) {
+    emit allTabRemoved();
+  } else {
+    std::list<QWidget*> widgets;
+    for (int i = 0; i < count(); i++) {
+      widgets.push_back(widget(i));
+    }
 
-  for (auto w : widgets) {
-    bool isSuccess = closeTab(w);
-    if (!isSuccess)
-      return false;
+    for (auto w : widgets) {
+      bool isSuccess = closeTab(w);
+      if (!isSuccess)
+        return false;
+    }
   }
 
   return true;
@@ -186,13 +190,9 @@ void TabView::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void TabView::tabRemoved(int index) {
-  tabRemoved(index, false);
-}
-
-void TabView::tabRemoved(int, bool afterDrag) {
+void TabView::tabRemoved(int) {
   if (count() == 0 && !m_tabDragging) {
-    emit allTabRemoved(afterDrag);
+    emit allTabRemoved();
   }
 }
 
@@ -304,13 +304,13 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
       newWindow->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
       DraggingTabInfo::setWidget(nullptr);
     } else {
-      qWarning("draggign widget is null");
+      qWarning("dragging widget is null");
     }
   }
 
   m_tabDragging = false;
   // call tabRemoved to emit allTabRemoved if this had only one tab before drag (it's empty now)
-  tabRemoved(-1, true);
+  tabRemoved(-1);
 }
 
 void TabView::request(TabView*, const QString&, msgpack::rpc::msgid_t, const msgpack::object&) {

@@ -33,7 +33,7 @@ class TabView : public QTabWidget, public UniqueObject<TabView> {
   int indexOfPath(const QString& path);
 
 signals:
-  void allTabRemoved(bool afterDrag);
+  void allTabRemoved();
   void activeTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  public slots:
@@ -53,7 +53,6 @@ signals:
 
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
-  void tabRemoved(int index, bool afterDrag);
   void mouseReleaseEvent(QMouseEvent* event) override;
 
  private:
