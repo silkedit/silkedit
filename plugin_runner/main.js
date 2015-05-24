@@ -30,6 +30,16 @@ function getDirs(dir) {
   return dirs;
 }
 
+function runInFiber(fn) {
+  sync.fiber(() => {
+    try {
+      fn()
+    } catch (err) {
+      console.log(err)
+    }
+ })
+}
+
 const c = rpc.createClient(socketFile, () => {
   GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters, configs);
 
@@ -105,7 +115,7 @@ const c = rpc.createClient(socketFile, () => {
                     }
 
                     if (module.activate) {
-                      sync.fiber(() => {
+                      runInFiber(() => {
                         module.activate()
                       })
                     }
@@ -133,12 +143,12 @@ const c = rpc.createClient(socketFile, () => {
   })
 });
 
-// Call user's package code in sync.fiber!!
+// Call user's package code in runInFiber!!
 const handler = {
   // notify handlers
   "runCommand": (cmd, args) => {
     if (cmd in commands) {
-      sync.fiber(() =>{
+      runInFiber(() =>{
         commands[cmd](args)
       })
     }
@@ -150,7 +160,7 @@ const handler = {
     }
     const type = "focusChanged"
     if (type in eventFilters) {
-      sync.fiber(() =>{
+      runInFiber(() =>{
         eventFilters[type].forEach(fn => fn(event))
       })
     }
@@ -160,7 +170,7 @@ const handler = {
   // request handlers
   ,"askContext": (name, operator, value, response) => {
       if (name in contexts) {
-      sync.fiber(() => {
+      runInFiber(() => {
         response.result(contexts[name](operator, value))
       })
     } else {
@@ -170,7 +180,7 @@ const handler = {
   ,"eventFilter": (type, event, response) => {
     // console.log('eventFilter. type: %s', type)
     if (type in eventFilters) {
-      sync.fiber(() => {
+      runInFiber(() => {
         response.result(eventFilters[type].some(fn => { return fn(event)}))
       })
     } else {
@@ -189,7 +199,7 @@ const handler = {
       ,"shiftKey": shiftKey
     }
     if (type in eventFilters) {
-      sync.fiber(() => {
+      runInFiber(() => {
         response.result(eventFilters[type].some((fn) => { return fn(event)}))
       })
     } else {
@@ -203,7 +213,7 @@ const handler = {
     }
     const type = "runCommand"
     if (type in eventFilters) {
-      sync.fiber(() => {
+      runInFiber(() => {
         const result = eventFilters[type].some(fn => { return fn(event)})
         response.result([result, event.name, event.args])
       })
