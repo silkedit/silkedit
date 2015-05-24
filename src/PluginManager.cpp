@@ -36,6 +36,10 @@ std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> PluginManager::s_even
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
   if (m_pluginProcess) {
+    disconnect(m_pluginProcess.get(),
+               static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+               this,
+               &PluginManager::onFinished);
     m_pluginProcess->terminate();
   }
 }
