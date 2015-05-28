@@ -300,9 +300,15 @@ void TextEditView::changeTheme(Theme* theme) {
       qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
     }
 
+    QString selectionBackgroundColor = "";
     if (settings->contains("selection")) {
+      selectionBackgroundColor = settings->value("selection").name();
+    } else if (settings->contains("selectionBackground")) {
+      selectionBackgroundColor = settings->value("selectionBackground").name();
+    }
+    if (!selectionBackgroundColor.isEmpty()) {
       style = style %
-              QString("selection-background-color: %1;").arg(settings->value("selection").name());
+              QString("selection-background-color: %1;").arg(selectionBackgroundColor);
       qDebug() << QString("selection-background-color: %1;")
                       .arg(settings->value("selection").name());
     }
