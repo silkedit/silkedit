@@ -125,7 +125,7 @@ function updateCursor() {
 function setMode(newMode) {
 	if (mode !== newMode) {
 		const view = silk.activeView()
-		if (newMode == MODE.INSERT && view != null) {
+		if (newMode == MODE.CMD && view != null) {
 			view.moveCursor('left')
 		}
 
