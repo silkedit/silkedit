@@ -100,12 +100,15 @@ signals:
   std::shared_ptr<Document> m_document;
   QVector<Region> m_searchMatchedRegions;
 
+  void clearHighlightingCurrentLine();
+
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
   void changeTheme(Theme* theme);
   void clearDirtyMarker();
+  void toggleHighlightingCurrentLine(bool hasSelection);
 };
 
 class LineNumberArea : public QWidget {

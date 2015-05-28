@@ -82,13 +82,13 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-
   connect(this,
           SIGNAL(destroying(const QString&)),
           &OpenRecentItemManager::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
+  connect(this, &TextEditView::copyAvailable, this, &TextEditView::toggleHighlightingCurrentLine);
 
   updateLineNumberAreaWidth(0);
 
@@ -341,6 +341,20 @@ void TextEditView::clearDirtyMarker() {
   document()->setModified(false);
 }
 
+void TextEditView::clearHighlightingCurrentLine()
+{
+    setExtraSelections(QList<QTextEdit::ExtraSelection>());
+}
+
+void TextEditView::toggleHighlightingCurrentLine(bool hasSelection)
+{
+  if (hasSelection) {
+    clearHighlightingCurrentLine();
+  } else {
+    highlightCurrentLine();
+  }
+}
+
 void TextEditView::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
 
@@ -349,6 +363,10 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 }
 
 void TextEditView::highlightCurrentLine() {
+  if (textCursor().hasSelection()) {
+    return;
+  }
+
   Theme* theme = Session::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
     ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
