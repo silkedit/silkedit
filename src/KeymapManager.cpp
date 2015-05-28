@@ -1,4 +1,3 @@
-#include <yaml-cpp/yaml.h>
 #include <string>
 #include <QDebug>
 #include <QShortcut>
@@ -70,9 +69,60 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 }
 
-void KeymapManager::load(const QString& filename) {
-  clear();
+void KeymapManager::handleImports(const YAML::Node& node) {
+  YAML::Node importsNode = node["imports"];
+  if (importsNode.IsDefined() && importsNode.IsSequence()) {
+    for (std::size_t i = 0; i < importsNode.size(); i++) {
+      QString keymapFile = QString::fromUtf8(importsNode[i].as<std::string>().c_str());
+      foreach (const QString& packageDir, Constants::packagePaths()) {
+        QString replacedKeymapFile = keymapFile.replace("$silk_package_dir", packageDir);
+        if (QFile(replacedKeymapFile).exists()) {
+          load(replacedKeymapFile);
+          break;
+        }
+      }
+    }
+  }
+}
 
+void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node) {
+  YAML::Node keymap = node["keymap"];
+  if (keymap.IsDefined()) {
+    for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); ++keymapIter) {
+      QString keyStr = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
+      QKeySequence key = toSequence(keyStr);
+      YAML::Node valueNode = keymapIter->second;
+      switch (valueNode.Type()) {
+        case YAML::NodeType::Scalar: {
+          QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
+          qDebug() << "key: " << key << ", cmd: " << cmd;
+          add(key, CommandEvent(cmd, context));
+          break;
+        }
+        case YAML::NodeType::Map: {
+          std::string cmdStr = valueNode["cmd"].as<std::string>();
+          QString cmd = QString::fromUtf8(cmdStr.c_str());
+          qDebug() << "key: " << key << ", cmd: " << cmd;
+
+          YAML::Node argsNode = valueNode["args"];
+          if (argsNode.IsMap()) {
+            assert(argsNode.IsMap());
+            CommandArgument args = parseArgs(argsNode);
+            add(key, CommandEvent(cmd, args, context));
+          } else {
+            add(key, CommandEvent(cmd, context));
+          }
+
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+}
+
+void KeymapManager::load(const QString& filename) {
   std::string name = filename.toUtf8().constData();
   try {
     YAML::Node keymaps = YAML::LoadFile(name);
@@ -82,6 +132,8 @@ void KeymapManager::load(const QString& filename) {
     for (auto it = keymaps.begin(); it != keymaps.end(); ++it) {
       YAML::Node node = *it;
       assert(node.IsMap());
+
+      handleImports(node);
 
       YAML::Node contextNode = node["context"];
       std::shared_ptr<Context> context;
@@ -94,40 +146,7 @@ void KeymapManager::load(const QString& filename) {
         }
       }
 
-      YAML::Node keymap = node["keymap"];
-      assert(keymap.IsMap());
-
-      for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); ++keymapIter) {
-        QString keyStr = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
-        QKeySequence key = toSequence(keyStr);
-        YAML::Node valueNode = keymapIter->second;
-        switch (valueNode.Type()) {
-          case YAML::NodeType::Scalar: {
-            QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
-            qDebug() << "key: " << key << ", cmd: " << cmd;
-            add(key, CommandEvent(cmd, context));
-            break;
-          }
-          case YAML::NodeType::Map: {
-            std::string cmdStr = valueNode["cmd"].as<std::string>();
-            QString cmd = QString::fromUtf8(cmdStr.c_str());
-            qDebug() << "key: " << key << ", cmd: " << cmd;
-
-            YAML::Node argsNode = valueNode["args"];
-            if (argsNode.IsMap()) {
-              assert(argsNode.IsMap());
-              CommandArgument args = parseArgs(argsNode);
-              add(key, CommandEvent(cmd, args, context));
-            } else {
-              add(key, CommandEvent(cmd, context));
-            }
-
-            break;
-          }
-          default:
-            break;
-        }
-      }
+      handleKeymap(context, node);
     }
   } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
@@ -160,11 +179,10 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 
   // check partial match
   auto partiallyMatchedKey =
-      std::find_if(m_keymaps.begin(),
-                   m_keymaps.end(),
+      std::find_if(m_keymaps.begin(), m_keymaps.end(),
                    [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
-        return key.matches(p.first) == QKeySequence::PartialMatch;
-      });
+                     return key.matches(p.first) == QKeySequence::PartialMatch;
+                   });
 
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");
@@ -188,9 +206,10 @@ void KeymapManager::load() {
     qDebug("copying default keymap.yml");
     if (Util::copy(":/keymap.yml", Constants::standardKeymapPath())) {
       existingKeymapPaths.append(Constants::standardKeymapPath());
-      if (!QFile(Constants::standardKeymapPath()).setPermissions(
-              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardKeymapPath())
+               .setPermissions(
+                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {
@@ -219,7 +238,18 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 }
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
-  m_cmdShortcuts.insert(std::make_pair(cmdEvent.cmdName(), key));
+  // Remove registered keymap if both key and context match
+  auto range = m_keymaps.equal_range(key);
+  for (auto it = range.first; it != range.second; it++) {
+    CommandEvent& ev = it->second;
+    if (cmdEvent.context() == ev.context()) {
+      m_cmdShortcuts.erase(m_cmdShortcuts.find(ev.cmdName()));
+      m_keymaps.erase(it);
+      break;
+    }
+  }
+
+  m_cmdShortcuts[cmdEvent.cmdName()] = key;
   m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
 }
 

@@ -21,6 +21,7 @@ class CommandEvent {
   DEFAULT_MOVE(CommandEvent)
 
   QString cmdName() { return m_cmdName; }
+  Context* context() { return m_context.get(); }
 
   bool execute(int repeat = 1);
   bool hasContext();
