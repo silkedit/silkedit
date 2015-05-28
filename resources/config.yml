@@ -1,4 +1,6 @@
-theme: Solarized (light)
+theme: Solarized (dark)
+# font_family: Consolas
+# font_size: 13
 # end_of_line_str:
 #   str: '←'
 #   color: '#0000ff'

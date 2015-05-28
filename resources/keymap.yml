@@ -3,7 +3,6 @@
 # $silk_package_dir is the directory where default or user packages exist
 
 - imports:
-  - '$silk_package_dir/silkedit/keymap.yml'
   - '$silk_package_dir/vim/keymap.yml'
 
 # Default keymap
