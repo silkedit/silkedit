@@ -7,6 +7,7 @@
 
 #include "macros.h"
 #include "stlSpecialization.h"
+#include "util/DialogUtils.h"
 
 class API {
   DISABLE_COPY_AND_MOVE(API)
@@ -41,6 +42,9 @@ class API {
   static void activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showFilesDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showDialogImpl(msgpack::rpc::msgid_t msgId, const msgpack::object& obj, DialogUtils::MODE mode);
   static void windows(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void version(msgpack::rpc::msgid_t msgId, msgpack::object obj);

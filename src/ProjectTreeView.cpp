@@ -213,3 +213,24 @@ QVariant MyFileSystemModel::data(const QModelIndex& index, int role) const {
 ProjectTreeView::~ProjectTreeView() {
   qDebug("~ProjectTreeView");
 }
+
+bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
+  QString path;
+  QModelIndex pathIndex = sourceParent.child(sourceRow, 0);
+  while (pathIndex.parent().isValid()) {
+    path = sourceModel()->data(pathIndex).toString() + "/" + path;
+    pathIndex = pathIndex.parent();
+  }
+
+#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
+  // Get the leading "/" on Mac and Linux.
+  path = sourceModel()->data(pathIndex).toString() + path;
+#else
+  // Get the drive on Windows. This becoms like "C:", so append "/".
+  path = sourceModel()->data(pathIndex).toString() + "/" + path;
+#endif
+
+  // First test matches paths before we've reached the target directory.
+  // Second test matches paths after we've passed the target directory.
+  return dir.startsWith(path) || path.startsWith(dir);
+}

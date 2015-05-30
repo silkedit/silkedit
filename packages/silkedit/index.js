@@ -23,6 +23,18 @@ module.exports = {
 				silk.open(path)
 			})
 		}
+		,"open_files": () => {
+			const paths = silk.showFilesDialog('Open Files')
+			paths.forEach(function(path) {
+				silk.open(path)
+			})
+		}
+		,"open_directory": () => {
+			const path = silk.showDirectoryDialog('Open Directory')
+			if (path != null) {
+				silk.open(path)
+			}
+		}
 		,"save": () => {
 			const editView = silk.activeView()
 			if (editView != null) {

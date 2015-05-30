@@ -202,6 +202,16 @@ module.exports = (client, contexts, eventFilters, configs) => {
       return client.invoke('showFileAndDirectoryDialog', caption)
     }
 
+    ,showFilesDialog: (caption) => {
+      caption = caption == null ? 'Open Files' : caption
+      return client.invoke('showFilesDialog', caption)
+    }
+
+    ,showDirectoryDialog: (caption) => {
+      caption = caption == null ? 'Open Directory' : caption
+      return client.invoke('showDirectoryDialog', caption)
+    }
+
     ,open: (path) => {
       if (path != null) {
         client.notify('open', path)

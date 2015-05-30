@@ -3,9 +3,16 @@ menu:
     submenu:
     - label: 'New File'
       command: new_file
-    - label: 'Open...'
+    - label: 'Open'
       command: open
       context: os != win
+      before: 'Open Recent'
+    - label: 'Open File'
+      command: open_files
+      context: os == win
+    - label: 'Open Directory'
+      command: open_directory
+      context: os == win
       before: 'Open Recent'
     - label: 'Save'
       command: save

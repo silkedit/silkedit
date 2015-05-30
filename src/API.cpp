@@ -23,6 +23,7 @@
 #include "modifiers.h"
 #include "ConfigManager.h"
 #include "Session.h"
+#include "util/DialogUtils.h"
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -45,6 +46,10 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("windows", &windows));
   s_requestFunctions.insert(
       std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  s_requestFunctions.insert(
+      std::make_pair("showFilesDialog", &showFilesDialog));
+  s_requestFunctions.insert(
+      std::make_pair("showDirectoryDialog", &showDirectoryDialog));
   s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
   s_requestFunctions.insert(std::make_pair("version", &version));
   s_requestFunctions.insert(std::make_pair("showFontDialog", &showFontDialog));
@@ -156,17 +161,40 @@ void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
 }
 
 void API::showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
-  // On Windows, native dialog sets QApplication::activeWindow() to NULL. We need to store and
-  // restore it after closing the dialog.
-  // https://bugreports.qt.io/browse/QTBUG-38414
-  msgpack::type::tuple<std::string> params;
-  obj.convert(&params);
-  QString caption = QString::fromUtf8(std::get<0>(params).c_str());
-  QWidget* activeWindow = QApplication::activeWindow();
-  QFileDialog dialog(nullptr, caption);
-  if (dialog.exec()) {
-    QApplication::setActiveWindow(activeWindow);
-    std::list<std::string> paths = Util::toStdStringList(dialog.selectedFiles());
+  showDialogImpl(msgId, obj, DialogUtils::MODE::FileAndDirectory);
+}
+
+void API::showFilesDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+  showDialogImpl(msgId, obj, DialogUtils::MODE::Files);
+}
+
+void API::showDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj)
+{
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    msgpack::type::tuple<std::string> params;
+    obj.convert(&params);
+    QString caption = QString::fromUtf8(std::get<0>(params).c_str());
+    std::list<std::string> paths = DialogUtils::showDialog(caption, DialogUtils::MODE::Directory);
+    for (std::string& path : paths) {
+      qDebug() << path.c_str();
+    }
+    if (paths.empty()) {
+      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    } else {
+      PluginManager::singleton().sendResponse(paths.front(), msgpack::type::nil(), msgId);
+    }
+  }
+
+}
+
+void API::showDialogImpl(msgpack::rpc::msgid_t msgId, const msgpack::object& obj, DialogUtils::MODE mode) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 1) {
+    msgpack::type::tuple<std::string> params;
+    obj.convert(&params);
+    QString caption = QString::fromUtf8(std::get<0>(params).c_str());
+    std::list<std::string> paths = DialogUtils::showDialog(caption, mode);
     for (std::string& path : paths) {
       qDebug() << path.c_str();
     }
@@ -223,7 +251,7 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
 void API::open(msgpack::object obj) {
   msgpack::type::tuple<std::string> params;
   obj.convert(&params);
-  QString path = QString::fromUtf8(std::get<0>(params).c_str());
+  QString path = QDir::fromNativeSeparators(QString::fromUtf8(std::get<0>(params).c_str()));
   QFileInfo info(path);
   if (info.isFile()) {
     DocumentManager::open(path);
