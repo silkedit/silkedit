@@ -10,7 +10,7 @@ menu:
     - label: 'Open File'
       command: open_files
       context: os == win
-    - label: 'Open Directory'
+    - label: 'Open Folder'
       command: open_directory
       context: os == win
       before: 'Open Recent'

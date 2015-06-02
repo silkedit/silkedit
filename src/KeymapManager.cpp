@@ -38,23 +38,25 @@ QKeySequence toSequence(const QKeyEvent& ev) {
   return QKeySequence(keyInt);
 }
 
-QString replace(QString str, const QString& regex, const QString& after) {
+void replace(QString& str, const QString& regex, const QString& after) {
   QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
   QRegularExpressionMatchIterator iter = re.globalMatch(str);
   while (iter.hasNext()) {
     QRegularExpressionMatch match = iter.next();
     str = str.replace(match.capturedStart(), match.capturedLength(), after);
   }
-  return str;
 }
 
-QKeySequence toSequence(QString str) {
-  QString replacedWithMetaStr = replace(str, "ctrl|control", "meta");
-  QString replacedWithCtrlStr = replace(replacedWithMetaStr, "cmd|command", "ctrl");
-  QString replacedWithAltStr = replace(replacedWithCtrlStr, "opt|option", "alt");
-  QString replacedWithReturnStr = replace(replacedWithAltStr, "enter", "return");
+QKeySequence toSequence(QString& str) {
+#ifdef Q_OS_MAC
+  replace(str, "ctrl|control", "meta");
+  replace(str, "cmd|command", "ctrl");
+  replace(str, "opt|option", "alt");
+#endif
 
-  return std::move(replacedWithReturnStr);
+  replace(str, "enter", "return");
+
+  return str;
 }
 
 CommandArgument parseArgs(const YAML::Node& argsNode) {

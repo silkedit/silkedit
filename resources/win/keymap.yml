@@ -1,0 +1,27 @@
+# Import package's default keymap
+
+# $silk_package_dir is the directory where default or user packages exist
+
+- imports:
+  - '$silk_package_dir/vim/keymap.yml'
+
+# Default keymap
+
+- keymap:
+    ctrl+n: new_file
+    ctrl+o: open
+    ctrl+s: save
+    shift+ctrl+s: save_as
+    alt+ctrl+s: save_all
+    ctrl+w: close_tab
+    shift+ctrl+t: reopen_last_closed_file
+    ctrl+w, s: split_horizontally
+    ctrl+w, v: split_vertically
+    ctrl+z: undo
+    ctrl+shift+z: redo
+    ctrl+x: cut
+    ctrl+c: copy
+    ctrl+v: paste
+    ctrl+a: select_all
+    ctrl+f: open_find_pane
+    ctrl+shift+p: show_scope

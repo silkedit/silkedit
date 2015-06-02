@@ -1,6 +1,11 @@
-- keymap:
+- context: os == mac
+  keymap:
     ctrl+cmd+i: vim.toggle_vim_emulation
-    
+
+- context: os == win
+  keymap:
+    ctrl+alt+i: vim.toggle_vim_emulation
+
 # Normal mode keymap
 
 - context: mode == normal
