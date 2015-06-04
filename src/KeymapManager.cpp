@@ -240,12 +240,14 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 }
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
-  // Remove registered keymap if both key and context match
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
     if (cmdEvent.context() == ev.context()) {
-      m_cmdShortcuts.erase(m_cmdShortcuts.find(ev.cmdName()));
+      // Remove registered keymap if both key and context match
+      if (m_cmdShortcuts.count(ev.cmdName()) != 0) {
+        m_cmdShortcuts.erase(ev.cmdName());
+      }
       m_keymaps.erase(it);
       break;
     }
