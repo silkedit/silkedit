@@ -36,6 +36,10 @@ find_package(Qt5Network REQUIRED)
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 if (APPLE)
+  # find yaml-cpp and onig library
+  find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
+  find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
+
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkedit.icns )
 
@@ -45,9 +49,12 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(msgpack-c/include src)
+  include_directories(/usr/local/include msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
 elseif (MINGW)
+  set(YAML_CPP_LIBRARY yaml-cpp)
+  set(ONIG_LIBRARY onig.a)
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set( MSYS_INCLUDE c:/msys64/mingw64/include )
@@ -70,7 +77,7 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON})
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml yaml-cpp onig.a )
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} )
 
 if(APPLE)
   # bundle packages
