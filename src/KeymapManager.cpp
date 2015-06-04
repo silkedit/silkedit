@@ -181,10 +181,11 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 
   // check partial match
   auto partiallyMatchedKey =
-      std::find_if(m_keymaps.begin(), m_keymaps.end(),
+      std::find_if(m_keymaps.begin(),
+                   m_keymaps.end(),
                    [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
-                     return key.matches(p.first) == QKeySequence::PartialMatch;
-                   });
+        return key.matches(p.first) == QKeySequence::PartialMatch;
+      });
 
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");
@@ -208,10 +209,9 @@ void KeymapManager::load() {
     qDebug("copying default keymap.yml");
     if (Util::copy(":/keymap.yml", Constants::standardKeymapPath())) {
       existingKeymapPaths.append(Constants::standardKeymapPath());
-      if (!QFile(Constants::standardKeymapPath())
-               .setPermissions(
-                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardKeymapPath()).setPermissions(
+              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {

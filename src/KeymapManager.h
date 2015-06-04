@@ -26,7 +26,7 @@ class KeymapManager : public Singleton<KeymapManager>, public IKeyEventFilter {
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
-private:
+ private:
   friend class Singleton<KeymapManager>;
   KeymapManager() = default;
 
@@ -36,7 +36,8 @@ private:
   void handleImports(const YAML::Node& node);
   void handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node);
 
-  // use multimap to store multiple keymaps that have same key combination but with different context
+  // use multimap to store multiple keymaps that have same key combination but with different
+  // context
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
   QString m_partiallyMatchedKeyString;

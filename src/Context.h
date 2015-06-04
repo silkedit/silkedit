@@ -21,9 +21,7 @@ class Context {
   bool isSatisfied();
   bool operator==(const Context& other) const;
 
-  bool operator!=(const Context& other) const {
-    return !(*this == other);
-  }
+  bool operator!=(const Context& other) const { return !(*this == other); }
 
  private:
   static std::unordered_map<QString, std::unique_ptr<IContext>> s_contexts;

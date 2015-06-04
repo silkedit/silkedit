@@ -17,8 +17,8 @@ class DialogUtils {
 
  private:
   static std::list<std::string> showDialogImpl(const QString& caption,
-                                        QFileDialog::FileMode fileMode,
-                                        QFileDialog::Options options = 0);
+                                               QFileDialog::FileMode fileMode,
+                                               QFileDialog::Options options = 0);
 
   DialogUtils() = delete;
   ~DialogUtils() = delete;

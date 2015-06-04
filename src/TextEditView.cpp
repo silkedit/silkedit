@@ -307,8 +307,7 @@ void TextEditView::changeTheme(Theme* theme) {
       selectionBackgroundColor = settings->value("selectionBackground").name();
     }
     if (!selectionBackgroundColor.isEmpty()) {
-      style = style %
-              QString("selection-background-color: %1;").arg(selectionBackgroundColor);
+      style = style % QString("selection-background-color: %1;").arg(selectionBackgroundColor);
       qDebug() << QString("selection-background-color: %1;")
                       .arg(settings->value("selection").name());
     }
@@ -341,13 +340,11 @@ void TextEditView::clearDirtyMarker() {
   document()->setModified(false);
 }
 
-void TextEditView::clearHighlightingCurrentLine()
-{
-    setExtraSelections(QList<QTextEdit::ExtraSelection>());
+void TextEditView::clearHighlightingCurrentLine() {
+  setExtraSelections(QList<QTextEdit::ExtraSelection>());
 }
 
-void TextEditView::toggleHighlightingCurrentLine(bool hasSelection)
-{
+void TextEditView::toggleHighlightingCurrentLine(bool hasSelection) {
   if (hasSelection) {
     clearHighlightingCurrentLine();
   } else {
