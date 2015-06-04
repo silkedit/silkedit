@@ -24,7 +24,7 @@ module.exports = (client, contexts, eventFilters, configs) => {
   }
 
   TabView.prototype.count = () => {
-    client.invoke('TabView.count', this.id)
+    return client.invoke('TabView.count', this.id)
   }
 
 
