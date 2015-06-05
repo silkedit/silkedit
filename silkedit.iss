@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "SilkEdit"
-#define MyAppVersion "0.1"
+#define MyAppExeName "silkedit.exe"
+#define MyAppVersion GetStringFileInfo("build\Release\silkedit.exe", PRODUCT_VERSION)
 #define MyAppPublisher "SilkEdit dev team"
 #define MyAppURL ""
-#define MyAppExeName "silkedit.exe"
 #define Arch "x64"
 
 [Setup]
