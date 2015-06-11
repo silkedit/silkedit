@@ -6,9 +6,9 @@ class RegexpTest : public QObject {
   Q_OBJECT
  private slots:
   void compile() {
-    Regexp* reg;
+    std::unique_ptr<Regexp> reg;
     for (int i = 0; i < 100; i++) {
-      reg = Regexp::compile(R"((?x)
+      reg.reset(Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -19,11 +19,12 @@ class RegexpTest : public QObject {
                                             (?:\.\.\.)?          # varargs ellipsis?
                                         )
                                     (\))                         # a close parenthesis
-                                )?)");
-      QVERIFY(reg);
+                                )?)"));
+      QVERIFY(reg.get());
     }
 
-    reg = Regexp::compile(R"((?x)
+    // This includes invalid \? pattern
+    reg.reset(Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((\?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -34,8 +35,8 @@ class RegexpTest : public QObject {
                                             (?:\.\.\.)?          # varargs ellipsis?
                                         )
                                     (\))                         # a close parenthesis
-                                )?)");
-    QVERIFY(!reg);
+                                )?)"));
+    QVERIFY(!reg.get());
   }
 
   void findStringSubmatchIndex() {
@@ -87,6 +88,14 @@ class RegexpTest : public QObject {
     QVERIFY(indices);
     QCOMPARE(indices->size(), 2);
     QCOMPARE(*indices, QVector<int>({1, 2}));
+  }
+
+  void findNotEmpty() {
+    // Without ONIG_OPTION_FIND_NOT_EMPTY option, \b matches to an empty region in this test
+    Regexp* reg = Regexp::compile(R"(\b)");
+    QString str = "a";
+    QVector<int>* indices = reg->findStringSubmatchIndex(str.midRef(0), true);
+    QVERIFY(!indices);
   }
 
   void escape() {

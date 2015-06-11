@@ -165,9 +165,6 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
     auto pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
-    //    if (pat && ret) {
-    //      qDebug() << "pat:" << *pat << "ret:" << *ret;
-    //    }
     int nl = m_text.mid(pos).indexOf(QRegularExpression(R"(\n|\r)"));
     if (nl != -1) {
       nl += pos;

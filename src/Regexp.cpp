@@ -65,7 +65,7 @@ Regexp* Regexp::compile(const QString& expr) {
   int r = onig_new(&reg,
                    pattern,
                    pattern + strlen((char*)pattern),
-                   ONIG_OPTION_CAPTURE_GROUP,
+                   ONIG_OPTION_CAPTURE_GROUP | ONIG_OPTION_FIND_NOT_EMPTY,
                    ONIG_ENCODING_UTF8,
                    ONIG_SYNTAX_DEFAULT,
                    &einfo);
