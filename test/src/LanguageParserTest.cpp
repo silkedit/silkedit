@@ -185,6 +185,26 @@ class LanguageParserTest : public QObject {
     compareLineByLine(root->toString(), result);
   }
 
+  void cppIncludeTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(#include <string>)";
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    Node* root = parser->parse();
+
+    QString result = R"r(0-17: "source.c++"
+  0-17: "meta.preprocessor.c.include"
+    1-8: "keyword.control.import.include.c" - Data: "include"
+    9-17: "string.quoted.other.lt-gt.include.c"
+      9-10: "punctuation.definition.string.begin.c" - Data: "<"
+      16-17: "punctuation.definition.string.end.c" - Data: ">")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+
   void cppFunctionTest() {
     const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 

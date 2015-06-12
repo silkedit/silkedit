@@ -162,18 +162,20 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
   int iter = MAX_ITER_COUNT;
   QVector<Node*> nodes(0);
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
-    auto pair = m_lang->rootPattern->find(m_text, pos);
+    // Try to find a root pattern in m_text from pos.
+    // The matched region must NOT include empty region [0,0], otherwise this loop never ends because pos doesn't increase.
+    auto pair = m_lang->rootPattern->find(m_text, pos, true);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
-    int nl = m_text.mid(pos).indexOf(QRegularExpression(R"(\n|\r)"));
-    if (nl != -1) {
-      nl += pos;
+    int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
+    if (newlinePos != -1) {
+      newlinePos += pos;
     }
 
     if (!regions) {
       break;
-    } else if (nl > 0 && nl <= (*regions)[0].begin()) {
-      pos = nl;
+    } else if (newlinePos > 0 && newlinePos <= (*regions)[0].begin()) {
+      pos = newlinePos;
       while (pos < m_text.length() && (m_text[pos] == '\n' || m_text[pos] == '\r')) {
         pos++;
       }
@@ -188,7 +190,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
   }
 
   if (iter == 0) {
-    throw "reached maximum number of iterations";
+    throw std::runtime_error("reached maximum number of iterations");
   }
 
   qDebug("parse finished. elapsed: %d ms", t.elapsed());
@@ -283,14 +285,14 @@ Pattern::Pattern(const QString& p_include)
       cachedRegions(nullptr) {
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos) {
+std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos, bool findNotEmpty) {
   //  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* resultPattern = nullptr;
   QVector<Region>* resultRegions = nullptr;
   int i = 0;
   while (i < cachedPatterns->length()) {
-    auto pair = (*cachedPatterns)[i]->find(str, beginPos);
+    auto pair = (*cachedPatterns)[i]->find(str, beginPos, findNotEmpty);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     if (regions) {
@@ -314,7 +316,16 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
   return std::make_pair(resultPattern, resultRegions);
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos) {
+/**
+ * @brief Pattern::find
+ * Find this pattern in the str from beginPos.
+ *
+ * @param str
+ * @param beginPos
+ * @param findNotEmpty If it's true, find doesn't return an empty region. e.g. \b matches "a" with region [0,0]
+ * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0] if findNotEmpty is false
+ */
+std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos, bool findNotEmpty) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
@@ -353,10 +364,10 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
   QVector<Region>* regions = nullptr;
   if (match.regex) {
     pattern = this;
-    regions = match.find(str, beginPos);
+    regions = match.find(str, beginPos, findNotEmpty);
   } else if (begin.regex) {
     pattern = this;
-    regions = begin.find(str, beginPos);
+    regions = begin.find(str, beginPos, findNotEmpty);
   } else if (!include.isEmpty()) {
     // # means an item name in the repository
     if (include.startsWith('#')) {
@@ -364,7 +375,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
       if (lang->repository.find(key) != lang->repository.end()) {
         //        qDebug("include %s", qPrintable(include));
         Pattern* p2 = lang->repository.at(key).get();
-        auto pair = p2->find(str, beginPos);
+        auto pair = p2->find(str, beginPos, findNotEmpty);
         pattern = pair.first;
         regions = pair.second;
       } else {
@@ -372,24 +383,24 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
       }
       // $self means the current syntax definition
     } else if (include == "$self") {
-      return lang->rootPattern->find(str, beginPos);
+      return lang->rootPattern->find(str, beginPos, findNotEmpty);
       // $base equals $self if it doesn't have a parent. When it does, $base means parent syntax
       // e.g. When source.c++ includes source.c, "include $base" in source.c means including
       // source.c++
     } else if (include == "$base" && lang->baseLanguage) {
-      return lang->baseLanguage->rootPattern->find(str, beginPos);
+      return lang->baseLanguage->rootPattern->find(str, beginPos, findNotEmpty);
     } else if (includedLanguage) {
-      return includedLanguage->rootPattern->find(str, beginPos);
+      return includedLanguage->rootPattern->find(str, beginPos, findNotEmpty);
       // external syntax definitions e.g. source.c++
     } else if (Language* includedLang = LanguageProvider::languageFromScope(include)) {
       includedLanguage.reset(includedLang);
       includedLanguage->baseLanguage = lang;
-      return includedLanguage->rootPattern->find(str, beginPos);
+      return includedLanguage->rootPattern->find(str, beginPos, findNotEmpty);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
   } else {
-    auto pair = searchInPatterns(str, beginPos);
+    auto pair = searchInPatterns(str, beginPos, findNotEmpty);
     pattern = pair.first;
     regions = pair.second;
   }
@@ -433,7 +444,8 @@ Node* Pattern::createNode(const QString& str,
   int i, endPos;
 
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
-    QVector<Region>* endMatchedRegions = end.find(str, i);
+    // end region can include an empty region [0,0]
+    QVector<Region>* endMatchedRegions = end.find(str, i, false);
     if (endMatchedRegions) {
       endPos = (*endMatchedRegions)[0].end();
     } else {
@@ -456,7 +468,8 @@ Node* Pattern::createNode(const QString& str,
 
     // Search patterns between begin and end
     if (cachedPatterns->length() > 0) {
-      auto pair = searchInPatterns(str, i);
+      // regions before end must NOT include an empty region
+      auto pair = searchInPatterns(str, i, true);
       Pattern* patternBeforeEnd = pair.first;
       QVector<Region>* regionsBeforeEnd = pair.second;
       if (regionsBeforeEnd && endMatchedRegions &&
@@ -662,11 +675,11 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   return lang;
 }
 
-QVector<Region>* Regex::find(const QString& str, int beginPos) {
+QVector<Region>* Regex::find(const QString& str, int beginPos, bool findNotEmpty) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   while (lastFound < str.length()) {
-    std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.midRef(lastFound)));
+    std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.midRef(lastFound), false, findNotEmpty));
     if (!indices) {
       break;
     } else if (((*indices)[0] + lastFound) < beginPos) {

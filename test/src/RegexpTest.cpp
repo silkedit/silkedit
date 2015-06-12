@@ -92,10 +92,17 @@ class RegexpTest : public QObject {
 
   void findNotEmpty() {
     // Without ONIG_OPTION_FIND_NOT_EMPTY option, \b matches to an empty region in this test
-    Regexp* reg = Regexp::compile(R"(\b)");
+    Regexp* reg = Regexp::compile(R"(\b\b)");
     QString str = "a";
-    QVector<int>* indices = reg->findStringSubmatchIndex(str.midRef(0), true);
+    bool findNotEmpty = true;
+    QVector<int>* indices = reg->findStringSubmatchIndex(str.midRef(0), false, findNotEmpty);
     QVERIFY(!indices);
+
+    findNotEmpty = false;
+    indices = reg->findStringSubmatchIndex(str.midRef(0), false, findNotEmpty);
+    QVERIFY(indices);
+    QCOMPARE(indices->size(), 2);
+    QCOMPARE(*indices, QVector<int>({0, 0}));
   }
 
   void escape() {

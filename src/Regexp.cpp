@@ -65,7 +65,7 @@ Regexp* Regexp::compile(const QString& expr) {
   int r = onig_new(&reg,
                    pattern,
                    pattern + strlen((char*)pattern),
-                   ONIG_OPTION_CAPTURE_GROUP | ONIG_OPTION_FIND_NOT_EMPTY,
+                   ONIG_OPTION_CAPTURE_GROUP ,
                    ONIG_ENCODING_UTF8,
                    ONIG_SYNTAX_DEFAULT,
                    &einfo);
@@ -80,7 +80,7 @@ Regexp* Regexp::compile(const QString& expr) {
   return new Regexp(reg, expr);
 }
 
-QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward) const {
+QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward, bool findNotEmpty) const {
   Q_ASSERT(m_reg);
 
   unsigned char* start, *range, *end;
@@ -97,6 +97,9 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s, bool backward
     range = end;
   }
   int r = onig_search(m_reg, str, end, start, range, region, ONIG_OPTION_NONE);
+  if (findNotEmpty && region->beg[0] == region->end[0]) {
+    r = ONIG_MISMATCH;
+  }
 
   QVector<int>* indices = nullptr;
   if (r >= 0) {
