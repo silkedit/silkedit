@@ -204,7 +204,6 @@ class LanguageParserTest : public QObject {
     compareLineByLine(root->toString(), result);
   }
 
-
   void cppFunctionTest() {
     const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
 

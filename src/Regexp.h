@@ -19,7 +19,9 @@ class Regexp {
   static QString escape(const QString& expr);
 
   QString pattern() const { return m_pattern; }
-  QVector<int>* findStringSubmatchIndex(const QStringRef& s, bool backward = false, bool findNotEmpty = false) const;
+  QVector<int>* findStringSubmatchIndex(const QStringRef& s,
+                                        bool backward = false,
+                                        bool findNotEmpty = false) const;
 
  private:
   regex_t* m_reg;

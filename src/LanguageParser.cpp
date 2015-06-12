@@ -163,7 +163,8 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
   QVector<Node*> nodes(0);
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
     // Try to find a root pattern in m_text from pos.
-    // The matched region must NOT include empty region [0,0], otherwise this loop never ends because pos doesn't increase.
+    // The matched region must NOT include empty region [0,0], otherwise this loop never ends
+    // because pos doesn't increase.
     auto pair = m_lang->rootPattern->find(m_text, pos, true);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
@@ -285,7 +286,9 @@ Pattern::Pattern(const QString& p_include)
       cachedRegions(nullptr) {
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos, bool findNotEmpty) {
+std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str,
+                                                                int beginPos,
+                                                                bool findNotEmpty) {
   //  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* resultPattern = nullptr;
@@ -322,10 +325,14 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
  *
  * @param str
  * @param beginPos
- * @param findNotEmpty If it's true, find doesn't return an empty region. e.g. \b matches "a" with region [0,0]
- * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0] if findNotEmpty is false
+ * @param findNotEmpty If it's true, find doesn't return an empty region. e.g. \b matches "a" with
+ *region [0,0]
+ * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0]
+ *if findNotEmpty is false
  */
-std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos, bool findNotEmpty) {
+std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str,
+                                                    int beginPos,
+                                                    bool findNotEmpty) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
@@ -679,7 +686,8 @@ QVector<Region>* Regex::find(const QString& str, int beginPos, bool findNotEmpty
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   while (lastFound < str.length()) {
-    std::unique_ptr<QVector<int>> indices(regex->findStringSubmatchIndex(str.midRef(lastFound), false, findNotEmpty));
+    std::unique_ptr<QVector<int>> indices(
+        regex->findStringSubmatchIndex(str.midRef(lastFound), false, findNotEmpty));
     if (!indices) {
       break;
     } else if (((*indices)[0] + lastFound) < beginPos) {
