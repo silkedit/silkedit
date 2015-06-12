@@ -1,4 +1,5 @@
 #include <QtTest/QtTest>
+#include <memory>
 
 #include "Regexp.h"
 
