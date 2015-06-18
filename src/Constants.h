@@ -8,6 +8,17 @@ class Constants {
   DISABLE_COPY_AND_MOVE(Constants)
 
  public:
+
+#ifdef Q_OS_MAC
+  static const QString defaultFontFamily;
+#endif
+
+#ifdef Q_OS_WIN
+  static const QString defaultFontFamily;
+#endif
+
+  static const int defaultFontSize;
+
   static QStringList configPaths();
   static QStringList keymapPaths();
   static QStringList packagePaths();

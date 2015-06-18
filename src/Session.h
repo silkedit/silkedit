@@ -6,6 +6,10 @@
 #include "Singleton.h"
 #include "Theme.h"
 
+/**
+ * @brief The Session class
+ * Session holds the temporary per user settings like current font and theme.
+ */
 class Session : public QObject, public Singleton<Session> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Session)

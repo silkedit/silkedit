@@ -14,6 +14,8 @@ void Session::setFont(const QFont& font) {
 
 void Session::init() {
   setTheme(ThemeProvider::theme(ConfigManager::theme()));
+  QFont font(ConfigManager::fontFamily(), ConfigManager::fontSize());
+  setFont(font);
 }
 
 Session::Session() : m_theme(nullptr) {

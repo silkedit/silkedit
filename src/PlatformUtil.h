@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QString>
+
 #include "macros.h"
 
 class PlatformUtil {

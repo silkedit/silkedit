@@ -17,10 +17,13 @@ class ConfigManager {
  public:
   static void load();
   static QString strValue(const QString& key, const QString& defaultValue = "");
+  static int intValue(const QString& key, int defaultValue);
   static std::unordered_map<std::string, std::string> mapValue(const QString& key);
   static bool contains(const QString& key);
   static TYPE type(const QString& key);
   static QString theme();
+  static QString fontFamily();
+  static int fontSize();
   static QString endOfLineStr();
   static QColor endOfLineColor();
   static QString endOfFileStr();

@@ -7,6 +7,7 @@
 #include "ConfigManager.h"
 #include "Constants.h"
 #include "Util.h"
+#include "Constants.h"
 
 namespace {
 const QString END_OF_LINE_STR = "end_of_line_str";
@@ -91,6 +92,17 @@ QString ConfigManager::strValue(const QString& key, const QString& defaultValue)
   return defaultValue;
 }
 
+int ConfigManager::intValue(const QString &key, int defaultValue)
+{
+  if (m_strConfigs.count(key) != 0) {
+    bool ok;
+    int value = m_strConfigs[key].toInt(&ok, 10);
+    return ok ? value : defaultValue;
+  }
+
+  return defaultValue;
+}
+
 std::unordered_map<std::string, std::string> ConfigManager::mapValue(const QString& key) {
   if (m_mapConfigs.count(key) != 0) {
     return m_mapConfigs[key];
@@ -105,6 +117,16 @@ bool ConfigManager::contains(const QString& key) {
 
 QString ConfigManager::theme() {
   return strValue("theme", "Solarized (light)");
+}
+
+QString ConfigManager::fontFamily()
+{
+  return strValue("font_family", Constants::defaultFontFamily);
+}
+
+int ConfigManager::fontSize()
+{
+  return intValue("font_size", Constants::defaultFontSize);
 }
 
 QString ConfigManager::endOfLineStr() {

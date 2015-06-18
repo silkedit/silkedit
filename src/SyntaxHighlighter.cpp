@@ -25,6 +25,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
   setDocument(doc);
   setParent(doc);
   changeTheme(Session::singleton().theme());
+  changeFont(Session::singleton().font());
 }
 
 SyntaxHighlighter::~SyntaxHighlighter() {
