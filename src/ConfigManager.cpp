@@ -92,8 +92,7 @@ QString ConfigManager::strValue(const QString& key, const QString& defaultValue)
   return defaultValue;
 }
 
-int ConfigManager::intValue(const QString &key, int defaultValue)
-{
+int ConfigManager::intValue(const QString& key, int defaultValue) {
   if (m_strConfigs.count(key) != 0) {
     bool ok;
     int value = m_strConfigs[key].toInt(&ok, 10);
@@ -119,13 +118,11 @@ QString ConfigManager::theme() {
   return strValue("theme", "Solarized (light)");
 }
 
-QString ConfigManager::fontFamily()
-{
+QString ConfigManager::fontFamily() {
   return strValue("font_family", Constants::defaultFontFamily);
 }
 
-int ConfigManager::fontSize()
-{
+int ConfigManager::fontSize() {
   return intValue("font_size", Constants::defaultFontSize);
 }
 

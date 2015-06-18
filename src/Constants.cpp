@@ -10,14 +10,14 @@ static QString silkHomePath =
 }
 
 #ifdef Q_OS_MAC
-  const QString Constants::defaultFontFamily = "Menlo";
+const QString Constants::defaultFontFamily = "Menlo";
 #endif
 
 #ifdef Q_OS_WIN
-  const QString Constants::defaultFontFamily = "Consolas";
+const QString Constants::defaultFontFamily = "Consolas";
 #endif
 
-  const int Constants::defaultFontSize = 12;
+const int Constants::defaultFontSize = 12;
 
 QStringList Constants::configPaths() {
   QStringList configPaths;

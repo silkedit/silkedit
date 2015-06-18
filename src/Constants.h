@@ -8,7 +8,6 @@ class Constants {
   DISABLE_COPY_AND_MOVE(Constants)
 
  public:
-
 #ifdef Q_OS_MAC
   static const QString defaultFontFamily;
 #endif
