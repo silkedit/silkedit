@@ -158,5 +158,12 @@ module.exports = {
 				win.statusBar().showMessage(editView.scopeName())
 			}
 		}
+		,"new_package": () => {
+			// enter package name
+			const text = silk.showInputDialog("", "Enter new package path", "")
+			console.log(text)
+			// create package template directory
+			// open the package dir as project
+		}
 	}
 }

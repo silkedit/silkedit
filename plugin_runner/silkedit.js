@@ -1,5 +1,7 @@
 'use strict';
 
+const path = require('path')
+
 module.exports = (client, contexts, eventFilters, configs) => {
 
   // class TabView
@@ -153,6 +155,13 @@ module.exports = (client, contexts, eventFilters, configs) => {
     }
   }
 
+// This is defined here because this is used by other API.
+// Returns SilkEdit package directory path.
+const packageDir = () => {
+  const home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']
+  return path.normalize(home + '/.silk/packages')
+}
+
   // API
   return {
     alert: (msg) => {
@@ -301,6 +310,13 @@ module.exports = (client, contexts, eventFilters, configs) => {
       } else {
         return null
       }
+    }
+
+    ,"packageDir": packageDir
+
+    ,showInputDialog: (title, label, initialText) => {
+      const pkgDirPath = packageDir()
+      return client.invoke('showInputDialog', title, label, path.normalize(pkgDirPath + '/my_package'))
     }
 
     ,setFont: (family, size) => {

@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFontDialog>
+#include <QInputDialog>
 
 #include "API.h"
 #include "Window.h"
@@ -51,6 +52,7 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
   s_requestFunctions.insert(std::make_pair("version", &version));
   s_requestFunctions.insert(std::make_pair("showFontDialog", &showFontDialog));
+  s_requestFunctions.insert(std::make_pair("showInputDialog", &showInputDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -242,6 +244,43 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   if (ok) {
     PluginManager::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
   } else {
+    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+  }
+}
+
+void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj)
+{
+  int numArgs = obj.via.array.size;
+  if (numArgs == 3) {
+    std::tuple<std::string, std::string, std::string> params;
+    obj.convert(&params);
+    std::string titleStr = std::get<0>(params);
+    QString title = QString::fromUtf8(titleStr.c_str());
+    std::string labelStr = std::get<1>(params);
+    QString label = QString::fromUtf8(labelStr.c_str());
+    std::string initialTextStr = std::get<2>(params);
+    QString initialText = QString::fromUtf8(initialTextStr.c_str());
+    bool ok;
+
+    // Can't use this convenience function because we can't resize it
+//    QInputDialog::getText(nullptr, title, label, QLineEdit::Normal, initialText, &ok);
+    auto dialog = new QInputDialog();
+    dialog->setWindowTitle(title);
+    dialog->setLabelText(label);
+    dialog->setTextValue(initialText);
+    dialog->setInputMode(QInputDialog::TextInput);
+    dialog->resize(500, 100);
+    ok = dialog->exec();
+
+    if (ok) {
+      QString text = dialog->textValue();
+      std::string textStr = text.toUtf8().constData();
+      PluginManager::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
+    } else {
+      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    }
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }

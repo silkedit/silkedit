@@ -51,4 +51,5 @@ class API {
   static void getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void version(msgpack::rpc::msgid_t msgId, msgpack::object obj);
   static void showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  static void showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
 };

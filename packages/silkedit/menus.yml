@@ -1,58 +1,60 @@
 menu:
-  - label: File
-    submenu:
-    - label: 'New File'
-      command: new_file
-    - label: 'Open'
-      command: open
-      context: os != win
-      before: 'Open Recent'
-    - label: 'Open File'
-      command: open_files
-      context: os == win
-    - label: 'Open Folder'
-      command: open_directory
-      context: os == win
-      before: 'Open Recent'
-    - label: 'Save'
-      command: save
-    - label: 'Save As'
-      command: save_as
-    - label: 'Save All'
-      command: save_all
-    - label: 'Close All Tabs'
-      command: close_all_tabs
-    - label: 'Close Other Tabs'
-      command: close_other_tabs
-    - label: 'Close Tab'
-      command: close_tab
+- label: File
+  submenu:
+  - label: 'New File'
+    command: new_file
+  - label: 'Open'
+    command: open
+    context: os != win
+    before: 'Open Recent'
+  - label: 'Open File'
+    command: open_files
+    context: os == win
+  - label: 'Open Folder'
+    command: open_directory
+    context: os == win
+    before: 'Open Recent'
+  - label: 'Save'
+    command: save
+  - label: 'Save As'
+    command: save_as
+  - label: 'Save All'
+    command: save_all
+  - label: 'Close All Tabs'
+    command: close_all_tabs
+  - label: 'Close Other Tabs'
+    command: close_other_tabs
+  - label: 'Close Tab'
+    command: close_tab
 
-  - label: Text
-    submenu:
-    # - type: separator
-    #   context: os == mac
-    # - label: 'Undo'
-    #   command: undo
-    - label: 'Redo'
-      command: redo
-    - type: separator
-    - label: 'Cut'
-      command: cut
-    - label: 'Copy'
-      command: copy
-    - label: 'Paste'
-      command: paste
-    - label: 'Select All'
-      command: select_all
+- label: Text
+  submenu:
+  # - type: separator
+  #   context: os == mac
+  # - label: 'Undo'
+  #   command: undo
+  - label: 'Redo'
+    command: redo
+  - type: separator
+  - label: 'Cut'
+    command: cut
+  - label: 'Copy'
+    command: copy
+  - label: 'Paste'
+    command: paste
+  - label: 'Select All'
+    command: select_all
 
-  - label: View
+- label: View
+  submenu:
+  - label: 'Font'
     submenu:
-    - label: 'Font'
-      submenu:
-      - label: 'Show Fonts'
-        command: show_fonts
+    - label: 'Show Fonts'
+      command: show_fonts
 
-  - label: Tools
+- label: Packages
+  submenu:
+  - label: 'Package Development'
     submenu:
     - label: 'Show Scope'
       command: show_scope

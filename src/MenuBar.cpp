@@ -10,6 +10,8 @@
 #include "ThemeProvider.h"
 #include "Session.h"
 #include "SilkApp.h"
+#include "commands/PluginCommand.h"
+#include "CommandManager.h"
 
 MenuBar* MenuBar::s_globalMenuBar;
 
@@ -40,6 +42,11 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   }
 
   connect(themeActionGroup, &QActionGroup::triggered, this, &MenuBar::themeActionTriggered);
+
+  // Packages menu
+  auto packagesMenu = addMenu(QObject::tr("&Packages"));
+  auto bundleDevelopmentMenu = packagesMenu->addMenu("Package Development");
+  bundleDevelopmentMenu->addAction(new CommandAction("New Package", "new_package"));
 
   // Help menu
   auto helpMenu = addMenu(QObject::tr("&Help"));
