@@ -36,6 +36,7 @@ const c = rpc.createClient(socketFile, () => {
   GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters, configs, commands);
 
   sync(c, 'invoke');
+  
   process.argv.slice(3).forEach((dirPath) => {
     fs.open(dirPath, 'r', (err, fd) => {
       fd && fs.close(fd, (err) => {
