@@ -129,6 +129,12 @@ module.exports = {
 				editView.selectAll()
 			}
 		}
+		,"complete": () => {
+			const editView = silk.activeView()
+			if (editView != null) {
+				editView.complete()
+			}
+		}
 		,"delete": (args) => {
 			const editView = silk.activeView()
 			if (editView != null) {

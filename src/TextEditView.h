@@ -6,6 +6,8 @@
 #include <QPlainTextEdit>
 #include <QHash>
 #include <QMutex>
+#include <QStringListModel>
+#include <QCompleter>
 
 #include "macros.h"
 #include "ICloneable.h"
@@ -69,6 +71,7 @@ class TextEditView : public QPlainTextEdit,
                            int end,
                            Document::FindFlags flags = 0,
                            bool preserveCase = false);
+  void performCompletion();
 
 signals:
   void destroying(const QString& path);
@@ -89,6 +92,7 @@ signals:
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
+  void mousePressEvent(QMouseEvent* e) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   int firstNonBlankCharPos(const QString& text);
@@ -99,8 +103,16 @@ signals:
   QWidget* m_lineNumberArea;
   std::shared_ptr<Document> m_document;
   QVector<Region> m_searchMatchedRegions;
+  std::unique_ptr<QStringListModel> m_model;
+  std::unique_ptr<QCompleter> m_completer;
+  bool m_completedAndSelected;
 
   void clearHighlightingCurrentLine();
+  void performCompletion(const QString& completionPrefix);
+  void insertCompletion(const QString& completion);
+  void insertCompletion(const QString& completion, bool singleWord);
+  void populateModel(const QString& completionPrefix);
+  bool handledCompletedAndSelected(QKeyEvent* event);
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);

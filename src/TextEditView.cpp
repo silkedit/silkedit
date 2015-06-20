@@ -74,17 +74,20 @@ int toMoveOperation(std::string str) {
     return QTextCursor::NoMove;
   }
 }
+
+bool caseInsensitiveLessThan(const QString& a, const QString& b) {
+  return a.compare(b, Qt::CaseInsensitive) < 0;
+}
 }
 
-TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
+TextEditView::TextEditView(QWidget* parent)
+    : QPlainTextEdit(parent), m_completedAndSelected(false) {
   m_lineNumberArea = new LineNumberArea(this);
 
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(QRect, int)), this, SLOT(updateLineNumberArea(QRect, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-  connect(this,
-          SIGNAL(destroying(const QString&)),
-          &OpenRecentItemManager::singleton(),
+  connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemManager::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
   connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
@@ -96,6 +99,20 @@ TextEditView::TextEditView(QWidget* parent) : QPlainTextEdit(parent) {
   installEventFilter(&KeyHandler::singleton());
   setLanguage(DEFAULT_SCOPE);
   changeTheme(Session::singleton().theme());
+
+  // setup for completion
+  m_model.reset(new QStringListModel(this));
+  m_completer.reset(new QCompleter(this));
+  m_completer->setWidget(this);
+  m_completer->setCompletionMode(QCompleter::PopupCompletion);
+  m_completer->setModel(m_model.get());
+  m_completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
+  m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+  m_completer->setWrapAround(true);
+
+  connect(m_completer.get(),
+          static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::activated), this,
+          static_cast<void (TextEditView::*)(const QString&)>(&TextEditView::insertCompletion));
 }
 
 TextEditView::~TextEditView() {
@@ -344,6 +361,78 @@ void TextEditView::clearHighlightingCurrentLine() {
   setExtraSelections(QList<QTextEdit::ExtraSelection>());
 }
 
+void TextEditView::performCompletion() {
+  QTextCursor cursor = textCursor();
+  cursor.select(QTextCursor::WordUnderCursor);
+  const QString completionPrefix = cursor.selectedText();
+  if (!completionPrefix.isEmpty() &&
+      completionPrefix.at(completionPrefix.length() - 1).isLetter()) {
+    performCompletion(completionPrefix);
+  }
+}
+
+void TextEditView::performCompletion(const QString& completionPrefix) {
+  populateModel(completionPrefix);
+  if (completionPrefix != m_completer->completionPrefix()) {
+    m_completer->setCompletionPrefix(completionPrefix);
+    m_completer->popup()->setCurrentIndex(m_completer->completionModel()->index(0, 0));
+  }
+
+  if (m_completer->completionCount() == 1) {
+    insertCompletion(m_completer->currentCompletion(), true);
+  } else {
+    QRect rect = cursorRect();
+    rect.setWidth(m_completer->popup()->sizeHintForColumn(0) +
+                  m_completer->popup()->verticalScrollBar()->sizeHint().width());
+    m_completer->complete(rect);
+  }
+}
+
+void TextEditView::insertCompletion(const QString& completion) {
+  insertCompletion(completion, false);
+}
+
+void TextEditView::insertCompletion(const QString& completion, bool singleWord) {
+  QTextCursor cursor = textCursor();
+  int numberOfCharsToComplete = completion.length() - m_completer->completionPrefix().length();
+  int insertionPosition = cursor.position();
+  cursor.insertText(completion.right(numberOfCharsToComplete));
+  if (singleWord) {
+    cursor.setPosition(insertionPosition);
+    cursor.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
+    m_completedAndSelected = true;
+  }
+
+  setTextCursor(cursor);
+}
+
+void TextEditView::populateModel(const QString& completionPrefix) {
+  QStringList strings = toPlainText().split(QRegExp("\\W+"));
+  strings.removeAll(completionPrefix);
+  strings.removeDuplicates();
+  qSort(strings.begin(), strings.end(), caseInsensitiveLessThan);
+  m_model->setStringList(strings);
+}
+
+bool TextEditView::handledCompletedAndSelected(QKeyEvent* event) {
+  m_completedAndSelected = false;
+  QTextCursor cursor = textCursor();
+  switch (event->key()) {
+    case Qt::Key_Enter:
+    case Qt::Key_Return:
+      cursor.clearSelection();
+      break;
+    case Qt::Key_Escape:
+      cursor.removeSelectedText();
+      break;
+    default:
+      return false;
+  }
+  setTextCursor(cursor);
+  event->accept();
+  return true;
+}
+
 void TextEditView::toggleHighlightingCurrentLine(bool hasSelection) {
   if (hasSelection) {
     clearHighlightingCurrentLine();
@@ -404,8 +493,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(
-          0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
+      painter.drawText(0, top, m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
+                       number);
     }
 
     block = block.next();
@@ -570,12 +659,12 @@ void TextEditView::request(TextEditView* view,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
-    PluginManager::singleton().sendResponse(
-        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
+                                            msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(
-        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
@@ -600,6 +689,8 @@ void TextEditView::notify(TextEditView* view, const QString& method, const msgpa
     view->paste();
   } else if (method == "selectAll") {
     view->selectAll();
+  } else if (method == "complete") {
+    view->performCompletion();
   } else if (method == "delete") {
     std::tuple<int, int> params;
     obj.convert(&params);
@@ -704,10 +795,41 @@ void TextEditView::wheelEvent(QWheelEvent* e) {
 }
 
 void TextEditView::keyPressEvent(QKeyEvent* event) {
+  if (m_completedAndSelected && handledCompletedAndSelected(event)) {
+    return;
+  }
+  m_completedAndSelected = false;
+
+  if (m_completer->popup()->isVisible()) {
+    switch (event->key()) {
+      case Qt::Key_Up:
+      case Qt::Key_Down:
+      case Qt::Key_Enter:
+      case Qt::Key_Return:
+      case Qt::Key_Escape:
+        event->ignore();
+        return;
+      default:
+        m_completer->popup()->hide();
+        break;
+    }
+  }
+
   switch (event->key()) {
     case Qt::Key_Escape:
       API::hideActiveFindReplacePanel();
       break;
   }
   QPlainTextEdit::keyPressEvent(event);
+}
+
+void TextEditView::mousePressEvent(QMouseEvent* event) {
+  if (m_completedAndSelected) {
+    m_completedAndSelected = false;
+    QTextCursor cursor = textCursor();
+    cursor.removeSelectedText();
+    setTextCursor(cursor);
+  }
+
+  QPlainTextEdit::mousePressEvent(event);
 }

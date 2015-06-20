@@ -114,6 +114,10 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
     return client.invoke('TextEditView.scopeName', this.id)
   }
 
+  TextEditView.prototype.complete = () => {
+    return client.notify('TextEditView.complete', this.id)
+  }
+
 
   // class Window
   const Window = (id) => {
