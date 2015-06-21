@@ -1,8 +1,28 @@
 'use strict'
 
-module.exports = {
+var fs = require('fs-extra')
+var path = require('path')
 
+// Replace oldexp (string or regexp) in a file content with newStr
+function replaceFileContent(file, oldexp, newStr, cb) {
+	fs.readFile(file, 'utf-8', (err, data) => {
+		if (err) return cb(err)
+					
+		const result = data.replace(oldexp, newStr)
+		fs.writeFile(file, result, 'utf-8', (err) => {
+			if (err) return cb(err)
+			cb()
+		})
+	})
+}
+
+module.exports = {
 	activate: () => {
+		const fontFamily = silk.config.get('font_family')
+		const fontSize = silk.config.get('font_size')
+		if (fontFamily || fontSize) {
+			silk.setFont(fontFamily, fontSize)
+		}
 	},
 
 	commands: {
@@ -159,11 +179,23 @@ module.exports = {
 			}
 		}
 		,"new_package": () => {
-			// enter package name
-			const text = silk.showInputDialog("", "Enter new package path", "")
-			console.log(text)
-			// create package template directory
-			// open the package dir as project
+			const pkgPath = silk.showInputDialog("", "Enter new package path", "")
+			// copy hello example package to a new package directory
+			fs.copy(__dirname + "/resources/hello", pkgPath, (err) => {
+				if (err) return console.error(err)
+
+				// replace <name> with the new package name
+				replaceFileContent(pkgPath + "/package.json", /<name>/, path.basename(pkgPath), (err) => {
+					if (err) return console.error(err)
+					replaceFileContent(pkgPath + "/menus.yml", /<name>/, path.basename(pkgPath), (err) => {
+						if (err) return console.error(err)
+
+						silk.open(pkgPath)
+						silk.open(pkgPath + '/package.json')
+						silk.loadPackage(pkgPath)
+					})
+				})
+			})
 		}
 	}
 }

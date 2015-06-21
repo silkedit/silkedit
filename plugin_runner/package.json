@@ -12,6 +12,5 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Shinichi Katayama",
-  "license": "ISC"
+  "author": "Shinichi Katayama"
 }

@@ -74,11 +74,17 @@ resolve() {
         rm -rf $node $node.tar.gz
       fi
 
-      # npm install
+      # npm install for plugin runner
       cd plugin_runner
       PATH=$(pwd)/bin:$PATH
       bin/npm install
       cd ..
+
+      # npm install for silkedit package
+      cd packages/silkedit
+      ../../plugin_runner/bin/npm install
+      cd ../..
+
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
@@ -115,10 +121,15 @@ resolve() {
             cd ..
         fi
 
-        # npm install
+        # npm install for plugin runner
         cd plugin_runner
         node bin/node_modules/npm/bin/npm-cli.js install
         cd ..
+
+        # npm install for silkedit package
+        cd packages/silkedit
+        node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
+        cd ../..
     fi
 
 

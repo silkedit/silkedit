@@ -1,8 +1,10 @@
-rpc = require('silk-msgpack-rpc');
-fs = require('fs')
-sync = require('synchronize')
-path = require('path')
-yaml = require('js-yaml');
+'use strict'
+
+var rpc = require('silk-msgpack-rpc');
+var fs = require('fs')
+var sync = require('synchronize')
+var path = require('path')
+var util = require('./util')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -10,7 +12,6 @@ if (process.argv.length < 3) {
 }
 
 const socketFile = process.argv[2];
-const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
 var commands = {}
 var contexts = {}
 var eventFilters = {}
@@ -30,112 +31,17 @@ function getDirs(dir) {
   return dirs;
 }
 
-function runInFiber(fn) {
-  sync.fiber(() => {
-    try {
-      fn()
-    } catch (err) {
-      console.log(err)
-    }
- })
-}
-
 const c = rpc.createClient(socketFile, () => {
-  GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters, configs);
+  GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters, configs, commands);
 
   sync(c, 'invoke');
-
-  const loadPackage = (dir) => {
-    fs.readdir(dir, (err, files) => {
-      if (err) {
-        console.log(err.message);
-        return;
-      }
-
-      moduleFiles.forEach((filename) => {
-        const filePath = path.join(dir, filename);
-        console.log(filePath);
-        // check if filePath exists by opening it. fs.exists is deprecated.
-        fs.open(filePath, 'r', (err, fd) => {
-          fd && fs.close(fd, (err) => {
-            switch (filename) {
-              case "menus.yml":
-              case "menus.yaml":
-                silk.loadMenu(filePath);
-                break;
-              case "package.json":
-                const pjson = require(filePath);
-                if (pjson.name == null) {
-                  console.warn('missing package name')
-                  return
-                }
-
-                const configPath = path.join(dir, "config.yml")
-                fs.open(configPath, 'r', (err, fd) => {
-                  if (fd) {
-                    try {
-                      const doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
-                      // console.log(doc)
-                      if ('config' in doc) {
-                        Object.keys(doc.config).forEach(c => {
-                          var configName
-                          // don't prepend package name for default package
-                          if (pjson.name != 'silkedit') {
-                            configName = pjson.name + '.' + c
-                          } else {
-                            configName = c
-                          }
-                          configs[configName] = doc.config[c]
-                        })
-                      }
-                    } catch(e) {
-                      console.warn(e)
-                    } finally {
-                      fs.close(fd)
-                    }
-                  }
-
-                  if (pjson.main) {
-                    const module = require(dir)
-                    if (module.commands) {
-                      if (pjson.name === 'silkedit') {
-                        // don't add a package prefix for silkedit package
-                        for (var prop in module.commands) {
-                          commands[prop] = module.commands[prop];
-                        }
-                        silk.registerCommands(Object.keys(module.commands));
-                      } else {
-                        for (var prop in module.commands) {
-                          commands[pjson.name + '.' + prop] = module.commands[prop];
-                        }
-                        silk.registerCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
-                      }
-                    } else {
-                      console.log("no commands")
-                    }
-
-                    if (module.activate) {
-                      runInFiber(() => {
-                        module.activate()
-                      })
-                    }
-                  }
-                })
-
-                break;
-            }
-          })
-        })
-      })
-    })
-  }
 
   process.argv.slice(3).forEach((dirPath) => {
     fs.open(dirPath, 'r', (err, fd) => {
       fd && fs.close(fd, (err) => {
         const dirs = getDirs(dirPath);
         dirs.forEach((dir) => {
-          loadPackage(path.join(dirPath, dir));
+          silk.loadPackage(path.join(dirPath, dir));
         });    
       })
     })
@@ -148,7 +54,7 @@ const handler = {
   // notify handlers
   "runCommand": (cmd, args) => {
     if (cmd in commands) {
-      runInFiber(() =>{
+      util.runInFiber(() =>{
         commands[cmd](args)
       })
     }
@@ -160,7 +66,7 @@ const handler = {
     }
     const type = "focusChanged"
     if (type in eventFilters) {
-      runInFiber(() =>{
+      util.runInFiber(() =>{
         eventFilters[type].forEach(fn => fn(event))
       })
     }
@@ -170,7 +76,7 @@ const handler = {
   // request handlers
   ,"askContext": (name, operator, value, response) => {
       if (name in contexts) {
-      runInFiber(() => {
+      util.runInFiber(() => {
         response.result(contexts[name](operator, value))
       })
     } else {
@@ -180,7 +86,7 @@ const handler = {
   ,"eventFilter": (type, event, response) => {
     // console.log('eventFilter. type: %s', type)
     if (type in eventFilters) {
-      runInFiber(() => {
+      util.runInFiber(() => {
         response.result(eventFilters[type].some(fn => { return fn(event)}))
       })
     } else {
@@ -199,7 +105,7 @@ const handler = {
       ,"shiftKey": shiftKey
     }
     if (type in eventFilters) {
-      runInFiber(() => {
+      util.runInFiber(() => {
         response.result(eventFilters[type].some((fn) => { return fn(event)}))
       })
     } else {
@@ -213,7 +119,7 @@ const handler = {
     }
     const type = "runCommand"
     if (type in eventFilters) {
-      runInFiber(() => {
+      util.runInFiber(() => {
         const result = eventFilters[type].some(fn => { return fn(event)})
         response.result([result, event.name, event.args])
       })

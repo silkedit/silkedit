@@ -1,8 +1,13 @@
-'use strict';
+'use strict'
 
-const path = require('path')
+var fs = require('fs')
+var path = require('path')
+var yaml = require('js-yaml');
+var util = require('./util')
 
-module.exports = (client, contexts, eventFilters, configs) => {
+const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
+
+module.exports = (client, contexts, eventFilters, configs, commands) => {
 
   // class TabView
   const TabView = (id) => {
@@ -155,12 +160,108 @@ module.exports = (client, contexts, eventFilters, configs) => {
     }
   }
 
-// This is defined here because this is used by other API.
+// These functions are defined here because this is used by other API.
+
 // Returns SilkEdit package directory path.
 const packageDir = () => {
   const home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']
   return path.normalize(home + '/.silk/packages')
 }
+
+const loadMenu = (ymlPath) => {
+  client.notify('loadMenu', ymlPath)
+}
+
+const registerCommands = (commands) => {
+  client.notify('registerCommands', commands)
+}
+
+const loadPackage = (dir) => {
+    var pjson, configPath, doc, module
+
+    fs.readdir(dir, (err, files) => {
+      if (err) {
+        console.warn(err.message);
+        return;
+      }
+
+      moduleFiles.forEach((filename) => {
+        const filePath = path.join(dir, filename);
+        console.log(filePath);
+        // check if filePath exists by opening it. fs.exists is deprecated.
+        fs.open(filePath, 'r', (err, fd) => {
+          fd && fs.close(fd, (err) => {
+            switch (filename) {
+              case "menus.yml":
+              case "menus.yaml":
+                loadMenu(filePath);
+                break;
+              case "package.json":
+                pjson = require(filePath);
+                if (pjson.name == null) {
+                  console.warn('missing package name')
+                  return
+                }
+
+                configPath = path.join(dir, "config.yml")
+                fs.open(configPath, 'r', (err, fd) => {
+                  if (fd) {
+                    try {
+                      doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
+                      // console.log(doc)
+                      if ('config' in doc) {
+                        Object.keys(doc.config).forEach(c => {
+                          var configName
+                          // don't prepend package name for default package
+                          if (pjson.name != 'silkedit') {
+                            configName = pjson.name + '.' + c
+                          } else {
+                            configName = c
+                          }
+                          configs[configName] = doc.config[c]
+                        })
+                      }
+                    } catch(e) {
+                      console.warn(e)
+                    } finally {
+                      fs.close(fd)
+                    }
+                  }
+
+                  if (pjson.main) {
+                    module = require(dir)
+                    if (module.commands) {
+                      if (pjson.name === 'silkedit') {
+                        // don't add a package prefix for silkedit package
+                        for (var prop in module.commands) {
+                          commands[prop] = module.commands[prop];
+                        }
+                        registerCommands(Object.keys(module.commands));
+                      } else {
+                        for (var prop in module.commands) {
+                          commands[pjson.name + '.' + prop] = module.commands[prop];
+                        }
+                        registerCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
+                      }
+                    } else {
+                      console.log("no commands")
+                    }
+
+                    if (module.activate) {
+                      util.runInFiber(() => {
+                        module.activate()
+                      })
+                    }
+                  }
+                })
+
+                break;
+            }
+          })
+        })
+      })
+    })
+  }
 
   // API
   return {
@@ -168,13 +269,11 @@ const packageDir = () => {
       client.notify('alert', msg);
     }
 
-    ,loadMenu: (ymlPath) => {
-      client.notify('loadMenu', ymlPath)
-    }
+    ,loadMenu: loadMenu
 
-    ,registerCommands: (commands) => {
-      client.notify('registerCommands', commands)
-    }
+    ,loadPackage: loadPackage
+
+    ,registerCommands: registerCommands
 
     ,registerContext: (name, func) => {
       contexts[name] = func

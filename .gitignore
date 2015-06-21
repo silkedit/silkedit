@@ -2,6 +2,7 @@
 CMakeLists.txt.user
 *.autosave
 .idea/
+node_modules/
 
 /build/
 /lib/
@@ -9,4 +10,3 @@ CMakeLists.txt.user
 /plugin_runner/bin
 /plugin_runner/lib
 /plugin_runner/nodejs
-/plugin_runner/node_modules
