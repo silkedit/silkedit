@@ -1,6 +1,7 @@
 #include <QDebug>
 
 #include "CommandManager.h"
+#include "PluginManager.h"
 
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::s_commands;
 std::vector<CommandManager::CmdEventHandler> CommandManager::s_cmdEventFilters;
@@ -23,6 +24,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   //  qDebug("qCmdName: %s", qPrintable(qCmdName));
   if (s_commands.find(qCmdName) != s_commands.end()) {
     s_commands[qCmdName]->run(cmdArg, repeat);
+    PluginManager::singleton().sendCommandEvent(qCmdName, cmdArg);
   } else {
     qDebug() << "Can't find a command: " << qCmdName;
   }

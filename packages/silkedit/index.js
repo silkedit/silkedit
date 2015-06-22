@@ -203,6 +203,11 @@ module.exports = {
 					})
 				})
 			})
+		},"newline": () => {
+			const editView = silk.activeView()
+			if (editView != null) {
+				editView.insertNewLine()
+			}
 		}
 	}
 }

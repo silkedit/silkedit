@@ -118,6 +118,10 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
   TextEditView.prototype.complete = () => {
     return client.notify('TextEditView.complete', this.id)
   }
+  
+  TextEditView.prototype.insertNewLine = () => {
+    client.notify('TextEditView.insertNewLine', this.id)
+  }
 
 
   // class Window
@@ -269,6 +273,7 @@ const loadPackage = (dir) => {
   }
 
   // API
+
   return {
     alert: (msg) => {
       client.notify('alert', msg);

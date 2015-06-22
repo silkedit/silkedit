@@ -20,7 +20,6 @@
 #include "IContext.h"
 #include "IKeyEventFilter.h"
 #include "CommandArgument.h"
-#include "CommandManager.h"
 
 class QKeyEvent;
 
@@ -58,7 +57,8 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void init();
 
   void sendFocusChangedEvent(const QString& viewType);
-  void callExternalCommand(const QString& cmd, CommandArgument args);
+  void sendCommandEvent(const QString& command, const CommandArgument& args);
+  void callExternalCommand(const QString& cmd, const CommandArgument& args);
   bool askExternalContext(const QString& name, Operator op, const QString& value);
 
   // IKeyEventFilter interface

@@ -52,11 +52,26 @@ const c = rpc.createClient(socketFile, () => {
 
 // Call user's package code in runInFiber!!
 const handler = {
+
   // notify handlers
+
   "runCommand": (cmd, args) => {
     if (cmd in commands) {
       util.runInFiber(() =>{
         commands[cmd](args)
+      })
+    }
+  }
+
+  ,"commandEvent": (cmd, args) => {
+    var event = {
+      "cmd": cmd,
+      "args": args
+    }
+    const type = "command"
+    if (type in eventFilters) {
+      util.runInFiber(() =>{
+        eventFilters[type].forEach(fn => fn(event))
       })
     }
   }
@@ -75,6 +90,7 @@ const handler = {
 
 
   // request handlers
+
   ,"askContext": (name, operator, value, response) => {
       if (name in contexts) {
       util.runInFiber(() => {

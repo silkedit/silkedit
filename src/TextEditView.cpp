@@ -718,6 +718,8 @@ void TextEditView::notify(TextEditView* view, const QString& method, const msgpa
     } else {
       qWarning("invalid numArgs: %d", numArgs);
     }
+  } else if (method == "insertNewLine") {
+    view->textCursor().insertBlock();
   } else {
     qWarning("%s is not support", qPrintable(method));
   }

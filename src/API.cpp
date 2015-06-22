@@ -248,8 +248,7 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   }
 }
 
-void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj)
-{
+void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 3) {
     std::tuple<std::string, std::string, std::string> params;
@@ -263,7 +262,7 @@ void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj)
     bool ok;
 
     // Can't use this convenience function because we can't resize it
-//    QInputDialog::getText(nullptr, title, label, QLineEdit::Normal, initialText, &ok);
+    //    QInputDialog::getText(nullptr, title, label, QLineEdit::Normal, initialText, &ok);
     auto dialog = new QInputDialog();
     dialog->setWindowTitle(title);
     dialog->setLabelText(label);
