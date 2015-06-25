@@ -12,9 +12,6 @@ class ThemeTest : public QObject {
     // name
     QCOMPARE(theme->name, QString("Monokai"));
 
-    // UUID
-    QCOMPARE(theme->uuid, QUuid("D8D5E82E-3D5B-46B5-B38E-8C841C21347D"));
-
     // gutterSettings
     QCOMPARE(theme->gutterSettings->size(), 3);
     QCOMPARE(theme->gutterSettings->value("background"), QColor("#49483E"));
@@ -45,9 +42,8 @@ class ThemeTest : public QObject {
     // fontStyle
     QVector<ScopeSetting*> settings = theme->scopeSettings;
     auto it = std::find_if(
-        settings.constBegin(), settings.constEnd(), [this](const ScopeSetting* setting) {
-          return setting->name == "Class inheritance";
-        });
+        settings.constBegin(), settings.constEnd(),
+        [this](const ScopeSetting* setting) { return setting->name == "Class inheritance"; });
     QVERIFY(it != settings.constEnd());
     ScopeSetting* setting = *it;
     QCOMPARE((int)setting->fontWeight, (int)QFont::Bold);

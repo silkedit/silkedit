@@ -5,6 +5,7 @@
 #include "PackageManager.h"
 #include "LanguageParser.h"
 #include "ThemeProvider.h"
+#include "Metadata.h"
 #include "Constants.h"
 
 void PackageManager::loadPackages() {
@@ -17,15 +18,19 @@ void PackageManager::loadPackages(const QString& dirName) {
     return;
 
   QStringList filters;
-  QString tmLanguage = ".tmLanguage";
-  QString tmTheme = ".tmTheme";
-  filters << QString("*%1").arg(tmLanguage) << QString("*%1").arg(tmTheme);
+  const QString tmLanguage = ".tmLanguage";
+  const QString tmTheme = ".tmTheme";
+  const QString tmPreferences = ".tmPreferences";
+  filters << QString("*%1").arg(tmLanguage) << QString("*%1").arg(tmTheme)
+          << QString("*%1").arg(tmPreferences);
   foreach (const QString& fileName, dir.entryList(filters)) {
     qDebug("loading %s", qPrintable(dir.filePath(fileName)));
     if (fileName.endsWith(tmLanguage)) {
       LanguageProvider::loadLanguage(dir.filePath(fileName));
     } else if (fileName.endsWith(tmTheme)) {
       ThemeProvider::loadTheme(dir.filePath(fileName));
+    } else if (fileName.endsWith(tmPreferences)) {
+      Metadata::load(dir.filePath(fileName));
     }
   }
 

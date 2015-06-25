@@ -5,7 +5,6 @@ namespace {
 const QString nameStr = "name";
 const QString scopeStr = "scope";
 const QString settingsStr = "settings";
-const QString uuidStr = "uuid";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
 
@@ -68,11 +67,8 @@ ScopeSetting* toScopeSetting(QVariant var) {
   // settings
   if (map.contains(settingsStr)) {
     scopeSetting->colorSettings.reset(new ColorSettings());
-    parseSettings(scopeSetting->colorSettings.get(),
-                  &(scopeSetting->fontWeight),
-                  &(scopeSetting->isItalic),
-                  &(scopeSetting->isUnderline),
-                  map.value(settingsStr));
+    parseSettings(scopeSetting->colorSettings.get(), &(scopeSetting->fontWeight),
+                  &(scopeSetting->isItalic), &(scopeSetting->isUnderline), map.value(settingsStr));
   }
 
   return scopeSetting;
@@ -99,11 +95,8 @@ Theme* Theme::loadTheme(const QString& filename) {
   const QString gutterSettingsStr = "gutterSettings";
   if (rootMap.contains(gutterSettingsStr)) {
     theme->gutterSettings.reset(new ColorSettings());
-    parseSettings(theme->gutterSettings.get(),
-                  &(theme->gutterFontWeight),
-                  &(theme->isGutterItalic),
-                  &(theme->isGutterUnderline),
-                  rootMap.value(gutterSettingsStr));
+    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
+                  &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
   }
 
   // name
@@ -115,11 +108,6 @@ Theme* Theme::loadTheme(const QString& filename) {
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
     foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
-  }
-
-  // UUID
-  if (rootMap.contains(uuidStr)) {
-    theme->uuid = rootMap.value(uuidStr).toString();
   }
 
   return theme;
@@ -159,10 +147,10 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
     }
   }
 
-  qSort(settingsWithRank.begin(),
-        settingsWithRank.end(),
-        [](std::tuple<Rank, ScopeSetting*>& s1,
-           std::tuple<Rank, ScopeSetting*>& s2) { return std::get<0>(s1) > std::get<0>(s2); });
+  qSort(settingsWithRank.begin(), settingsWithRank.end(),
+        [](std::tuple<Rank, ScopeSetting*>& s1, std::tuple<Rank, ScopeSetting*>& s2) {
+          return std::get<0>(s1) > std::get<0>(s2);
+        });
 
   QVector<ScopeSetting*> matchedSettings;
   for (std::tuple<Rank, ScopeSetting*>& setting : settingsWithRank) {

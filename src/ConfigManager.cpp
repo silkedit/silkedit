@@ -71,9 +71,10 @@ void ConfigManager::load() {
     qDebug("copying default config.yml");
     if (Util::copy(":/config.yml", Constants::standardConfigPath())) {
       existingConfigPaths.append(Constants::standardConfigPath());
-      if (!QFile(Constants::standardConfigPath()).setPermissions(
-              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardConfigPath())
+               .setPermissions(
+                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {
@@ -97,6 +98,21 @@ int ConfigManager::intValue(const QString& key, int defaultValue) {
     bool ok;
     int value = m_strConfigs[key].toInt(&ok, 10);
     return ok ? value : defaultValue;
+  }
+
+  return defaultValue;
+}
+
+bool ConfigManager::boolValue(const QString& key, bool defaultValue) {
+  if (m_strConfigs.count(key) != 0) {
+    bool value = false;
+    QString valueStr = m_strConfigs[key].trimmed();
+    if (valueStr == "true") {
+      value = true;
+    } else if (valueStr != "false") {
+      qWarning("%s is not recognized as boolean value", qPrintable(valueStr));
+    }
+    return value;
   }
 
   return defaultValue;
@@ -168,4 +184,12 @@ QColor ConfigManager::endOfFileColor() {
   }
 
   return QColor();
+}
+
+int ConfigManager::tabWidth() {
+  return intValue("tab_width", 4);
+}
+
+bool ConfigManager::indentUsingSpaces() {
+  return boolValue("indent_using_spaces", false);
 }

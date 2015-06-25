@@ -17,7 +17,7 @@ class ThemeProvider {
   static Theme* theme(const QString& name);
 
  private:
-  static std::unordered_map<QString, std::unique_ptr<Theme>> m_nameThemeMap;
+  static std::unordered_map<QString, std::unique_ptr<Theme>> s_nameThemeMap;
 
   ThemeProvider() = delete;
   ~ThemeProvider() = delete;

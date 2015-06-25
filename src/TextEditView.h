@@ -72,6 +72,9 @@ class TextEditView : public QPlainTextEdit,
                            Document::FindFlags flags = 0,
                            bool preserveCase = false);
   void performCompletion();
+  void insertNewLineWithIndent();
+  // indent a current line based on a previous line
+  void indentCurrentLine();
 
 signals:
   void destroying(const QString& path);

@@ -24,11 +24,19 @@ class Session : public QObject, public Singleton<Session> {
   QFont font() { return m_font; }
   void setFont(const QFont& font);
 
+  int tabWidth() { return m_tabWidth; }
+  void setTabWidth(int tabWidth);
+
+  bool indentUsingSpaces() { return m_indentUsingSpaces; }
+  void setIndentUsingSpaces(bool value);
+
   void init();
 
 signals:
   void themeChanged(Theme* newTheme);
   void fontChanged(QFont font);
+  void tabWidthChanged(int tabWidth);
+  void indentUsingSpacesChanged(bool indentUsingSpaces);
 
  private:
   friend class Singleton<Session>;
@@ -36,4 +44,6 @@ signals:
 
   Theme* m_theme;
   QFont m_font;
+  int m_tabWidth;
+  bool m_indentUsingSpaces;
 };

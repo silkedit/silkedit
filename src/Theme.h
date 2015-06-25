@@ -5,7 +5,6 @@
 #include <QString>
 #include <QColor>
 #include <QVector>
-#include <QUuid>
 #include <QTextCharFormat>
 
 #include "macros.h"
@@ -46,7 +45,6 @@ class Theme {
   bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> scopeSettings;
-  QUuid uuid;
 
  private:
   static ScopeSetting* matchedSetting(const QString& scope);

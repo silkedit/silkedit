@@ -62,13 +62,8 @@ Regexp* Regexp::compile(const QString& expr) {
   Q_ASSERT(pattern);
 
   // todo: check encoding!
-  int r = onig_new(&reg,
-                   pattern,
-                   pattern + strlen((char*)pattern),
-                   ONIG_OPTION_CAPTURE_GROUP,
-                   ONIG_ENCODING_UTF8,
-                   ONIG_SYNTAX_DEFAULT,
-                   &einfo);
+  int r = onig_new(&reg, pattern, pattern + strlen((char*)pattern), ONIG_OPTION_CAPTURE_GROUP,
+                   ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
   if (r != ONIG_NORMAL) {
     unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
     onig_error_code_to_str(s, r, &einfo);
@@ -80,6 +75,7 @@ Regexp* Regexp::compile(const QString& expr) {
   return new Regexp(reg, expr);
 }
 
+// todo: Use QString instead of QStringRef
 QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s,
                                               bool backward,
                                               bool findNotEmpty) const {
@@ -110,14 +106,13 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s,
 
     for (i = 0; i < region->num_regs; i++) {
       // Convert from byte offset to char offset in utf-8 string
-      int begCharPos = region->beg[i] < 0
-                           ? region->beg[i]
-                           : onigenc_strlen(ONIG_ENCODING_UTF8, str, (str + region->beg[i]));
+      int begCharPos = region->beg[i] < 0 ? region->beg[i] : onigenc_strlen(ONIG_ENCODING_UTF8, str,
+                                                                            (str + region->beg[i]));
       indices->append(begCharPos);
-      int endCharPos =
-          region->end[i] < 0 ? region->end[i] : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8,
-                                                                            str + region->beg[i],
-                                                                            str + region->end[i]);
+      int endCharPos = region->end[i] < 0
+                           ? region->end[i]
+                           : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i],
+                                                         str + region->end[i]);
       indices->append(endCharPos);
     }
   } else if (r == ONIG_MISMATCH) {
@@ -130,6 +125,10 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s,
 
   onig_region_free(region, 1 /* 1:free self, 0:free contents only */);
   return indices;
+}
+
+bool Regexp::matches(const QString& text, bool findNotEmpty) {
+  return findStringSubmatchIndex(QStringRef(&text), false, findNotEmpty) != nullptr;
 }
 
 Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {

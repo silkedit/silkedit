@@ -27,6 +27,7 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
     client.notify('TabView.closeActiveTab', this.id)
   }
 
+
   TabView.prototype.addNew = () => {
     client.notify('TabView.addNew', this.id)
   }
@@ -59,14 +60,16 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
     this.id = id;
   }
 
-  TextEditView.prototype.text = () => {
-    return client.invoke('TextEditView.text', this.id)
+  TextEditView.prototype = {
+    text: () => {
+      return client.invoke('TextEditView.text', this.id)
+    }
+    ,save: () => {
+      client.notify('TextEditView.save', this.id)
+    }
   }
 
-  TextEditView.prototype.save = () => {
-    client.notify('TextEditView.save', this.id)
-  }
-
+  // todo: Put these functions into a single object above
   TextEditView.prototype.saveAs = () => {
     client.notify('TextEditView.saveAs', this.id)
   }

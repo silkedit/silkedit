@@ -18,6 +18,7 @@ class ConfigManager {
   static void load();
   static QString strValue(const QString& key, const QString& defaultValue = "");
   static int intValue(const QString& key, int defaultValue);
+  static bool boolValue(const QString& key, bool defaultValue);
   static std::unordered_map<std::string, std::string> mapValue(const QString& key);
   static bool contains(const QString& key);
   static TYPE type(const QString& key);
@@ -28,6 +29,8 @@ class ConfigManager {
   static QColor endOfLineColor();
   static QString endOfFileStr();
   static QColor endOfFileColor();
+  static int tabWidth();
+  static bool indentUsingSpaces();
 
  private:
   ConfigManager() = delete;

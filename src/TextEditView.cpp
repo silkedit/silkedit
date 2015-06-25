@@ -14,6 +14,7 @@
 #include "API.h"
 #include "PluginManager.h"
 #include "ConfigManager.h"
+#include "Metadata.h"
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -77,6 +78,24 @@ int toMoveOperation(std::string str) {
 
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {
   return a.compare(b, Qt::CaseInsensitive) < 0;
+}
+
+int indentLength(const QString& str) {
+  int len = 0;
+  std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
+  std::unique_ptr<QVector<int>> regions(regex->findStringSubmatchIndex(QStringRef(&str)));
+  if (regions) {
+    QString indentStr = str.left(regions->at(1));
+    foreach (const QChar& ch, indentStr) {
+      if (ch == '\t') {
+        len += Session::singleton().tabWidth();
+      } else {
+        len++;
+      }
+    }
+  }
+
+  return len;
 }
 }
 
@@ -143,6 +162,8 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   m_document = document;
   updateLineNumberAreaWidth(blockCount());
   connect(m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
+  connect(m_document.get(), &QTextDocument::contentsChanged, this,
+          &TextEditView::indentCurrentLine);
 }
 
 Language* TextEditView::language() {
@@ -654,6 +675,112 @@ void TextEditView::replaceAllSelection(const QString& findText,
   }
 }
 
+void TextEditView::insertNewLineWithIndent() {
+  // textCursor()->insertBlock() doesn't work because QPlainTextEdit does more things
+  // than just inserting a new block such as ensuring a cursor visible.
+  // Instead, we send return key press event directly to QPlainTextEdit.
+  // see qwidgettextcontrol.cpp at 1372
+  QKeyEvent event(QEvent::KeyPress, Qt::Key_Return, Qt::NoModifier);
+  QPlainTextEdit::keyPressEvent(&event);
+
+  // Indent a new line based on indent settings
+  auto currentVisibleCursor = textCursor();
+  auto cursor = textCursor();
+  bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
+  if (!moved)
+    return;
+
+  cursor.select(QTextCursor::LineUnderCursor);
+  const QString& prevLineText = cursor.selectedText();
+
+  std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
+  std::unique_ptr<QVector<int>> regions(regex->findStringSubmatchIndex(QStringRef(&prevLineText)));
+  if (regions) {
+    // align the current line with the previous line
+    currentVisibleCursor.insertText(prevLineText.left(regions->at(1)));
+
+    // check increaseIndentPattern for additional indent
+    auto metadata = Metadata::get(m_document->language()->scopeName);
+    if (metadata) {
+      if ((metadata->increaseIndentPattern() &&
+           metadata->increaseIndentPattern()->matches(prevLineText)) ||
+          (metadata->bracketIndentNextLinePattern() &&
+           metadata->bracketIndentNextLinePattern()->matches(prevLineText))) {
+        // indent one level
+        QString indentStr = "\t";
+        if (Session::singleton().indentUsingSpaces()) {
+          indentStr = QString(Session::singleton().tabWidth(), ' ');
+        }
+        currentVisibleCursor.insertText(indentStr);
+      }
+    }
+  }
+}
+
+void TextEditView::indentCurrentLine() {
+  auto currentVisibleCursor = textCursor();
+  auto cursor = textCursor();
+  bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
+  if (!moved)
+    return;
+
+  cursor.select(QTextCursor::LineUnderCursor);
+  const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
+  const QString& prevLineText = cursor.selectedText();
+  auto metadata = Metadata::get(m_document->language()->scopeName);
+
+  if (metadata) {
+    if (metadata->unIndentedLinePattern() &&
+        metadata->unIndentedLinePattern()->matches(currentLineText)) {
+      // todo: delete indent of current line
+    } else if (!metadata->unIndentedLinePattern() ||
+               !metadata->unIndentedLinePattern()->matches(currentLineText)) {
+      int currentLineIndentSize = indentLength(currentLineText);
+      int prevLineIndentSize = indentLength(prevLineText);
+      bool isPrevLineIncreasePattern = false;
+      if (metadata->increaseIndentPattern() &&
+          metadata->increaseIndentPattern()->matches(prevLineText)) {
+        isPrevLineIncreasePattern = true;
+      }
+
+      // Outdent in these cases
+      // case 1 (previous line's indent level is equal to the indent level of current line)
+      //     {
+      //       int hoge = 0;
+      //       } inserted here
+
+      // case 2 (previous line matches increaseIndentPattern and the diff of indent level between
+      // previous line and current line is exactly 1 indent level)
+      //     {
+      //       } inserted here
+      bool outdent = false;
+      if (currentVisibleCursor.atBlockEnd() &&
+          ((!isPrevLineIncreasePattern && currentLineIndentSize == prevLineIndentSize) ||
+           (isPrevLineIncreasePattern &&
+            (currentLineIndentSize - prevLineIndentSize) == Session::singleton().tabWidth()))) {
+        outdent = true;
+      }
+      if (outdent && metadata->decreaseIndentPattern() &&
+          metadata->decreaseIndentPattern()->matches(currentLineText)) {
+        // outdent one level
+        currentVisibleCursor.movePosition(QTextCursor::PreviousCharacter);
+        QChar prevChar = m_document->characterAt(currentVisibleCursor.position() - 1);
+        if (prevChar == '\t') {
+          currentVisibleCursor.deletePreviousChar();
+        } else if (prevChar == ' ') {
+          int i = 1;
+          while (i < Session::singleton().tabWidth() &&
+                 m_document->characterAt(currentVisibleCursor.position() - 1 - i++) == ' ')
+            ;
+          currentVisibleCursor.setPosition(currentVisibleCursor.position() - i,
+                                           QTextCursor::KeepAnchor);
+          currentVisibleCursor.removeSelectedText();
+        }
+      }
+    }
+  }
+}
+
 void TextEditView::request(TextEditView* view,
                            const QString& method,
                            msgpack::rpc::msgid_t msgId,
@@ -719,7 +846,7 @@ void TextEditView::notify(TextEditView* view, const QString& method, const msgpa
       qWarning("invalid numArgs: %d", numArgs);
     }
   } else if (method == "insertNewLine") {
-    view->textCursor().insertBlock();
+    view->insertNewLineWithIndent();
   } else {
     qWarning("%s is not support", qPrintable(method));
   }

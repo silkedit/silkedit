@@ -22,6 +22,7 @@ class Regexp {
   QVector<int>* findStringSubmatchIndex(const QStringRef& s,
                                         bool backward = false,
                                         bool findNotEmpty = false) const;
+  bool matches(const QString& text, bool findNotEmpty = false);
 
  private:
   regex_t* m_reg;
