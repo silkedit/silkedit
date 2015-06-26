@@ -191,6 +191,7 @@ module.exports = {
 				if (err) return console.error(err)
 
 				// replace <name> with the new package name
+				// open the package dir as project
 				replaceFileContent(pkgPath + "/package.json", /<name>/, path.basename(pkgPath), (err) => {
 					if (err) return console.error(err)
 					replaceFileContent(pkgPath + "/menus.yml", /<name>/, path.basename(pkgPath), (err) => {
