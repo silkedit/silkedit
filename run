@@ -95,12 +95,12 @@ resolve() {
             cd yaml-cpp-0.5.1
 
             # apply a patch to fix an issue of CMakeLists.txt
-            wget http://home.shinichy.com/files/yaml-cpp/CMakeLists.txt.patch
+            wget http://silksmiths.sakura.ne.jp/files/yaml-cpp/CMakeLists.txt.patch
             patch < CMakeLists.txt.patch
 
             # apply a patch to fix a compile error https://code.google.com/p/yaml-cpp/issues/detail?id=276&colspec=ID%20Type%20Status%20Priority%20Milestone%20Component%20Owner%20Summary
             cd src
-            wget http://home.shinichy.com/files/yaml-cpp/ostream_wrapper.patch
+            wget http://silksmiths.sakura.ne.jp/files/yaml-cpp/ostream_wrapper.patch
             patch < ostream_wrapper.patch
             cd ..
 
