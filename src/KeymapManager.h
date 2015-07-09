@@ -43,21 +43,19 @@ class KeymapManager : public Singleton<KeymapManager>, public IKeyEventFilter {
   QString m_partiallyMatchedKeyString;
 };
 
-class KeyHandler : public QObject, public Singleton<KeyHandler> {
+class TextEditViewKeyHandler : public QObject, public Singleton<TextEditViewKeyHandler> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(KeyHandler)
+  DISABLE_COPY_AND_MOVE(TextEditViewKeyHandler)
  public:
-  ~KeyHandler() = default;
+  ~TextEditViewKeyHandler() = default;
 
   void registerKeyEventFilter(IKeyEventFilter* filter);
   void unregisterKeyEventFilter(IKeyEventFilter* filter);
-
- protected:
-  bool eventFilter(QObject* watched, QEvent* event) override;
+  bool dispatchKeyPressEvent(QKeyEvent* event);
 
  private:
-  friend class Singleton<KeyHandler>;
-  KeyHandler();
+  friend class Singleton<TextEditViewKeyHandler>;
+  TextEditViewKeyHandler();
 
   std::unordered_set<IKeyEventFilter*> m_keyEventFilters;
 };

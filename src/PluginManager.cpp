@@ -50,7 +50,7 @@ void PluginManager::startPluginRunnerProcess() {
 void PluginManager::init() {
   Q_ASSERT(!m_pluginProcess);
 
-  KeyHandler::singleton().registerKeyEventFilter(this);
+  TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
   CommandManager::addEventFilter(std::bind(&PluginManager::cmdEventFilter, this,
                                            std::placeholders::_1, std::placeholders::_2));
 

@@ -181,11 +181,10 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 
   // check partial match
   auto partiallyMatchedKey =
-      std::find_if(m_keymaps.begin(),
-                   m_keymaps.end(),
+      std::find_if(m_keymaps.begin(), m_keymaps.end(),
                    [key](const std::unordered_map<QKeySequence, CommandEvent>::value_type& p) {
-        return key.matches(p.first) == QKeySequence::PartialMatch;
-      });
+                     return key.matches(p.first) == QKeySequence::PartialMatch;
+                   });
 
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");
@@ -209,9 +208,10 @@ void KeymapManager::load() {
     qDebug("copying default keymap.yml");
     if (Util::copy(":/keymap.yml", Constants::standardKeymapPath())) {
       existingKeymapPaths.append(Constants::standardKeymapPath());
-      if (!QFile(Constants::standardKeymapPath()).setPermissions(
-              QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-              QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
+      if (!QFile(Constants::standardKeymapPath())
+               .setPermissions(
+                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
+                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
         qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
       }
     } else {
@@ -262,26 +262,24 @@ void KeymapManager::clear() {
   m_cmdShortcuts.clear();
 }
 
-bool KeyHandler::eventFilter(QObject*, QEvent* event) {
-  if (event->type() == QEvent::KeyPress) {
-    for (const auto& filter : m_keyEventFilters) {
-      if (filter->keyEventFilter(static_cast<QKeyEvent*>(event))) {
-        return true;
-      }
+TextEditViewKeyHandler::TextEditViewKeyHandler() {
+  registerKeyEventFilter(&KeymapManager::singleton());
+}
+
+void TextEditViewKeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
+  m_keyEventFilters.insert(filter);
+}
+
+void TextEditViewKeyHandler::unregisterKeyEventFilter(IKeyEventFilter* filter) {
+  m_keyEventFilters.erase(filter);
+}
+
+bool TextEditViewKeyHandler::dispatchKeyPressEvent(QKeyEvent* event) {
+  for (const auto& filter : m_keyEventFilters) {
+    if (filter->keyEventFilter(event)) {
+      return true;
     }
   }
 
   return false;
-}
-
-KeyHandler::KeyHandler() {
-  registerKeyEventFilter(&KeymapManager::singleton());
-}
-
-void KeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.insert(filter);
-}
-
-void KeyHandler::unregisterKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.erase(filter);
 }

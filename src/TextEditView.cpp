@@ -115,7 +115,6 @@ TextEditView::TextEditView(QWidget* parent)
   updateLineNumberAreaWidth(0);
 
   QApplication::setCursorFlashTime(0);
-  installEventFilter(&KeyHandler::singleton());
   setLanguage(DEFAULT_SCOPE);
   changeTheme(Session::singleton().theme());
 
@@ -949,6 +948,11 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
       API::hideActiveFindReplacePanel();
       break;
   }
+
+  if (TextEditViewKeyHandler::singleton().dispatchKeyPressEvent(event)) {
+    return;
+  }
+
   QPlainTextEdit::keyPressEvent(event);
 }
 
