@@ -453,6 +453,18 @@ bool TextEditView::handledCompletedAndSelected(QKeyEvent* event) {
   return true;
 }
 
+QString TextEditView::prevLineText(int prevCount) {
+  auto cursor = textCursor();
+  for (int i = 0; i < prevCount; i++) {
+    bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
+    if (!moved)
+      return nullptr;
+  }
+
+  cursor.select(QTextCursor::LineUnderCursor);
+  return cursor.selectedText();
+}
+
 void TextEditView::toggleHighlightingCurrentLine(bool hasSelection) {
   if (hasSelection) {
     clearHighlightingCurrentLine();
@@ -674,6 +686,18 @@ void TextEditView::replaceAllSelection(const QString& findText,
   }
 }
 
+/**
+ * @brief Indent one level
+ * @param currentVisibleCursor
+ */
+void TextEditView::indent(QTextCursor& currentVisibleCursor) {
+  QString indentStr = "\t";
+  if (Session::singleton().indentUsingSpaces()) {
+    indentStr = QString(Session::singleton().tabWidth(), ' ');
+  }
+  currentVisibleCursor.insertText(indentStr);
+}
+
 void TextEditView::insertNewLineWithIndent() {
   // textCursor()->insertBlock() doesn't work because QPlainTextEdit does more things
   // than just inserting a new block such as ensuring a cursor visible.
@@ -684,35 +708,53 @@ void TextEditView::insertNewLineWithIndent() {
 
   // Indent a new line based on indent settings
   auto currentVisibleCursor = textCursor();
-  auto cursor = textCursor();
-  bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
-  if (!moved)
+  const QString& prevLineString = prevLineText();
+  if (prevLineString.isEmpty()) {
     return;
-
-  cursor.select(QTextCursor::LineUnderCursor);
-  const QString& prevLineText = cursor.selectedText();
+  }
+  const QString& prevPrevLineText = prevLineText(2);
 
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
-  std::unique_ptr<QVector<int>> regions(regex->findStringSubmatchIndex(QStringRef(&prevLineText)));
+  std::unique_ptr<QVector<int>> regions(
+      regex->findStringSubmatchIndex(QStringRef(&prevLineString)));
   if (regions) {
     // align the current line with the previous line
-    currentVisibleCursor.insertText(prevLineText.left(regions->at(1)));
+    currentVisibleCursor.insertText(prevLineString.left(regions->at(1)));
 
     // check increaseIndentPattern for additional indent
     auto metadata = Metadata::get(m_document->language()->scopeName);
     if (metadata) {
-      if ((metadata->increaseIndentPattern() &&
-           metadata->increaseIndentPattern()->matches(prevLineText)) ||
-          (metadata->bracketIndentNextLinePattern() &&
-           metadata->bracketIndentNextLinePattern()->matches(prevLineText))) {
-        // indent one level
-        QString indentStr = "\t";
-        if (Session::singleton().indentUsingSpaces()) {
-          indentStr = QString(Session::singleton().tabWidth(), ' ');
-        }
-        currentVisibleCursor.insertText(indentStr);
+      bool indentNextLine = (metadata->increaseIndentPattern() &&
+                             metadata->increaseIndentPattern()->matches(prevLineString)) ||
+                            (metadata->bracketIndentNextLinePattern() &&
+                             metadata->bracketIndentNextLinePattern()->matches(prevLineString));
+      bool outdentNextLine = (metadata->bracketIndentNextLinePattern() &&
+                              metadata->bracketIndentNextLinePattern()->matches(prevPrevLineText));
+      if (indentNextLine) {
+        indent(currentVisibleCursor);
+      } else if (outdentNextLine) {
+        outdent(currentVisibleCursor);
       }
     }
+  }
+}
+
+/**
+ * @brief Outdent one level
+ * @param currentVisibleCursor
+ */
+void TextEditView::outdent(QTextCursor& currentVisibleCursor) {
+  currentVisibleCursor.movePosition(QTextCursor::PreviousCharacter);
+  QChar prevChar = m_document->characterAt(currentVisibleCursor.position() - 1);
+  if (prevChar == '\t') {
+    currentVisibleCursor.deletePreviousChar();
+  } else if (prevChar == ' ') {
+    int i = 1;
+    while (i < Session::singleton().tabWidth() &&
+           m_document->characterAt(currentVisibleCursor.position() - 1 - i++) == ' ')
+      ;
+    currentVisibleCursor.setPosition(currentVisibleCursor.position() - i, QTextCursor::KeepAnchor);
+    currentVisibleCursor.removeSelectedText();
   }
 }
 
@@ -752,29 +794,17 @@ void TextEditView::indentCurrentLine() {
       // previous line and current line is exactly 1 indent level)
       //     {
       //       } inserted here
-      bool outdent = false;
+      bool isOutdentNecessary = false;
       if (currentVisibleCursor.atBlockEnd() &&
           ((!isPrevLineIncreasePattern && currentLineIndentSize == prevLineIndentSize) ||
            (isPrevLineIncreasePattern &&
             (currentLineIndentSize - prevLineIndentSize) == Session::singleton().tabWidth()))) {
-        outdent = true;
+        isOutdentNecessary = true;
       }
-      if (outdent && metadata->decreaseIndentPattern() &&
+
+      if (isOutdentNecessary && metadata->decreaseIndentPattern() &&
           metadata->decreaseIndentPattern()->matches(currentLineText)) {
-        // outdent one level
-        currentVisibleCursor.movePosition(QTextCursor::PreviousCharacter);
-        QChar prevChar = m_document->characterAt(currentVisibleCursor.position() - 1);
-        if (prevChar == '\t') {
-          currentVisibleCursor.deletePreviousChar();
-        } else if (prevChar == ' ') {
-          int i = 1;
-          while (i < Session::singleton().tabWidth() &&
-                 m_document->characterAt(currentVisibleCursor.position() - 1 - i++) == ' ')
-            ;
-          currentVisibleCursor.setPosition(currentVisibleCursor.position() - i,
-                                           QTextCursor::KeepAnchor);
-          currentVisibleCursor.removeSelectedText();
-        }
+        outdent(currentVisibleCursor);
       }
     }
   }

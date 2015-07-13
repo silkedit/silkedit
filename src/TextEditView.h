@@ -116,6 +116,9 @@ signals:
   void insertCompletion(const QString& completion, bool singleWord);
   void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
+  QString prevLineText(int prevCount = 1);
+  void indent(QTextCursor& currentVisibleCursor);
+  void outdent(QTextCursor& currentVisibleCursor);
 
  private slots:
   void updateLineNumberAreaWidth(int newBlockCount);
