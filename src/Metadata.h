@@ -1,3 +1,4 @@
+#include <memory>
 #include <unordered_map>
 #include <QString>
 
@@ -42,8 +43,8 @@ class Metadata {
   QString m_scope;
 
   // Indentation Options
-  // see TextMate site for more detail.
-  // http://manual.macromates.com/ja/appendix
+  // see SublimeText's site for more detail.
+  // http://sublime-text-unofficial-documentation.readthedocs.org/en/latest/reference/metadata.html
   std::unique_ptr<Regexp> m_increaseIndentPattern;
   std::unique_ptr<Regexp> m_decreaseIndentPattern;
   std::unique_ptr<Regexp> m_bracketIndentNextLinePattern;
