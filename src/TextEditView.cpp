@@ -162,7 +162,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   updateLineNumberAreaWidth(blockCount());
   connect(m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
   connect(m_document.get(), &QTextDocument::contentsChanged, this,
-          &TextEditView::indentCurrentLine);
+          &TextEditView::outdentCurrentLineIfNecessary);
 }
 
 Language* TextEditView::language() {
@@ -453,15 +453,24 @@ bool TextEditView::handledCompletedAndSelected(QKeyEvent* event) {
   return true;
 }
 
-QString TextEditView::prevLineText(int prevCount) {
+/**
+ * @brief Get previous line which doesn't match the pattern
+ * @param prevCount
+ * @param pattern
+ * @return
+ */
+QString TextEditView::prevLineText(int prevCount, Regexp* ignorePattern) {
   auto cursor = textCursor();
   for (int i = 0; i < prevCount; i++) {
-    bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
-    if (!moved)
-      return nullptr;
+    bool moved = false;
+    do {
+      moved = cursor.movePosition(QTextCursor::PreviousBlock);
+      if (!moved)
+        return "";
+      cursor.select(QTextCursor::LineUnderCursor);
+    } while (ignorePattern && ignorePattern->matches(cursor.selectedText()));
   }
 
-  cursor.select(QTextCursor::LineUnderCursor);
   return cursor.selectedText();
 }
 
@@ -707,23 +716,29 @@ void TextEditView::insertNewLineWithIndent() {
   QPlainTextEdit::keyPressEvent(&event);
 
   // Indent a new line based on indent settings
-  auto currentVisibleCursor = textCursor();
-  const QString& prevLineString = prevLineText();
+  auto metadata = Metadata::get(m_document->language()->scopeName);
+  QString prevLineString;
+  if (metadata) {
+    prevLineString = prevLineText(1, metadata->unIndentedLinePattern());
+  } else {
+    prevLineString = prevLineText();
+  }
   if (prevLineString.isEmpty()) {
     return;
   }
-  const QString& prevPrevLineText = prevLineText(2);
 
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
   std::unique_ptr<QVector<int>> regions(
       regex->findStringSubmatchIndex(QStringRef(&prevLineString)));
   if (regions) {
     // align the current line with the previous line
+    auto currentVisibleCursor = textCursor();
     currentVisibleCursor.insertText(prevLineString.left(regions->at(1)));
 
     // check increaseIndentPattern for additional indent
     auto metadata = Metadata::get(m_document->language()->scopeName);
     if (metadata) {
+      const QString& prevPrevLineText = prevLineText(2, metadata->unIndentedLinePattern());
       bool indentNextLine = (metadata->increaseIndentPattern() &&
                              metadata->increaseIndentPattern()->matches(prevLineString)) ||
                             (metadata->bracketIndentNextLinePattern() &&
@@ -743,44 +758,34 @@ void TextEditView::insertNewLineWithIndent() {
  * @brief Outdent one level
  * @param currentVisibleCursor
  */
-void TextEditView::outdent(QTextCursor& currentVisibleCursor) {
-  currentVisibleCursor.movePosition(QTextCursor::PreviousCharacter);
-  QChar prevChar = m_document->characterAt(currentVisibleCursor.position() - 1);
+void TextEditView::outdent(QTextCursor& cursor) {
+  cursor.movePosition(QTextCursor::PreviousCharacter);
+  QChar prevChar = m_document->characterAt(cursor.position() - 1);
   if (prevChar == '\t') {
-    currentVisibleCursor.deletePreviousChar();
+    cursor.deletePreviousChar();
   } else if (prevChar == ' ') {
     int i = 1;
     while (i < Session::singleton().tabWidth() &&
-           m_document->characterAt(currentVisibleCursor.position() - 1 - i++) == ' ')
+           m_document->characterAt(cursor.position() - 1 - i++) == ' ')
       ;
-    currentVisibleCursor.setPosition(currentVisibleCursor.position() - i, QTextCursor::KeepAnchor);
-    currentVisibleCursor.removeSelectedText();
+    cursor.setPosition(cursor.position() - i, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
   }
 }
 
-void TextEditView::indentCurrentLine() {
-  auto currentVisibleCursor = textCursor();
-  auto cursor = textCursor();
-  bool moved = cursor.movePosition(QTextCursor::PreviousBlock);
-  if (!moved)
-    return;
-
-  cursor.select(QTextCursor::LineUnderCursor);
-  const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
-  const QString& prevLineText = cursor.selectedText();
+void TextEditView::outdentCurrentLineIfNecessary() {
   auto metadata = Metadata::get(m_document->language()->scopeName);
 
   if (metadata) {
-    if (metadata->unIndentedLinePattern() &&
-        metadata->unIndentedLinePattern()->matches(currentLineText)) {
-      // todo: delete indent of current line
-    } else if (!metadata->unIndentedLinePattern() ||
-               !metadata->unIndentedLinePattern()->matches(currentLineText)) {
+    auto currentVisibleCursor = textCursor();
+    const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
+    const QString& prevLineString = prevLineText();
+    if (!prevLineString.isEmpty()) {
       int currentLineIndentSize = indentLength(currentLineText);
-      int prevLineIndentSize = indentLength(prevLineText);
+      int prevLineIndentSize = indentLength(prevLineString);
       bool isPrevLineIncreasePattern = false;
       if (metadata->increaseIndentPattern() &&
-          metadata->increaseIndentPattern()->matches(prevLineText)) {
+          metadata->increaseIndentPattern()->matches(prevLineString)) {
         isPrevLineIncreasePattern = true;
       }
 

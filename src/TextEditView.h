@@ -73,8 +73,7 @@ class TextEditView : public QPlainTextEdit,
                            bool preserveCase = false);
   void performCompletion();
   void insertNewLineWithIndent();
-  // indent a current line based on a previous line
-  void indentCurrentLine();
+  void outdentCurrentLineIfNecessary();
 
 signals:
   void destroying(const QString& path);
@@ -116,7 +115,7 @@ signals:
   void insertCompletion(const QString& completion, bool singleWord);
   void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
-  QString prevLineText(int prevCount = 1);
+  QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
   void indent(QTextCursor& currentVisibleCursor);
   void outdent(QTextCursor& currentVisibleCursor);
 
