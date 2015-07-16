@@ -759,16 +759,22 @@ void TextEditView::insertNewLineWithIndent() {
  * @param currentVisibleCursor
  */
 void TextEditView::outdent(QTextCursor& cursor) {
-  cursor.movePosition(QTextCursor::PreviousCharacter);
-  QChar prevChar = m_document->characterAt(cursor.position() - 1);
+  if (cursor.atBlockStart()) return;
+
+  bool moved = cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+  if (!moved) return;
+
+  QChar prevChar = m_document->characterAt(cursor.position());
   if (prevChar == '\t') {
-    cursor.deletePreviousChar();
+    cursor.deleteChar();
   } else if (prevChar == ' ') {
     int i = 1;
-    while (i < Session::singleton().tabWidth() &&
-           m_document->characterAt(cursor.position() - 1 - i++) == ' ')
-      ;
-    cursor.setPosition(cursor.position() - i, QTextCursor::KeepAnchor);
+    while (!cursor.atBlockStart() &&
+           i < Session::singleton().tabWidth() &&
+           m_document->characterAt(cursor.position()) == ' ') {
+        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+        i++;
+    }
     cursor.removeSelectedText();
   }
 }
