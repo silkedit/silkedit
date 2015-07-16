@@ -168,6 +168,7 @@ build() {
 				until [ $n -ge $MAX ]
 				do
           rm -rf /Volumes/SilkEdit*
+          touch dmg/.Trash
           hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg && break
           echo "Failed to create DMG. retrying"
 					n=$[$n+1]
