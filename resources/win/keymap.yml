@@ -25,3 +25,5 @@
     ctrl+a: select_all
     ctrl+f: open_find_pane
     ctrl+shift+p: show_scope
+    ctrl+space: complete
+    enter: newline
