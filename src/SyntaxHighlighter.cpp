@@ -88,7 +88,8 @@ void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdde
          charsAdded);
   if (document()) {
     m_parser->setText(document()->toPlainText());
-    adjust(position, charsAdded - charsRemoved);
+    // position is the position after removal happeened, so we need +charsRemoved
+    adjust(position + charsRemoved, charsAdded - charsRemoved);
   }
 }
 

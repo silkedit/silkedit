@@ -29,6 +29,11 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   QString scopeTree() const;
 
+  /**
+   * @brief adjust
+   * @param pos position before modification happened
+   * @param delta
+   */
   void adjust(int pos, int delta);
 
  public slots:
