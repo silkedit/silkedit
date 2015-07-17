@@ -58,3 +58,5 @@ menu:
     submenu:
     - label: 'Show Scope'
       command: show_scope
+    - label: 'Show Scope Tree'
+      command: show_scope_tree

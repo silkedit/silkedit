@@ -134,12 +134,8 @@ QTextCursor Document::find(const Regexp* expr,
                            int end,
                            Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
-         qPrintable(expr->pattern()),
-         (options.testFlag(FindFlag::FindBackward)),
-         from,
-         begin,
-         end);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
+         (options.testFlag(FindFlag::FindBackward)), from, begin, end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);
@@ -177,6 +173,10 @@ QTextCursor Document::find(const Regexp* expr,
   return find(expr, pos, begin, end, options);
 }
 
-QString Document::scopeName(int pos) {
-  return m_syntaxHighlighter->scopeName(pos);
+QString Document::scopeName(int pos) const {
+  return m_syntaxHighlighter ? m_syntaxHighlighter->scopeName(pos) : "";
+}
+
+QString Document::scopeTree() const {
+  return m_syntaxHighlighter ? m_syntaxHighlighter->scopeTree() : "";
 }

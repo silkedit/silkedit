@@ -54,6 +54,10 @@ QString SyntaxHighlighter::scopeName(int point) {
   return m_lastScopeName;
 }
 
+QString SyntaxHighlighter::scopeTree() const {
+  return m_rootNode ? m_rootNode->toString() : "";
+}
+
 void SyntaxHighlighter::adjust(int pos, int delta) {
   //  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
   if (m_rootNode) {
@@ -80,9 +84,7 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
-  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)",
-         position,
-         charsRemoved,
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
          charsAdded);
   if (document()) {
     m_parser->setText(document()->toPlainText());

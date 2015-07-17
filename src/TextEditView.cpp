@@ -759,21 +759,22 @@ void TextEditView::insertNewLineWithIndent() {
  * @param currentVisibleCursor
  */
 void TextEditView::outdent(QTextCursor& cursor) {
-  if (cursor.atBlockStart()) return;
+  if (cursor.atBlockStart())
+    return;
 
   bool moved = cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-  if (!moved) return;
+  if (!moved)
+    return;
 
   QChar prevChar = m_document->characterAt(cursor.position());
   if (prevChar == '\t') {
     cursor.deleteChar();
   } else if (prevChar == ' ') {
     int i = 1;
-    while (!cursor.atBlockStart() &&
-           i < Session::singleton().tabWidth() &&
+    while (!cursor.atBlockStart() && i < Session::singleton().tabWidth() &&
            m_document->characterAt(cursor.position()) == ' ') {
-        cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-        i++;
+      cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+      i++;
     }
     cursor.removeSelectedText();
   }
@@ -831,6 +832,10 @@ void TextEditView::request(TextEditView* view,
   } else if (method == "scopeName") {
     QString scope = view->m_document->scopeName(view->textCursor().position());
     PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
+  } else if (method == "scopeTree") {
+    QString scopeTree = view->m_document->scopeTree();
+    PluginManager::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
                                             msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));

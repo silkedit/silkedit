@@ -184,6 +184,13 @@ module.exports = {
 				win.statusBar().showMessage(editView.scopeName())
 			}
 		}
+		,"show_scope_tree": () => {
+			const win = silk.activeWindow()
+			const editView = silk.activeView()
+			if (win != null && editView != null) {
+				silk.alert(editView.scopeTree())
+			}
+		}
 		,"new_package": () => {
 			const pkgPath = silk.showInputDialog("", "Enter new package path", "")
 			// copy hello example package to a new package directory

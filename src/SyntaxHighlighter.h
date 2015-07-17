@@ -27,6 +27,8 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   // Returns the full concatenated nested scope name of the scope(s) containing "point".
   QString scopeName(int point);
 
+  QString scopeTree() const;
+
   void adjust(int pos, int delta);
 
  public slots:
