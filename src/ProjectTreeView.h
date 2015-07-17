@@ -37,6 +37,7 @@ class ProjectTreeView : public QTreeView {
   void showInFinder();
   void createNewFile();
   void createNewDir();
+  void focusRootDirectory(const QString& path);
 };
 
 /**

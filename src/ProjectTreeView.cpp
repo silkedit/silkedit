@@ -48,6 +48,8 @@ bool ProjectTreeView::open(const QString& dirPath) {
     }
 
     m_model = new MyFileSystemModel(this);
+    connect(m_model, &QFileSystemModel::directoryLoaded, this,
+            &ProjectTreeView::focusRootDirectory);
     m_model->setRootPath(dirPath);
 
     FilterModel* const filter = new FilterModel(this, dirPath);
@@ -172,6 +174,13 @@ void ProjectTreeView::createNewDir() {
   }
 }
 
+void ProjectTreeView::focusRootDirectory(const QString& path) {
+  FilterModel* filter = qobject_cast<FilterModel*>(model());
+  setFocus();
+  selectionModel()->select(filter->mapFromSource(m_model->index(path)),
+                           QItemSelectionModel::Select | QItemSelectionModel::Rows);
+}
+
 void ProjectTreeView::createNewFile(const QDir& dir) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   QFile newFile(getUniqueFileName(dir.absoluteFilePath("untitled")));
@@ -226,7 +235,7 @@ bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParen
   // Get the leading "/" on Mac and Linux.
   path = sourceModel()->data(pathIndex).toString() + path;
 #else
-  // Get the drive on Windows. This becoms like "C:", so append "/".
+  // Get the drive on Windows. This becomes like "C:", so append "/".
   path = sourceModel()->data(pathIndex).toString() + "/" + path;
 #endif
 

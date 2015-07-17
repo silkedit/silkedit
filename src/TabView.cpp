@@ -63,6 +63,7 @@ int TabView::insertTab(int index, QWidget* w, const QString& label) {
   int result = QTabWidget::insertTab(index, w, label);
   if (count() == 1 && result >= 0) {
     m_activeEditView = editView;
+    editView->setFocus();
   }
   return result;
 }
