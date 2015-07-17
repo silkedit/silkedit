@@ -67,9 +67,9 @@ function toModeText(mode) {
 }
 
 function enable() {
-	silk.on('keypress', keyPressHandler)
-	silk.on('runCommand', runCommandHandler)
-	silk.on('focusChanged', focusChangedHandler)
+	silk.installEventFilter('keypress', keyPressHandler)
+	silk.installEventFilter('runCommand', runCommandHandler)
+	silk.installEventFilter('focusChanged', focusChangedHandler)
 	silk.registerContext("mode", (operator, value) => {
 		console.log('checking mode context')
 		return isEnabled && silk.contextUtils.isSatisfied(toModeText(mode), operator, value)
@@ -81,7 +81,7 @@ function enable() {
 }
 
 function disable() {
-	silk.removeListener('keypress', keyPressHandler)
+	silk.removeEventFilter('keypress', keyPressHandler)
 	silk.unregisterContext("mode")
 	const view = silk.activeView();
 	if (view != null) {

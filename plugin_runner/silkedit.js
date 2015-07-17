@@ -370,7 +370,7 @@ const loadPackage = (dir) => {
       }
     }
 
-    ,on: (type, fn) => {
+    ,installEventFilter: (type, fn) => {
       if (type in eventFilters) {
         eventFilters[type].push(fn)
       } else {
@@ -378,7 +378,7 @@ const loadPackage = (dir) => {
       }
     }
 
-    ,removeListener: (type, fn) => {
+    ,removeEventFilter: (type, fn) => {
       if (type in eventFilters) {
         const index = eventFilters[type].indexOf(fn)
         if (index !== -1) {
@@ -386,6 +386,7 @@ const loadPackage = (dir) => {
         }
       }
     }
+    
     ,windows: () => {
       const ids = client.invoke('windows')
       return ids != null ? ids.map(id => new Window(id)) : []
