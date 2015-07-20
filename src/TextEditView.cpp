@@ -108,7 +108,8 @@ TextEditView::TextEditView(QWidget* parent)
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
   connect(this, SIGNAL(destroying(const QString&)), &OpenRecentItemManager::singleton(),
           SLOT(addOpenRecentItem(const QString&)));
-  connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
+  connect(&Session::singleton(), &Session::themeChanged, this, &TextEditView::setTheme);
+  connect(&Session::singleton(), &Session::fontChanged, this, &QPlainTextEdit::setFont);
   connect(this, &TextEditView::saved, this, &TextEditView::clearDirtyMarker);
   connect(this, &TextEditView::copyAvailable, this, &TextEditView::toggleHighlightingCurrentLine);
 
@@ -116,7 +117,8 @@ TextEditView::TextEditView(QWidget* parent)
 
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
-  changeTheme(Session::singleton().theme());
+  setTheme(Session::singleton().theme());
+  setFont(Session::singleton().font());
 
   // setup for completion
   m_model.reset(new QStringListModel(this));
@@ -317,7 +319,7 @@ void TextEditView::updateLineNumberArea(const QRect& rect, int dy) {
     updateLineNumberAreaWidth(0);
 }
 
-void TextEditView::changeTheme(Theme* theme) {
+void TextEditView::setTheme(Theme* theme) {
   qDebug("changeTheme");
   if (!theme) {
     qWarning("theme is null");

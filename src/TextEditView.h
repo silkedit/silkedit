@@ -123,7 +123,7 @@ signals:
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
-  void changeTheme(Theme* theme);
+  void setTheme(Theme* theme);
   void clearDirtyMarker();
   void toggleHighlightingCurrentLine(bool hasSelection);
 };
