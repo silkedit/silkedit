@@ -19,6 +19,7 @@
 #include "TabViewGroup.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
+#include "InputDialog.h"
 #include "modifiers.h"
 
 #define REGISTER_FUNC(type)                                                 \
@@ -136,6 +137,7 @@ PluginManager::PluginManager()
   REGISTER_FUNC(TabViewGroup)
   REGISTER_FUNC(Window)
   REGISTER_FUNC(StatusBar)
+  REGISTER_FUNC(InputDialog)
 }
 
 void PluginManager::readStdout() {

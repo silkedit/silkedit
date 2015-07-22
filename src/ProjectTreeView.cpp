@@ -176,7 +176,8 @@ void ProjectTreeView::createNewDir() {
 
 void ProjectTreeView::focusRootDirectory(const QString& path) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
-  setFocus();
+  // it causes crash somehow...
+  //  setFocus();
   selectionModel()->select(filter->mapFromSource(m_model->index(path)),
                            QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }

@@ -192,8 +192,17 @@ module.exports = {
 			}
 		}
 		,"new_package": () => {
-			const pkgPath = silk.showInputDialog("", "Enter new package path", "")
+			const validate = (pkgName, callback) => {
+			      fs.open(path.normalize(silk.packageDir() + '/' + pkgName), 'r', (err, fd) => {
+                                         fd && fs.close(fd, (err) => { callback(false) })
+                                         err && callback(true)
+                                       })
+			}
+			const pkgName = silk.showInputDialog("Enter new package path", "my_package", validate)
 			// copy hello example package to a new package directory
+			if (pkgName == null) return
+				
+		    const pkgPath = path.normalize(silk.packageDir() + '/' + pkgName)
 			fs.copy(__dirname + "/resources/hello", pkgPath, (err) => {
 				if (err) return console.error(err)
 

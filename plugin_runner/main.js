@@ -4,8 +4,9 @@ var rpc = require('silk-msgpack-rpc');
 var fs = require('fs')
 var sync = require('synchronize')
 var path = require('path')
-var util = require('./util')
-var yaml = require('js-yaml');
+var silkutil = require('./silkutil')
+var yaml = require('js-yaml')
+var InputDialog = require('./views/input_dialog')(null)
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -57,7 +58,7 @@ const handler = {
 
   "runCommand": (cmd, args) => {
     if (cmd in commands) {
-      util.runInFiber(() =>{
+      silkutil.runInFiber(() =>{
         commands[cmd](args)
       })
     }
@@ -70,7 +71,7 @@ const handler = {
     }
     const type = "command"
     if (type in eventFilters) {
-      util.runInFiber(() =>{
+      silkutil.runInFiber(() =>{
         eventFilters[type].forEach(fn => fn(event))
       })
     }
@@ -82,8 +83,17 @@ const handler = {
     }
     const type = "focusChanged"
     if (type in eventFilters) {
-      util.runInFiber(() =>{
+      silkutil.runInFiber(() => {
         eventFilters[type].forEach(fn => fn(event))
+      })
+    }
+  }
+  
+  ,"InputDialog.textValueChanged": (id, text) => {
+    const dialog = InputDialog.getInstance(id)
+    if (dialog != null) {
+      silkutil.runInFiber(() => {
+        dialog.textValueChanged(text)
       })
     }
   }
@@ -93,7 +103,7 @@ const handler = {
 
   ,"askContext": (name, operator, value, response) => {
       if (name in contexts) {
-      util.runInFiber(() => {
+      silkutil.runInFiber(() => {
         response.result(contexts[name](operator, value))
       })
     } else {
@@ -103,7 +113,7 @@ const handler = {
   ,"eventFilter": (type, event, response) => {
     // console.log('eventFilter. type: %s', type)
     if (type in eventFilters) {
-      util.runInFiber(() => {
+      silkutil.runInFiber(() => {
         response.result(eventFilters[type].some(fn => { return fn(event)}))
       })
     } else {
@@ -122,7 +132,7 @@ const handler = {
       ,"shiftKey": shiftKey
     }
     if (type in eventFilters) {
-      util.runInFiber(() => {
+      silkutil.runInFiber(() => {
         response.result(eventFilters[type].some((fn) => { return fn(event)}))
       })
     } else {
@@ -136,7 +146,7 @@ const handler = {
     }
     const type = "runCommand"
     if (type in eventFilters) {
-      util.runInFiber(() => {
+      silkutil.runInFiber(() => {
         const result = eventFilters[type].some(fn => { return fn(event)})
         response.result([result, event.name, event.args])
       })

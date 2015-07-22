@@ -25,6 +25,7 @@
 #include "ConfigManager.h"
 #include "Session.h"
 #include "util/DialogUtils.h"
+#include "InputDialog.h"
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -53,6 +54,7 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("version", &version));
   s_requestFunctions.insert(std::make_pair("showFontDialog", &showFontDialog));
   s_requestFunctions.insert(std::make_pair("showInputDialog", &showInputDialog));
+  s_requestFunctions.insert(std::make_pair("newInputDialog", &newInputDialog));
 }
 
 void API::hideActiveFindReplacePanel() {
@@ -259,20 +261,16 @@ void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) 
     QString label = QString::fromUtf8(labelStr.c_str());
     std::string initialTextStr = std::get<2>(params);
     QString initialText = QString::fromUtf8(initialTextStr.c_str());
-    bool ok;
+    int result;
 
-    // Can't use this convenience function because we can't resize it
-    //    QInputDialog::getText(nullptr, title, label, QLineEdit::Normal, initialText, &ok);
-    auto dialog = new QInputDialog();
-    dialog->setWindowTitle(title);
-    dialog->setLabelText(label);
-    dialog->setTextValue(initialText);
-    dialog->setInputMode(QInputDialog::TextInput);
-    dialog->resize(500, 100);
-    ok = dialog->exec();
+    InputDialog dialog;
+    dialog.setWindowTitle(title);
+    dialog.setLabelText(label);
+    dialog.setTextValue(initialText);
+    result = dialog.exec();
 
-    if (ok) {
-      QString text = dialog->textValue();
+    if (result == QDialog::Accepted) {
+      QString text = dialog.textValue();
       std::string textStr = text.toUtf8().constData();
       PluginManager::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
     } else {
@@ -282,6 +280,11 @@ void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) 
     qWarning("invalid arguments. numArgs: %d", numArgs);
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
+}
+
+void API::newInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) {
+  InputDialog* dialog = new InputDialog();
+  PluginManager::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
 }
 
 void API::open(msgpack::object obj) {

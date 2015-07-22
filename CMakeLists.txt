@@ -1,17 +1,19 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.0.2)
 
 project(SilkEdit)
 
 option (BUILD_EDGE "Build edge version" OFF)
 
-# Instruct CMake to run moc automatically when needed.
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
+file(GLOB_RECURSE SILK_UIS src/*.ui)
+
 if (APPLE)
   file(GLOB_RECURSE SILK_RESOURCES resources/mac/*.qrc)
 elseif (MINGW)
@@ -50,7 +52,7 @@ if (APPLE)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   include_directories(/usr/local/include msgpack-c/include src)
-  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES})
+	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES})
 elseif (MINGW)
   set(YAML_CPP_LIBRARY yaml-cpp)
   set(ONIG_LIBRARY onig.a)

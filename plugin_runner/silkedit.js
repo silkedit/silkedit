@@ -3,12 +3,14 @@
 var fs = require('fs')
 var path = require('path')
 var yaml = require('js-yaml');
-var util = require('./util')
+var silkutil = require('./silkutil')
 var path = require('path')
 
 const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
 
 module.exports = (client, contexts, eventFilters, configs, commands) => {
+
+  var InputDialog = require('./views/input_dialog')(client)
 
   // class TabView
   const TabView = (id) => {
@@ -264,7 +266,7 @@ const loadPackage = (dir) => {
                     }
 
                     if (module.activate) {
-                      util.runInFiber(() => {
+                      silkutil.runInFiber(() => {
                         module.activate()
                       })
                     }
@@ -431,9 +433,14 @@ const loadPackage = (dir) => {
 
     ,"packageDir": packageDir
 
-    ,showInputDialog: (title, label, initialText) => {
-      const pkgDirPath = packageDir()
-      return client.invoke('showInputDialog', title, label, path.normalize(pkgDirPath + '/my_package'))
+    ,showInputDialog: (label, initialText, validateFunc) => {
+      const dialog = new InputDialog
+      dialog.labelText = label
+      dialog.textValue = initialText
+      if (validateFunc != null) {
+        dialog.validateFunc = validateFunc
+      }
+      return dialog.show()
     }
 
     ,setFont: (family, size) => {
