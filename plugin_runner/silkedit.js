@@ -14,7 +14,7 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
 
   // class TabView
   const TabView = (id) => {
-    this.id = id;
+    this.id = id
   }
 
   TabView.prototype.closeAllTabs = () => {
