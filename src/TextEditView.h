@@ -33,7 +33,7 @@ class TextEditView : public QPlainTextEdit,
   virtual ~TextEditView();
 
   QString path();
-  inline Document* document();
+  Document* document();
   void setDocument(std::shared_ptr<Document> document);
   Language* language();
   void setLanguage(const QString& scopeName);

@@ -126,7 +126,7 @@ QString TextEditView::path() {
   return d->m_document ? d->m_document->path() : "";
 }
 
-inline Document* TextEditView::document() {
+Document* TextEditView::document() {
   return d->m_document.get();
 }
 

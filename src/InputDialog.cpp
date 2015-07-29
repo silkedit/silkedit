@@ -37,7 +37,7 @@ void InputDialog::enableOK() {
 void InputDialog::request(InputDialog* view,
                           const QString& method,
                           msgpack::rpc::msgid_t msgId,
-                          const msgpack::v1::object& obj) {
+                          const msgpack::v1::object&) {
   if (method == "new") {
     InputDialog* dialog = new InputDialog();
     PluginManager::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
