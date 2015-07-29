@@ -21,6 +21,7 @@ class QWidget;
 class QElapsedTimer;
 
 class LineNumberArea;
+class TextEditViewPrivate;
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,
@@ -32,7 +33,7 @@ class TextEditView : public QPlainTextEdit,
   virtual ~TextEditView();
 
   QString path();
-  Document* document() { return m_document.get(); }
+  inline Document* document();
   void setDocument(std::shared_ptr<Document> document);
   Language* language();
   void setLanguage(const QString& scopeName);
@@ -73,7 +74,6 @@ class TextEditView : public QPlainTextEdit,
                            bool preserveCase = false);
   void performCompletion();
   void insertNewLineWithIndent();
-  void outdentCurrentLineIfNecessary();
 
 signals:
   void destroying(const QString& path);
@@ -102,30 +102,10 @@ signals:
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
-  QWidget* m_lineNumberArea;
-  std::shared_ptr<Document> m_document;
-  QVector<Region> m_searchMatchedRegions;
-  std::unique_ptr<QStringListModel> m_model;
-  std::unique_ptr<QCompleter> m_completer;
-  bool m_completedAndSelected;
+  std::unique_ptr<TextEditViewPrivate> d;
+  void setViewportMargins(int left, int top, int right, int bottom);
 
-  void clearHighlightingCurrentLine();
-  void performCompletion(const QString& completionPrefix);
-  void insertCompletion(const QString& completion);
-  void insertCompletion(const QString& completion, bool singleWord);
-  void populateModel(const QString& completionPrefix);
-  bool handledCompletedAndSelected(QKeyEvent* event);
-  QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
-  void indent(QTextCursor& currentVisibleCursor);
-  void outdent(QTextCursor& currentVisibleCursor);
-
- private slots:
-  void updateLineNumberAreaWidth(int newBlockCount);
-  void highlightCurrentLine();
-  void updateLineNumberArea(const QRect&, int);
-  void setTheme(Theme* theme);
-  void clearDirtyMarker();
-  void toggleHighlightingCurrentLine(bool hasSelection);
+  friend class TextEditViewPrivate;
 };
 
 class LineNumberArea : public QWidget {

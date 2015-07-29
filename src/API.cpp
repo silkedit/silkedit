@@ -282,7 +282,7 @@ void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) 
   }
 }
 
-void API::newInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) {
+void API::newInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object) {
   InputDialog* dialog = new InputDialog();
   PluginManager::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
 }
