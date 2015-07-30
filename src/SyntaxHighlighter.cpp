@@ -89,7 +89,10 @@ void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdde
   if (document()) {
     m_parser->setText(document()->toPlainText());
     // position is the position after removal happeened, so we need +charsRemoved
-    adjust(position + charsRemoved, charsAdded - charsRemoved);
+    // INFO: When pasting a text in an empty document, charsRemoved becomes 1 because of this bug.
+    // We added -1 as a workaround.
+    // https://bugreports.qt.io/browse/QTBUG-3495
+    adjust(position + charsRemoved - 1, charsAdded - charsRemoved);
   }
 }
 
