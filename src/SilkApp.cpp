@@ -20,6 +20,14 @@ T findParent(QWidget* widget) {
     return desiredWidget;
   return findParent<T>(widget->parentWidget());
 }
+
+int installFont(const QString& path) {
+  auto result = QFontDatabase::addApplicationFont(path);
+  if (result == -1) {
+    qWarning("Failed to install %s", qPrintable(path));
+  }
+  return result;
+}
 }
 
 TabBar* SilkApp::tabBarAt(int x, int y) {
@@ -35,9 +43,13 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setApplicationVersion(VERSION);
 
+  // Install Source Han Code JP font
+  installFont(":/SourceHanCodeJP-Normal.otf");
+  installFont(":/SourceHanCodeJP-Bold.otf");
+
   // Track active TabView
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
-    qDebug("focusChanged");
+//    qDebug("focusChanged");
     if (TextEditView* editView = qobject_cast<TextEditView*>(focusedWidget)) {
       if (TabView* tabView = findParent<TabView*>(editView)) {
         if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {

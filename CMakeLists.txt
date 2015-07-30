@@ -13,12 +13,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 file(GLOB_RECURSE SILK_UIS src/*.ui)
+file(GLOB_RECURSE COMMON_RESOURCES resources/*.qrc)
 
 if (APPLE)
-  file(GLOB_RECURSE SILK_RESOURCES resources/mac/*.qrc)
+  file(GLOB_RECURSE PLATFORM_RESOURCES resources/mac/*.qrc)
 elseif (MINGW)
-  file(GLOB_RECURSE SILK_RESOURCES resources/win/*.qrc)
+  file(GLOB_RECURSE PLATFORM_RESOURCES resources/win/*.qrc)
 endif (APPLE)
+
+set(SILK_RESOURCES ${COMMON_RESOURCES} ${PLATFORM_RESOURCES})
 
 if (APPLE)
   set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.2)
