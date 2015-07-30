@@ -31,6 +31,7 @@ class ConfigManager {
   static QColor endOfFileColor();
   static int tabWidth();
   static bool indentUsingSpaces();
+  static bool enableMnemonic();
 
  private:
   ConfigManager() = delete;

@@ -12,6 +12,7 @@
 #include "SilkApp.h"
 #include "commands/PluginCommand.h"
 #include "CommandManager.h"
+#include "ConfigManager.h"
 
 MenuBar* MenuBar::s_globalMenuBar;
 
@@ -21,18 +22,23 @@ void MenuBar::init() {
 
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu
-  auto fileMenu = addMenu(QObject::tr("&File"));
+  const QString& fileMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&File") : QObject::tr("File");
+  auto fileMenu = addMenu(fileMenuStr);
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
 
   // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)
-  auto editMenu = addMenu(QObject::tr("&Text"));
+  const QString& textMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&Text") : QObject::tr("Text");
+  auto editMenu = addMenu(textMenuStr);
   // we need at least one sub menu to show the Text menu correctly because of this bug.
   // https://bugreports.qt.io/browse/QTBUG-44412?jql=text%20~%20%22qmenubar%20mac%22
-  editMenu->addAction(new CommandAction(QObject::tr("&Undo"), UndoCommand::name));
+  const QString& undoMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&Undo") : QObject::tr("Undo");
+  editMenu->addAction(new CommandAction(undoMenuStr, UndoCommand::name));
 
   // View menu
-  auto viewMenu = addMenu(QObject::tr("&View"));
-  ThemeMenu* themeMenu = new ThemeMenu(QObject::tr("&Theme"));
+  const QString& viewMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&View") : QObject::tr("View");
+  auto viewMenu = addMenu(viewMenuStr);
+  const QString& themeMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&Theme") : QObject::tr("Theme");
+  ThemeMenu* themeMenu = new ThemeMenu(themeMenuStr);
   viewMenu->addMenu(themeMenu);
   QActionGroup* themeActionGroup = new QActionGroup(themeMenu);
   for (const QString& name : ThemeProvider::sortedThemeNames()) {
@@ -44,13 +50,16 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   connect(themeActionGroup, &QActionGroup::triggered, this, &MenuBar::themeActionTriggered);
 
   // Packages menu
-  auto packagesMenu = addMenu(QObject::tr("&Packages"));
+  const QString& packageMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&Packages") : QObject::tr("Packages");
+  auto packagesMenu = addMenu(packageMenuStr);
   auto bundleDevelopmentMenu = packagesMenu->addMenu("Package Development");
   bundleDevelopmentMenu->addAction(new CommandAction("New Package", "new_package"));
 
   // Help menu
-  auto helpMenu = addMenu(QObject::tr("&Help"));
-  QAction* aboutAction = new QAction(QObject::tr("&About"), helpMenu);
+  const QString& helpMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&Help") : QObject::tr("Help");
+  auto helpMenu = addMenu(helpMenuStr);
+  const QString& abountMenuStr = ConfigManager::enableMnemonic() ? QObject::tr("&About") : QObject::tr("About");
+  QAction* aboutAction = new QAction(abountMenuStr, helpMenu);
   connect(aboutAction, &QAction::triggered, this, &MenuBar::showAboutDialog);
   helpMenu->addAction(aboutAction);
 }
