@@ -79,3 +79,8 @@ set(REGION_TEST_SRCS ../src/Region.cpp src/RegionTest.cpp)
 add_executable(RegionTest ${REGION_TEST_SRCS} )
 target_link_libraries(RegionTest Qt5::Gui Qt5::Xml Qt5::Test ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY})
 add_test( NAME RegionTest COMMAND RegionTest)
+
+set(TEXTEDITVIEWLOGIC_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguageParser.cpp ../src/PListParser.cpp ../src/Regexp.cpp ../src/Util.cpp ../src/Region.cpp ../src/Theme.cpp ../src/Session.cpp ../src/ThemeProvider.cpp ../src/ConfigManager.cpp ../src/Constants.cpp ../src/TextEditViewLogic.cpp ../src/Regexp.cpp src/TextEditViewLogicTest.cpp)
+add_executable(TextEditViewLogicTest ${TEXTEDITVIEWLOGIC_TEST_SRCS} )
+target_link_libraries(TextEditViewLogicTest Qt5::Widgets Qt5::Xml Qt5::Test ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY})
+add_test( NAME TextEditViewLogicTest COMMAND TextEditViewLogicTest)

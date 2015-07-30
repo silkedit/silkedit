@@ -5,6 +5,8 @@
 
 #include "TextEditView.h"
 
+class Regexp;
+
 class TextEditViewPrivate : public QObject {
   Q_OBJECT
  public:
@@ -26,7 +28,6 @@ class TextEditViewPrivate : public QObject {
   bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
   void indent(QTextCursor& currentVisibleCursor);
-  void outdent(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();

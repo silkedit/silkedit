@@ -2,30 +2,13 @@
 #include <QStringBuilder>
 
 #include "TextEditView_p.h"
+#include "TextEditViewLogic.h"
 #include "Session.h"
 #include "Metadata.h"
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {
   return a.compare(b, Qt::CaseInsensitive) < 0;
-}
-
-int indentLength(const QString& str) {
-  int len = 0;
-  std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
-  std::unique_ptr<QVector<int>> regions(regex->findStringSubmatchIndex(QStringRef(&str)));
-  if (regions) {
-    QString indentStr = str.left(regions->at(1));
-    foreach (const QChar& ch, indentStr) {
-      if (ch == '\t') {
-        len += Session::singleton().tabWidth();
-      } else {
-        len++;
-      }
-    }
-  }
-
-  return len;
 }
 }
 
@@ -252,66 +235,19 @@ TextEditViewPrivate::TextEditViewPrivate(TextEditView* q_ptr)
     : q(q_ptr), m_document(nullptr), m_completedAndSelected(false) {
 }
 
-void TextEditViewPrivate::outdent(QTextCursor& cursor) {
-  if (cursor.atBlockStart())
-    return;
-
-  bool moved = cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-  if (!moved)
-    return;
-
-  QChar prevChar = m_document->characterAt(cursor.position());
-  if (prevChar == '\t') {
-    cursor.deleteChar();
-  } else if (prevChar == ' ') {
-    int i = 1;
-    while (!cursor.atBlockStart() && i < Session::singleton().tabWidth() &&
-           m_document->characterAt(cursor.position()) == ' ') {
-      cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
-      i++;
-    }
-    cursor.removeSelectedText();
-  }
-}
-
 void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   auto metadata = Metadata::get(m_document->language()->scopeName);
+  if (!metadata) {
+    return;
+  }
 
-  if (metadata) {
-    auto currentVisibleCursor = q->textCursor();
-    const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
-    const QString& prevLineString = prevLineText();
-    if (!prevLineString.isEmpty()) {
-      int currentLineIndentSize = indentLength(currentLineText);
-      int prevLineIndentSize = indentLength(prevLineString);
-      bool isPrevLineIncreasePattern = false;
-      if (metadata->increaseIndentPattern() &&
-          metadata->increaseIndentPattern()->matches(prevLineString)) {
-        isPrevLineIncreasePattern = true;
-      }
-
-      // Outdent in these cases
-      // case 1 (previous line's indent level is equal to the indent level of current line)
-      //     {
-      //       int hoge = 0;
-      //       } inserted here
-
-      // case 2 (previous line matches increaseIndentPattern and the diff of indent level between
-      // previous line and current line is exactly 1 indent level)
-      //     {
-      //       } inserted here
-      bool isOutdentNecessary = false;
-      if (currentVisibleCursor.atBlockEnd() &&
-          ((!isPrevLineIncreasePattern && currentLineIndentSize == prevLineIndentSize) ||
-           (isPrevLineIncreasePattern &&
-            (currentLineIndentSize - prevLineIndentSize) == Session::singleton().tabWidth()))) {
-        isOutdentNecessary = true;
-      }
-
-      if (isOutdentNecessary && metadata->decreaseIndentPattern() &&
-          metadata->decreaseIndentPattern()->matches(currentLineText)) {
-        outdent(currentVisibleCursor);
-      }
-    }
+  auto currentVisibleCursor = q->textCursor();
+  const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
+  const QString& prevLineString = prevLineText();
+  if (TextEditViewLogic::isOutdentNecessary(
+          metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
+          prevLineString, currentVisibleCursor.atBlockEnd(), Session::singleton().tabWidth())) {
+    TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
+                               Session::singleton().tabWidth());
   }
 }

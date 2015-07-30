@@ -6,6 +6,7 @@
 
 #include "vi.h"
 #include "TextEditView_p.h"
+#include "TextEditViewLogic.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
@@ -525,7 +526,8 @@ void TextEditView::insertNewLineWithIndent() {
       if (indentNextLine) {
         d->indent(currentVisibleCursor);
       } else if (outdentNextLine) {
-        d->outdent(currentVisibleCursor);
+        TextEditViewLogic::outdent(d->m_document.get(), currentVisibleCursor,
+                                   Session::singleton().tabWidth());
       }
     }
   }

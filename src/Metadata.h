@@ -13,9 +13,7 @@ class Metadata {
   static Metadata* get(const QString& scope);
   static void load(const QString& filename);
 
-  explicit Metadata(const QString& scope);
   ~Metadata() = default;
-  DEFAULT_MOVE(Metadata)
 
   // accessors
   QString name() { return m_name; }
@@ -50,4 +48,7 @@ class Metadata {
   std::unique_ptr<Regexp> m_bracketIndentNextLinePattern;
   std::unique_ptr<Regexp> m_disableIndentNextLinePattern;
   std::unique_ptr<Regexp> m_unIndentedLinePattern;
+
+  explicit Metadata(const QString& scope);
+  DEFAULT_MOVE(Metadata)
 };
