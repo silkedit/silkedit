@@ -107,16 +107,3 @@ signals:
 
   friend class TextEditViewPrivate;
 };
-
-class LineNumberArea : public QWidget {
- public:
-  LineNumberArea(TextEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
-
-  QSize sizeHint() const override { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
-
- protected:
-  void paintEvent(QPaintEvent* event) override { m_codeEditor->lineNumberAreaPaintEvent(event); }
-
- private:
-  TextEditView* m_codeEditor;
-};

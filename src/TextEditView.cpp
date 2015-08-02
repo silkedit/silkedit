@@ -78,6 +78,19 @@ int toMoveOperation(std::string str) {
 }
 }
 
+class LineNumberArea : public QWidget {
+ public:
+  LineNumberArea(TextEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
+
+  QSize sizeHint() const override { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
+
+ protected:
+  void paintEvent(QPaintEvent* event) override { m_codeEditor->lineNumberAreaPaintEvent(event); }
+
+ private:
+  TextEditView* m_codeEditor;
+};
+
 TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), d(new TextEditViewPrivate(this)) {
   d->m_lineNumberArea = new LineNumberArea(this);
