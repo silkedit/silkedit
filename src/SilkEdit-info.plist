@@ -10,6 +10,7 @@
 	"LSMinimumSystemVersion" = "10.7";
 	"LSApplicationCategoryType" = "public.app-category.developer-tools";
 	CFBundleIconFile = "silkedit.icns";
+  ATSApplicationFontsPath = fonts;
 	"CFBundleDocumentTypes" = (
 		{
 			CFBundleTypeName = Document;

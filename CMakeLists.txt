@@ -50,6 +50,7 @@ if (APPLE)
 
   # set where in the bundle to put the icns files
   set_source_files_properties( ${OSX_ICON_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
@@ -97,6 +98,9 @@ if(APPLE)
   if (BUILD_EDGE)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_SOURCE_DIR}/resources/silkedit_edge.icns ${PROJECT_NAME}.app/Contents/Resources/silkedit.icns)
   endif (BUILD_EDGE)
+
+  # bundle fonts
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/resources/fonts ${PROJECT_NAME}.app/Contents/Resources)
 elseif (MINGW)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)

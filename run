@@ -140,6 +140,7 @@ resolve() {
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
         wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
+        mkdir -p resources/fonts
         mv *.otf resources/fonts
     fi
 }
