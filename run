@@ -241,7 +241,21 @@ run_tests() {
     fi
 }
 
-# -e: stops if any command returns 0
+set_version() {
+    if [ $# -ne 1 ]; then
+        echo 'Specify a version number (e.g., 1.0.0)'
+    else
+        sed -i '' -E "s/CFBundleShortVersionString = \"[0-9]+\.[0-9]+\.[0-9]+\";/CFBundleShortVersionString = \"$1\";/" src/SilkEdit-info.plist 
+        commaVersion=$(echo $1 | sed -E 's/\./,/g')
+        sed -i '' -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc
+        sed -i '' -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc
+        sed -i '' -E "s/VERSION \"[0-9]+\.[0-9]+\.[0-9]+\"/VERSION \"$1\"/" src/version.h
+        git commit -am "Bump version to $1"
+        git tag v$1
+    fi
+}
+
+# -e: stops if any command returns non zero value
 set -e
 
 case "$1" in
@@ -275,16 +289,21 @@ case "$1" in
         run_tests
         echo
         ;;
+    set_version)
+        set_version $2
+        echo
+        ;;
     *)
 
         cat << EOF
-analyze     static analysis
-build       build an app and an installer
-clean       clean build dir
-format      format sources
-rebuild     build from scratch
-resolve     resolve dependency
-test        run tests
+analyze      static analysis
+build        build an app and an installer
+clean        clean build dir
+format       format sources
+rebuild      build from scratch
+resolve      resolve dependency
+test         run tests
+set_version  set version number
 EOF
 
         exit 1
