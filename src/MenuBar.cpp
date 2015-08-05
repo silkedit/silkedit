@@ -13,6 +13,7 @@
 #include "commands/PluginCommand.h"
 #include "CommandManager.h"
 #include "ConfigManager.h"
+#include "version.h"
 
 MenuBar* MenuBar::s_globalMenuBar;
 
@@ -71,7 +72,7 @@ void MenuBar::themeActionTriggered(QAction* action) {
 }
 
 void MenuBar::showAboutDialog() {
-  QMessageBox::about(this, SilkApp::applicationName(), "version " + SilkApp::applicationVersion());
+  QMessageBox::about(this, SilkApp::applicationName(), "version " + SilkApp::applicationVersion() + " (build: " + BUILD + ")");
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {
