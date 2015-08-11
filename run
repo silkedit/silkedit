@@ -56,6 +56,17 @@ clean() {
 
 # resolve dependency
 resolve() {
+    # msgpack-c and libguess submodules
+    git submodule init
+    git submodule update
+
+    # Source Han Code JP font
+    if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
+        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
+        mkdir -p resources/fonts
+        mv *.otf resources/fonts
+    fi
+
     if [ $OS == 'Mac' ]; then
       brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
       brew list oniguruma || brew install oniguruma
@@ -84,6 +95,19 @@ resolve() {
       cd packages/silkedit
       ../../plugin_runner/bin/npm install
       cd ../..
+
+      # libguess
+      if [ ! -f /usr/local/lib/libguess.dylib ]; then
+        brew list automake || brew install automake
+        cd libguess
+        autoheader
+        aclocal
+        autoconf
+        ./configure
+        make
+        make install
+        cd ..
+      fi
 
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
@@ -130,18 +154,6 @@ resolve() {
         cd packages/silkedit
         node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
         cd ../..
-    fi
-
-
-    # msgpack-c
-    git submodule init
-    git submodule update
-
-    # Source Han Code JP font
-    if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
-        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
-        mkdir -p resources/fonts
-        mv *.otf resources/fonts
     fi
 }
 

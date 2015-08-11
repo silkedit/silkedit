@@ -6,7 +6,6 @@ node_modules
 *.otf
 
 /build/
-/lib/
 /include/
 /plugin_runner/bin
 /plugin_runner/lib

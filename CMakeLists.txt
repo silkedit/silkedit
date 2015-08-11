@@ -41,9 +41,9 @@ find_package(Qt5Network REQUIRED)
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 if (APPLE)
-  # find yaml-cpp and onig library
-  find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
+	find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
+	find_library(LIBGUESS_LIBRARY NAMES libguess.dylib PATHS /usr/local/lib)
 
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkedit.icns )
@@ -83,7 +83,7 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON})
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} )
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${LIBGUESS_LIBRARY})
 
 if(APPLE)
   # bundle packages

@@ -1,3 +1,7 @@
 [submodule "msgpack-c"]
 	path = msgpack-c
 	url = https://github.com/msgpack/msgpack-c.git
+[submodule "libguess"]
+	path = libguess
+	url = https://github.com/kaniini/libguess.git
+	ignore = dirty
