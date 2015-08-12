@@ -154,6 +154,22 @@ resolve() {
         cd packages/silkedit
         node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
         cd ../..
+
+        # libguess
+        if [ ! -f /usr/local/lib/libguess.dll.a ]; then
+            cd libguess
+            autoheader
+            aclocal
+            autoconf
+            if [ $OS == 'Win32' ]; then
+                ./configure --build=i686-w64-mingw32
+            else
+                ./configure --build=x86_64-w64-mingw32
+            fi
+            make
+            make install
+            cd ..
+        fi
     fi
 }
 
@@ -206,7 +222,7 @@ build() {
         cp -r silkedit.exe packages plugin_runner Release
         rm -rf silkedit.exe packages plugin_runner
         cd Release
-        windeployqt --release-with-debug-info silkedit.exe
+        windeployqt --release silkedit.exe
         if [ $OS == 'Win32' ]; then
             # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
             cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ../../silkedit_x86.iss
