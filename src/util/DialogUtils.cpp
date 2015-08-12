@@ -13,7 +13,7 @@ std::list<std::string> DialogUtils::showDialog(const QString& caption, DialogUti
     case MODE::Directory:
       return showDialogImpl(caption, QFileDialog::Directory, QFileDialog::ShowDirsOnly);
     default:
-      qWarning("invalid mode: %d", mode);
+      qWarning("invalid mode: %d", static_cast<int>(mode));
       return std::list<std::string>();
   }
 }
