@@ -41,7 +41,7 @@ find_package(Qt5Network REQUIRED)
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 if (APPLE)
-	find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
+  find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
   find_library(UCHARDET_LIBRARY NAMES libuchardet.a PATHS /usr/local/lib)
 

@@ -6,13 +6,13 @@
 #include "Encoding.h"
 
 namespace {
-QString guessEncodingInternal(const QByteArray& bytes) {
-  const int length = 256 * 1024;  // 256KB
+const int MAX_LENGTH_TO_READ = 256 * 1024;  // 256KB
 
+QString guessEncodingInternal(const QByteArray& bytes) {
   // Detect character code set
   uchardet_t ucd = uchardet_new();
-  if (uchardet_handle_data(ucd, bytes, length) != 0) {
-    return nullptr;
+  if (uchardet_handle_data(ucd, bytes, std::min(bytes.size(), MAX_LENGTH_TO_READ)) != 0) {
+    return "";
   }
 
   uchardet_data_end(ucd);
@@ -36,8 +36,8 @@ const QList<Encoding> Encoding::s_availableEncodings =
                     Encoding("EUC-JP", "Japanese (EUC-JP)"),
                     Encoding("ISO-2022-JP", "Japanese (ISO-2022-JP)")};
 
-Encoding Encoding::guessEncoding(const QByteArray& text) {
-  QString encName = guessEncodingInternal(text);
+Encoding Encoding::guessEncoding(const QByteArray& bytes) {
+  QString encName = guessEncodingInternal(bytes);
   auto encodingIter =
       std::find_if(s_availableEncodings.begin(),
                    s_availableEncodings.end(),

@@ -5,6 +5,7 @@ CMakeLists.txt.user
 node_modules
 *.otf
 
+/lib/
 /build/
 /include/
 /plugin_runner/bin
