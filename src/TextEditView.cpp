@@ -174,6 +174,14 @@ Language* TextEditView::language() {
   return nullptr;
 }
 
+Encoding TextEditView::encoding()
+{
+  if (d->m_document) {
+    return d->m_document->encoding();
+  }
+  return Encoding::defaultEncoding();
+}
+
 void TextEditView::setLanguage(const QString& scopeName) {
   if (d->m_document) {
     bool isSuccess = d->m_document->setLanguage(scopeName);

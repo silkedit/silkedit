@@ -1,11 +1,17 @@
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
+#include "EncodingComboBox.h"
 #include "Window.h"
 #include "TabView.h"
 #include "TextEditView.h"
 
-StatusBar::StatusBar(Window* window) : QStatusBar(window), m_langComboBox(new LanguageComboBox) {
+StatusBar::StatusBar(Window* window)
+    : QStatusBar(window),
+      m_langComboBox(new LanguageComboBox),
+      m_encComboBox(new EncodingComboBox) {
+  // StatusBar becomes the owner of these widgets
   addPermanentWidget(m_langComboBox);
+  addPermanentWidget(m_encComboBox);
 
   connect(m_langComboBox,
           SIGNAL(currentIndexChanged(int)),
@@ -68,5 +74,14 @@ void StatusBar::setCurrentLanguage(Language* lang) {
     } else {
       qDebug("lang: %s is not registered.", qPrintable(lang->name()));
     }
+  }
+}
+
+void StatusBar::setCurrentEncoding(const QString& encoding) {
+  int idx = m_encComboBox->findData(encoding);
+  if (idx >= 0) {
+    m_encComboBox->setCurrentIndex(idx);
+  } else {
+    qDebug("Encoding: %s is not registered.", qPrintable(encoding));
   }
 }

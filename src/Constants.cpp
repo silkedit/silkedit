@@ -10,7 +10,7 @@ static QString silkHomePath =
 }
 
 #ifdef Q_OS_MAC
-const QString Constants::defaultFontFamily = "Menlo";
+const QString Constants::defaultFontFamily = "Source Han Code JP";
 #endif
 
 #ifdef Q_OS_WIN

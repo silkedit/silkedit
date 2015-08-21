@@ -12,6 +12,7 @@
 #include "macros.h"
 #include "ICloneable.h"
 #include "Document.h"
+#include "Encoding.h"
 #include "UniqueObject.h"
 
 class QPaintEvent;
@@ -19,7 +20,7 @@ class QResizeEvent;
 class QSize;
 class QWidget;
 class QElapsedTimer;
-
+struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
 
@@ -36,6 +37,7 @@ class TextEditView : public QPlainTextEdit,
   Document* document();
   void setDocument(std::shared_ptr<Document> document);
   Language* language();
+  Encoding encoding();
   void setLanguage(const QString& scopeName);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);

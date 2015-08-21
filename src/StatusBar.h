@@ -7,6 +7,7 @@
 
 class TextEditView;
 class LanguageComboBox;
+class EncodingComboBox;
 class Window;
 struct Language;
 
@@ -20,6 +21,7 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   DEFAULT_MOVE(StatusBar)
 
   void setCurrentLanguage(Language* lang);
+  void setCurrentEncoding(const QString& encoding);
 
 signals:
   void languageChanged(const QString& scopeName);
@@ -40,4 +42,5 @@ signals:
 
  private:
   LanguageComboBox* m_langComboBox;
+  EncodingComboBox* m_encComboBox;
 };

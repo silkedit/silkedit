@@ -1,26 +1,10 @@
-#include <libguess/libguess.h>
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
 
 #include "Document.h"
 
-namespace {
-const char* guessEncoding(std::string text) {
-  /*
-   - libguess_determine_encoding(const char *inbuf, int length, const char *region);
-
-    This detects a character set.  Returns an appropriate charset name
-    that can be passed to iconv_open().  Region is the name of the language
-    or region that the data is related to, e.g. 'Baltic' for the Baltic states,
-    or 'Japanese' for Japan.
-  */
-  const int length = 256 * 1024;  // 256KB
-  return libguess_determine_encoding(text.c_str(), length, "Japanese");
-}
-}
-
-Document::Document(const QString& path, const QString& text)
-    : QTextDocument(text), m_path(path), m_syntaxHighlighter(nullptr) {
+Document::Document(const QString& path, const QString& text, const Encoding& encoding)
+    : QTextDocument(text), m_path(path), m_encoding(encoding), m_syntaxHighlighter(nullptr) {
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');
@@ -33,7 +17,7 @@ Document::Document(const QString& path, const QString& text)
   }
 }
 
-Document::Document() {
+Document::Document() : m_encoding(Encoding::defaultEncoding()), m_syntaxHighlighter(nullptr) {
   setupLayout();
   setupSyntaxHighlighter(LanguageProvider::defaultLanguage());
 }
@@ -65,13 +49,10 @@ Document* Document::create(const QString& path) {
 
   std::string str = file.readAll().constData();
   QString content;
-  if (auto encoding = guessEncoding(str)) {
-    QTextCodec* codec = QTextCodec::codecForName(encoding);
-    content = codec->toUnicode(str.c_str());
-  } else {
-    content = QString::fromUtf8(str.c_str());
-  }
-  return new Document(path, content);
+  auto encoding = Encoding::guessEncoding(str);
+  QTextCodec* codec = encoding.codec();
+  content = codec->toUnicode(str.c_str());
+  return new Document(path, content, encoding);
 }
 
 Document* Document::createBlank() {
@@ -158,8 +139,12 @@ QTextCursor Document::find(const Regexp* expr,
                            int end,
                            Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
-         (options.testFlag(FindFlag::FindBackward)), from, begin, end);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
+         qPrintable(expr->pattern()),
+         (options.testFlag(FindFlag::FindBackward)),
+         from,
+         begin,
+         end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);

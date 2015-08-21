@@ -6,6 +6,7 @@
 #include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 #include "Regexp.h"
+#include "Encoding.h"
 
 class Document : public QTextDocument {
   Q_OBJECT
@@ -29,8 +30,12 @@ class Document : public QTextDocument {
 
   QString path() { return m_path; }
   void setPath(const QString& path);
+
   Language* language() { return m_lang.get(); }
   bool setLanguage(const QString& scopeName);
+
+  Encoding encoding() { return m_encoding; }
+
   QTextCursor find(const QString& subString,
                    int from = 0,
                    int begin = 0,
@@ -60,9 +65,10 @@ signals:
  private:
   QString m_path;
   std::unique_ptr<Language> m_lang;
+  Encoding m_encoding;
   SyntaxHighlighter* m_syntaxHighlighter;
 
-  Document(const QString& path, const QString& text);
+  Document(const QString& path, const QString& text, const Encoding& encoding);
   Document();
 
   void setupLayout();
