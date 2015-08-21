@@ -56,7 +56,7 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # msgpack-c and libguess submodules
+    # msgpack-c submodule
     git submodule init
     git submodule update
 
@@ -73,6 +73,7 @@ resolve() {
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
+      brew list uchardet || brew install uchardet
 
       # node
       if [ ! -d plugin_runner/bin ]; then
@@ -95,19 +96,6 @@ resolve() {
       cd packages/silkedit
       ../../plugin_runner/bin/npm install
       cd ../..
-
-      # libguess
-      if [ ! -f /usr/local/lib/libguess.dylib ]; then
-        brew list automake || brew install automake
-        cd libguess
-        autoheader
-        aclocal
-        autoconf
-        ./configure
-        make
-        make install
-        cd ..
-      fi
 
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'

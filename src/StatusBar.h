@@ -10,6 +10,7 @@ class LanguageComboBox;
 class EncodingComboBox;
 class Window;
 struct Language;
+class Encoding;
 
 class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   Q_OBJECT
@@ -20,16 +21,13 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
-  void setCurrentLanguage(Language* lang);
-  void setCurrentEncoding(const QString& encoding);
+  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+  void setLanguage(const QString& scope);
+  void setActiveTextEditViewLanguage();
+  void setCurrentEncoding(const Encoding& encoding);
 
 signals:
   void languageChanged(const QString& scopeName);
-
- public slots:
-  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
-  void setActiveTextEditViewLanguage();
-  void setLanguage(const QString& scope);
 
  protected:
   friend struct UniqueObject<StatusBar>;
@@ -43,4 +41,6 @@ signals:
  private:
   LanguageComboBox* m_langComboBox;
   EncodingComboBox* m_encComboBox;
+
+  void setCurrentLanguage(Language* lang);
 };

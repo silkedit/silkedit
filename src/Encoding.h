@@ -9,7 +9,7 @@
 class Encoding {
  public:
   static QList<Encoding> availableEncodings() { return s_availableEncodings; }
-  static Encoding guessEncoding(const std::string& text);
+  static Encoding guessEncoding(const QByteArray& bytes);
   static Encoding defaultEncoding();
 
   Encoding(const QString& name, const QString& displayName);
@@ -19,6 +19,9 @@ class Encoding {
   QString name() const { return m_name; }
   QString displayName() const { return m_displayName; }
   QTextCodec* codec() const;
+
+  bool operator==(const Encoding& other) const;
+  bool operator!=(const Encoding& other) const;
 
  private:
   const static QList<Encoding> s_availableEncodings;

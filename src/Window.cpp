@@ -68,7 +68,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 }
 
 void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
-  qDebug("updateConnection for new active TabView");
+//  qDebug("updateConnection for new active TabView");
 
   if (oldTabView && m_statusBar) {
     disconnect(oldTabView,
@@ -95,18 +95,18 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
 }
 
 void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
-  qDebug("updateConnection for new active TextEditView");
+//  qDebug("updateConnection for new active TextEditView");
 
   if (oldEditView && m_statusBar) {
+    disconnect(oldEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
     disconnect(
-        oldEditView, SIGNAL(languageChanged(QString)), m_statusBar, SLOT(setLanguage(QString)));
+        oldEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setCurrentEncoding);
   }
 
   if (newEditView && m_statusBar) {
-    connect(newEditView,
-            SIGNAL(languageChanged(const QString&)),
-            m_statusBar,
-            SLOT(setLanguage(const QString&)));
+    connect(newEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
+    connect(
+        newEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setCurrentEncoding);
   }
 }
 

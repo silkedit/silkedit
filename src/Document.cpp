@@ -47,12 +47,12 @@ Document* Document::create(const QString& path) {
   if (!file.open(QIODevice::ReadWrite))
     return nullptr;
 
-  std::string str = file.readAll().constData();
-  QString content;
-  auto encoding = Encoding::guessEncoding(str);
+  QByteArray contentBytes = file.readAll();
+  QString text;
+  auto encoding = Encoding::guessEncoding(contentBytes);
   QTextCodec* codec = encoding.codec();
-  content = codec->toUnicode(str.c_str());
-  return new Document(path, content, encoding);
+  text = codec->toUnicode(contentBytes);
+  return new Document(path, text, encoding);
 }
 
 Document* Document::createBlank() {

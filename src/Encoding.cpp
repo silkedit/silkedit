@@ -1,21 +1,26 @@
-#include <libguess/libguess.h>
+#include <uchardet/uchardet.h>
 #include <algorithm>
 #include <QTextCodec>
+#include <QDebug>
 
 #include "Encoding.h"
 
 namespace {
-const char* guessEncodingInternal(const std::string& text) {
-  /*
-   - libguess_determine_encoding(const char *inbuf, int length, const char *region);
-
-    This detects a character set.  Returns an appropriate charset name
-    that can be passed to iconv_open().  Region is the name of the language
-    or region that the data is related to, e.g. 'Baltic' for the Baltic states,
-    or 'Japanese' for Japan.
-  */
+QString guessEncodingInternal(const QByteArray& bytes) {
   const int length = 256 * 1024;  // 256KB
-  return libguess_determine_encoding(text.c_str(), length, "Japanese");
+
+  // Detect character code set
+  uchardet_t ucd = uchardet_new();
+  if (uchardet_handle_data(ucd, bytes, length) != 0) {
+    return nullptr;
+  }
+
+  uchardet_data_end(ucd);
+  const char* charSetName = uchardet_get_charset(ucd);
+  QString csn = charSetName;
+  qDebug() << "Detected character set: " << csn;
+  uchardet_delete(ucd);
+  return csn;
 }
 
 const QString DEFAULT_ENCODING_NAME = "UTF-8";
@@ -31,8 +36,8 @@ const QList<Encoding> Encoding::s_availableEncodings =
                     Encoding("EUC-JP", "Japanese (EUC-JP)"),
                     Encoding("ISO-2022-JP", "Japanese (ISO-2022-JP)")};
 
-Encoding Encoding::guessEncoding(const std::string& text) {
-  const char* encName = guessEncodingInternal(text);
+Encoding Encoding::guessEncoding(const QByteArray& text) {
+  QString encName = guessEncodingInternal(text);
   auto encodingIter =
       std::find_if(s_availableEncodings.begin(),
                    s_availableEncodings.end(),
@@ -43,8 +48,7 @@ Encoding Encoding::guessEncoding(const std::string& text) {
   return DEFAULT_ENCODING;
 }
 
-Encoding Encoding::defaultEncoding()
-{
+Encoding Encoding::defaultEncoding() {
   return DEFAULT_ENCODING;
 }
 
@@ -54,4 +58,12 @@ Encoding::Encoding(const QString& name, const QString& displayName)
 
 QTextCodec* Encoding::codec() const {
   return QTextCodec::codecForName(name().toUtf8().constData());
+}
+
+bool Encoding::operator==(const Encoding& other) const {
+  return this->name() == other.name();
+}
+
+bool Encoding::operator!=(const Encoding& other) const {
+  return !(*this == other);
 }

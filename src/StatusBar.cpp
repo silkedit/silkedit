@@ -23,6 +23,7 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEdit
   qDebug("onActiveTextEditViewChanged");
   if (newEditView) {
     setCurrentLanguage(newEditView->language());
+    setCurrentEncoding(newEditView->encoding());
   } else {
     qDebug("newEditView is null");
   }
@@ -77,11 +78,11 @@ void StatusBar::setCurrentLanguage(Language* lang) {
   }
 }
 
-void StatusBar::setCurrentEncoding(const QString& encoding) {
-  int idx = m_encComboBox->findData(encoding);
+void StatusBar::setCurrentEncoding(const Encoding& encoding) {
+  int idx = m_encComboBox->findData(encoding.name());
   if (idx >= 0) {
     m_encComboBox->setCurrentIndex(idx);
   } else {
-    qDebug("Encoding: %s is not registered.", qPrintable(encoding));
+    qDebug("Encoding: %s is not registered.", qPrintable(encoding.name()));
   }
 }

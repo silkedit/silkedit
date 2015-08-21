@@ -82,6 +82,7 @@ signals:
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
+  void encodingChanged(const Encoding& encoding);
 
  protected:
   friend struct UniqueObject<TextEditView>;

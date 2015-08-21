@@ -43,7 +43,7 @@ qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 if (APPLE)
 	find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
-	find_library(LIBGUESS_LIBRARY NAMES libguess.dylib PATHS /usr/local/lib)
+  find_library(UCHARDET_LIBRARY NAMES libuchardet.a PATHS /usr/local/lib)
 
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkedit.icns )
@@ -60,7 +60,7 @@ if (APPLE)
 elseif (MINGW)
   set(YAML_CPP_LIBRARY yaml-cpp)
   set(ONIG_LIBRARY onig.a)
-  set(LIBGUESS_LIBRARY guess.dll.a)
+  set(UCHARDET_LIBRARY uchardet.a)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
@@ -84,7 +84,7 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON})
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${LIBGUESS_LIBRARY})
+target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${UCHARDET_LIBRARY})
 
 if(APPLE)
   # bundle packages
