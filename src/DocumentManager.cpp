@@ -37,6 +37,7 @@ bool DocumentManager::save(Document* doc) {
   QFile outFile(doc->path());
   if (outFile.open(QIODevice::WriteOnly)) {
     QTextStream out(&outFile);
+    out.setCodec(doc->encoding().codec());
     for (int i = 0; i < doc->blockCount(); i++) {
       if (i < doc->blockCount() - 1) {
         out << doc->findBlockByNumber(i).text() << endl;
