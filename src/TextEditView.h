@@ -83,6 +83,7 @@ signals:
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
+  // emitted when underlying document's encoding is changed.
   void encodingChanged(const Encoding& encoding);
 
  protected:

@@ -107,6 +107,7 @@ bool Document::setLanguage(const QString& scopeName) {
 void Document::setEncoding(const Encoding& encoding) {
   if (m_encoding != encoding) {
     m_encoding = encoding;
+    emit encodingChanged(encoding);
   }
 }
 
@@ -213,10 +214,20 @@ QString Document::scopeTree() const {
   return m_syntaxHighlighter ? m_syntaxHighlighter->scopeTree() : "";
 }
 
+void Document::reload() {
+  if (const boost::optional<std::tuple<QString, Encoding>> textAndEnc = load(m_path)) {
+    setPlainText(std::get<0>(*textAndEnc));
+    setEncoding(std::get<1>(*textAndEnc));
+    setModified(false);
+    emit modificationChanged(false);
+  }
+}
+
 void Document::reload(const Encoding& encoding) {
   if (const boost::optional<QString> text = load(m_path, encoding)) {
     setPlainText(*text);
     setEncoding(encoding);
     setModified(false);
+    emit modificationChanged(false);
   }
 }

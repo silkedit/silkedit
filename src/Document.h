@@ -59,10 +59,21 @@ class Document : public QTextDocument {
                    FindFlags options = 0) const;
   QString scopeName(int pos) const;
   QString scopeTree() const;
+
+  /**
+   * @brief reload from a local file and guess its encoding
+   */
+  void reload();
+
+  /**
+   * @brief reload from a local file in the encoding
+   * @param encoding
+   */
   void reload(const Encoding& encoding);
 
 signals:
   void pathUpdated(const QString& path);
+  void encodingChanged(const Encoding& encoding);
 
  private:
   QString m_path;

@@ -172,9 +172,18 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
     }
   }
 
+  // disconnect from old document
+  disconnect(d->m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
+  disconnect(d->m_document.get(), &Document::encodingChanged, d.get(),
+             &TextEditViewPrivate::emitEncodingChanged);
+  disconnect(d->m_document.get(), &QTextDocument::contentsChanged, d.get(),
+             &TextEditViewPrivate::outdentCurrentLineIfNecessary);
+
   d->m_document = document;
   d->updateLineNumberAreaWidth(blockCount());
   connect(d->m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
+  connect(d->m_document.get(), &Document::encodingChanged, d.get(),
+          &TextEditViewPrivate::emitEncodingChanged);
   connect(d->m_document.get(), &QTextDocument::contentsChanged, d.get(),
           &TextEditViewPrivate::outdentCurrentLineIfNecessary);
 }

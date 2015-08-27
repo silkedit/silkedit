@@ -3,8 +3,9 @@
 #include <QComboBox>
 
 #include "macros.h"
+#include "Encoding.h"
 
-class Encoding;
+class TextEditView;
 
 class EncodingComboBox : public QComboBox {
   DISABLE_COPY(EncodingComboBox)
@@ -15,6 +16,9 @@ class EncodingComboBox : public QComboBox {
   DEFAULT_MOVE(EncodingComboBox)
 
   void setCurrentEncoding(const Encoding& encoding);
+  Encoding currentEncoding();
+
+  bool isAutoDetectSelected();
 
  private:
 };

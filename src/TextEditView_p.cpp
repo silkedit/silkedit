@@ -183,6 +183,10 @@ void TextEditViewPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
   }
 }
 
+void TextEditViewPrivate::emitEncodingChanged(const Encoding& enc) {
+  emit q->encodingChanged(enc);
+}
+
 void TextEditViewPrivate::highlightCurrentLine() {
   if (q->textCursor().hasSelection()) {
     return;

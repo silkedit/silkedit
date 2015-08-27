@@ -1,3 +1,5 @@
+#include <QMessageBox>
+
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
 #include "EncodingComboBox.h"
@@ -11,8 +13,8 @@ StatusBar::StatusBar(Window* window)
       m_langComboBox(new LanguageComboBox),
       m_encComboBox(new EncodingComboBox) {
   // StatusBar becomes the owner of these widgets
-  addPermanentWidget(m_langComboBox);
   addPermanentWidget(m_encComboBox);
+  addPermanentWidget(m_langComboBox);
 
   connect(m_langComboBox,
           static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), this,
@@ -57,26 +59,41 @@ void StatusBar::setActiveTextEditViewEncoding() {
       if (boost::optional<Encoding> oldEncoding = editView->encoding()) {
         QString fromEncodingName = oldEncoding->name();
         qDebug("active editView's encoding: %s", qPrintable(fromEncodingName));
-        if (const boost::optional<Encoding> newEncoding =
-                Encoding::encodingForName(m_encComboBox->currentData().toString())) {
-          if (*newEncoding != *oldEncoding) {
-            // If the document is empty or has no file path, just change current document's encoding
+        if (m_encComboBox->isAutoDetectSelected()) {
+          if (editView->path().isEmpty()) {
+            m_encComboBox->setCurrentEncoding(*oldEncoding);
+            return;
+          }
+
+          if (editView->document()->isModified()) {
+            int ret = QMessageBox::question(this, "",
+                                            tr("Current document is changed. This change will be "
+                                               "lost after reloading. Do you want to continue?"));
+            if (ret == QMessageBox::No) {
+              m_encComboBox->setCurrentEncoding(*oldEncoding);
+              return;
+            }
+          }
+          editView->document()->reload();
+          m_encComboBox->setCurrentEncoding(editView->document()->encoding());
+        } else {
+          auto newEncoding = m_encComboBox->currentEncoding();
+          if (newEncoding != *oldEncoding) {
+            // If the document is empty or has no file path, just change current document's
+            // encoding
             bool isEmptyDoc = editView->document() && editView->document()->isEmpty();
             bool hasNoPath = editView->document() && editView->document()->path().isEmpty();
             if (isEmptyDoc || hasNoPath) {
-              editView->document()->setEncoding(*newEncoding);
+              editView->document()->setEncoding(newEncoding);
             } else {
               // Show the dialog to choose Reload or Convert
-              ReloadEncodingDialog dialog(editView, *oldEncoding, *newEncoding);
+              ReloadEncodingDialog dialog(editView, *oldEncoding, newEncoding);
               int ret = dialog.exec();
               if (ret == QDialog::Rejected) {
                 m_encComboBox->setCurrentEncoding(*oldEncoding);
               }
             }
           }
-        } else {
-          qWarning("invalid encoding name: %s",
-                   qPrintable(m_encComboBox->currentData().toString()));
         }
       }
     } else {

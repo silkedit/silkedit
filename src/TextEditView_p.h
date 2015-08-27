@@ -35,4 +35,5 @@ class TextEditViewPrivate : public QObject {
   void setTheme(Theme* theme);
   void clearDirtyMarker();
   void toggleHighlightingCurrentLine(bool hasSelection);
+  void emitEncodingChanged(const Encoding& enc);
 };
