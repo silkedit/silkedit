@@ -95,25 +95,17 @@ TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), d(new TextEditViewPrivate(this)) {
   d->m_lineNumberArea = new LineNumberArea(this);
 
-  connect(this,
-          &TextEditView::blockCountChanged,
-          d.get(),
+  connect(this, &TextEditView::blockCountChanged, d.get(),
           &TextEditViewPrivate::updateLineNumberAreaWidth);
   connect(this, &TextEditView::updateRequest, d.get(), &TextEditViewPrivate::updateLineNumberArea);
-  connect(this,
-          &TextEditView::cursorPositionChanged,
-          d.get(),
+  connect(this, &TextEditView::cursorPositionChanged, d.get(),
           &TextEditViewPrivate::highlightCurrentLine);
-  connect(this,
-          &TextEditView::destroying,
-          &OpenRecentItemManager::singleton(),
+  connect(this, &TextEditView::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
   connect(&Session::singleton(), &Session::themeChanged, d.get(), &TextEditViewPrivate::setTheme);
   connect(&Session::singleton(), &Session::fontChanged, this, &QPlainTextEdit::setFont);
   connect(this, &TextEditView::saved, d.get(), &TextEditViewPrivate::clearDirtyMarker);
-  connect(this,
-          &TextEditView::copyAvailable,
-          d.get(),
+  connect(this, &TextEditView::copyAvailable, d.get(),
           &TextEditViewPrivate::toggleHighlightingCurrentLine);
 
   d->updateLineNumberAreaWidth(0);
@@ -134,8 +126,7 @@ TextEditView::TextEditView(QWidget* parent)
   d->m_completer->setWrapAround(true);
 
   connect(d->m_completer.get(),
-          static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::activated),
-          d.get(),
+          static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::activated), d.get(),
           static_cast<void (TextEditViewPrivate::*)(const QString&)>(
               &TextEditViewPrivate::insertCompletion));
 }
@@ -150,7 +141,7 @@ QString TextEditView::path() {
 }
 
 Document* TextEditView::document() {
-  return d->m_document.get();
+  return d->m_document ? d->m_document.get() : nullptr;
 }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
@@ -174,8 +165,8 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   // Compare previous and current encodings
   if (d->m_document && document) {
-    Encoding prevEnc = d->m_document->encoding();
-    Encoding newEnc = document->encoding();
+    const Encoding& prevEnc = d->m_document->encoding();
+    const Encoding& newEnc = document->encoding();
     if (prevEnc != newEnc) {
       emit encodingChanged(newEnc);
     }
@@ -184,9 +175,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   d->m_document = document;
   d->updateLineNumberAreaWidth(blockCount());
   connect(d->m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
-  connect(d->m_document.get(),
-          &QTextDocument::contentsChanged,
-          d.get(),
+  connect(d->m_document.get(), &QTextDocument::contentsChanged, d.get(),
           &TextEditViewPrivate::outdentCurrentLineIfNecessary);
 }
 
@@ -197,11 +186,11 @@ Language* TextEditView::language() {
   return nullptr;
 }
 
-Encoding TextEditView::encoding() {
+boost::optional<Encoding> TextEditView::encoding() {
   if (d->m_document) {
     return d->m_document->encoding();
   }
-  return Encoding::defaultEncoding();
+  return boost::none;
 }
 
 void TextEditView::setLanguage(const QString& scopeName) {
@@ -363,8 +352,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(
-          0, top, d->m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
+      painter.drawText(0, top, d->m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight,
+                       number);
     }
 
     block = block.next();
@@ -569,8 +558,8 @@ void TextEditView::insertNewLineWithIndent() {
       if (indentNextLine) {
         d->indent(currentVisibleCursor);
       } else if (outdentNextLine) {
-        TextEditViewLogic::outdent(
-            d->m_document.get(), currentVisibleCursor, Session::singleton().tabWidth());
+        TextEditViewLogic::outdent(d->m_document.get(), currentVisibleCursor,
+                                   Session::singleton().tabWidth());
       }
     }
   }
@@ -581,16 +570,16 @@ void TextEditView::request(TextEditView* view,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
-    PluginManager::singleton().sendResponse(
-        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
+                                            msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->d->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(
-        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
   } else if (method == "scopeTree") {
     QString scopeTree = view->d->m_document->scopeTree();
-    PluginManager::singleton().sendResponse(
-        scopeTree.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);

@@ -35,6 +35,7 @@ class Document : public QTextDocument {
   bool setLanguage(const QString& scopeName);
 
   Encoding encoding() { return m_encoding; }
+  void setEncoding(const Encoding& encoding);
 
   QTextCursor find(const QString& subString,
                    int from = 0,
@@ -58,6 +59,7 @@ class Document : public QTextDocument {
                    FindFlags options = 0) const;
   QString scopeName(int pos) const;
   QString scopeTree() const;
+  void reload(const Encoding& encoding);
 
 signals:
   void pathUpdated(const QString& path);

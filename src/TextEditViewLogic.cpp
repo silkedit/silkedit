@@ -1,7 +1,5 @@
 #include <memory>
 #include <QVector>
-//#include <QtWidgets>
-//#include <QStringBuilder>
 
 #include "TextEditViewLogic.h"
 #include "Regexp.h"

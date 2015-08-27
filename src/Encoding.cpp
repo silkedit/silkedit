@@ -28,19 +28,16 @@ const QString DEFAULT_ENCODING_NAME = "UTF-8";
 const Encoding DEFAULT_ENCODING = Encoding("UTF-8", "UTF-8");
 }
 
-// todo: create a map to get an encoding by a name
-
 const QList<Encoding> Encoding::s_availableEncodings =
     QList<Encoding>{DEFAULT_ENCODING,
                     Encoding("Shift_JIS", "Japanese (Shift_JIS)"),
                     Encoding("EUC-JP", "Japanese (EUC-JP)"),
                     Encoding("ISO-2022-JP", "Japanese (ISO-2022-JP)")};
 
-Encoding Encoding::guessEncoding(const QByteArray& bytes) {
+const Encoding Encoding::guessEncoding(const QByteArray& bytes) {
   QString encName = guessEncodingInternal(bytes);
   auto encodingIter =
-      std::find_if(s_availableEncodings.begin(),
-                   s_availableEncodings.end(),
+      std::find_if(s_availableEncodings.begin(), s_availableEncodings.end(),
                    [encName](const QList<Encoding>::value_type& p) { return p.name() == encName; });
   if (encodingIter != s_availableEncodings.end()) {
     return *encodingIter;
@@ -48,8 +45,18 @@ Encoding Encoding::guessEncoding(const QByteArray& bytes) {
   return DEFAULT_ENCODING;
 }
 
-Encoding Encoding::defaultEncoding() {
+const Encoding Encoding::defaultEncoding() {
   return DEFAULT_ENCODING;
+}
+
+const boost::optional<Encoding> Encoding::encodingForName(const QString& name) {
+  auto encodingIter =
+      std::find_if(s_availableEncodings.begin(), s_availableEncodings.end(),
+                   [name](const QList<Encoding>::value_type& p) { return p.name() == name; });
+  if (encodingIter != s_availableEncodings.end()) {
+    return *encodingIter;
+  }
+  return boost::none;
 }
 
 Encoding::Encoding(const QString& name, const QString& displayName)

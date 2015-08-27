@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <boost/optional.hpp>
 #include <QList>
 #include <QString>
 
@@ -9,8 +10,9 @@
 class Encoding {
  public:
   static QList<Encoding> availableEncodings() { return s_availableEncodings; }
-  static Encoding guessEncoding(const QByteArray& bytes);
-  static Encoding defaultEncoding();
+  static const Encoding guessEncoding(const QByteArray& bytes);
+  static const Encoding defaultEncoding();
+  static const boost::optional<Encoding> encodingForName(const QString& name);
 
   Encoding(const QString& name, const QString& displayName);
   ~Encoding() = default;

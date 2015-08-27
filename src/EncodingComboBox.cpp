@@ -6,3 +6,12 @@ EncodingComboBox::EncodingComboBox(QWidget* parent) : QComboBox(parent) {
     addItem(encoding.displayName(), encoding.name());
   }
 }
+
+void EncodingComboBox::setCurrentEncoding(const Encoding& encoding) {
+  int idx = findData(encoding.name());
+  if (idx >= 0) {
+    setCurrentIndex(idx);
+  } else {
+    qDebug("Encoding: %s is not registered.", qPrintable(encoding.name()));
+  }
+}

@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <boost/optional.hpp>
 #include <QObject>
 #include <QPlainTextEdit>
 #include <QHash>
@@ -12,7 +13,6 @@
 #include "macros.h"
 #include "ICloneable.h"
 #include "Document.h"
-#include "Encoding.h"
 #include "UniqueObject.h"
 
 class QPaintEvent;
@@ -23,6 +23,7 @@ class QElapsedTimer;
 struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
+class Encoding;
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,
@@ -37,8 +38,8 @@ class TextEditView : public QPlainTextEdit,
   Document* document();
   void setDocument(std::shared_ptr<Document> document);
   Language* language();
-  Encoding encoding();
   void setLanguage(const QString& scopeName);
+  boost::optional<Encoding> encoding();
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();

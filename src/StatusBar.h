@@ -24,6 +24,7 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
   void setLanguage(const QString& scope);
   void setActiveTextEditViewLanguage();
+  void setActiveTextEditViewEncoding();
   void setCurrentEncoding(const Encoding& encoding);
 
 signals:

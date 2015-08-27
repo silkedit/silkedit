@@ -4,6 +4,8 @@
 
 #include "macros.h"
 
+class Encoding;
+
 class EncodingComboBox : public QComboBox {
   DISABLE_COPY(EncodingComboBox)
 
@@ -11,6 +13,8 @@ class EncodingComboBox : public QComboBox {
   EncodingComboBox(QWidget* parent = nullptr);
   ~EncodingComboBox() = default;
   DEFAULT_MOVE(EncodingComboBox)
+
+  void setCurrentEncoding(const Encoding& encoding);
 
  private:
 };

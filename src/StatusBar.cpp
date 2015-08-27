@@ -4,6 +4,7 @@
 #include "Window.h"
 #include "TabView.h"
 #include "TextEditView.h"
+#include "ReloadEncodingDialog.h"
 
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),
@@ -14,16 +15,20 @@ StatusBar::StatusBar(Window* window)
   addPermanentWidget(m_encComboBox);
 
   connect(m_langComboBox,
-          SIGNAL(currentIndexChanged(int)),
-          this,
-          SLOT(setActiveTextEditViewLanguage()));
+          static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), this,
+          &StatusBar::setActiveTextEditViewLanguage);
+  connect(m_encComboBox,
+          static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), this,
+          &StatusBar::setActiveTextEditViewEncoding);
 }
 
 void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
   qDebug("onActiveTextEditViewChanged");
   if (newEditView) {
     setCurrentLanguage(newEditView->language());
-    setCurrentEncoding(newEditView->encoding());
+    if (auto enc = newEditView->encoding()) {
+      setCurrentEncoding(*enc);
+    }
   } else {
     qDebug("newEditView is null");
   }
@@ -36,6 +41,44 @@ void StatusBar::setActiveTextEditViewLanguage() {
     if (TextEditView* editView = tabView->activeEditView()) {
       qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));
       editView->setLanguage(m_langComboBox->currentData().toString());
+    } else {
+      qDebug("active TextEditView is null");
+    }
+  } else {
+    qDebug("active tab widget is null");
+  }
+}
+
+void StatusBar::setActiveTextEditViewEncoding() {
+  qDebug("currentIndexChanged in encComboBox. %d", m_encComboBox->currentIndex());
+  TabView* tabView = static_cast<Window*>(window())->activeTabView();
+  if (tabView) {
+    if (TextEditView* editView = tabView->activeEditView()) {
+      if (boost::optional<Encoding> oldEncoding = editView->encoding()) {
+        QString fromEncodingName = oldEncoding->name();
+        qDebug("active editView's encoding: %s", qPrintable(fromEncodingName));
+        if (const boost::optional<Encoding> newEncoding =
+                Encoding::encodingForName(m_encComboBox->currentData().toString())) {
+          if (*newEncoding != *oldEncoding) {
+            // If the document is empty or has no file path, just change current document's encoding
+            bool isEmptyDoc = editView->document() && editView->document()->isEmpty();
+            bool hasNoPath = editView->document() && editView->document()->path().isEmpty();
+            if (isEmptyDoc || hasNoPath) {
+              editView->document()->setEncoding(*newEncoding);
+            } else {
+              // Show the dialog to choose Reload or Convert
+              ReloadEncodingDialog dialog(editView, *oldEncoding, *newEncoding);
+              int ret = dialog.exec();
+              if (ret == QDialog::Rejected) {
+                m_encComboBox->setCurrentEncoding(*oldEncoding);
+              }
+            }
+          }
+        } else {
+          qWarning("invalid encoding name: %s",
+                   qPrintable(m_encComboBox->currentData().toString()));
+        }
+      }
     } else {
       qDebug("active TextEditView is null");
     }
@@ -79,10 +122,5 @@ void StatusBar::setCurrentLanguage(Language* lang) {
 }
 
 void StatusBar::setCurrentEncoding(const Encoding& encoding) {
-  int idx = m_encComboBox->findData(encoding.name());
-  if (idx >= 0) {
-    m_encComboBox->setCurrentIndex(idx);
-  } else {
-    qDebug("Encoding: %s is not registered.", qPrintable(encoding.name()));
-  }
+  m_encComboBox->setCurrentEncoding(encoding);
 }

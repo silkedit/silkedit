@@ -1,7 +1,33 @@
+#include <boost/optional.hpp>
+#include <tuple>
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
 
 #include "Document.h"
+
+namespace {
+boost::optional<std::tuple<QString, Encoding>> load(const QString& path) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadWrite))
+    return boost::none;
+
+  QByteArray contentBytes = file.readAll();
+  QTextCodec* codec;
+  auto guessedEncoding = Encoding::guessEncoding(contentBytes);
+  codec = guessedEncoding.codec();
+  return std::make_tuple(codec->toUnicode(contentBytes), guessedEncoding);
+}
+
+boost::optional<QString> load(const QString& path, const Encoding& encoding) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadWrite))
+    return boost::none;
+
+  QByteArray contentBytes = file.readAll();
+  QTextCodec* codec = encoding.codec();
+  return codec->toUnicode(contentBytes);
+}
+}
 
 Document::Document(const QString& path, const QString& text, const Encoding& encoding)
     : QTextDocument(text), m_path(path), m_encoding(encoding), m_syntaxHighlighter(nullptr) {
@@ -43,16 +69,11 @@ Document::~Document() {
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
-  QFile file(path);
-  if (!file.open(QIODevice::ReadWrite))
+  if (const boost::optional<std::tuple<QString, Encoding>> textAndEnc = load(path)) {
+    return new Document(path, std::get<0>(*textAndEnc), std::get<1>(*textAndEnc));
+  } else {
     return nullptr;
-
-  QByteArray contentBytes = file.readAll();
-  QString text;
-  auto encoding = Encoding::guessEncoding(contentBytes);
-  QTextCodec* codec = encoding.codec();
-  text = codec->toUnicode(contentBytes);
-  return new Document(path, text, encoding);
+  }
 }
 
 Document* Document::createBlank() {
@@ -81,6 +102,12 @@ bool Document::setLanguage(const QString& scopeName) {
     }
   }
   return true;
+}
+
+void Document::setEncoding(const Encoding& encoding) {
+  if (m_encoding != encoding) {
+    m_encoding = encoding;
+  }
 }
 
 QTextCursor Document::find(const QString& subString,
@@ -139,12 +166,8 @@ QTextCursor Document::find(const Regexp* expr,
                            int end,
                            Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
-  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d",
-         qPrintable(expr->pattern()),
-         (options.testFlag(FindFlag::FindBackward)),
-         from,
-         begin,
-         end);
+  qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
+         (options.testFlag(FindFlag::FindBackward)), from, begin, end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
   QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);
@@ -188,4 +211,12 @@ QString Document::scopeName(int pos) const {
 
 QString Document::scopeTree() const {
   return m_syntaxHighlighter ? m_syntaxHighlighter->scopeTree() : "";
+}
+
+void Document::reload(const Encoding& encoding) {
+  if (const boost::optional<QString> text = load(m_path, encoding)) {
+    setPlainText(*text);
+    setEncoding(encoding);
+    setModified(false);
+  }
 }
