@@ -25,14 +25,53 @@ QString guessEncodingInternal(const QByteArray& bytes) {
 
 const QString DEFAULT_ENCODING_NAME = "UTF-8";
 
-const Encoding DEFAULT_ENCODING = Encoding("UTF-8", "UTF-8");
+const Encoding DEFAULT_ENCODING = Encoding("UTF-8", QObject::tr("UTF-8"));
 }
 
 const QList<Encoding> Encoding::s_availableEncodings =
-    QList<Encoding>{DEFAULT_ENCODING,
-                    Encoding("Shift_JIS", "Japanese (Shift_JIS)"),
-                    Encoding("EUC-JP", "Japanese (EUC-JP)"),
-                    Encoding("ISO-2022-JP", "Japanese (ISO-2022-JP)")};
+    QList<Encoding>{// Unicode
+                    DEFAULT_ENCODING,
+                    Encoding("UTF-16BE", QObject::tr("UTF-16 Big Endian")),
+                    Encoding("UTF-16LE", QObject::tr("UTF-16 Little Endian")),
+                    Encoding("UTF-32BE", QObject::tr("UTF-32 Big Endian")),
+                    Encoding("UTF-32LE", QObject::tr("UTF-32 Little Endian")),
+                    // Japanese
+                    Encoding("Shift_JIS", QObject::tr("Japanese (Shift_JIS)")),
+                    Encoding("EUC-JP", QObject::tr("Japanese (EUC-JP)")),
+                    Encoding("ISO-2022-JP", QObject::tr("Japanese (ISO-2022-JP)")),
+                    // Korean
+                    Encoding("EUC-KR", QObject::tr("Korean (EUC-KR)")),
+                    // Chinese
+                    Encoding("Big5", QObject::tr("Chinese Traditional (Big5)")),
+                    Encoding("Big5-HKSCS", QObject::tr("Chinese Traditional (Big5-HKSCS)")),
+                    Encoding("GB18030", QObject::tr("Chinese Simplified (GB18030)")),
+                    // Others
+                    Encoding("ISO 8859-1", QObject::tr("Western (ISO 8859-1)")),
+                    Encoding("ISO 8859-15", QObject::tr("Western (ISO 8859-15)")),
+                    Encoding("Windows-1252", QObject::tr("Western (Windows-1252)")),
+                    Encoding("Macintosh", QObject::tr("Western (Macintosh)")),
+                    Encoding("ISO 8859-2", QObject::tr("Central European (ISO 8859-2)")),
+                    Encoding("Windows-1250", QObject::tr("Central European (Windows-1250)")),
+                    Encoding("ISO 8859-3", QObject::tr("South European (ISO 8859-3)")),
+                    Encoding("ISO 8859-4", QObject::tr("Baltic (ISO 8859-4)")),
+                    Encoding("ISO 8859-13", QObject::tr("Baltic (ISO 8859-13)")),
+                    Encoding("Windows-1257", QObject::tr("Baltic (Windows-1257)")),
+                    Encoding("ISO 8859-5", QObject::tr("Cyrillic (ISO 8859-5)")),
+                    Encoding("KOI8-R", QObject::tr("Cyrillic (KOI8-R)")),
+                    Encoding("KOI8-U", QObject::tr("Cyrillic (KOI8-U)")),
+                    Encoding("Windows-1251", QObject::tr("Cyrillic (Windows-1251)")),
+                    Encoding("ISO 8859-6", QObject::tr("Arabic (ISO 8859-6)")),
+                    Encoding("Windows-1256", QObject::tr("Arabic (Windows-1256)")),
+                    Encoding("ISO 8859-7", QObject::tr("Greek (ISO 8859-7)")),
+                    Encoding("Windows-1253", QObject::tr("Greek (Windows-1253)")),
+                    Encoding("ISO 8859-8", QObject::tr("Hebrew (ISO 8859-8)")),
+                    Encoding("Windows-1255", QObject::tr("Hebrew (Windows-1255)")),
+                    Encoding("ISO 8859-9", QObject::tr("Turkish (ISO 8859-9)")),
+                    Encoding("Windows-1254", QObject::tr("Turkish (Windows-1254)")),
+                    Encoding("ISO 8859-10", QObject::tr("Nordic (ISO 8859-10)")),
+                    Encoding("ISO 8859-14", QObject::tr("Celtic (ISO 8859-14)")),
+                    Encoding("ISO 8859-16", QObject::tr("Romanian (ISO 8859-16)")),
+                    Encoding("Windows-1258", QObject::tr("Vietnamese (Windows-1258)"))};
 
 const Encoding Encoding::guessEncoding(const QByteArray& bytes) {
   QString encName = guessEncodingInternal(bytes);
