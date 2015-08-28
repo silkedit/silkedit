@@ -8,6 +8,7 @@
 class TextEditView;
 class LanguageComboBox;
 class EncodingComboBox;
+class LineSeparatorComboBox;
 class Window;
 struct Language;
 class Encoding;
@@ -41,6 +42,7 @@ signals:
 
  private:
   LanguageComboBox* m_langComboBox;
+  LineSeparatorComboBox* m_separatorComboBox;
   EncodingComboBox* m_encComboBox;
 
   void setCurrentLanguage(Language* lang);

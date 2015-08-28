@@ -3,6 +3,7 @@
 #include "StatusBar.h"
 #include "LanguageComboBox.h"
 #include "EncodingComboBox.h"
+#include "LineSeparatorComboBox.h"
 #include "Window.h"
 #include "TabView.h"
 #include "TextEditView.h"
@@ -11,8 +12,10 @@
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),
       m_langComboBox(new LanguageComboBox),
+      m_separatorComboBox(new LineSeparatorComboBox),
       m_encComboBox(new EncodingComboBox) {
   // StatusBar becomes the owner of these widgets
+  addPermanentWidget(m_separatorComboBox);
   addPermanentWidget(m_encComboBox);
   addPermanentWidget(m_langComboBox);
 
