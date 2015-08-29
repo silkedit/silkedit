@@ -13,7 +13,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 file(GLOB_RECURSE SILK_UIS src/*.ui)
-file(GLOB_RECURSE COMMON_RESOURCES resources/*.qrc)
+file(GLOB COMMON_RESOURCES resources/*.qrc)
 
 if (APPLE)
   file(GLOB_RECURSE PLATFORM_RESOURCES resources/mac/*.qrc)
