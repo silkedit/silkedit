@@ -32,10 +32,13 @@ class Document : public QTextDocument {
   void setPath(const QString& path);
 
   Language* language() { return m_lang.get(); }
-  bool setLanguage(const QString& scopeName);
+  void setLanguage(const QString& scopeName);
 
   Encoding encoding() { return m_encoding; }
   void setEncoding(const Encoding& encoding);
+
+  QString lineSeparator() { return m_lineSeparator; }
+  void setLineSeparator(const QString& lineSeparator);
 
   QTextCursor find(const QString& subString,
                    int from = 0,
@@ -73,15 +76,21 @@ class Document : public QTextDocument {
 
 signals:
   void pathUpdated(const QString& path);
+  void languageChanged(const QString& scopeName);
   void encodingChanged(const Encoding& encoding);
+  void lineSeparatorChanged(const QString& lineSeparator);
 
  private:
   QString m_path;
   std::unique_ptr<Language> m_lang;
   Encoding m_encoding;
+  QString m_lineSeparator;
   SyntaxHighlighter* m_syntaxHighlighter;
 
-  Document(const QString& path, const QString& text, const Encoding& encoding);
+  Document(const QString& path,
+           const QString& text,
+           const Encoding& encoding,
+           const QString& separator);
   Document();
 
   void setupLayout();

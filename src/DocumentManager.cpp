@@ -40,10 +40,7 @@ bool DocumentManager::save(Document* doc) {
     out.setCodec(doc->encoding().codec());
     for (int i = 0; i < doc->blockCount(); i++) {
       if (i < doc->blockCount() - 1) {
-        // << endl writes '\n' to the stream and flushes the stream.
-        // Note: On Windows, all '\n' characters are written as '\r\n' if QTextStream's device or
-        // string is opened using the QIODevice::Text flag.
-        out << doc->findBlockByNumber(i).text() << endl;
+        out << doc->findBlockByNumber(i).text() << doc->lineSeparator() << flush;
       } else {
         // don't output a new line character in the last block.
         out << doc->findBlockByNumber(i).text();

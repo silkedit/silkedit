@@ -14,5 +14,8 @@ class LineSeparatorComboBox : public QComboBox {
   ~LineSeparatorComboBox() = default;
   DEFAULT_MOVE(LineSeparatorComboBox)
 
+  void setCurrentLineSeparator(const QString& separator);
+  QString currentLineSeparator();
+
  private:
 };

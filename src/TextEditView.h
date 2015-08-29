@@ -40,6 +40,8 @@ class TextEditView : public QPlainTextEdit,
   Language* language();
   void setLanguage(const QString& scopeName);
   boost::optional<Encoding> encoding();
+  boost::optional<QString> lineSeparator();
+  void setLineSeparator(const QString& lineSeparator);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -85,6 +87,7 @@ signals:
   void languageChanged(const QString& scope);
   // emitted when underlying document's encoding is changed.
   void encodingChanged(const Encoding& encoding);
+  void lineSeparatorChanged(const QString& separator);
 
  protected:
   friend struct UniqueObject<TextEditView>;

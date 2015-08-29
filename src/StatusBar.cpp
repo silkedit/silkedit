@@ -19,12 +19,13 @@ StatusBar::StatusBar(Window* window)
   addPermanentWidget(m_encComboBox);
   addPermanentWidget(m_langComboBox);
 
-  connect(m_langComboBox,
-          static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), this,
-          &StatusBar::setActiveTextEditViewLanguage);
-  connect(m_encComboBox,
-          static_cast<void (QComboBox::*)(int)>(&LanguageComboBox::currentIndexChanged), this,
-          &StatusBar::setActiveTextEditViewEncoding);
+  connect(m_langComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          this, &StatusBar::setActiveTextEditViewLanguage);
+  connect(m_encComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          this, &StatusBar::setActiveTextEditViewEncoding);
+  connect(m_separatorComboBox,
+          static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &StatusBar::setActiveTextEditViewLineSeparator);
 }
 
 void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
@@ -32,7 +33,10 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEdit
   if (newEditView) {
     setCurrentLanguage(newEditView->language());
     if (auto enc = newEditView->encoding()) {
-      setCurrentEncoding(*enc);
+      setEncoding(*enc);
+    }
+    if (auto separator = newEditView->lineSeparator()) {
+      setLineSeparator(*separator);
     }
   } else {
     qDebug("newEditView is null");
@@ -107,6 +111,23 @@ void StatusBar::setActiveTextEditViewEncoding() {
   }
 }
 
+void StatusBar::setActiveTextEditViewLineSeparator() {
+  qDebug("currentIndexChanged in separatorComboBox. %d", m_separatorComboBox->currentIndex());
+  TabView* tabView = static_cast<Window*>(window())->activeTabView();
+  if (tabView) {
+    if (TextEditView* editView = tabView->activeEditView()) {
+      if (auto separator = editView->lineSeparator()) {
+        qDebug("active editView's line separator: %s", qPrintable(*separator));
+        editView->setLineSeparator(m_separatorComboBox->currentLineSeparator());
+      }
+    } else {
+      qDebug("active TextEditView is null");
+    }
+  } else {
+    qDebug("active tab widget is null");
+  }
+}
+
 void StatusBar::setLanguage(const QString& scope) {
   qDebug("setLanguage inStatusBar. scope: %s", qPrintable(scope));
   Language* lang = LanguageProvider::languageFromScope(scope);
@@ -141,6 +162,10 @@ void StatusBar::setCurrentLanguage(Language* lang) {
   }
 }
 
-void StatusBar::setCurrentEncoding(const Encoding& encoding) {
+void StatusBar::setEncoding(const Encoding& encoding) {
   m_encComboBox->setCurrentEncoding(encoding);
+}
+
+void StatusBar::setLineSeparator(const QString& separator) {
+  m_separatorComboBox->setCurrentLineSeparator(separator);
 }

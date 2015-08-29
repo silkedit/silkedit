@@ -5,21 +5,25 @@
 #include "macros.h"
 
 class LineSeparator {
-
  public:
+  ~LineSeparator() = default;
   DEFAULT_COPY_AND_MOVE(LineSeparator)
 
   static const LineSeparator Windows;
   static const LineSeparator Unix;
   static const LineSeparator ClassicMac;
 
-  QString separator() const { return m_separator; }
+  static const LineSeparator guess(const QString& text);
+
+  QString separatorStr() const { return m_separator; }
   QString displayName() const { return m_displayName; }
-  LineSeparator defaultLineSeparator();
+  static const LineSeparator defaultLineSeparator();
+
+  bool operator==(const LineSeparator& other) const;
+  bool operator!=(const LineSeparator& other) const;
 
  private:
-  LineSeparator(const QString& separator, const QString& displayName);
-  ~LineSeparator() = default;
+  LineSeparator(const QString& separatorStr, const QString& displayName);
 
   const QString m_separator;
   const QString m_displayName;

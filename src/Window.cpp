@@ -53,60 +53,50 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   setStatusBar(m_statusBar);
 
-  connect(m_tabViewGroup,
-          &TabViewGroup::activeTabViewChanged,
-          this,
+  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
-  connect(m_tabViewGroup,
-          &TabViewGroup::activeTabViewChanged,
-          this,
+  connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           &Window::emitActiveEditViewChanged);
-  connect(
-      this, &Window::activeEditViewChanged, m_statusBar, &StatusBar::onActiveTextEditViewChanged);
+  connect(this, &Window::activeEditViewChanged, m_statusBar,
+          &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
 
 void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
-//  qDebug("updateConnection for new active TabView");
+  //  qDebug("updateConnection for new active TabView");
 
   if (oldTabView && m_statusBar) {
-    disconnect(oldTabView,
-               &TabView::activeTextEditViewChanged,
-               m_statusBar,
+    disconnect(oldTabView, &TabView::activeTextEditViewChanged, m_statusBar,
                &StatusBar::onActiveTextEditViewChanged);
     disconnect(
-        oldTabView,
-        &TabView::activeTextEditViewChanged,
-        this,
+        oldTabView, &TabView::activeTextEditViewChanged, this,
         static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
   }
 
   if (newTabView && m_statusBar) {
-    connect(newTabView,
-            &TabView::activeTextEditViewChanged,
-            m_statusBar,
+    connect(newTabView, &TabView::activeTextEditViewChanged, m_statusBar,
             &StatusBar::onActiveTextEditViewChanged);
-    connect(newTabView,
-            &TabView::activeTextEditViewChanged,
-            this,
+    connect(newTabView, &TabView::activeTextEditViewChanged, this,
             static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
   }
 }
 
 void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
-//  qDebug("updateConnection for new active TextEditView");
+  //  qDebug("updateConnection for new active TextEditView");
 
   if (oldEditView && m_statusBar) {
     disconnect(oldEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
-    disconnect(
-        oldEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setCurrentEncoding);
+    disconnect(oldEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setEncoding);
+    disconnect(oldEditView, &TextEditView::lineSeparatorChanged, m_statusBar,
+               &StatusBar::setLineSeparator);
   }
 
   if (newEditView && m_statusBar) {
     connect(newEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
-    connect(
-        newEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setCurrentEncoding);
+    connect(newEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setEncoding);
+    connect(newEditView, &TextEditView::lineSeparatorChanged, m_statusBar,
+            &StatusBar::setLineSeparator);
   }
 }
 
