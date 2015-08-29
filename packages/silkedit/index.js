@@ -38,8 +38,8 @@ module.exports = {
 				silk.open(path)
 			})
 		}
-		,"open_files": () => {
-			const paths = silk.showFilesDialog('Open Files')
+		,"open_file": () => {
+			const paths = silk.showFilesDialog('Open File')
 			paths.forEach(function(path) {
 				silk.open(path)
 			})

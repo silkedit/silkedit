@@ -9,7 +9,7 @@
 
 - keymap:
     ctrl+n: new_file
-    ctrl+o: open
+    ctrl+o: open_file
     ctrl+s: save
     shift+ctrl+s: save_as
     alt+ctrl+s: save_all

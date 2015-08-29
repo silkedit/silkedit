@@ -8,7 +8,7 @@ menu:
     context: os != win
     before: 'Open Recent'
   - label: 'Open File'
-    command: open_files
+    command: open_file
     context: os == win
   - label: 'Open Folder'
     command: open_directory
