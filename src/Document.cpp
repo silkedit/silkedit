@@ -5,6 +5,7 @@
 
 #include "Document.h"
 #include "LineSeparator.h"
+#include "Session.h"
 
 namespace {
 boost::optional<std::tuple<QString, Encoding, QString>> load(const QString& path) {
@@ -42,6 +43,7 @@ Document::Document(const QString& path,
       m_encoding(encoding),
       m_lineSeparator(separator),
       m_syntaxHighlighter(nullptr) {
+  setDefaultFont(Session::singleton().font());
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');
@@ -52,6 +54,8 @@ Document::Document(const QString& path,
   } else {
     qDebug("extension not found. path: %s", qPrintable(path));
   }
+
+  connect(&Session::singleton(), &Session::fontChanged, this, &QTextDocument::setDefaultFont);
 }
 
 Document::Document()

@@ -103,7 +103,6 @@ TextEditView::TextEditView(QWidget* parent)
   connect(this, &TextEditView::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
   connect(&Session::singleton(), &Session::themeChanged, d.get(), &TextEditViewPrivate::setTheme);
-  connect(&Session::singleton(), &Session::fontChanged, this, &QPlainTextEdit::setFont);
   connect(this, &TextEditView::saved, d.get(), &TextEditViewPrivate::clearDirtyMarker);
   connect(this, &TextEditView::copyAvailable, d.get(),
           &TextEditViewPrivate::toggleHighlightingCurrentLine);
@@ -113,7 +112,6 @@ TextEditView::TextEditView(QWidget* parent)
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
   d->setTheme(Session::singleton().theme());
-  setFont(Session::singleton().font());
 
   // setup for completion
   d->m_model.reset(new QStringListModel(this));
