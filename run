@@ -56,9 +56,8 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # msgpack-c and libguess submodules
-    git submodule init
-    git submodule update
+    # msgpack-c and uchardet submodule
+    git submodule update --init
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
@@ -73,6 +72,8 @@ resolve() {
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
+      brew list uchardet || brew install uchardet
+      brew list boost || brew install boost
 
       # node
       if [ ! -d plugin_runner/bin ]; then
@@ -95,19 +96,6 @@ resolve() {
       cd packages/silkedit
       ../../plugin_runner/bin/npm install
       cd ../..
-
-      # libguess
-      if [ ! -f /usr/local/lib/libguess.dylib ]; then
-        brew list automake || brew install automake
-        cd libguess
-        autoheader
-        aclocal
-        autoconf
-        ./configure
-        make
-        make install
-        cd ..
-      fi
 
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
@@ -155,19 +143,11 @@ resolve() {
         node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
         cd ../..
 
-        # libguess
-        if [ ! -f /usr/local/lib/libguess.dll.a ]; then
-            cd libguess
-            autoheader
-            aclocal
-            autoconf
-            if [ $OS == 'Win32' ]; then
-                ./configure --build=i686-w64-mingw32
-            else
-                ./configure --build=x86_64-w64-mingw32
-            fi
-            make
-            make install
+        # uchardet
+        if [ ! -f /usr/local/lib/uchardet.a ]; then
+            cd uchardet
+            cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .
+            mingw32-make && mingw32-make install
             cd ..
         fi
     fi

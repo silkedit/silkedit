@@ -141,11 +141,13 @@ QString TextEditView::path() {
 }
 
 Document* TextEditView::document() {
-  return d->m_document.get();
+  return d->m_document ? d->m_document.get() : nullptr;
 }
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
+
+  // Compare previous and current languages
   Language* prevLang = nullptr;
   Language* newLang = nullptr;
   if (d->m_document) {
@@ -160,9 +162,53 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
       setLanguage(newLang->scopeName);
     }
   }
+
+  // Compare previous and current encodings
+  boost::optional<Encoding> prevEnc = boost::none;
+  boost::optional<Encoding> newEnc = boost::none;
+  if (d->m_document && document) {
+    prevEnc = d->m_document->encoding();
+  }
+  if (document) {
+    newEnc = document->encoding();
+  }
+  if (prevEnc != newEnc && newEnc) {
+    emit encodingChanged(*newEnc);
+  }
+
+  // Compare previous and current line separators
+  boost::optional<QString> prevSeparator = boost::none;
+  boost::optional<QString> newSeparator = boost::none;
+  if (d->m_document) {
+    prevSeparator = d->m_document->lineSeparator();
+  }
+  if (document) {
+    newSeparator = document->lineSeparator();
+  }
+  if (prevSeparator != newSeparator && newSeparator) {
+    emit lineSeparatorChanged(*newSeparator);
+  }
+
+  // disconnect from old document
+  disconnect(d->m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
+  disconnect(d->m_document.get(), &Document::languageChanged, d.get(),
+             &TextEditViewPrivate::emitLanguageChanged);
+  disconnect(d->m_document.get(), &Document::encodingChanged, d.get(),
+             &TextEditViewPrivate::emitEncodingChanged);
+  disconnect(d->m_document.get(), &Document::lineSeparatorChanged, d.get(),
+             &TextEditViewPrivate::emitLineSeparatorChanged);
+  disconnect(d->m_document.get(), &QTextDocument::contentsChanged, d.get(),
+             &TextEditViewPrivate::outdentCurrentLineIfNecessary);
+
   d->m_document = document;
   d->updateLineNumberAreaWidth(blockCount());
   connect(d->m_document.get(), &Document::pathUpdated, this, &TextEditView::pathUpdated);
+  connect(d->m_document.get(), &Document::languageChanged, d.get(),
+          &TextEditViewPrivate::emitLanguageChanged);
+  connect(d->m_document.get(), &Document::encodingChanged, d.get(),
+          &TextEditViewPrivate::emitEncodingChanged);
+  connect(d->m_document.get(), &Document::lineSeparatorChanged, d.get(),
+          &TextEditViewPrivate::emitLineSeparatorChanged);
   connect(d->m_document.get(), &QTextDocument::contentsChanged, d.get(),
           &TextEditViewPrivate::outdentCurrentLineIfNecessary);
 }
@@ -174,12 +220,29 @@ Language* TextEditView::language() {
   return nullptr;
 }
 
+boost::optional<Encoding> TextEditView::encoding() {
+  if (d->m_document) {
+    return d->m_document->encoding();
+  }
+  return boost::none;
+}
+
+boost::optional<QString> TextEditView::lineSeparator() {
+  if (d->m_document) {
+    return d->m_document->lineSeparator();
+  }
+  return boost::none;
+}
+
+void TextEditView::setLineSeparator(const QString& lineSeparator) {
+  if (d->m_document) {
+    d->m_document->setLineSeparator(lineSeparator);
+  }
+}
+
 void TextEditView::setLanguage(const QString& scopeName) {
   if (d->m_document) {
-    bool isSuccess = d->m_document->setLanguage(scopeName);
-    if (isSuccess) {
-      emit languageChanged(scopeName);
-    }
+    d->m_document->setLanguage(scopeName);
   }
 }
 

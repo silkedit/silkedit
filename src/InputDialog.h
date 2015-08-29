@@ -3,6 +3,7 @@
 #include <QDialog>
 
 #include "UniqueObject.h"
+#include "macros.h"
 
 namespace Ui {
 class InputDialog;
@@ -15,6 +16,7 @@ class InputDialog : public QDialog, public UniqueObject<InputDialog> {
  public:
   explicit InputDialog(QWidget* parent = 0);
   ~InputDialog();
+  DEFAULT_COPY_AND_MOVE(InputDialog)
 
   void setLabelText(const QString& label);
   QString textValue();

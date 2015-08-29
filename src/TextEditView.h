@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <memory>
+#include <boost/optional.hpp>
 #include <QObject>
 #include <QPlainTextEdit>
 #include <QHash>
@@ -19,9 +20,10 @@ class QResizeEvent;
 class QSize;
 class QWidget;
 class QElapsedTimer;
-
+struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
+class Encoding;
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,
@@ -37,6 +39,9 @@ class TextEditView : public QPlainTextEdit,
   void setDocument(std::shared_ptr<Document> document);
   Language* language();
   void setLanguage(const QString& scopeName);
+  boost::optional<Encoding> encoding();
+  boost::optional<QString> lineSeparator();
+  void setLineSeparator(const QString& lineSeparator);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -80,6 +85,9 @@ signals:
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
+  // emitted when underlying document's encoding is changed.
+  void encodingChanged(const Encoding& encoding);
+  void lineSeparatorChanged(const QString& separator);
 
  protected:
   friend struct UniqueObject<TextEditView>;

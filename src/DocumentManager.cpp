@@ -37,9 +37,10 @@ bool DocumentManager::save(Document* doc) {
   QFile outFile(doc->path());
   if (outFile.open(QIODevice::WriteOnly)) {
     QTextStream out(&outFile);
+    out.setCodec(doc->encoding().codec());
     for (int i = 0; i < doc->blockCount(); i++) {
       if (i < doc->blockCount() - 1) {
-        out << doc->findBlockByNumber(i).text() << endl;
+        out << doc->findBlockByNumber(i).text() << doc->lineSeparator() << flush;
       } else {
         // don't output a new line character in the last block.
         out << doc->findBlockByNumber(i).text();

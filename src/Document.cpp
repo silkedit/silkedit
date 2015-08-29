@@ -1,26 +1,47 @@
-#include <libguess/libguess.h>
+#include <boost/optional.hpp>
+#include <tuple>
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
 
 #include "Document.h"
+#include "LineSeparator.h"
 
 namespace {
-const char* guessEncoding(std::string text) {
-  /*
-   - libguess_determine_encoding(const char *inbuf, int length, const char *region);
+boost::optional<std::tuple<QString, Encoding, QString>> load(const QString& path) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadWrite))
+    return boost::none;
 
-    This detects a character set.  Returns an appropriate charset name
-    that can be passed to iconv_open().  Region is the name of the language
-    or region that the data is related to, e.g. 'Baltic' for the Baltic states,
-    or 'Japanese' for Japan.
-  */
-  const int length = 256 * 1024;  // 256KB
-  return libguess_determine_encoding(text.c_str(), length, "Japanese");
+  QByteArray contentBytes = file.readAll();
+  QTextCodec* codec;
+  auto guessedEncoding = Encoding::guessEncoding(contentBytes);
+  codec = guessedEncoding.codec();
+  const QString& text = codec->toUnicode(contentBytes);
+  const LineSeparator& separator = LineSeparator::guess(text);
+  return std::make_tuple(text, guessedEncoding, separator.separatorStr());
+}
+
+boost::optional<std::tuple<QString, QString>> load(const QString& path, const Encoding& encoding) {
+  QFile file(path);
+  if (!file.open(QIODevice::ReadWrite))
+    return boost::none;
+
+  QByteArray contentBytes = file.readAll();
+  QTextCodec* codec = encoding.codec();
+  const QString& text = codec->toUnicode(contentBytes);
+  return std::make_tuple(text, LineSeparator::guess(text).separatorStr());
 }
 }
 
-Document::Document(const QString& path, const QString& text)
-    : QTextDocument(text), m_path(path), m_syntaxHighlighter(nullptr) {
+Document::Document(const QString& path,
+                   const QString& text,
+                   const Encoding& encoding,
+                   const QString& separator)
+    : QTextDocument(text),
+      m_path(path),
+      m_encoding(encoding),
+      m_lineSeparator(separator),
+      m_syntaxHighlighter(nullptr) {
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');
@@ -33,7 +54,10 @@ Document::Document(const QString& path, const QString& text)
   }
 }
 
-Document::Document() {
+Document::Document()
+    : m_encoding(Encoding::defaultEncoding()),
+      m_lineSeparator(LineSeparator::defaultLineSeparator().separatorStr()),
+      m_syntaxHighlighter(nullptr) {
   setupLayout();
   setupSyntaxHighlighter(LanguageProvider::defaultLanguage());
 }
@@ -59,19 +83,13 @@ Document::~Document() {
 
 Document* Document::create(const QString& path) {
   qDebug("Docment::create(%s)", qPrintable(path));
-  QFile file(path);
-  if (!file.open(QIODevice::ReadWrite))
-    return nullptr;
-
-  std::string str = file.readAll().constData();
-  QString content;
-  if (auto encoding = guessEncoding(str)) {
-    QTextCodec* codec = QTextCodec::codecForName(encoding);
-    content = codec->toUnicode(str.c_str());
+  if (const boost::optional<std::tuple<QString, Encoding, QString>> textAndEncAndSeparator =
+          load(path)) {
+    return new Document(path, std::get<0>(*textAndEncAndSeparator),
+                        std::get<1>(*textAndEncAndSeparator), std::get<2>(*textAndEncAndSeparator));
   } else {
-    content = QString::fromUtf8(str.c_str());
+    return nullptr;
   }
-  return new Document(path, content);
 }
 
 Document* Document::createBlank() {
@@ -83,12 +101,12 @@ void Document::setPath(const QString& path) {
   emit pathUpdated(path);
 }
 
-bool Document::setLanguage(const QString& scopeName) {
+void Document::setLanguage(const QString& scopeName) {
   qDebug("setLanguage: %s", qPrintable(scopeName));
   Language* newLang = LanguageProvider::languageFromScope(scopeName);
   if (m_lang.get() == newLang || (m_lang && newLang && *m_lang == *newLang)) {
     qDebug("lang is already %s", qPrintable(scopeName));
-    return false;
+    return;
   }
 
   m_lang.reset(newLang);
@@ -99,7 +117,21 @@ bool Document::setLanguage(const QString& scopeName) {
       m_syntaxHighlighter->rehighlight();
     }
   }
-  return true;
+  emit languageChanged(scopeName);
+}
+
+void Document::setEncoding(const Encoding& encoding) {
+  if (m_encoding != encoding) {
+    m_encoding = encoding;
+    emit encodingChanged(encoding);
+  }
+}
+
+void Document::setLineSeparator(const QString& lineSeparator) {
+  if (m_lineSeparator != lineSeparator) {
+    m_lineSeparator = lineSeparator;
+    emit lineSeparatorChanged(lineSeparator);
+  }
 }
 
 QTextCursor Document::find(const QString& subString,
@@ -203,4 +235,26 @@ QString Document::scopeName(int pos) const {
 
 QString Document::scopeTree() const {
   return m_syntaxHighlighter ? m_syntaxHighlighter->scopeTree() : "";
+}
+
+void Document::reload() {
+  if (const boost::optional<std::tuple<QString, Encoding, QString>> textAndEncAndSeparator =
+          load(m_path)) {
+    setPlainText(std::get<0>(*textAndEncAndSeparator));
+    setEncoding(std::get<1>(*textAndEncAndSeparator));
+    setLineSeparator(std::get<2>(*textAndEncAndSeparator));
+    setModified(false);
+    emit modificationChanged(false);
+  }
+}
+
+void Document::reload(const Encoding& encoding) {
+  if (const boost::optional<std::tuple<QString, QString>> textAndSeparator =
+          load(m_path, encoding)) {
+    setPlainText(std::get<0>(*textAndSeparator));
+    setEncoding(encoding);
+    setLineSeparator(std::get<1>(*textAndSeparator));
+    setModified(false);
+    emit modificationChanged(false);
+  }
 }

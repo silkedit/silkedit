@@ -84,3 +84,8 @@ set(TEXTEDITVIEWLOGIC_TEST_SRCS ../src/SyntaxHighlighter.cpp ../src/LanguagePars
 add_executable(TextEditViewLogicTest ${TEXTEDITVIEWLOGIC_TEST_SRCS} )
 target_link_libraries(TextEditViewLogicTest Qt5::Widgets Qt5::Xml Qt5::Test ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY})
 add_test( NAME TextEditViewLogicTest COMMAND TextEditViewLogicTest)
+
+set(LINE_SEPARATOR_TEST_SRCS ../src/LineSeparator.cpp src/LineSeparatorTest.cpp)
+add_executable(LineSeparatorTest ${LINE_SEPARATOR_TEST_SRCS} )
+target_link_libraries(LineSeparatorTest Qt5::Widgets Qt5::Xml Qt5::Test ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY})
+add_test( NAME LineSeparatorTest COMMAND LineSeparatorTest)

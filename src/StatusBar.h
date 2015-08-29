@@ -7,8 +7,11 @@
 
 class TextEditView;
 class LanguageComboBox;
+class EncodingComboBox;
+class LineSeparatorComboBox;
 class Window;
 struct Language;
+class Encoding;
 
 class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   Q_OBJECT
@@ -19,15 +22,16 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
-  void setCurrentLanguage(Language* lang);
+  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+  void setLanguage(const QString& scope);
+  void setEncoding(const Encoding& encoding);
+  void setLineSeparator(const QString& separator);
+  void setActiveTextEditViewLanguage();
+  void setActiveTextEditViewEncoding();
+  void setActiveTextEditViewLineSeparator();
 
 signals:
   void languageChanged(const QString& scopeName);
-
- public slots:
-  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
-  void setActiveTextEditViewLanguage();
-  void setLanguage(const QString& scope);
 
  protected:
   friend struct UniqueObject<StatusBar>;
@@ -40,4 +44,8 @@ signals:
 
  private:
   LanguageComboBox* m_langComboBox;
+  LineSeparatorComboBox* m_separatorComboBox;
+  EncodingComboBox* m_encComboBox;
+
+  void setCurrentLanguage(Language* lang);
 };

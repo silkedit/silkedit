@@ -183,6 +183,18 @@ void TextEditViewPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
   }
 }
 
+void TextEditViewPrivate::emitLanguageChanged(const QString& scope) {
+  emit q->languageChanged(scope);
+}
+
+void TextEditViewPrivate::emitEncodingChanged(const Encoding& enc) {
+  emit q->encodingChanged(enc);
+}
+
+void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator) {
+  emit q->lineSeparatorChanged(lineSeparator);
+}
+
 void TextEditViewPrivate::highlightCurrentLine() {
   if (q->textCursor().hasSelection()) {
     return;
