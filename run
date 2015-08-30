@@ -102,6 +102,7 @@ resolve() {
     else
         # yaml-cpp (If you install it from pacman, it doesn't work somehow)
         if [ ! -f lib/libyaml-cpp.a ]; then
+            echo 'Building yaml-cpp ...'
             wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
             tar zxf yaml-cpp-0.5.1.tar.gz
             cd yaml-cpp-0.5.1
@@ -145,7 +146,7 @@ resolve() {
 
         # uchardet
         if [ ! -f /usr/local/lib/libuchardet.a ]; then
-            echo 'Building uchardet...'
+            echo 'Building uchardet ...'
             cd uchardet
             cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .
             mingw32-make && mingw32-make install
