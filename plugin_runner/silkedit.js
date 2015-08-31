@@ -71,7 +71,7 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
     }
   }
 
-  // todo: Put these functions into a single object above
+  // todo: Put these functions into a single object like above
   TextEditView.prototype.saveAs = () => {
     client.notify('TextEditView.saveAs', this.id)
   }
@@ -131,7 +131,10 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
   TextEditView.prototype.insertNewLine = () => {
     client.notify('TextEditView.insertNewLine', this.id)
   }
-
+  
+  TextEditView.prototype.indent = () => {
+    client.notify('TextEditView.indent', this.id)
+  }
 
   // class Window
   const Window = (id) => {

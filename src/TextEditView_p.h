@@ -38,4 +38,5 @@ class TextEditViewPrivate : public QObject {
   void emitLanguageChanged(const QString& scope);
   void emitEncodingChanged(const Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);
+  void setTabStopWidthFromSession();
 };
