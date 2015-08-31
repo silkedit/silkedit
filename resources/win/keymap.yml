@@ -27,3 +27,4 @@
     ctrl+shift+p: show_scope
     ctrl+space: complete
     enter: newline
+    tab: indent

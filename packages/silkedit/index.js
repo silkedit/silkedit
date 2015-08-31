@@ -219,10 +219,17 @@ module.exports = {
 					})
 				})
 			})
-		},"newline": () => {
+		}
+		,"newline": () => {
 			const editView = silk.activeView()
 			if (editView != null) {
 				editView.insertNewLine()
+			}
+		}
+		,"indent": () => {
+			const editView = silk.activeView()
+			if (editView != null) {
+				editView.indent()
 			}
 		}
 	}

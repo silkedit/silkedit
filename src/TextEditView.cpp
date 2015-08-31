@@ -683,6 +683,9 @@ void TextEditView::notify(TextEditView* view, const QString& method, const msgpa
     }
   } else if (method == "insertNewLine") {
     view->insertNewLineWithIndent();
+  } else if (method == "indent") {
+    auto cursor = view->textCursor();
+    view->d->indent(cursor);
   } else {
     qWarning("%s is not support", qPrintable(method));
   }

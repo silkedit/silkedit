@@ -31,3 +31,4 @@
     ctrl+shift+p: show_scope
     ctrl+space: complete
     return: newline
+    tab: indent
