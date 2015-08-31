@@ -29,6 +29,9 @@ int main(int argv, char** args) {
 
   ConfigManager::load();
 
+  // Populate session values after loading configs
+  Session::singleton().init();
+
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
 
@@ -42,8 +45,6 @@ int main(int argv, char** args) {
   if (auto v = w->activeTabView()->activeEditView()) {
     v->setFocus();
   }
-
-  Session::singleton().init();
 
   API::init();
   PluginManager::singleton().init();

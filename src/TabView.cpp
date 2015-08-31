@@ -12,6 +12,7 @@
 #include "SilkApp.h"
 #include "DocumentManager.h"
 #include "PluginManager.h"
+#include "Session.h"
 
 namespace {
 QString getFileNameFrom(const QString& path) {

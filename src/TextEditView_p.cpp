@@ -195,6 +195,11 @@ void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator)
   emit q->lineSeparatorChanged(lineSeparator);
 }
 
+void TextEditViewPrivate::setTabStopWidthFromSession() {
+  QFontMetrics metrics(Session::singleton().font());
+  q->setTabStopWidth(Session::singleton().tabWidth() * metrics.width(" "));
+}
+
 void TextEditViewPrivate::highlightCurrentLine() {
   if (q->textCursor().hasSelection()) {
     return;

@@ -106,6 +106,10 @@ TextEditView::TextEditView(QWidget* parent)
   connect(this, &TextEditView::saved, d.get(), &TextEditViewPrivate::clearDirtyMarker);
   connect(this, &TextEditView::copyAvailable, d.get(),
           &TextEditViewPrivate::toggleHighlightingCurrentLine);
+  connect(&Session::singleton(), &Session::fontChanged, d.get(),
+          &TextEditViewPrivate::setTabStopWidthFromSession);
+  connect(&Session::singleton(), &Session::tabWidthChanged, d.get(),
+          &TextEditViewPrivate::setTabStopWidthFromSession);
 
   d->updateLineNumberAreaWidth(0);
 
@@ -144,6 +148,8 @@ Document* TextEditView::document() {
 
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
+
+  d->setTabStopWidthFromSession();
 
   // Compare previous and current languages
   Language* prevLang = nullptr;
