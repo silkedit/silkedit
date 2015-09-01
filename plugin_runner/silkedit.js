@@ -34,8 +34,21 @@ module.exports = (client, contexts, eventFilters, configs, commands) => {
     client.notify('TabView.addNew', this.id)
   }
 
+  // This property holds the number of tabs in the tab bar.
   TabView.prototype.count = () => {
     return client.invoke('TabView.count', this.id)
+  }
+  
+  // This property holds the index of the tab bar's visible tab.
+  // The current index is -1 if there is no current tab.
+  TabView.prototype.currentIndex = () => {
+    return client.invoke('TabView.currentIndex', this.id)
+  }
+  
+  TabView.prototype.setCurrentIndex = (index) => {
+    if (typeof(index) == 'number') {
+      client.notify('TabView.setCurrentIndex', this.id, index)
+    }
   }
 
 
