@@ -331,7 +331,11 @@ void TextEditView::moveCursor(int mv, int n) {
       const QString text = block.text();
       if (text.isEmpty())
         return;  // new line or EOF only
-      const int endpos = blockPos + text.length() - 1;
+      int endpos = blockPos + text.length();
+      // If the cursor is block mode, don't allow it to move at EOL
+      if (!isThinCursor()) {
+        endpos -= 1;
+      }
       if (pos >= endpos)
         return;
       n = qMin(n, endpos - pos);
@@ -746,6 +750,10 @@ void TextEditView::doRedo(int n) {
   for (int i = 0; i < n; i++) {
     redo();
   }
+}
+
+bool TextEditView::isThinCursor() {
+  return !overwriteMode();
 }
 
 void TextEditView::setThinCursor(bool on) {

@@ -49,6 +49,7 @@ class TextEditView : public QPlainTextEdit,
   void doDelete(int n);
   void doUndo(int n);
   void doRedo(int n);
+  bool isThinCursor();
   void setThinCursor(bool on);
   TextEditView* clone() override;
   void save();

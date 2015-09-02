@@ -32,3 +32,5 @@
     ctrl+space: complete
     return: newline
     tab: indent
+    cmd+shift+]: select_next_tab
+    cmd+shift+[: select_previous_tab

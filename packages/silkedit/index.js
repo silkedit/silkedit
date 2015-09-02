@@ -232,5 +232,27 @@ module.exports = {
 				editView.indent()
 			}
 		}
+		,"select_next_tab": () => {
+			const tabView = silk.activeTabView()
+			if (tabView != null) {
+				const currentIndex = tabView.currentIndex()
+				if (currentIndex + 1 >= tabView.count()) {
+					tabView.setCurrentIndex(0)
+				} else {
+					tabView.setCurrentIndex(currentIndex + 1)
+				}
+			}
+		}
+		,"select_previous_tab": () => {
+			const tabView = silk.activeTabView()
+			if (tabView != null) {
+				const currentIndex = tabView.currentIndex()
+				if (currentIndex - 1 < 0) {
+					tabView.setCurrentIndex(tabView.count() - 1)
+				} else {
+					tabView.setCurrentIndex(currentIndex - 1)
+				}
+			}
+		}
 	}
 }

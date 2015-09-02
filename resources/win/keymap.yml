@@ -28,3 +28,5 @@
     ctrl+space: complete
     enter: newline
     tab: indent
+    ctrl+tab: select_next_tab
+    ctrl+shift+tab: select_previous_tab

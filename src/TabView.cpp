@@ -271,6 +271,11 @@ bool TabView::closeTab(QWidget* w) {
   }
 
   removeTabAndWidget(indexOf(w));
+
+  // Focus to the current widget after closing a tab
+  if (QWidget* w = currentWidget()) {
+    w->setFocus();
+  }
   return true;
 }
 
@@ -323,12 +328,15 @@ void TabView::request(TabView* view,
                       const msgpack::object&) {
   if (method == "count") {
     PluginManager::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
+  } else if (method == "currentIndex") {
+    PluginManager::singleton().sendResponse(view->currentIndex(), msgpack::type::nil(), msgId);
   } else {
     qDebug("method: %s not found", qPrintable(method));
   }
 }
 
-void TabView::notify(TabView* view, const QString& method, const msgpack::object&) {
+void TabView::notify(TabView* view, const QString& method, const msgpack::object& obj) {
+  int numArgs = obj.via.array.size;
   if (method == "closeAllTabs") {
     view->closeAllTabs();
   } else if (method == "closeActiveTab") {
@@ -337,5 +345,14 @@ void TabView::notify(TabView* view, const QString& method, const msgpack::object
     view->closeOtherTabs();
   } else if (method == "addNew") {
     view->addNew();
+  } else if (method == "setCurrentIndex") {
+    if (numArgs == 2) {
+      std::tuple<int, int> params;
+      obj.convert(&params);
+      int index = std::get<1>(params);
+      view->setCurrentIndex(index);
+    } else {
+      qWarning("invalid numArgs: %d", numArgs);
+    }
   }
 }
