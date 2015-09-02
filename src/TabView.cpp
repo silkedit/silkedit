@@ -271,6 +271,11 @@ bool TabView::closeTab(QWidget* w) {
   }
 
   removeTabAndWidget(indexOf(w));
+
+  // Focus to the current widget after closing a tab
+  if (QWidget* w = currentWidget()) {
+    w->setFocus();
+  }
   return true;
 }
 
