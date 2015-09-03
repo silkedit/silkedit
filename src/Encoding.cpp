@@ -28,6 +28,7 @@ const QString DEFAULT_ENCODING_NAME = "UTF-8";
 const Encoding DEFAULT_ENCODING = Encoding("UTF-8", QObject::tr("UTF-8"));
 }
 
+// todo: can't use tr for static members
 const QList<Encoding> Encoding::s_availableEncodings =
     QList<Encoding>{DEFAULT_ENCODING,
                     // Japanese
@@ -61,10 +62,10 @@ const QList<Encoding> Encoding::s_availableEncodings =
                     Encoding("IBM 874", QObject::tr("Thai (IBM 874)")),
                     Encoding("ISO 8859-9", QObject::tr("Turkish (ISO 8859-9)")),
                     Encoding("Windows-1254", QObject::tr("Turkish (Windows-1254)")),
-                    Encoding("UTF-16BE", QObject::tr("UTF-16 Big Endian")),
-                    Encoding("UTF-16LE", QObject::tr("UTF-16 Little Endian")),
-                    Encoding("UTF-32BE", QObject::tr("UTF-32 Big Endian")),
-                    Encoding("UTF-32LE", QObject::tr("UTF-32 Little Endian")),
+                    Encoding("UTF-16BE", QObject::tr("UTF-16BE")),
+                    Encoding("UTF-16LE", QObject::tr("UTF-16LE")),
+                    Encoding("UTF-32BE", QObject::tr("UTF-32BE")),
+                    Encoding("UTF-32LE", QObject::tr("UTF-32LE")),
                     Encoding("Windows-1258", QObject::tr("Vietnamese (Windows-1258)")),
                     Encoding("ISO 8859-1", QObject::tr("Western (ISO 8859-1)")),
                     Encoding("ISO 8859-15", QObject::tr("Western (ISO 8859-15)")),

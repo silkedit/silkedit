@@ -28,7 +28,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_findReplaceView(new FindReplaceView(this)) {
   qDebug("creating Window");
 
-  setWindowTitle(QObject::tr("SilkEdit"));
+  setWindowTitle("SilkEdit");
   setAttribute(Qt::WA_DeleteOnClose);
 
   // Copy global menu bar
