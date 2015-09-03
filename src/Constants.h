@@ -26,6 +26,7 @@ class Constants {
   static QString pluginRunnerPath();
   static QStringList pluginRunnerArgs();
   static QString pluginServerSocketPath();
+  static QString translationDirPath();
 
  private:
   Constants() = delete;

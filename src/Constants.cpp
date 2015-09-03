@@ -81,6 +81,16 @@ QString Constants::pluginServerSocketPath() {
 #endif
 }
 
+QString Constants::translationDirPath() {
+#ifdef Q_OS_MAC
+  return QCoreApplication::applicationDirPath() + "/../Resources/translations";
+#elif Q_OS_WIN
+  return "";
+#else
+  return "";
+#endif
+}
+
 QStringList Constants::dataDirectoryPaths() {
   QStringList paths(silkHomePath);
   paths.prepend(QApplication::applicationDirPath());
