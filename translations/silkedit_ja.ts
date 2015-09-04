@@ -4,7 +4,7 @@
 <context>
     <name>ClearRecentItemListAction</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="100"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="99"/>
         <source>Clear List</source>
         <translation>履歴をクリア</translation>
     </message>
@@ -108,32 +108,32 @@
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="54"/>
+        <location filename="../src/MenuBar.cpp" line="55"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="54"/>
+        <location filename="../src/MenuBar.cpp" line="55"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="60"/>
+        <location filename="../src/MenuBar.cpp" line="61"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="60"/>
+        <location filename="../src/MenuBar.cpp" line="61"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="62"/>
+        <location filename="../src/MenuBar.cpp" line="63"/>
         <source>&amp;About</source>
         <translation>SilkEditについて(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="62"/>
+        <location filename="../src/MenuBar.cpp" line="63"/>
         <source>About</source>
         <translation>SilkEditについて</translation>
     </message>
@@ -146,7 +146,7 @@
         <translation>最近開いたファイル</translation>
     </message>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="44"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="45"/>
         <source>&amp;Reopen Last Closed File</source>
         <translation>最後に閉じたファイルを開く(&amp;R)</translation>
     </message>
@@ -187,167 +187,167 @@
         <translation>UTF-8</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="34"/>
+        <location filename="../src/Encoding.cpp" line="35"/>
         <source>Japanese (Shift_JIS)</source>
         <translation>日本語 (Shift_JIS)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="35"/>
+        <location filename="../src/Encoding.cpp" line="36"/>
         <source>Japanese (EUC-JP)</source>
         <translation>日本語 (EUC-JP)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="36"/>
+        <location filename="../src/Encoding.cpp" line="37"/>
         <source>Japanese (ISO-2022-JP)</source>
         <translation>日本語 (ISO-2022-JP)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="38"/>
+        <location filename="../src/Encoding.cpp" line="39"/>
         <source>Arabic (ISO 8859-6)</source>
         <translation>アラビア語 (ISO 8859-6)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="39"/>
+        <location filename="../src/Encoding.cpp" line="40"/>
         <source>Arabic (Windows-1256)</source>
         <translation>アラビア語 (Windows-1256)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="40"/>
+        <location filename="../src/Encoding.cpp" line="41"/>
         <source>Baltic (ISO 8859-4)</source>
         <translation>バルト語 (ISO 8859-4)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="41"/>
+        <location filename="../src/Encoding.cpp" line="42"/>
         <source>Baltic (ISO 8859-13)</source>
         <translation>バルト語 (ISO 8859-13)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="42"/>
+        <location filename="../src/Encoding.cpp" line="43"/>
         <source>Baltic (Windows-1257)</source>
         <translation>バルト語 (Windows-1257)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="43"/>
+        <location filename="../src/Encoding.cpp" line="44"/>
         <source>Celtic (ISO 8859-14)</source>
         <translation>ケルト語 (ISO 8859-14)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="44"/>
+        <location filename="../src/Encoding.cpp" line="45"/>
         <source>Central European (ISO 8859-2)</source>
         <translation>中欧 (ISO 8859-2)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="45"/>
+        <location filename="../src/Encoding.cpp" line="46"/>
         <source>Central European (Windows-1250)</source>
         <translation>中欧 (Windows-1250)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="46"/>
+        <location filename="../src/Encoding.cpp" line="47"/>
         <source>Chinese Simplified (GB18030)</source>
         <translation>簡体字中国語 (GB18030)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="47"/>
+        <location filename="../src/Encoding.cpp" line="48"/>
         <source>Chinese Traditional (Big5)</source>
         <translation>繁体字中国語 (Big5)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="48"/>
+        <location filename="../src/Encoding.cpp" line="49"/>
         <source>Chinese Traditional (Big5-HKSCS)</source>
         <translation>繁体字中国語 (Big5-HKSCS)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="49"/>
+        <location filename="../src/Encoding.cpp" line="50"/>
         <source>Cyrillic (ISO 8859-5)</source>
         <translation>キリル文字 (ISO 8859-5)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="50"/>
+        <location filename="../src/Encoding.cpp" line="51"/>
         <source>Cyrillic (Windows-1251)</source>
         <translation>キリル文字 (Windows-1251)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="51"/>
+        <location filename="../src/Encoding.cpp" line="52"/>
         <source>Cyrillic (KOI8-R)</source>
         <translation>キリル文字 (KOI8-R)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="52"/>
+        <location filename="../src/Encoding.cpp" line="53"/>
         <source>Cyrillic (KOI8-U)</source>
         <translation>キリル文字 (KOI8-U)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="53"/>
+        <location filename="../src/Encoding.cpp" line="54"/>
         <source>Greek (ISO 8859-7)</source>
         <translation>ギリシャ語 (ISO 8859-7)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="54"/>
+        <location filename="../src/Encoding.cpp" line="55"/>
         <source>Greek (Windows-1253)</source>
         <translation>ギリシャ語 (Windows-1253)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="55"/>
+        <location filename="../src/Encoding.cpp" line="56"/>
         <source>Hebrew (ISO 8859-8)</source>
         <translation>ヘブライ語 (ISO 8859-8)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="56"/>
+        <location filename="../src/Encoding.cpp" line="57"/>
         <source>Hebrew (Windows-1255)</source>
         <translation>ヘブライ語 (Windows-1255)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="57"/>
+        <location filename="../src/Encoding.cpp" line="58"/>
         <source>Korean (EUC-KR)</source>
         <translation>韓国語 (EUC-KR)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="58"/>
+        <location filename="../src/Encoding.cpp" line="59"/>
         <source>Nordic (ISO 8859-10)</source>
         <translation>北欧 (ISO 8859-10)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="59"/>
+        <location filename="../src/Encoding.cpp" line="60"/>
         <source>Romanian (ISO 8859-16)</source>
         <translation>ルーマニア語 (ISO 8859-16)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="60"/>
+        <location filename="../src/Encoding.cpp" line="61"/>
         <source>South European (ISO 8859-3)</source>
         <translation>南欧 (ISO 8859-3)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="61"/>
+        <location filename="../src/Encoding.cpp" line="62"/>
         <source>Thai (IBM 874)</source>
         <translation>タイ語 (IBM 874)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="62"/>
+        <location filename="../src/Encoding.cpp" line="63"/>
         <source>Turkish (ISO 8859-9)</source>
         <translation>トルコ語 (ISO 8859-9)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="63"/>
+        <location filename="../src/Encoding.cpp" line="64"/>
         <source>Turkish (Windows-1254)</source>
         <translation>トルコ語 (Windows-1254)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="64"/>
+        <location filename="../src/Encoding.cpp" line="65"/>
         <source>UTF-16BE</source>
         <translation>UTF-16BE</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="65"/>
+        <location filename="../src/Encoding.cpp" line="66"/>
         <source>UTF-16LE</source>
         <translation>UTF-16LE</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="66"/>
+        <location filename="../src/Encoding.cpp" line="67"/>
         <source>UTF-32BE</source>
         <translation>UTF-32BE</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="67"/>
+        <location filename="../src/Encoding.cpp" line="68"/>
         <source>UTF-32LE</source>
         <translation>UTF-32LE</translation>
     </message>
@@ -356,27 +356,27 @@
         <translation type="obsolete">UTF-16 ビッグエンディアン</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="68"/>
+        <location filename="../src/Encoding.cpp" line="69"/>
         <source>Vietnamese (Windows-1258)</source>
         <translation>ベトナム語 (Windows-1258)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="69"/>
+        <location filename="../src/Encoding.cpp" line="70"/>
         <source>Western (ISO 8859-1)</source>
         <translation>西欧 (ISO 8859-1)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="70"/>
+        <location filename="../src/Encoding.cpp" line="71"/>
         <source>Western (ISO 8859-15)</source>
         <translation>西欧 (ISO 8859-15)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="71"/>
+        <location filename="../src/Encoding.cpp" line="72"/>
         <source>Western (Windows-1252)</source>
         <translation>西欧 (Windows-1252)</translation>
     </message>
     <message>
-        <location filename="../src/Encoding.cpp" line="72"/>
+        <location filename="../src/Encoding.cpp" line="73"/>
         <source>Western (Macintosh)</source>
         <translation>西欧 (Macintosh)</translation>
     </message>
