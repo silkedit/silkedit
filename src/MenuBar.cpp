@@ -26,20 +26,24 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   const QString& fileMenuStr = ConfigManager::enableMnemonic() ? tr("&File") : tr("File");
   auto fileMenu = addMenu(fileMenuStr);
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
+  fileMenu->setObjectName("file");
 
   // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)
   const QString& textMenuStr = ConfigManager::enableMnemonic() ? tr("&Text") : tr("Text");
   auto editMenu = addMenu(textMenuStr);
+  editMenu->setObjectName("edit");
   // we need at least one sub menu to show the Text menu correctly because of this bug.
   // https://bugreports.qt.io/browse/QTBUG-44412?jql=text%20~%20%22qmenubar%20mac%22
   const QString& undoMenuStr = ConfigManager::enableMnemonic() ? tr("&Undo") : tr("Undo");
-  editMenu->addAction(new CommandAction(undoMenuStr, UndoCommand::name));
+  editMenu->addAction(new CommandAction("undo", undoMenuStr, UndoCommand::name));
 
   // View menu
   const QString& viewMenuStr = ConfigManager::enableMnemonic() ? tr("&View") : tr("View");
   auto viewMenu = addMenu(viewMenuStr);
+  viewMenu->setObjectName("view");
   const QString& themeMenuStr = ConfigManager::enableMnemonic() ? tr("&Theme") : tr("Theme");
   ThemeMenu* themeMenu = new ThemeMenu(themeMenuStr);
+  themeMenu->setObjectName("theme");
   viewMenu->addMenu(themeMenu);
   QActionGroup* themeActionGroup = new QActionGroup(themeMenu);
   for (const QString& name : ThemeProvider::sortedThemeNames()) {
@@ -54,12 +58,16 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   const QString& packageMenuStr =
       ConfigManager::enableMnemonic() ? tr("&Packages") : tr("Packages");
   auto packagesMenu = addMenu(packageMenuStr);
-  auto bundleDevelopmentMenu = packagesMenu->addMenu("Package Development");
-  bundleDevelopmentMenu->addAction(new CommandAction("New Package", "new_package"));
+  packagesMenu->setObjectName("packages");
+  auto bundleDevelopmentMenu = packagesMenu->addMenu(tr("Package Development"));
+  bundleDevelopmentMenu->addAction(
+      new CommandAction("new_package", tr("&New Package"), "new_package"));
+  bundleDevelopmentMenu->setObjectName("package_development");
 
   // Help menu
   const QString& helpMenuStr = ConfigManager::enableMnemonic() ? tr("&Help") : tr("Help");
   auto helpMenu = addMenu(helpMenuStr);
+  helpMenu->setObjectName("help");
   const QString& abountMenuStr = ConfigManager::enableMnemonic() ? tr("&About") : tr("About");
   QAction* aboutAction = new QAction(abountMenuStr, helpMenu);
   connect(aboutAction, &QAction::triggered, this, &MenuBar::showAboutDialog);

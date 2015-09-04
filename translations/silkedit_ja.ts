@@ -68,74 +68,84 @@
         <translation>ファイル</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="31"/>
+        <location filename="../src/MenuBar.cpp" line="32"/>
         <source>&amp;Text</source>
         <translation>編集(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="31"/>
+        <location filename="../src/MenuBar.cpp" line="32"/>
         <source>Text</source>
         <translation>編集</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="35"/>
+        <location filename="../src/MenuBar.cpp" line="37"/>
         <source>&amp;Undo</source>
         <translation>元に戻す(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="35"/>
+        <location filename="../src/MenuBar.cpp" line="37"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="39"/>
+        <location filename="../src/MenuBar.cpp" line="41"/>
         <source>&amp;View</source>
         <translation>ビュー(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="39"/>
+        <location filename="../src/MenuBar.cpp" line="41"/>
         <source>View</source>
         <translation>ビュー</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="41"/>
+        <location filename="../src/MenuBar.cpp" line="44"/>
         <source>&amp;Theme</source>
         <translation>テーマ(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="41"/>
+        <location filename="../src/MenuBar.cpp" line="44"/>
         <source>Theme</source>
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="55"/>
+        <location filename="../src/MenuBar.cpp" line="59"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="55"/>
+        <location filename="../src/MenuBar.cpp" line="59"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="61"/>
+        <location filename="../src/MenuBar.cpp" line="62"/>
+        <source>Package Development</source>
+        <translation>パッケージ開発</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="63"/>
+        <source>&amp;New Package</source>
+        <translation>新しいパッケージ(&amp;N)</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="67"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="61"/>
+        <location filename="../src/MenuBar.cpp" line="67"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="63"/>
+        <location filename="../src/MenuBar.cpp" line="70"/>
         <source>&amp;About</source>
-        <translation>SilkEditについて(&amp;A)</translation>
+        <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="63"/>
+        <location filename="../src/MenuBar.cpp" line="70"/>
         <source>About</source>
-        <translation>SilkEditについて</translation>
+        <translation>SilkEdit について</translation>
     </message>
 </context>
 <context>
@@ -381,13 +391,13 @@
         <translation>西欧 (Macintosh)</translation>
     </message>
     <message>
-        <location filename="../src/PlatformUtil.cpp" line="34"/>
-        <location filename="../src/PlatformUtil.cpp" line="42"/>
+        <location filename="../src/PlatformUtil.cpp" line="36"/>
+        <location filename="../src/PlatformUtil.cpp" line="44"/>
         <source>Show in Finder</source>
         <translation>Finderで開く</translation>
     </message>
     <message>
-        <location filename="../src/PlatformUtil.cpp" line="38"/>
+        <location filename="../src/PlatformUtil.cpp" line="40"/>
         <source>Show in Explorer</source>
         <translation>エクスプローラーで開く</translation>
     </message>

@@ -41,8 +41,10 @@ void OpenRecentItemManager::addOpenRecentItem(const QString& path) {
 }
 
 OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
-  m_reopenLastClosedFileAction = new CommandAction(
-      tr("&Reopen Last Closed File"), ReopenLastClosedFileCommand::name, m_openRecentMenu.get());
+  m_reopenLastClosedFileAction =
+      new CommandAction(ReopenLastClosedFileCommand::name, tr("&Reopen Last Closed File"),
+                        ReopenLastClosedFileCommand::name, m_openRecentMenu.get());
+  m_openRecentMenu->setObjectName("open_recent");
   m_openRecentMenu->addAction(m_reopenLastClosedFileAction);
   m_openRecentMenu->addSeparator();
 

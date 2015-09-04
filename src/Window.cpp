@@ -18,6 +18,7 @@
 #include "util/YamlUtils.h"
 #include "Context.h"
 #include "PluginManager.h"
+#include "PlatformUtil.h"
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -129,8 +130,7 @@ void Window::loadMenu(const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
-    YamlUtils::parseMenuNode(MenuBar::globalMenuBar(), menuNode);
+    PlatformUtil::parseMenuNode(menuNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }
