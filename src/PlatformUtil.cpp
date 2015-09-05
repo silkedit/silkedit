@@ -51,12 +51,12 @@ void PlatformUtil::enableMnemonicOnMac() {
 #endif
 }
 
-void PlatformUtil::parseMenuNode(const YAML::Node& menuNode) {
+void PlatformUtil::parseMenuNode(const std::string& pkgName, const YAML::Node& menuNode) {
 #ifdef Q_OS_MAC
   // There's only 1 global menu bar on Mac.
-  YamlUtils::parseMenuNode(MenuBar::globalMenuBar(), menuNode);
+  YamlUtils::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
 #elif Q_OS_WIN
   // Menu bar belongs to each window.
-  foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
+  foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(pkgName, win->menuBar(), menuNode); }
 #endif
 }

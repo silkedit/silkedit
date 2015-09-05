@@ -4,7 +4,7 @@
 <context>
     <name>ClearRecentItemListAction</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="99"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="101"/>
         <source>Clear List</source>
         <translation>履歴をクリア</translation>
     </message>
@@ -123,29 +123,39 @@
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="63"/>
+        <location filename="../src/MenuBar.cpp" line="64"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="67"/>
+        <location filename="../src/MenuBar.cpp" line="68"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="67"/>
+        <location filename="../src/MenuBar.cpp" line="68"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="70"/>
+        <location filename="../src/MenuBar.cpp" line="71"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="70"/>
+        <location filename="../src/MenuBar.cpp" line="71"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="85"/>
+        <source>version</source>
+        <translation>バージョン</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="85"/>
+        <source>build</source>
+        <translation>ビルド</translation>
     </message>
 </context>
 <context>

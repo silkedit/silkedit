@@ -81,8 +81,9 @@ void MenuBar::themeActionTriggered(QAction* action) {
 }
 
 void MenuBar::showAboutDialog() {
-  QMessageBox::about(this, SilkApp::applicationName(),
-                     "version " + SilkApp::applicationVersion() + " (build: " + BUILD + ")");
+  QMessageBox::about(this, SilkApp::applicationName(), tr("version") + " " +
+                                                           SilkApp::applicationVersion() + " (" +
+                                                           tr("build") + ": " + BUILD + ")");
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {

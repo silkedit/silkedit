@@ -120,8 +120,8 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   return w;
 }
 
-void Window::loadMenu(const std::string& ymlPath) {
-  qDebug("Start loading: %s", ymlPath.c_str());
+void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
     if (!rootNode.IsMap()) {
@@ -130,7 +130,7 @@ void Window::loadMenu(const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    PlatformUtil::parseMenuNode(menuNode);
+    PlatformUtil::parseMenuNode(pkgName, menuNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }

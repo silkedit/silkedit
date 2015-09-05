@@ -60,6 +60,7 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void sendCommandEvent(const QString& command, const CommandArgument& args);
   void callExternalCommand(const QString& cmd, const CommandArgument& args);
   bool askExternalContext(const QString& name, Operator op, const QString& value);
+  QString translate(const std::string& key, const QString& defaultValue);
 
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
@@ -84,6 +85,7 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
     m_socket->write(sbuf.data(), sbuf.size());
   }
 
+  // todo: return boost::optional<Result>
   template <typename Parameter, typename Result>
   Result sendRequest(const std::string& method,
                      const Parameter& params,

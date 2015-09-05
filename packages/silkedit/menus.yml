@@ -15,8 +15,8 @@ menu:
     command: open_file
     context: os == win
   - label: 'Open Folder'
-    id: open_directory
-    command: open_directory
+    id: open_folder
+    command: open_folder
     context: os == win
     before: open_recent
   - label: 'Save'

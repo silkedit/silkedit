@@ -17,7 +17,7 @@ class PlatformUtil {
    * @brief Parse a menu node and add menus
    * @param menuNode
    */
-  static void parseMenuNode(const YAML::Node& menuNode);
+  static void parseMenuNode(const std::string& pkgName, const YAML::Node& menuNode);
 
  private:
   PlatformUtil() = delete;

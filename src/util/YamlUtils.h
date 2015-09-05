@@ -12,7 +12,9 @@ class YamlUtils {
 
  public:
   static Context* parseContext(const YAML::Node& contextNode);
-  static void parseMenuNode(QWidget* parent, YAML::Node menuNode);
+  static void parseMenuNode(const std::string& pkgName,
+                            QWidget* parent,
+                            const YAML::Node& menuNode);
 
  private:
   YamlUtils() = delete;

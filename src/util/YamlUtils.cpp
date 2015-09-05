@@ -7,6 +7,7 @@
 #include "YamlUtils.h"
 #include "Context.h"
 #include "CommandAction.h"
+#include "PluginManager.h"
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -73,7 +74,9 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
+void YamlUtils::parseMenuNode(const std::string& pkgName,
+                              QWidget* parent,
+                              const YAML::Node& menuNode) {
   if (!menuNode.IsSequence()) {
     qWarning("menuNode must be a sequence.");
     return;
@@ -103,12 +106,17 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
     QString beforeId = beforeNode.IsDefined() && beforeNode.IsScalar()
                            ? QString::fromUtf8(beforeNode.as<std::string>().c_str())
                            : prevId;
-    QString label = labelNode.IsDefined() && labelNode.IsScalar()
-                        ? QString::fromUtf8(labelNode.as<std::string>().c_str())
-                        : "";
+    QString defaultLabel = labelNode.IsDefined() && labelNode.IsScalar()
+                               ? QString::fromUtf8(labelNode.as<std::string>().c_str())
+                               : "";
     QString id = idNode.IsDefined() && idNode.IsScalar()
                      ? QString::fromUtf8(idNode.as<std::string>().c_str())
                      : "";
+    QString label = defaultLabel;
+    if (idNode.IsDefined() && idNode.IsScalar()) {
+      label = PluginManager::singleton().translate(pkgName + ":menu." + idNode.as<std::string>(),
+                                                   defaultLabel);
+    }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["submenu"];
     if (submenuNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
@@ -135,7 +143,7 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
           }
         }
       }
-      parseMenuNode(currentMenu, submenuNode);
+      parseMenuNode(pkgName, currentMenu, submenuNode);
     } else {
       // Check context
       YAML::Node contextNode = node["context"];

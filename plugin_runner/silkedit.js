@@ -8,8 +8,6 @@ var path = require('path')
 
 var packageDirMap = {}
 
-const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
-
 module.exports = (client, locale, contexts, eventFilters, configs, commands) => {
 
   var InputDialog = require('./views/input_dialog')(client)
@@ -204,8 +202,8 @@ const packageDir = () => {
   return path.normalize(home + '/.silk/packages')
 }
 
-const loadMenu = (ymlPath) => {
-  client.notify('loadMenu', ymlPath)
+const loadMenu = (pkgName, ymlPath) => {
+  client.notify('loadMenu', pkgName, ymlPath)
 }
 
 const registerCommands = (commands) => {
@@ -221,83 +219,80 @@ const loadPackage = (dir) => {
         return;
       }
 
-      moduleFiles.forEach((filename) => {
-        const filePath = path.join(dir, filename);
-        console.log(filePath);
-        // check if filePath exists by opening it. fs.exists is deprecated.
-        fs.open(filePath, 'r', (err, fd) => {
-          fd && fs.close(fd, (err) => {
-            switch (filename) {
-              case "menus.yml":
-              case "menus.yaml":
-                loadMenu(filePath);
-                break;
-              case "package.json":
-                pjson = require(filePath);
-                if (pjson.name == null) {
-                  console.warn('missing package name')
-                  return
-                }
+      const packageJsonPath = path.join(dir, "package.json");
+      console.log(packageJsonPath);
+      // check if packageJsonPath exists by opening it. fs.exists is deprecated.
+      fs.open(packageJsonPath, 'r', (err, fd) => {
+        fd && fs.close(fd, (err) => {
+          pjson = require(packageJsonPath);
+          if (pjson.name == null) {
+            console.warn('missing package name')
+            return
+          }
 
-                // cache a package directory path
-                packageDirMap[pjson.name] = dir
+          // cache a package directory path
+          packageDirMap[pjson.name] = dir
 
-                // load configs
-                configPath = path.join(dir, "config.yml")
-                fs.open(configPath, 'r', (err, fd) => {
-                  if (fd) {
-                    try {
-                      doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
-                      // console.log(doc)
-                      if ('config' in doc) {
-                        Object.keys(doc.config).forEach(c => {
-                          var configName
-                          // don't prepend package name for default package
-                          if (pjson.name != 'silkedit') {
-                            configName = pjson.name + '.' + c
-                          } else {
-                            configName = c
-                          }
-                          configs[configName] = doc.config[c]
-                        })
-                      }
-                    } catch(e) {
-                      console.warn(e)
-                    } finally {
-                      fs.close(fd)
-                    }
-                  }
+          // load menus
+          const menuFilePath = path.join(dir, "menus.yml");
+          fs.open(menuFilePath, 'r', (err, fd) => {
+            fd && fs.close(fd, (err) => {
+              loadMenu(pjson.name, menuFilePath);
+            })
+          })
 
-                  // register commands
-                  if (pjson.main) {
-                    module = require(dir)
-                    if (module.commands) {
-                      if (pjson.name === 'silkedit') {
-                        // don't add a package prefix for silkedit package
-                        for (var prop in module.commands) {
-                          commands[prop] = module.commands[prop];
-                        }
-                        registerCommands(Object.keys(module.commands));
-                      } else {
-                        for (var prop in module.commands) {
-                          commands[pjson.name + '.' + prop] = module.commands[prop];
-                        }
-                        registerCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
-                      }
+          // load configs
+          configPath = path.join(dir, "config.yml")
+          fs.open(configPath, 'r', (err, fd) => {
+            if (fd) {
+              try {
+                doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
+                // console.log(doc)
+                if ('config' in doc) {
+                  Object.keys(doc.config).forEach(c => {
+                    var configName
+                    // don't prepend package name for default package
+                    if (pjson.name != 'silkedit') {
+                      configName = pjson.name + '.' + c
                     } else {
-                      console.log("no commands")
+                      configName = c
                     }
+                    configs[configName] = doc.config[c]
+                  })
+                }
+              } catch(e) {
+                console.warn(e)
+              } finally {
+                fs.close(fd)
+              }
+            }
 
-                    // call module's activate method
-                    if (module.activate) {
-                      silkutil.runInFiber(() => {
-                        module.activate()
-                      })
-                    }
+            // register commands
+            if (pjson.main) {
+              module = require(dir)
+              if (module.commands) {
+                if (pjson.name === 'silkedit') {
+                  // don't add a package prefix for silkedit package
+                  for (var prop in module.commands) {
+                    commands[prop] = module.commands[prop];
                   }
-                })
+                  registerCommands(Object.keys(module.commands));
+                } else {
+                  for (var prop in module.commands) {
+                    commands[pjson.name + '.' + prop] = module.commands[prop];
+                  }
+                  registerCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
+                }
+              } else {
+                console.log("no commands")
+              }
 
-                break;
+              // call module's activate method
+              if (module.activate) {
+                silkutil.runInFiber(() => {
+                  module.activate()
+                })
+              }
             }
           })
         })
@@ -358,8 +353,8 @@ const loadPackage = (dir) => {
       return client.invoke('showFilesDialog', caption)
     }
 
-    ,showDirectoryDialog: (caption) => {
-      caption = caption == null ? 'Open Directory' : caption
+    ,showFolderDialog: (caption) => {
+      caption = caption == null ? 'Open Folder' : caption
       return client.invoke('showDirectoryDialog', caption)
     }
 
@@ -473,42 +468,60 @@ const loadPackage = (dir) => {
       client.notify('setFont', family, size)
     }
     ,t: (key, defaultValue) => {
-      var i, packageName, currentObj;
-      // get package name <package>:key
-      const semicolonIndex = key.indexOf(':')
-      if (semicolonIndex > 0) {
-        packageName = key.substring(0, semicolonIndex)
-      } else {
-        packageName = 'silkedit'
-      }
+      var i, packageName, currentObj, fd, translationPaths;
+      try {
+        // get package name from '<package>:key'
+        const semicolonIndex = key.indexOf(':')
+        if (semicolonIndex > 0) {
+          packageName = key.substring(0, semicolonIndex)
+        } else {
+          // use 'silkedit' if the package name is missing
+          packageName = 'silkedit'
+        }
 
-      if (packageName in packageDirMap) {
-        const translationPath = path.normalize(packageDirMap[packageName] + '/locales/' + locale + "/translation.yml")
-        const fd = fs.openSync(translationPath, 'r')
-        if (fd) {
-          try {
-            // get value for the matching key
-            const doc = yaml.safeLoad(fs.readFileSync(translationPath, 'utf8'))
-            const subKeys = key.substring(semicolonIndex + 1).split('.')
-            currentObj = doc
-            for (i = 0; i < subKeys.length; i++) {
-              if (subKeys[i] in currentObj) {
-                currentObj = currentObj[subKeys[i]]
-              } else {
-                currentObj = null
-                break
+        if (packageName in packageDirMap) {
+          translationPaths = []
+          translationPaths.push(path.normalize(packageDirMap[packageName] + '/locales/' + locale + "/translation.yml"))
+          const indexOf_ = locale.indexOf('_')
+          if (indexOf_ > 0) {
+            translationPaths.push(path.normalize(packageDirMap[packageName] + '/locales/' + locale.substring(0, indexOf_) + "/translation.yml"))
+          }
+          for (i = 0; i < translationPaths.length; i++) {
+            try {
+              fd = fs.openSync(translationPaths[i], 'r')
+            } catch(e) {
+              // translation file doesn't exist
+              if (e.code === 'ENOENT') {
+                continue;
+              }
+              throw e
+            }
+            if (fd != null) {
+              try {
+                // get value for the matching key
+                const doc = yaml.safeLoad(fs.readFileSync(translationPaths[i], 'utf8'))
+                const subKeys = key.substring(semicolonIndex + 1).split('.')
+                currentObj = doc
+                for (i = 0; i < subKeys.length; i++) {
+                  if (subKeys[i] in currentObj) {
+                    currentObj = currentObj[subKeys[i]]
+                  } else {
+                    currentObj = null
+                    break
+                  }
+                }
+
+                if (currentObj != null) {
+                  return currentObj
+                }
+              } finally {
+                fs.close(fd)
               }
             }
-
-            if (currentObj != null) {
-              return currentObj
-            }
-          } catch(e) {
-            console.warn(e)
-          } finally {
-            fs.close(fd)
           }
         }
+      } catch(e) {
+        console.warn(e)
       }
 
       return defaultValue
