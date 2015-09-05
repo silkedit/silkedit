@@ -6,9 +6,11 @@ var yaml = require('js-yaml');
 var silkutil = require('./silkutil')
 var path = require('path')
 
+var packageDirMap = {}
+
 const moduleFiles = ["menus.yml", "menus.yaml", "package.json"]
 
-module.exports = (client, contexts, eventFilters, configs, commands) => {
+module.exports = (client, locale, contexts, eventFilters, configs, commands) => {
 
   var InputDialog = require('./views/input_dialog')(client)
 
@@ -237,6 +239,10 @@ const loadPackage = (dir) => {
                   return
                 }
 
+                // cache a package directory path
+                packageDirMap[pjson.name] = dir
+
+                // load configs
                 configPath = path.join(dir, "config.yml")
                 fs.open(configPath, 'r', (err, fd) => {
                   if (fd) {
@@ -262,6 +268,7 @@ const loadPackage = (dir) => {
                     }
                   }
 
+                  // register commands
                   if (pjson.main) {
                     module = require(dir)
                     if (module.commands) {
@@ -281,6 +288,7 @@ const loadPackage = (dir) => {
                       console.log("no commands")
                     }
 
+                    // call module's activate method
                     if (module.activate) {
                       silkutil.runInFiber(() => {
                         module.activate()
@@ -463,6 +471,47 @@ const loadPackage = (dir) => {
       family = family == null ? '' : family
       size = size == null ? 0 : size
       client.notify('setFont', family, size)
+    }
+    ,t: (key, defaultValue) => {
+      var i, packageName, currentObj;
+      // get package name <package>:key
+      const semicolonIndex = key.indexOf(':')
+      if (semicolonIndex > 0) {
+        packageName = key.substring(0, semicolonIndex)
+      } else {
+        packageName = 'silkedit'
+      }
+
+      if (packageName in packageDirMap) {
+        const translationPath = path.normalize(packageDirMap[packageName] + '/locales/' + locale + "/translation.yml")
+        const fd = fs.openSync(translationPath, 'r')
+        if (fd) {
+          try {
+            // get value for the matching key
+            const doc = yaml.safeLoad(fs.readFileSync(translationPath, 'utf8'))
+            const subKeys = key.substring(semicolonIndex + 1).split('.')
+            currentObj = doc
+            for (i = 0; i < subKeys.length; i++) {
+              if (subKeys[i] in currentObj) {
+                currentObj = currentObj[subKeys[i]]
+              } else {
+                currentObj = null
+                break
+              }
+            }
+
+            if (currentObj != null) {
+              return currentObj
+            }
+          } catch(e) {
+            console.warn(e)
+          } finally {
+            fs.close(fd)
+          }
+        }
+      }
+
+      return defaultValue
     }
   }
 }

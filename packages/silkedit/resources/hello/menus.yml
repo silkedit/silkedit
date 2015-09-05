@@ -3,5 +3,5 @@ menu:
     id: packages
     submenu:
       - label: 'Say Hello!'
-        id: <name>.hello
+        id: hello
         command: <name>.hello

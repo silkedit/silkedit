@@ -24,14 +24,14 @@ class Constants {
   static QString standardConfigPath();
   static QString standardKeymapPath();
   static QString pluginRunnerPath();
-  static QStringList pluginRunnerArgs();
   static QString pluginServerSocketPath();
   static QString translationDirPath();
+  static QString pluginServerDir();
+  static QString silkHomePath();
 
  private:
   Constants() = delete;
   ~Constants() = delete;
 
   static QStringList dataDirectoryPaths();
-  static QString pluginServerDir();
 };

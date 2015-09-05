@@ -21,10 +21,29 @@
 #include "CommandManager.h"
 #include "InputDialog.h"
 #include "modifiers.h"
+#include "ConfigManager.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
+
+namespace {
+QStringList pluginRunnerArgs() {
+  QStringList args;
+  // add --harmony option first
+  args << "--harmony";
+  // first argument is main script
+  args << Constants::pluginServerDir() + "/main.js";
+  // second argument is a socket path
+  args << Constants::pluginServerSocketPath();
+  // third argument is locale
+  args << ConfigManager::locale();
+  // remaining arguments are paths to be loaded in a plugin server
+  args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
+  args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");
+  return args;
+}
+}
 
 std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
     PluginManager::s_notifyFunctions;
@@ -45,7 +64,7 @@ PluginManager::~PluginManager() {
 }
 
 void PluginManager::startPluginRunnerProcess() {
-  m_pluginProcess->start(Constants::pluginRunnerPath(), Constants::pluginRunnerArgs());
+  m_pluginProcess->start(Constants::pluginRunnerPath(), pluginRunnerArgs());
 }
 
 void PluginManager::init() {
@@ -76,7 +95,7 @@ void PluginManager::init() {
   connect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
           &PluginManager::onFinished);
   qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
-  qDebug() << "args:" << Constants::pluginRunnerArgs();
+  qDebug() << "args:" << pluginRunnerArgs();
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
   m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
   startPluginRunnerProcess();
