@@ -151,8 +151,13 @@ bool PluginManager::askExternalContext(const QString& name, Operator op, const Q
 
 QString PluginManager::translate(const std::string& key, const QString& defaultValue) {
   try {
-    return QString::fromUtf8(sendRequest<std::tuple<std::string>, std::string>(
-                                 "translate", std::make_tuple(key), msgpack::type::STR).c_str());
+    if (const boost::optional<std::string> result =
+            sendRequestOption<std::tuple<std::string>, std::string>(
+                "translate", std::make_tuple(key), msgpack::type::STR)) {
+      return QString::fromUtf8((*result).c_str());
+    } else {
+      return defaultValue;
+    }
   } catch (const std::exception& e) {
     qWarning() << e.what();
     return defaultValue;
