@@ -54,14 +54,14 @@ if (APPLE)
 
   # set where in the bundle to put the icns files
   set_source_files_properties( ${OSX_ICON_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
-	set_source_files_properties( ${QM_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/translations)
+  set_source_files_properties( ${QM_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/translations)
 
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-	include_directories(SYSTEM /usr/local/include msgpack-c/include src)
-	add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
+  include_directories(SYSTEM /usr/local/include msgpack-c/include src)
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MINGW)
   set(YAML_CPP_LIBRARY yaml-cpp)
   set(ONIG_LIBRARY onig.a)
@@ -86,7 +86,7 @@ elseif (MINGW)
     set( SILK_ICON resources/silkedit.rc)
   endif (BUILD_EDGE)
 
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON})
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON} ${QM_FILES})
 endif (APPLE)
 
 target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${UCHARDET_LIBRARY})

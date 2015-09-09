@@ -130,7 +130,7 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    PlatformUtil::parseMenuNode(pkgName, menuNode);
+    PlatformUtil::parseMenuNode(pkgName, menuNode, s_windows);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }

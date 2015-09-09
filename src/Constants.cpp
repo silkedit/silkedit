@@ -65,8 +65,8 @@ QString Constants::pluginServerSocketPath() {
 QString Constants::translationDirPath() {
 #ifdef Q_OS_MAC
   return QCoreApplication::applicationDirPath() + "/../Resources/translations";
-#elif Q_OS_WIN
-  return "";
+#elif defined Q_OS_WIN
+  return QApplication::applicationDirPath();
 #else
   return "";
 #endif
