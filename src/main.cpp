@@ -38,14 +38,23 @@ int main(int argv, char** args) {
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
 
-  // setup translator
+  // setup translators
   QTranslator translator;
+  QTranslator qtTranslator;
+  // Load silkedit_<locale>.qm to translate SilkEdit menu
   bool result =
       translator.load("silkedit_" + ConfigManager::locale(), Constants::translationDirPath());
   if (!result) {
-    qWarning() << "Failed to load a translation file";
+    qWarning() << "Failed to load" << qPrintable("silkedit_");
+  }
+
+  // Load qt_<locale>.qm to translate Mac application menu
+  result = qtTranslator.load("qt_" + ConfigManager::locale(), Constants::translationDirPath());
+  if (!result) {
+    qWarning() << "Failed to load" << qPrintable("qt_");
   }
   app.installTranslator(&translator);
+  app.installTranslator(&qtTranslator);
 
   // Create default menu bar before creating any new window
   MenuBar::init();

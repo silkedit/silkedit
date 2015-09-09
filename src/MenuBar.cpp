@@ -70,6 +70,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   helpMenu->setObjectName("help");
   const QString& abountMenuStr = ConfigManager::enableMnemonic() ? tr("&About") : tr("About");
   QAction* aboutAction = new QAction(abountMenuStr, helpMenu);
+  aboutAction->setMenuRole(QAction::AboutRole);
   connect(aboutAction, &QAction::triggered, this, &MenuBar::showAboutDialog);
   helpMenu->addAction(aboutAction);
 }
