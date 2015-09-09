@@ -9,6 +9,9 @@
 
 class QString;
 
+/**
+ * @brief ConfigManager handles static configurations (load from or save to a config file)
+ */
 class ConfigManager {
   DISABLE_COPY_AND_MOVE(ConfigManager)
 
@@ -32,6 +35,7 @@ class ConfigManager {
   static int tabWidth();
   static bool indentUsingSpaces();
   static bool enableMnemonic();
+  static QString locale();
 
  private:
   ConfigManager() = delete;

@@ -44,8 +44,8 @@ module.exports = {
 				silk.open(path)
 			})
 		}
-		,"open_directory": () => {
-			const path = silk.showDirectoryDialog('Open Directory')
+		,"open_folder": () => {
+			const path = silk.showFolderDialog('Open Folder')
 			if (path != null) {
 				silk.open(path)
 			}
@@ -208,14 +208,15 @@ module.exports = {
 
 				// replace <name> with the new package name
 				// open the package dir as project
-				replaceFileContent(pkgPath + "/package.json", /<name>/, path.basename(pkgPath), (err) => {
+				replaceFileContent(pkgPath + "/package.json", /<name>/g, path.basename(pkgPath), (err) => {
 					if (err) return console.error(err)
-					replaceFileContent(pkgPath + "/menus.yml", /<name>/, path.basename(pkgPath), (err) => {
+					replaceFileContent(pkgPath + "/menus.yml", /<name>/g, path.basename(pkgPath), (err) => {
 						if (err) return console.error(err)
-
-						silk.open(pkgPath)
-						silk.open(pkgPath + '/package.json')
-						silk.loadPackage(pkgPath)
+						replaceFileContent(pkgPath + "/index.js", /<name>/g, path.basename(pkgPath), (err) => {
+							silk.open(pkgPath)
+							silk.open(pkgPath + '/package.json')
+							silk.loadPackage(pkgPath)
+						})
 					})
 				})
 			})

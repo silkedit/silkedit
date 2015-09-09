@@ -18,6 +18,7 @@
 #include "util/YamlUtils.h"
 #include "Context.h"
 #include "PluginManager.h"
+#include "PlatformUtil.h"
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -28,7 +29,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_findReplaceView(new FindReplaceView(this)) {
   qDebug("creating Window");
 
-  setWindowTitle(QObject::tr("SilkEdit"));
+  setWindowTitle("SilkEdit");
   setAttribute(Qt::WA_DeleteOnClose);
 
   // Copy global menu bar
@@ -119,8 +120,8 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   return w;
 }
 
-void Window::loadMenu(const std::string& ymlPath) {
-  qDebug("Start loading: %s", ymlPath.c_str());
+void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
     if (!rootNode.IsMap()) {
@@ -129,8 +130,7 @@ void Window::loadMenu(const std::string& ymlPath) {
     }
 
     YAML::Node menuNode = rootNode["menu"];
-    foreach (Window* win, s_windows) { YamlUtils::parseMenuNode(win->menuBar(), menuNode); }
-    YamlUtils::parseMenuNode(MenuBar::globalMenuBar(), menuNode);
+    PlatformUtil::parseMenuNode(pkgName, menuNode, s_windows);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }

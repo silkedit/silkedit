@@ -9,7 +9,7 @@
 
 class Encoding {
  public:
-  static QList<Encoding> availableEncodings() { return s_availableEncodings; }
+  static const QList<Encoding> availableEncodings();
   static const Encoding guessEncoding(const QByteArray& bytes);
   static const Encoding defaultEncoding();
   static const boost::optional<Encoding> encodingForName(const QString& name);
@@ -26,8 +26,6 @@ class Encoding {
   bool operator!=(const Encoding& other) const;
 
  private:
-  const static QList<Encoding> s_availableEncodings;
-
   // Encoding name
   // See http://www.iana.org/assignments/character-sets/character-sets.xml
   QString m_name;

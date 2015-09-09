@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <string>
 #include <unordered_map>
 #include <tuple>
@@ -60,6 +61,7 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void sendCommandEvent(const QString& command, const CommandArgument& args);
   void callExternalCommand(const QString& cmd, const CommandArgument& args);
   bool askExternalContext(const QString& name, Operator op, const QString& value);
+  QString translate(const std::string& key, const QString& defaultValue);
 
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
@@ -84,51 +86,46 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
     m_socket->write(sbuf.data(), sbuf.size());
   }
 
+  /**
+   * @brief Send a request via msgpack rpc.
+   * Throws an exception if the response type is not an expected type.
+   * @param method
+   * @param params
+   * @param type
+   * @return return a response as the expected type.
+   */
   template <typename Parameter, typename Result>
   Result sendRequest(const std::string& method,
                      const Parameter& params,
                      msgpack::type::object_type type) {
-    if (m_isStopped) {
-      throw std::runtime_error("plugin runner is not running");
-    }
-
-    qDebug("sendRequest. method: %s", method.c_str());
-    msgpack::sbuffer sbuf;
-    msgpack::rpc::msg_request<std::string, Parameter> request;
-    request.method = method;
-    msgpack::rpc::msgid_t msgId = s_msgId++;
-    request.msgid = msgId;
-    request.param = params;
-    msgpack::pack(sbuf, request);
-
-    m_socket->write(sbuf.data(), sbuf.size());
-
-    QEventLoop loop;
-    ResponseResult result;
-    QTimer timer;
-    timer.setSingleShot(true);
-    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
-
-    s_eventLoopMap.insert(std::make_pair(msgId, &result));
-    connect(&result, &ResponseResult::ready, &loop, &QEventLoop::quit);
-
-    timer.start(TIMEOUT_IN_MS);
-    // start a local event loop to wait until plugin runner returns response or timeout occurs
-    loop.exec();
-
-    if (result.isReady()) {
-      if (result.isSuccess()) {
-        if (result.result().type == type) {
-          return result.result().as<Result>();
-        } else {
-          throw std::runtime_error("unexpected result type");
-        }
-      } else {
-        std::string errMsg = result.result().as<std::string>();
-        throw std::runtime_error(errMsg);
-      }
+    std::unique_ptr<ResponseResult> result = sendRequestInternal<Parameter, Result>(method, params);
+    if (result->result().type == type) {
+      return result->result().as<Result>();
     } else {
-      throw std::runtime_error("timeout for waiting the result");
+      throw std::runtime_error("unexpected result type");
+    }
+  }
+
+  /**
+   * @brief Send a request via msgpack rpc.
+   * Returns none if the response type is msgpack::Nil
+   * Throws an exception if the response type is not null and an expected type.
+   * @param method
+   * @param params
+   * @param type
+   * @return return a response as the specified type.
+   */
+  template <typename Parameter, typename Result>
+  boost::optional<Result> sendRequestOption(const std::string& method,
+                                            const Parameter& params,
+                                            msgpack::type::object_type type) {
+    std::unique_ptr<ResponseResult> result = sendRequestInternal<Parameter, Result>(method, params);
+    if (result->result().type == msgpack::type::NIL) {
+      return boost::none;
+    } else if (result->result().type == type) {
+      return result->result().as<Result>();
+    } else {
+      throw std::runtime_error("unexpected result type");
     }
   }
 
@@ -154,6 +151,50 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void startPluginRunnerProcess();
 
  private:
+  // Send a request via msgpack rpc.
+  template <typename Parameter, typename Result>
+  std::unique_ptr<ResponseResult> sendRequestInternal(const std::string& method,
+                                                      const Parameter& params) {
+    if (m_isStopped) {
+      throw std::runtime_error("plugin runner is not running");
+    }
+
+    qDebug("sendRequest. method: %s", method.c_str());
+    msgpack::sbuffer sbuf;
+    msgpack::rpc::msg_request<std::string, Parameter> request;
+    request.method = method;
+    msgpack::rpc::msgid_t msgId = s_msgId++;
+    request.msgid = msgId;
+    request.param = params;
+    msgpack::pack(sbuf, request);
+
+    m_socket->write(sbuf.data(), sbuf.size());
+
+    QEventLoop loop;
+    std::unique_ptr<ResponseResult> result(new ResponseResult());
+    QTimer timer;
+    timer.setSingleShot(true);
+    connect(&timer, &QTimer::timeout, &loop, &QEventLoop::quit);
+
+    s_eventLoopMap.insert(std::make_pair(msgId, result.get()));
+    connect(result.get(), &ResponseResult::ready, &loop, &QEventLoop::quit);
+
+    timer.start(TIMEOUT_IN_MS);
+    // start a local event loop to wait until plugin runner returns response or timeout occurs
+    loop.exec();
+
+    if (result->isReady()) {
+      if (result->isSuccess()) {
+        return std::move(result);
+      } else {
+        std::string errMsg = result->result().as<std::string>();
+        throw std::runtime_error(errMsg);
+      }
+    } else {
+      throw std::runtime_error("timeout for waiting the result");
+    }
+  }
+
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
       s_notifyFunctions;
   static std::unordered_map<

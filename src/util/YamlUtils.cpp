@@ -7,11 +7,16 @@
 #include "YamlUtils.h"
 #include "Context.h"
 #include "CommandAction.h"
+#include "PluginManager.h"
 
 namespace {
-QAction* findAction(QList<QAction*> actions, const QString& label) {
+QAction* findAction(QList<QAction*> actions, const QString& id) {
+  if (id.isEmpty())
+    return nullptr;
+
   foreach (QAction* action, actions) {
-    if (action->text().replace("&", "") == label) {
+    Q_ASSERT(action);
+    if (action->objectName() == id || (action->menu() && action->menu()->objectName() == id)) {
       return action;
     }
   }
@@ -69,19 +74,22 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
+void YamlUtils::parseMenuNode(const std::string& pkgName,
+                              QWidget* parent,
+                              const YAML::Node& menuNode) {
   if (!menuNode.IsSequence()) {
     qWarning("menuNode must be a sequence.");
     return;
   }
 
-  // Reverse node order to handle 'before' correctly
+  // Reverse node order to handle 'before' correctly.
+  // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
   for (auto it = menuNode.begin(); it != menuNode.end(); it++) {
     nodes.push(*it);
   }
 
-  QString prevLabel;
+  QString prevId;
 
   while (!nodes.empty()) {
     YAML::Node node = nodes.top();
@@ -92,25 +100,34 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
     }
 
     YAML::Node labelNode = node["label"];
+    YAML::Node idNode = node["id"];
     YAML::Node typeNode = node["type"];
     YAML::Node beforeNode = node["before"];
-    QString before = beforeNode.IsDefined() && beforeNode.IsScalar()
-                         ? QString::fromUtf8(beforeNode.as<std::string>().c_str())
-                         : prevLabel;
-    QString label = labelNode.IsDefined() && labelNode.IsScalar()
-                        ? QString::fromUtf8(labelNode.as<std::string>().c_str())
-                        : "";
+    QString beforeId = beforeNode.IsDefined() && beforeNode.IsScalar()
+                           ? QString::fromUtf8(beforeNode.as<std::string>().c_str())
+                           : prevId;
+    QString defaultLabel = labelNode.IsDefined() && labelNode.IsScalar()
+                               ? QString::fromUtf8(labelNode.as<std::string>().c_str())
+                               : "";
+    QString id = idNode.IsDefined() && idNode.IsScalar()
+                     ? QString::fromUtf8(idNode.as<std::string>().c_str())
+                     : "";
+    QString label = defaultLabel;
+    if (idNode.IsDefined() && idNode.IsScalar()) {
+      label = PluginManager::singleton().translate(pkgName + ":menu." + idNode.as<std::string>(),
+                                                   defaultLabel);
+    }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["submenu"];
-    if (submenuNode.IsDefined() && !label.isEmpty()) {
+    if (submenuNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
       QMenu* currentMenu;
-      if (QAction* action = findAction(parent->actions(), label)) {
+      if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
       } else {
         currentMenu = new QMenu(label, parent);
         if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
           QAction* beforeAction =
-              before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
+              beforeId.isEmpty() ? nullptr : findAction(menuBar->actions(), beforeId);
           if (beforeAction) {
             menuBar->insertMenu(beforeAction, currentMenu);
           } else {
@@ -118,7 +135,7 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
           }
         } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
           QAction* beforeAction =
-              before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
+              beforeId.isEmpty() ? nullptr : findAction(parentMenu->actions(), beforeId);
           if (beforeAction) {
             parentMenu->insertMenu(beforeAction, currentMenu);
           } else {
@@ -126,7 +143,7 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
           }
         }
       }
-      parseMenuNode(currentMenu, submenuNode);
+      parseMenuNode(pkgName, currentMenu, submenuNode);
     } else {
       // Check context
       YAML::Node contextNode = node["context"];
@@ -140,11 +157,12 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
       QAction* action = nullptr;
       if (commandNode.IsDefined() && !label.isEmpty()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
-        action = new CommandAction(label, command);
+        action = new CommandAction(id, label, command);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         QString type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
           action = new QAction(QUuid::createUuid().toString(), parent);
+          action->setObjectName(action->text());
           action->setSeparator(true);
         } else {
           qWarning("%s is not supported", qPrintable(type));
@@ -155,13 +173,14 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
         continue;
       }
 
-      if (!label.isEmpty() && findAction(parent->actions(), label)) {
-        qWarning("%s already exists", qPrintable(label));
+      if (!id.isEmpty() && findAction(parent->actions(), id)) {
+        qWarning("%s already exists", qPrintable(id));
         continue;
       }
 
       if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
-        QAction* beforeAction = before.isEmpty() ? nullptr : findAction(menuBar->actions(), before);
+        QAction* beforeAction =
+            beforeId.isEmpty() ? nullptr : findAction(menuBar->actions(), beforeId);
         if (beforeAction) {
           menuBar->insertAction(beforeAction, action);
         } else {
@@ -169,14 +188,14 @@ void YamlUtils::parseMenuNode(QWidget* parent, YAML::Node menuNode) {
         }
       } else if (QMenu* parentMenu = qobject_cast<QMenu*>(parent)) {
         QAction* beforeAction =
-            before.isEmpty() ? nullptr : findAction(parentMenu->actions(), before);
+            beforeId.isEmpty() ? nullptr : findAction(parentMenu->actions(), beforeId);
         if (beforeAction) {
           parentMenu->insertAction(beforeAction, action);
         } else {
           parentMenu->addAction(action);
         }
       }
-      prevLabel = label.isEmpty() ? action->text() : label;
+      prevId = id.isEmpty() ? action->objectName() : id;
     }
   }
 }

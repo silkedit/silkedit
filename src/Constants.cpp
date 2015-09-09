@@ -4,11 +4,6 @@
 
 #include "Constants.h"
 
-namespace {
-static QString silkHomePath =
-    QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
-}
-
 #ifdef Q_OS_MAC
 const QString Constants::defaultFontFamily = "Source Han Code JP";
 #endif
@@ -48,29 +43,15 @@ QStringList Constants::packagePaths() {
 }
 
 QString Constants::standardConfigPath() {
-  return silkHomePath + "/config.yml";
+  return silkHomePath() + "/config.yml";
 }
 
 QString Constants::standardKeymapPath() {
-  return silkHomePath + "/keymap.yml";
+  return silkHomePath() + "/keymap.yml";
 }
 
 QString Constants::pluginRunnerPath() {
   return pluginServerDir() + "/bin/node";
-}
-
-QStringList Constants::pluginRunnerArgs() {
-  QStringList args;
-  // add --harmony option first
-  args << "--harmony";
-  // first argument is main script
-  args << pluginServerDir() + "/main.js";
-  // second argument is a socket path
-  args << pluginServerSocketPath();
-  // remaining arguments are paths to be loaded in a plugin server
-  args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
-  args << QDir::toNativeSeparators(silkHomePath + "/packages");
-  return args;
 }
 
 QString Constants::pluginServerSocketPath() {
@@ -81,12 +62,26 @@ QString Constants::pluginServerSocketPath() {
 #endif
 }
 
+QString Constants::translationDirPath() {
+#ifdef Q_OS_MAC
+  return QCoreApplication::applicationDirPath() + "/../Resources/translations";
+#elif defined Q_OS_WIN
+  return QApplication::applicationDirPath();
+#else
+  return "";
+#endif
+}
+
 QStringList Constants::dataDirectoryPaths() {
-  QStringList paths(silkHomePath);
+  QStringList paths(silkHomePath());
   paths.prepend(QApplication::applicationDirPath());
   return paths;
 }
 
 QString Constants::pluginServerDir() {
   return QApplication::applicationDirPath() + "/plugin_runner";
+}
+
+QString Constants::silkHomePath() {
+  return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }

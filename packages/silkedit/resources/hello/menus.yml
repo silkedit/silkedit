@@ -1,5 +1,7 @@
 menu:
   - label: Packages
+    id: packages
     submenu:
       - label: 'Say Hello!'
+        id: hello
         command: <name>.hello

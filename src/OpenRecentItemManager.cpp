@@ -41,9 +41,10 @@ void OpenRecentItemManager::addOpenRecentItem(const QString& path) {
 }
 
 OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("Open Recent"))) {
-  m_reopenLastClosedFileAction = new CommandAction(QObject::tr("&Reopen Last Closed File"),
-                                                   ReopenLastClosedFileCommand::name,
-                                                   m_openRecentMenu.get());
+  m_reopenLastClosedFileAction =
+      new CommandAction(ReopenLastClosedFileCommand::name, tr("&Reopen Last Closed File"),
+                        ReopenLastClosedFileCommand::name, m_openRecentMenu.get());
+  m_openRecentMenu->setObjectName("open_recent");
   m_openRecentMenu->addAction(m_reopenLastClosedFileAction);
   m_openRecentMenu->addSeparator();
 
@@ -98,6 +99,6 @@ OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
 
 ClearRecentItemListAction::ClearRecentItemListAction(QObject* parent)
     : QAction(tr("Clear List"), parent) {
-  QObject::connect(
-      this, &QAction::triggered, [this]() { OpenRecentItemManager::singleton().clear(); });
+  QObject::connect(this, &QAction::triggered,
+                   [this]() { OpenRecentItemManager::singleton().clear(); });
 }

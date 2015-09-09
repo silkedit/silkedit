@@ -89,10 +89,16 @@ void API::alert(msgpack::object obj) {
 }
 
 void API::loadMenu(msgpack::object obj) {
-  msgpack::type::tuple<std::string> params;
-  obj.convert(&params);
-  std::string ymlPath = std::get<0>(params);
-  Window::loadMenu(ymlPath);
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    Window::loadMenu(pkgName, ymlPath);
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
 }
 
 void API::registerCommands(msgpack::object obj) {

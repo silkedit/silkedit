@@ -43,6 +43,7 @@ class OpenRecentItemManager : public QObject, public Singleton<OpenRecentItemMan
 };
 
 class OpenRecentAction : public QAction {
+  Q_OBJECT
   DISABLE_COPY(OpenRecentAction)
  public:
   explicit OpenRecentAction(QObject* parent = nullptr);
@@ -51,6 +52,7 @@ class OpenRecentAction : public QAction {
 };
 
 class ClearRecentItemListAction : public QAction {
+  Q_OBJECT
   DISABLE_COPY(ClearRecentItemListAction)
  public:
   explicit ClearRecentItemListAction(QObject* parent = nullptr);

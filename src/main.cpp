@@ -1,5 +1,7 @@
 #include <QStringList>
 #include <QTime>
+#include <QTranslator>
+#include <QLibraryInfo>
 
 #include "PackageManager.h"
 #include "SilkApp.h"
@@ -16,6 +18,7 @@
 #include "PluginManager.h"
 #include "Context.h"
 #include "MenuBar.h"
+#include "Constants.h"
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -34,6 +37,15 @@ int main(int argv, char** args) {
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();
+
+  // setup translator
+  QTranslator translator;
+  bool result =
+      translator.load("silkedit_" + ConfigManager::locale(), Constants::translationDirPath());
+  if (!result) {
+    qWarning() << "Failed to load a translation file";
+  }
+  app.installTranslator(&translator);
 
   // Create default menu bar before creating any new window
   MenuBar::init();

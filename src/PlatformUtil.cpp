@@ -3,6 +3,9 @@
 #include <QDir>
 
 #include "PlatformUtil.h"
+#include "MenuBar.h"
+#include "Window.h"
+#include "util/YamlUtils.h"
 
 #ifdef Q_OS_MAC
 extern void qt_set_sequence_auto_mnemonic(bool b);
@@ -46,5 +49,15 @@ QString PlatformUtil::showInFinderText() {
 void PlatformUtil::enableMnemonicOnMac() {
 #ifdef Q_OS_MAC
   qt_set_sequence_auto_mnemonic(true);
+#endif
+}
+
+void PlatformUtil::parseMenuNode(const std::string& pkgName, const YAML::Node& menuNode, QList<Window *> windows) {
+#ifdef Q_OS_MAC
+  // There's only 1 global menu bar on Mac.
+  YamlUtils::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
+#elif defined Q_OS_WIN
+  // Menu bar belongs to each window.
+  foreach (Window* win, windows) { YamlUtils::parseMenuNode(pkgName, win->menuBar(), menuNode); }
 #endif
 }

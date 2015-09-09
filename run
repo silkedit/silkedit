@@ -278,6 +278,10 @@ set_build() {
     fi
 }
 
+localize() {
+    lupdate src -ts translations/silkedit_ja.ts
+}
+
 # -e: stops if any command returns non zero value
 set -e
 
@@ -320,6 +324,10 @@ case "$1" in
         set_build $2
         echo
         ;;
+    localize)
+        localize
+        echo
+        ;;
     *)
 
         cat << EOF
@@ -327,6 +335,7 @@ analyze      static analysis
 build        build an app and an installer
 clean        clean build dir
 format       format sources
+localize     run lupdate to generate a ts file for localization
 rebuild      build from scratch
 resolve      resolve dependency
 test         run tests

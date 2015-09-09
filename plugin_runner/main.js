@@ -14,6 +14,8 @@ if (process.argv.length < 3) {
 }
 
 const socketFile = process.argv[2];
+const locale = process.argv[3];
+const packagesBeginIndex = 4
 var commands = {}
 var contexts = {}
 var eventFilters = {}
@@ -34,11 +36,12 @@ function getDirs(dir) {
 }
 
 const c = rpc.createClient(socketFile, () => {
-  GLOBAL.silk = require('./silkedit')(c, contexts, eventFilters, configs, commands);
+  const packagePaths = process.argv.slice(packagesBeginIndex)
+  GLOBAL.silk = require('./silkedit')(c, locale, contexts, eventFilters, configs, commands);
 
   sync(c, 'invoke');
   
-  process.argv.slice(3).forEach((dirPath) => {
+  packagePaths.forEach((dirPath) => {
     fs.open(dirPath, 'r', (err, fd) => {
       fd && fs.close(fd, (err) => {
         const dirs = getDirs(dirPath);
@@ -153,6 +156,9 @@ const handler = {
     } else {
       response.result([false, event.name, event.args])
     }
+  }
+  ,"translate": (key, response) => {
+    response.result(silk.t(key, null))
   }
 }
 c.setHandler(handler);

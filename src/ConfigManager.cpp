@@ -191,10 +191,13 @@ int ConfigManager::tabWidth() {
 }
 
 bool ConfigManager::indentUsingSpaces() {
-    return boolValue("indent_using_spaces", false);
+  return boolValue("indent_using_spaces", false);
 }
 
-bool ConfigManager::enableMnemonic()
-{
-    return boolValue("enable_mnemonic", false);
+bool ConfigManager::enableMnemonic() {
+  return boolValue("enable_mnemonic", false);
+}
+
+QString ConfigManager::locale() {
+  return strValue("locale", QLocale::system().name());
 }

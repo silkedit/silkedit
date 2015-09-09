@@ -8,6 +8,7 @@
 class TextEditView;
 
 class EncodingComboBox : public QComboBox {
+  Q_OBJECT
   DISABLE_COPY(EncodingComboBox)
 
  public:

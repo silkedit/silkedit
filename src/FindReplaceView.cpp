@@ -12,11 +12,11 @@
 #include "TextEditView.h"
 
 namespace {
-constexpr auto MATCH_CASE_TEXT = "Match &Case";
-constexpr auto REGEX_TEXT = "Re&gex";
-constexpr auto WHOLE_WORD_TEXT = "&Whole Word";
-constexpr auto PRESERVE_CASE_TEXT = "&Preserve Case";
-constexpr auto IN_SELECTION_TEXT = "In &Selection";
+const char* MATCH_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Match &Case");
+const char* REGEX_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Re&gex");
+const char* WHOLE_WORD_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "&Whole Word");
+const char* PRESERVE_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "&Preserve Case");
+const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In &Selection");
 constexpr int lineEditWidth = 500;
 }
 
@@ -237,12 +237,8 @@ void FindReplaceView::replaceAll() {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->replaceAllSelection(m_lineEditForFind->text(),
-                                  m_lineEditForReplace->text(),
-                                  begin,
-                                  end,
-                                  getFindFlags(),
-                                  m_preserveCaseChk->isChecked());
+    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin,
+                                  end, getFindFlags(), m_preserveCaseChk->isChecked());
     m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
   }
 }

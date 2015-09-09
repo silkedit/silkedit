@@ -24,9 +24,10 @@ ReloadEncodingDialog::ReloadEncodingDialog(TextEditView* editView,
   buttonBox->addButton(reloadBtn, QDialogButtonBox::ActionRole);
   buttonBox->addButton(convertBtn, QDialogButtonBox::ActionRole);
   buttonBox->addButton(cancelBtn, QDialogButtonBox::ResetRole);
-  auto label = new QLabel(tr("Reload: reload current file from disk in %1\nConvert: "
-                             "convert current text in %1").arg(toEncoding.name()),
-                          this);
+  auto label = new QLabel(
+      tr("Reload: reload current file from disk in %1\nConvert: convert current text in %1")
+          .arg(toEncoding.name()),
+      this);
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->addWidget(label);
   layout->addWidget(buttonBox, 0, Qt::AlignRight);

@@ -26,7 +26,7 @@ class Window : public QMainWindow, public UniqueObject<Window> {
   static Window* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<Window*> windows() { return s_windows; }
-  static void loadMenu(const std::string& ymlPath);
+  static void loadMenu(const std::string& pkgName, const std::string& ymlPath);
 
   ~Window();
   DEFAULT_MOVE(Window)
