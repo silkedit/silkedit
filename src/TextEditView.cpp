@@ -589,30 +589,29 @@ void TextEditView::insertNewLineWithIndent() {
     return;
   }
 
+  auto currentVisibleCursor = textCursor();
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
   std::unique_ptr<QVector<int>> regions(
       regex->findStringSubmatchIndex(QStringRef(&prevLineString)));
+  // align the current line with the previous line
   if (regions) {
-    // align the current line with the previous line
-    auto currentVisibleCursor = textCursor();
     currentVisibleCursor.insertText(prevLineString.left(regions->at(1)));
+  }
 
-    // check increaseIndentPattern for additional indent
-    auto metadata = Metadata::get(d->m_document->language()->scopeName);
-    if (metadata) {
-      const QString& prevPrevLineText = d->prevLineText(2, metadata->unIndentedLinePattern());
-      bool indentNextLine = (metadata->increaseIndentPattern() &&
-                             metadata->increaseIndentPattern()->matches(prevLineString)) ||
-                            (metadata->bracketIndentNextLinePattern() &&
-                             metadata->bracketIndentNextLinePattern()->matches(prevLineString));
-      bool outdentNextLine = (metadata->bracketIndentNextLinePattern() &&
-                              metadata->bracketIndentNextLinePattern()->matches(prevPrevLineText));
-      if (indentNextLine) {
-        d->indent(currentVisibleCursor);
-      } else if (outdentNextLine) {
-        TextEditViewLogic::outdent(d->m_document.get(), currentVisibleCursor,
-                                   Session::singleton().tabWidth());
-      }
+  // check increaseIndentPattern for additional indent
+  if (metadata) {
+    const QString& prevPrevLineText = d->prevLineText(2, metadata->unIndentedLinePattern());
+    bool indentNextLine = (metadata->increaseIndentPattern() &&
+                           metadata->increaseIndentPattern()->matches(prevLineString)) ||
+                          (metadata->bracketIndentNextLinePattern() &&
+                           metadata->bracketIndentNextLinePattern()->matches(prevLineString));
+    bool outdentNextLine = (metadata->bracketIndentNextLinePattern() &&
+                            metadata->bracketIndentNextLinePattern()->matches(prevPrevLineText));
+    if (indentNextLine) {
+      d->indent(currentVisibleCursor);
+    } else if (outdentNextLine) {
+      TextEditViewLogic::outdent(d->m_document.get(), currentVisibleCursor,
+                                 Session::singleton().tabWidth());
     }
   }
 }
