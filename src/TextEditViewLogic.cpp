@@ -3,6 +3,7 @@
 
 #include "TextEditViewLogic.h"
 #include "Regexp.h"
+#include "Metadata.h"
 
 namespace {
 int indentLength(const QString& str, int tabWidth) {
@@ -79,4 +80,50 @@ bool TextEditViewLogic::isOutdentNecessary(Regexp* increaseIndentPattern,
     }
   }
   return false;
+}
+
+/**
+ * @brief Indent one level
+ * @param currentVisibleCursor
+ */
+void TextEditViewLogic::indentOneLevel(QTextCursor& currentVisibleCursor,
+                                       bool indentUsingSpaces,
+                                       int tabWidth) {
+  QString indentStr = "\t";
+  if (indentUsingSpaces) {
+    indentStr = QString(tabWidth, ' ');
+  }
+  currentVisibleCursor.insertText(indentStr);
+}
+
+void TextEditViewLogic::indentCurrentLine(QTextDocument* doc,
+                                          QTextCursor& cursor,
+                                          const QString& prevLineText,
+                                          const boost::optional<QString>& prevPrevLineText,
+                                          Metadata* metadata,
+                                          bool indentUsingSpaces,
+                                          int tabWidth) {
+  std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
+  std::unique_ptr<QVector<int>> regions(regex->findStringSubmatchIndex(QStringRef(&prevLineText)));
+  // align the current line with the previous line
+  if (regions) {
+    cursor.insertText(prevLineText.left(regions->at(1)));
+  }
+
+  // check increaseIndentPattern for additional indent
+  if (metadata) {
+    bool indentNextLine = (metadata->increaseIndentPattern() &&
+                           metadata->increaseIndentPattern()->matches(prevLineText)) ||
+                          (metadata->bracketIndentNextLinePattern() &&
+                           metadata->bracketIndentNextLinePattern()->matches(prevLineText));
+    bool outdentNextLine = (metadata->bracketIndentNextLinePattern() && prevPrevLineText &&
+                            metadata->bracketIndentNextLinePattern()->matches(*prevPrevLineText) &&
+                            (!metadata->increaseIndentPattern() ||
+                             !metadata->increaseIndentPattern()->matches(*prevPrevLineText)));
+    if (indentNextLine) {
+      TextEditViewLogic::indentOneLevel(cursor, indentUsingSpaces, tabWidth);
+    } else if (outdentNextLine) {
+      TextEditViewLogic::outdent(doc, cursor, tabWidth);
+    }
+  }
 }

@@ -27,7 +27,7 @@ class TextEditViewPrivate : public QObject {
   void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
-  void indent(QTextCursor& currentVisibleCursor);
+  void indentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();

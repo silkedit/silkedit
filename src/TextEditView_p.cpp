@@ -236,12 +236,9 @@ void TextEditViewPrivate::highlightCurrentLine() {
  * @brief Indent one level
  * @param currentVisibleCursor
  */
-void TextEditViewPrivate::indent(QTextCursor& currentVisibleCursor) {
-  QString indentStr = "\t";
-  if (Session::singleton().indentUsingSpaces()) {
-    indentStr = QString(Session::singleton().tabWidth(), ' ');
-  }
-  currentVisibleCursor.insertText(indentStr);
+void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
+  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Session::singleton().indentUsingSpaces(),
+                                    Session::singleton().tabWidth());
 }
 
 /**

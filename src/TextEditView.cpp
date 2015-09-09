@@ -589,31 +589,17 @@ void TextEditView::insertNewLineWithIndent() {
     return;
   }
 
-  auto currentVisibleCursor = textCursor();
-  std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
-  std::unique_ptr<QVector<int>> regions(
-      regex->findStringSubmatchIndex(QStringRef(&prevLineString)));
-  // align the current line with the previous line
-  if (regions) {
-    currentVisibleCursor.insertText(prevLineString.left(regions->at(1)));
-  }
-
-  // check increaseIndentPattern for additional indent
+  boost::optional<QString> prevPrevLineText;
   if (metadata) {
-    const QString& prevPrevLineText = d->prevLineText(2, metadata->unIndentedLinePattern());
-    bool indentNextLine = (metadata->increaseIndentPattern() &&
-                           metadata->increaseIndentPattern()->matches(prevLineString)) ||
-                          (metadata->bracketIndentNextLinePattern() &&
-                           metadata->bracketIndentNextLinePattern()->matches(prevLineString));
-    bool outdentNextLine = (metadata->bracketIndentNextLinePattern() &&
-                            metadata->bracketIndentNextLinePattern()->matches(prevPrevLineText));
-    if (indentNextLine) {
-      d->indent(currentVisibleCursor);
-    } else if (outdentNextLine) {
-      TextEditViewLogic::outdent(d->m_document.get(), currentVisibleCursor,
-                                 Session::singleton().tabWidth());
-    }
+    prevPrevLineText = d->prevLineText(2, metadata->unIndentedLinePattern());
+  } else {
+    prevPrevLineText = boost::none;
   }
+  bool indentUsingSpaces = Session::singleton().indentUsingSpaces();
+  int tabWidth = Session::singleton().tabWidth();
+  auto cursor = textCursor();
+  TextEditViewLogic::indentCurrentLine(d->m_document.get(), cursor, prevLineString,
+                                       prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
 }
 
 void TextEditView::request(TextEditView* view,
@@ -688,7 +674,7 @@ void TextEditView::notify(TextEditView* view, const QString& method, const msgpa
     view->insertNewLineWithIndent();
   } else if (method == "indent") {
     auto cursor = view->textCursor();
-    view->d->indent(cursor);
+    view->d->indentOneLevel(cursor);
   } else {
     qWarning("%s is not support", qPrintable(method));
   }

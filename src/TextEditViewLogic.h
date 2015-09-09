@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/optional.hpp>
 #include <QString>
 #include <QTextDocument>
 #include <QTextCursor>
@@ -7,6 +8,7 @@
 #include "macros.h"
 
 class Regexp;
+class Metadata;
 
 /**
  * @brief This class has business logics for TextEditView
@@ -22,6 +24,16 @@ class TextEditViewLogic {
                                  const QString& prevLineText,
                                  bool isAtBlockEnd,
                                  int tabWidth);
+  static void indentOneLevel(QTextCursor& currentVisibleCursor,
+                             bool indentUsingSpaces,
+                             int tabWidth);
+  static void indentCurrentLine(QTextDocument* doc,
+                                QTextCursor& cursor,
+                                const QString& prevLineText,
+                                const boost::optional<QString>& prevPrevLineText,
+                                Metadata* metadata,
+                                bool indentUsingSpaces,
+                                int tabWidth);
 
  private:
   TextEditViewLogic() = delete;

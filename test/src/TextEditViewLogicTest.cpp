@@ -4,6 +4,7 @@
 
 #include "TextEditViewLogic.h"
 #include "Regexp.h"
+#include "Metadata.h"
 
 class TextEditViewLogicTest : public QObject {
   Q_OBJECT
@@ -70,6 +71,119 @@ class TextEditViewLogicTest : public QObject {
         "\t{\n"
         "\t\thoge\n"
         "\t}";
+    QCOMPARE(doc.toPlainText(), expectedText);
+  }
+
+  void increaseIndentPattern() {
+    // Given
+    // "if (true) {" matches increaseIndentPattern (doesn't match bracketIndentNextLinePattern)
+    const QString text = "if (true) {\n";
+    QTextDocument doc;
+    doc.setPlainText(text);
+    QTextCursor cursor(&doc);
+    // cursor is at the end of the document
+    cursor.movePosition(QTextCursor::End);
+    int tabWidth = 2;
+    QString prevLineText = "if (true) {";
+    boost::optional<QString> prevPrevLineText = boost::none;
+    Metadata::load("testdata/CppIndentation Rules.tmPreferences");
+    Metadata* metadata = Metadata::get("source.c++");
+
+    // When
+    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+                                         false, tabWidth);
+
+    // Then
+    // Current line should be indented.
+    const QString expectedText =
+        "if (true) {\n"
+        "\t";
+    QCOMPARE(doc.toPlainText(), expectedText);
+  }
+
+  void bracketIndentNextLinePattern() {
+    // Given
+    // "if (true)" matches bracketIndentNextLinePattern (doesn't match increaseIndentPattern)
+    const QString text =
+        "if (true)\n"
+        "\thoge\n";
+    QTextDocument doc;
+    doc.setPlainText(text);
+    QTextCursor cursor(&doc);
+    // cursor is at the end of the document
+    cursor.movePosition(QTextCursor::End);
+    int tabWidth = 2;
+    QString prevLineText = "\thoge";
+    QString prevPrevLineText = "if (true)";
+    Metadata::load("testdata/CppIndentation Rules.tmPreferences");
+    Metadata* metadata = Metadata::get("source.c++");
+
+    // When
+    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+                                         false, tabWidth);
+
+    // Then
+    // Current line should NOT be indented.
+    // bracketIndentNextLinePattern makes ONLY the next line indent
+    const QString expectedText =
+        "if (true)\n"
+        "\thoge\n";
+    QCOMPARE(doc.toPlainText(), expectedText);
+  }
+
+  void BothIncreaseIndentPatternAndBracketIndentNextLinePatternMatched() {
+    // Given
+    // "if (true) {" matches both increaseIndentPattern and bracketIndentNextLinePattern
+    const QString text =
+        "if (true) {\n"
+        "\thoge\n";
+    QTextDocument doc;
+    doc.setPlainText(text);
+    QTextCursor cursor(&doc);
+    // cursor is at the end of the document
+    cursor.movePosition(QTextCursor::End);
+    int tabWidth = 2;
+    QString prevLineText = "\thoge";
+    QString prevPrevLineText = "if (true) {";
+    Metadata::load("testdata/CppIndentation Rules.tmPreferences");
+    Metadata* metadata = Metadata::get("source.c++");
+
+    // When
+    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+                                         false, tabWidth);
+
+    // Then
+    // Current line should be indented.
+    // bracketIndentNextLinePattern should be ignored when increaseIndentPattern is effective.
+    const QString expectedText =
+        "if (true) {\n"
+        "\thoge\n"
+        "\t";
+    QCOMPARE(doc.toPlainText(), expectedText);
+  }
+
+  void alignTheCurrentLineBasedOnPrevLine() {
+    // Given
+    const QString text = "\t\n";
+    QTextDocument doc;
+    doc.setPlainText(text);
+    QTextCursor cursor(&doc);
+    // cursor is at the end of the document
+    cursor.movePosition(QTextCursor::End);
+    int tabWidth = 2;
+    QString prevLineText = "\t";
+    boost::optional<QString> prevPrevLineText = boost::none;
+    Metadata* metadata = nullptr;
+
+    // When
+    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+                                         false, tabWidth);
+
+    // Then
+    // Current line should be aligned with the previous line.
+    const QString expectedText =
+        "\t\n"
+        "\t";
     QCOMPARE(doc.toPlainText(), expectedText);
   }
 };
