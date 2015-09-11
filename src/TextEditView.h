@@ -20,10 +20,10 @@ class QResizeEvent;
 class QSize;
 class QWidget;
 class QElapsedTimer;
-struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
 namespace core {
+struct Language;
 class Encoding;
 }
 
@@ -38,7 +38,7 @@ class TextEditView : public QPlainTextEdit,
   QString path();
   core::Document* document();
   void setDocument(std::shared_ptr<core::Document> document);
-  Language* language();
+  core::Language* language();
   void setLanguage(const QString& scopeName);
   boost::optional<core::Encoding> encoding();
   boost::optional<QString> lineSeparator();

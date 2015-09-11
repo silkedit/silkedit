@@ -1,5 +1,7 @@
 #include "LanguageComboBox.h"
-#include "LanguageParser.h"
+#include "core/LanguageParser.h"
+
+using core::LanguageProvider;
 
 LanguageComboBox::LanguageComboBox(QWidget* parent) : QComboBox(parent) {
   foreach (auto& pair, LanguageProvider::scopeAndLangNamePairs()) {

@@ -15,7 +15,7 @@ class TextEditViewPrivate : public QObject {
   TextEditView* q;
   QWidget* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
-  QVector<Region> m_searchMatchedRegions;
+  QVector<core::Region> m_searchMatchedRegions;
   std::unique_ptr<QStringListModel> m_model;
   std::unique_ptr<QCompleter> m_completer;
   bool m_completedAndSelected;

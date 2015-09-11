@@ -5,6 +5,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class Region {
  public:
   Region() : m_begin(0), m_end(0) {}
@@ -44,3 +46,5 @@ class Region {
     return dbg.space();
   }
 };
+
+}  // namespace core

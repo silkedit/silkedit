@@ -5,6 +5,11 @@
 #include "PListParser.h"
 #include "Util.h"
 #include "Session.h"
+#include "core/LanguageParser.h"
+
+using core::LanguageParser;
+using core::Region;
+using core::Node;
 
 // fixme: memory leak of new QObject();
 // Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass

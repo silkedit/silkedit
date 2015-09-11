@@ -3,12 +3,13 @@
 #include <QStandardPaths>
 
 #include "PackageManager.h"
-#include "LanguageParser.h"
+#include "core/LanguageParser.h"
 #include "ThemeProvider.h"
 #include "Metadata.h"
 #include "core/Constants.h"
 
 using core::Constants;
+using core::LanguageProvider;
 
 void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }

@@ -3,7 +3,6 @@
 #include <QTextDocument>
 
 #include "macros.h"
-#include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 #include "Regexp.h"
 #include "core/Encoding.h"

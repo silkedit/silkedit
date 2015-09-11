@@ -10,8 +10,8 @@ class LanguageComboBox;
 class EncodingComboBox;
 class LineSeparatorComboBox;
 class Window;
-struct Language;
 namespace core {
+struct Language;
 class Encoding;
 }
 
@@ -49,5 +49,5 @@ signals:
   LineSeparatorComboBox* m_separatorComboBox;
   EncodingComboBox* m_encComboBox;
 
-  void setCurrentLanguage(Language* lang);
+  void setCurrentLanguage(core::Language* lang);
 };

@@ -1,4 +1,6 @@
-#include "Region.h"
+#include "core/Region.h"
+
+namespace core {
 
 bool Region::fullyCovers(const Region& other) const {
   return contains(other.begin()) && other.end() <= end();
@@ -66,3 +68,5 @@ int Region::length() const {
 QString Region::toString() const {
   return QString("[%1 - %2)").arg(m_begin).arg(m_end);
 }
+
+}  // namespace core

@@ -20,6 +20,8 @@
 using core::ConfigManager;
 using core::Document;
 using core::Encoding;
+using core::Language;
+using core::Region;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

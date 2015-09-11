@@ -6,6 +6,7 @@
 #include "core/Document.h"
 #include "LineSeparator.h"
 #include "Session.h"
+#include "core/LanguageParser.h"
 
 namespace {
 using core::Encoding;

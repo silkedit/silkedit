@@ -10,6 +10,8 @@
 #include "ReloadEncodingDialog.h"
 
 using core::Encoding;
+using core::Language;
+using core::LanguageProvider;
 
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),

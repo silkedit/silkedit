@@ -10,7 +10,14 @@
 #include "macros.h"
 #include "Regexp.h"
 #include "stlSpecialization.h"
-#include "Region.h"
+#include "core/Region.h"
+
+namespace core {
+
+struct Language;
+class LanguageParser;
+struct Node;
+struct RootNode;
 
 struct Capture {
   int key;
@@ -18,12 +25,6 @@ struct Capture {
 };
 
 typedef QVector<Capture> Captures;
-
-struct Language;
-class LanguageParser;
-struct Node;
-struct RootNode;
-class Region;
 
 struct Regex {
   std::unique_ptr<Regexp> regex;
@@ -172,3 +173,5 @@ struct RootNode : public Node {
   void adjust(int pos, int delta) override;
   void updateChildren(const Region& region, LanguageParser* parser);
 };
+
+}  // namespace core
