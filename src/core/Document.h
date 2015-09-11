@@ -8,6 +8,8 @@
 #include "Regexp.h"
 #include "Encoding.h"
 
+namespace core {
+
 class Document : public QTextDocument {
   Q_OBJECT
   DISABLE_COPY(Document)
@@ -96,3 +98,5 @@ signals:
   void setupLayout();
   void setupSyntaxHighlighter(Language* lang, const QString& text = "");
 };
+
+}  // namespace core

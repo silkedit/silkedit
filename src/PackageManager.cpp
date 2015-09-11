@@ -6,7 +6,9 @@
 #include "LanguageParser.h"
 #include "ThemeProvider.h"
 #include "Metadata.h"
-#include "Constants.h"
+#include "core/Constants.h"
+
+using core::Constants;
 
 void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }

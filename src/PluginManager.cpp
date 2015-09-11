@@ -10,7 +10,7 @@
 
 #include "PluginManager.h"
 #include "SilkApp.h"
-#include "Constants.h"
+#include "core/Constants.h"
 #include "API.h"
 #include "TextEditView.h"
 #include "TabView.h"
@@ -21,15 +21,17 @@
 #include "CommandManager.h"
 #include "InputDialog.h"
 #include "modifiers.h"
-#include "app/ConfigManager.h"
+#include "core/ConfigManager.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
 
-using app::ConfigManager;
+using core::Constants;
+using core::ConfigManager;
 
 namespace {
+
 QStringList pluginRunnerArgs() {
   QStringList args;
   // add --harmony option first

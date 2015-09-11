@@ -5,11 +5,13 @@
 #include <QCheckBox>
 
 #include "macros.h"
-#include "Document.h"
+#include "core/Document.h"
 #include "HistoryModel.h"
 
 class LineEdit;
 class QCheckBox;
+
+using core::Document;
 
 class FindReplaceView : public QWidget {
   Q_OBJECT

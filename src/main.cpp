@@ -8,7 +8,7 @@
 #include "TabView.h"
 #include "Window.h"
 #include "KeymapManager.h"
-#include "app/ConfigManager.h"
+#include "core/ConfigManager.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
 #include "Session.h"
@@ -18,9 +18,11 @@
 #include "PluginManager.h"
 #include "Context.h"
 #include "MenuBar.h"
-#include "Constants.h"
+#include "core/Constants.h"
 
-using app::ConfigManager;
+using core::Constants;
+
+using core::ConfigManager;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();

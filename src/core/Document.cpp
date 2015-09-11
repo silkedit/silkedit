@@ -3,7 +3,7 @@
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
 
-#include "Document.h"
+#include "core/Document.h"
 #include "LineSeparator.h"
 #include "Session.h"
 
@@ -33,6 +33,8 @@ boost::optional<std::tuple<QString, QString>> load(const QString& path, const En
   return std::make_tuple(text, LineSeparator::guess(text).separatorStr());
 }
 }
+
+namespace core {
 
 Document::Document(const QString& path,
                    const QString& text,
@@ -262,3 +264,5 @@ void Document::reload(const Encoding& encoding) {
     emit modificationChanged(false);
   }
 }
+
+}  // namespace core

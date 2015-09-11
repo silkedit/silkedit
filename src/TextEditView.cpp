@@ -14,10 +14,10 @@
 #include "Session.h"
 #include "API.h"
 #include "PluginManager.h"
-#include "app/ConfigManager.h"
+#include "core/ConfigManager.h"
 #include "Metadata.h"
 
-using app::ConfigManager;
+using core::ConfigManager;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

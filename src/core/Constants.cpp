@@ -2,7 +2,9 @@
 #include <QApplication>
 #include <QDir>
 
-#include "Constants.h"
+#include "core/Constants.h"
+
+namespace core {
 
 #ifdef Q_OS_MAC
 const QString Constants::defaultFontFamily = "Source Han Code JP";
@@ -85,3 +87,5 @@ QString Constants::pluginServerDir() {
 QString Constants::silkHomePath() {
   return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }
+
+}  // namespace core

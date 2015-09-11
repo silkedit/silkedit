@@ -4,16 +4,18 @@
 #include <QString>
 #include <QFile>
 
-#include "app/ConfigManager.h"
-#include "Constants.h"
+#include "core/ConfigManager.h"
+#include "core/Constants.h"
 #include "Util.h"
+
+using core::Constants;
 
 namespace {
 const QString END_OF_LINE_STR = "end_of_line_str";
 const QString END_OF_FILE_STR = "end_of_file_str";
 }
 
-namespace app {
+namespace core {
 
 std::unordered_map<QString, QString> ConfigManager::m_strConfigs;
 std::unordered_map<QString, std::unordered_map<std::string, std::string>>
@@ -203,4 +205,4 @@ QString ConfigManager::locale() {
   return strValue("locale", QLocale::system().name());
 }
 
-}  // namespace app
+}  // namespace core

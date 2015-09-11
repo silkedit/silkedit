@@ -12,7 +12,7 @@
 
 #include "macros.h"
 #include "ICloneable.h"
-#include "Document.h"
+#include "core/Document.h"
 #include "UniqueObject.h"
 
 class QPaintEvent;
@@ -24,6 +24,8 @@ struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
 class Encoding;
+
+using core::Document;
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,

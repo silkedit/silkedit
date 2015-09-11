@@ -9,7 +9,7 @@
 
 class QString;
 
-namespace app {
+namespace core {
 
 /**
  * @brief ConfigManager handles static configurations (load from or save to a config file)
@@ -49,4 +49,4 @@ class ConfigManager {
   static void load(const QString& filename);
 };
 
-}  // namespace app
+}  // namespace core

@@ -4,6 +4,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class Constants {
   DISABLE_COPY_AND_MOVE(Constants)
 
@@ -35,3 +37,5 @@ class Constants {
 
   static QStringList dataDirectoryPaths();
 };
+
+}  // namespace core

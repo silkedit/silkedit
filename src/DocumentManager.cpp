@@ -10,7 +10,9 @@
 #include "Window.h"
 #include "SilkApp.h"
 #include "TabView.h"
-#include "Document.h"
+#include "core/Document.h"
+
+using core::Document;
 
 const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
