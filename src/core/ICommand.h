@@ -20,6 +20,8 @@ std::string toString(const CommandArgument& arg) {
 }
 }
 
+namespace core {
+
 class ICommand {
   DISABLE_COPY_AND_MOVE(ICommand)
  public:
@@ -40,3 +42,5 @@ class ICommand {
 
   QString m_name;
 };
+
+}  // namespace core

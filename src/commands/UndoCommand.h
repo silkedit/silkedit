@@ -1,8 +1,8 @@
 #pragma once
 
-#include "ICommand.h"
+#include "core/ICommand.h"
 
-class UndoCommand : public ICommand {
+class UndoCommand : public core::ICommand {
  public:
   static QString name;
 

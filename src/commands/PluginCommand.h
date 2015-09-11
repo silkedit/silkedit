@@ -3,9 +3,9 @@
 #include <QString>
 
 #include "macros.h"
-#include "ICommand.h"
+#include "core/ICommand.h"
 
-class PluginCommand : public ICommand {
+class PluginCommand : public core::ICommand {
  public:
   PluginCommand(const QString& name);
   ~PluginCommand() = default;
