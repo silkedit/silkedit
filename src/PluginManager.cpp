@@ -21,11 +21,13 @@
 #include "CommandManager.h"
 #include "InputDialog.h"
 #include "modifiers.h"
-#include "ConfigManager.h"
+#include "app/ConfigManager.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
+
+using app::ConfigManager;
 
 namespace {
 QStringList pluginRunnerArgs() {

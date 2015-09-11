@@ -12,8 +12,10 @@
 #include "SilkApp.h"
 #include "commands/PluginCommand.h"
 #include "CommandManager.h"
-#include "ConfigManager.h"
+#include "app/ConfigManager.h"
 #include "version.h"
+
+using app::ConfigManager;
 
 MenuBar* MenuBar::s_globalMenuBar;
 
