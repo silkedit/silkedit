@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QString>
 
-#include "macros.h"
+#include "core/macros.h"
 
 namespace core {
 

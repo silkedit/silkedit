@@ -2,7 +2,7 @@
 
 #include <QApplication>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class TabBar;
 class TextEditView;

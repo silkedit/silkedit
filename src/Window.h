@@ -6,7 +6,7 @@
 #include <list>
 #include <QMainWindow>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "UniqueObject.h"
 
 class TabView;

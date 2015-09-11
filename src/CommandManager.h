@@ -9,7 +9,7 @@
 #include <QString>
 #include <QVariant>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "core/ICommand.h"
 #include "stlSpecialization.h"
 

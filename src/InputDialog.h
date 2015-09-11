@@ -3,7 +3,7 @@
 #include <QDialog>
 
 #include "UniqueObject.h"
-#include "macros.h"
+#include "core/macros.h"
 
 namespace Ui {
 class InputDialog;

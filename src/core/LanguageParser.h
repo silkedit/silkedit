@@ -7,7 +7,7 @@
 #include <QMap>
 #include <QDebug>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "Regexp.h"
 #include "stlSpecialization.h"
 #include "core/Region.h"

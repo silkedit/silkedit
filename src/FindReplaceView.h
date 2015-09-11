@@ -4,7 +4,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "core/Document.h"
 #include "core/HistoryModel.h"
 

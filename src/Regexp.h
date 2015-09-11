@@ -2,7 +2,7 @@
 
 #include <QVector>
 
-#include "macros.h"
+#include "core/macros.h"
 
 struct re_pattern_buffer;
 typedef re_pattern_buffer OnigRegexType;

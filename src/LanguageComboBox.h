@@ -2,7 +2,7 @@
 
 #include <QComboBox>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class LanguageComboBox : public QComboBox {
   DISABLE_COPY(LanguageComboBox)

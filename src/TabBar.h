@@ -2,7 +2,7 @@
 
 #include <QTabBar>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class QMouseEvent;
 class QWindow;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "macros.h"
+#include "core/macros.h"
 
 // http://cflat-inc.hatenablog.com/entry/2014/03/04/214608
 template <class T>

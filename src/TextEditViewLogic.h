@@ -5,7 +5,7 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class Regexp;
 class Metadata;

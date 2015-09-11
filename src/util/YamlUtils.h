@@ -3,7 +3,7 @@
 #include <yaml-cpp/yaml.h>
 #include <QWidget>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class Context;
 

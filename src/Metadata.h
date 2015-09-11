@@ -3,7 +3,7 @@
 #include <QString>
 
 #include "Regexp.h"
-#include "macros.h"
+#include "core/macros.h"
 #include "stlSpecialization.h"
 
 // Model class for .tmPreferences file

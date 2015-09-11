@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class TabBar;
 

@@ -2,7 +2,7 @@
 
 #include <QStatusBar>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "UniqueObject.h"
 
 class TextEditView;

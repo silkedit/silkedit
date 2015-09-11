@@ -7,7 +7,7 @@
 
 #include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
-#include "macros.h"
+#include "core/macros.h"
 #include "Singleton.h"
 #include "stlSpecialization.h"
 

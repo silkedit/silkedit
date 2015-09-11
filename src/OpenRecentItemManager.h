@@ -8,7 +8,7 @@
 #include <QMenu>
 
 #include "OpenRecentItemManager.h"
-#include "macros.h"
+#include "core/macros.h"
 #include "Singleton.h"
 
 class ClearRecentItemListAction;

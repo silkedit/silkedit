@@ -10,7 +10,7 @@
 #include <QStringListModel>
 #include <QCompleter>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "core/ICloneable.h"
 #include "core/Document.h"
 #include "UniqueObject.h"

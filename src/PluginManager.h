@@ -14,7 +14,7 @@
 #include <QEventLoop>
 #include <QTimer>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "msgpackHelper.h"
 #include "stlSpecialization.h"
 #include "Singleton.h"

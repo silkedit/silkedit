@@ -5,7 +5,7 @@
 #include <QString>
 #include <QFileDialog>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class DialogUtils {
   DISABLE_COPY_AND_MOVE(DialogUtils)

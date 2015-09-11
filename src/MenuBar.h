@@ -3,7 +3,7 @@
 #include <QMenuBar>
 #include <QAction>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class Theme;
 

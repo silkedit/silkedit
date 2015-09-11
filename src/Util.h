@@ -5,7 +5,7 @@
 #include <functional>
 #include <QStringList>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class Util {
   DISABLE_COPY_AND_MOVE(Util)

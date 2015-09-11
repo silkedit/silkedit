@@ -2,7 +2,7 @@
 
 #include <QAbstractListModel>
 
-#include "macros.h"
+#include "core/macros.h"
 
 namespace core {
 

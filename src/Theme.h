@@ -7,7 +7,7 @@
 #include <QVector>
 #include <QTextCharFormat>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "core/LanguageParser.h"
 
 typedef QMap<QString, QColor> ColorSettings;

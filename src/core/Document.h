@@ -2,7 +2,7 @@
 
 #include <QTextDocument>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "SyntaxHighlighter.h"
 #include "Regexp.h"
 #include "core/Encoding.h"

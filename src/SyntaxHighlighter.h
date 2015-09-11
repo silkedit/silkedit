@@ -3,7 +3,7 @@
 #include <memory>
 #include <QSyntaxHighlighter>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "Theme.h"
 
 namespace core {

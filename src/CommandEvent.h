@@ -6,7 +6,7 @@
 #include <QVariant>
 
 #include "stlSpecialization.h"
-#include "macros.h"
+#include "core/macros.h"
 #include "Context.h"
 #include "CommandArgument.h"
 

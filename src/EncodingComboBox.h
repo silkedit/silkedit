@@ -2,7 +2,7 @@
 
 #include <QComboBox>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "core/Encoding.h"
 
 class TextEditView;

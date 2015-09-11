@@ -4,7 +4,7 @@
 #include <unordered_set>
 #include <QTabWidget>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "set_unique_ptr.h"
 #include "UniqueObject.h"
 

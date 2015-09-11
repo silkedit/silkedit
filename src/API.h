@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "stlSpecialization.h"
 #include "util/DialogUtils.h"
 

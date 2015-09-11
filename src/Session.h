@@ -2,7 +2,7 @@
 
 #include <QObject>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "Singleton.h"
 #include "Theme.h"
 

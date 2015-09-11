@@ -1,6 +1,6 @@
 #pragma once
 
-#include "macros.h"
+#include "core/macros.h"
 
 class QString;
 

@@ -4,7 +4,7 @@
 #include <functional>
 #include <QWidget>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "UniqueObject.h"
 
 class TabView;

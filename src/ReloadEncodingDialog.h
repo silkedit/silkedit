@@ -2,7 +2,7 @@
 
 #include <QDialog>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class TextEditView;
 namespace core {

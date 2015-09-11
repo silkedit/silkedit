@@ -3,7 +3,7 @@
 #include <unordered_map>
 #include <QString>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "Theme.h"
 #include "stlSpecialization.h"
 
