@@ -3,7 +3,7 @@
 #include <QComboBox>
 
 #include "macros.h"
-#include "Encoding.h"
+#include "core/Encoding.h"
 
 class TextEditView;
 
@@ -16,8 +16,8 @@ class EncodingComboBox : public QComboBox {
   ~EncodingComboBox() = default;
   DEFAULT_MOVE(EncodingComboBox)
 
-  void setCurrentEncoding(const Encoding& encoding);
-  Encoding currentEncoding();
+  void setCurrentEncoding(const core::Encoding& encoding);
+  core::Encoding currentEncoding();
 
   bool isAutoDetectSelected();
 

@@ -1,6 +1,8 @@
 #include "EncodingComboBox.h"
-#include "Encoding.h"
+#include "core/Encoding.h"
 #include "TextEditView.h"
+
+using core::Encoding;
 
 namespace {
 const int AUTO_DETECT_INDEX = 0;

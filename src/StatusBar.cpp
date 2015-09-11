@@ -9,6 +9,8 @@
 #include "TextEditView.h"
 #include "ReloadEncodingDialog.h"
 
+using core::Encoding;
+
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),
       m_langComboBox(new LanguageComboBox),

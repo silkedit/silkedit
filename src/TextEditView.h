@@ -23,25 +23,24 @@ class QElapsedTimer;
 struct Language;
 class LineNumberArea;
 class TextEditViewPrivate;
+namespace core {
 class Encoding;
-
-using core::Document;
+}
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,
                      public ICloneable<TextEditView> {
   Q_OBJECT
-
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
 
   QString path();
-  Document* document();
-  void setDocument(std::shared_ptr<Document> document);
+  core::Document* document();
+  void setDocument(std::shared_ptr<core::Document> document);
   Language* language();
   void setLanguage(const QString& scopeName);
-  boost::optional<Encoding> encoding();
+  boost::optional<core::Encoding> encoding();
   boost::optional<QString> lineSeparator();
   void setLineSeparator(const QString& lineSeparator);
 
@@ -57,28 +56,28 @@ class TextEditView : public QPlainTextEdit,
   void save();
   void saveAs();
   void setPath(const QString& path);
-  void find(const QString& text, int begin = 0, int end = -1, Document::FindFlags flags = 0);
+  void find(const QString& text, int begin = 0, int end = -1, core::Document::FindFlags flags = 0);
   void find(const QString& text,
             int searchStartPos = -1,
             int begin = 0,
             int end = -1,
-            Document::FindFlags flags = 0);
+            core::Document::FindFlags flags = 0);
   void find(const QString& text,
             const QTextCursor& cursor,
             int begin = 0,
             int end = -1,
-            Document::FindFlags flags = 0);
+            core::Document::FindFlags flags = 0);
   void highlightSearchMatches(const QString& text,
                               int begin,
                               int end,
-                              Document::FindFlags flags = 0);
+                              core::Document::FindFlags flags = 0);
   void clearSearchHighlight();
   void replaceSelection(const QString& text, bool preserveCase = false);
   void replaceAllSelection(const QString& findText,
                            const QString& replaceText,
                            int begin,
                            int end,
-                           Document::FindFlags flags = 0,
+                           core::Document::FindFlags flags = 0,
                            bool preserveCase = false);
   void performCompletion();
   void insertNewLineWithIndent();
@@ -89,7 +88,7 @@ signals:
   void saved();
   void languageChanged(const QString& scope);
   // emitted when underlying document's encoding is changed.
-  void encodingChanged(const Encoding& encoding);
+  void encodingChanged(const core::Encoding& encoding);
   void lineSeparatorChanged(const QString& separator);
 
  protected:

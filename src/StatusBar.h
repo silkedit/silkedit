@@ -11,7 +11,9 @@ class EncodingComboBox;
 class LineSeparatorComboBox;
 class Window;
 struct Language;
+namespace core {
 class Encoding;
+}
 
 class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
   Q_OBJECT
@@ -24,7 +26,7 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
 
   void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
   void setLanguage(const QString& scope);
-  void setEncoding(const Encoding& encoding);
+  void setEncoding(const core::Encoding& encoding);
   void setLineSeparator(const QString& separator);
   void setActiveTextEditViewLanguage();
   void setActiveTextEditViewEncoding();

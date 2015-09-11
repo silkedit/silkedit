@@ -11,8 +11,6 @@
 class LineEdit;
 class QCheckBox;
 
-using core::Document;
-
 class FindReplaceView : public QWidget {
   Q_OBJECT
   DISABLE_COPY(FindReplaceView)
@@ -51,11 +49,11 @@ class FindReplaceView : public QWidget {
   void findNext();
   void findPrev();
   void findFromActiveCursor();
-  void findText(const QString& text, int searchStartPos = -1, Document::FindFlags flags = 0);
-  void findText(const QString& text, Document::FindFlags flags);
+  void findText(const QString& text, int searchStartPos = -1, core::Document::FindFlags flags = 0);
+  void findText(const QString& text, core::Document::FindFlags flags);
   void highlightMatches();
   void clearSearchHighlight();
-  Document::FindFlags getFindFlags();
+  core::Document::FindFlags getFindFlags();
   void updateSelectionRegion();
   void updateActiveCursorPos();
   void selectFirstMatch();

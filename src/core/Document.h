@@ -6,7 +6,7 @@
 #include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 #include "Regexp.h"
-#include "Encoding.h"
+#include "core/Encoding.h"
 
 namespace core {
 

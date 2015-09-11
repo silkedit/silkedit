@@ -7,6 +7,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class Encoding {
  public:
   static const QList<Encoding> availableEncodings();
@@ -33,3 +35,5 @@ class Encoding {
   // Display name. (e.g., "Japanese (Shift_JIS)")
   QString m_displayName;
 };
+
+}  // namespace core

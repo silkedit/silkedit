@@ -8,6 +8,8 @@
 #include "Session.h"
 
 namespace {
+using core::Encoding;
+
 boost::optional<std::tuple<QString, Encoding, QString>> load(const QString& path) {
   QFile file(path);
   if (!file.open(QIODevice::ReadWrite))

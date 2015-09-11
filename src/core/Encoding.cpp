@@ -3,7 +3,9 @@
 #include <QTextCodec>
 #include <QDebug>
 
-#include "Encoding.h"
+#include "core/Encoding.h"
+
+using core::Encoding;
 
 namespace {
 const int MAX_LENGTH_TO_READ = 256 * 1024;  // 256KB
@@ -27,6 +29,8 @@ const QString DEFAULT_ENCODING_NAME = "UTF-8";
 
 const Encoding DEFAULT_ENCODING = Encoding("UTF-8", QObject::tr("UTF-8"));
 }
+
+namespace core {
 
 const QList<Encoding> Encoding::availableEncodings() {
   static const QList<Encoding> s_availableEncodings =
@@ -115,3 +119,5 @@ bool Encoding::operator==(const Encoding& other) const {
 bool Encoding::operator!=(const Encoding& other) const {
   return !(*this == other);
 }
+
+}  // namespace core

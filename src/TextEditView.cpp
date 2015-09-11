@@ -18,6 +18,8 @@
 #include "Metadata.h"
 
 using core::ConfigManager;
+using core::Document;
+using core::Encoding;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

@@ -5,8 +5,10 @@
 #include <QMessageBox>
 
 #include "ReloadEncodingDialog.h"
-#include "Encoding.h"
+#include "core/Encoding.h"
 #include "TextEditView.h"
+
+using core::Encoding;
 
 ReloadEncodingDialog::ReloadEncodingDialog(TextEditView* editView,
                                            const Encoding& fromEncoding,

@@ -13,6 +13,8 @@
 #include "DocumentManager.h"
 #include "PluginManager.h"
 
+using core::Document;
+
 namespace {
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);

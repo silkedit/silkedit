@@ -14,7 +14,7 @@ class TextEditViewPrivate : public QObject {
 
   TextEditView* q;
   QWidget* m_lineNumberArea;
-  std::shared_ptr<Document> m_document;
+  std::shared_ptr<core::Document> m_document;
   QVector<Region> m_searchMatchedRegions;
   std::unique_ptr<QStringListModel> m_model;
   std::unique_ptr<QCompleter> m_completer;
@@ -36,7 +36,7 @@ class TextEditViewPrivate : public QObject {
   void clearDirtyMarker();
   void toggleHighlightingCurrentLine(bool hasSelection);
   void emitLanguageChanged(const QString& scope);
-  void emitEncodingChanged(const Encoding& enc);
+  void emitEncodingChanged(const core::Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);
   void setTabStopWidthFromSession();
 };

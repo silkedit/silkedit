@@ -6,6 +6,8 @@
 #include "Session.h"
 #include "Metadata.h"
 
+using core::Encoding;
+
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {
   return a.compare(b, Qt::CaseInsensitive) < 0;

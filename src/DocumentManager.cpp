@@ -7,7 +7,6 @@
 #include <QDebug>
 
 #include "DocumentManager.h"
-#include "Window.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "core/Document.h"
