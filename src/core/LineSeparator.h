@@ -4,6 +4,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class LineSeparator {
  public:
   ~LineSeparator() = default;
@@ -28,3 +30,5 @@ class LineSeparator {
   const QString m_separator;
   const QString m_displayName;
 };
+
+}  // namespace core

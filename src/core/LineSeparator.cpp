@@ -1,6 +1,8 @@
 #include <QRegularExpression>
 
-#include "LineSeparator.h"
+#include "core/LineSeparator.h"
+
+namespace core {
 
 const LineSeparator LineSeparator::Windows = LineSeparator("\r\n", "CRLF - Windows(\\r\\n)");
 const LineSeparator LineSeparator::Unix = LineSeparator("\n", "LF - Unix and OS X(\\n)");
@@ -51,3 +53,5 @@ bool LineSeparator::operator!=(const LineSeparator& other) const {
 LineSeparator::LineSeparator(const QString& separator, const QString& displayName)
     : m_separator(separator), m_displayName(displayName) {
 }
+
+}  // namespace core

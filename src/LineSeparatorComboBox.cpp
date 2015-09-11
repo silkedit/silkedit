@@ -1,7 +1,9 @@
 #include <boost/optional.hpp>
 
 #include "LineSeparatorComboBox.h"
-#include "LineSeparator.h"
+#include "core/LineSeparator.h"
+
+using core::LineSeparator;
 
 LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : QComboBox(parent) {
   addItem(LineSeparator::Windows.displayName(), LineSeparator::Windows.separatorStr());

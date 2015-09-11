@@ -4,12 +4,13 @@
 #include <QTextCodec>
 
 #include "core/Document.h"
-#include "LineSeparator.h"
+#include "core/LineSeparator.h"
 #include "Session.h"
 #include "core/LanguageParser.h"
 
 namespace {
 using core::Encoding;
+using core::LineSeparator;
 
 boost::optional<std::tuple<QString, Encoding, QString>> load(const QString& path) {
   QFile file(path);
