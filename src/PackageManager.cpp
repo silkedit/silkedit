@@ -5,11 +5,12 @@
 #include "PackageManager.h"
 #include "core/LanguageParser.h"
 #include "ThemeProvider.h"
-#include "Metadata.h"
+#include "core/Metadata.h"
 #include "core/Constants.h"
 
 using core::Constants;
 using core::LanguageProvider;
+using core::Metadata;
 
 void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }

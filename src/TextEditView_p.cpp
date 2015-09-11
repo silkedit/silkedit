@@ -4,9 +4,10 @@
 #include "TextEditView_p.h"
 #include "TextEditViewLogic.h"
 #include "Session.h"
-#include "Metadata.h"
+#include "core/Metadata.h"
 
 using core::Encoding;
+using core::Metadata;
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {

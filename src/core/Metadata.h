@@ -6,6 +6,8 @@
 #include "core/macros.h"
 #include "stlSpecialization.h"
 
+namespace core {
+
 // Model class for .tmPreferences file
 class Metadata {
   DISABLE_COPY(Metadata)
@@ -52,3 +54,5 @@ class Metadata {
   explicit Metadata(const QString& scope);
   DEFAULT_MOVE(Metadata)
 };
+
+}  // namespace core

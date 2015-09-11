@@ -8,7 +8,9 @@
 #include "core/macros.h"
 
 class Regexp;
+namespace core {
 class Metadata;
+}
 
 /**
  * @brief This class has business logics for TextEditView
@@ -31,7 +33,7 @@ class TextEditViewLogic {
                                 QTextCursor& cursor,
                                 const QString& prevLineText,
                                 const boost::optional<QString>& prevPrevLineText,
-                                Metadata* metadata,
+                                core::Metadata* metadata,
                                 bool indentUsingSpaces,
                                 int tabWidth);
 

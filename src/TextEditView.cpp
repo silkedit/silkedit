@@ -15,13 +15,14 @@
 #include "API.h"
 #include "PluginManager.h"
 #include "core/ConfigManager.h"
-#include "Metadata.h"
+#include "core/Metadata.h"
 
 using core::ConfigManager;
 using core::Document;
 using core::Encoding;
 using core::Language;
 using core::Region;
+using core::Metadata;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

@@ -3,7 +3,9 @@
 
 #include "TextEditViewLogic.h"
 #include "Regexp.h"
-#include "Metadata.h"
+#include "core/Metadata.h"
+
+using core::Metadata;
 
 namespace {
 int indentLength(const QString& str, int tabWidth) {

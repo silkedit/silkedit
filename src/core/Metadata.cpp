@@ -1,7 +1,7 @@
 #include <QFile>
 #include <QVariant>
 
-#include "Metadata.h"
+#include "core/Metadata.h"
 #include "PListParser.h"
 
 namespace {
@@ -14,6 +14,8 @@ const QString bracketIndentNextLinePatternStr = "bracketIndentNextLinePattern";
 const QString disableIndentNextLinePatternStr = "disableIndentNextLinePattern";
 const QString unIndentedLinePatternStr = "unIndentedLinePattern";
 }
+
+namespace core {
 
 std::unordered_map<QString, std::unique_ptr<Metadata>> Metadata::s_scopeMetadataMap;
 
@@ -103,3 +105,5 @@ void Metadata::load(const QString& filename) {
     }
   }
 }
+
+}  // namespace core
