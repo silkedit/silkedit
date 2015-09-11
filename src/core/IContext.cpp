@@ -1,6 +1,8 @@
 #include <QString>
 
-#include "IContext.h"
+#include "core/IContext.h"
+
+namespace core {
 
 QString IContext::operatorString(Operator op) {
   switch (op) {
@@ -23,3 +25,5 @@ bool IContext::isSatisfied(Operator op, const QString& operand) {
       return false;
   }
 }
+
+}  // namespace core

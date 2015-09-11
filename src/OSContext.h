@@ -1,9 +1,9 @@
 #pragma once
 
-#include "IContext.h"
+#include "core/IContext.h"
 #include "macros.h"
 
-class OSContext : public IContext {
+class OSContext : public core::IContext {
   DISABLE_COPY(OSContext)
 
  public:

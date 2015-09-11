@@ -1,16 +1,16 @@
 #pragma once
 
 #include <QString>
-#include "IContext.h"
+#include "core/IContext.h"
 
-class PluginContext : public IContext {
+class PluginContext : public core::IContext {
   DISABLE_COPY(PluginContext)
 
  public:
   PluginContext(const QString& context);
   ~PluginContext() = default;
 
-  bool isSatisfied(Operator op, const QString& operand) override;
+  bool isSatisfied(core::Operator op, const QString& operand) override;
 
  private:
   QString m_key;

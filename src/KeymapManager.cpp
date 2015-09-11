@@ -14,6 +14,7 @@
 #include "util/YamlUtils.h"
 
 using core::Constants;
+using core::IKeyEventFilter;
 
 namespace {
 

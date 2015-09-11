@@ -4,6 +4,8 @@
 
 class QKeyEvent;
 
+namespace core {
+
 class IKeyEventFilter {
   DISABLE_COPY_AND_MOVE(IKeyEventFilter)
 
@@ -13,3 +15,5 @@ class IKeyEventFilter {
 
   virtual bool keyEventFilter(QKeyEvent* event) = 0;
 };
+
+}  // namespace core

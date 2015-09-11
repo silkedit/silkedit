@@ -4,6 +4,8 @@
 
 class QString;
 
+namespace core {
+
 enum class Operator {
   EQUALS,
   NOT_EQUALS,
@@ -24,3 +26,5 @@ class IContext {
  private:
   virtual QString key() = 0;
 };
+
+}  // namespace core

@@ -2,6 +2,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class IOperator {
   DISABLE_COPY(ICommand)
  public:
@@ -24,3 +26,5 @@ class IOperator {
 
   QString m_name;
 };
+
+}  // namespace core

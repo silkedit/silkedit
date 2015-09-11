@@ -4,6 +4,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 class HistoryModel : public QAbstractListModel {
   Q_OBJECT
   DISABLE_COPY(HistoryModel)
@@ -26,3 +28,5 @@ class HistoryModel : public QAbstractListModel {
  private:
   QStringList m_stringList;
 };
+
+}  // namespace core

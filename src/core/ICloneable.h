@@ -2,6 +2,8 @@
 
 #include "macros.h"
 
+namespace core {
+
 template <class T>
 class ICloneable {
   DISABLE_COPY_AND_MOVE(ICloneable)
@@ -12,3 +14,5 @@ class ICloneable {
 
   virtual T* clone() = 0;
 };
+
+}  // namespace core

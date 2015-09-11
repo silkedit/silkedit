@@ -18,8 +18,8 @@
 #include "msgpackHelper.h"
 #include "stlSpecialization.h"
 #include "Singleton.h"
-#include "IContext.h"
-#include "IKeyEventFilter.h"
+#include "core/IContext.h"
+#include "core/IKeyEventFilter.h"
 #include "CommandArgument.h"
 
 class QKeyEvent;
@@ -48,7 +48,9 @@ signals:
   std::unique_ptr<object_with_zone> m_result;
 };
 
-class PluginManager : public QObject, public Singleton<PluginManager>, public IKeyEventFilter {
+class PluginManager : public QObject,
+                      public Singleton<PluginManager>,
+                      public core::IKeyEventFilter {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(PluginManager)
 
@@ -60,7 +62,7 @@ class PluginManager : public QObject, public Singleton<PluginManager>, public IK
   void sendFocusChangedEvent(const QString& viewType);
   void sendCommandEvent(const QString& command, const CommandArgument& args);
   void callExternalCommand(const QString& cmd, const CommandArgument& args);
-  bool askExternalContext(const QString& name, Operator op, const QString& value);
+  bool askExternalContext(const QString& name, core::Operator op, const QString& value);
   QString translate(const std::string& key, const QString& defaultValue);
 
   // IKeyEventFilter interface

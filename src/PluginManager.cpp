@@ -29,6 +29,8 @@
 
 using core::Constants;
 using core::ConfigManager;
+using core::Operator;
+using core::IContext;
 
 namespace {
 

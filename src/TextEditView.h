@@ -11,7 +11,7 @@
 #include <QCompleter>
 
 #include "macros.h"
-#include "ICloneable.h"
+#include "core/ICloneable.h"
 #include "core/Document.h"
 #include "UniqueObject.h"
 
@@ -29,7 +29,7 @@ class Encoding;
 
 class TextEditView : public QPlainTextEdit,
                      public UniqueObject<TextEditView>,
-                     public ICloneable<TextEditView> {
+                     public core::ICloneable<TextEditView> {
   Q_OBJECT
  public:
   explicit TextEditView(QWidget* parent);

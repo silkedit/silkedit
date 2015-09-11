@@ -6,7 +6,7 @@
 
 #include "macros.h"
 #include "core/Document.h"
-#include "HistoryModel.h"
+#include "core/HistoryModel.h"
 
 class LineEdit;
 class QCheckBox;
@@ -43,8 +43,8 @@ class FindReplaceView : public QWidget {
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;
-  HistoryModel m_searchHistoryModel;
-  HistoryModel m_replaceHistoryModel;
+  core::HistoryModel m_searchHistoryModel;
+  core::HistoryModel m_replaceHistoryModel;
 
   void findNext();
   void findPrev();

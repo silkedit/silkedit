@@ -1,8 +1,10 @@
-#include "HistoryModel.h"
+#include "core/HistoryModel.h"
 
 namespace {
 static constexpr int HISTORY_LIMIT = 10;
 }
+
+namespace core {
 
 int HistoryModel::rowCount(const QModelIndex&) const {
   return m_stringList.count();
@@ -66,3 +68,5 @@ void HistoryModel::prepend(const QString& str) {
     setData(index(0), str);
   }
 }
+
+}  // namespace core

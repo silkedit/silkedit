@@ -9,6 +9,8 @@
 #include "CommandAction.h"
 #include "PluginManager.h"
 
+using core::Operator;
+
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
   if (id.isEmpty())
