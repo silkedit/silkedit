@@ -3,7 +3,7 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 
-#include "PackageManager.h"
+#include "core/PackageManager.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "Window.h"
@@ -32,7 +32,7 @@ int main(int argv, char** args) {
 
   Context::init();
 
-  PackageManager::loadPackages();
+  core::PackageManager::loadPackages();
 
   ConfigManager::load();
 

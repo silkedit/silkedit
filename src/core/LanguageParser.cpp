@@ -7,7 +7,7 @@
 #include <QDir>
 
 #include "core/LanguageParser.h"
-#include "PListParser.h"
+#include "core/PListParser.h"
 #include "Regexp.h"
 
 namespace {

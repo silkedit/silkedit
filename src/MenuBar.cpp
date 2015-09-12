@@ -7,7 +7,7 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
-#include "ThemeProvider.h"
+#include "core/ThemeProvider.h"
 #include "Session.h"
 #include "SilkApp.h"
 #include "commands/PluginCommand.h"
@@ -16,6 +16,8 @@
 #include "version.h"
 
 using core::ConfigManager;
+using core::ThemeProvider;
+using core::Theme;
 
 MenuBar* MenuBar::s_globalMenuBar;
 

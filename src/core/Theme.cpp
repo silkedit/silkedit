@@ -1,7 +1,10 @@
-#include "Theme.h"
-#include "PListParser.h"
+#include "core/Theme.h"
+#include "core/PListParser.h"
 
 namespace {
+using core::ColorSettings;
+using core::ScopeSetting;
+
 const QString nameStr = "name";
 const QString scopeStr = "scope";
 const QString settingsStr = "settings";
@@ -74,6 +77,8 @@ ScopeSetting* toScopeSetting(QVariant var) {
   return scopeSetting;
 }
 }
+
+namespace core {
 
 Theme* Theme::loadTheme(const QString& filename) {
   QFile file(filename);
@@ -346,3 +351,5 @@ int Rank::calcRank(const QStringRef& singleScopeSelector, const QStringRef& sing
 bool ScopeSetting::hasFontStyle() {
   return fontWeight != QFont::Normal || isItalic || isUnderline;
 }
+
+}  // namespace core

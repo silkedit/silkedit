@@ -1,7 +1,9 @@
-#include "PListParser.h"
+#include "core/PListParser.h"
 #include <QDomElement>
 #include <QDomNode>
 #include <QDomDocument>
+
+namespace core {
 
 QVariant PListParser::parsePList(QIODevice* device) {
   QVariantMap result;
@@ -83,3 +85,5 @@ QVariantMap PListParser::parseDictElement(const QDomElement& element) {
   }
   return result;
 }
+
+}  // namespace core

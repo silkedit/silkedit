@@ -4,6 +4,8 @@
 
 #include "core/macros.h"
 
+namespace core {
+
 class PackageManager {
   DISABLE_COPY_AND_MOVE(PackageManager)
 
@@ -16,3 +18,5 @@ class PackageManager {
 
   static void loadPackages(const QString& dirName);
 };
+
+}  // namespace core

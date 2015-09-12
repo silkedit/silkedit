@@ -10,6 +10,8 @@
 #include "core/macros.h"
 #include "core/LanguageParser.h"
 
+namespace core {
+
 typedef QMap<QString, QColor> ColorSettings;
 
 struct ScopeSetting {
@@ -78,3 +80,5 @@ class Rank {
   QVector<int> m_scores;
   State m_state;
 };
+
+}  // namespace core

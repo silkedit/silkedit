@@ -2,15 +2,13 @@
 #include <QApplication>
 #include <QStandardPaths>
 
-#include "PackageManager.h"
+#include "core/PackageManager.h"
 #include "core/LanguageParser.h"
-#include "ThemeProvider.h"
+#include "core/ThemeProvider.h"
 #include "core/Metadata.h"
 #include "core/Constants.h"
 
-using core::Constants;
-using core::LanguageProvider;
-using core::Metadata;
+namespace core {
 
 void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }
@@ -44,3 +42,5 @@ void PackageManager::loadPackages(const QString& dirName) {
     loadPackages(dir.filePath(subdir));
   }
 }
+
+}  // namespace core

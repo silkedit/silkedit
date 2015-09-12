@@ -16,6 +16,8 @@
 #include "PluginManager.h"
 #include "core/ConfigManager.h"
 #include "core/Metadata.h"
+#include "core/LanguageParser.h"
+#include "core/Theme.h"
 
 using core::ConfigManager;
 using core::Document;

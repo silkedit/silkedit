@@ -1,7 +1,9 @@
 #include <algorithm>
 
-#include "ThemeProvider.h"
-#include "Theme.h"
+#include "core/ThemeProvider.h"
+#include "core/Theme.h"
+
+namespace core {
 
 std::unordered_map<QString, std::unique_ptr<Theme>> ThemeProvider::s_nameThemeMap;
 
@@ -32,3 +34,5 @@ Theme* ThemeProvider::theme(const QString& name) {
     return nullptr;
   }
 }
+
+}  // namespace core

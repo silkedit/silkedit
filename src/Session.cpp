@@ -1,8 +1,10 @@
 #include "Session.h"
-#include "ThemeProvider.h"
+#include "core/ThemeProvider.h"
 #include "core/ConfigManager.h"
 
 using core::ConfigManager;
+using core::Theme;
+using core::ThemeProvider;
 
 void Session::setTheme(Theme* theme) {
   if (m_theme != theme) {

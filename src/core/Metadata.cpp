@@ -2,7 +2,7 @@
 #include <QVariant>
 
 #include "core/Metadata.h"
-#include "PListParser.h"
+#include "core/PListParser.h"
 
 namespace {
 const QString nameStr = "name";

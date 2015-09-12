@@ -1,8 +1,9 @@
-#ifndef PLIST_PARSER_H
-#define PLIST_PARSER_H
+#pragma once
 
 #include <QtCore>
 #include <QDomElement>
+
+namespace core {
 
 class PListParser {
  public:
@@ -13,4 +14,5 @@ class PListParser {
   static QVariantList parseArrayElement(const QDomElement& node);
   static QVariantMap parseDictElement(const QDomElement& element);
 };
-#endif
+
+}  // namespace core

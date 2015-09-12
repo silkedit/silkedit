@@ -1,10 +1,14 @@
 #pragma once
 
 #include <QObject>
+#include <QFont>
 
 #include "core/macros.h"
 #include "Singleton.h"
-#include "Theme.h"
+
+namespace core {
+class Theme;
+}
 
 /**
  * @brief Session holds the temporary per user settings like current font and theme.
@@ -17,8 +21,8 @@ class Session : public QObject, public Singleton<Session> {
   ~Session() = default;
 
   // accessor
-  Theme* theme() { return m_theme; }
-  void setTheme(Theme* theme);
+  core::Theme* theme() { return m_theme; }
+  void setTheme(core::Theme* theme);
 
   QFont font() { return m_font; }
   void setFont(const QFont& font);
@@ -32,7 +36,7 @@ class Session : public QObject, public Singleton<Session> {
   void init();
 
 signals:
-  void themeChanged(Theme* newTheme);
+  void themeChanged(core::Theme* newTheme);
   void fontChanged(QFont font);
   void tabWidthChanged(int tabWidth);
   void indentUsingSpacesChanged(bool indentUsingSpaces);
@@ -41,7 +45,7 @@ signals:
   friend class Singleton<Session>;
   Session();
 
-  Theme* m_theme;
+  core::Theme* m_theme;
   QFont m_font;
   int m_tabWidth;
   bool m_indentUsingSpaces;

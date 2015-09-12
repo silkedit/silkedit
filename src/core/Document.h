@@ -9,6 +9,8 @@
 
 namespace core {
 
+struct Language;
+
 class Document : public QTextDocument {
   Q_OBJECT
   DISABLE_COPY(Document)

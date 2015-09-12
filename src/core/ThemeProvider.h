@@ -4,8 +4,10 @@
 #include <QString>
 
 #include "core/macros.h"
-#include "Theme.h"
+#include "core/Theme.h"
 #include "stlSpecialization.h"
+
+namespace core {
 
 class ThemeProvider {
   DISABLE_COPY_AND_MOVE(ThemeProvider)
@@ -22,3 +24,5 @@ class ThemeProvider {
   ThemeProvider() = delete;
   ~ThemeProvider() = delete;
 };
+
+}  // namespace core

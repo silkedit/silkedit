@@ -4,10 +4,13 @@
 #include <QSyntaxHighlighter>
 
 #include "core/macros.h"
-#include "Theme.h"
 
 namespace core {
 class LanguageParser;
+struct Node;
+struct RootNode;
+class Region;
+class Theme;
 }
 
 class SyntaxHighlighter : public QSyntaxHighlighter {
@@ -50,7 +53,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   core::Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
-  Theme* m_theme;
+  core::Theme* m_theme;
   std::unique_ptr<core::LanguageParser> m_parser;
   QFont m_font;
 
@@ -62,6 +65,6 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   void updateScope(int point);
 
  private slots:
-  void changeTheme(Theme* theme);
+  void changeTheme(core::Theme* theme);
   void changeFont(const QFont& font);
 };

@@ -4,6 +4,7 @@
 #include <memory>
 
 #include "TextEditView.h"
+#include "core/Region.h"
 
 class Regexp;
 
@@ -32,7 +33,7 @@ class TextEditViewPrivate : public QObject {
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
-  void setTheme(Theme* theme);
+  void setTheme(core::Theme* theme);
   void clearDirtyMarker();
   void toggleHighlightingCurrentLine(bool hasSelection);
   void emitLanguageChanged(const QString& scope);
