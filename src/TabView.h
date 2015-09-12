@@ -5,7 +5,7 @@
 #include <QTabWidget>
 
 #include "core/macros.h"
-#include "set_unique_ptr.h"
+#include "core/set_unique_ptr.h"
 #include "UniqueObject.h"
 
 class TextEditView;
