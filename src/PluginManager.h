@@ -15,7 +15,7 @@
 #include <QTimer>
 
 #include "core/macros.h"
-#include "msgpackHelper.h"
+#include "core/msgpackHelper.h"
 #include "stlSpecialization.h"
 #include "Singleton.h"
 #include "core/IContext.h"

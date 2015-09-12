@@ -1,5 +1,7 @@
 #include <QString>
-#include "OSContext.h"
+#include "core/OSContext.h"
+
+namespace core {
 
 const QString OSContext::name = "os";
 
@@ -12,3 +14,5 @@ QString OSContext::key() {
   return "mac";
 #endif
 }
+
+}  // namespace core

@@ -3,6 +3,8 @@
 #include "core/IContext.h"
 #include "core/macros.h"
 
+namespace core {
+
 class OSContext : public core::IContext {
   DISABLE_COPY(OSContext)
 
@@ -16,3 +18,5 @@ class OSContext : public core::IContext {
  private:
   QString key() override;
 };
+
+}  // namespace core

@@ -21,7 +21,7 @@
 #include "util.h"
 #include "Context.h"
 #include "PluginContext.h"
-#include "modifiers.h"
+#include "core/modifiers.h"
 #include "core/ConfigManager.h"
 #include "Session.h"
 #include "util/DialogUtils.h"

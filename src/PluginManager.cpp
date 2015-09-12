@@ -20,7 +20,7 @@
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "InputDialog.h"
-#include "modifiers.h"
+#include "core/modifiers.h"
 #include "core/ConfigManager.h"
 
 #define REGISTER_FUNC(type)                                                 \
