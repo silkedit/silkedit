@@ -3,7 +3,7 @@
 #include <QStringBuilder>
 #include <QDebug>
 
-#include "Regexp.h"
+#include "core/Regexp.h"
 
 namespace {
 bool isMetaChar(const QChar& ch) {
@@ -13,6 +13,8 @@ bool isMetaChar(const QChar& ch) {
          ch == '\f' || ch == '\v';
 }
 }
+
+namespace core {
 
 Regexp::~Regexp() {
   onig_free(m_reg);
@@ -133,3 +135,5 @@ bool Regexp::matches(const QString& text, bool findNotEmpty) {
 
 Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {
 }
+
+}  // namespace core

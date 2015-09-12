@@ -1,12 +1,15 @@
 #pragma once
 
 #include <QVector>
+#include <QStringRef>
 
 #include "core/macros.h"
 
 struct re_pattern_buffer;
 typedef re_pattern_buffer OnigRegexType;
 typedef OnigRegexType regex_t;
+
+namespace core {
 
 class Regexp {
   DISABLE_COPY(Regexp)
@@ -30,3 +33,5 @@ class Regexp {
 
   Regexp(regex_t* reg, const QString& pattern);
 };
+
+}  // namespace core

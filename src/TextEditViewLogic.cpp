@@ -2,12 +2,14 @@
 #include <QVector>
 
 #include "TextEditViewLogic.h"
-#include "Regexp.h"
+#include "core/Regexp.h"
 #include "core/Metadata.h"
 
 using core::Metadata;
 
 namespace {
+using core::Regexp;
+
 int indentLength(const QString& str, int tabWidth) {
   int len = 0;
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));

@@ -7,8 +7,8 @@
 
 #include "core/macros.h"
 
-class Regexp;
 namespace core {
+class Regexp;
 class Metadata;
 }
 
@@ -20,8 +20,8 @@ class TextEditViewLogic {
   DISABLE_COPY_AND_MOVE(TextEditViewLogic)
  public:
   static void outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth);
-  static bool isOutdentNecessary(Regexp* increaseIndentPattern,
-                                 Regexp* decreaseIndentPattern,
+  static bool isOutdentNecessary(core::Regexp* increaseIndentPattern,
+                                 core::Regexp* decreaseIndentPattern,
                                  const QString& currentLineText,
                                  const QString& prevLineText,
                                  bool isAtBlockEnd,

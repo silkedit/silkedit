@@ -3,6 +3,7 @@
 
 #include "core/Metadata.h"
 #include "core/PListParser.h"
+#include "core/Regexp.h"
 
 namespace {
 const QString nameStr = "name";

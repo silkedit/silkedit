@@ -8,7 +8,7 @@
 #include <QDebug>
 
 #include "core/macros.h"
-#include "Regexp.h"
+#include "core/Regexp.h"
 #include "stlSpecialization.h"
 #include "core/Region.h"
 

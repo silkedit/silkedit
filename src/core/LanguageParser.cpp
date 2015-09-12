@@ -8,7 +8,7 @@
 
 #include "core/LanguageParser.h"
 #include "core/PListParser.h"
-#include "Regexp.h"
+#include "core/Regexp.h"
 
 namespace {
 using core::Capture;

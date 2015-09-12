@@ -4,12 +4,12 @@
 
 #include "core/macros.h"
 #include "SyntaxHighlighter.h"
-#include "Regexp.h"
 #include "core/Encoding.h"
 
 namespace core {
 
 struct Language;
+class Regexp;
 
 class Document : public QTextDocument {
   Q_OBJECT
@@ -53,12 +53,12 @@ class Document : public QTextDocument {
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr,
+  QTextCursor find(const core::Regexp* expr,
                    int from = 0,
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr,
+  QTextCursor find(const core::Regexp* expr,
                    const QTextCursor& cursor,
                    int begin = 0,
                    int end = -1,

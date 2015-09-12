@@ -2,11 +2,12 @@
 #include <unordered_map>
 #include <QString>
 
-#include "Regexp.h"
 #include "core/macros.h"
 #include "stlSpecialization.h"
 
 namespace core {
+
+class Regexp;
 
 // Model class for .tmPreferences file
 class Metadata {
@@ -21,19 +22,19 @@ class Metadata {
   QString name() { return m_name; }
   void setName(const QString& name) { m_name = name; }
 
-  Regexp* increaseIndentPattern() { return m_increaseIndentPattern.get(); }
+  core::Regexp* increaseIndentPattern() { return m_increaseIndentPattern.get(); }
   void setIncreaseIndentPattern(const QString& pattern);
 
-  Regexp* decreaseIndentPattern() { return m_decreaseIndentPattern.get(); }
+  core::Regexp* decreaseIndentPattern() { return m_decreaseIndentPattern.get(); }
   void setDecreateIndentPattern(const QString& pattern);
 
-  Regexp* bracketIndentNextLinePattern() { return m_bracketIndentNextLinePattern.get(); }
+  core::Regexp* bracketIndentNextLinePattern() { return m_bracketIndentNextLinePattern.get(); }
   void setBracketIndentNextLinePattern(const QString& pattern);
 
-  Regexp* disableIndentNextLinePattern() { return m_disableIndentNextLinePattern.get(); }
+  core::Regexp* disableIndentNextLinePattern() { return m_disableIndentNextLinePattern.get(); }
   void setDisableIndentNextLinePattern(const QString& pattern);
 
-  Regexp* unIndentedLinePattern() { return m_unIndentedLinePattern.get(); }
+  core::Regexp* unIndentedLinePattern() { return m_unIndentedLinePattern.get(); }
   void setUnIndentedLinePattern(const QString& pattern);
 
  private:
@@ -45,11 +46,11 @@ class Metadata {
   // Indentation Options
   // see SublimeText's site for more detail.
   // http://sublime-text-unofficial-documentation.readthedocs.org/en/latest/reference/metadata.html
-  std::unique_ptr<Regexp> m_increaseIndentPattern;
-  std::unique_ptr<Regexp> m_decreaseIndentPattern;
-  std::unique_ptr<Regexp> m_bracketIndentNextLinePattern;
-  std::unique_ptr<Regexp> m_disableIndentNextLinePattern;
-  std::unique_ptr<Regexp> m_unIndentedLinePattern;
+  std::unique_ptr<core::Regexp> m_increaseIndentPattern;
+  std::unique_ptr<core::Regexp> m_decreaseIndentPattern;
+  std::unique_ptr<core::Regexp> m_bracketIndentNextLinePattern;
+  std::unique_ptr<core::Regexp> m_disableIndentNextLinePattern;
+  std::unique_ptr<core::Regexp> m_unIndentedLinePattern;
 
   explicit Metadata(const QString& scope);
   DEFAULT_MOVE(Metadata)

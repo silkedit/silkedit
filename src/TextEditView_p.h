@@ -6,7 +6,9 @@
 #include "TextEditView.h"
 #include "core/Region.h"
 
+namespace core {
 class Regexp;
+}
 
 class TextEditViewPrivate : public QObject {
   Q_OBJECT
@@ -27,7 +29,7 @@ class TextEditViewPrivate : public QObject {
   void insertCompletion(const QString& completion, bool singleWord);
   void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
-  QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
+  QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);

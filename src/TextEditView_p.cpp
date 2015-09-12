@@ -11,6 +11,7 @@ using core::Encoding;
 using core::Metadata;
 using core::Theme;
 using core::ColorSettings;
+using core::Regexp;
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {
