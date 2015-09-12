@@ -3,6 +3,8 @@
 #include <memory>
 #include "core/macros.h"
 
+namespace core {
+
 // http://cflat-inc.hatenablog.com/entry/2014/03/04/214608
 template <class T>
 class Singleton {
@@ -23,3 +25,5 @@ class Singleton {
  protected:
   Singleton() {}
 };
+
+}  // namespace core

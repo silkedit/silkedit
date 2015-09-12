@@ -5,7 +5,7 @@
 
 #include "core/Document.h"
 #include "core/LineSeparator.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "core/LanguageParser.h"
 #include "core/Regexp.h"
 

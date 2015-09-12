@@ -11,7 +11,7 @@
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "API.h"
 #include "PluginManager.h"
 #include "core/ConfigManager.h"
@@ -25,6 +25,7 @@ using core::Encoding;
 using core::Language;
 using core::Region;
 using core::Metadata;
+using core::Session;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

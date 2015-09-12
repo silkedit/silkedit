@@ -9,11 +9,11 @@
 
 #include "OpenRecentItemManager.h"
 #include "core/macros.h"
-#include "Singleton.h"
+#include "core/Singleton.h"
 
 class ClearRecentItemListAction;
 
-class OpenRecentItemManager : public QObject, public Singleton<OpenRecentItemManager> {
+class OpenRecentItemManager : public QObject, public core::Singleton<OpenRecentItemManager> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(OpenRecentItemManager)
 

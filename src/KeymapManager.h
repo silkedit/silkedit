@@ -8,14 +8,14 @@
 #include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
 #include "core/macros.h"
-#include "Singleton.h"
+#include "core/Singleton.h"
 #include "stlSpecialization.h"
 
 class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public Singleton<KeymapManager>, public core::IKeyEventFilter {
+class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEventFilter {
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
@@ -43,7 +43,7 @@ class KeymapManager : public Singleton<KeymapManager>, public core::IKeyEventFil
   QString m_partiallyMatchedKeyString;
 };
 
-class TextEditViewKeyHandler : public QObject, public Singleton<TextEditViewKeyHandler> {
+class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(TextEditViewKeyHandler)
  public:

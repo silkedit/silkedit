@@ -23,13 +23,14 @@
 #include "PluginContext.h"
 #include "core/modifiers.h"
 #include "core/ConfigManager.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "util/DialogUtils.h"
 #include "InputDialog.h"
 
 using core::ConfigManager;
 using core::IContext;
 using core::ICommand;
+using core::Session;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>

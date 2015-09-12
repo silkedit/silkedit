@@ -3,7 +3,7 @@
 
 #include "TextEditView_p.h"
 #include "TextEditViewLogic.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "core/Metadata.h"
 #include "core/Theme.h"
 
@@ -12,6 +12,7 @@ using core::Metadata;
 using core::Theme;
 using core::ColorSettings;
 using core::Regexp;
+using core::Session;
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {

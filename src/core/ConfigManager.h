@@ -4,7 +4,7 @@
 #include <QColor>
 
 #include "core/macros.h"
-#include "Singleton.h"
+#include "core/Singleton.h"
 #include "stlSpecialization.h"
 
 class QString;

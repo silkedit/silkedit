@@ -8,7 +8,7 @@
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
 #include "core/ThemeProvider.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "SilkApp.h"
 #include "commands/PluginCommand.h"
 #include "CommandManager.h"
@@ -18,6 +18,7 @@
 using core::ConfigManager;
 using core::ThemeProvider;
 using core::Theme;
+using core::Session;
 
 MenuBar* MenuBar::s_globalMenuBar;
 

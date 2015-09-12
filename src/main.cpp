@@ -11,7 +11,7 @@
 #include "core/ConfigManager.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
@@ -37,7 +37,7 @@ int main(int argv, char** args) {
   ConfigManager::load();
 
   // Populate session values after loading configs
-  Session::singleton().init();
+  core::Session::singleton().init();
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();

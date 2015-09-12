@@ -1,10 +1,8 @@
-#include "Session.h"
+#include "core/Session.h"
 #include "core/ThemeProvider.h"
 #include "core/ConfigManager.h"
 
-using core::ConfigManager;
-using core::Theme;
-using core::ThemeProvider;
+namespace core {
 
 void Session::setTheme(Theme* theme) {
   if (m_theme != theme) {
@@ -44,3 +42,5 @@ void Session::init() {
 
 Session::Session() : m_theme(nullptr) {
 }
+
+}  // namespace core

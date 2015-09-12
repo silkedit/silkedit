@@ -4,16 +4,16 @@
 #include <QFont>
 
 #include "core/macros.h"
-#include "Singleton.h"
+#include "core/Singleton.h"
 
 namespace core {
+
 class Theme;
-}
 
 /**
  * @brief Session holds the temporary per user settings like current font and theme.
  */
-class Session : public QObject, public Singleton<Session> {
+class Session : public QObject, public core::Singleton<Session> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Session)
 
@@ -50,3 +50,5 @@ signals:
   int m_tabWidth;
   bool m_indentUsingSpaces;
 };
+
+}  // namespace core
