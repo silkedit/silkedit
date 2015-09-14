@@ -6,12 +6,12 @@
 
 #include "core/macros.h"
 #include "core/set_unique_ptr.h"
-#include "UniqueObject.h"
+#include "core/UniqueObject.h"
 
 class TextEditView;
 class TabBar;
 
-class TabView : public QTabWidget, public UniqueObject<TabView> {
+class TabView : public QTabWidget, public core::UniqueObject<TabView> {
   Q_OBJECT
   DISABLE_COPY(TabView)
 

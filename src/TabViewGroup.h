@@ -5,13 +5,13 @@
 #include <QWidget>
 
 #include "core/macros.h"
-#include "UniqueObject.h"
+#include "core/UniqueObject.h"
 
 class TabView;
 class TabBar;
 class Splitter;
 
-class TabViewGroup : public QWidget, public UniqueObject<TabViewGroup> {
+class TabViewGroup : public QWidget, public core::UniqueObject<TabViewGroup> {
   Q_OBJECT
   DISABLE_COPY(TabViewGroup)
 

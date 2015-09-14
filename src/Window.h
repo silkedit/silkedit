@@ -7,7 +7,7 @@
 #include <QMainWindow>
 
 #include "core/macros.h"
-#include "UniqueObject.h"
+#include "core/UniqueObject.h"
 
 class TabView;
 class QBoxLayout;
@@ -18,7 +18,7 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 
-class Window : public QMainWindow, public UniqueObject<Window> {
+class Window : public QMainWindow, public core::UniqueObject<Window> {
   Q_OBJECT
   DISABLE_COPY(Window)
 

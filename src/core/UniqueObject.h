@@ -5,6 +5,8 @@
 #include <QHash>
 #include <QMutex>
 
+namespace core {
+
 // Trait to assign unique id for each instance of T using CRTP
 // http://en.wikipedia.org/wiki/Curiously_recurring_template_pattern
 template <typename T>
@@ -98,3 +100,5 @@ template <typename T>
 QHash<int, T*> UniqueObject<T>::s_objects;
 template <typename T>
 QMutex UniqueObject<T>::s_mutex;
+
+}  // namespace core

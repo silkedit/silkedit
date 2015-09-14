@@ -3,7 +3,7 @@
 #include <QStatusBar>
 
 #include "core/macros.h"
-#include "UniqueObject.h"
+#include "core/UniqueObject.h"
 
 class TextEditView;
 class LanguageComboBox;
@@ -15,7 +15,7 @@ struct Language;
 class Encoding;
 }
 
-class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
+class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   Q_OBJECT
   DISABLE_COPY(StatusBar)
 

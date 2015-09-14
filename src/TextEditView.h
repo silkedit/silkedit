@@ -13,7 +13,7 @@
 #include "core/macros.h"
 #include "core/ICloneable.h"
 #include "core/Document.h"
-#include "UniqueObject.h"
+#include "core/UniqueObject.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -28,7 +28,7 @@ class Encoding;
 }
 
 class TextEditView : public QPlainTextEdit,
-                     public UniqueObject<TextEditView>,
+                     public core::UniqueObject<TextEditView>,
                      public core::ICloneable<TextEditView> {
   Q_OBJECT
  public:
