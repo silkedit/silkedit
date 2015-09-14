@@ -1,7 +1,8 @@
-#include "core/PListParser.h"
 #include <QDomElement>
 #include <QDomNode>
 #include <QDomDocument>
+
+#include "core/PListParser.h"
 
 namespace core {
 
