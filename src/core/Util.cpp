@@ -2,7 +2,9 @@
 #include <QFileInfo>
 #include <QDir>
 
-#include "Util.h"
+#include "core/Util.h"
+
+namespace core {
 
 // This function is same as sort.Search in golang
 // Search uses binary search to find and return the smallest index i in [0, n) at which f(i) is
@@ -44,3 +46,5 @@ std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
 
   return list;
 }
+
+}  // namespace core

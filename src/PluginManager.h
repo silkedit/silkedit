@@ -16,7 +16,7 @@
 
 #include "core/macros.h"
 #include "core/msgpackHelper.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 #include "core/Singleton.h"
 #include "core/IContext.h"
 #include "core/IKeyEventFilter.h"

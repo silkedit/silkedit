@@ -5,7 +5,7 @@
 #include <QString>
 
 #include "core/IContext.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 
 class Context {
  public:

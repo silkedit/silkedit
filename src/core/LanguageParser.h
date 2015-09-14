@@ -9,7 +9,7 @@
 
 #include "core/macros.h"
 #include "core/Regexp.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 #include "core/Region.h"
 
 namespace core {

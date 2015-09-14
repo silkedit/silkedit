@@ -11,7 +11,7 @@
 
 #include "core/macros.h"
 #include "core/ICommand.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 
 class CommandManager {
   DISABLE_COPY_AND_MOVE(CommandManager)

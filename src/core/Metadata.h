@@ -3,7 +3,7 @@
 #include <QString>
 
 #include "core/macros.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 
 namespace core {
 

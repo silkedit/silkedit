@@ -8,6 +8,7 @@
 #include "core/Session.h"
 #include "core/LanguageParser.h"
 #include "core/Regexp.h"
+#include "core/SyntaxHighlighter.h"
 
 namespace {
 using core::Encoding;

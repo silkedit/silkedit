@@ -5,7 +5,7 @@
 
 #include "core/macros.h"
 #include "core/Theme.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 
 namespace core {
 

@@ -7,6 +7,8 @@
 
 #include "core/macros.h"
 
+namespace core {
+
 class Util {
   DISABLE_COPY_AND_MOVE(Util)
 
@@ -31,3 +33,5 @@ class Util {
   Util() = delete;
   ~Util() = delete;
 };
+
+}  // namespace core

@@ -8,6 +8,7 @@
 
 namespace core {
 class Regexp;
+class Theme;
 }
 
 class TextEditViewPrivate : public QObject {

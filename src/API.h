@@ -6,7 +6,7 @@
 #include <string>
 
 #include "core/macros.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 #include "util/DialogUtils.h"
 
 class API {

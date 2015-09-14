@@ -1,18 +1,14 @@
 #include <QTextDocument>
 #include <QDebug>
 
-#include "SyntaxHighlighter.h"
+#include "core/SyntaxHighlighter.h"
 #include "core/PListParser.h"
-#include "Util.h"
+#include "core/Util.h"
 #include "core/Session.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
 
-using core::LanguageParser;
-using core::Region;
-using core::Node;
-using core::Theme;
-using core::Session;
+namespace core {
 
 // fixme: memory leak of new QObject();
 // Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass
@@ -218,3 +214,5 @@ void SyntaxHighlighter::changeFont(const QFont& font) {
   m_font = font;
   rehighlight();
 }
+
+}  // namespace core

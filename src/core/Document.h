@@ -3,13 +3,13 @@
 #include <QTextDocument>
 
 #include "core/macros.h"
-#include "SyntaxHighlighter.h"
 #include "core/Encoding.h"
 
 namespace core {
 
 struct Language;
 class Regexp;
+class SyntaxHighlighter;
 
 class Document : public QTextDocument {
   Q_OBJECT
