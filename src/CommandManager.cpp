@@ -3,8 +3,6 @@
 #include "CommandManager.h"
 #include "PluginManager.h"
 
-using core::ICommand;
-
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::s_commands;
 std::vector<CommandManager::CmdEventHandler> CommandManager::s_cmdEventFilters;
 

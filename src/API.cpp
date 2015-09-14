@@ -29,7 +29,6 @@
 
 using core::ConfigManager;
 using core::IContext;
-using core::ICommand;
 using core::Session;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;

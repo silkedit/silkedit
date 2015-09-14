@@ -10,7 +10,7 @@
 #include <QVariant>
 
 #include "core/macros.h"
-#include "core/ICommand.h"
+#include "ICommand.h"
 #include "core/stlSpecialization.h"
 
 class CommandManager {
@@ -24,7 +24,7 @@ class CommandManager {
   static void runCommand(const QString& name,
                          const CommandArgument& args = CommandArgument(),
                          int repeat = 1);
-  static void add(std::unique_ptr<core::ICommand> cmd);
+  static void add(std::unique_ptr<ICommand> cmd);
   static void remove(const QString& name);
   static void addEventFilter(CmdEventHandler handler);
 
@@ -34,7 +34,7 @@ class CommandManager {
 
   // QHash doesn't like unique_ptr (probably lack of move semantics),
   // so use an unordered_map here instead
-  static std::unordered_map<QString, std::unique_ptr<core::ICommand>> s_commands;
+  static std::unordered_map<QString, std::unique_ptr<ICommand>> s_commands;
 
   static std::vector<CmdEventHandler> s_cmdEventFilters;
 };

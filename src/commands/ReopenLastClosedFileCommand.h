@@ -2,9 +2,9 @@
 
 #include <QObject>
 
-#include "core/ICommand.h"
+#include "ICommand.h"
 
-class ReopenLastClosedFileCommand : public QObject, public core::ICommand {
+class ReopenLastClosedFileCommand : public QObject, public ICommand {
   Q_OBJECT
  public:
   static const QString name;
