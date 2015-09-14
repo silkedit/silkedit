@@ -44,6 +44,8 @@ qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
 
+add_subdirectory(core)
+
 if (APPLE)
   find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
@@ -60,7 +62,7 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(SYSTEM /usr/local/include msgpack-c/include src)
+  include_directories(SYSTEM /usr/local/include msgpack-c/include src core)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MINGW)
   set(YAML_CPP_LIBRARY yaml-cpp)
@@ -77,7 +79,7 @@ elseif (MINGW)
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include)
+  include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include core)
   link_directories(${MSYS_LIB} lib)
 
   if (BUILD_EDGE)
@@ -89,7 +91,7 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON} ${QM_FILES})
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${UCHARDET_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${ONIG_LIBRARY} ${UCHARDET_LIBRARY})
 
 if(APPLE)
   # bundle packages
