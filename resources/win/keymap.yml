@@ -23,7 +23,7 @@
     ctrl+c: copy
     ctrl+v: paste
     ctrl+a: select_all
-    ctrl+f: open_find_pane
+    ctrl+f: open_find_panel
     ctrl+shift+p: show_scope
     ctrl+space: complete
     enter: newline
