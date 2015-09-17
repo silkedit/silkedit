@@ -8,10 +8,10 @@
 # Default keymap
 
 - keymap:
-    ctrl+b: { cmd: move_cursor, args: { operation: left }}
-    ctrl+f: { cmd: move_cursor, args: { operation: right }}
-    ctrl+p: { cmd: move_cursor, args: { operation: up }}
-    ctrl+n: { cmd: move_cursor, args: { operation: down }}
+    ctrl+b: { command: move_cursor, args: { operation: left }}
+    ctrl+f: { command: move_cursor, args: { operation: right }}
+    ctrl+p: { command: move_cursor, args: { operation: up }}
+    ctrl+n: { command: move_cursor, args: { operation: down }}
     cmd+n: new_file
     cmd+o: open
     cmd+s: save

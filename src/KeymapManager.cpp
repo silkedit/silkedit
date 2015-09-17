@@ -100,23 +100,23 @@ void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const 
       YAML::Node valueNode = keymapIter->second;
       switch (valueNode.Type()) {
         case YAML::NodeType::Scalar: {
-          QString cmd = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
-          qDebug() << "key: " << key << ", cmd: " << cmd;
-          add(key, CommandEvent(cmd, context));
+          QString command = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
+          qDebug() << "key: " << key << ", command: " << command;
+          add(key, CommandEvent(command, context));
           break;
         }
         case YAML::NodeType::Map: {
-          std::string cmdStr = valueNode["cmd"].as<std::string>();
-          QString cmd = QString::fromUtf8(cmdStr.c_str());
-          qDebug() << "key: " << key << ", cmd: " << cmd;
+          std::string commandStr = valueNode["command"].as<std::string>();
+          QString command = QString::fromUtf8(commandStr.c_str());
+          qDebug() << "key: " << key << ", command: " << command;
 
           YAML::Node argsNode = valueNode["args"];
           if (argsNode.IsMap()) {
             assert(argsNode.IsMap());
             CommandArgument args = parseArgs(argsNode);
-            add(key, CommandEvent(cmd, args, context));
+            add(key, CommandEvent(command, args, context));
           } else {
-            add(key, CommandEvent(cmd, context));
+            add(key, CommandEvent(command, context));
           }
 
           break;

@@ -10,30 +10,30 @@
 
 - context: mode == normal
   keymap:
-    i: { cmd: vim.change_mode, args: { mode: insert }}
-    'shift+:': { cmd: vim.change_mode, args: { mode: commandline }}
-    h: { cmd: move_cursor, args: { operation: left }}
-    j: { cmd: move_cursor, args: { operation: down }}
-    k: { cmd: move_cursor, args: { operation: up }}
-    l: { cmd: move_cursor, args: { operation: right }}
-    space: { cmd: move_cursor, args: { operation: right }}
-    0: { cmd: move_cursor, args: { operation: start_of_block }}
-    'shift+^': { cmd: move_cursor, args: { operation: first_non_blank_char }}
-    'shift+$': { cmd: move_cursor, args: { operation: last_char }}
-    enter: { cmd: move_cursor, args: { operation: next_line }}
-    shift++: { cmd: move_cursor, args: { operation: next_line }}
-    -: { cmd: move_cursor, args: { operation: prev_line }}
+    i: { command: vim.change_mode, args: { mode: insert }}
+    'shift+:': { command: vim.change_mode, args: { mode: commandline }}
+    h: { command: move_cursor, args: { operation: left }}
+    j: { command: move_cursor, args: { operation: down }}
+    k: { command: move_cursor, args: { operation: up }}
+    l: { command: move_cursor, args: { operation: right }}
+    space: { command: move_cursor, args: { operation: right }}
+    0: { command: move_cursor, args: { operation: start_of_block }}
+    'shift+^': { command: move_cursor, args: { operation: first_non_blank_char }}
+    'shift+$': { command: move_cursor, args: { operation: last_char }}
+    enter: { command: move_cursor, args: { operation: next_line }}
+    shift++: { command: move_cursor, args: { operation: next_line }}
+    -: { command: move_cursor, args: { operation: prev_line }}
     x: delete
-    shift+x: { cmd: delete, args: { direction: backward }}
+    shift+x: { command: delete, args: { direction: backward }}
     u: undo
     ctrl+r: redo
-    left: { cmd: move_cursor, args: { operation: left }}
-    down: { cmd: move_cursor, args: { operation: down }}
-    up: { cmd: move_cursor, args: { operation: up }}
-    right: { cmd: move_cursor, args: { operation: right }}
+    left: { command: move_cursor, args: { operation: left }}
+    down: { command: move_cursor, args: { operation: down }}
+    up: { command: move_cursor, args: { operation: up }}
+    right: { command: move_cursor, args: { operation: right }}
 
 # Insert mode keymap
 
 - context: mode == insert
   keymap:
-    escape: { cmd: vim.change_mode, args: { mode: normal }}
+    escape: { command: vim.change_mode, args: { mode: normal }}
