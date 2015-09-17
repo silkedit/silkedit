@@ -343,9 +343,9 @@ const loadPackage = (dir) => {
       return id != null ? new Window(id) : null
     }
 
-    ,showFileAndDirectoryDialog: (caption) => {
+    ,showFileAndFolderDialog: (caption) => {
       caption = caption == null ? 'Open' : caption
-      return client.invoke('showFileAndDirectoryDialog', caption)
+      return client.invoke('showFileAndFolderDialog', caption)
     }
 
     ,showFilesDialog: (caption) => {
@@ -355,7 +355,7 @@ const loadPackage = (dir) => {
 
     ,showFolderDialog: (caption) => {
       caption = caption == null ? 'Open Folder' : caption
-      return client.invoke('showDirectoryDialog', caption)
+      return client.invoke('showFolderDialog', caption)
     }
 
     ,open: (path) => {

@@ -33,7 +33,7 @@ module.exports = {
 			}
 		}
 		,"open": () => {
-			const paths = silk.showFileAndDirectoryDialog('Open')
+			const paths = silk.showFileAndFolderDialog('Open')
 			paths.forEach(function(path) {
 				silk.open(path)
 			})

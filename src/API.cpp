@@ -50,10 +50,9 @@ void API::init() {
   s_requestFunctions.insert(std::make_pair("activeTabViewGroup", &activeTabViewGroup));
   s_requestFunctions.insert(std::make_pair("activeWindow", &activeWindow));
   s_requestFunctions.insert(std::make_pair("windows", &windows));
-  s_requestFunctions.insert(
-      std::make_pair("showFileAndDirectoryDialog", &showFileAndDirectoryDialog));
+  s_requestFunctions.insert(std::make_pair("showFileAndFolderDialog", &showFileAndFolderDialog));
   s_requestFunctions.insert(std::make_pair("showFilesDialog", &showFilesDialog));
-  s_requestFunctions.insert(std::make_pair("showDirectoryDialog", &showDirectoryDialog));
+  s_requestFunctions.insert(std::make_pair("showFolderDialog", &showFolderDialog));
   s_requestFunctions.insert(std::make_pair("getConfig", &getConfig));
   s_requestFunctions.insert(std::make_pair("version", &version));
   s_requestFunctions.insert(std::make_pair("showFontDialog", &showFontDialog));
@@ -172,7 +171,7 @@ void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
   }
 }
 
-void API::showFileAndDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+void API::showFileAndFolderDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
   showDialogImpl(msgId, obj, DialogUtils::MODE::FileAndDirectory);
 }
 
@@ -180,7 +179,7 @@ void API::showFilesDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
   showDialogImpl(msgId, obj, DialogUtils::MODE::Files);
 }
 
-void API::showDirectoryDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
+void API::showFolderDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 1) {
     msgpack::type::tuple<std::string> params;

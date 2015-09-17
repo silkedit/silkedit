@@ -39,7 +39,7 @@ int main(int argv, char** args) {
   // Populate session values after loading configs
   core::Session::singleton().init();
 
-  //   Load keymap settings after registering commands
+  // Load keymap settings after registering commands
   KeymapManager::singleton().load();
 
   // setup translators
