@@ -589,13 +589,18 @@ void TextEditView::insertNewLineWithIndent() {
   QPlainTextEdit::keyPressEvent(&event);
 
   // Indent a new line based on indent settings
-  auto metadata = Metadata::get(d->m_document->language()->scopeName);
-  QString prevLineString;
-  if (metadata) {
-    prevLineString = d->prevLineText(1, metadata->unIndentedLinePattern());
-  } else {
+  QString prevLineString = "";
+  Metadata* metadata = nullptr;
+  if (d->m_document && d->m_document->language()) {
+    metadata = Metadata::get(d->m_document->language()->scopeName);
+    if (metadata) {
+      prevLineString = d->prevLineText(1, metadata->unIndentedLinePattern());
+    }
+  }
+  if (!metadata) {
     prevLineString = d->prevLineText();
   }
+
   if (prevLineString.isEmpty()) {
     return;
   }

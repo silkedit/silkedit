@@ -259,6 +259,9 @@ TextEditViewPrivate::TextEditViewPrivate(TextEditView* q_ptr)
 }
 
 void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
+  if (!m_document || !m_document->language()) {
+    return;
+  }
   auto metadata = Metadata::get(m_document->language()->scopeName);
   if (!metadata) {
     return;
