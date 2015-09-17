@@ -55,8 +55,7 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(SYSTEM /usr/local/include msgpack-c/include)
-  include_directories(src)
+  include_directories(SYSTEM /usr/local/include msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MINGW)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
@@ -69,8 +68,7 @@ elseif (MINGW)
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include ${MSYS_INCLUDE} include)
-  include_directories(src)
+  include_directories(SYSTEM msgpack-c/include ${MSYS_INCLUDE} include src)
   link_directories(${MSYS_LIB} lib)
 
   if (BUILD_EDGE)

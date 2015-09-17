@@ -18,7 +18,6 @@
 #include "core/msgpackHelper.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
-#include "core/IContext.h"
 #include "core/IKeyEventFilter.h"
 #include "CommandArgument.h"
 #include "PluginManager_p.h"

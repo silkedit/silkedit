@@ -17,11 +17,10 @@
 #include "InputDialog.h"
 #include "core/modifiers.h"
 #include "core/ConfigManager.h"
+#include "core/IContext.h"
 
 using core::Constants;
 using core::ConfigManager;
-using core::Operator;
-using core::IContext;
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
@@ -49,10 +48,10 @@ void PluginManager::callExternalCommand(const QString& cmd, const CommandArgumen
   sendNotification("runCommand", params);
 }
 
-bool PluginManager::askExternalContext(const QString& name, Operator op, const QString& value) {
+bool PluginManager::askExternalContext(const QString& name, core::Operator op, const QString& value) {
   qDebug("askExternalContext");
   std::tuple<std::string, std::string, std::string> params =
-      std::make_tuple(name.toUtf8().constData(), IContext::operatorString(op).toUtf8().constData(),
+      std::make_tuple(name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
                       value.toUtf8().constData());
 
   try {

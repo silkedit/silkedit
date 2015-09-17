@@ -29,8 +29,6 @@
 
 using core::Constants;
 using core::ConfigManager;
-using core::Operator;
-using core::IContext;
 
 namespace {
 
@@ -142,11 +140,11 @@ void PluginManagerPrivate::callExternalCommand(const QString& cmd, const Command
 }
 
 bool PluginManagerPrivate::askExternalContext(const QString& name,
-                                              Operator op,
+                                              core::Operator op,
                                               const QString& value) {
   qDebug("askExternalContext");
   std::tuple<std::string, std::string, std::string> params =
-      std::make_tuple(name.toUtf8().constData(), IContext::operatorString(op).toUtf8().constData(),
+      std::make_tuple(name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
                       value.toUtf8().constData());
 
   try {
