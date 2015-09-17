@@ -9,11 +9,13 @@
 #include "TextEditView.h"
 #include "ReloadEncodingDialog.h"
 #include "core/LanguageParser.h"
+#include "core/LineSeparator.h"
 
 using core::Encoding;
 using core::Language;
 using core::LanguageParser;
 using core::LanguageProvider;
+using core::LineSeparator;
 
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),
@@ -32,6 +34,11 @@ StatusBar::StatusBar(Window* window)
   connect(m_separatorComboBox,
           static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
           &StatusBar::setActiveTextEditViewLineSeparator);
+
+  // Set default values
+  setCurrentLanguage(LanguageProvider::defaultLanguage());
+  setEncoding(Encoding::defaultEncoding());
+  setLineSeparator(LineSeparator::defaultLineSeparator().separatorStr());
 }
 
 void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
