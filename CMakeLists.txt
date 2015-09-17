@@ -81,7 +81,7 @@ elseif (MINGW)
     set( SILK_ICON resources/silkedit.rc)
   endif (BUILD_EDGE)
 
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON} ${QM_FILES})
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif (APPLE)
 
 # enable_testing should be in the root
@@ -107,13 +107,13 @@ if(APPLE)
   # bundle fonts
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/resources/fonts ${PROJECT_NAME}.app/Contents/Resources)
 
-	# Copy qt_<locale>.qm files because macdeployqt doesn't copy them (windeployqt does)
-	file(COPY ${CMAKE_PREFIX_PATH}/translations/qt_ja.qm
-						${CMAKE_PREFIX_PATH}/translations/qtmultimedia_ja.qm
-						${CMAKE_PREFIX_PATH}/translations/qtbase_ja.qm
-						${CMAKE_PREFIX_PATH}/translations/qtquick1_ja.qm
-						${CMAKE_PREFIX_PATH}/translations/qtscript_ja.qm
-						${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
+  # Copy qt_<locale>.qm files because macdeployqt doesn't copy them (windeployqt does)
+  file(COPY ${CMAKE_PREFIX_PATH}/translations/qt_ja.qm
+            ${CMAKE_PREFIX_PATH}/translations/qtmultimedia_ja.qm
+            ${CMAKE_PREFIX_PATH}/translations/qtbase_ja.qm
+            ${CMAKE_PREFIX_PATH}/translations/qtquick1_ja.qm
+            ${CMAKE_PREFIX_PATH}/translations/qtscript_ja.qm
+            ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
 elseif (MINGW)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)

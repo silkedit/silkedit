@@ -201,7 +201,7 @@ build() {
         if [ ! -d Release ]; then
             mkdir Release
         fi
-        cp -r silkedit.exe packages plugin_runner Release
+        cp -r silkedit.exe packages plugin_runner silkedit_ja.qm Release
         rm -rf silkedit.exe packages plugin_runner
         cd Release
         windeployqt --release silkedit.exe
