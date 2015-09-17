@@ -31,6 +31,7 @@ class TextEditView : public QPlainTextEdit,
                      public core::UniqueObject<TextEditView>,
                      public core::ICloneable<TextEditView> {
   Q_OBJECT
+  Q_DECLARE_PRIVATE(TextEditView)
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
@@ -112,8 +113,17 @@ signals:
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
-  std::unique_ptr<TextEditViewPrivate> d;
+  TextEditViewPrivate* d_ptr;
   void setViewportMargins(int left, int top, int right, int bottom);
 
-  friend class TextEditViewPrivate;
+  Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
+  Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion))
+  Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion, bool singleWord))
+  Q_PRIVATE_SLOT(d_func(), void updateLineNumberAreaWidth(int newBlockCount))
+  Q_PRIVATE_SLOT(d_func(), void updateLineNumberArea(const QRect&, int))
+  Q_PRIVATE_SLOT(d_func(), void highlightCurrentLine())
+  Q_PRIVATE_SLOT(d_func(), void setTheme(core::Theme* theme))
+  Q_PRIVATE_SLOT(d_func(), void clearDirtyMarker())
+  Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
+  Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
 };

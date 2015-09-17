@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include <memory>
 
 #include "TextEditView.h"
@@ -9,14 +8,15 @@
 namespace core {
 class Regexp;
 class Theme;
+class Document;
 }
 
-class TextEditViewPrivate : public QObject {
-  Q_OBJECT
+class TextEditViewPrivate {
+  Q_DECLARE_PUBLIC(TextEditView)
  public:
   explicit TextEditViewPrivate(TextEditView* q_ptr);
 
-  TextEditView* q;
+  TextEditView* q_ptr;
   QWidget* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;
@@ -43,4 +43,5 @@ class TextEditViewPrivate : public QObject {
   void emitEncodingChanged(const core::Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);
   void setTabStopWidthFromSession();
+  void setupConnections(std::shared_ptr<core::Document> document);
 };

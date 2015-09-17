@@ -6,6 +6,7 @@
 #include "core/Session.h"
 #include "core/Metadata.h"
 #include "core/Theme.h"
+#include "core/Document.h"
 
 using core::Encoding;
 using core::Metadata;
@@ -14,6 +15,7 @@ using core::ColorSettings;
 using core::Regexp;
 using core::Session;
 using core::TextEditViewLogic;
+using core::Document;
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {
@@ -23,7 +25,7 @@ bool caseInsensitiveLessThan(const QString& a, const QString& b) {
 
 void TextEditViewPrivate::updateLineNumberAreaWidth(int /* newBlockCount */) {
   //  qDebug("updateLineNumberAreaWidth");
-  q->setViewportMargins(q->lineNumberAreaWidth(), 0, 0, 0);
+  q_ptr->setViewportMargins(q_ptr->lineNumberAreaWidth(), 0, 0, 0);
 }
 
 void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
@@ -33,7 +35,7 @@ void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
   else
     m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
 
-  if (rect.contains(q->viewport()->rect()))
+  if (rect.contains(q_ptr->viewport()->rect()))
     updateLineNumberAreaWidth(0);
 }
 
@@ -87,18 +89,18 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
                       .arg(settings->value("selectionForeground").name());
     }
 
-    q->setStyleSheet(QString("QPlainTextEdit{%1}").arg(style));
+    q_ptr->setStyleSheet(QString("QPlainTextEdit{%1}").arg(style));
   }
 
   highlightCurrentLine();
 }
 
 void TextEditViewPrivate::clearDirtyMarker() {
-  q->document()->setModified(false);
+  q_ptr->document()->setModified(false);
 }
 
 void TextEditViewPrivate::clearHighlightingCurrentLine() {
-  q->setExtraSelections(QList<QTextEdit::ExtraSelection>());
+  q_ptr->setExtraSelections(QList<QTextEdit::ExtraSelection>());
 }
 
 void TextEditViewPrivate::performCompletion(const QString& completionPrefix) {
@@ -111,7 +113,7 @@ void TextEditViewPrivate::performCompletion(const QString& completionPrefix) {
   if (m_completer->completionCount() == 1) {
     insertCompletion(m_completer->currentCompletion(), true);
   } else {
-    QRect rect = q->cursorRect();
+    QRect rect = q_ptr->cursorRect();
     rect.setWidth(m_completer->popup()->sizeHintForColumn(0) +
                   m_completer->popup()->verticalScrollBar()->sizeHint().width());
     m_completer->complete(rect);
@@ -123,7 +125,7 @@ void TextEditViewPrivate::insertCompletion(const QString& completion) {
 }
 
 void TextEditViewPrivate::insertCompletion(const QString& completion, bool singleWord) {
-  QTextCursor cursor = q->textCursor();
+  QTextCursor cursor = q_ptr->textCursor();
   int numberOfCharsToComplete = completion.length() - m_completer->completionPrefix().length();
   int insertionPosition = cursor.position();
   cursor.insertText(completion.right(numberOfCharsToComplete));
@@ -133,11 +135,11 @@ void TextEditViewPrivate::insertCompletion(const QString& completion, bool singl
     m_completedAndSelected = true;
   }
 
-  q->setTextCursor(cursor);
+  q_ptr->setTextCursor(cursor);
 }
 
 void TextEditViewPrivate::populateModel(const QString& completionPrefix) {
-  QStringList strings = q->toPlainText().split(QRegExp("\\W+"));
+  QStringList strings = q_ptr->toPlainText().split(QRegExp("\\W+"));
   strings.removeAll(completionPrefix);
   strings.removeDuplicates();
   qSort(strings.begin(), strings.end(), caseInsensitiveLessThan);
@@ -146,7 +148,7 @@ void TextEditViewPrivate::populateModel(const QString& completionPrefix) {
 
 bool TextEditViewPrivate::handledCompletedAndSelected(QKeyEvent* event) {
   m_completedAndSelected = false;
-  QTextCursor cursor = q->textCursor();
+  QTextCursor cursor = q_ptr->textCursor();
   switch (event->key()) {
     case Qt::Key_Enter:
     case Qt::Key_Return:
@@ -158,7 +160,7 @@ bool TextEditViewPrivate::handledCompletedAndSelected(QKeyEvent* event) {
     default:
       return false;
   }
-  q->setTextCursor(cursor);
+  q_ptr->setTextCursor(cursor);
   event->accept();
   return true;
 }
@@ -170,7 +172,7 @@ bool TextEditViewPrivate::handledCompletedAndSelected(QKeyEvent* event) {
  * @return
  */
 QString TextEditViewPrivate::prevLineText(int prevCount, Regexp* ignorePattern) {
-  auto cursor = q->textCursor();
+  auto cursor = q_ptr->textCursor();
   for (int i = 0; i < prevCount; i++) {
     bool moved = false;
     do {
@@ -193,24 +195,48 @@ void TextEditViewPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
 }
 
 void TextEditViewPrivate::emitLanguageChanged(const QString& scope) {
-  emit q->languageChanged(scope);
+  emit q_ptr->languageChanged(scope);
 }
 
 void TextEditViewPrivate::emitEncodingChanged(const Encoding& enc) {
-  emit q->encodingChanged(enc);
+  emit q_ptr->encodingChanged(enc);
 }
 
 void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator) {
-  emit q->lineSeparatorChanged(lineSeparator);
+  emit q_ptr->lineSeparatorChanged(lineSeparator);
 }
 
 void TextEditViewPrivate::setTabStopWidthFromSession() {
   QFontMetrics metrics(Session::singleton().font());
-  q->setTabStopWidth(Session::singleton().tabWidth() * metrics.width(" "));
+  q_ptr->setTabStopWidth(Session::singleton().tabWidth() * metrics.width(" "));
+}
+
+void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
+  Q_Q(TextEditView);
+
+  // QObject::disconnect from old document
+  QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
+  QObject::disconnect(m_document.get(), &Document::languageChanged, q,
+                      &TextEditView::languageChanged);
+  QObject::disconnect(m_document.get(), &Document::encodingChanged, q,
+                      &TextEditView::encodingChanged);
+  QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
+                      &TextEditView::lineSeparatorChanged);
+  QObject::disconnect(m_document.get(), SIGNAL(contentsChanged), q,
+                      SLOT(outdentCurrentLineIfNecessary));
+
+  m_document = document;
+  QObject::connect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
+  QObject::connect(m_document.get(), &Document::languageChanged, q, &TextEditView::languageChanged);
+  QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
+  QObject::connect(m_document.get(), &Document::lineSeparatorChanged, q,
+                   &TextEditView::lineSeparatorChanged);
+  QObject::connect(m_document.get(), SIGNAL(contentsChanged), q,
+                   SLOT(outdentCurrentLineIfNecessary));
 }
 
 void TextEditViewPrivate::highlightCurrentLine() {
-  if (q->textCursor().hasSelection()) {
+  if (q_ptr->textCursor().hasSelection()) {
     return;
   }
 
@@ -220,19 +246,19 @@ void TextEditViewPrivate::highlightCurrentLine() {
     if (settings->contains("lineHighlight")) {
       QList<QTextEdit::ExtraSelection> extraSelections;
 
-      if (!q->isReadOnly()) {
+      if (!q_ptr->isReadOnly()) {
         QTextEdit::ExtraSelection selection;
 
         QColor lineColor = QColor(settings->value("lineHighlight"));
 
         selection.format.setBackground(lineColor);
         selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = q->textCursor();
+        selection.cursor = q_ptr->textCursor();
         selection.cursor.clearSelection();
         extraSelections.append(selection);
       }
 
-      q->setExtraSelections(extraSelections);
+      q_ptr->setExtraSelections(extraSelections);
     } else {
       qDebug("lineHighlight not found");
     }
@@ -255,7 +281,7 @@ void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
  * @param currentVisibleCursor
  */
 TextEditViewPrivate::TextEditViewPrivate(TextEditView* q_ptr)
-    : q(q_ptr), m_document(nullptr), m_completedAndSelected(false) {
+    : q_ptr(q_ptr), m_document(nullptr), m_completedAndSelected(false) {
 }
 
 void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
@@ -267,7 +293,7 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
     return;
   }
 
-  auto currentVisibleCursor = q->textCursor();
+  auto currentVisibleCursor = q_ptr->textCursor();
   const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
   const QString& prevLineString = prevLineText();
   if (TextEditViewLogic::isOutdentNecessary(
