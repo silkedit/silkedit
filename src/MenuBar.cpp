@@ -98,7 +98,7 @@ ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, p
 }
 
 ThemeMenu::ThemeMenu(const QString& title, QWidget* parent) : QMenu(title, parent) {
-  connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(themeChanged(Theme*)));
+  connect(&Session::singleton(), &Session::themeChanged, this, &ThemeMenu::themeChanged);
 }
 
 void ThemeMenu::themeChanged(Theme* theme) {

@@ -11,6 +11,8 @@ class Theme;
 class Document;
 }
 
+class TextEditView;
+
 class TextEditViewPrivate {
   Q_DECLARE_PUBLIC(TextEditView)
  public:
@@ -28,7 +30,7 @@ class TextEditViewPrivate {
   void performCompletion(const QString& completionPrefix);
   void insertCompletion(const QString& completion);
   void insertCompletion(const QString& completion, bool singleWord);
-  void populateModel(const QString& completionPrefix);
+  void populateModel(const QString& completionPrefix );
   bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);

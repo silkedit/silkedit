@@ -25,6 +25,7 @@ class TextEditViewPrivate;
 namespace core {
 struct Language;
 class Encoding;
+class Theme;
 }
 
 class TextEditView : public QPlainTextEdit,
@@ -122,8 +123,10 @@ signals:
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberAreaWidth(int newBlockCount))
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberArea(const QRect&, int))
   Q_PRIVATE_SLOT(d_func(), void highlightCurrentLine())
-  Q_PRIVATE_SLOT(d_func(), void setTheme(core::Theme* theme))
   Q_PRIVATE_SLOT(d_func(), void clearDirtyMarker())
   Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
   Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
+
+ private slots:
+  void setTheme(core::Theme *theme);
 };
