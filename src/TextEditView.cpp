@@ -362,7 +362,7 @@ void TextEditView::moveCursor(int mv, int n) {
 
 void TextEditView::performCompletion() {
   QTextCursor cursor = textCursor();
-  cursor.select(QTextCursor::WordUnderCursor);
+  cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
   const QString completionPrefix = cursor.selectedText();
   if (!completionPrefix.isEmpty() &&
       completionPrefix.at(completionPrefix.length() - 1).isLetter()) {
