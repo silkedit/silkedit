@@ -6,7 +6,7 @@
 
 #include "vi.h"
 #include "TextEditView_p.h"
-#include "TextEditViewLogic.h"
+#include "core/TextEditViewLogic.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
@@ -26,6 +26,7 @@ using core::Language;
 using core::Region;
 using core::Metadata;
 using core::Session;
+using core::TextEditViewLogic;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

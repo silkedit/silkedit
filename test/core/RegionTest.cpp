@@ -2,6 +2,8 @@
 
 #include "Region.h"
 
+namespace core {
+
 class RegionTest : public QObject {
   Q_OBJECT
  private slots:
@@ -36,5 +38,7 @@ void RegionTest::intersects() {
   QVERIFY(Region(0, 3).intersects(Region(0, 3)));
 }
 
-QTEST_MAIN(RegionTest)
+}  // namespace core
+
+QTEST_MAIN(core::RegionTest)
 #include "RegionTest.moc"

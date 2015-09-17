@@ -3,6 +3,8 @@
 
 #include "Theme.h"
 
+namespace core {
+
 class ThemeTest : public QObject {
   Q_OBJECT
  private slots:
@@ -161,5 +163,7 @@ class ThemeTest : public QObject {
   }
 };
 
-QTEST_MAIN(ThemeTest)
+}  // namespace core
+
+QTEST_MAIN(core::ThemeTest)
 #include "ThemeTest.moc"

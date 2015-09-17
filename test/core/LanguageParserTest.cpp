@@ -22,11 +22,14 @@ void compareLineByLine(const QString& str1, const QString& str2) {
 }
 }
 
+namespace core {
+
 class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
   void loadLanguage() {
     Language* lang = LanguageProvider::loadLanguage("testdata/C++.tmLanguage");
+    Q_ASSERT(lang);
 
     // fileTypes
     QCOMPARE(lang->fileTypes.size(), 13);
@@ -225,5 +228,7 @@ class LanguageParserTest : public QObject {
   }
 };
 
-QTEST_MAIN(LanguageParserTest)
+}  // namespace core
+
+QTEST_MAIN(core::LanguageParserTest)
 #include "LanguageParserTest.moc"

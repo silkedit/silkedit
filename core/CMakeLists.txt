@@ -1,44 +1,17 @@
-cmake_minimum_required(VERSION 3.0.2)
+set(MODULE_NAME ${PROJECT_NAME}_core)
 
-project(SilkEdit_core)
-
-set(CMAKE_AUTOMOC ON)
-
-# Automatically add the current source- and build directories to the include path.
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-file(GLOB_RECURSE SILK_CORE_SOURCES *.cpp)
-file(GLOB_RECURSE SILK_CORE_HEADERS *.h)
-
-# Find the QtWidgets library
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Xml REQUIRED)
+file(GLOB SILK_CORE_SOURCES *.cpp)
+file(GLOB SILK_CORE_HEADERS *.h)
 
 if (APPLE)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
   find_library(UCHARDET_LIBRARY NAMES libuchardet.a PATHS /usr/local/lib)
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(SYSTEM /usr/local/include)
-  add_library(${PROJECT_NAME} ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
+  find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
 elseif (MINGW)
   set(ONIG_LIBRARY onig.a)
   set(UCHARDET_LIBRARY uchardet.a)
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( MSYS_INCLUDE c:/msys64/mingw64/include c:/msys64/usr/local/include)
-    set( MSYS_LIB c:/msys64/mingw64/lib c:/msys64/usr/local/lib)
-  else ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( MSYS_INCLUDE c:/msys32/mingw32/include c:/msys32/usr/local/include)
-    set( MSYS_LIB c:/msys32/mingw32/lib c:/msys32/usr/local/lib)
-  endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
-  # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM ${MSYS_INCLUDE})
-  link_directories(${MSYS_LIB} lib)
-
-  add_library(${PROJECT_NAME} ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
+  set(YAML_CPP_LIBRARY yaml-cpp)
 endif (APPLE)
 
-target_link_libraries(${PROJECT_NAME} Qt5::Widgets Qt5::Xml ${ONIG_LIBRARY} ${UCHARDET_LIBRARY})
+add_library(${MODULE_NAME} ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
+target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ${ONIG_LIBRARY} ${UCHARDET_LIBRARY} ${YAML_CPP_LIBRARY})

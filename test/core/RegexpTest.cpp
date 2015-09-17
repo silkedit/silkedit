@@ -3,6 +3,8 @@
 
 #include "Regexp.h"
 
+namespace core {
+
 class RegexpTest : public QObject {
   Q_OBJECT
  private slots:
@@ -115,5 +117,7 @@ class RegexpTest : public QObject {
   }
 };
 
-QTEST_MAIN(RegexpTest)
+}  // namespace core
+
+QTEST_MAIN(core::RegexpTest)
 #include "RegexpTest.moc"

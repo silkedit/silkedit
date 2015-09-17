@@ -5,12 +5,12 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
-#include "core/macros.h"
+#include "macros.h"
 
 namespace core {
+
 class Regexp;
 class Metadata;
-}
 
 /**
  * @brief This class has business logics for TextEditView
@@ -20,8 +20,8 @@ class TextEditViewLogic {
   DISABLE_COPY_AND_MOVE(TextEditViewLogic)
  public:
   static void outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth);
-  static bool isOutdentNecessary(core::Regexp* increaseIndentPattern,
-                                 core::Regexp* decreaseIndentPattern,
+  static bool isOutdentNecessary(Regexp* increaseIndentPattern,
+                                 Regexp* decreaseIndentPattern,
                                  const QString& currentLineText,
                                  const QString& prevLineText,
                                  bool isAtBlockEnd,
@@ -33,7 +33,7 @@ class TextEditViewLogic {
                                 QTextCursor& cursor,
                                 const QString& prevLineText,
                                 const boost::optional<QString>& prevPrevLineText,
-                                core::Metadata* metadata,
+                                Metadata* metadata,
                                 bool indentUsingSpaces,
                                 int tabWidth);
 
@@ -41,3 +41,5 @@ class TextEditViewLogic {
   TextEditViewLogic() = delete;
   ~TextEditViewLogic() = delete;
 };
+
+}  // namespace core

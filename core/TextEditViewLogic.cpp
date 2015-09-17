@@ -2,10 +2,10 @@
 #include <QVector>
 
 #include "TextEditViewLogic.h"
-#include "core/Regexp.h"
-#include "core/Metadata.h"
+#include "Regexp.h"
+#include "Metadata.h"
 
-using core::Metadata;
+namespace core {
 
 namespace {
 using core::Regexp;
@@ -131,3 +131,5 @@ void TextEditViewLogic::indentCurrentLine(QTextDocument* doc,
     }
   }
 }
+
+}  // namespace core

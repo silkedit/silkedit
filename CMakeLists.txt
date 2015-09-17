@@ -41,14 +41,9 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
-
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
 
-add_subdirectory(core)
-
 if (APPLE)
-  find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
-
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkedit.icns )
 
@@ -60,11 +55,10 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(SYSTEM /usr/local/include msgpack-c/include src core)
+  include_directories(SYSTEM /usr/local/include msgpack-c/include)
+  include_directories(src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MINGW)
-  set(YAML_CPP_LIBRARY yaml-cpp)
-
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set( MSYS_INCLUDE c:/msys64/mingw64/include c:/msys64/usr/local/include)
@@ -75,7 +69,8 @@ elseif (MINGW)
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include src ${MSYS_INCLUDE} include core)
+  include_directories(SYSTEM msgpack-c/include ${MSYS_INCLUDE} include)
+  include_directories(src)
   link_directories(${MSYS_LIB} lib)
 
   if (BUILD_EDGE)
@@ -87,6 +82,10 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${UI_RESOURCES} ${SILK_ICON} ${QM_FILES})
 endif (APPLE)
 
+# enable_testing should be in the root
+enable_testing()
+add_subdirectory(core)
+add_subdirectory(test)
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})
 
 if(APPLE)

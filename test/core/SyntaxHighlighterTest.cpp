@@ -4,11 +4,12 @@
 #include "LanguageParser.h"
 #include "SyntaxHighlighter.h"
 
+namespace core {
+
 namespace {
 void checkRegion(Node* node, Region region) {
   if (!region.fullyCovers(node->region)) {
-    qWarning("%s doesn't fully cover %s",
-             qPrintable(region.toString()),
+    qWarning("%s doesn't fully cover %s", qPrintable(region.toString()),
              qPrintable(node->region.toString()));
     QFAIL("");
   }
@@ -106,5 +107,7 @@ class hoge {
   checkRegion(plistHighlighter->rootNode(), plistHighlighter->rootNode()->region);
 }
 
-QTEST_MAIN(SyntaxHighlighterTest)
+}  // namespace core
+
+QTEST_MAIN(core::SyntaxHighlighterTest)
 #include "SyntaxHighlighterTest.moc"

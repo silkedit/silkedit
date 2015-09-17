@@ -6,6 +6,8 @@
 #include "Regexp.h"
 #include "Metadata.h"
 
+namespace core {
+
 class TextEditViewLogicTest : public QObject {
   Q_OBJECT
  private slots:
@@ -188,5 +190,7 @@ class TextEditViewLogicTest : public QObject {
   }
 };
 
-QTEST_MAIN(TextEditViewLogicTest)
+}  // namespace core
+
+QTEST_MAIN(core::TextEditViewLogicTest)
 #include "TextEditViewLogicTest.moc"

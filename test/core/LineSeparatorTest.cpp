@@ -2,7 +2,7 @@
 
 #include "LineSeparator.h"
 
-namespace {}
+namespace core {
 
 class LineSeparatorTest : public QObject {
   Q_OBJECT
@@ -34,5 +34,7 @@ class LineSeparatorTest : public QObject {
   }
 };
 
-QTEST_MAIN(LineSeparatorTest)
+}  // namespace core
+
+QTEST_MAIN(core::LineSeparatorTest)
 #include "LineSeparatorTest.moc"
