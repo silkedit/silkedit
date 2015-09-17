@@ -5,17 +5,17 @@
 #include <unordered_set>
 #include <QObject>
 
-#include "IKeyEventFilter.h"
+#include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
-#include "macros.h"
-#include "Singleton.h"
-#include "stlSpecialization.h"
+#include "core/macros.h"
+#include "core/Singleton.h"
+#include "core/stlSpecialization.h"
 
 class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public Singleton<KeymapManager>, public IKeyEventFilter {
+class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEventFilter {
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
@@ -43,19 +43,19 @@ class KeymapManager : public Singleton<KeymapManager>, public IKeyEventFilter {
   QString m_partiallyMatchedKeyString;
 };
 
-class TextEditViewKeyHandler : public QObject, public Singleton<TextEditViewKeyHandler> {
+class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(TextEditViewKeyHandler)
  public:
   ~TextEditViewKeyHandler() = default;
 
-  void registerKeyEventFilter(IKeyEventFilter* filter);
-  void unregisterKeyEventFilter(IKeyEventFilter* filter);
+  void registerKeyEventFilter(core::IKeyEventFilter* filter);
+  void unregisterKeyEventFilter(core::IKeyEventFilter* filter);
   bool dispatchKeyPressEvent(QKeyEvent* event);
 
  private:
   friend class Singleton<TextEditViewKeyHandler>;
   TextEditViewKeyHandler();
 
-  std::unordered_set<IKeyEventFilter*> m_keyEventFilters;
+  std::unordered_set<core::IKeyEventFilter*> m_keyEventFilters;
 };

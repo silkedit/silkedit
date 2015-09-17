@@ -11,6 +11,8 @@
 #include "SilkApp.h"
 #include "TextEditView.h"
 
+using core::Document;
+
 namespace {
 const char* MATCH_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Match &Case");
 const char* REGEX_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Re&gex");

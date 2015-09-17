@@ -2,7 +2,7 @@
 
 #include <QAction>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class CommandAction : public QAction {
  public:

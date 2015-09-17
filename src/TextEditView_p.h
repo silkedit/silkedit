@@ -4,8 +4,12 @@
 #include <memory>
 
 #include "TextEditView.h"
+#include "core/Region.h"
 
+namespace core {
 class Regexp;
+class Theme;
+}
 
 class TextEditViewPrivate : public QObject {
   Q_OBJECT
@@ -14,8 +18,8 @@ class TextEditViewPrivate : public QObject {
 
   TextEditView* q;
   QWidget* m_lineNumberArea;
-  std::shared_ptr<Document> m_document;
-  QVector<Region> m_searchMatchedRegions;
+  std::shared_ptr<core::Document> m_document;
+  QVector<core::Region> m_searchMatchedRegions;
   std::unique_ptr<QStringListModel> m_model;
   std::unique_ptr<QCompleter> m_completer;
   bool m_completedAndSelected;
@@ -26,17 +30,17 @@ class TextEditViewPrivate : public QObject {
   void insertCompletion(const QString& completion, bool singleWord);
   void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
-  QString prevLineText(int prevCount = 1, Regexp* ignorePattern = nullptr);
+  QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
-  void setTheme(Theme* theme);
+  void setTheme(core::Theme* theme);
   void clearDirtyMarker();
   void toggleHighlightingCurrentLine(bool hasSelection);
   void emitLanguageChanged(const QString& scope);
-  void emitEncodingChanged(const Encoding& enc);
+  void emitEncodingChanged(const core::Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);
   void setTabStopWidthFromSession();
 };

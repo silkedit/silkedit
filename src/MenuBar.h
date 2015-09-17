@@ -3,9 +3,11 @@
 #include <QMenuBar>
 #include <QAction>
 
-#include "macros.h"
+#include "core/macros.h"
 
+namespace core {
 class Theme;
+}
 
 class MenuBar : public QMenuBar {
   Q_OBJECT
@@ -36,7 +38,7 @@ class ThemeMenu : public QMenu {
   DEFAULT_MOVE(ThemeMenu)
 
  private slots:
-  void themeChanged(Theme* theme);
+  void themeChanged(core::Theme* theme);
 };
 
 class ThemeAction : public QAction {

@@ -3,22 +3,26 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 
-#include "PackageManager.h"
+#include "core/PackageManager.h"
 #include "SilkApp.h"
 #include "TabView.h"
 #include "Window.h"
 #include "KeymapManager.h"
-#include "ConfigManager.h"
+#include "core/ConfigManager.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
 #include "Context.h"
 #include "MenuBar.h"
-#include "Constants.h"
+#include "core/Constants.h"
+
+using core::Constants;
+
+using core::ConfigManager;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -28,12 +32,12 @@ int main(int argv, char** args) {
 
   Context::init();
 
-  PackageManager::loadPackages();
+  core::PackageManager::loadPackages();
 
   ConfigManager::load();
 
   // Populate session values after loading configs
-  Session::singleton().init();
+  core::Session::singleton().init();
 
   //   Load keymap settings after registering commands
   KeymapManager::singleton().load();

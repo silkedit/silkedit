@@ -1,3 +1,4 @@
+#include <memory>
 #include <string>
 #include <QApplication>
 #include <QMessageBox>
@@ -18,14 +19,17 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "util.h"
 #include "Context.h"
 #include "PluginContext.h"
-#include "modifiers.h"
-#include "ConfigManager.h"
-#include "Session.h"
+#include "core/modifiers.h"
+#include "core/ConfigManager.h"
+#include "core/Session.h"
 #include "util/DialogUtils.h"
 #include "InputDialog.h"
+#include "core/IContext.h"
+
+using core::ConfigManager;
+using core::Session;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -118,7 +122,7 @@ void API::registerContext(msgpack::object obj) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
     QString context = QString::fromUtf8(std::get<0>(params).c_str());
-    Context::add(context, std::move(std::unique_ptr<IContext>(new PluginContext(context))));
+    Context::add(context, std::move(std::unique_ptr<core::IContext>(new PluginContext(context))));
   }
 }
 

@@ -6,16 +6,27 @@
 
 #include "vi.h"
 #include "TextEditView_p.h"
-#include "TextEditViewLogic.h"
+#include "core/TextEditViewLogic.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
-#include "Session.h"
+#include "core/Session.h"
 #include "API.h"
 #include "PluginManager.h"
-#include "ConfigManager.h"
-#include "Metadata.h"
+#include "core/ConfigManager.h"
+#include "core/Metadata.h"
+#include "core/LanguageParser.h"
+#include "core/Theme.h"
+
+using core::ConfigManager;
+using core::Document;
+using core::Encoding;
+using core::Language;
+using core::Region;
+using core::Metadata;
+using core::Session;
+using core::TextEditViewLogic;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";

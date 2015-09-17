@@ -5,8 +5,8 @@
 #include <QString>
 #include <QVariant>
 
-#include "stlSpecialization.h"
-#include "macros.h"
+#include "core/stlSpecialization.h"
+#include "core/macros.h"
 #include "Context.h"
 #include "CommandArgument.h"
 

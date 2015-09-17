@@ -1,6 +1,8 @@
 #include "PluginContext.h"
 #include "PluginManager.h"
 
+using core::Operator;
+
 PluginContext::PluginContext(const QString& context) : m_key(context) {
 }
 

@@ -2,7 +2,7 @@
 
 #include <QSplitter>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class Splitter : public QSplitter {
   Q_OBJECT

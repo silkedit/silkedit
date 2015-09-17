@@ -9,15 +9,15 @@
 #include <QString>
 #include <QVariant>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "ICommand.h"
-#include "stlSpecialization.h"
+#include "core/stlSpecialization.h"
 
 class CommandManager {
   DISABLE_COPY_AND_MOVE(CommandManager)
 
-  typedef std::function<
-      std::tuple<bool, std::string, CommandArgument>(const std::string&, const CommandArgument&)>
+  typedef std::function<std::tuple<bool, std::string, CommandArgument>(const std::string&,
+                                                                       const CommandArgument&)>
       CmdEventHandler;
 
  public:

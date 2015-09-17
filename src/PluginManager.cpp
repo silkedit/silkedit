@@ -10,110 +10,24 @@
 
 #include "PluginManager.h"
 #include "SilkApp.h"
-#include "Constants.h"
+#include "core/Constants.h"
 #include "API.h"
-#include "TextEditView.h"
-#include "TabView.h"
-#include "Window.h"
-#include "StatusBar.h"
-#include "TabViewGroup.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "InputDialog.h"
-#include "modifiers.h"
-#include "ConfigManager.h"
+#include "core/modifiers.h"
+#include "core/ConfigManager.h"
+#include "core/IContext.h"
 
-#define REGISTER_FUNC(type)                                                 \
-  s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
-  s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
-
-namespace {
-QStringList pluginRunnerArgs() {
-  QStringList args;
-  // add --harmony option first
-  args << "--harmony";
-  // first argument is main script
-  args << Constants::pluginServerDir() + "/main.js";
-  // second argument is a socket path
-  args << Constants::pluginServerSocketPath();
-  // third argument is locale
-  args << ConfigManager::locale();
-  // remaining arguments are paths to be loaded in a plugin server
-  args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
-  args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");
-  return args;
-}
-}
-
-std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
-    PluginManager::s_notifyFunctions;
-std::unordered_map<
-    QString,
-    std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
-    PluginManager::s_requestFunctions;
-msgpack::rpc::msgid_t PluginManager::s_msgId = 0;
-std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> PluginManager::s_eventLoopMap;
+using core::Constants;
+using core::ConfigManager;
 
 PluginManager::~PluginManager() {
   qDebug("~PluginManager");
-  if (m_pluginProcess) {
-    disconnect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-               this, &PluginManager::onFinished);
-    m_pluginProcess->terminate();
-  }
-}
-
-void PluginManager::startPluginRunnerProcess() {
-  m_pluginProcess->start(Constants::pluginRunnerPath(), pluginRunnerArgs());
 }
 
 void PluginManager::init() {
-  Q_ASSERT(!m_pluginProcess);
-
-  TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
-  CommandManager::addEventFilter(std::bind(&PluginManager::cmdEventFilter, this,
-                                           std::placeholders::_1, std::placeholders::_2));
-
-  m_server = new QLocalServer(this);
-  QFile socketFile(Constants::pluginServerSocketPath());
-  if (socketFile.exists()) {
-    socketFile.remove();
-  }
-
-  if (!m_server->listen(Constants::pluginServerSocketPath())) {
-    qCritical("Unable to start the server: %s", qPrintable(m_server->errorString()));
-    return;
-  }
-
-  connect(m_server, &QLocalServer::newConnection, this, &PluginManager::pluginRunnerConnected);
-
-  m_pluginProcess.reset(new QProcess(this));
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardOutput, this,
-          &PluginManager::readStdout);
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardError, this,
-          &PluginManager::readStderr);
-  connect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-          &PluginManager::onFinished);
-  qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
-  qDebug() << "args:" << pluginRunnerArgs();
-  // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
-  m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
-  startPluginRunnerProcess();
-}
-
-void PluginManager::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
-  if (m_isStopped)
-    return;
-
-  msgpack::sbuffer sbuf;
-  msgpack::rpc::msg_response<msgpack::type::nil, std::string> response;
-  response.msgid = id;
-  response.error = err;
-  response.result = msgpack::type::nil();
-
-  msgpack::pack(sbuf, response);
-
-  m_socket->write(sbuf.data(), sbuf.size());
+  d->init();
 }
 
 void PluginManager::sendFocusChangedEvent(const QString& viewType) {
@@ -134,10 +48,10 @@ void PluginManager::callExternalCommand(const QString& cmd, const CommandArgumen
   sendNotification("runCommand", params);
 }
 
-bool PluginManager::askExternalContext(const QString& name, Operator op, const QString& value) {
+bool PluginManager::askExternalContext(const QString& name, core::Operator op, const QString& value) {
   qDebug("askExternalContext");
   std::tuple<std::string, std::string, std::string> params =
-      std::make_tuple(name.toUtf8().constData(), IContext::operatorString(op).toUtf8().constData(),
+      std::make_tuple(name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
                       value.toUtf8().constData());
 
   try {
@@ -164,149 +78,7 @@ QString PluginManager::translate(const std::string& key, const QString& defaultV
   }
 }
 
-PluginManager::PluginManager()
-    : m_pluginProcess(nullptr), m_socket(nullptr), m_server(nullptr), m_isStopped(false) {
-  REGISTER_FUNC(TextEditView)
-  REGISTER_FUNC(TabView)
-  REGISTER_FUNC(TabViewGroup)
-  REGISTER_FUNC(Window)
-  REGISTER_FUNC(StatusBar)
-  REGISTER_FUNC(InputDialog)
-}
-
-void PluginManager::readStdout() {
-  QProcess* p = (QProcess*)sender();
-  QByteArray buf = p->readAllStandardOutput();
-  qDebug() << buf;
-}
-
-void PluginManager::readStderr() {
-  QProcess* p = (QProcess*)sender();
-  QByteArray buf = p->readAllStandardError();
-  qWarning() << buf;
-}
-
-void PluginManager::pluginRunnerConnected() {
-  qDebug() << "new Plugin runner connected";
-
-  m_socket = m_server->nextPendingConnection();
-  connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
-
-  // QueuedConnection is necessary to emit readyRead() recursively.
-  // > readyRead() is not emitted recursively; if you reenter the event loop or call
-  // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
-  // reemitted (although waitForReadyRead() may still return true).
-  connect(m_socket, &QLocalSocket::readyRead, this, &PluginManager::readRequest,
-          Qt::QueuedConnection);
-  connect(m_socket,
-          static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
-          this, &PluginManager::displayError);
-}
-
-void PluginManager::onFinished(int exitCode) {
-  qWarning("plugin runner has stopped working. exit code: %d", exitCode);
-  m_isStopped = true;
-  auto reply =
-      QMessageBox::question(nullptr, "Error",
-                            "Plugin runner has stopped working. SilkEdit can continue to run but "
-                            "you can't use any plugins. Do you want to restart the plugin runner?");
-  if (reply == QMessageBox::Yes) {
-    startPluginRunnerProcess();
-    m_isStopped = false;
-  }
-}
-
-void PluginManager::readRequest() {
-  qDebug("readRequest");
-
-  msgpack::unpacker unpacker;
-  std::size_t readSize = m_socket->bytesAvailable();
-
-  // Message receive loop
-  while (true) {
-    unpacker.reserve_buffer(readSize);
-    // unp has at least readSize buffer on this point.
-
-    // read message to msgpack::unpacker's internal buffer directly.
-    qint64 actual_read_size = m_socket->read(unpacker.buffer(), readSize);
-    //    qDebug() << actual_read_size;
-    QByteArray array(unpacker.buffer(), actual_read_size);
-    qDebug() << QString(array.toHex());
-    if (actual_read_size == 0) {
-      break;
-    } else if (actual_read_size == -1) {
-      qCritical("unable to read a socket. %s", qPrintable(m_socket->errorString()));
-      break;
-    }
-
-    // tell msgpack::unpacker actual consumed size.
-    unpacker.buffer_consumed(actual_read_size);
-
-    msgpack::unpacked result;
-    // Message pack data loop
-    while (unpacker.next(result)) {
-      msgpack::object obj(result.get());
-      msgpack::rpc::msg_rpc rpc;
-      try {
-        obj.convert(&rpc);
-
-        switch (rpc.type) {
-          case msgpack::rpc::REQUEST: {
-            msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
-            obj.convert(&req);
-            QString methodName = QString::fromUtf8(req.method.as<std::string>().c_str());
-            callRequestFunc(methodName, req.msgid, req.param);
-          } break;
-
-          case msgpack::rpc::RESPONSE: {
-            msgpack::rpc::msg_response<msgpack::object, msgpack::object> res;
-            obj.convert(&res);
-            auto found = s_eventLoopMap.find(res.msgid);
-            if (found != s_eventLoopMap.end()) {
-              qDebug("result of %d arrived", res.msgid);
-              if (res.error.type == msgpack::type::NIL) {
-                found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
-                    new object_with_zone(res.result, std::move(result.zone())))));
-              } else {
-                found->second->setError(std::move(std::unique_ptr<object_with_zone>(
-                    new object_with_zone(res.error, std::move(result.zone())))));
-              }
-            } else {
-              qWarning("no matched response result for %d", res.msgid);
-            }
-          } break;
-
-          case msgpack::rpc::NOTIFY: {
-            msgpack::rpc::msg_notify<msgpack::object, msgpack::object> notify;
-            obj.convert(&notify);
-            QString methodName = QString::fromUtf8(notify.method.as<std::string>().c_str());
-            callNotifyFunc(methodName, notify.param);
-          } break;
-          default:
-            qCritical("invalid rpc type");
-        }
-      } catch (msgpack::v1::type_error e) {
-        qCritical() << "type error. bad cast.";
-        continue;
-      }
-    }
-  }
-}
-
-void PluginManager::displayError(QLocalSocket::LocalSocketError socketError) {
-  switch (socketError) {
-    case QLocalSocket::ServerNotFoundError:
-      qWarning("The host was not found.");
-      break;
-    case QLocalSocket::ConnectionRefusedError:
-      qWarning("The connection was refused by the peer.");
-      break;
-    case QLocalSocket::PeerClosedError:
-      break;
-    default:
-      qWarning("The following error occurred: %s.", qPrintable(m_socket->errorString()));
-      break;
-  }
+PluginManager::PluginManager() : d(new PluginManagerPrivate(this)) {
 }
 
 std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
@@ -327,50 +99,11 @@ std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
 void PluginManager::callRequestFunc(const QString& methodName,
                                     msgpack::rpc::msgid_t msgId,
                                     const msgpack::object& obj) {
-  qDebug() << "method:" << qPrintable(methodName);
-  int dotIndex = methodName.indexOf(".");
-  if (dotIndex >= 0) {
-    QString type = methodName.mid(0, dotIndex);
-    QString method = methodName.mid(dotIndex + 1);
-    if (type.isEmpty() || method.isEmpty()) {
-      return;
-    }
-
-    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
-    if (s_requestFunctions.count(type) != 0) {
-      s_requestFunctions.at(type)(msgId, method, obj);
-    } else {
-      qWarning("type: %s not supported", qPrintable(type));
-    }
-  } else {
-    API::call(methodName, msgId, obj);
-  }
+  d->callRequestFunc(methodName, msgId, obj);
 }
 
 void PluginManager::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
-  qDebug() << "method:" << qPrintable(methodName);
-  if (obj.type != msgpack::type::ARRAY) {
-    qWarning("params must be an array");
-    return;
-  }
-
-  int dotIndex = methodName.indexOf(".");
-  if (dotIndex >= 0) {
-    QString type = methodName.mid(0, dotIndex);
-    QString method = methodName.mid(dotIndex + 1);
-    if (type.isEmpty() || method.isEmpty()) {
-      return;
-    }
-
-    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
-    if (s_notifyFunctions.count(type) != 0) {
-      s_notifyFunctions.at(type)(method, obj);
-    } else {
-      qWarning("type: %s not supported", qPrintable(type));
-    }
-  } else {
-    API::call(methodName, obj);
-  }
+  d->callNotifyFunc(methodName, obj);
 }
 
 bool PluginManager::keyEventFilter(QKeyEvent* event) {
@@ -419,20 +152,4 @@ bool PluginManager::keyEventFilter(QKeyEvent* event) {
     qCritical() << e.what();
     return false;
   }
-}
-
-void ResponseResult::setResult(std::unique_ptr<object_with_zone> obj) {
-  qDebug("setResult");
-  m_isReady = true;
-  m_isSuccess = true;
-  m_result = std::move(obj);
-  emit ready();
-}
-
-void ResponseResult::setError(std::unique_ptr<object_with_zone> obj) {
-  qDebug("setError");
-  m_isReady = true;
-  m_isSuccess = false;
-  m_result = std::move(obj);
-  emit ready();
 }

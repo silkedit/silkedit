@@ -9,9 +9,13 @@
 
 #include "KeymapManager.h"
 #include "CommandEvent.h"
-#include "Constants.h"
-#include "Util.h"
+#include "core/Constants.h"
+#include "core/Util.h"
 #include "util/YamlUtils.h"
+
+using core::Constants;
+using core::IKeyEventFilter;
+using core::Util;
 
 namespace {
 

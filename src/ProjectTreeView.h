@@ -4,7 +4,7 @@
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
 
-#include "macros.h"
+#include "core/macros.h"
 
 class MyFileSystemModel;
 

@@ -2,7 +2,9 @@
 #include <QFileDialog>
 
 #include "DialogUtils.h"
-#include "Util.h"
+#include "core/Util.h"
+
+using core::Util;
 
 std::list<std::string> DialogUtils::showDialog(const QString& caption, DialogUtils::MODE mode) {
   switch (mode) {

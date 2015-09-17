@@ -1,6 +1,10 @@
 #include "Context.h"
-#include "OSContext.h"
+#include "core/OSContext.h"
 #include "PluginContext.h"
+
+using core::IContext;
+using core::Operator;
+using core::OSContext;
 
 std::unordered_map<QString, std::unique_ptr<IContext>> Context::s_contexts;
 

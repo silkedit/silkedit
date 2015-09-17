@@ -2,6 +2,8 @@
 
 #define USE_EVENT_FILTER 1
 
+// todo: Move these enum to TextEditView
+
 enum class Mode {
   CMD = 0,
   INSERT,

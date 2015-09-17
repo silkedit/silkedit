@@ -2,9 +2,18 @@
 #include <QStringBuilder>
 
 #include "TextEditView_p.h"
-#include "TextEditViewLogic.h"
-#include "Session.h"
-#include "Metadata.h"
+#include "core/TextEditViewLogic.h"
+#include "core/Session.h"
+#include "core/Metadata.h"
+#include "core/Theme.h"
+
+using core::Encoding;
+using core::Metadata;
+using core::Theme;
+using core::ColorSettings;
+using core::Regexp;
+using core::Session;
+using core::TextEditViewLogic;
 
 namespace {
 bool caseInsensitiveLessThan(const QString& a, const QString& b) {

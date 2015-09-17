@@ -2,15 +2,15 @@
 
 #include <QDialog>
 
-#include "UniqueObject.h"
-#include "macros.h"
+#include "core/UniqueObject.h"
+#include "core/macros.h"
 
 namespace Ui {
 class InputDialog;
 }
 
 // QInputDialog doesn't have validation capability. So we created custom InputDialog.
-class InputDialog : public QDialog, public UniqueObject<InputDialog> {
+class InputDialog : public QDialog, public core::UniqueObject<InputDialog> {
   Q_OBJECT
 
  public:

@@ -4,9 +4,9 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
-#include "macros.h"
-#include "Document.h"
-#include "HistoryModel.h"
+#include "core/macros.h"
+#include "core/Document.h"
+#include "core/HistoryModel.h"
 
 class LineEdit;
 class QCheckBox;
@@ -43,17 +43,17 @@ class FindReplaceView : public QWidget {
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;
-  HistoryModel m_searchHistoryModel;
-  HistoryModel m_replaceHistoryModel;
+  core::HistoryModel m_searchHistoryModel;
+  core::HistoryModel m_replaceHistoryModel;
 
   void findNext();
   void findPrev();
   void findFromActiveCursor();
-  void findText(const QString& text, int searchStartPos = -1, Document::FindFlags flags = 0);
-  void findText(const QString& text, Document::FindFlags flags);
+  void findText(const QString& text, int searchStartPos = -1, core::Document::FindFlags flags = 0);
+  void findText(const QString& text, core::Document::FindFlags flags);
   void highlightMatches();
   void clearSearchHighlight();
-  Document::FindFlags getFindFlags();
+  core::Document::FindFlags getFindFlags();
   void updateSelectionRegion();
   void updateActiveCursorPos();
   void selectFirstMatch();

@@ -172,7 +172,7 @@ build() {
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
     fi
 
-    ninja
+    ninja SilkEdit
 
     if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
@@ -243,13 +243,11 @@ analyze() {
 run_tests() {
     resolve
 
-    cd test
     ensure_dir build
     cd build
-
     cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
     if [ -f build.ninja ]; then
-        ninja
+        ninja unit_test
         ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
     fi
 }

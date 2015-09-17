@@ -6,7 +6,7 @@
 #include <QVariant>
 #include <QDebug>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "CommandArgument.h"
 
 namespace {

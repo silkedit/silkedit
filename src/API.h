@@ -5,8 +5,8 @@
 #include <unordered_map>
 #include <string>
 
-#include "macros.h"
-#include "stlSpecialization.h"
+#include "core/macros.h"
+#include "core/stlSpecialization.h"
 #include "util/DialogUtils.h"
 
 class API {

@@ -8,6 +8,12 @@
 #include "TabView.h"
 #include "TextEditView.h"
 #include "ReloadEncodingDialog.h"
+#include "core/LanguageParser.h"
+
+using core::Encoding;
+using core::Language;
+using core::LanguageParser;
+using core::LanguageProvider;
 
 StatusBar::StatusBar(Window* window)
     : QStatusBar(window),

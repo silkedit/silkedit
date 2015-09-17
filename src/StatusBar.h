@@ -2,18 +2,20 @@
 
 #include <QStatusBar>
 
-#include "macros.h"
-#include "UniqueObject.h"
+#include "core/macros.h"
+#include "core/UniqueObject.h"
 
 class TextEditView;
 class LanguageComboBox;
 class EncodingComboBox;
 class LineSeparatorComboBox;
 class Window;
+namespace core {
 struct Language;
 class Encoding;
+}
 
-class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
+class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   Q_OBJECT
   DISABLE_COPY(StatusBar)
 
@@ -24,7 +26,7 @@ class StatusBar : public QStatusBar, public UniqueObject<StatusBar> {
 
   void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
   void setLanguage(const QString& scope);
-  void setEncoding(const Encoding& encoding);
+  void setEncoding(const core::Encoding& encoding);
   void setLineSeparator(const QString& separator);
   void setActiveTextEditViewLanguage();
   void setActiveTextEditViewEncoding();
@@ -47,5 +49,5 @@ signals:
   LineSeparatorComboBox* m_separatorComboBox;
   EncodingComboBox* m_encComboBox;
 
-  void setCurrentLanguage(Language* lang);
+  void setCurrentLanguage(core::Language* lang);
 };

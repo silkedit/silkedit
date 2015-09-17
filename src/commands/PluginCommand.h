@@ -2,7 +2,7 @@
 
 #include <QString>
 
-#include "macros.h"
+#include "core/macros.h"
 #include "ICommand.h"
 
 class PluginCommand : public ICommand {
