@@ -30,17 +30,27 @@ int indentLength(const QString& str, int tabWidth) {
 }
 
 void TextEditViewLogic::outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth) {
+  // Move cursor to the beginning of current line
   bool moved = cursor.movePosition(QTextCursor::StartOfLine);
   if (!moved)
     return;
 
-  QChar currentChar = doc->characterAt(cursor.position());
-  if (currentChar == '\t') {
-    cursor.deleteChar();
-  } else if (currentChar == ' ') {
+  // find the last indent char
+  // e.g. the last indent char is ' ' when the line is "\t  hoge\t"
+  // e.g. the last indent char is \t when the line is "\t  \thoge  "
+  while (!cursor.atBlockEnd() && (doc->characterAt(cursor.position()) == ' ' ||
+                                  doc->characterAt(cursor.position()) == '\t')) {
+    cursor.movePosition(QTextCursor::NextCharacter);
+  }
+
+  QChar lastIndentChar = doc->characterAt(cursor.position() - 1);
+  if (lastIndentChar == '\t') {
+    cursor.deletePreviousChar();
+  } else if (lastIndentChar == ' ') {
     int i = 0;
-    while (!cursor.atBlockEnd() && i < tabWidth && doc->characterAt(cursor.position()) == ' ') {
-      cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    while (!cursor.atBlockStart() && i < tabWidth &&
+           doc->characterAt(cursor.position() - 1) == ' ') {
+      cursor.movePosition(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
       i++;
     }
     cursor.removeSelectedText();

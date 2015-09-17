@@ -76,6 +76,26 @@ class TextEditViewLogicTest : public QObject {
     QCOMPARE(doc.toPlainText(), expectedText);
   }
 
+  void outdentWithTabAndSpacesMixed() {
+    const QString text =
+        "\t{\n"
+        "\t  }";
+    QTextDocument doc;
+    doc.setPlainText(text);
+    QTextCursor cursor(&doc);
+    cursor.movePosition(QTextCursor::End);
+    int tabWidth = 2;
+
+    // When
+    TextEditViewLogic::outdent(&doc, cursor, tabWidth);
+
+    // Then
+    const QString expectedText =
+        "\t{\n"
+        "\t}";
+    QCOMPARE(doc.toPlainText(), expectedText);
+  }
+
   void increaseIndentPattern() {
     // Given
     // "if (true) {" matches increaseIndentPattern (doesn't match bracketIndentNextLinePattern)
