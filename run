@@ -172,7 +172,7 @@ build() {
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
     fi
 
-    ninja SilkEdit
+    ninja
 
     if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
