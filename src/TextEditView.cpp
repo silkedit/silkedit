@@ -302,23 +302,23 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
 
   // QObject::disconnect from old document
   QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
-  QObject::disconnect(
-      m_document.get(), &Document::languageChanged, q, &TextEditView::languageChanged);
-  QObject::disconnect(
-      m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
-  QObject::disconnect(
-      m_document.get(), &Document::lineSeparatorChanged, q, &TextEditView::lineSeparatorChanged);
-  QObject::disconnect(
-      m_document.get(), SIGNAL(contentsChanged()), q, SLOT(outdentCurrentLineIfNecessary()));
+  QObject::disconnect(m_document.get(), &Document::languageChanged, q,
+                      &TextEditView::languageChanged);
+  QObject::disconnect(m_document.get(), &Document::encodingChanged, q,
+                      &TextEditView::encodingChanged);
+  QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
+                      &TextEditView::lineSeparatorChanged);
+  QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
+                      SLOT(outdentCurrentLineIfNecessary()));
 
   m_document = document;
   QObject::connect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
   QObject::connect(m_document.get(), &Document::languageChanged, q, &TextEditView::languageChanged);
   QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
-  QObject::connect(
-      m_document.get(), &Document::lineSeparatorChanged, q, &TextEditView::lineSeparatorChanged);
-  QObject::connect(
-      m_document.get(), SIGNAL(contentsChanged()), q, SLOT(outdentCurrentLineIfNecessary()));
+  QObject::connect(m_document.get(), &Document::lineSeparatorChanged, q,
+                   &TextEditView::lineSeparatorChanged);
+  QObject::connect(m_document.get(), SIGNAL(contentsChanged()), q,
+                   SLOT(outdentCurrentLineIfNecessary()));
 }
 
 void TextEditViewPrivate::highlightCurrentLine() {
@@ -358,8 +358,7 @@ void TextEditViewPrivate::highlightCurrentLine() {
  * @param currentVisibleCursor
  */
 void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::indentOneLevel(currentVisibleCursor,
-                                    Session::singleton().indentUsingSpaces(),
+  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Session::singleton().indentUsingSpaces(),
                                     Session::singleton().tabWidth());
 }
 
@@ -383,14 +382,11 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   auto currentVisibleCursor = q_ptr->textCursor();
   const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
   const QString& prevLineString = prevLineText();
-  if (TextEditViewLogic::isOutdentNecessary(metadata->increaseIndentPattern(),
-                                            metadata->decreaseIndentPattern(),
-                                            currentLineText,
-                                            prevLineString,
-                                            currentVisibleCursor.atBlockEnd(),
-                                            Session::singleton().tabWidth())) {
-    TextEditViewLogic::outdent(
-        m_document.get(), currentVisibleCursor, Session::singleton().tabWidth());
+  if (TextEditViewLogic::isOutdentNecessary(
+          metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
+          prevLineString, currentVisibleCursor.atBlockEnd(), Session::singleton().tabWidth())) {
+    TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
+                               Session::singleton().tabWidth());
   }
 }
 
@@ -400,19 +396,21 @@ TextEditView::TextEditView(QWidget* parent)
 
   Q_D(TextEditView);
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
-  connect(this, SIGNAL(updateRequest(const QRect&, int)), this, SLOT(updateLineNumberArea(const QRect&, int)));
+  connect(this, SIGNAL(updateRequest(const QRect&, int)), this,
+          SLOT(updateLineNumberArea(const QRect&, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
-  connect(this,
-          &TextEditView::destroying,
-          &OpenRecentItemManager::singleton(),
+  connect(this, &TextEditView::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
-  // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider namespace).
+  // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider
+  // namespace).
   // Session::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
   connect(&Session::singleton(), &Session::themeChanged, this, &TextEditView::setTheme);
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
   connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(toggleHighlightingCurrentLine(bool)));
-  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this, SLOT(setTabStopWidthFromSession()));
-  connect(&Session::singleton(), SIGNAL(tabWidthChanged(int)), this, SLOT(setTabStopWidthFromSession()));
+  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this,
+          SLOT(setTabStopWidthFromSession()));
+  connect(&Session::singleton(), SIGNAL(tabWidthChanged(int)), this,
+          SLOT(setTabStopWidthFromSession()));
 
   d->updateLineNumberAreaWidth(0);
 
@@ -430,7 +428,8 @@ TextEditView::TextEditView(QWidget* parent)
   d_ptr->m_completer->setCaseSensitivity(Qt::CaseInsensitive);
   d_ptr->m_completer->setWrapAround(true);
 
-  connect(d_ptr->m_completer.get(), SIGNAL(activated(const QString&)), this, SLOT(insertCompletion(const QString&)));
+  connect(d_ptr->m_completer.get(), SIGNAL(activated(const QString&)), this,
+          SLOT(insertCompletion(const QString&)));
 }
 
 TextEditView::~TextEditView() {
@@ -687,8 +686,8 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
       painter.setPen(Qt::black);
-      painter.drawText(
-          0, top, d_ptr->m_lineNumberArea->width(), fontMetrics().height(), Qt::AlignRight, number);
+      painter.drawText(0, top, d_ptr->m_lineNumberArea->width(), fontMetrics().height(),
+                       Qt::AlignRight, number);
     }
 
     block = block.next();
@@ -794,8 +793,7 @@ void TextEditView::setViewportMargins(int left, int top, int right, int bottom) 
   QPlainTextEdit::setViewportMargins(left, top, right, bottom);
 }
 
-void TextEditView::setTheme(core::Theme *theme)
-{
+void TextEditView::setTheme(core::Theme* theme) {
   Q_D(TextEditView);
   d->setTheme(theme);
 }
@@ -893,13 +891,8 @@ void TextEditView::insertNewLineWithIndent() {
   bool indentUsingSpaces = Session::singleton().indentUsingSpaces();
   int tabWidth = Session::singleton().tabWidth();
   auto cursor = textCursor();
-  TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(),
-                                       cursor,
-                                       prevLineString,
-                                       prevPrevLineText,
-                                       metadata,
-                                       indentUsingSpaces,
-                                       tabWidth);
+  TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
+                                       prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
 }
 
 void TextEditView::request(TextEditView* view,
@@ -907,16 +900,16 @@ void TextEditView::request(TextEditView* view,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
-    PluginManager::singleton().sendResponse(
-        view->toPlainText().toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
+                                            msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->d_ptr->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(
-        scope.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
   } else if (method == "scopeTree") {
     QString scopeTree = view->d_ptr->m_document->scopeTree();
-    PluginManager::singleton().sendResponse(
-        scopeTree.toUtf8().constData(), msgpack::type::nil(), msgId);
+    PluginManager::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
+                                            msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
     PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
@@ -1101,4 +1094,3 @@ void TextEditView::mousePressEvent(QMouseEvent* event) {
 }
 
 #include "moc_TextEditView.cpp"
-#include "moc_TextEditView_p.cpp"
