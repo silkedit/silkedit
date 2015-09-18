@@ -19,6 +19,12 @@ class Context {
 
   Context(const QString& key, core::Operator op, const QString& value);
   bool isSatisfied();
+
+  /**
+   * @brief check if context is static (e.g., os == mac)
+   * @return
+   */
+  bool isStatic();
   bool operator==(const Context& other) const;
 
   bool operator!=(const Context& other) const { return !(*this == other); }

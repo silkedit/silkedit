@@ -32,6 +32,13 @@ bool Context::isSatisfied() {
   return s_contexts.at(m_key)->isSatisfied(m_op, m_value);
 }
 
+bool Context::isStatic() {
+  if (s_contexts.find(m_key) == s_contexts.end())
+    return false;
+
+  return s_contexts.at(m_key)->isStatic();
+}
+
 bool Context::operator==(const Context& other) const {
   return this->m_key == other.m_key && this->m_op == other.m_op && this->m_value == other.m_value;
 }

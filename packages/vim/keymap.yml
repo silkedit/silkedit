@@ -2,7 +2,7 @@
   keymap:
     ctrl+cmd+i: vim.toggle_vim_emulation
 
-- context: os == win
+- context: os == windows
   keymap:
     ctrl+alt+i: vim.toggle_vim_emulation
 

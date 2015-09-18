@@ -44,11 +44,11 @@ QStringList Constants::packagePaths() {
   return packagePaths;
 }
 
-QString Constants::standardConfigPath() {
+QString Constants::userConfigPath() {
   return silkHomePath() + "/config.yml";
 }
 
-QString Constants::standardKeymapPath() {
+QString Constants::userKeymapPath() {
   return silkHomePath() + "/keymap.yml";
 }
 

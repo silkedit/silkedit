@@ -15,6 +15,8 @@ class OSContext : public IContext {
   ~OSContext() = default;
   DEFAULT_MOVE(OSContext)
 
+  bool isStatic() override { return true; }
+
  private:
   QString key() override;
 };

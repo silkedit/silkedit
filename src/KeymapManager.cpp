@@ -209,14 +209,14 @@ void KeymapManager::load() {
   }
 
   if (existingKeymapPaths.isEmpty()) {
-    qDebug("copying default keymap.yml");
-    if (Util::copy(":/keymap.yml", Constants::standardKeymapPath())) {
-      existingKeymapPaths.append(Constants::standardKeymapPath());
-      if (!QFile(Constants::standardKeymapPath())
+    qDebug("copying default user keymap.yml");
+    if (Util::copy(":/keymap.yml", Constants::userKeymapPath())) {
+      existingKeymapPaths.append(Constants::userKeymapPath());
+      if (!QFile(Constants::userKeymapPath())
                .setPermissions(
                    QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
                    QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
-        qWarning("failed to set permission to %s", qPrintable(Constants::standardKeymapPath()));
+        qWarning("failed to set permission to %s", qPrintable(Constants::userKeymapPath()));
       }
     } else {
       qWarning("failed to copy default keymap.yml");
@@ -231,8 +231,14 @@ QKeySequence KeymapManager::findShortcut(QString cmdName) {
   if (foundIter != m_cmdShortcuts.end()) {
     auto range = m_keymaps.equal_range(foundIter->second);
     for (auto it = range.first; it != range.second; it++) {
+      // Set shortcut if command event has no context or it has static context and it's satisfied
       if (!it->second.hasContext()) {
         return m_cmdShortcuts.at(cmdName);
+      } else {
+        Context* context = it->second.context();
+        if (context->isStatic() && context->isSatisfied()) {
+          return m_cmdShortcuts.at(cmdName);
+        }
       }
     }
   }
@@ -244,6 +250,14 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 }
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
+  // If cmdEvent has static context, evaluate it immediately
+  if (cmdEvent.hasContext()) {
+    Context* context = cmdEvent.context();
+    if (context->isStatic() && !context->isSatisfied()) {
+      return;
+    }
+  }
+
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
@@ -257,7 +271,16 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  m_cmdShortcuts[cmdEvent.cmdName()] = key;
+  // Don't register shortcut if cmdEvent has dynamic context
+  if (!cmdEvent.hasContext()) {
+    m_cmdShortcuts[cmdEvent.cmdName()] = key;
+  } else {
+    Context* context = cmdEvent.context();
+    if (context->isStatic()) {
+      m_cmdShortcuts[cmdEvent.cmdName()] = key;
+    }
+  }
+
   m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
 }
 

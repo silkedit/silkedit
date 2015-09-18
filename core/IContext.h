@@ -20,6 +20,12 @@ class IContext {
 
   virtual bool isSatisfied(Operator op, const QString& operand);
 
+  /**
+   * @brief if context is static or not
+   * @return
+   */
+  virtual bool isStatic() = 0;
+
  protected:
   IContext() = default;
 

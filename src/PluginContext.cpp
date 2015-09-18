@@ -3,7 +3,7 @@
 
 using core::Operator;
 
-PluginContext::PluginContext(const QString& context) : m_key(context) {
+PluginContext::PluginContext(const QString& key) : m_key(key) {
 }
 
 bool PluginContext::isSatisfied(Operator op, const QString& operand) {

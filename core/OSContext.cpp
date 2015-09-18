@@ -7,7 +7,7 @@ const QString OSContext::name = "os";
 
 QString OSContext::key() {
 #if defined Q_OS_WIN
-  return "win";
+  return "windows";
 #elif defined Q_OS_LINUX
   return "linux";
 #else

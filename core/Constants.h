@@ -23,8 +23,8 @@ class Constants {
   static QStringList configPaths();
   static QStringList keymapPaths();
   static QStringList packagePaths();
-  static QString standardConfigPath();
-  static QString standardKeymapPath();
+  static QString userConfigPath();
+  static QString userKeymapPath();
   static QString pluginRunnerPath();
   static QString pluginServerSocketPath();
   static QString translationDirPath();
