@@ -1,17 +1,17 @@
 {
 	CFBundleName = SilkEdit;
-  CFBundleVersion = "0";
+    CFBundleVersion = "0";
 	CFBundleShortVersionString = "0.4.0";
 	CFBundleIdentifier = "com.silksmiths.SilkEdit";
-	"CFBundleDevelopmentRegion" = English;
+	CFBundleDevelopmentRegion = English;
 	CFBundleExecutable = SilkEdit;
-	"CFBundleInfoDictionaryVersion" = "6.0";
+	CFBundleInfoDictionaryVersion = "6.0";
 	CFBundlePackageType = APPL;
-	"LSMinimumSystemVersion" = "10.7";
-	"LSApplicationCategoryType" = "public.app-category.developer-tools";
+	LSMinimumSystemVersion = "10.7";
+	LSApplicationCategoryType = "public.app-category.developer-tools";
 	CFBundleIconFile = "silkedit.icns";
-  ATSApplicationFontsPath = fonts;
-	"CFBundleDocumentTypes" = (
+    ATSApplicationFontsPath = fonts;
+	CFBundleDocumentTypes = (
 		{
 			CFBundleTypeName = Document;
 			LSItemContentTypes = (
@@ -31,3 +31,4 @@
     NSPrincipalClass = NSApplication;
     NSHighResolutionCapable = true;
 }
+
