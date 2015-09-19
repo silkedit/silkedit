@@ -28,4 +28,6 @@
 			CFBundleTypeRole = Editor;
 		},
 	);
+    NSPrincipalClass = NSApplication;
+    NSHighResolutionCapable = true;
 }
