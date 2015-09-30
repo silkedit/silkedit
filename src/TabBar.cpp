@@ -12,34 +12,25 @@
 TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
   setAcceptDrops(true);
-
   setElideMode(Qt::ElideRight);
   setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
-
-  setMovable(true);
-  setDocumentMode(true);
-  setTabsClosable(true);
 }
 
 void TabBar::startMovingTab(const QPoint& tabPos) {
   qDebug() << "startMovingTab. tabPos:" << tabPos;
 
-  QMouseEvent pressEvent(
-      QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+  QMouseEvent pressEvent(QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton,
+                         Qt::NoModifier);
   QTabBar::mousePressEvent(&pressEvent);
 
-  QMouseEvent startMoveEvent(QEvent::MouseMove,
-                             QPoint(tabPos.x(), tabPos.y()),
-                             Qt::NoButton,
-                             Qt::LeftButton,
-                             Qt::NoModifier);
+  QMouseEvent startMoveEvent(QEvent::MouseMove, QPoint(tabPos.x(), tabPos.y()), Qt::NoButton,
+                             Qt::LeftButton, Qt::NoModifier);
   QTabBar::mouseMoveEvent(&startMoveEvent);
 
   m_isGrabbingMouse = true;
   m_dragStartPos = tabPos;
 }
 
-//////////////////////////////////////////////////////////////////////////////
 void TabBar::mousePressEvent(QMouseEvent* event) {
   qDebug() << "mousePressEvent."
            << "pos:" << event->pos();
@@ -54,7 +45,6 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
   QTabBar::mousePressEvent(event);
 }
 
-//////////////////////////////////////////////////////////////////////////////
 void TabBar::mouseMoveEvent(QMouseEvent* event) {
   // If we call winId() here, drag no longer works.
   //  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
@@ -96,8 +86,8 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
       (!geometry().contains(event->pos()))) {
     m_dragInitiated = true;
     // Stop the move to be able to convert to a drag
-    QMouseEvent finishMoveEvent(
-        QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+    QMouseEvent finishMoveEvent(QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton,
+                                Qt::NoModifier);
     QTabBar::mouseMoveEvent(&finishMoveEvent);
 
     // Initiate Drag

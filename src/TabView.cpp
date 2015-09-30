@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QStylePainter>
 
 #include "TabView.h"
 #include "TextEditView.h"
@@ -12,13 +13,23 @@
 #include "SilkApp.h"
 #include "DocumentManager.h"
 #include "PluginManager.h"
+#include "core/Session.h"
+#include "core/Theme.h"
 
 using core::Document;
+using core::Session;
+using core::Theme;
+using core::ColorSettings;
 
 namespace {
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
   return info.fileName();
+}
+
+// http://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
+bool isLightColor(const QColor& color) {
+  return (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114) > 186;
 }
 }
 
@@ -31,7 +42,7 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  setTabShape(TabShape::Triangular);
+  changeTabStyleBasedOn(Session::singleton().theme());
 
   connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
@@ -39,6 +50,7 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveEditView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
+  connect(&Session::singleton(), &Session::themeChanged, this, &TabView::changeTabStyleBasedOn);
 }
 
 TabView::~TabView() {
@@ -62,7 +74,9 @@ int TabView::insertTab(int index, QWidget* w, const QString& label) {
   } else {
     qDebug("inserted widget is not TextEditView");
   }
+
   int result = QTabWidget::insertTab(index, w, label);
+
   if (count() == 1 && result >= 0) {
     m_activeEditView = editView;
     if (editView) {
@@ -214,7 +228,8 @@ void TabView::changeActiveEditView(int index) {
 
   qDebug("currentChanged. index: %i, tab count: %i", index, count());
   if (auto w = widget(index)) {
-    setActiveEditView(qobject_cast<TextEditView*>(w));
+    TextEditView* editView = qobject_cast<TextEditView*>(w);
+    setActiveEditView(editView);
   } else {
     qDebug("active edit view is null");
     setActiveEditView(nullptr);
@@ -232,6 +247,20 @@ void TabView::setActiveEditView(TextEditView* editView) {
 void TabView::changeTabText(const QString& path) {
   if (TextEditView* editView = qobject_cast<TextEditView*>(QObject::sender())) {
     setTabText(indexOf(editView), getFileNameFrom(path));
+  }
+}
+
+void TabView::changeTabStyleBasedOn(Theme* theme) {
+  if (theme) {
+    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
+    if (settings->contains("background")) {
+      QColor color = settings->value("background");
+      bool isLight = isLightColor(color);
+      QString selectedTabTextColor = isLight ? "gray" : "lightGray";
+      tabBar()->setStyleSheet(QString("QTabBar::tab:selected { background-color: %1; color: %2; } ")
+                                  .arg(color.name())
+                                  .arg(selectedTabTextColor));
+    }
   }
 }
 
