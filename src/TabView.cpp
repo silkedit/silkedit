@@ -43,6 +43,8 @@ TabView::TabView(QWidget* parent)
   setDocumentMode(true);
   setTabsClosable(true);
   changeTabStyle(Session::singleton().theme());
+  // Note: setDocumentMode also calls setDrawBase
+  tabBar()->setDrawBase(false);
 
   connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
