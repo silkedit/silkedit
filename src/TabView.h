@@ -10,6 +10,9 @@
 
 class TextEditView;
 class TabBar;
+namespace core {
+class Theme;
+}
 
 class TabView : public QTabWidget, public core::UniqueObject<TabView> {
   Q_OBJECT
@@ -70,4 +73,5 @@ signals:
   void updateTabTextBasedOn(bool changed);
   void changeActiveEditView(int index);
   void changeTabText(const QString& path);
+  void changeTabStyle(core::Theme* theme);
 };

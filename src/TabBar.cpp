@@ -12,13 +12,10 @@
 TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
   setAcceptDrops(true);
-
   setElideMode(Qt::ElideRight);
   setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
-
-  setMovable(true);
-  setDocumentMode(true);
-  setTabsClosable(true);
+  setMouseTracking(true);
+  hideAllCloseButtons();
 }
 
 void TabBar::startMovingTab(const QPoint& tabPos) {
@@ -39,7 +36,6 @@ void TabBar::startMovingTab(const QPoint& tabPos) {
   m_dragStartPos = tabPos;
 }
 
-//////////////////////////////////////////////////////////////////////////////
 void TabBar::mousePressEvent(QMouseEvent* event) {
   qDebug() << "mousePressEvent."
            << "pos:" << event->pos();
@@ -54,59 +50,69 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
   QTabBar::mousePressEvent(event);
 }
 
-//////////////////////////////////////////////////////////////////////////////
 void TabBar::mouseMoveEvent(QMouseEvent* event) {
-  // If we call winId() here, drag no longer works.
-  //  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
-  //    qDebug() << "mouseMoveEvent" << event;
+  // while dragging
+  if (event->buttons() & Qt::LeftButton) {
+    // If we call winId() here, drag no longer works.
+    //  qDebug() << "mouseMoveEvent. pos:" << event->pos() << "globalPos:" << event->globalPos();
+    //    qDebug() << "mouseMoveEvent" << event;
 
-  // first mouse enter event after dragging
-  if (m_dragInitiated && geometry().contains(event->pos())) {
-    qDebug("first mouse enter event");
-    finishDrag();
+    // first mouse enter event after dragging
+    if (m_dragInitiated && geometry().contains(event->pos())) {
+      qDebug("first mouse enter event");
+      finishDrag();
 
-    // Start mouse move
-    emit onDetachTabEntered(event->screenPos().toPoint());
-    return QTabBar::mouseMoveEvent(event);
-  }
+      // Start mouse move
+      emit onDetachTabEntered(event->screenPos().toPoint());
+      return QTabBar::mouseMoveEvent(event);
+    }
 
-  // dragging tab is over an another tab bar.
-  TabBar* anotherTabBar = SilkApp::tabBarAt(event->screenPos().x(), event->screenPos().y());
+    // dragging tab is over an another tab bar.
+    TabBar* anotherTabBar = SilkApp::tabBarAt(event->screenPos().x(), event->screenPos().y());
 
-  if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
-    qDebug("dragging tab is over an another tab bar.");
+    if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
+      qDebug("dragging tab is over an another tab bar.");
 
-    finishDrag();
-    emit anotherTabBar->onDetachTabEntered(event->screenPos().toPoint());
-    anotherTabBar->m_sourceTabBar = this;
-    anotherTabBar->grabMouse();
-    return;
-  }
+      finishDrag();
+      emit anotherTabBar->onDetachTabEntered(event->screenPos().toPoint());
+      anotherTabBar->m_sourceTabBar = this;
+      anotherTabBar->grabMouse();
+      return;
+    }
 
-  if (m_dragInitiated && m_fakeWindow) {
-    m_fakeWindow->moveWithOffset(event->globalPos());
-    return QTabBar::mouseMoveEvent(event);
-  }
+    if (m_dragInitiated && m_fakeWindow) {
+      m_fakeWindow->moveWithOffset(event->globalPos());
+      return QTabBar::mouseMoveEvent(event);
+    }
 
-  //    qDebug() << "manhattanLength? " << ((event->pos() - m_dragStartPos).manhattanLength() <
-  //    QApplication::startDragDistance()) << "outside of tabbar? " <<
-  //    !geometry().contains(event->pos());
-  if (!m_dragStartPos.isNull() && ((event->buttons() & Qt::LeftButton)) &&
-      ((event->pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()) &&
-      (!geometry().contains(event->pos()))) {
-    m_dragInitiated = true;
-    // Stop the move to be able to convert to a drag
-    QMouseEvent finishMoveEvent(
-        QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
-    QTabBar::mouseMoveEvent(&finishMoveEvent);
+    //    qDebug() << "manhattanLength? " << ((event->pos() - m_dragStartPos).manhattanLength() <
+    //    QApplication::startDragDistance()) << "outside of tabbar? " <<
+    //    !geometry().contains(event->pos());
+    if (!m_dragStartPos.isNull() && ((event->buttons() & Qt::LeftButton)) &&
+        ((event->pos() - m_dragStartPos).manhattanLength() > QApplication::startDragDistance()) &&
+        (!geometry().contains(event->pos()))) {
+      m_dragInitiated = true;
+      // Stop the move to be able to convert to a drag
+      QMouseEvent finishMoveEvent(
+          QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+      QTabBar::mouseMoveEvent(&finishMoveEvent);
 
-    // Initiate Drag
-    qDebug("start dragging a tab");
-    m_fakeWindow = new FakeWindow(this, m_dragStartPos);
-    m_fakeWindow->show();
-    emit onDetachTabStarted(tabAt(m_dragStartPos), event->screenPos().toPoint());
+      // Initiate Drag
+      qDebug("start dragging a tab");
+      m_fakeWindow = new FakeWindow(this, m_dragStartPos);
+      m_fakeWindow->show();
+      emit onDetachTabStarted(tabAt(m_dragStartPos), event->screenPos().toPoint());
+    } else {
+      QTabBar::mouseMoveEvent(event);
+    }
+    // not dragging
   } else {
-    QTabBar::mouseMoveEvent(event);
+    hideAllCloseButtons();
+
+    int index = tabAt(event->pos());
+    if (index >= 0) {
+      tabButton(index, QTabBar::RightSide)->show();
+    }
   }
 }
 
@@ -139,6 +145,14 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event) {
   QTabBar::mouseReleaseEvent(event);
 }
 
+void TabBar::leaveEvent(QEvent*) {
+  hideAllCloseButtons();
+}
+
+void TabBar::tabInserted(int index) {
+  tabButton(index, QTabBar::RightSide)->hide();
+}
+
 void TabBar::finishDrag() {
   m_dragInitiated = false;
   m_dragStartPos = QPoint();
@@ -152,4 +166,10 @@ void TabBar::finishDrag() {
 void TabBar::grabMouse() {
   QTabBar::grabMouse();
   m_isGrabbingMouse = true;
+}
+
+void TabBar::hideAllCloseButtons() {
+  for (int i = 0; i < count(); i++) {
+    tabButton(i, QTabBar::RightSide)->hide();
+  }
 }

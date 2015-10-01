@@ -35,9 +35,15 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setApplicationVersion(VERSION);
 
+  QFile file(":/stylesheet.css");
+  if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    setStyleSheet(file.readAll());
+    file.close();
+  }
+
   // Track active TabView
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
-//    qDebug("focusChanged");
+    //    qDebug("focusChanged");
     if (TextEditView* editView = qobject_cast<TextEditView*>(focusedWidget)) {
       if (TabView* tabView = findParent<TabView*>(editView)) {
         if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
