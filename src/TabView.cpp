@@ -42,7 +42,7 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  changeTabStyleBasedOn(Session::singleton().theme());
+  changeTabStyle(Session::singleton().theme());
 
   connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
@@ -50,7 +50,7 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveEditView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
-  connect(&Session::singleton(), &Session::themeChanged, this, &TabView::changeTabStyleBasedOn);
+  connect(&Session::singleton(), &Session::themeChanged, this, &TabView::changeTabStyle);
 }
 
 TabView::~TabView() {
@@ -250,7 +250,7 @@ void TabView::changeTabText(const QString& path) {
   }
 }
 
-void TabView::changeTabStyleBasedOn(Theme* theme) {
+void TabView::changeTabStyle(Theme* theme) {
   if (theme) {
     ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("background")) {
