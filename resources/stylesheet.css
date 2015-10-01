@@ -9,7 +9,6 @@ QTabBar::tab {
     border-top-right-radius: 1px;
     min-width: 18ex;
     padding: 8px;
-    color: white;
 }
 
 QTabBar::tab:first:selected {
