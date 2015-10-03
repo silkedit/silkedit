@@ -38,6 +38,7 @@ std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::o
 void API::init() {
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
+  s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
   s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
@@ -99,6 +100,19 @@ void API::loadMenu(msgpack::object obj) {
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
     Window::loadMenu(pkgName, ymlPath);
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
+}
+
+void API::loadToolbar(msgpack::v1::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    Window::loadToolbar(pkgName, ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }

@@ -19,11 +19,11 @@ class PlatformUtil {
  * @param menuNode
  */
 #ifdef Q_OS_MAC
-  static void parseMenuNode(const std::string& pkgName, const YAML::Node& menuNode);
+  static void parseMenusNode(const std::string& pkgName, const YAML::Node& menusNode);
 #elif defined Q_OS_WIN
-  static void parseMenuNode(const std::string& pkgName,
-                            const YAML::Node& menuNode,
-                            QList<Window*> windows);
+  static void parseMenusNode(const std::string& pkgName,
+                             const YAML::Node& menusNode,
+                             QList<Window*> windows);
 #endif
 
  private:

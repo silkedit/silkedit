@@ -3,9 +3,11 @@
 #include <QApplication>
 #include <QDebug>
 #include <QVBoxLayout>
+#include <QToolBar>
 
-#include "API.h"
 #include "Window.h"
+#include "ui_Window.h"
+#include "API.h"
 #include "TabViewGroup.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
@@ -22,21 +24,20 @@
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
-      m_rootSplitter(new HSplitter(parent)),
+      ui(new Ui::Window),
       m_tabViewGroup(new TabViewGroup(this)),
-      m_statusBar(new StatusBar(this)),
       m_projectView(nullptr),
       m_findReplaceView(new FindReplaceView(this)) {
   qDebug("creating Window");
+  ui->setupUi(this);
 
-  setWindowTitle("SilkEdit");
   setAttribute(Qt::WA_DeleteOnClose);
 
   // Copy global menu bar
   QList<QAction*> actions = MenuBar::globalMenuBar()->actions();
   menuBar()->insertActions(nullptr, actions);
 
-  m_rootSplitter->setContentsMargins(0, 0, 0, 0);
+  ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
 
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -49,16 +50,13 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   QWidget* editorWidget = new QWidget(this);
   editorWidget->setLayout(layout);
 
-  m_rootSplitter->addWidget(editorWidget);
-  setCentralWidget(m_rootSplitter);
-
-  setStatusBar(m_statusBar);
+  ui->rootSplitter->addWidget(editorWidget);
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           &Window::emitActiveEditViewChanged);
-  connect(this, &Window::activeEditViewChanged, m_statusBar,
+  connect(this, &Window::activeEditViewChanged, ui->statusBar,
           &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
@@ -67,16 +65,16 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
   //  qDebug("updateConnection for new active TabView");
 
-  if (oldTabView && m_statusBar) {
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+  if (oldTabView && ui->statusBar) {
+    disconnect(oldTabView, &TabView::activeTextEditViewChanged, ui->statusBar,
                &StatusBar::onActiveTextEditViewChanged);
     disconnect(
         oldTabView, &TabView::activeTextEditViewChanged, this,
         static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
   }
 
-  if (newTabView && m_statusBar) {
-    connect(newTabView, &TabView::activeTextEditViewChanged, m_statusBar,
+  if (newTabView && ui->statusBar) {
+    connect(newTabView, &TabView::activeTextEditViewChanged, ui->statusBar,
             &StatusBar::onActiveTextEditViewChanged);
     connect(newTabView, &TabView::activeTextEditViewChanged, this,
             static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
@@ -86,17 +84,17 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
 void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
   //  qDebug("updateConnection for new active TextEditView");
 
-  if (oldEditView && m_statusBar) {
-    disconnect(oldEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
-    disconnect(oldEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setEncoding);
-    disconnect(oldEditView, &TextEditView::lineSeparatorChanged, m_statusBar,
+  if (oldEditView && ui->statusBar) {
+    disconnect(oldEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
+    disconnect(oldEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
+    disconnect(oldEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
                &StatusBar::setLineSeparator);
   }
 
-  if (newEditView && m_statusBar) {
-    connect(newEditView, &TextEditView::languageChanged, m_statusBar, &StatusBar::setLanguage);
-    connect(newEditView, &TextEditView::encodingChanged, m_statusBar, &StatusBar::setEncoding);
-    connect(newEditView, &TextEditView::lineSeparatorChanged, m_statusBar,
+  if (newEditView && ui->statusBar) {
+    connect(newEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
+    connect(newEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
+    connect(newEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
             &StatusBar::setLineSeparator);
   }
 }
@@ -109,7 +107,6 @@ void Window::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView)
 
 Window* Window::create(QWidget* parent, Qt::WindowFlags flags) {
   Window* window = new Window(parent, flags);
-  window->resize(1280, 720);
   s_windows.append(window);
   return window;
 }
@@ -129,14 +126,32 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
       return;
     }
 
-    YAML::Node menuNode = rootNode["menu"];
+    YAML::Node menusNode = rootNode["menus"];
 #ifdef Q_OS_MAC
-    PlatformUtil::parseMenuNode(pkgName, menuNode);
+    PlatformUtil::parseMenusNode(pkgName, menusNode);
 #elif defined Q_OS_WIN
     PlatformUtil::parseMenuNode(pkgName, menuNode, s_windows);
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+  }
+}
+
+void Window::loadToolbar(const std::string& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
+  foreach (Window* win, s_windows) {
+    try {
+      YAML::Node rootNode = YAML::LoadFile(ymlPath);
+      if (!rootNode.IsMap()) {
+        qWarning("root node must be a map");
+        return;
+      }
+
+      YAML::Node toolbarsNode = rootNode["toolbars"];
+      YamlUtils::parseToolbarsNode(pkgName, ymlPath, win, toolbarsNode);
+    } catch (const YAML::ParserException& ex) {
+      qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+    }
   }
 }
 
@@ -153,9 +168,8 @@ TabView* Window::activeTabView() {
   }
 }
 
-void Window::setStatusBar(StatusBar* statusBar) {
-  m_statusBar = statusBar;
-  QMainWindow::setStatusBar(statusBar);
+StatusBar* Window::statusBar() {
+  return ui->statusBar;
 }
 
 void Window::show() {
@@ -183,11 +197,11 @@ bool Window::openDir(const QString& dirPath) {
 
   if (m_projectView->open(dirPath)) {
     // root splitter becomes the owner of a project view.
-    m_rootSplitter->insertWidget(0, m_projectView);
+    ui->rootSplitter->insertWidget(0, m_projectView);
     // Set the initial sizes for QSplitter widgets
     QList<int> sizes;
     sizes << 50 << 300;
-    m_rootSplitter->setSizes(sizes);
+    ui->rootSplitter->setSizes(sizes);
     return true;
   } else {
     return false;
@@ -201,6 +215,14 @@ void Window::openFindAndReplacePanel() {
 void Window::hideFindReplacePanel() {
   if (m_findReplaceView) {
     m_findReplaceView->hide();
+  }
+}
+
+QToolBar* Window::findToolbar(const QString& id) {
+  if (QToolBar* toolbar = findChild<QToolBar*>(id)) {
+    return toolbar;
+  } else {
+    return nullptr;
   }
 }
 

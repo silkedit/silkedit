@@ -29,6 +29,7 @@ class API {
   // notify functions
   static void alert(msgpack::object obj);
   static void loadMenu(msgpack::object obj);
+  static void loadToolbar(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
   static void registerContext(msgpack::object obj);
   static void unregisterContext(msgpack::object obj);

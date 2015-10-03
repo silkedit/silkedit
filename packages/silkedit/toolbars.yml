@@ -1,0 +1,38 @@
+toolbars:
+- label: File
+  id: file
+  items:
+  - icon: resources/images/new.png
+    label: New
+    command: new_file
+    tooltip: "New File"
+    id: new_file
+  - icon: resources/images/open.png
+    label: Open
+    command: open
+    tooltip: Open
+    id: open
+    context: os != windows
+  - icon: resources/images/save.png
+    label: Save
+    command: save
+    tooltip: Save
+    id: save
+- label: Edit
+  id: edit
+  items:
+  - icon: resources/images/cut.png
+    label: Cut
+    tooltip: Cut
+    id: cut
+    command: cut
+  - icon: resources/images/copy.png
+    label: Copy
+    tooltip: Copy
+    id: copy
+    command: copy
+  - icon: resources/images/paste.png
+    label: Paste
+    tooltip: Paste
+    id: paste
+    command: paste

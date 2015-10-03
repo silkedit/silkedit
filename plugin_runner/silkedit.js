@@ -206,6 +206,10 @@ const loadMenu = (pkgName, ymlPath) => {
   client.notify('loadMenu', pkgName, ymlPath)
 }
 
+const loadToolbar = (pkgName, ymlPath) => {
+  client.notify('loadToolbar', pkgName, ymlPath)
+}
+
 const registerCommands = (commands) => {
   client.notify('registerCommands', commands)
 }
@@ -238,6 +242,14 @@ const loadPackage = (dir) => {
           fs.open(menuFilePath, 'r', (err, fd) => {
             fd && fs.close(fd, (err) => {
               loadMenu(pjson.name, menuFilePath);
+            })
+          })
+          
+          // load toolbars
+          const toolbarFilePath = path.join(dir, "toolbars.yml");
+          fs.open(toolbarFilePath, 'r', (err, fd) => {
+            fd && fs.close(fd, (err) => {
+              loadToolbar(pjson.name, toolbarFilePath);
             })
           })
 
@@ -468,7 +480,8 @@ const loadPackage = (dir) => {
       client.notify('setFont', family, size)
     }
     ,t: (key, defaultValue) => {
-      var i, packageName, currentObj, fd, translationPaths;
+    	  console.log('key: ' + key)
+      var i, j, packageName, currentObj, fd, translationPaths;
       try {
         // get package name from '<package>:key'
         const semicolonIndex = key.indexOf(':')
@@ -502,9 +515,10 @@ const loadPackage = (dir) => {
                 const doc = yaml.safeLoad(fs.readFileSync(translationPaths[i], 'utf8'))
                 const subKeys = key.substring(semicolonIndex + 1).split('.')
                 currentObj = doc
-                for (i = 0; i < subKeys.length; i++) {
-                  if (subKeys[i] in currentObj) {
-                    currentObj = currentObj[subKeys[i]]
+                for (j = 0; j < subKeys.length; j++) {
+                  if (subKeys[j] in currentObj) {
+                    console.log('subKey:' + subKeys[j])
+                    currentObj = currentObj[subKeys[j]]
                   } else {
                     currentObj = null
                     break

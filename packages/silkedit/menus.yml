@@ -1,7 +1,7 @@
-menu:
+menus:
 - label: File
   id: file
-  submenu:
+  menus:
   - label: 'New File'
     id: new_file
     command: new_file
@@ -40,7 +40,7 @@ menu:
 
 - label: Text
   id: edit
-  submenu:
+  menus:
   # - type: separator
   #   context: os == mac
   # - label: 'Undo'
@@ -64,20 +64,20 @@ menu:
 
 - label: View
   id: view
-  submenu:
+  menus:
   - label: 'Font'
     id: font
-    submenu:
+    menus:
     - label: 'Show Fonts'
       id: show_fonts
       command: show_fonts
 
 - label: Packages
   id: packages
-  submenu:
+  menus:
   - label: 'Package Development'
     id: package_development
-    submenu:
+    menus:
     - label: 'Show Scope'
       id: show_scope
       command: show_scope
