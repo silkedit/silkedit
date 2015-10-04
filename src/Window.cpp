@@ -147,7 +147,7 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
     YamlUtils::parseMenusNode(pkgName, MenuBar::globalMenuBar(), menusNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
-    foreach (Window* win, windows) {
+    foreach (Window* win, s_windows) {
       YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode);
     }
 #endif
