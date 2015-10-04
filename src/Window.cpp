@@ -130,7 +130,7 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
 #ifdef Q_OS_MAC
     PlatformUtil::parseMenusNode(pkgName, menusNode);
 #elif defined Q_OS_WIN
-    PlatformUtil::parseMenuNode(pkgName, menuNode, s_windows);
+    PlatformUtil::parseMenusNode(pkgName, menusNode, s_windows);
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());

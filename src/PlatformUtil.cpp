@@ -63,6 +63,6 @@ void PlatformUtil::parseMenusNode(const std::string& pkgName,
                                   const YAML::Node& menusNode,
                                   QList<Window*> windows) {
   // Menu bar belongs to each window.
-  foreach (Window* win, windows) { YamlUtils::parseMenuNode(pkgName, win->menuBar(), menusNode); }
+  foreach (Window* win, windows) { YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode); }
 }
 #endif
