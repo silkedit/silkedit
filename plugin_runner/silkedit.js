@@ -224,7 +224,7 @@ const loadPackage = (dir) => {
       }
 
       const packageJsonPath = path.join(dir, "package.json");
-      console.log(packageJsonPath);
+      //console.log(packageJsonPath);
       // check if packageJsonPath exists by opening it. fs.exists is deprecated.
       fs.open(packageJsonPath, 'r', (err, fd) => {
         fd && fs.close(fd, (err) => {
@@ -480,7 +480,6 @@ const loadPackage = (dir) => {
       client.notify('setFont', family, size)
     }
     ,t: (key, defaultValue) => {
-    	  console.log('key: ' + key)
       var i, j, packageName, currentObj, fd, translationPaths;
       try {
         // get package name from '<package>:key'
@@ -517,7 +516,6 @@ const loadPackage = (dir) => {
                 currentObj = doc
                 for (j = 0; j < subKeys.length; j++) {
                   if (subKeys[j] in currentObj) {
-                    console.log('subKey:' + subKeys[j])
                     currentObj = currentObj[subKeys[j]]
                   } else {
                     currentObj = null

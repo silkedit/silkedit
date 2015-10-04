@@ -237,11 +237,7 @@ void Window::hideFindReplacePanel() {
 }
 
 QToolBar* Window::findToolbar(const QString& id) {
-  if (QToolBar* toolbar = findChild<QToolBar*>(id)) {
-    return toolbar;
-  } else {
-    return nullptr;
-  }
+  return findChild<QToolBar*>(id);
 }
 
 void Window::request(Window* window,
