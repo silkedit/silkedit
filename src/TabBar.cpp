@@ -21,15 +21,12 @@ TabBar::TabBar(QWidget* parent)
 void TabBar::startMovingTab(const QPoint& tabPos) {
   qDebug() << "startMovingTab. tabPos:" << tabPos;
 
-  QMouseEvent pressEvent(
-      QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton, Qt::NoModifier);
+  QMouseEvent pressEvent(QEvent::MouseButtonPress, tabPos, Qt::LeftButton, Qt::LeftButton,
+                         Qt::NoModifier);
   QTabBar::mousePressEvent(&pressEvent);
 
-  QMouseEvent startMoveEvent(QEvent::MouseMove,
-                             QPoint(tabPos.x(), tabPos.y()),
-                             Qt::NoButton,
-                             Qt::LeftButton,
-                             Qt::NoModifier);
+  QMouseEvent startMoveEvent(QEvent::MouseMove, QPoint(tabPos.x(), tabPos.y()), Qt::NoButton,
+                             Qt::LeftButton, Qt::NoModifier);
   QTabBar::mouseMoveEvent(&startMoveEvent);
 
   m_isGrabbingMouse = true;
@@ -48,6 +45,15 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
   m_dragInitiated = false;
 
   QTabBar::mousePressEvent(event);
+}
+
+void TabBar::showCloseButtonOnActiveTab(const QPoint& pos) {
+  hideAllCloseButtons();
+
+  int index = tabAt(pos);
+  if (index >= 0) {
+    tabButton(index, QTabBar::RightSide)->show();
+  }
 }
 
 void TabBar::mouseMoveEvent(QMouseEvent* event) {
@@ -93,8 +99,8 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
         (!geometry().contains(event->pos()))) {
       m_dragInitiated = true;
       // Stop the move to be able to convert to a drag
-      QMouseEvent finishMoveEvent(
-          QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton, Qt::NoModifier);
+      QMouseEvent finishMoveEvent(QEvent::MouseMove, event->pos(), Qt::NoButton, Qt::NoButton,
+                                  Qt::NoModifier);
       QTabBar::mouseMoveEvent(&finishMoveEvent);
 
       // Initiate Drag
@@ -107,12 +113,7 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
     }
     // not dragging
   } else {
-    hideAllCloseButtons();
-
-    int index = tabAt(event->pos());
-    if (index >= 0) {
-      tabButton(index, QTabBar::RightSide)->show();
-    }
+    showCloseButtonOnActiveTab(event->pos());
   }
 }
 
@@ -151,6 +152,10 @@ void TabBar::leaveEvent(QEvent*) {
 
 void TabBar::tabInserted(int index) {
   tabButton(index, QTabBar::RightSide)->hide();
+}
+
+void TabBar::tabRemoved(int) {
+  showCloseButtonOnActiveTab(mapFromGlobal(QCursor::pos()));
 }
 
 void TabBar::finishDrag() {

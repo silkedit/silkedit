@@ -34,6 +34,8 @@ namespace {
 
 QStringList pluginRunnerArgs() {
   QStringList args;
+  // stop Node in debug mode
+  //  args << "--debug-brk";
   // add --harmony option first
   args << "--harmony";
   // first argument is main script
@@ -143,9 +145,9 @@ bool PluginManagerPrivate::askExternalContext(const QString& name,
                                               core::Operator op,
                                               const QString& value) {
   qDebug("askExternalContext");
-  std::tuple<std::string, std::string, std::string> params =
-      std::make_tuple(name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
-                      value.toUtf8().constData());
+  std::tuple<std::string, std::string, std::string> params = std::make_tuple(
+      name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
+      value.toUtf8().constData());
 
   try {
     return sendRequest<std::tuple<std::string, std::string, std::string>, bool>(

@@ -1,3 +1,5 @@
+/* Tabbar */
+
 QPlainTextEdit {
   border: 0;
 }
@@ -32,4 +34,38 @@ QTabBar::tab:only-one {
 
 QTabBar::close-button {
     subcontrol-position: right;
+}
+
+
+/* Toolbar */
+
+QToolBar {
+    background-color: transparent;
+    spacing: 2px; /* spacing between items in the tool bar */
+}
+
+QToolBar::handle {
+    width: 0;
+    height: 0;
+}
+
+QToolButton {
+    border: 1px solid transparent;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    background-color: transparent;
+    padding: 3px;
+    height: 16px;
+    width: 16px;
+}
+
+QToolButton:hover {
+    border-color: #6D6D6D;
+    background-color: #BABABA;
+}
+
+QToolButton:pressed {
+    background-color: #A7B3BA;
 }

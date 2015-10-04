@@ -1,20 +1,63 @@
 menu:
-  new_file: 新規作成
-  open: 開く
-  open_file: ファイルを開く
-  open_folder: フォルダを開く
-  save: 保存
-  save_as: 名前を付けて保存
-  save_all: 全て保存
-  close_all_tabs: 全てのタブを閉じる
-  close_other_tabs: 他のタブを閉じる
-  close_tab: タブを閉じる
-  redo: やり直し
-  cut: 切り取り
-  copy: コピー
-  paste: 貼り付け
-  select_all: 全て選択
-  font: フォント
-  show_fonts: フォントを選択
-  show_scope: スコープを表示
-  show_scope_tree: スコープをツリー形式で表示
+  close_all_tabs:
+    label: 全てのタブを閉じる
+  close_other_tabs:
+    label: 他のタブを閉じる
+  close_tab:
+    label: タブを閉じる
+  copy:
+    label: コピー
+  cut:
+    label: 切り取り
+  font:
+    label: フォント
+  new_file:
+    label: 新規作成
+  open:
+    label: 開く
+  open_file:
+    label: ファイルを開く
+  open_folder:
+    label: フォルダを開く
+  paste:
+    label: 貼り付け
+  redo:
+    label: やり直し
+  save:
+    label: 保存
+  save_all:
+    label: 全て保存
+  save_as:
+    label: 名前を付けて保存
+  select_all:
+    label: 全て選択
+  show_fonts:
+    label: フォントを選択
+  show_scope:
+    label: スコープを表示
+  show_scope_tree:
+    label: スコープをツリー形式で表示
+    
+toolbar:
+  file:
+    label: ファイル
+  new_file:
+    tooltip: 新規作成
+  open:
+    tooltip: 開く
+  open_file:
+    tooltip: ファイルを開く
+  open_folder:
+    tooltip: フォルダを開く
+  save:
+    tooltip: 保存
+  copy:
+    tooltip: コピー
+  cut:
+    tooltip: 切り取り
+  paste:
+    tooltip: 貼り付け
+  redo:
+    tooltip: やり直し
+  save_all:
+    tooltip: 全て保存

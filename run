@@ -73,7 +73,7 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list uchardet || brew install uchardet
-      brew list boost || brew install boost
+      brew list boost || brew install boost --c++11
 
       # node
       if [ ! -d plugin_runner/bin ]; then

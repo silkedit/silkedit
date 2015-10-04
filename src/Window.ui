@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Window</class>
+ <widget class="QMainWindow" name="Window">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SilkEdit</string>
+  </property>
+  <widget class="HSplitter" name="rootSplitter"/>
+  <widget class="StatusBar" name="statusBar"/>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>StatusBar</class>
+   <extends>QStatusBar</extends>
+   <header>StatusBar.h</header>
+  </customwidget>
+  <customwidget>
+   <class>HSplitter</class>
+   <extends>QWidget</extends>
+   <header>Splitter.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

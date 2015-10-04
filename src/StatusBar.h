@@ -9,7 +9,7 @@ class TextEditView;
 class LanguageComboBox;
 class EncodingComboBox;
 class LineSeparatorComboBox;
-class Window;
+class QMainWindow;
 namespace core {
 struct Language;
 class Encoding;
@@ -20,7 +20,7 @@ class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   DISABLE_COPY(StatusBar)
 
  public:
-  explicit StatusBar(Window* window);
+  explicit StatusBar(QMainWindow* window);
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 

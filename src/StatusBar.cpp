@@ -17,7 +17,7 @@ using core::LanguageParser;
 using core::LanguageProvider;
 using core::LineSeparator;
 
-StatusBar::StatusBar(Window* window)
+StatusBar::StatusBar(QMainWindow* window)
     : QStatusBar(window),
       m_langComboBox(new LanguageComboBox),
       m_separatorComboBox(new LineSeparatorComboBox),
