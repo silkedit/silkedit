@@ -25,6 +25,7 @@ class TabBar : public QTabBar {
   void mouseReleaseEvent(QMouseEvent* event) override;
   void leaveEvent(QEvent* event) override;
   void tabInserted(int index) override;
+  void tabRemoved(int index) override;
 
 signals:
   // Detach Tab
@@ -43,4 +44,5 @@ signals:
   void finishDrag();
   void grabMouse();
   void hideAllCloseButtons();
+  void showCloseButtonOnActiveTab(const QPoint& pos);
 };

@@ -128,9 +128,11 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
 
     YAML::Node menusNode = rootNode["menus"];
 #ifdef Q_OS_MAC
-    PlatformUtil::parseMenusNode(pkgName, menusNode);
+    // There's only 1 global menu bar on Mac.
+    YamlUtils::parseMenusNode(pkgName, MenuBar::globalMenuBar(), menusNode);
 #elif defined Q_OS_WIN
-    PlatformUtil::parseMenusNode(pkgName, menusNode, s_windows);
+    // Menu bar belongs to each window.
+    foreach (Window* win, windows) { YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode); }
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());

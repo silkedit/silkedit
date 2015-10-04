@@ -65,3 +65,7 @@ QToolButton:hover {
     border-color: #6D6D6D;
     background-color: #BABABA;
 }
+
+QToolButton:pressed {
+    background-color: #A7B3BA;
+}
