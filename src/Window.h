@@ -29,7 +29,21 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<Window*> windows() { return s_windows; }
   static void loadMenu(const std::string& pkgName, const std::string& ymlPath);
+
+  /**
+   * @brief parse toolbars definition and create toolbars for all windows.
+   * @param pkgName
+   * @param ymlPath
+   */
   static void loadToolbar(const std::string& pkgName, const std::string& ymlPath);
+
+  /**
+   * @brief parse toolbars definition and create toolbars for a window.
+   * @param window
+   * @param pkgName
+   * @param ymlPath
+   */
+  static void loadToolbar(Window* window, const std::string& pkgName, const std::string& ymlPath);
 
   ~Window();
   DEFAULT_MOVE(Window)
@@ -61,6 +75,12 @@ signals:
 
  private:
   static QList<Window*> s_windows;
+
+  /**
+   * @brief toolbars definitions
+   * A new window can load toolbars using this toolbars definition map
+   */
+  static QMap<std::string, std::string> s_toolbarsDefinitions;
 
   explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 

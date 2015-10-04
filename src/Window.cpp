@@ -22,6 +22,8 @@
 #include "PluginManager.h"
 #include "PlatformUtil.h"
 
+QMap<std::string, std::string> Window::s_toolbarsDefinitions;
+
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
       ui(new Ui::Window),
@@ -33,9 +35,17 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   setAttribute(Qt::WA_DeleteOnClose);
 
-  // Copy global menu bar
+// Note: Windows of Mac app share global menu bar
+#ifndef Q_OS_MAC
+  // Copy menus from global menu bar
   QList<QAction*> actions = MenuBar::globalMenuBar()->actions();
   menuBar()->insertActions(nullptr, actions);
+#endif
+
+  // Setup toolbars for this window from toolbars definitions
+  for (const auto& pkgName : s_toolbarsDefinitions.keys()) {
+    loadToolbar(this, pkgName, s_toolbarsDefinitions.value(pkgName));
+  }
 
   ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
 
@@ -60,6 +70,11 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           &StatusBar::onActiveTextEditViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
+}
+
+void Window::loadToolbar(const std::string& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
+  foreach (Window* win, s_windows) { loadToolbar(win, pkgName, ymlPath); }
 }
 
 void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
@@ -132,28 +147,29 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
     YamlUtils::parseMenusNode(pkgName, MenuBar::globalMenuBar(), menusNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
-    foreach (Window* win, windows) { YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode); }
+    foreach (Window* win, windows) {
+      YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode);
+    }
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }
 }
 
-void Window::loadToolbar(const std::string& pkgName, const std::string& ymlPath) {
-  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
-  foreach (Window* win, s_windows) {
-    try {
-      YAML::Node rootNode = YAML::LoadFile(ymlPath);
-      if (!rootNode.IsMap()) {
-        qWarning("root node must be a map");
-        return;
-      }
-
-      YAML::Node toolbarsNode = rootNode["toolbars"];
-      YamlUtils::parseToolbarsNode(pkgName, ymlPath, win, toolbarsNode);
-    } catch (const YAML::ParserException& ex) {
-      qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+void Window::loadToolbar(Window* win, const std::string& pkgName, const std::string& ymlPath) {
+  try {
+    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    if (!rootNode.IsMap()) {
+      qWarning("root node must be a map");
+      return;
     }
+
+    s_toolbarsDefinitions.insert(pkgName, ymlPath);
+
+    YAML::Node toolbarsNode = rootNode["toolbars"];
+    YamlUtils::parseToolbarsNode(pkgName, ymlPath, win, toolbarsNode);
+  } catch (const YAML::ParserException& ex) {
+    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }
 }
 
