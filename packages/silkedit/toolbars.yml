@@ -18,9 +18,6 @@ toolbars:
     command: save
     tooltip: Save
     id: save
-- label: Edit
-  id: edit
-  items:
   - icon: resources/images/cut.png
     label: Cut
     tooltip: Cut
