@@ -20,10 +20,9 @@ CommandAction::CommandAction(const QString& id,
 }
 
 CommandAction::CommandAction(const QString& id,
-                             const QString& text,
                              const QString& cmdName,
                              const QIcon& icon,
                              QObject* parent)
-    : QAction(icon, text, parent), m_cmdName(cmdName) {
+    : QAction(icon, id, parent), m_cmdName(cmdName) {
   init(id, cmdName);
 }

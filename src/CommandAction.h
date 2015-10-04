@@ -11,7 +11,6 @@ class CommandAction : public QAction {
                 const QString& cmdName,
                 QObject* parent = nullptr);
   CommandAction(const QString& id,
-                const QString& text,
                 const QString& cmdName,
                 const QIcon& icon,
                 QObject* parent = nullptr);

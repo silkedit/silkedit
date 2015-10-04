@@ -284,15 +284,17 @@ void YamlUtils::parseToolbarsNode(const std::string& pkgName,
       }
 
       QAction* action = nullptr;
-      if (commandNode.IsDefined() && !label.isEmpty() && iconNode.IsDefined()) {
+      if (commandNode.IsDefined() && iconNode.IsDefined()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         QString iconPath = QString::fromUtf8(iconNode.as<std::string>().c_str());
         if (!iconPath.startsWith('/')) {
           iconPath = QFileInfo(QString::fromUtf8(ymlPath.c_str())).dir().absoluteFilePath(iconPath);
         }
-        action = new CommandAction(id, label, command, QIcon(iconPath));
+        action = new CommandAction(id, command, QIcon(iconPath));
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
+          tooltip = PluginManager::singleton().translate(
+              pkgName + ":toolbar." + idNode.as<std::string>() + ".tooltip", tooltip);
           action->setToolTip(tooltip);
         }
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {

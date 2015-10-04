@@ -37,3 +37,27 @@ menu:
     label: スコープを表示
   show_scope_tree:
     label: スコープをツリー形式で表示
+    
+toolbar:
+  file:
+    label: ファイル
+  new_file:
+    tooltip: 新規作成
+  open:
+    tooltip: 開く
+  open_file:
+    tooltip: ファイルを開く
+  open_folder:
+    tooltip: フォルダを開く
+  save:
+    tooltip: 保存
+  copy:
+    tooltip: コピー
+  cut:
+    tooltip: 切り取り
+  paste:
+    tooltip: 貼り付け
+  redo:
+    tooltip: やり直し
+  save_all:
+    tooltip: 全て保存
