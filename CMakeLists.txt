@@ -86,6 +86,7 @@ elseif (MINGW)
 endif (APPLE)
 
 # enable_testing should be in the root
+INCLUDE(Dart)
 enable_testing()
 add_subdirectory(core)
 add_subdirectory(test)
