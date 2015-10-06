@@ -1,6 +1,5 @@
 #include <QtTest/QtTest>
 #include <QStringList>
-#include <typeinfo>
 #include "Util.h"
 
 namespace core {
