@@ -29,6 +29,12 @@ const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In Selecti
 FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::FindReplaceView) {
   ui->setupUi(this);
 
+  // Make 'Replace' and 'Replace All' fonts 2 points smaller
+  QFont font = ui->replaceButton->font();
+  font.setPointSize(font.pointSize() - 2);
+  ui->replaceButton->setFont(font);
+  ui->replaceAllButton->setFont(font);
+
   // The contents margin is the width of the reserved space along each of the QGridLayout's four
   // sides.
   ui->layout->setContentsMargins(3, 0, 0, 3);
