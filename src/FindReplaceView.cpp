@@ -6,87 +6,66 @@
 #include <QSizePolicy>
 #include <QCompleter>
 #include <QCheckBox>
+#include <QPainter>
 
 #include "FindReplaceView.h"
+#include "ui_FindReplaceView.h"
 #include "SilkApp.h"
 #include "TextEditView.h"
+#include "LineEdit.h"
 
 using core::Document;
 
 namespace {
-const char* MATCH_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Match &Case");
-const char* REGEX_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Re&gex");
-const char* WHOLE_WORD_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "&Whole Word");
-const char* PRESERVE_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "&Preserve Case");
-const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In &Selection");
-constexpr int lineEditWidth = 500;
+const char* PREVIOUS_MATCH_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Previous match");
+const char* NEXT_MATCH_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Next match");
+const char* MATCH_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Match Case");
+const char* REGEX_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Regex");
+const char* WHOLE_WORD_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Whole Word");
+const char* PRESERVE_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Preserve Case");
+const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In Selection");
 }
 
-FindReplaceView::FindReplaceView(QWidget* parent)
-    : QWidget(parent),
-      m_lineEditForFind(new LineEdit(this)),
-      m_lineEditForReplace(new LineEdit(this)),
-      m_regexChk(new CheckBox(tr(REGEX_TEXT), this)),
-      m_matchCaseChk(new CheckBox(tr(MATCH_CASE_TEXT), this)),
-      m_wholeWordChk(new CheckBox(tr(WHOLE_WORD_TEXT), this)),
-      m_inSelectionChk(new CheckBox(tr(IN_SELECTION_TEXT), this)),
-      m_preserveCaseChk(new CheckBox(tr(PRESERVE_CASE_TEXT), this)) {
-  QGridLayout* layout = new QGridLayout(this);
-  layout->setContentsMargins(0, 0, 0, 0);
-  // QTBUG-14643: setSpacing(0) causes QCheckBox to overlap with another widgets.
-  // https://bugreports.qt.io/browse/QTBUG-14643?jql=text%20~%20%22QGridLayout%20QCheckBox%22
-  //  layout->setSpacing(0);
+FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::FindReplaceView) {
+  ui->setupUi(this);
 
-  m_lineEditForFind->setFixedWidth(lineEditWidth);
-  m_lineEditForReplace->setFixedWidth(lineEditWidth);
+  // The contents margin is the width of the reserved space along each of the QGridLayout's four
+  // sides.
+  ui->layout->setContentsMargins(3, 0, 0, 3);
+  // The spacing() is the width of the automatically allocated spacing between neighboring boxes.
+  ui->layout->setSpacing(0);
+
   QCompleter* searchCompleter = new QCompleter(this);
   searchCompleter->setModel(&m_searchHistoryModel);
-  m_lineEditForFind->setCompleter(searchCompleter);
+  ui->lineEditForFind->setCompleter(searchCompleter);
   QCompleter* replaceCompleter = new QCompleter(this);
   replaceCompleter->setModel(&m_replaceHistoryModel);
-  m_lineEditForReplace->setCompleter(replaceCompleter);
+  ui->lineEditForReplace->setCompleter(replaceCompleter);
 
-  connect(m_lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
-  connect(m_lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
-  connect(m_lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
-  connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateSelectionRegion);
-  connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateActiveCursorPos);
-  connect(m_lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::highlightMatches);
+  connect(ui->lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
+  connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
+  connect(ui->lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateSelectionRegion);
+  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateActiveCursorPos);
+  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::highlightMatches);
+  connect(ui->replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
+  connect(ui->replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
+  connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
+  connect(ui->nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
 
-  layout->addWidget(m_lineEditForFind, 0, 0);
-  layout->addWidget(m_lineEditForReplace, 1, 0);
+  // todo: configure mnemonic in keymap.yml using context
+  ui->prevButton->setToolTip(tr(PREVIOUS_MATCH_TEXT));
+  ui->nextButton->setToolTip(tr(NEXT_MATCH_TEXT));
+  ui->regexChk->setToolTip(tr(REGEX_TEXT));
+  ui->matchCaseChk->setToolTip(tr(MATCH_CASE_TEXT));
+  ui->wholeWordChk->setToolTip(tr(WHOLE_WORD_TEXT));
+  ui->inSelectionChk->setToolTip(tr(IN_SELECTION_TEXT));
+  ui->preserveCaseChk->setToolTip(tr(PRESERVE_CASE_TEXT));
 
-  QPushButton* replaceButton = new QPushButton(tr("Replace"));
-  connect(replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
-  layout->addWidget(replaceButton, 1, 1);
+  setLayout(ui->layout);
+}
 
-  QPushButton* replaceAllButton = new QPushButton(tr("Replace All"));
-  connect(replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
-  layout->addWidget(replaceAllButton, 1, 2);
-
-  QPushButton* prevButton = new QPushButton("▲");
-  QPushButton* nextButton = new QPushButton("▼");
-  connect(prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
-  connect(nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
-  layout->addWidget(prevButton, 0, 3);
-  layout->addWidget(nextButton, 1, 3);
-
-  m_matchCaseChk->setToolTip(QKeySequence::mnemonic(MATCH_CASE_TEXT).toString());
-  m_regexChk->setToolTip(QKeySequence::mnemonic(REGEX_TEXT).toString());
-  layout->addWidget(m_matchCaseChk, 0, 4);
-  layout->addWidget(m_regexChk, 1, 4);
-
-  m_wholeWordChk->setToolTip(QKeySequence::mnemonic(WHOLE_WORD_TEXT).toString());
-  m_preserveCaseChk->setToolTip(QKeySequence::mnemonic(PRESERVE_CASE_TEXT).toString());
-  layout->addWidget(m_wholeWordChk, 1, 5);
-  layout->addWidget(m_preserveCaseChk, 0, 5);
-
-  m_inSelectionChk->setToolTip(QKeySequence::mnemonic(IN_SELECTION_TEXT).toString());
-  layout->addWidget(m_inSelectionChk, 1, 6);
-
-  layout->setColumnStretch(7, 1);
-
-  setLayout(layout);
+FindReplaceView::~FindReplaceView() {
 }
 
 void FindReplaceView::show() {
@@ -97,21 +76,21 @@ void FindReplaceView::show() {
 }
 
 void FindReplaceView::showEvent(QShowEvent*) {
-  m_inSelectionChk->setChecked(false);
+  ui->inSelectionChk->setChecked(false);
   if (TextEditView* editView = SilkApp::activeEditView()) {
     QString selectedText = editView->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
       // If the selection obtained from an editor spans a line break, the text will contain a
       // Unicode U+2029 paragraph separator character instead of a newline \n character.
       if (selectedText.contains(QChar::ParagraphSeparator)) {
-        m_inSelectionChk->setChecked(true);
+        ui->inSelectionChk->setChecked(true);
       } else {
-        m_lineEditForFind->setText(selectedText);
+        ui->lineEditForFind->setText(selectedText);
       }
     }
   }
-  m_lineEditForFind->setFocus();
-  m_lineEditForFind->selectAll();
+  ui->lineEditForFind->setFocus();
+  ui->lineEditForFind->selectAll();
 }
 
 void FindReplaceView::keyPressEvent(QKeyEvent* event) {
@@ -123,21 +102,28 @@ void FindReplaceView::keyPressEvent(QKeyEvent* event) {
   QWidget::keyPressEvent(event);
 }
 
+void FindReplaceView::paintEvent(QPaintEvent*) {
+  QStyleOption opt;
+  opt.init(this);
+  QPainter p(this);
+  style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
 void FindReplaceView::findNext() {
-  Q_ASSERT(m_lineEditForFind);
-  findText(m_lineEditForFind->text());
-  m_searchHistoryModel.prepend(m_lineEditForFind->text());
+  Q_ASSERT(ui->lineEditForFind);
+  findText(ui->lineEditForFind->text());
+  m_searchHistoryModel.prepend(ui->lineEditForFind->text());
 }
 
 void FindReplaceView::findPrev() {
-  Q_ASSERT(m_lineEditForFind);
-  findText(m_lineEditForFind->text(), Document::FindFlag::FindBackward);
-  m_searchHistoryModel.prepend(m_lineEditForFind->text());
+  Q_ASSERT(ui->lineEditForFind);
+  findText(ui->lineEditForFind->text(), Document::FindFlag::FindBackward);
+  m_searchHistoryModel.prepend(ui->lineEditForFind->text());
 }
 
 void FindReplaceView::findFromActiveCursor() {
-  findText(m_lineEditForFind->text(), m_activeCursorPos);
-  m_searchHistoryModel.prepend(m_lineEditForFind->text());
+  findText(ui->lineEditForFind->text(), m_activeCursorPos);
+  m_searchHistoryModel.prepend(ui->lineEditForFind->text());
 }
 
 void FindReplaceView::findText(const QString& text,
@@ -167,11 +153,11 @@ void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
 void FindReplaceView::highlightMatches() {
   if (TextEditView* editView = SilkApp::activeEditView()) {
     int begin = 0, end = -1;
-    if (m_inSelectionChk->isChecked()) {
+    if (ui->inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->highlightSearchMatches(m_lineEditForFind->text(), begin, end, getFindFlags());
+    editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
     selectFirstMatch();
   }
 }
@@ -184,16 +170,16 @@ void FindReplaceView::clearSearchHighlight() {
 
 Document::FindFlags FindReplaceView::getFindFlags() {
   Document::FindFlags flags;
-  if (m_regexChk->isChecked()) {
+  if (ui->regexChk->isChecked()) {
     flags |= Document::FindFlag::FindRegex;
   }
-  if (m_matchCaseChk->isChecked()) {
+  if (ui->matchCaseChk->isChecked()) {
     flags |= Document::FindFlag::FindCaseSensitively;
   }
-  if (m_wholeWordChk->isChecked()) {
+  if (ui->wholeWordChk->isChecked()) {
     flags |= Document::FindFlag::FindWholeWords;
   }
-  if (m_inSelectionChk->isChecked()) {
+  if (ui->inSelectionChk->isChecked()) {
     flags |= Document::FindFlag::FindInSelection;
   }
   return flags;
@@ -219,59 +205,33 @@ void FindReplaceView::updateActiveCursorPos() {
 }
 
 void FindReplaceView::selectFirstMatch() {
-  Q_ASSERT(m_lineEditForFind);
-  findText(m_lineEditForFind->text(), m_activeCursorPos);
+  Q_ASSERT(ui->lineEditForFind);
+  findText(ui->lineEditForFind->text(), m_activeCursorPos);
 }
 
 void FindReplaceView::replace() {
-  Q_ASSERT(m_lineEditForReplace);
+  Q_ASSERT(ui->lineEditForReplace);
   if (TextEditView* editView = SilkApp::activeEditView()) {
-    editView->replaceSelection(m_lineEditForReplace->text(), m_preserveCaseChk->isChecked());
+    editView->replaceSelection(ui->lineEditForReplace->text(), ui->preserveCaseChk->isChecked());
     highlightMatches();
-    m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
+    m_replaceHistoryModel.prepend(ui->lineEditForReplace->text());
   }
 }
 
 void FindReplaceView::replaceAll() {
   if (TextEditView* editView = SilkApp::activeEditView()) {
     int begin = 0, end = -1;
-    if (m_inSelectionChk->isChecked()) {
+    if (ui->inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    editView->replaceAllSelection(m_lineEditForFind->text(), m_lineEditForReplace->text(), begin,
-                                  end, getFindFlags(), m_preserveCaseChk->isChecked());
-    m_replaceHistoryModel.prepend(m_lineEditForReplace->text());
+    editView->replaceAllSelection(ui->lineEditForFind->text(), ui->lineEditForReplace->text(),
+                                  begin, end, getFindFlags(), ui->preserveCaseChk->isChecked());
+    m_replaceHistoryModel.prepend(ui->lineEditForReplace->text());
   }
 }
 
 void FindReplaceView::hide() {
   clearSearchHighlight();
   QWidget::hide();
-}
-
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
-  setClearButtonEnabled(true);
-}
-
-void LineEdit::keyPressEvent(QKeyEvent* event) {
-  switch (event->key()) {
-    case Qt::Key_Return:
-      if (event->modifiers() & Qt::ShiftModifier) {
-        emit shiftReturnPressed();
-        return;
-      }
-  }
-
-  QLineEdit::keyPressEvent(event);
-}
-
-void LineEdit::focusInEvent(QFocusEvent* ev) {
-  emit focusIn();
-  QLineEdit::focusInEvent(ev);
-}
-
-FindReplaceView::CheckBox::CheckBox(const QString& text, FindReplaceView* parent)
-    : QCheckBox(text, parent) {
-  connect(this, &QCheckBox::stateChanged, parent, &FindReplaceView::highlightMatches);
 }

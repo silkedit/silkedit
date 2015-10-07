@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>SilkEdit</string>
+   <string notr="true">SilkEdit</string>
   </property>
   <widget class="HSplitter" name="rootSplitter"/>
   <widget class="StatusBar" name="statusBar"/>

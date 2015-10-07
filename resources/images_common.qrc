@@ -1,0 +1,16 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/find-and-replace-icon-case.png</file>
+    <file>images/find-and-replace-icon-case-unchecked.png</file>
+    <file>images/find-and-replace-icon-regex.png</file>
+    <file>images/find-and-replace-icon-regex-unchecked.png</file>
+    <file>images/find-and-replace-icon-word.png</file>
+    <file>images/find-and-replace-icon-word-unchecked.png</file>
+    <file>images/find-and-replace-icon-preserve-case.png</file>
+    <file>images/find-and-replace-icon-preserve-case-unchecked.png</file>
+    <file>images/find-and-replace-icon-selection.png</file>
+    <file>images/find-and-replace-icon-selection-unchecked.png</file>
+    <file>images/find-and-replace-left-arrow.png</file>
+    <file>images/find-and-replace-right-arrow.png</file>
+</qresource>
+</RCC>

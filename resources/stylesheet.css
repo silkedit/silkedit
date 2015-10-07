@@ -69,3 +69,151 @@ QToolButton:hover {
 QToolButton:pressed {
     background-color: #A7B3BA;
 }
+
+
+/* Find and Replace panel */
+
+QWidget#FindReplaceView {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #858585, stop:1 #565656);
+}
+
+#FindReplaceView QLineEdit {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    border: 0;
+}
+
+#FindReplaceView QLineEdit#lineEditForFind {
+    margin: 2px 2px 2px 0;
+}
+
+#FindReplaceView QLineEdit#lineEditForReplace {
+    margin: 0px 2px 0 0;
+}
+
+#FindReplaceView QPushButton {
+    background-color: transparent;
+    color: white;
+    border: 0;
+    margin: 0;
+    width: 18px;
+    height: 18px;
+}
+
+#FindReplaceView #prevButton, #FindReplaceView #nextButton {
+    padding: 1px 5px 0 5px;
+}
+
+#FindReplaceView #replaceButton, #FindReplaceView #replaceAllButton {
+    padding: 0px 5px 0px 5px;
+}
+
+#FindReplaceView QPushButton:focus {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #7D8794, stop:1 #727C8A);
+    border: 1px solid #949CA5;
+}
+
+#FindReplaceView #prevButton:hover, #FindReplaceView #nextButton:hover {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #919191, stop:1 #7E7E7E);
+}
+
+#FindReplaceView #prevButton:pressed, #FindReplaceView #nextButton:pressed {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #6A6A6A, stop:1 #595959);
+}
+
+#FindReplaceView #replaceButton:hover, #FindReplaceView #replaceAllButton:hover {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #7D7D7D, stop:1 #696969);
+}
+
+#FindReplaceView #replaceButton:pressed, #FindReplaceView #replaceAllButton:pressed {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #575757, stop:1 #444444);
+}
+
+#FindReplaceView QCheckBox {
+    spacing: 0px;
+    border: 1px solid transparent;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
+    padding: 0px 5px 0px 5px;
+    margin: 0;
+}
+
+#FindReplaceView QCheckBox:focus {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #7D8794, stop:1 #727C8A);
+    border: 1px solid #949CA5;
+}
+
+#FindReplaceView QCheckBox::indicator {
+    width: 18px;
+    height: 18px;
+}
+
+#FindReplaceView QCheckBox:unchecked:hover {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #919191, stop:1 #7E7E7E);
+}
+
+#FindReplaceView QCheckBox:unchecked:pressed {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #575757, stop:1 #444444);
+}
+
+#FindReplaceView QCheckBox:checked:hover {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #919191, stop:1 #7E7E7E);
+}
+
+#FindReplaceView QCheckBox:checked:pressed {
+    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
+                 stop:0 #6A6A6A, stop:1 #595959);
+}
+
+#FindReplaceView QCheckBox#matchCaseChk::indicator {
+    image: url(:/images/find-and-replace-icon-case-unchecked.png);
+}
+
+#FindReplaceView QCheckBox#matchCaseChk::indicator:checked {
+    image: url(:/images/find-and-replace-icon-case.png);
+}
+
+#FindReplaceView QCheckBox#regexChk::indicator {
+    image: url(:/images/find-and-replace-icon-regex-unchecked.png);
+}
+
+#FindReplaceView QCheckBox#regexChk::indicator:checked {
+    image: url(:/images/find-and-replace-icon-regex.png);
+}
+
+#FindReplaceView QCheckBox#wholeWordChk::indicator {
+    image: url(:/images/find-and-replace-icon-word-unchecked.png);
+}
+
+#FindReplaceView QCheckBox#wholeWordChk::indicator:checked {
+    image: url(:/images/find-and-replace-icon-word.png);
+}
+
+#FindReplaceView QCheckBox#preserveCaseChk::indicator {
+    image: url(:/images/find-and-replace-icon-preserve-case-unchecked.png);
+}
+
+#FindReplaceView QCheckBox#preserveCaseChk::indicator:checked {
+    image: url(:/images/find-and-replace-icon-preserve-case.png);
+}
+
+#FindReplaceView QCheckBox#inSelectionChk::indicator {
+    image: url(:/images/find-and-replace-icon-selection-unchecked.png);
+}
+
+#FindReplaceView QCheckBox#inSelectionChk::indicator:checked {
+    image: url(:/images/find-and-replace-icon-selection.png);
+}

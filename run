@@ -277,7 +277,7 @@ set_build() {
 }
 
 localize() {
-    lupdate src -ts translations/silkedit_ja.ts
+    lupdate src core -ts translations/silkedit_ja.ts
 }
 
 # -e: stops if any command returns non zero value

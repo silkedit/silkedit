@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <QWidget>
 #include <QLineEdit>
 #include <QCheckBox>
@@ -9,7 +10,9 @@
 #include "core/HistoryModel.h"
 
 class LineEdit;
-class QCheckBox;
+namespace Ui {
+class FindReplaceView;
+}
 
 class FindReplaceView : public QWidget {
   Q_OBJECT
@@ -17,29 +20,25 @@ class FindReplaceView : public QWidget {
 
  public:
   explicit FindReplaceView(QWidget* parent);
-  ~FindReplaceView() = default;
+  ~FindReplaceView();
   DEFAULT_MOVE(FindReplaceView)
 
   void show();
   void hide();
+  void highlightMatches();
 
  protected:
   void showEvent(QShowEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
 
- private:
-  class CheckBox : public QCheckBox {
-   public:
-    CheckBox(const QString& text, FindReplaceView* parent);
-  };
+  // If you subclass from QWidget, you need to provide a paintEvent for your custom QWidget to
+  // support stylesheet
+  // http://doc.qt.io/qt-5/stylesheet-reference.html#list-of-stylable-widgets
+  void paintEvent(QPaintEvent* event) override;
 
-  LineEdit* m_lineEditForFind;
-  LineEdit* m_lineEditForReplace;
-  CheckBox* m_regexChk;
-  CheckBox* m_matchCaseChk;
-  CheckBox* m_wholeWordChk;
-  CheckBox* m_inSelectionChk;
-  CheckBox* m_preserveCaseChk;
+ private:
+  std::unique_ptr<Ui::FindReplaceView> ui;
+
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;
@@ -51,7 +50,6 @@ class FindReplaceView : public QWidget {
   void findFromActiveCursor();
   void findText(const QString& text, int searchStartPos = -1, core::Document::FindFlags flags = 0);
   void findText(const QString& text, core::Document::FindFlags flags);
-  void highlightMatches();
   void clearSearchHighlight();
   core::Document::FindFlags getFindFlags();
   void updateSelectionRegion();
@@ -59,21 +57,4 @@ class FindReplaceView : public QWidget {
   void selectFirstMatch();
   void replace();
   void replaceAll();
-};
-
-class LineEdit : public QLineEdit {
-  Q_OBJECT
-  DISABLE_COPY(LineEdit)
- public:
-  explicit LineEdit(QWidget* parent);
-  ~LineEdit() = default;
-  DEFAULT_MOVE(LineEdit)
-
- protected:
-  void keyPressEvent(QKeyEvent* event) override;
-  void focusInEvent(QFocusEvent* ev) override;
-
-signals:
-  void shiftReturnPressed();
-  void focusIn();
 };
