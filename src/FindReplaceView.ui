@@ -38,6 +38,9 @@
      <layout class="QHBoxLayout" name="checkBoxsLayout">
       <item>
        <widget class="QPushButton" name="prevButton">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -55,6 +58,9 @@
       </item>
       <item>
        <widget class="QPushButton" name="nextButton">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -111,11 +117,6 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="replaceButton">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>Replace</string>
         </property>
@@ -123,11 +124,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="replaceAllButton">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>Replace All</string>
         </property>
@@ -150,6 +146,17 @@
    <header>CheckBox.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>lineEditForFind</tabstop>
+  <tabstop>lineEditForReplace</tabstop>
+  <tabstop>replaceButton</tabstop>
+  <tabstop>replaceAllButton</tabstop>
+  <tabstop>matchCaseChk</tabstop>
+  <tabstop>regexChk</tabstop>
+  <tabstop>wholeWordChk</tabstop>
+  <tabstop>preserveCaseChk</tabstop>
+  <tabstop>inSelectionChk</tabstop>
+ </tabstops>
  <resources>
   <include location="../resources/images_common.qrc"/>
  </resources>

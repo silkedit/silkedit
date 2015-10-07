@@ -102,6 +102,19 @@ void FindReplaceView::keyPressEvent(QKeyEvent* event) {
   QWidget::keyPressEvent(event);
 }
 
+// Override this method to cycle tabs within this view
+bool FindReplaceView::focusNextPrevChild(bool next) {
+  if (next && ui->inSelectionChk->hasFocus()) {
+    ui->lineEditForFind->setFocus(Qt::TabFocusReason);
+  } else if (!next && ui->lineEditForFind->hasFocus()) {
+    ui->inSelectionChk->setFocus(Qt::TabFocusReason);
+  } else {
+    return QWidget::focusNextPrevChild(next);
+  }
+
+  return true;
+}
+
 void FindReplaceView::paintEvent(QPaintEvent*) {
   QStyleOption opt;
   opt.init(this);
