@@ -714,8 +714,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     lineRect.setLeft(textLine.cursorToX(beginPos));
     lineRect.setRight(textLine.cursorToX(endPos));
     lineRect = lineRect.translated(blockBoundingGeometry(block).topLeft() + contentOffset());
-    painter.setPen(Qt::red);
-    painter.drawRoundedRect(lineRect, 0.0, 0.0);
+    painter.drawRoundedRect(lineRect, 3.0, 3.0);
   }
 
   // draw an end of line string
