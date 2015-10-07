@@ -30,6 +30,7 @@ class FindReplaceView : public QWidget {
  protected:
   void showEvent(QShowEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
+  bool focusNextPrevChild(bool next) override;
 
   // If you subclass from QWidget, you need to provide a paintEvent for your custom QWidget to
   // support stylesheet
