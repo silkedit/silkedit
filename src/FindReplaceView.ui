@@ -111,11 +111,6 @@
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QPushButton" name="replaceButton">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>Replace</string>
         </property>
@@ -123,11 +118,6 @@
       </item>
       <item>
        <widget class="QPushButton" name="replaceAllButton">
-        <property name="font">
-         <font>
-          <pointsize>11</pointsize>
-         </font>
-        </property>
         <property name="text">
          <string>Replace All</string>
         </property>
