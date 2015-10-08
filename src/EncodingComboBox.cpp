@@ -13,7 +13,7 @@ EncodingComboBox::EncodingComboBox(QWidget* parent) : SComboBox(parent) {
   insertSeparator(1);
 
   for (const Encoding& encoding : Encoding::availableEncodings()) {
-    addItem(encoding.displayName(), encoding.name());
+    addItemWithPopupText(encoding.name(), encoding.displayName(), encoding.name());
   }
 
   // Auto Detect
