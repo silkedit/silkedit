@@ -4,9 +4,10 @@
 
 namespace core {
 
-const LineSeparator LineSeparator::Windows = LineSeparator("\r\n", "CRLF - Windows(\\r\\n)");
-const LineSeparator LineSeparator::Unix = LineSeparator("\n", "LF - Unix and OS X(\\n)");
-const LineSeparator LineSeparator::ClassicMac = LineSeparator("\r", "CR - Classic Mac(\\r)");
+const LineSeparator LineSeparator::Windows =
+    LineSeparator("\r\n", "CRLF - Windows(\\r\\n)", "CRLF");
+const LineSeparator LineSeparator::Unix = LineSeparator("\n", "LF - Unix and OS X(\\n)", "LF");
+const LineSeparator LineSeparator::ClassicMac = LineSeparator("\r", "CR - Classic Mac(\\r)", "CR");
 
 const LineSeparator LineSeparator::guess(const QString& text) {
   int index = text.indexOf(QRegularExpression("\r|\n"));
@@ -50,8 +51,10 @@ bool LineSeparator::operator!=(const LineSeparator& other) const {
   return !(*this == other);
 }
 
-LineSeparator::LineSeparator(const QString& separator, const QString& displayName)
-    : m_separator(separator), m_displayName(displayName) {
+LineSeparator::LineSeparator(const QString& separator,
+                             const QString& displayName,
+                             const QString& shortDisplayName)
+    : m_separator(separator), m_displayName(displayName), m_shortDisplayName(shortDisplayName) {
 }
 
 }  // namespace core

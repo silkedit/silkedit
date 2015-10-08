@@ -1,10 +1,9 @@
 #pragma once
 
-#include <QComboBox>
-
 #include "core/macros.h"
+#include "SComboBox.h"
 
-class LanguageComboBox : public QComboBox {
+class LanguageComboBox : public SComboBox {
   DISABLE_COPY(LanguageComboBox)
 
  public:

@@ -8,7 +8,7 @@ namespace {
 const int AUTO_DETECT_INDEX = 0;
 }
 
-EncodingComboBox::EncodingComboBox(QWidget* parent) : QComboBox(parent) {
+EncodingComboBox::EncodingComboBox(QWidget* parent) : SComboBox(parent) {
   addItem(tr("Auto Detect (Reload)", ""));
   insertSeparator(1);
 
