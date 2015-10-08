@@ -33,7 +33,7 @@ struct Regex {
   Regex() : lastFound(0) {}
   explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastFound(0) {}
 
-  QVector<Region>* find(const QString& str, int beginPos, bool findNotEmpty);
+  QVector<Region>* find(const QString& str, int beginPos);
 };
 
 // This struct is mutable because it has cache
@@ -60,10 +60,8 @@ struct Pattern {
   explicit Pattern(const QString& p_include);
   virtual ~Pattern() = default;
 
-  std::pair<Pattern*, QVector<Region>*> searchInPatterns(const QString& data,
-                                                         int pos,
-                                                         bool findNotEmpty);
-  std::pair<Pattern*, QVector<Region>*> find(const QString& data, int pos, bool findNotEmpty);
+  std::pair<Pattern*, QVector<Region>*> searchInPatterns(const QString& data, int pos);
+  std::pair<Pattern*, QVector<Region>*> find(const QString& data, int pos);
   Node* createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
   void createCaptureNodes(LanguageParser* parser,
                           QVector<Region> regions,

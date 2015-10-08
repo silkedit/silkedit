@@ -1,5 +1,7 @@
 include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/core)
 
+file(COPY "testdata" DESTINATION .)
+
 function(add_unittest test_class)
   add_executable(${test_class} EXCLUDE_FROM_ALL ${test_class}.cpp)
   target_link_libraries(${test_class} Qt5::Test SilkEdit_core)

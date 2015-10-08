@@ -167,7 +167,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
     // Try to find a root pattern in m_text from pos.
     // The matched region must NOT include empty region [0,0], otherwise this loop never ends
     // because pos doesn't increase.
-    auto pair = m_lang->rootPattern->find(m_text, pos, true);
+    auto pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
@@ -288,16 +288,14 @@ Pattern::Pattern(const QString& p_include)
       cachedRegions(nullptr) {
 }
 
-std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str,
-                                                                int beginPos,
-                                                                bool findNotEmpty) {
+std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos) {
   //  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* resultPattern = nullptr;
   QVector<Region>* resultRegions = nullptr;
   int i = 0;
   while (i < cachedPatterns->length()) {
-    auto pair = (*cachedPatterns)[i]->find(str, beginPos, findNotEmpty);
+    auto pair = (*cachedPatterns)[i]->find(str, beginPos);
     Pattern* pattern = pair.first;
     QVector<Region>* regions = pair.second;
     if (regions) {
@@ -327,14 +325,9 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
  *
  * @param str
  * @param beginPos
- * @param findNotEmpty If it's true, find doesn't return an empty region. e.g. \b matches "a" with
- *region [0,0]
  * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0]
- *if findNotEmpty is false
  */
-std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str,
-                                                    int beginPos,
-                                                    bool findNotEmpty) {
+std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
@@ -373,10 +366,10 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str,
   QVector<Region>* regions = nullptr;
   if (match.regex) {
     pattern = this;
-    regions = match.find(str, beginPos, findNotEmpty);
+    regions = match.find(str, beginPos);
   } else if (begin.regex) {
     pattern = this;
-    regions = begin.find(str, beginPos, findNotEmpty);
+    regions = begin.find(str, beginPos);
   } else if (!include.isEmpty()) {
     // # means an item name in the repository
     if (include.startsWith('#')) {
@@ -384,7 +377,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str,
       if (lang->repository.find(key) != lang->repository.end()) {
         //        qDebug("include %s", qPrintable(include));
         Pattern* p2 = lang->repository.at(key).get();
-        auto pair = p2->find(str, beginPos, findNotEmpty);
+        auto pair = p2->find(str, beginPos);
         pattern = pair.first;
         regions = pair.second;
       } else {
@@ -392,24 +385,24 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str,
       }
       // $self means the current syntax definition
     } else if (include == "$self") {
-      return lang->rootPattern->find(str, beginPos, findNotEmpty);
+      return lang->rootPattern->find(str, beginPos);
       // $base equals $self if it doesn't have a parent. When it does, $base means parent syntax
       // e.g. When source.c++ includes source.c, "include $base" in source.c means including
       // source.c++
     } else if (include == "$base" && lang->baseLanguage) {
-      return lang->baseLanguage->rootPattern->find(str, beginPos, findNotEmpty);
+      return lang->baseLanguage->rootPattern->find(str, beginPos);
     } else if (includedLanguage) {
-      return includedLanguage->rootPattern->find(str, beginPos, findNotEmpty);
+      return includedLanguage->rootPattern->find(str, beginPos);
       // external syntax definitions e.g. source.c++
     } else if (Language* includedLang = LanguageProvider::languageFromScope(include)) {
       includedLanguage.reset(includedLang);
       includedLanguage->baseLanguage = lang;
-      return includedLanguage->rootPattern->find(str, beginPos, findNotEmpty);
+      return includedLanguage->rootPattern->find(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
   } else {
-    auto pair = searchInPatterns(str, beginPos, findNotEmpty);
+    auto pair = searchInPatterns(str, beginPos);
     pattern = pair.first;
     regions = pair.second;
   }
@@ -454,7 +447,7 @@ Node* Pattern::createNode(const QString& str,
 
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
-    QVector<Region>* endMatchedRegions = end.find(str, i, false);
+    QVector<Region>* endMatchedRegions = end.find(str, i);
     if (endMatchedRegions) {
       endPos = (*endMatchedRegions)[0].end();
     } else {
@@ -477,8 +470,7 @@ Node* Pattern::createNode(const QString& str,
 
     // Search patterns between begin and end
     if (cachedPatterns->length() > 0) {
-      // regions before end must NOT include an empty region
-      auto pair = searchInPatterns(str, i, true);
+      auto pair = searchInPatterns(str, i);
       Pattern* patternBeforeEnd = pair.first;
       QVector<Region>* regionsBeforeEnd = pair.second;
       if (regionsBeforeEnd && endMatchedRegions &&
@@ -684,12 +676,12 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   return lang;
 }
 
-QVector<Region>* Regex::find(const QString& str, int beginPos, bool findNotEmpty) {
+QVector<Region>* Regex::find(const QString& str, int beginPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   while (lastFound < str.length()) {
     std::unique_ptr<QVector<int>> indices(
-        regex->findStringSubmatchIndex(str.midRef(lastFound), false, findNotEmpty));
+        regex->findStringSubmatchIndex(str.midRef(lastFound), false));
     if (!indices) {
       break;
     } else if (((*indices)[0] + lastFound) < beginPos) {
