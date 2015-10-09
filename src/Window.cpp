@@ -33,6 +33,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   qDebug("creating Window");
   ui->setupUi(this);
 
+  setUnifiedTitleAndToolBarOnMac(true);
   setAttribute(Qt::WA_DeleteOnClose);
 
 // Note: Windows of Mac app share global menu bar
