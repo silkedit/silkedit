@@ -5,7 +5,7 @@
 
 using core::LineSeparator;
 
-LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : SComboBox(parent) {
+LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : ComboBox(parent) {
   addItemWithPopupText(LineSeparator::Windows.shortDisplayName(),
                        LineSeparator::Windows.displayName(), LineSeparator::Windows.separatorStr());
   addItemWithPopupText(LineSeparator::Unix.shortDisplayName(), LineSeparator::Unix.displayName(),

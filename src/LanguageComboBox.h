@@ -1,9 +1,9 @@
 #pragma once
 
 #include "core/macros.h"
-#include "SComboBox.h"
+#include "ComboBox.h"
 
-class LanguageComboBox : public SComboBox {
+class LanguageComboBox : public ComboBox {
   DISABLE_COPY(LanguageComboBox)
 
  public:

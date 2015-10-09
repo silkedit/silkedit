@@ -1,11 +1,11 @@
 #pragma once
 
 #include "core/macros.h"
-#include "SComboBox.h"
+#include "ComboBox.h"
 
 class TextEditView;
 
-class LineSeparatorComboBox : public SComboBox {
+class LineSeparatorComboBox : public ComboBox {
   DISABLE_COPY(LineSeparatorComboBox)
 
  public:

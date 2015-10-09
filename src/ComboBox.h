@@ -1,5 +1,4 @@
-#ifndef SCOMBOBOX_H
-#define SCOMBOBOX_H
+#pragma once
 
 #include <QComboBox>
 
@@ -10,12 +9,12 @@
  * This is implemented by abusing WhatsThisRole.
  *
  */
-class SComboBox : public QComboBox {
+class ComboBox : public QComboBox {
   Q_OBJECT
 
  public:
-  explicit SComboBox(QWidget* parent = 0);
-  ~SComboBox();
+  explicit ComboBox(QWidget* parent = 0);
+  ~ComboBox();
   void addItemWithPopupText(const QString& text,
                             const QString& popupText,
                             const QVariant& userData = QVariant());
@@ -27,5 +26,3 @@ class SComboBox : public QComboBox {
  private:
   void resize(int index);
 };
-
-#endif  // SCOMBOBOX_H

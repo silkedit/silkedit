@@ -12,5 +12,6 @@
     <file>images/find-and-replace-icon-selection-unchecked.png</file>
     <file>images/find-and-replace-left-arrow.png</file>
     <file>images/find-and-replace-right-arrow.png</file>
+    <file>images/down-arrow.png</file>
 </qresource>
 </RCC>

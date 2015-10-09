@@ -2,9 +2,9 @@
 
 #include "core/macros.h"
 #include "core/Encoding.h"
-#include "SComboBox.h"
+#include "ComboBox.h"
 
-class EncodingComboBox : public SComboBox {
+class EncodingComboBox : public ComboBox {
   Q_OBJECT
   DISABLE_COPY(EncodingComboBox)
 
