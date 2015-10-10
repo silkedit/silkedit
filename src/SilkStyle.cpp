@@ -6,9 +6,6 @@ int SilkStyle::styleHint(StyleHint hint,
                          const QStyleOption* option,
                          const QWidget* widget,
                          QStyleHintReturn* returnData) const {
-  if (hint == QStyle::SH_UnderlineShortcut)
-    return 0;
-
   // http://stackoverflow.com/questions/20554940/qcombobox-pop-up-expanding-and-qtwebkit
   if (hint == QStyle::SH_ComboBox_Popup) {
     const QComboBox* combo = (QComboBox*)widget;  // convert qwidget in QComboBox
