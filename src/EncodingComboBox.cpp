@@ -8,12 +8,12 @@ namespace {
 const int AUTO_DETECT_INDEX = 0;
 }
 
-EncodingComboBox::EncodingComboBox(QWidget* parent) : QComboBox(parent) {
+EncodingComboBox::EncodingComboBox(QWidget* parent) : ComboBox(parent) {
   addItem(tr("Auto Detect (Reload)", ""));
   insertSeparator(1);
 
   for (const Encoding& encoding : Encoding::availableEncodings()) {
-    addItem(encoding.displayName(), encoding.name());
+    addItemWithPopupText(encoding.name(), encoding.displayName(), encoding.name());
   }
 
   // Auto Detect
@@ -25,6 +25,8 @@ EncodingComboBox::EncodingComboBox(QWidget* parent) : QComboBox(parent) {
   // ----------------------  <- insert here
   // ...
   insertSeparator(6);
+  // resize is needed because currentIndexChanged isn't fired for the first time
+  resize(currentIndex());
 }
 
 void EncodingComboBox::setCurrentEncoding(const Encoding& encoding) {

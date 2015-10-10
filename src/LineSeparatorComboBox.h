@@ -1,12 +1,11 @@
 #pragma once
 
-#include <QComboBox>
-
 #include "core/macros.h"
+#include "ComboBox.h"
 
 class TextEditView;
 
-class LineSeparatorComboBox : public QComboBox {
+class LineSeparatorComboBox : public ComboBox {
   DISABLE_COPY(LineSeparatorComboBox)
 
  public:

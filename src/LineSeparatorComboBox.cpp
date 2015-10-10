@@ -5,10 +5,16 @@
 
 using core::LineSeparator;
 
-LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : QComboBox(parent) {
-  addItem(LineSeparator::Windows.displayName(), LineSeparator::Windows.separatorStr());
-  addItem(LineSeparator::Unix.displayName(), LineSeparator::Unix.separatorStr());
-  addItem(LineSeparator::ClassicMac.displayName(), LineSeparator::ClassicMac.separatorStr());
+LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : ComboBox(parent) {
+  addItemWithPopupText(LineSeparator::Windows.shortDisplayName(),
+                       LineSeparator::Windows.displayName(), LineSeparator::Windows.separatorStr());
+  addItemWithPopupText(LineSeparator::Unix.shortDisplayName(), LineSeparator::Unix.displayName(),
+                       LineSeparator::Unix.separatorStr());
+  addItemWithPopupText(LineSeparator::ClassicMac.shortDisplayName(),
+                       LineSeparator::ClassicMac.displayName(),
+                       LineSeparator::ClassicMac.separatorStr());
+  // resize is needed because currentIndexChanged isn't fired for the first time
+  resize(currentIndex());
 }
 
 void LineSeparatorComboBox::setCurrentLineSeparator(const QString& separator) {

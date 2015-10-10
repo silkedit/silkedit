@@ -52,7 +52,9 @@ void TabBar::showCloseButtonOnActiveTab(const QPoint& pos) {
 
   int index = tabAt(pos);
   if (index >= 0) {
-    tabButton(index, QTabBar::RightSide)->show();
+    if (auto w = tabButton(index, QTabBar::RightSide)) {
+      w->show();
+    }
   }
 }
 
@@ -151,7 +153,9 @@ void TabBar::leaveEvent(QEvent*) {
 }
 
 void TabBar::tabInserted(int index) {
-  tabButton(index, QTabBar::RightSide)->hide();
+  if (auto w = tabButton(index, QTabBar::RightSide)) {
+    w->hide();
+  }
 }
 
 void TabBar::tabRemoved(int) {
@@ -175,6 +179,8 @@ void TabBar::grabMouse() {
 
 void TabBar::hideAllCloseButtons() {
   for (int i = 0; i < count(); i++) {
-    tabButton(i, QTabBar::RightSide)->hide();
+    if (auto w = tabButton(i, QTabBar::RightSide)) {
+      w->hide();
+    }
   }
 }

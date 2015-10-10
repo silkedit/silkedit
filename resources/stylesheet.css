@@ -75,7 +75,7 @@ QToolButton:pressed {
 
 QWidget#FindReplaceView {
     background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
-                 stop:0 #858585, stop:1 #565656);
+                 stop:0 #858585, stop:1 #515151);
 }
 
 #FindReplaceView QLineEdit {
@@ -218,4 +218,33 @@ QWidget#FindReplaceView {
 
 #FindReplaceView QCheckBox#inSelectionChk::indicator:checked {
     image: url(:/images/find-and-replace-icon-selection.png);
+}
+
+
+/* Status Bar */
+
+StatusBar {
+    border: 0;
+    max-height: 28px;
+}
+
+StatusBar QComboBox {
+    background: palette(window);
+    color: black;
+    outline: 0;
+    border: 0;
+}
+
+StatusBar QComboBox::drop-down {
+    background: transparent;
+}
+
+StatusBar QComboBox::down-arrow {
+    image: url(:/images/down-arrow.png);
+}
+
+StatusBar QComboBox QAbstractItemView {
+    color: black;
+    border: 0;
+    padding: 0 3px 0 3px;
 }

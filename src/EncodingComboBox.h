@@ -1,13 +1,10 @@
 #pragma once
 
-#include <QComboBox>
-
 #include "core/macros.h"
 #include "core/Encoding.h"
+#include "ComboBox.h"
 
-class TextEditView;
-
-class EncodingComboBox : public QComboBox {
+class EncodingComboBox : public ComboBox {
   Q_OBJECT
   DISABLE_COPY(EncodingComboBox)
 
