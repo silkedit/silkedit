@@ -235,10 +235,6 @@ StatusBar QComboBox {
     border: 0;
 }
 
-StatusBar QComboBox:hover {
-    background: #656565;
-}
-
 StatusBar QComboBox::drop-down {
     background: transparent;
 }
