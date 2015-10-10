@@ -2,11 +2,12 @@
 #include <QApplication>
 #include <QStandardItemModel>
 #include <QItemDelegate>
+#include <QStyledItemDelegate>
 
 #include "ComboBox.h"
 
 // Delegate class to style a popup of a combo box
-class ComboDelegate : public QItemDelegate {
+class ComboDelegate : public QStyledItemDelegate {
  public:
   void paint(QPainter* painter,
              const QStyleOptionViewItem& option,
@@ -14,13 +15,13 @@ class ComboDelegate : public QItemDelegate {
     QStyleOptionViewItem newOption(option);
     QString type = index.data(Qt::AccessibleDescriptionRole).toString();
     if (type == QLatin1String("separator")) {
-      QItemDelegate::paint(painter, newOption, index);
+      QStyledItemDelegate::paint(painter, newOption, index);
       int y = (newOption.rect.top() + newOption.rect.bottom()) / 2;
       painter->setPen(newOption.palette.color(QPalette::Active, QPalette::Dark));
       painter->drawLine(newOption.rect.left(), y, newOption.rect.right(), y);
     } else {
       newOption.rect = newOption.rect.adjusted(-2, 0, 20, 0);
-      QItemDelegate::paint(painter, newOption, index);
+      QStyledItemDelegate::paint(painter, newOption, index);
     }
   }
 };
@@ -52,7 +53,7 @@ QString ComboBox::currentText() const {
     QStandardItem* item = m->item(currentIndex());
     QVariant v = item->data(Qt::WhatsThisRole);
     if (v.isValid()) {
-      return item->data(Qt::WhatsThisRole).toString();
+      return v.toString();
     }
   }
 

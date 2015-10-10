@@ -25,6 +25,8 @@ EncodingComboBox::EncodingComboBox(QWidget* parent) : ComboBox(parent) {
   // ----------------------  <- insert here
   // ...
   insertSeparator(6);
+  // resize is needed because currentIndexChanged isn't fired for the first time
+  resize(currentIndex());
 }
 
 void EncodingComboBox::setCurrentEncoding(const Encoding& encoding) {

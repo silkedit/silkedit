@@ -13,6 +13,8 @@ LineSeparatorComboBox::LineSeparatorComboBox(QWidget* parent) : ComboBox(parent)
   addItemWithPopupText(LineSeparator::ClassicMac.shortDisplayName(),
                        LineSeparator::ClassicMac.displayName(),
                        LineSeparator::ClassicMac.separatorStr());
+  // resize is needed because currentIndexChanged isn't fired for the first time
+  resize(currentIndex());
 }
 
 void LineSeparatorComboBox::setCurrentLineSeparator(const QString& separator) {

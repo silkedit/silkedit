@@ -8,6 +8,7 @@
 #include "Window.h"
 #include "PluginManager.h"
 #include "version.h"
+#include "SilkStyle.h"
 
 namespace {
 template <typename T>
@@ -34,6 +35,7 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setApplicationVersion(VERSION);
+  setStyle(new SilkStyle());
 
   QFile file(":/stylesheet.css");
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {

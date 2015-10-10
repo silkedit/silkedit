@@ -22,7 +22,7 @@ class ComboBox : public QComboBox {
 
  protected:
   void paintEvent(QPaintEvent*);
+  void resize(int index);
 
  private:
-  void resize(int index);
 };
