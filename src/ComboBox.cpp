@@ -84,5 +84,5 @@ void ComboBox::resize(int) {
   QStyleOptionComboBox opt;
   initStyleOption(&opt);
   tmp = style()->sizeFromContents(QStyle::CT_ComboBox, &opt, tmp, this);
-  setFixedWidth(tmp.expandedTo(QApplication::globalStrut()).width() + 12);
+  setFixedWidth(tmp.expandedTo(QApplication::globalStrut()).width() + 13);
 }

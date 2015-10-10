@@ -225,7 +225,7 @@ QWidget#FindReplaceView {
 
 StatusBar {
     border: 0;
-    max-height: 24px;
+    max-height: 28px;
 }
 
 StatusBar QComboBox {

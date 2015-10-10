@@ -22,6 +22,13 @@ StatusBar::StatusBar(QMainWindow* window)
       m_langComboBox(new LanguageComboBox),
       m_separatorComboBox(new LineSeparatorComboBox),
       m_encComboBox(new EncodingComboBox) {
+#ifdef Q_OS_WIN
+  // Can't set padding and margin of StatusBar and ComboBox in a stylesheet.
+  // As a workaround, setSizeGripEnabled(true) (defualt value) to set a right margin of StatusBar on
+  // Mac
+  setSizeGripEnabled(false);
+#endif
+
   // StatusBar becomes the owner of these widgets
   addPermanentWidget(m_separatorComboBox);
   addPermanentWidget(m_encComboBox);
