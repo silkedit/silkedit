@@ -78,6 +78,9 @@
       </item>
       <item>
        <widget class="CheckBox" name="matchCaseChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -85,6 +88,9 @@
       </item>
       <item>
        <widget class="CheckBox" name="regexChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -92,6 +98,9 @@
       </item>
       <item>
        <widget class="CheckBox" name="wholeWordChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -99,6 +108,9 @@
       </item>
       <item>
        <widget class="CheckBox" name="preserveCaseChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -106,6 +118,9 @@
       </item>
       <item>
        <widget class="CheckBox" name="inSelectionChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -151,11 +166,6 @@
   <tabstop>lineEditForReplace</tabstop>
   <tabstop>replaceButton</tabstop>
   <tabstop>replaceAllButton</tabstop>
-  <tabstop>matchCaseChk</tabstop>
-  <tabstop>regexChk</tabstop>
-  <tabstop>wholeWordChk</tabstop>
-  <tabstop>preserveCaseChk</tabstop>
-  <tabstop>inSelectionChk</tabstop>
  </tabstops>
  <resources>
   <include location="../resources/images_common.qrc"/>
