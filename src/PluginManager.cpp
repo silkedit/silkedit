@@ -23,6 +23,7 @@
 #include "core/modifiers.h"
 #include "core/ConfigManager.h"
 #include "core/IContext.h"
+#include "core/Util.h"
 
 #define REGISTER_FUNC(type)                                                 \
   s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
@@ -30,6 +31,7 @@
 
 using core::Constants;
 using core::ConfigManager;
+using core::Util;
 
 namespace {
 
@@ -122,56 +124,6 @@ void PluginManagerPrivate::sendError(const std::string& err, msgpack::rpc::msgid
   msgpack::pack(sbuf, response);
 
   q->m_socket->write(sbuf.data(), sbuf.size());
-}
-
-void PluginManagerPrivate::sendFocusChangedEvent(const QString& viewType) {
-  std::string type = viewType.toUtf8().constData();
-  std::tuple<std::string> params = std::make_tuple(type);
-  q->sendNotification("focusChanged", params);
-}
-
-void PluginManagerPrivate::sendCommandEvent(const QString& command, const CommandArgument& args) {
-  std::string methodName = command.toUtf8().constData();
-  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  q->sendNotification("commandEvent", params);
-}
-
-void PluginManagerPrivate::callExternalCommand(const QString& cmd, const CommandArgument& args) {
-  std::string methodName = cmd.toUtf8().constData();
-  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  q->sendNotification("runCommand", params);
-}
-
-bool PluginManagerPrivate::askExternalContext(const QString& name,
-                                              core::Operator op,
-                                              const QString& value) {
-  qDebug("askExternalContext");
-  std::tuple<std::string, std::string, std::string> params = std::make_tuple(
-      name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
-      value.toUtf8().constData());
-
-  try {
-    return q->sendRequest<std::tuple<std::string, std::string, std::string>, bool>(
-        "askContext", params, msgpack::type::BOOLEAN);
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return false;
-  }
-}
-
-QString PluginManagerPrivate::translate(const std::string& key, const QString& defaultValue) {
-  try {
-    if (const boost::optional<std::string> result =
-            q->sendRequestOption<std::tuple<std::string>, std::string>(
-                "translate", std::make_tuple(key), msgpack::type::STR)) {
-      return QString::fromUtf8((*result).c_str());
-    } else {
-      return defaultValue;
-    }
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return defaultValue;
-  }
 }
 
 PluginManagerPrivate::PluginManagerPrivate(PluginManager* q_ptr)
@@ -469,9 +421,12 @@ void PluginManager::sendCommandEvent(const QString& command, const CommandArgume
 }
 
 void PluginManager::callExternalCommand(const QString& cmd, const CommandArgument& args) {
-  std::string methodName = cmd.toUtf8().constData();
-  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  sendNotification("runCommand", params);
+  Util::stopWatch([&] {
+    std::string methodName = cmd.toUtf8().constData();
+    std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
+    sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
+                                                                msgpack::type::BOOLEAN);
+  }, cmd + " time");
 }
 
 bool PluginManager::askExternalContext(const QString& name,
@@ -523,14 +478,4 @@ std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
     qCritical() << e.what();
     return std::make_tuple(false, "", CommandArgument());
   }
-}
-
-void PluginManager::callRequestFunc(const QString& methodName,
-                                    msgpack::rpc::msgid_t msgId,
-                                    const msgpack::object& obj) {
-  d->callRequestFunc(methodName, msgId, obj);
-}
-
-void PluginManager::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
-  d->callNotifyFunc(methodName, obj);
 }

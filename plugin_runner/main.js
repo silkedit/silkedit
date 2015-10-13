@@ -59,15 +59,7 @@ const handler = {
 
   // notify handlers
 
-  "runCommand": (cmd, args) => {
-    if (cmd in commands) {
-      silkutil.runInFiber(() =>{
-        commands[cmd](args)
-      })
-    }
-  }
-
-  ,"commandEvent": (cmd, args) => {
+  "commandEvent": (cmd, args) => {
     var event = {
       "cmd": cmd,
       "args": args
@@ -103,9 +95,20 @@ const handler = {
 
 
   // request handlers
+  
+  ,"runCommand": (cmd, args, response) => {
+    if (cmd in commands) {
+      silkutil.runInFiber(() =>{
+        commands[cmd](args)
+        response.result(true)
+      })
+    } else {
+      response.result(false)
+    }
+  }
 
   ,"askContext": (name, operator, value, response) => {
-      if (name in contexts) {
+    if (name in contexts) {
       silkutil.runInFiber(() => {
         response.result(contexts[name](operator, value))
       })

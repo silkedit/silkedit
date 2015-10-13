@@ -189,7 +189,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
 
     timer.start(TIMEOUT_IN_MS);
     // start a local event loop to wait until plugin runner returns response or timeout occurs
-    loop.exec();
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
 
     if (result->isReady()) {
       if (result->isSuccess()) {
@@ -205,8 +205,4 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
 
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,
                                                                 const CommandArgument& arg);
-  void callRequestFunc(const QString& method,
-                       msgpack::rpc::msgid_t msgId,
-                       const msgpack::object& obj);
-  void callNotifyFunc(const QString& method, const msgpack::object& obj);
 };
