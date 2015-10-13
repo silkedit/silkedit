@@ -300,16 +300,18 @@ void TextEditViewPrivate::setTabStopWidthFromSession() {
 void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
   Q_Q(TextEditView);
 
-  // QObject::disconnect from old document
-  QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
-  QObject::disconnect(m_document.get(), &Document::languageChanged, q,
-                      &TextEditView::languageChanged);
-  QObject::disconnect(m_document.get(), &Document::encodingChanged, q,
-                      &TextEditView::encodingChanged);
-  QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
-                      &TextEditView::lineSeparatorChanged);
-  QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
-                      SLOT(outdentCurrentLineIfNecessary()));
+  if (m_document) {
+    // QObject::disconnect from old document
+    QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
+    QObject::disconnect(m_document.get(), &Document::languageChanged, q,
+                        &TextEditView::languageChanged);
+    QObject::disconnect(m_document.get(), &Document::encodingChanged, q,
+                        &TextEditView::encodingChanged);
+    QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
+                        &TextEditView::lineSeparatorChanged);
+    QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
+                        SLOT(outdentCurrentLineIfNecessary()));
+  }
 
   m_document = document;
   QObject::connect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
