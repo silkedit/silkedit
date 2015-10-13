@@ -424,8 +424,12 @@ void PluginManager::callExternalCommand(const QString& cmd, const CommandArgumen
   Util::stopWatch([&] {
     std::string methodName = cmd.toUtf8().constData();
     std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-    sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
-                                                                msgpack::type::BOOLEAN);
+    try {
+      sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
+                                                                  msgpack::type::BOOLEAN, -1);
+    } catch (const std::exception& e) {
+      qWarning("cmd: %s:, cause: %s", qPrintable(cmd), e.what());
+    }
   }, cmd + " time");
 }
 

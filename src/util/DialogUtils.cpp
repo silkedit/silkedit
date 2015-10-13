@@ -30,6 +30,7 @@ std::list<std::string> DialogUtils::showDialogImpl(const QString& caption,
   QFileDialog dialog(nullptr, caption);
   dialog.setFileMode(fileMode);
   dialog.setOptions(options);
+  // NOTE: event loop is blocked by native dialog
   if (dialog.exec()) {
     QApplication::setActiveWindow(activeWindow);
     QStringList paths;
