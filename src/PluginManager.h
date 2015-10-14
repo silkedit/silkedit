@@ -94,8 +94,10 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   template <typename Parameter, typename Result>
   Result sendRequest(const std::string& method,
                      const Parameter& params,
-                     msgpack::type::object_type type) {
-    std::unique_ptr<ResponseResult> result = sendRequestInternal<Parameter, Result>(method, params);
+                     msgpack::type::object_type type,
+                     int timeoutInMs = TIMEOUT_IN_MS) {
+    std::unique_ptr<ResponseResult> result =
+        sendRequestInternal<Parameter, Result>(method, params, timeoutInMs);
     if (result->result().type == type) {
       return result->result().as<Result>();
     } else {
@@ -115,8 +117,10 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   template <typename Parameter, typename Result>
   boost::optional<Result> sendRequestOption(const std::string& method,
                                             const Parameter& params,
-                                            msgpack::type::object_type type) {
-    std::unique_ptr<ResponseResult> result = sendRequestInternal<Parameter, Result>(method, params);
+                                            msgpack::type::object_type type,
+                                            int timeoutInMs = TIMEOUT_IN_MS) {
+    std::unique_ptr<ResponseResult> result =
+        sendRequestInternal<Parameter, Result>(method, params, timeoutInMs);
     if (result->result().type == msgpack::type::NIL) {
       return boost::none;
     } else if (result->result().type == type) {
@@ -159,7 +163,8 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   // Send a request via msgpack rpc.
   template <typename Parameter, typename Result>
   std::unique_ptr<ResponseResult> sendRequestInternal(const std::string& method,
-                                                      const Parameter& params) {
+                                                      const Parameter& params,
+                                                      int timeoutInMs) {
     if (m_isStopped) {
       throw std::runtime_error("plugin runner is not running");
     }
@@ -187,9 +192,11 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
     s_eventLoopMap.insert(std::make_pair(msgId, result.get()));
     connect(result.get(), &ResponseResult::ready, &loop, &QEventLoop::quit);
 
-    timer.start(TIMEOUT_IN_MS);
+    if (timeoutInMs > 0) {
+      timer.start(timeoutInMs);
+    }
     // start a local event loop to wait until plugin runner returns response or timeout occurs
-    loop.exec();
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
 
     if (result->isReady()) {
       if (result->isSuccess()) {
@@ -205,8 +212,4 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
 
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,
                                                                 const CommandArgument& arg);
-  void callRequestFunc(const QString& method,
-                       msgpack::rpc::msgid_t msgId,
-                       const msgpack::object& obj);
-  void callNotifyFunc(const QString& method, const msgpack::object& obj);
 };

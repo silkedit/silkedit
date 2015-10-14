@@ -3,7 +3,6 @@
 #include <QMessageBox>
 
 #include "commands/ReopenLastClosedFileCommand.h"
-#include "commands/UndoCommand.h"
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
@@ -40,7 +39,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // we need at least one sub menu to show the Text menu correctly because of this bug.
   // https://bugreports.qt.io/browse/QTBUG-44412?jql=text%20~%20%22qmenubar%20mac%22
   const QString& undoMenuStr = ConfigManager::enableMnemonic() ? tr("&Undo") : tr("Undo");
-  editMenu->addAction(new CommandAction("undo", undoMenuStr, UndoCommand::name));
+  editMenu->addAction(new CommandAction("undo", undoMenuStr, "undo"));
 
   // View menu
   const QString& viewMenuStr = ConfigManager::enableMnemonic() ? tr("&View") : tr("View");

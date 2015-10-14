@@ -4,6 +4,7 @@
 #include <string>
 #include <functional>
 #include <QStringList>
+#include <QTime>
 
 #include "macros.h"
 
@@ -28,6 +29,14 @@ class Util {
   static bool copy(const QString& source, const QString& dist);
 
   static std::list<std::string> toStdStringList(const QStringList& qStrList);
+
+  template <typename Func>
+  static void stopWatch(Func func, const QString& msg = "time") {
+    QTime startTime = QTime::currentTime();
+    func();
+    int passed = startTime.msecsTo(QTime::currentTime());
+    qDebug("%s: %d [ms]", qPrintable(msg), passed);
+  }
 
  private:
   Util() = delete;

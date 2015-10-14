@@ -22,12 +22,6 @@ class PluginManagerPrivate : public QObject, public core::IKeyEventFilter {
 
   void init();
 
-  void sendFocusChangedEvent(const QString& viewType);
-  void sendCommandEvent(const QString& command, const CommandArgument& args);
-  void callExternalCommand(const QString& cmd, const CommandArgument& args);
-  bool askExternalContext(const QString& name, core::Operator op, const QString& value);
-  QString translate(const std::string& key, const QString& defaultValue);
-
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
   void readStdout();

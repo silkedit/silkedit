@@ -1,8 +1,17 @@
 #include <QStandardPaths>
 #include <QApplication>
 #include <QDir>
+#include <QUuid>
 
 #include "Constants.h"
+
+namespace {
+#ifdef Q_OS_WIN32
+const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
+#else
+const QString serverSocketPath = QDir::tempPath() + "/silkedit.sock";
+#endif
+}
 
 namespace core {
 
@@ -57,11 +66,7 @@ QString Constants::pluginRunnerPath() {
 }
 
 QString Constants::pluginServerSocketPath() {
-#ifndef Q_OS_WIN32
-  return QDir::tempPath() + "/silkedit.sock";
-#else
-  return R"(\\.\pipe\silkedit)";
-#endif
+  return serverSocketPath;
 }
 
 QString Constants::translationDirPath() {
