@@ -7,11 +7,10 @@
 
 namespace {
 #ifdef Q_OS_WIN32
-  const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
+const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
 #else
-  const QString serverSocketPath = QDir::tempPath() + "/silkedit_" + QUuid::createUuid().toString() + ".sock";
+const QString serverSocketPath = QDir::tempPath() + "/silkedit.sock";
 #endif
-
 }
 
 namespace core {
@@ -67,7 +66,7 @@ QString Constants::pluginRunnerPath() {
 }
 
 QString Constants::pluginServerSocketPath() {
-    return serverSocketPath;
+  return serverSocketPath;
 }
 
 QString Constants::translationDirPath() {
