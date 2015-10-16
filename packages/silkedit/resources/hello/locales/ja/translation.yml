@@ -1,4 +1,5 @@
 menu:
-  hello: "挨拶"
+  hello: 
+    label: 挨拶
 
 hello: こんにちは！
