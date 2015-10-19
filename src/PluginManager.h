@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/optional.hpp>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <tuple>

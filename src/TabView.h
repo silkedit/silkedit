@@ -46,7 +46,7 @@ signals:
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
 
  protected:
-  friend struct UniqueObject<TabView>;
+  friend struct core::UniqueObject<TabView>;
 
   static void request(TabView* window,
                       const QString& method,

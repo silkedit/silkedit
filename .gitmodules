@@ -3,5 +3,10 @@
 	url = https://github.com/msgpack/msgpack-c.git
 [submodule "uchardet"]
 	path = uchardet
-	url = git@github.com:BYVoid/uchardet.git
+	url = git@github.com:silkedit/uchardet.git
+	branch = msvc_build
+	ignore = dirty
+[submodule "oniguruma"]
+	path = oniguruma
+	url = git@github.com:kkos/oniguruma.git
 	ignore = dirty

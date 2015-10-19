@@ -34,7 +34,7 @@ signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
 
  protected:
-  friend struct UniqueObject<TabViewGroup>;
+  friend struct core::UniqueObject<TabViewGroup>;
 
   static void request(TabViewGroup* view,
                       const QString& method,

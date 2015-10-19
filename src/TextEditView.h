@@ -94,7 +94,7 @@ signals:
   void lineSeparatorChanged(const QString& separator);
 
  protected:
-  friend struct UniqueObject<TextEditView>;
+  friend struct core::UniqueObject<TextEditView>;
 
   static void request(TextEditView* view,
                       const QString& method,

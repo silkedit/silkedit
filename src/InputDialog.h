@@ -25,7 +25,7 @@ class InputDialog : public QDialog, public core::UniqueObject<InputDialog> {
   void enableOK();
 
  protected:
-  friend struct UniqueObject<InputDialog>;
+  friend struct core::UniqueObject<InputDialog>;
 
   static void request(InputDialog* view,
                       const QString& method,

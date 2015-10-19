@@ -7,8 +7,16 @@ elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
 elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
   if [ "$(uname -m)" == "x86_64" ]; then
     OS='Win64'
+    MSVC="Visual Studio 14 2015 Win64"
+    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    # Add path to MSBuild.exe and jom.exe
+    PATH="/c/Program Files (x86)/MSBuild/14.0/Bin":/c/jom:$PATH
   else
     OS='Win32'
+    MSVC="Visual Studio 14 2015"
+    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    # Add path to MSBuild.exe and jom.exe
+    PATH="/c/Program Files/MSBuild/14.0/Bin":/c/jom:$PATH
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
@@ -100,8 +108,8 @@ resolve() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        # yaml-cpp (If you install it from pacman, it doesn't work somehow)
-        if [ ! -f lib/libyaml-cpp.a ]; then
+        # yaml-cpp
+        if [ ! -f lib/libyaml-cppmd.lib ]; then
             echo 'Building yaml-cpp ...'
             wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
             tar zxf yaml-cpp-0.5.1.tar.gz
@@ -119,9 +127,11 @@ resolve() {
 
             ensure_dir build
             cd build
-            cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
-            ninja
-            ninja install
+            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=../.. ..
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Release
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Debug
             cd ../..
             rm -rf yaml-cpp-0.5.1*
         fi
@@ -145,11 +155,28 @@ resolve() {
         cd ../..
 
         # uchardet
-        if [ ! -f /usr/local/lib/libuchardet.a ]; then
+        if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
             echo 'Building uchardet ...'
             cd uchardet
-            cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .
-            mingw32-make && mingw32-make install
+            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=..
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
+            mkdir -p ../lib/uchardet
+            cp -r src/Release ../lib/uchardet
+            cp -r src/Debug ../lib/uchardet
+            mkdir -p ../include/uchardet
+            cp src/uchardet.h ../include/uchardet
+            cd ..
+        fi
+
+        # oniguruma
+        if [ ! -f lib/onig.dll ]; then
+            echo 'Building oniguruma...'
+            cd oniguruma
+            cp win32/Makefile .
+            cp win32/config.h .
+            echo $ONIG_BUILD_BAT > /tmp/build_oniguruma.bat && /tmp/build_oniguruma.bat
+            cp onig.lib onig.dll ../lib
             cd ..
         fi
     fi
@@ -166,15 +193,16 @@ build() {
 
     cd build
 
-    if [ "$1" = '-edge' ]; then
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
-    else
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
-    fi
-
-    ninja
 
     if [ $OS == 'Mac' ]; then
+        if [ "$1" = '-edge' ]; then
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+        else
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+        fi
+
+        ninja
+
         echo "Creating dmg..."
         macdeployqt SilkEdit.app
         ensure_dir dmg
@@ -198,11 +226,20 @@ build() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        if [ ! -d Release ]; then
-            mkdir Release
+        if [ $OS == 'Win64' ]; then
+            VCVARSALL_ARG=amd64
+        else
+            VCVARSALL_ARG=x86
         fi
-        cp -r silkedit.exe packages plugin_runner silkedit_ja.qm Release
-        rm -rf silkedit.exe packages plugin_runner
+
+        if [ "$1" = '-edge' ]; then
+          ../build.bat $VCVARSALL_ARG edge
+        else
+          ../build.bat $VCVARSALL_ARG
+        fi
+
+        mkdir -p Release
+        mv silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
         cd Release
         windeployqt --release silkedit.exe
         if [ $OS == 'Win32' ]; then

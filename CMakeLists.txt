@@ -23,7 +23,7 @@ file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
 if (APPLE)
   file(GLOB_RECURSE PLATFORM_RESOURCES resources/mac/*.qrc)
-elseif (MINGW)
+else (APPLE)
   file(GLOB_RECURSE PLATFORM_RESOURCES resources/win/*.qrc)
 endif (APPLE)
 
@@ -31,11 +31,11 @@ set(SILK_RESOURCES ${COMMON_RESOURCES} ${PLATFORM_RESOURCES})
 
 if (APPLE)
   set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.2)
-elseif (MINGW)
+else (APPLE)
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.4.2/mingw64")
+    set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.5.1")
   else ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.4.2/mingw32")
+    set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.5.1")
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 endif (APPLE)
 
@@ -62,19 +62,10 @@ if (APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
   include_directories(SYSTEM /usr/local/include msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
-elseif (MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( MSYS_INCLUDE c:/msys64/mingw64/include c:/msys64/usr/local/include)
-    set( MSYS_LIB c:/msys64/mingw64/lib c:/msys64/usr/local/lib)
-  else ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-    set( MSYS_INCLUDE c:/msys32/mingw32/include c:/msys32/usr/local/include)
-    set( MSYS_LIB c:/msys32/mingw32/lib c:/msys32/usr/local/lib)
-  endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-
+else (APPLE)
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include ${MSYS_INCLUDE} include src)
-  link_directories(${MSYS_LIB} lib)
+  include_directories(SYSTEM msgpack-c/include include src c:/boost_1_59_0)
+  link_directories(lib)
 
   if (BUILD_EDGE)
     set( SILK_ICON resources/silkedit_edge.rc)
@@ -85,8 +76,8 @@ elseif (MINGW)
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif (APPLE)
 
-# enable_testing should be in the root
 INCLUDE(Dart)
+# enable_testing should be in the root
 enable_testing()
 add_subdirectory(core)
 add_subdirectory(test)
@@ -116,10 +107,13 @@ if(APPLE)
             ${CMAKE_PREFIX_PATH}/translations/qtquick1_ja.qm
             ${CMAKE_PREFIX_PATH}/translations/qtscript_ja.qm
             ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
-elseif (MINGW)
+else (APPLE)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
 
   # Copy plugin_runner (node.js)
   file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION .)
+
+  # Copy onig.dll
+  file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
 ENDIF(APPLE)

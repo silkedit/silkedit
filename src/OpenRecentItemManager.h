@@ -30,7 +30,7 @@ class OpenRecentItemManager : public QObject, public core::Singleton<OpenRecentI
  private:
   static const int MAX_RECENT_ITEMS = 5;
 
-  friend class Singleton<OpenRecentItemManager>;
+  friend class core::Singleton<OpenRecentItemManager>;
   OpenRecentItemManager();
 
   std::array<QAction*, MAX_RECENT_ITEMS> m_recentItemActions;
