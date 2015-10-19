@@ -1,6 +1,7 @@
 include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/core)
 
 file(COPY "testdata" DESTINATION .)
+file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
 
 function(add_unittest test_class)
   add_executable(${test_class} EXCLUDE_FROM_ALL ${test_class}.cpp)

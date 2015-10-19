@@ -11,12 +11,14 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
     ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     # Add path to MSBuild.exe and jom.exe
     PATH="/c/Program Files (x86)/MSBuild/14.0/Bin":/c/jom:$PATH
+    VCVARSALL_ARG=amd64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
     ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     # Add path to MSBuild.exe and jom.exe
     PATH="/c/Program Files/MSBuild/14.0/Bin":/c/jom:$PATH
+    VCVARSALL_ARG=x86
   fi
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
@@ -226,16 +228,10 @@ build() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        if [ $OS == 'Win64' ]; then
-            VCVARSALL_ARG=amd64
-        else
-            VCVARSALL_ARG=x86
-        fi
-
         if [ "$1" = '-edge' ]; then
-          ../build.bat $VCVARSALL_ARG edge
+          ../build.bat $VCVARSALL_ARG all edge
         else
-          ../build.bat $VCVARSALL_ARG
+          ../build.bat $VCVARSALL_ARG all
         fi
 
         mkdir -p Release
@@ -282,9 +278,14 @@ run_tests() {
 
     ensure_dir build
     cd build
-    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-    if [ -f build.ninja ]; then
-        ninja unit_test
+    if [ $OS == 'Mac' ]; then
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+        if [ -f build.ninja ]; then
+            ninja unit_test
+            ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+        fi
+    else
+        ../build.bat $VCVARSALL_ARG unit_test
         ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
     fi
 }
