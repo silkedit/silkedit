@@ -1,4 +1,4 @@
-#include <string>
+﻿#include <string>
 #include <QDebug>
 #include <QShortcut>
 #include <QList>

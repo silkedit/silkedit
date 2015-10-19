@@ -1,4 +1,4 @@
-#include <memory>
+﻿#include <memory>
 #include <QFile>
 #include <QTextStream>
 #include <QTextDocument>

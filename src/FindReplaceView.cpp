@@ -1,4 +1,4 @@
-#include <QGridLayout>
+﻿#include <QGridLayout>
 #include <QPushButton>
 #include <QLineEdit>
 #include <QCheckBox>

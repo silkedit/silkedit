@@ -1,4 +1,4 @@
-#include <QWidget>
+﻿#include <QWidget>
 
 #include "SilkApp.h"
 #include "TabViewGroup.h"

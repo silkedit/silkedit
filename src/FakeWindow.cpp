@@ -1,4 +1,4 @@
-#include <QDebug>
+﻿#include <QDebug>
 
 #include "FakeWindow.h"
 #include "TabBar.h"

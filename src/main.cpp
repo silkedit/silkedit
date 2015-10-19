@@ -1,4 +1,4 @@
-#include <QStringList>
+﻿#include <QStringList>
 #include <QTime>
 #include <QTranslator>
 #include <QLibraryInfo>

@@ -1,4 +1,4 @@
-#include <memory>
+﻿#include <memory>
 #include <QVector>
 
 #include "TextEditViewLogic.h"

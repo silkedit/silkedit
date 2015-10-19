@@ -1,4 +1,4 @@
-#include "LanguageComboBox.h"
+﻿#include "LanguageComboBox.h"
 #include "core/LanguageParser.h"
 
 using core::LanguageProvider;

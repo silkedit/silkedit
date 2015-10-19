@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <QStringList>
 #include <QStringBuilder>
 #include <QDebug>

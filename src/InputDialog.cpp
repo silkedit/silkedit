@@ -1,4 +1,4 @@
-#include <QPushButton>
+﻿#include <QPushButton>
 
 #include "InputDialog.h"
 #include "ui_InputDialog.h"

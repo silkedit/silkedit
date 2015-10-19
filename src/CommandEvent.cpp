@@ -1,4 +1,4 @@
-#include "CommandEvent.h"
+﻿#include "CommandEvent.h"
 #include "CommandManager.h"
 
 CommandEvent::CommandEvent(const QString& name) : CommandEvent(name, CommandArgument(), nullptr) {

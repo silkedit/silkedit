@@ -1,4 +1,4 @@
-#include <uchardet/uchardet.h>
+﻿#include <uchardet/uchardet.h>
 #include <algorithm>
 #include <QTextCodec>
 #include <QDebug>

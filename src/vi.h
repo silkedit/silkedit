@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define USE_EVENT_FILTER 1
 

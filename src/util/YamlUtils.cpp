@@ -1,4 +1,4 @@
-#include <stack>
+﻿#include <stack>
 #include <QStringList>
 #include <QDebug>
 #include <QMenuBar>

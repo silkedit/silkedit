@@ -1,4 +1,4 @@
-#include <boost/optional.hpp>
+﻿#include <boost/optional.hpp>
 #include <tuple>
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>

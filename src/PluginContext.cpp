@@ -1,4 +1,4 @@
-#include "PluginContext.h"
+﻿#include "PluginContext.h"
 #include "PluginManager.h"
 
 using core::Operator;

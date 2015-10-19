@@ -1,4 +1,4 @@
-#include <QObject>
+﻿#include <QObject>
 #include <QString>
 #include <QtTest/QtTest>
 

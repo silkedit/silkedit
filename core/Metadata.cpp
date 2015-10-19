@@ -1,4 +1,4 @@
-#include <QFile>
+﻿#include <QFile>
 #include <QVariant>
 
 #include "Metadata.h"
