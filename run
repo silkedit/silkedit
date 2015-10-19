@@ -10,16 +10,18 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
     MSVC="Visual Studio 14 2015 Win64"
     ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     # Add path to MSBuild.exe and jom.exe
-    PATH="/c/Program Files (x86)/MSBuild/14.0/Bin":/c/jom:$PATH
     VCVARSALL_ARG=amd64
+    PROGRAM_FILES="Program Files (x86)"
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
     ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     # Add path to MSBuild.exe and jom.exe
-    PATH="/c/Program Files/MSBuild/14.0/Bin":/c/jom:$PATH
     VCVARSALL_ARG=x86
+    PROGRAM_FILES="Program Files"
   fi
+
+  PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -235,9 +237,23 @@ build() {
         fi
 
         mkdir -p Release
-        mv silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
+        # Can't use mv because mv fails when Release/packages already exists
+        cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
+        rm -rf silkedit.exe onig.dll packages plugin_runner
         cd Release
-        windeployqt --release silkedit.exe
+
+        windeployqt --release --no-compiler-runtime silkedit.exe
+
+        # Copy URCT
+        RELEASE_DIR=`pwd`
+        cd "/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/x64"
+        cp api-ms-win-*.dll ucrtbase.dll $RELEASE_DIR
+
+        # Copy VC Runtime
+        cd "/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/x64/Microsoft.VC140.CRT"
+        cp msvcp140.dll vcruntime140.dll $RELEASE_DIR
+        cd $RELEASE_DIR
+
         if [ $OS == 'Win32' ]; then
             # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
             cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ../../silkedit_x86.iss
