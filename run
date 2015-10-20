@@ -73,7 +73,8 @@ clean() {
 # resolve dependency
 resolve() {
     # msgpack-c and uchardet submodule
-    git submodule update --init
+    # Currently git submodule is disabled because it takes long time
+    # git submodule update --remote --init
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
