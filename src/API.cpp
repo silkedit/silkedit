@@ -265,7 +265,8 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   // If the user clicks OK, the selected font is returned. If the user clicks Cancel, the initial
   // font is returned.
   QFont font = QFontDialog::getFont(&ok, Session::singleton().font());
-  auto fontParams = std::make_tuple(font.family().toUtf8().constData(), font.pointSize());
+  std::string family = font.family().toUtf8().constData();
+  auto fontParams = std::make_tuple(family, font.pointSize());
   if (ok) {
     PluginManager::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
   } else {
@@ -375,6 +376,10 @@ void API::setFont(msgpack::object obj) {
     std::string family = std::get<0>(params);
     int size = std::get<1>(params);
     QFont font(QString::fromUtf8(family.c_str()), size);
+    // http://doc.qt.io/qt-5.5/qfont.html#HintingPreference-enum
+    // On Windows, FullHinting makes some fonts ugly
+    // On Mac, hintingPreference is ignored.
+    font.setHintingPreference(QFont::PreferVerticalHinting);
     Session::singleton().setFont(font);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
