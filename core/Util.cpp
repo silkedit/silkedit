@@ -20,6 +20,9 @@ size_t Util::binarySearch(size_t last, std::function<bool(size_t)> fn) {
     size_t mid = (low + high) / 2;
     //    qDebug("low: %d, high: %d, mid: %d", low, high, mid);
     if (fn(mid)) {
+      if (mid == 0) {
+        break;
+      }
       high = mid - 1;
     } else {
       low = mid + 1;
