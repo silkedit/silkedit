@@ -85,12 +85,18 @@ resolve() {
 
     if [ $OS == 'Mac' ]; then
       brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
-      brew list oniguruma || brew install oniguruma
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list uchardet || brew install uchardet
       brew list boost || brew install boost --c++11
+      
+      # Onigmo
+      if [ ! -f /usr/local/lib/libonig.a ]; then
+        cd Onigmo
+        ./configure && make && make install
+        cd ..
+      fi
 
       # node
       if [ ! -d plugin_runner/bin ]; then
