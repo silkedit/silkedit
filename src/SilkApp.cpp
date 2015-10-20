@@ -21,6 +21,15 @@ T findParent(QWidget* widget) {
     return desiredWidget;
   return findParent<T>(widget->parentWidget());
 }
+
+int installFont(const QString& path) {
+  auto result = QFontDatabase::addApplicationFont(path);
+  if (result == -1) {
+    qWarning("Failed to install %s", qPrintable(path));
+  }
+  return result;
+}
+
 }
 
 TabBar* SilkApp::tabBarAt(int x, int y) {
@@ -36,6 +45,13 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
+
+#ifdef Q_OS_WIN
+  // Install Source Han Code JP fonts
+  installFont(":/SourceHanCodeJP-Normal.otf");
+  installFont(":/SourceHanCodeJP-Regular.otf");
+  installFont(":/SourceHanCodeJP-Bold.otf");
+#endif
 
   QFile file(":/stylesheet.css");
   if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
