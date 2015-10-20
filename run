@@ -12,16 +12,20 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
     # Add path to MSBuild.exe and jom.exe
     VCVARSALL_ARG=amd64
     PROGRAM_FILES="Program Files (x86)"
+    ARCH=x64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
     ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     # Add path to MSBuild.exe and jom.exe
     VCVARSALL_ARG=x86
+    ARCH=x86
     PROGRAM_FILES="Program Files"
   fi
 
   PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
+  UCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/$ARCH"
+  VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -246,11 +250,11 @@ build() {
 
         # Copy URCT
         RELEASE_DIR=`pwd`
-        cd "/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/x64"
+        cd "$UCRT_DIR"
         cp api-ms-win-*.dll ucrtbase.dll $RELEASE_DIR
 
         # Copy VC Runtime
-        cd "/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/x64/Microsoft.VC140.CRT"
+        cd "$VCRT_DIR"
         cp msvcp140.dll vcruntime140.dll $RELEASE_DIR
         cd $RELEASE_DIR
 
