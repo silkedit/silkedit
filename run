@@ -178,13 +178,13 @@ resolve() {
             cd ..
         fi
 
-        # oniguruma
+        # Onigmo
         if [ ! -f lib/onig.dll ]; then
-            echo 'Building oniguruma...'
-            cd oniguruma
+            echo 'Building Onigmo...'
+            cd Onigmo
             cp win32/Makefile .
             cp win32/config.h .
-            echo $ONIG_BUILD_BAT > /tmp/build_oniguruma.bat && /tmp/build_oniguruma.bat
+            echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
             cp onig.lib onig.dll ../lib
             cd ..
         fi
@@ -257,6 +257,8 @@ build() {
         # Copy VC Runtime
         cd "$VCRT_DIR"
         cp msvcp140.dll vcruntime140.dll $RELEASE_DIR
+        attrib -r $RELEASE_DIR/msvcp140.dll
+        attrib -r $RELEASE_DIR/vcruntime140
         cd $RELEASE_DIR
 
         if [ $OS == 'Win32' ]; then
