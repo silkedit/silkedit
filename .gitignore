@@ -11,3 +11,4 @@ node_modules
 /plugin_runner/bin
 /plugin_runner/lib
 /plugin_runner/nodejs
+/yaml-cpp-*

@@ -63,6 +63,7 @@ if (APPLE)
   include_directories(SYSTEM /usr/local/include msgpack-c/include src)
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 else (APPLE)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS")
   # SYSTEM tells the compiler to skip warning for these header files.
   include_directories(SYSTEM msgpack-c/include include src c:/boost_1_59_0)
   link_directories(lib)

@@ -13,11 +13,11 @@ namespace core {
 // for the (possibly empty) remainder; Search returns the first true index. If there is no such
 // index, Search returns n. (Note that the "not found" return value is not -1 as in, for instance,
 // strings.Index). Search calls f(i) only for i in the range [0, n).
-int Util::binarySearch(int last, std::function<bool(int)> fn) {
-  int low = 0;
-  int high = last;
+size_t Util::binarySearch(size_t last, std::function<bool(size_t)> fn) {
+  size_t low = 0;
+  size_t high = last;
   while (low < high) {
-    int mid = (low + high) / 2;
+    size_t mid = (low + high) / 2;
     //    qDebug("low: %d, high: %d, mid: %d", low, high, mid);
     if (fn(mid)) {
       high = mid - 1;

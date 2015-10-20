@@ -148,7 +148,8 @@ resolve() {
             msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
             msbuild.exe INSTALL.vcxproj //p:Configuration=Debug
             cd ../..
-            rm -rf yaml-cpp-0.5.1*
+            # Don't delete yaml-cpp-0.5.1 dir because libyaml-cppmdd.lib refers to a pdb in there
+            rm yaml-cpp-*.tar.gz
         fi
 
         # node
@@ -264,7 +265,7 @@ build() {
         cd "$VCRT_DIR"
         cp msvcp140.dll vcruntime140.dll $RELEASE_DIR
         attrib -r $RELEASE_DIR/msvcp140.dll
-        attrib -r $RELEASE_DIR/vcruntime140
+        attrib -r $RELEASE_DIR/vcruntime140.dll
         cd $RELEASE_DIR
 
         if [ $OS == 'Win32' ]; then

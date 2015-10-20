@@ -144,12 +144,12 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 }
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
-  int idx = Util::binarySearch(node->children.size(), [search, node](int i) {
+  size_t idx = Util::binarySearch(node->children.size(), [search, node](size_t i) {
     return node->children[i]->region.begin() >= search.begin() ||
            node->children[i]->region.fullyCovers(search);
   });
 
-  while (idx < (int)node->children.size()) {
+  while (idx < node->children.size()) {
     Node* child = node->children[idx].get();
     if (child->region.begin() > search.end()) {
       break;
