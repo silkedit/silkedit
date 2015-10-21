@@ -47,10 +47,12 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setStyle(new SilkStyle());
 
 #ifdef Q_OS_WIN
+  // application font doesn't work with DirectWrite font engine
+  // https://bugreports.qt.io/browse/QTBUG-18711
   // Install Source Han Code JP fonts
-  installFont(":/SourceHanCodeJP-Normal.otf");
-  installFont(":/SourceHanCodeJP-Regular.otf");
-  installFont(":/SourceHanCodeJP-Bold.otf");
+//  installFont(":/SourceHanCodeJP-Normal.otf");
+//  installFont(":/SourceHanCodeJP-Regular.otf");
+//  installFont(":/SourceHanCodeJP-Bold.otf");
 #endif
 
   QFile file(":/stylesheet.css");
