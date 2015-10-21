@@ -1,4 +1,4 @@
-#include "ProjectManager.h"
+﻿#include "ProjectManager.h"
 #include "ProjectTreeView.h"
 #include "Window.h"
 #include "API.h"

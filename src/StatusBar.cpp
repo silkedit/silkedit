@@ -1,4 +1,4 @@
-#include <QMessageBox>
+﻿#include <QMessageBox>
 
 #include "StatusBar.h"
 #include "LanguageComboBox.h"

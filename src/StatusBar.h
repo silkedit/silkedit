@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QStatusBar>
 
@@ -36,7 +36,7 @@ signals:
   void languageChanged(const QString& scopeName);
 
  protected:
-  friend struct UniqueObject<StatusBar>;
+  friend struct core::UniqueObject<StatusBar>;
 
   static void request(StatusBar* view,
                       const QString& method,

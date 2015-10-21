@@ -1,4 +1,4 @@
-#include "HistoryModel.h"
+﻿#include "HistoryModel.h"
 
 namespace {
 static constexpr int HISTORY_LIMIT = 10;

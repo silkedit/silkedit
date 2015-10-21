@@ -1,4 +1,4 @@
-#include <tuple>
+﻿#include <tuple>
 #include <string>
 #include <algorithm>
 #include <QtWidgets>

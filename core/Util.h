@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <list>
 #include <string>
@@ -14,7 +14,7 @@ class Util {
   DISABLE_COPY_AND_MOVE(Util)
 
  public:
-  static int binarySearch(int last, std::function<bool(int)> fn);
+  static size_t binarySearch(size_t last, std::function<bool(size_t)> fn);
   static void ensureDir(const QString& path);
 
   /**

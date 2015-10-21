@@ -1,4 +1,4 @@
-#include "PluginCommand.h"
+﻿#include "PluginCommand.h"
 #include "PluginManager.h"
 
 PluginCommand::PluginCommand(const QString& name) : ICommand(name) {

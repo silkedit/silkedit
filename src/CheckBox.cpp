@@ -1,4 +1,4 @@
-#include "CheckBox.h"
+﻿#include "CheckBox.h"
 #include "FindReplaceView.h"
 
 CheckBox::CheckBox(QWidget* parent) : QCheckBox(parent) {

@@ -1,4 +1,4 @@
-#include <QtTest/QtTest>
+﻿#include <QtTest/QtTest>
 #include <QStringList>
 #include "Util.h"
 
@@ -16,12 +16,16 @@ void UtilTest::binarySearch() {
   for (int i = 0; i < 100; i++) {
     vec.append(i);
   }
-  int idx = Util::binarySearch(vec.length(), [vec](int i) { return i > 70; });
+  int idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i > 70; });
   QCOMPARE(idx, 70);
 
   // binarySearch returns vec.length if there's no element which returns f(i) == true
-  idx = Util::binarySearch(vec.length(), [vec](int i) { return i < 0; });
+  idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i < 0; });
   QCOMPARE(idx, vec.length());
+
+  // binarySearch returns 0 if all the items satisfies the predicate.
+  idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i <= 100; });
+  QCOMPARE(idx, 0);
 }
 
 void UtilTest::toStdStringList() {

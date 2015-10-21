@@ -1,4 +1,4 @@
-#include <QStandardPaths>
+﻿#include <QStandardPaths>
 #include <QApplication>
 #include <QDir>
 #include <QUuid>

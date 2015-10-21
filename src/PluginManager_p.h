@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "PluginManager.h"
 #include "core/IKeyEventFilter.h"

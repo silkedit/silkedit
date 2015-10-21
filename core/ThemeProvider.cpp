@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 
 #include "ThemeProvider.h"
 #include "Theme.h"

@@ -1,4 +1,4 @@
-#include <qDebug>
+﻿#include <qDebug>
 
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"

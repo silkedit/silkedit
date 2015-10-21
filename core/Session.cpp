@@ -1,4 +1,4 @@
-#include "Session.h"
+﻿#include "Session.h"
 #include "ThemeProvider.h"
 #include "ConfigManager.h"
 
@@ -14,7 +14,11 @@ void Session::setTheme(Theme* theme) {
 void Session::setFont(const QFont& font) {
   if (m_font != font) {
     m_font = font;
-    emit fontChanged(font);
+    // http://doc.qt.io/qt-5.5/qfont.html#HintingPreference-enum
+    // On Windows, FullHinting makes some fonts ugly
+    // On Mac, hintingPreference is ignored.
+    m_font.setHintingPreference(QFont::PreferVerticalHinting);
+    emit fontChanged(m_font);
   }
 }
 

@@ -1,4 +1,4 @@
-#include <QtTest/QtTest>
+﻿#include <QtTest/QtTest>
 #include <memory>
 
 #include "Regexp.h"
@@ -57,8 +57,8 @@ class RegexpTest : public QObject {
   }
 
   void findStringSubmatchIndexInJapanese() {
-    Regexp* reg = Regexp::compile(R"((いう(?:(a))?)\s*([あいうえお]+))");
-    QString str = R"(あいうあいうえおかきくけこ)";
+    Regexp* reg = Regexp::compile(u8R"((いう(?:(a))?)\s*([あいうえお]+))");
+    QString str = u8R"(あいうあいうえおかきくけこ)";
     QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str));
     QVERIFY(indices);
     QCOMPARE(indices->size(), 8);
@@ -85,8 +85,8 @@ class RegexpTest : public QObject {
   }
 
   void findJapaneseChar() {
-    Regexp* reg = Regexp::compile("い");
-    QString str = "あいうえお";
+    Regexp* reg = Regexp::compile(u8"い");
+    QString str = u8"あいうえお";
     QVector<int>* indices = reg->findStringSubmatchIndex(QStringRef(&str), true);
     QVERIFY(indices);
     QCOMPARE(indices->size(), 2);

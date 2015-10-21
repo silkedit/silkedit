@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
@@ -27,7 +27,7 @@ class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEv
   bool dispatch(QKeyEvent* ev, int repeat = 1);
 
  private:
-  friend class Singleton<KeymapManager>;
+  friend class core::Singleton<KeymapManager>;
   KeymapManager() = default;
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
@@ -54,7 +54,7 @@ class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditVi
   bool dispatchKeyPressEvent(QKeyEvent* event);
 
  private:
-  friend class Singleton<TextEditViewKeyHandler>;
+  friend class core::Singleton<TextEditViewKeyHandler>;
   TextEditViewKeyHandler();
 
   std::unordered_set<core::IKeyEventFilter*> m_keyEventFilters;

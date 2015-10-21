@@ -1,4 +1,4 @@
-#include <functional>
+﻿#include <functional>
 #include <QApplication>
 #include <QDebug>
 #include <QMenu>

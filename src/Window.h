@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <functional>
@@ -65,7 +65,7 @@ signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  protected:
-  friend struct UniqueObject<Window>;
+  friend struct core::UniqueObject<Window>;
 
   static void request(Window* window,
                       const QString& method,

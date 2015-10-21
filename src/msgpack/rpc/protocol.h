@@ -1,4 +1,4 @@
-//
+﻿//
 // msgpack::rpc::protocol - MessagePack-RPC for C++
 //
 // Copyright (C) 2009-2010 FURUHASHI Sadayuki

@@ -1,4 +1,4 @@
-#include <qstylepainter.h>
+﻿#include <qstylepainter.h>
 #include <QApplication>
 #include <QStandardItemModel>
 #include <QItemDelegate>

@@ -1,4 +1,4 @@
-#include <QApplication>
+﻿#include <QApplication>
 #include <QFileDialog>
 
 #include "DialogUtils.h"

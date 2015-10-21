@@ -7,9 +7,25 @@ elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
 elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
   if [ "$(uname -m)" == "x86_64" ]; then
     OS='Win64'
+    MSVC="Visual Studio 14 2015 Win64"
+    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    # Add path to MSBuild.exe and jom.exe
+    VCVARSALL_ARG=amd64
+    PROGRAM_FILES="Program Files (x86)"
+    ARCH=x64
   else
     OS='Win32'
+    MSVC="Visual Studio 14 2015"
+    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    # Add path to MSBuild.exe and jom.exe
+    VCVARSALL_ARG=x86
+    ARCH=x86
+    PROGRAM_FILES="Program Files"
   fi
+
+  PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
+  UCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/$ARCH"
+  VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -57,23 +73,30 @@ clean() {
 # resolve dependency
 resolve() {
     # msgpack-c and uchardet submodule
-    git submodule update --init
+    # Currently git submodule is disabled because it takes long time
+    # git submodule update --remote --init
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
-        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
+        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Regular.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
         mkdir -p resources/fonts
         mv *.otf resources/fonts
     fi
 
     if [ $OS == 'Mac' ]; then
       brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
-      brew list oniguruma || brew install oniguruma
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list uchardet || brew install uchardet
       brew list boost || brew install boost --c++11
+      
+      # Onigmo
+      if [ ! -f /usr/local/lib/libonig.a ]; then
+        cd Onigmo
+        ./configure && make && make install
+        cd ..
+      fi
 
       # node
       if [ ! -d plugin_runner/bin ]; then
@@ -100,8 +123,8 @@ resolve() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        # yaml-cpp (If you install it from pacman, it doesn't work somehow)
-        if [ ! -f lib/libyaml-cpp.a ]; then
+        # yaml-cpp
+        if [ ! -f lib/libyaml-cppmd.lib ]; then
             echo 'Building yaml-cpp ...'
             wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
             tar zxf yaml-cpp-0.5.1.tar.gz
@@ -119,11 +142,14 @@ resolve() {
 
             ensure_dir build
             cd build
-            cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../.. ..
-            ninja
-            ninja install
+            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=../.. ..
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Release
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Debug
             cd ../..
-            rm -rf yaml-cpp-0.5.1*
+            # Don't delete yaml-cpp-0.5.1 dir because libyaml-cppmdd.lib refers to a pdb in there
+            rm yaml-cpp-*.tar.gz
         fi
 
         # node
@@ -145,11 +171,28 @@ resolve() {
         cd ../..
 
         # uchardet
-        if [ ! -f /usr/local/lib/libuchardet.a ]; then
+        if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
             echo 'Building uchardet ...'
             cd uchardet
-            cmake -G "MSYS Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="/usr/local" .
-            mingw32-make && mingw32-make install
+            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=..
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
+            mkdir -p ../lib/uchardet
+            cp -r src/Release ../lib/uchardet
+            cp -r src/Debug ../lib/uchardet
+            mkdir -p ../include/uchardet
+            cp src/uchardet.h ../include/uchardet
+            cd ..
+        fi
+
+        # Onigmo
+        if [ ! -f lib/onig.dll ]; then
+            echo 'Building Onigmo...'
+            cd Onigmo
+            cp win32/Makefile .
+            cp win32/config.h .
+            echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
+            cp onig.lib onig.dll ../lib
             cd ..
         fi
     fi
@@ -166,15 +209,16 @@ build() {
 
     cd build
 
-    if [ "$1" = '-edge' ]; then
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
-    else
-        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
-    fi
-
-    ninja
 
     if [ $OS == 'Mac' ]; then
+        if [ "$1" = '-edge' ]; then
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+        else
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+        fi
+
+        ninja
+
         echo "Creating dmg..."
         macdeployqt SilkEdit.app
         ensure_dir dmg
@@ -198,13 +242,32 @@ build() {
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'
     else
-        if [ ! -d Release ]; then
-            mkdir Release
+        if [ "$1" = '-edge' ]; then
+          ../build.bat $VCVARSALL_ARG all edge
+        else
+          ../build.bat $VCVARSALL_ARG all
         fi
-        cp -r silkedit.exe packages plugin_runner silkedit_ja.qm Release
-        rm -rf silkedit.exe packages plugin_runner
+
+        mkdir -p Release
+        # Can't use mv because mv fails when Release/packages already exists
+        cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
+        rm -rf silkedit.exe onig.dll packages plugin_runner
         cd Release
-        windeployqt --release silkedit.exe
+
+        windeployqt --release --no-compiler-runtime silkedit.exe
+
+        # Copy URCT
+        RELEASE_DIR=`pwd`
+        cd "$UCRT_DIR"
+        cp api-ms-win-*.dll ucrtbase.dll $RELEASE_DIR
+
+        # Copy VC Runtime
+        cd "$VCRT_DIR"
+        cp msvcp140.dll vcruntime140.dll $RELEASE_DIR
+        attrib -r $RELEASE_DIR/msvcp140.dll
+        attrib -r $RELEASE_DIR/vcruntime140.dll
+        cd $RELEASE_DIR
+
         if [ $OS == 'Win32' ]; then
             # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
             cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ../../silkedit_x86.iss
@@ -245,9 +308,14 @@ run_tests() {
 
     ensure_dir build
     cd build
-    cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
-    if [ -f build.ninja ]; then
-        ninja unit_test
+    if [ $OS == 'Mac' ]; then
+        cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
+        if [ -f build.ninja ]; then
+            ninja unit_test
+            ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+        fi
+    else
+        ../build.bat $VCVARSALL_ARG unit_test
         ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
     fi
 }

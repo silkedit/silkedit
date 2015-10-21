@@ -1,4 +1,4 @@
-#include <QObject>
+﻿#include <QObject>
 #include <QTimer>
 
 #include "DocumentManager.h"

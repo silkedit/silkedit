@@ -1,4 +1,4 @@
-#include <memory>
+﻿#include <memory>
 #include <string>
 #include <QApplication>
 #include <QMessageBox>
@@ -265,7 +265,8 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   // If the user clicks OK, the selected font is returned. If the user clicks Cancel, the initial
   // font is returned.
   QFont font = QFontDialog::getFont(&ok, Session::singleton().font());
-  auto fontParams = std::make_tuple(font.family().toUtf8().constData(), font.pointSize());
+  std::string family = font.family().toUtf8().constData();
+  auto fontParams = std::make_tuple(family, font.pointSize());
   if (ok) {
     PluginManager::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
   } else {
