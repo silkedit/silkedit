@@ -5,6 +5,9 @@
 #include <QAbstractTableModel>
 #include <QTableView>
 #include <QMovie>
+#include <QItemDelegate>
+#include <QPainter>
+#include <QMouseEvent>
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
@@ -14,12 +17,16 @@ PackagesView::PackagesView(QWidget* parent)
       ui(new Ui::PackagesView),
       m_accessManager(new QNetworkAccessManager(this)),
       m_reply(nullptr),
-      m_pkgsModel(new PackageTableModel(this)) {
+      m_pkgsModel(new PackageTableModel(this)),
+      m_delegate(new PackageDelegate(this)) {
   ui->setupUi(this);
   auto indicatorMovie = new QMovie(":/images/indicator.gif");
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
   ui->tableView->setModel(m_pkgsModel);
+  ui->tableView->setItemDelegate(m_delegate);
+  connect(m_delegate, &PackageDelegate::needsUpdate,
+          [=](const QModelIndex& index) { ui->tableView->update(index); });
   setLayout(ui->rootHLayout);
 }
 
@@ -104,22 +111,33 @@ int PackageTableModel::rowCount(const QModelIndex&) const {
 }
 
 int PackageTableModel::columnCount(const QModelIndex&) const {
-  return 3;
+  return 4;
 }
 
 QVariant PackageTableModel::data(const QModelIndex& index, int role) const {
-  if (!index.isValid() || role != Qt::DisplayRole || index.row() >= m_packages.size() ||
+  if (!index.isValid())
+    return QVariant();
+
+  if (role == Qt::UserRole) {
+    if (m_buttonStateMap.contains(index)) {
+      return QVariant(m_buttonStateMap[index]);
+    }
+
+    return QVariant();
+  }
+
+  if (role != Qt::DisplayRole || index.row() >= m_packages.size() ||
       index.column() >= Package::ITEM_COUNT) {
     return QVariant();
   }
 
   const Package& pkg = m_packages[index.row()];
   switch (index.column()) {
-    case 0:
-      return pkg.name;
     case 1:
-      return pkg.version;
+      return pkg.name;
     case 2:
+      return pkg.version;
+    case 3:
       return pkg.description;
     default:
       return QVariant();
@@ -132,10 +150,94 @@ QVariant PackageTableModel::headerData(int, Qt::Orientation, int role) const {
   return QVariant();
 }
 
+bool PackageTableModel::setData(const QModelIndex& index, const QVariant& value, int role) {
+  if (role == Qt::UserRole) {
+    m_buttonStateMap[index] = (PackageDelegate::ButtonState)value.toInt();
+    return true;
+  } else {
+    return QAbstractTableModel::setData(index, value, role);
+  }
+}
+
 Package::Package(const QJsonValue& jsonValue) {
   QJsonObject jsonObj = jsonValue.toObject();
   name = jsonObj["name"].toString();
   version = jsonObj["version"].toString();
   description = jsonObj["description"].toString();
   repository = jsonObj["repository"].toString();
+}
+
+PackageDelegate::PackageDelegate(QObject* parent) : QStyledItemDelegate(parent) {
+}
+
+void PackageDelegate::paint(QPainter* painter,
+                            const QStyleOptionViewItem& option,
+                            const QModelIndex& index) const {
+  if (!index.isValid() || index.column() != PackageTableModel::BUTTON_COLUMN) {
+    return QStyledItemDelegate::paint(painter, option, index);
+  }
+
+  QStyleOptionButton opt;
+  initButtonStyleOption(index, option, &opt);
+  QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter, 0);
+}
+
+bool PackageDelegate::hitTestWithbutton(QEvent* event,
+                                        const QModelIndex& index,
+                                        const QStyleOptionViewItem& option) {
+  QStyleOptionButton opt;
+  initButtonStyleOption(index, option, &opt);
+  QString text("Install");
+  QSize textSize = opt.fontMetrics.size(Qt::TextShowMnemonic, text);
+  // fixme: btnSize is not correct.
+  QSize btnSize =
+      (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
+          .expandedTo(QApplication::globalStrut()) +
+      QSize(10, -10);
+  int wmargin = (option.rect.width() - btnSize.width()) / 2;
+  int hmargin = (option.rect.height() - btnSize.height()) / 2;
+  QRect buttonRect(QPoint(option.rect.left() + wmargin, option.rect.top() + hmargin), btnSize);
+  QMouseEvent* mouseEv = static_cast<QMouseEvent*>(event);
+  return buttonRect.contains(mouseEv->x(), mouseEv->y());
+}
+
+bool PackageDelegate::editorEvent(QEvent* event,
+                                  QAbstractItemModel* model,
+                                  const QStyleOptionViewItem& option,
+                                  const QModelIndex& index) {
+  if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
+    bool hit = hitTestWithbutton(event, index, option);
+    if (index.isValid() && hit && index.column() == PackageTableModel::BUTTON_COLUMN) {
+      model->setData(index, (int)Pressed, Qt::UserRole);
+      emit needsUpdate(index);
+    }
+  } else if (event->type() == QEvent::MouseButtonRelease) {
+    if (index.isValid() && index.column() == PackageTableModel::BUTTON_COLUMN) {
+      ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
+      if (s == Pressed) {
+        // emit clicked
+        qDebug("clicked");
+      }
+      model->setData(index, (int)Raised, Qt::UserRole);
+      emit needsUpdate(index);
+    }
+  }
+  return QStyledItemDelegate::editorEvent(event, model, option, index);
+}
+
+void PackageDelegate::initButtonStyleOption(const QModelIndex& index,
+                                            const QStyleOptionViewItem& option,
+                                            QStyleOptionButton* btnOption) const {
+  ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
+  if (s == Pressed) {
+    btnOption->state |= QStyle::State_Sunken;
+  } else {
+    btnOption->state |= QStyle::State_Raised;
+  }
+  btnOption->state |= QStyle::State_Enabled;
+  btnOption->rect = option.rect.adjusted(1, 1, -1, -1);
+  btnOption->text = tr("Install");
+  QPalette palette = QPalette();
+  palette.setBrush(QPalette::ButtonText, Qt::black);
+  btnOption->palette = palette;
 }
