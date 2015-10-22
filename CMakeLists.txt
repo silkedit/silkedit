@@ -30,7 +30,7 @@ endif (APPLE)
 set(SILK_RESOURCES ${COMMON_RESOURCES} ${PLATFORM_RESOURCES})
 
 if (APPLE)
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.4.2)
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.5.1)
 else (APPLE)
   if( CMAKE_SIZEOF_VOID_P EQUAL 8 )
     set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.5.1")
