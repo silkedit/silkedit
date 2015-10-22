@@ -182,7 +182,7 @@ void PackageDelegate::paint(QPainter* painter,
   QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter, 0);
 }
 
-bool PackageDelegate::hitTestWithbutton(QEvent* event,
+bool PackageDelegate::hitTestWithButton(QEvent* event,
                                         const QModelIndex& index,
                                         const QStyleOptionViewItem& option) {
   QStyleOptionButton opt;
@@ -206,7 +206,7 @@ bool PackageDelegate::editorEvent(QEvent* event,
                                   const QStyleOptionViewItem& option,
                                   const QModelIndex& index) {
   if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
-    bool hit = hitTestWithbutton(event, index, option);
+    bool hit = hitTestWithButton(event, index, option);
     if (index.isValid() && hit && index.column() == PackageTableModel::BUTTON_COLUMN) {
       model->setData(index, (int)Pressed, Qt::UserRole);
       emit needsUpdate(index);

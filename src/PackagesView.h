@@ -83,7 +83,7 @@ signals:
   void initButtonStyleOption(const QModelIndex& index,
                              const QStyleOptionViewItem& option,
                              QStyleOptionButton* btnOption) const;
-  bool hitTestWithbutton(QEvent* event,
+  bool hitTestWithButton(QEvent* event,
                          const QModelIndex& index,
                          const QStyleOptionViewItem& option);
 };
