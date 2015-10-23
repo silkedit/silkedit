@@ -4,7 +4,6 @@
 #include <QJsonArray>
 #include <QAbstractTableModel>
 #include <QTableView>
-#include <QMovie>
 #include <QItemDelegate>
 #include <QPainter>
 #include <QMouseEvent>
@@ -20,13 +19,24 @@ PackagesView::PackagesView(QWidget* parent)
       m_pkgsModel(new PackageTableModel(this)),
       m_delegate(new PackageDelegate(this)) {
   ui->setupUi(this);
-  auto indicatorMovie = new QMovie(":/images/indicator.gif");
+  QMovie* indicatorMovie = new QMovie(":/images/indicator.gif", QByteArray(), this);
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
   ui->tableView->setModel(m_pkgsModel);
   ui->tableView->setItemDelegate(m_delegate);
   connect(m_delegate, &PackageDelegate::needsUpdate,
           [=](const QModelIndex& index) { ui->tableView->update(index); });
+  connect(m_delegate, &PackageDelegate::clicked, [&](const QModelIndex& index) {
+    if (auto pkgOpt = m_pkgsModel->package(index.row())) {
+      std::unique_ptr<QMovie> indicatorMovie(
+          new QMovie(":/images/indicator.gif", QByteArray(), this));
+      connect(indicatorMovie.get(), &QMovie::updated,
+              [=](const QRect&) { ui->tableView->update(index); });
+      indicatorMovie->start();
+      m_delegate->setMovie(index.row(), std::move(indicatorMovie));
+      // install
+    }
+  });
   setLayout(ui->rootHLayout);
 }
 
@@ -150,6 +160,14 @@ QVariant PackageTableModel::headerData(int, Qt::Orientation, int role) const {
   return QVariant();
 }
 
+boost::optional<Package> PackageTableModel::package(int row) {
+  if (row < m_packages.size()) {
+    return m_packages.at(row);
+  } else {
+    return boost::none;
+  }
+}
+
 bool PackageTableModel::setData(const QModelIndex& index, const QVariant& value, int role) {
   if (role == Qt::UserRole) {
     m_buttonStateMap[index] = (PackageDelegate::ButtonState)value.toInt();
@@ -170,6 +188,10 @@ Package::Package(const QJsonValue& jsonValue) {
 PackageDelegate::PackageDelegate(QObject* parent) : QStyledItemDelegate(parent) {
 }
 
+void PackageDelegate::setMovie(int row, std::unique_ptr<QMovie> movie) {
+  m_rowMovieMap[row] = std::move(movie);
+}
+
 void PackageDelegate::paint(QPainter* painter,
                             const QStyleOptionViewItem& option,
                             const QModelIndex& index) const {
@@ -177,9 +199,34 @@ void PackageDelegate::paint(QPainter* painter,
     return QStyledItemDelegate::paint(painter, option, index);
   }
 
-  QStyleOptionButton opt;
-  initButtonStyleOption(index, option, &opt);
-  QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter, 0);
+  ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
+  switch (s) {
+    case Raised:
+    case Pressed: {
+      QStyleOptionButton opt;
+      initButtonStyleOption(index, option, &opt);
+      QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter, 0);
+      break;
+    }
+    case Installing: {
+      // draw indicator
+      if (m_rowMovieMap.count(index.row()) == 0) {
+        qWarning("movie not found for row: %d", index.row());
+        return;
+      }
+
+      int align = QStyle::visualAlignment(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignVCenter);
+      QApplication::style()->drawItemPixmap(painter, option.rect, align,
+                                            m_rowMovieMap.at(index.row())->currentPixmap());
+      break;
+    }
+    case Installed:
+      // draw label
+      break;
+    default:
+      qWarning("invalid ButtonState");
+      break;
+  }
 }
 
 bool PackageDelegate::hitTestWithButton(QEvent* event,
@@ -208,18 +255,20 @@ bool PackageDelegate::editorEvent(QEvent* event,
   if (event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
     bool hit = hitTestWithButton(event, index, option);
     if (index.isValid() && hit && index.column() == PackageTableModel::BUTTON_COLUMN) {
-      model->setData(index, (int)Pressed, Qt::UserRole);
-      emit needsUpdate(index);
+      ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
+      if (s == Raised) {
+        model->setData(index, (int)Pressed, Qt::UserRole);
+        emit needsUpdate(index);
+      }
     }
   } else if (event->type() == QEvent::MouseButtonRelease) {
     if (index.isValid() && index.column() == PackageTableModel::BUTTON_COLUMN) {
       ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
       if (s == Pressed) {
-        // emit clicked
-        qDebug("clicked");
+        model->setData(index, (int)Installing, Qt::UserRole);
+        emit needsUpdate(index);
+        emit clicked(index);
       }
-      model->setData(index, (int)Raised, Qt::UserRole);
-      emit needsUpdate(index);
     }
   }
   return QStyledItemDelegate::editorEvent(event, model, option, index);

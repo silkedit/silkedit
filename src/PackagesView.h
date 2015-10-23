@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unordered_map>
+#include <boost/optional.hpp>
 #include <QNetworkAccessManager>
 #include <QWidget>
 #include <QLabel>
@@ -8,6 +10,7 @@
 #include <QStyledItemDelegate>
 #include <QModelIndex>
 #include <QMap>
+#include <QMovie>
 
 #include "core/macros.h"
 
@@ -15,7 +18,6 @@ namespace Ui {
 class PackagesView;
 }
 
-class QProgressIndicator;
 class PackageTableModel;
 class PackageDelegate;
 
@@ -63,11 +65,14 @@ struct Package {
 class PackageDelegate : public QStyledItemDelegate {
   Q_OBJECT
  public:
-  enum ButtonState { Raised = 100, Pressed = 200 };
+  enum ButtonState { Raised, Pressed, Installing, Installed };
   explicit PackageDelegate(QObject* parent = nullptr);
+
+  void setMovie(int row, std::unique_ptr<QMovie> movie);
 
 signals:
   void needsUpdate(const QModelIndex& index);
+  void clicked(const QModelIndex& index);
 
  protected:
   void paint(QPainter* painter,
@@ -80,6 +85,7 @@ signals:
                    const QModelIndex& index) override;
 
  private:
+  std::unordered_map<int, std::unique_ptr<QMovie>> m_rowMovieMap;
   void initButtonStyleOption(const QModelIndex& index,
                              const QStyleOptionViewItem& option,
                              QStyleOptionButton* btnOption) const;
@@ -94,6 +100,7 @@ class PackageTableModel : public QAbstractTableModel {
 
  public:
   static const int BUTTON_COLUMN = 0;
+
   explicit PackageTableModel(QObject* parent = 0);
 
   void setPackages(const QList<Package>& packages);
@@ -104,6 +111,10 @@ class PackageTableModel : public QAbstractTableModel {
   QVariant headerData(int section,
                       Qt::Orientation orientation,
                       int role = Qt::DisplayRole) const override;
+  boost::optional<Package> package(int row);
+
+signals:
+  void clicked(const Package& package);
 
  private:
   QList<Package> m_packages;
