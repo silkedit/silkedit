@@ -45,6 +45,7 @@ qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
 
 if (APPLE)
+  find_library(QUAZIP_LIBRARY NAMES libquazip.dylib PATHS /usr/local/lib)
   # icon files to copy in the bundle
   set( OSX_ICON_FILES resources/silkedit.icns )
 
@@ -78,7 +79,8 @@ INCLUDE(Dart)
 enable_testing()
 add_subdirectory(core)
 add_subdirectory(test)
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})
+
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY} ${QUAZIP_LIBRARY})
 
 if(APPLE)
   # bundle packages

@@ -22,7 +22,6 @@
 #include "core/IContext.h"
 #include "CommandArgument.h"
 
-class QKeyEvent;
 class PluginManagerPrivate;
 
 class ResponseResult : public QObject {

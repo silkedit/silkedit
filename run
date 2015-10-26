@@ -119,6 +119,16 @@ resolve() {
       cd packages/silkedit
       ../../plugin_runner/bin/npm install
       cd ../..
+      
+      # quazip
+      if [ ! -f /usr/local/lib/libquazip.dylib ]; then
+          wget 'http://sourceforge.net/projects/quazip/files/quazip/0.7.1/quazip-0.7.1.tar.gz/download' -O quazip.tar.gz
+          tar zxvf quazip.tar.gz
+          cd quazip-0.7.1
+          qmake LIBS+=-lz
+          make
+          INSTALL_ROOT=/usr/local make install
+      fi
 
     elif [ $OS == 'Linux' ]; then
       OS = 'Linux'

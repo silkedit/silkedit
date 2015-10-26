@@ -13,6 +13,7 @@
 #include <QMovie>
 
 #include "core/macros.h"
+#include "core/Package.h"
 
 namespace Ui {
 class PackagesView;
@@ -44,22 +45,8 @@ class PackagesView : public QWidget {
   void handleError(QNetworkReply* reply);
   void startAnimation();
   void stopAnimation();
-};
-
-// Package model class
-struct Package {
-  DEFAULT_COPY_AND_MOVE(Package)
-
-  static const int ITEM_COUNT = 4;
-  static Package fromJson(const QJsonValue& value) { return std::move(Package(value)); }
-
-  QString name;
-  QString version;
-  QString description;
-  QString repository;
-
-  explicit Package(const QJsonValue& jsonValue);
-  ~Package() = default;
+  QNetworkReply* sendGetRequest(const QString& url);
+  QNetworkReply* sendGetRequest(const QUrl& url);
 };
 
 class PackageDelegate : public QStyledItemDelegate {
@@ -103,7 +90,7 @@ class PackageTableModel : public QAbstractTableModel {
 
   explicit PackageTableModel(QObject* parent = 0);
 
-  void setPackages(const QList<Package>& packages);
+  void setPackages(const QList<core::Package>& packages);
   int rowCount(const QModelIndex& parent = QModelIndex()) const override;
   int columnCount(const QModelIndex& parent = QModelIndex()) const override;
   QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
@@ -111,12 +98,12 @@ class PackageTableModel : public QAbstractTableModel {
   QVariant headerData(int section,
                       Qt::Orientation orientation,
                       int role = Qt::DisplayRole) const override;
-  boost::optional<Package> package(int row);
+  boost::optional<core::Package> package(int row);
 
 signals:
-  void clicked(const Package& package);
+  void clicked(const core::Package& package);
 
  private:
-  QList<Package> m_packages;
+  QList<core::Package> m_packages;
   QMap<QModelIndex, PackageDelegate::ButtonState> m_buttonStateMap;
 };

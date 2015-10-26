@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <quazip/quazip.h>
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -7,9 +8,12 @@
 #include <QItemDelegate>
 #include <QPainter>
 #include <QMouseEvent>
+#include <QDir>
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
+
+using core::Package;
 
 PackagesView::PackagesView(QWidget* parent)
     : QWidget(parent),
@@ -34,7 +38,73 @@ PackagesView::PackagesView(QWidget* parent)
               [=](const QRect&) { ui->tableView->update(index); });
       indicatorMovie->start();
       m_delegate->setMovie(index.row(), std::move(indicatorMovie));
-      // install
+
+      // validate package
+      Package pkg = *pkgOpt;
+      QStringList validationErrors = pkg.validate();
+      if (!validationErrors.isEmpty()) {
+        for (const QString& msg : validationErrors) {
+          qWarning() << msg;
+        }
+        return;
+      }
+
+      QString zipUrlStr = pkg.zipUrl();
+      if (zipUrlStr.isEmpty()) {
+        qWarning("zip url is empty");
+        return;
+      }
+
+      // Start downloading a package content as zip
+      qDebug("Github zip url: %s", qPrintable(zipUrlStr));
+      QNetworkReply* reply = sendGetRequest(zipUrlStr);
+      connect(reply, &QNetworkReply::finished, this, [=] {
+        qWarning("Finished getting redirect url");
+        reply->deleteLater();
+
+        // Handle zip url redirection.
+        // https://developer.github.com/v3/repos/contents/#get-archive-link
+        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+        if (redirectUrl.isEmpty()) {
+          qWarning("redirectUrl is empty");
+          return;
+        }
+        qDebug("redirect url: %s", qPrintable(redirectUrl.toString()));
+
+        QNetworkReply* zipReply = sendGetRequest(redirectUrl);
+        QFile* tmpZipFile = new QFile(QDir::temp().filePath(pkg.name + ".zip"), zipReply);
+        if (!tmpZipFile->open(QIODevice::ReadWrite)) {
+          qWarning("failed to create a tmp zip file. pkg: %s", qPrintable(pkg.name));
+          return;
+        }
+
+        // Save content to temp zip file
+        connect(zipReply, &QNetworkReply::readyRead, this, [=] {
+          const QByteArray& bytesRead = zipReply->read(zipReply->bytesAvailable());
+          tmpZipFile->write(bytesRead);
+        });
+
+        connect(zipReply, &QNetworkReply::finished, this, [=] {
+          qDebug("finished downloading content as zip");
+          zipReply->deleteLater();
+          QuaZip zip(tmpZipFile);
+          if (zip.open(QuaZip::mdUnzip)) {
+            qDebug() << "Opened";
+
+            for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile()) {
+              // do something
+              qDebug() << zip.getCurrentFileName();
+            }
+            if (zip.getZipError() == UNZ_OK) {
+              // ok, there was no error
+            }
+          } else {
+            qWarning("failed to unzip content");
+            return;
+          }
+        });
+
+      });
     }
   });
   setLayout(ui->rootHLayout);
@@ -51,26 +121,19 @@ void PackagesView::startLoading() {
 
   //   Note: QNetworkReply objects that are returned from QNetworkAccessManager have this object set
   //   as their parents
-  m_reply = m_accessManager->get(QNetworkRequest(
-      QUrl("https://raw.githubusercontent.com/silkedit/packages/master/packages.json")));
-  connect(m_reply,
-          static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-          this, [=](QNetworkReply::NetworkError) { handleError(m_reply); });
-  connect(m_reply, &QNetworkReply::sslErrors, this, [=](QList<QSslError> errors) {
-    for (QSslError e : errors) {
-      qWarning("SSL error: %s", qPrintable(e.errorString()));
-    }
-  });
-  connect(m_reply, &QNetworkReply::finished, this, [=] {
-    Q_ASSERT(m_reply->isFinished());
+  // todo: make packages source configurable
+  QNetworkReply* reply =
+      sendGetRequest("https://raw.githubusercontent.com/silkedit/packages/master/packages.json");
+  connect(reply, &QNetworkReply::finished, this, [=] {
+    reply->deleteLater();
     stopAnimation();
 
-    if (m_reply->error() != QNetworkReply::NoError) {
-      handleError(m_reply);
+    if (reply->error() != QNetworkReply::NoError) {
+      handleError(reply);
       return;
     }
 
-    QJsonDocument doc = QJsonDocument::fromJson(m_reply->readAll());
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
     if (!doc.isNull()) {
       QJsonArray jsonPackages = doc.array();
       QList<Package> packages;
@@ -105,6 +168,23 @@ void PackagesView::startAnimation() {
 void PackagesView::stopAnimation() {
   ui->indicatorLabel->hide();
   ui->indicatorLabel->movie()->stop();
+}
+
+QNetworkReply* PackagesView::sendGetRequest(const QString& url) {
+  return sendGetRequest(QUrl(url));
+}
+
+QNetworkReply* PackagesView::sendGetRequest(const QUrl& url) {
+  QNetworkReply* reply = m_accessManager->get(QNetworkRequest(url));
+  connect(reply,
+          static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
+          this, [=](QNetworkReply::NetworkError) { handleError(reply); });
+  connect(reply, &QNetworkReply::sslErrors, this, [=](QList<QSslError> errors) {
+    for (QSslError e : errors) {
+      qWarning("SSL error: %s", qPrintable(e.errorString()));
+    }
+  });
+  return reply;
 }
 
 PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {
@@ -175,14 +255,6 @@ bool PackageTableModel::setData(const QModelIndex& index, const QVariant& value,
   } else {
     return QAbstractTableModel::setData(index, value, role);
   }
-}
-
-Package::Package(const QJsonValue& jsonValue) {
-  QJsonObject jsonObj = jsonValue.toObject();
-  name = jsonObj["name"].toString();
-  version = jsonObj["version"].toString();
-  description = jsonObj["description"].toString();
-  repository = jsonObj["repository"].toString();
 }
 
 PackageDelegate::PackageDelegate(QObject* parent) : QStyledItemDelegate(parent) {
