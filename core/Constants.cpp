@@ -61,6 +61,10 @@ QString Constants::userKeymapPath() {
   return silkHomePath() + "/keymap.yml";
 }
 
+QString Constants::userPackagesDirPath() {
+  return silkHomePath() + "/packages";
+}
+
 QString Constants::pluginRunnerPath() {
   return pluginServerDir() + "/bin/node";
 }

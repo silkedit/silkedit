@@ -25,6 +25,7 @@ class Constants {
   static QStringList packagePaths();
   static QString userConfigPath();
   static QString userKeymapPath();
+  static QString userPackagesDirPath();
   static QString pluginRunnerPath();
   static QString pluginServerSocketPath();
   static QString translationDirPath();

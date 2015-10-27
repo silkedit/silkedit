@@ -21,6 +21,8 @@ class PackagesView;
 
 class PackageTableModel;
 class PackageDelegate;
+class QFile;
+class QuaZip;
 
 class PackagesView : public QWidget {
   Q_OBJECT
@@ -30,6 +32,14 @@ class PackagesView : public QWidget {
   ~PackagesView();
 
   void startLoading();
+
+signals:
+  void installationFailed(const QModelIndex& index);
+  void installationSucceeded(const QModelIndex& index);
+  void downloadFinished(QFile* tmpZipFile,
+                        QNetworkReply* zipReply,
+                        const QModelIndex& index,
+                        const QString& pkgName);
 
  protected:
   void showEvent(QShowEvent* event) override;
@@ -47,6 +57,13 @@ class PackagesView : public QWidget {
   void stopAnimation();
   QNetworkReply* sendGetRequest(const QString& url);
   QNetworkReply* sendGetRequest(const QUrl& url);
+  void startDownloadingPackage(const QModelIndex& index);
+  void downloadPackage(QNetworkReply* reply, const QModelIndex& index, const core::Package& pkg);
+  void installPackage(QFile* tmpZipFile,
+                      QNetworkReply* zipReply,
+                      const QModelIndex& index,
+                      const QString& pkgName);
+  bool copyContentsInZip(QuaZip& zip, const QDir& userPackagesDir);
 };
 
 class PackageDelegate : public QStyledItemDelegate {
@@ -56,6 +73,7 @@ class PackageDelegate : public QStyledItemDelegate {
   explicit PackageDelegate(QObject* parent = nullptr);
 
   void setMovie(int row, std::unique_ptr<QMovie> movie);
+  void stopMovie(int row);
 
 signals:
   void needsUpdate(const QModelIndex& index);

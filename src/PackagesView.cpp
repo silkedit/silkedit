@@ -1,5 +1,6 @@
-#include <algorithm>
 #include <quazip/quazip.h>
+#include <quazip/quazipfile.h>
+#include <algorithm>
 #include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -12,8 +13,12 @@
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
+#include "core/Constants.h"
+#include "core/scoped_guard.h"
 
 using core::Package;
+using core::Constants;
+using core::scoped_guard;
 
 PackagesView::PackagesView(QWidget* parent)
     : QWidget(parent),
@@ -30,82 +35,19 @@ PackagesView::PackagesView(QWidget* parent)
   ui->tableView->setItemDelegate(m_delegate);
   connect(m_delegate, &PackageDelegate::needsUpdate,
           [=](const QModelIndex& index) { ui->tableView->update(index); });
-  connect(m_delegate, &PackageDelegate::clicked, [&](const QModelIndex& index) {
-    if (auto pkgOpt = m_pkgsModel->package(index.row())) {
-      std::unique_ptr<QMovie> indicatorMovie(
-          new QMovie(":/images/indicator.gif", QByteArray(), this));
-      connect(indicatorMovie.get(), &QMovie::updated,
-              [=](const QRect&) { ui->tableView->update(index); });
-      indicatorMovie->start();
-      m_delegate->setMovie(index.row(), std::move(indicatorMovie));
-
-      // validate package
-      Package pkg = *pkgOpt;
-      QStringList validationErrors = pkg.validate();
-      if (!validationErrors.isEmpty()) {
-        for (const QString& msg : validationErrors) {
-          qWarning() << msg;
-        }
-        return;
-      }
-
-      QString zipUrlStr = pkg.zipUrl();
-      if (zipUrlStr.isEmpty()) {
-        qWarning("zip url is empty");
-        return;
-      }
-
-      // Start downloading a package content as zip
-      qDebug("Github zip url: %s", qPrintable(zipUrlStr));
-      QNetworkReply* reply = sendGetRequest(zipUrlStr);
-      connect(reply, &QNetworkReply::finished, this, [=] {
-        qWarning("Finished getting redirect url");
-        reply->deleteLater();
-
-        // Handle zip url redirection.
-        // https://developer.github.com/v3/repos/contents/#get-archive-link
-        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-        if (redirectUrl.isEmpty()) {
-          qWarning("redirectUrl is empty");
-          return;
-        }
-        qDebug("redirect url: %s", qPrintable(redirectUrl.toString()));
-
-        QNetworkReply* zipReply = sendGetRequest(redirectUrl);
-        QFile* tmpZipFile = new QFile(QDir::temp().filePath(pkg.name + ".zip"), zipReply);
-        if (!tmpZipFile->open(QIODevice::ReadWrite)) {
-          qWarning("failed to create a tmp zip file. pkg: %s", qPrintable(pkg.name));
-          return;
-        }
-
-        // Save content to temp zip file
-        connect(zipReply, &QNetworkReply::readyRead, this, [=] {
-          const QByteArray& bytesRead = zipReply->read(zipReply->bytesAvailable());
-          tmpZipFile->write(bytesRead);
-        });
-
-        connect(zipReply, &QNetworkReply::finished, this, [=] {
-          qDebug("finished downloading content as zip");
-          zipReply->deleteLater();
-          QuaZip zip(tmpZipFile);
-          if (zip.open(QuaZip::mdUnzip)) {
-            qDebug() << "Opened";
-
-            for (bool more = zip.goToFirstFile(); more; more = zip.goToNextFile()) {
-              // do something
-              qDebug() << zip.getCurrentFileName();
-            }
-            if (zip.getZipError() == UNZ_OK) {
-              // ok, there was no error
-            }
-          } else {
-            qWarning("failed to unzip content");
-            return;
-          }
-        });
-
-      });
-    }
+  connect(m_delegate, &PackageDelegate::clicked, this, &PackagesView::startDownloadingPackage);
+  connect(this, &PackagesView::downloadFinished, this, &PackagesView::installPackage);
+  connect(this, &PackagesView::installationFailed, [&](const QModelIndex& index) {
+    qDebug("installation failed. row: %d", index.row());
+    m_delegate->stopMovie(index.row());
+    m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
+    ui->tableView->update(index);
+  });
+  connect(this, &PackagesView::installationSucceeded, [&](const QModelIndex& index) {
+    qDebug("installation succeeded. row: %d", index.row());
+    m_delegate->stopMovie(index.row());
+    m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
+    ui->tableView->update(index);
   });
   setLayout(ui->rootHLayout);
 }
@@ -187,6 +129,171 @@ QNetworkReply* PackagesView::sendGetRequest(const QUrl& url) {
   return reply;
 }
 
+void PackagesView::startDownloadingPackage(const QModelIndex& index) {
+  auto pkgOpt = m_pkgsModel->package(index.row());
+  if (!pkgOpt) {
+    qWarning("package not found. row: %d", index.row());
+    emit installationFailed(index);
+    return;
+  }
+
+  std::unique_ptr<QMovie> indicatorMovie(new QMovie(":/images/indicator.gif", QByteArray(), this));
+  connect(indicatorMovie.get(), &QMovie::updated,
+          [=](const QRect&) { ui->tableView->update(index); });
+  indicatorMovie->start();
+  m_delegate->setMovie(index.row(), std::move(indicatorMovie));
+
+  // validate package
+  Package pkg = *pkgOpt;
+  QStringList validationErrors = pkg.validate();
+  if (!validationErrors.isEmpty()) {
+    for (const QString& msg : validationErrors) {
+      qWarning() << msg;
+    }
+    emit installationFailed(index);
+    return;
+  }
+  QString zipUrlStr = pkg.zipUrl();
+  if (zipUrlStr.isEmpty()) {
+    qWarning("zip url is empty");
+    emit installationFailed(index);
+    return;
+  }
+
+  // Start downloading a package content as zip
+  qDebug("Github zip url: %s", qPrintable(zipUrlStr));
+  QNetworkReply* reply = sendGetRequest(zipUrlStr);
+  connect(reply, &QNetworkReply::finished, this,
+          [this, reply, index, pkg] { downloadPackage(reply, index, pkg); });
+}
+
+void PackagesView::downloadPackage(QNetworkReply* reply,
+                                   const QModelIndex& index,
+                                   const Package& pkg) {
+  qWarning("Finished getting redirect url");
+  reply->deleteLater();
+
+  if (reply->error() != QNetworkReply::NoError) {
+    emit installationFailed(index);
+    return;
+  }
+
+  // Handle zip url redirection.
+  // https://developer.github.com/v3/repos/contents/#get-archive-link
+  QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+  if (redirectUrl.isEmpty()) {
+    qWarning("redirectUrl is empty");
+    emit installationFailed(index);
+    return;
+  }
+  qDebug("redirect url: %s", qPrintable(redirectUrl.toString()));
+
+  QNetworkReply* zipReply = sendGetRequest(redirectUrl);
+  QFile* tmpZipFile = new QFile(QDir::temp().filePath(pkg.name + ".zip"), zipReply);
+  if (!tmpZipFile->open(QIODevice::ReadWrite)) {
+    qWarning("failed to create a tmp zip file. pkg: %s", qPrintable(pkg.name));
+    emit installationFailed(index);
+    return;
+  }
+
+  // Save content to temp zip file
+  connect(zipReply, &QNetworkReply::readyRead, this, [zipReply, tmpZipFile] {
+    qint64 availableSize = zipReply->bytesAvailable();
+    const QByteArray& bytesRead = zipReply->read(availableSize);
+    qint64 size = tmpZipFile->write(bytesRead);
+    if (size != availableSize) {
+      qWarning("writing to a zip file failed. size: %lld, availableSize: %lld", size,
+               availableSize);
+    }
+  });
+
+  connect(zipReply, &QNetworkReply::finished, this, [this, tmpZipFile, zipReply, index, pkg] {
+    qDebug("finished downloading content as zip");
+    tmpZipFile->flush();
+    emit downloadFinished(tmpZipFile, zipReply, index, pkg.name);
+  });
+}
+
+void PackagesView::installPackage(QFile* tmpZipFile,
+                                  QNetworkReply* zipReply,
+                                  const QModelIndex& index,
+                                  const QString& pkgName) {
+  zipReply->deleteLater();
+  if (zipReply->error() != QNetworkReply::NoError) {
+    emit installationFailed(index);
+    return;
+  }
+
+  QuaZip zip(tmpZipFile);
+
+  scoped_guard guard([&zip, tmpZipFile] {
+    zip.close();
+    tmpZipFile->remove();
+  });
+
+  if (!zip.open(QuaZip::mdUnzip)) {
+    qWarning("failed to unzip content");
+    emit installationFailed(index);
+    return;
+  }
+
+  QDir userPackagesDir(Constants::userPackagesDirPath());
+  zip.goToFirstFile();
+  const QString& rootDirName = zip.getCurrentFileName();
+  if (!rootDirName.endsWith("/")) {
+    qWarning("Can't find root dir. rootDirName: %s", qPrintable(rootDirName));
+    emit installationFailed(index);
+    return;
+  }
+
+  // Create root directory
+  userPackagesDir.mkpath(rootDirName);
+  zip.goToNextFile();
+
+  // Copy contents in a zip file to user's package directory
+  bool success = copyContentsInZip(zip, userPackagesDir);
+  if (!success) {
+    emit installationFailed(index);
+    return;
+  }
+
+  // Change root directory name to package's name because root dir name in a zip file is wrong.
+  userPackagesDir.rename(rootDirName, pkgName);
+
+  emit installationSucceeded(index);
+}
+
+bool PackagesView::copyContentsInZip(QuaZip& zip, const QDir& userPackagesDir) {
+  QuaZipFile file(&zip);
+  for (bool more = true; more; more = zip.goToNextFile()) {
+    const QString& entry = zip.getCurrentFileName();
+    if (entry.endsWith("/")) {
+      // create a directory
+      userPackagesDir.mkpath(entry);
+    } else {
+      // copy a file
+      file.open(QIODevice::ReadOnly);
+      scoped_guard fileGuard([&file] { file.close(); });
+      QFile newFile(userPackagesDir.filePath(entry));
+      if (!newFile.open(QIODevice::ReadWrite)) {
+        qWarning("Failed to open %s", qPrintable(newFile.fileName()));
+        return false;
+      }
+
+      qint64 availableSize = file.bytesAvailable();
+      qint64 size = newFile.write(file.readAll());
+      if (size != availableSize) {
+        qWarning("writing to a zip file failed. size: %lld, availableSize: %lld", size,
+                 availableSize);
+        return false;
+      }
+      newFile.flush();
+    }
+  }
+
+  return true;
+}
+
 PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {
 }
 
@@ -264,6 +371,10 @@ void PackageDelegate::setMovie(int row, std::unique_ptr<QMovie> movie) {
   m_rowMovieMap[row] = std::move(movie);
 }
 
+void PackageDelegate::stopMovie(int row) {
+  m_rowMovieMap.erase(row);
+}
+
 void PackageDelegate::paint(QPainter* painter,
                             const QStyleOptionViewItem& option,
                             const QModelIndex& index) const {
@@ -292,9 +403,12 @@ void PackageDelegate::paint(QPainter* painter,
                                             m_rowMovieMap.at(index.row())->currentPixmap());
       break;
     }
-    case Installed:
-      // draw label
+    case Installed: {
+      int align = QStyle::visualAlignment(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignVCenter);
+      QApplication::style()->drawItemText(painter, option.rect, align, option.palette, true,
+                                          "Installed", QPalette::WindowText);
       break;
+    }
     default:
       qWarning("invalid ButtonState");
       break;
