@@ -39,11 +39,11 @@ else (APPLE)
   endif ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
 endif (APPLE)
 
-# Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
+find_package(Boost REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
@@ -65,7 +65,7 @@ if (APPLE)
 else (APPLE)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS")
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include include src c:/boost_1_59_0)
+  include_directories(SYSTEM msgpack-c/include include src ${Boost_INCLUDE_DIRS})
   link_directories(lib)
 
   if (BUILD_EDGE)
