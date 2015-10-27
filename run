@@ -167,7 +167,7 @@ resolve() {
 
         # npm install for silkedit package
         cd packages/silkedit
-        node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install
+        node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
         cd ../..
 
         # uchardet
