@@ -12,4 +12,3 @@ node_modules
 /plugin_runner/lib
 /plugin_runner/nodejs
 /yaml-cpp-*
-/quazip*

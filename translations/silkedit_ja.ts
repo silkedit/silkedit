@@ -10,6 +10,19 @@
     </message>
 </context>
 <context>
+    <name>ConfigDialog</name>
+    <message>
+        <location filename="../src/ConfigDialog.ui" line="14"/>
+        <source>Preferences</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <location filename="../src/ConfigDialog.ui" line="39"/>
+        <source>Packages</source>
+        <translation>パッケージ</translation>
+    </message>
+</context>
+<context>
     <name>EncodingComboBox</name>
     <message>
         <location filename="../src/EncodingComboBox.cpp" line="12"/>
@@ -46,12 +59,12 @@
     </message>
     <message>
         <location filename="../src/FindReplaceView.ui" line="33"/>
-        <location filename="../src/FindReplaceView.ui" line="120"/>
+        <location filename="../src/FindReplaceView.ui" line="136"/>
         <source>Replace</source>
         <translation>置換</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.ui" line="132"/>
+        <location filename="../src/FindReplaceView.ui" line="143"/>
         <source>Replace All</source>
         <translation>全て置換</translation>
     </message>
@@ -164,32 +177,42 @@
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="73"/>
+        <location filename="../src/MenuBar.cpp" line="74"/>
+        <source>&amp;Settings</source>
+        <translation>設定(&amp;S)</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="74"/>
+        <source>Settings</source>
+        <translation>設定</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="83"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="73"/>
+        <location filename="../src/MenuBar.cpp" line="83"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="76"/>
+        <location filename="../src/MenuBar.cpp" line="86"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="76"/>
+        <location filename="../src/MenuBar.cpp" line="86"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="90"/>
+        <location filename="../src/MenuBar.cpp" line="100"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="92"/>
+        <location filename="../src/MenuBar.cpp" line="102"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>
@@ -205,6 +228,20 @@
         <location filename="../src/OpenRecentItemManager.cpp" line="45"/>
         <source>&amp;Reopen Last Closed File</source>
         <translation>最後に閉じたファイルを開く(&amp;R)</translation>
+    </message>
+</context>
+<context>
+    <name>PackageDelegate</name>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="412"/>
+        <source>Installed</source>
+        <translation>インストール済み</translation>
+    </message>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="426"/>
+        <location filename="../src/PackagesView.cpp" line="477"/>
+        <source>Install</source>
+        <translation>インストール</translation>
     </message>
 </context>
 <context>
@@ -486,7 +523,7 @@ Convert: convert current text in %1</source>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../src/StatusBar.cpp" line="90"/>
+        <location filename="../src/StatusBar.cpp" line="97"/>
         <source>Current document is changed. This change will be lost after reloading. Do you want to continue?</source>
         <translation>ファイルが変更されています。再読み込みするとこの変更が破棄されますが、実行しますか？</translation>
     </message>

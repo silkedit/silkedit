@@ -22,7 +22,6 @@ class PackagesView;
 class PackageTableModel;
 class PackageDelegate;
 class QFile;
-class QuaZip;
 
 class PackagesView : public QWidget {
   Q_OBJECT
@@ -36,10 +35,6 @@ class PackagesView : public QWidget {
 signals:
   void installationFailed(const QModelIndex& index);
   void installationSucceeded(const QModelIndex& index);
-  void downloadFinished(QFile* tmpZipFile,
-                        QNetworkReply* zipReply,
-                        const QModelIndex& index,
-                        const QString& pkgName);
 
  protected:
   void showEvent(QShowEvent* event) override;
@@ -58,12 +53,7 @@ signals:
   QNetworkReply* sendGetRequest(const QString& url);
   QNetworkReply* sendGetRequest(const QUrl& url);
   void startDownloadingPackage(const QModelIndex& index);
-  void downloadPackage(QNetworkReply* reply, const QModelIndex& index, const core::Package& pkg);
-  void installPackage(QFile* tmpZipFile,
-                      QNetworkReply* zipReply,
-                      const QModelIndex& index,
-                      const QString& pkgName);
-  bool copyContentsInZip(QuaZip& zip, const QDir& userPackagesDir);
+  void installPackage(QNetworkReply* reply, const QModelIndex& index, const core::Package& pkg);
 };
 
 class PackageDelegate : public QStyledItemDelegate {

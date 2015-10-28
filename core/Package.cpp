@@ -29,10 +29,10 @@ QStringList core::Package::validate() {
   return errors;
 }
 
-QString core::Package::zipUrl() {
+QString core::Package::tarballUrl() {
   QString owner;
   QString repo;
-  QRegularExpression regex(R"(^https://github.com/([^/]+)/([^/]+)$)");
+  QRegularExpression regex(R"(^([^/]+)/([^/]+)$)");
   QRegularExpressionMatch match = regex.match(repository);
   if (!match.hasMatch()) {
     qWarning("no match of owner and repo. reposiotry: %s", qPrintable(repository));
@@ -40,5 +40,5 @@ QString core::Package::zipUrl() {
   }
   owner = match.captured(1);
   repo = match.captured(2);
-  return QString("https://api.github.com/repos/%1/%2/zipball/%3").arg(owner, repo, version);
+  return QString("https://api.github.com/repos/%1/%2/tarball/%3").arg(owner, repo, version);
 }

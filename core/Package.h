@@ -24,6 +24,6 @@ struct Package {
   ~Package() = default;
 
   QStringList validate();
-  QString zipUrl();
+  QString tarballUrl();
 };
 }  // namespace core

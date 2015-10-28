@@ -24,7 +24,7 @@ class PackageTest : public QObject {
 "version": "0.1.0",
 "description": "SilkEdit hello package example",
 "main": "index.js",
-"repository": "https:\/\/github.com/silkedit/hello",
+"repository": ":silkedit/hello",
 "author": "SilkEdit team",
 "license": "MIT"
 })";
@@ -35,21 +35,22 @@ class PackageTest : public QObject {
     QCOMPARE(errors.size(), 0);
   }
 
-  void zipUrl() {
+  void tarballUrl() {
     QString emptyJson =
         u8R"({
 "name": "hello_example",
 "version": "0.1.0",
 "description": "SilkEdit hello package example",
 "main": "index.js",
-"repository": "https:\/\/github.com/silkedit/hello",
+"repository": "silkedit/hello",
 "author": "SilkEdit team",
 "license": "MIT"
 })";
     QJsonDocument doc = QJsonDocument::fromJson(emptyJson.toUtf8());
     QVERIFY(!doc.isNull());
     Package pkg(QJsonValue(doc.object()));
-    QCOMPARE(pkg.zipUrl(), QString("https://api.github.com/repos/silkedit/hello/zipball/0.1.0"));
+    QCOMPARE(pkg.tarballUrl(),
+             QString("https://api.github.com/repos/silkedit/hello/tarball/0.1.0"));
   }
 };
 
