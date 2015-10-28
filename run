@@ -9,7 +9,6 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
     ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
-    # Add path to MSBuild.exe and jom.exe
     VCVARSALL_ARG=amd64
     PROGRAM_FILES="Program Files (x86)"
     ARCH=x64
@@ -17,15 +16,16 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
     OS='Win32'
     MSVC="Visual Studio 14 2015"
     ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
-    # Add path to MSBuild.exe and jom.exe
     VCVARSALL_ARG=x86
     ARCH=x86
     PROGRAM_FILES="Program Files"
   fi
 
+  # Add path to MSBuild.exe and jom.exe
   PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
   UCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/$ARCH"
   VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
+  VisualStudioVersion=14.0
 elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -143,10 +143,10 @@ resolve() {
             ensure_dir build
             cd build
             cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=../.. ..
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
-            msbuild.exe INSTALL.vcxproj //p:Configuration=Release
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
-            msbuild.exe INSTALL.vcxproj //p:Configuration=Debug
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
+            msbuild.exe INSTALL.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
             cd ../..
             # Don't delete yaml-cpp-0.5.1 dir because libyaml-cppmdd.lib refers to a pdb in there
             rm yaml-cpp-*.tar.gz
@@ -175,8 +175,8 @@ resolve() {
             echo 'Building uchardet ...'
             cd uchardet
             cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=..
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
+            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
             mkdir -p ../lib/uchardet
             cp -r src/Release ../lib/uchardet
             cp -r src/Debug ../lib/uchardet
