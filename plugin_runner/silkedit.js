@@ -281,7 +281,12 @@ const loadPackage = (dir) => {
 
             // register commands
             if (pjson.main) {
-              module = require(dir)
+              try {
+                module = require(dir)
+              } catch(e) {
+                console.warn(e)
+                return
+              }
               if (module.commands) {
                 if (pjson.name === 'silkedit') {
                   // don't add a package prefix for silkedit package
