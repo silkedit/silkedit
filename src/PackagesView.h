@@ -34,7 +34,7 @@ class PackagesView : public QWidget {
 
 signals:
   void installationFailed(const QModelIndex& index);
-  void installationSucceeded(const QModelIndex& index);
+  void installationSucceeded(const QModelIndex& index, const QString& pkgName);
 
  protected:
   void showEvent(QShowEvent* event) override;

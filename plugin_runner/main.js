@@ -92,6 +92,9 @@ const handler = {
       })
     }
   }
+  ,"loadPackage": (path) => {
+    silk.loadPackage(path)
+  }
 
 
   // request handlers

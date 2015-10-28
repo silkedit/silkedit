@@ -465,6 +465,13 @@ QString PluginManager::translate(const std::string& key, const QString& defaultV
   }
 }
 
+void PluginManager::loadPackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+  const std::tuple<std::string>& params =
+      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
+  sendNotification("loadPackage", params);
+}
+
 PluginManager::PluginManager()
     : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {
 }

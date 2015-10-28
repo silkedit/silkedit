@@ -9,15 +9,21 @@
 #include <QMouseEvent>
 #include <QDir>
 #include <QProcess>
+#include <QTimer>
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
+#include "PluginManager.h"
 #include "core/Constants.h"
 #include "core/scoped_guard.h"
 
 using core::Package;
 using core::Constants;
 using core::scoped_guard;
+
+namespace {
+static const int TIMEOUT_IN_MS = 10000;  // 10sec
+}
 
 PackagesView::PackagesView(QWidget* parent)
     : QWidget(parent),
@@ -41,12 +47,14 @@ PackagesView::PackagesView(QWidget* parent)
     m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
     ui->tableView->update(index);
   });
-  connect(this, &PackagesView::installationSucceeded, [&](const QModelIndex& index) {
-    qDebug("installation succeeded. row: %d", index.row());
-    m_delegate->stopMovie(index.row());
-    m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
-    ui->tableView->update(index);
-  });
+  connect(this, &PackagesView::installationSucceeded,
+          [&](const QModelIndex& index, const QString& pkgName) {
+            qDebug("installation succeeded. row: %d", index.row());
+            m_delegate->stopMovie(index.row());
+            m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
+            ui->tableView->update(index);
+            PluginManager::singleton().loadPackage(pkgName);
+          });
   setLayout(ui->rootHLayout);
 }
 
@@ -83,8 +91,6 @@ void PackagesView::startLoading() {
       m_pkgsModel->setPackages(packages);
     }
   });
-
-  // todo: set timeout
 }
 
 void PackagesView::showEvent(QShowEvent*) {
@@ -124,6 +130,9 @@ QNetworkReply* PackagesView::sendGetRequest(const QUrl& url) {
       qWarning("SSL error: %s", qPrintable(e.errorString()));
     }
   });
+
+  // set timeout
+  QTimer::singleShot(TIMEOUT_IN_MS, reply, &QNetworkReply::abort);
   return reply;
 }
 
@@ -224,7 +233,7 @@ void PackagesView::installPackage(QNetworkReply* reply,
               return;
             }
 
-            emit installationSucceeded(index);
+            emit installationSucceeded(index, pkg.name);
           });
   const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), redirectUrl.toString()};
   npmProcess->start(Constants::npmPath(), args);
