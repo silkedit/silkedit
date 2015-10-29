@@ -89,7 +89,7 @@ void PackagesView::stopAnimation() {
 }
 
 void PackagesView::processWithPackage(const QModelIndex& index) {
-  auto pkgOpt = m_pkgsModel->package(index.row());
+  auto pkgOpt = m_pkgsModel->package(m_proxyModel->mapToSource(index).row());
   if (!pkgOpt) {
     qWarning("package not found. row: %d", index.row());
     emit m_viewModel->processFailed(index);
