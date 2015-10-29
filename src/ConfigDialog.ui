@@ -43,7 +43,7 @@
     </item>
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
-      <widget class="PackagesView" name="packagesView"/>
+      <widget class="PackagesTabView" name="packagesView"/>
      </widget>
     </item>
    </layout>
@@ -51,9 +51,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PackagesView</class>
+   <class>PackagesTabView</class>
    <extends>QWidget</extends>
-   <header>PackagesView.h</header>
+   <header>PackagesTabView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

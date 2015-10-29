@@ -5,35 +5,35 @@ QPlainTextEdit {
   border: 0;
 }
 
-QTabWidget::pane {
+TabView::pane {
 }
 
-QTabWidget::tab-bar {
+TabView::tab-bar {
     left: 0px;
 }
 
 /* Style the tab using the tab sub-control. Note that
-    it reads QTabBar _not_ QTabWidget */
-QTabBar::tab {
+    it reads TabBar _not_ TabView */
+TabBar::tab {
     border-top-left-radius: 1px;
     border-top-right-radius: 1px;
     min-width: 18ex;
     padding: 8px;
 }
 
-QTabBar::tab:first:selected {
+TabBar::tab:first:selected {
     margin-left: 0; /* the first selected tab has nothing to overlap with on the left */
 }
 
-QTabBar::tab:last:selected {
+TabBar::tab:last:selected {
     margin-right: 0; /* the last selected tab has nothing to overlap with on the right */
 }
 
-QTabBar::tab:only-one {
+TabBar::tab:only-one {
     margin: 0; /* if there is only one tab, we don't want overlapping margins */
 }
 
-QTabBar::close-button {
+TabBar::close-button {
     subcontrol-position: right;
 }
 

@@ -18,12 +18,15 @@ struct Package {
   QString name;
   QString version;
   QString description;
-  QString repository;
+  /**
+   * @brief githubUrl used to install an npm package
+   * See npm help install for more detail
+   */
+  QString githubUrl;
 
   explicit Package(const QJsonValue& jsonValue);
   ~Package() = default;
 
   QStringList validate();
-  QString tarballUrl();
 };
 }  // namespace core

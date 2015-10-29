@@ -1,8 +1,14 @@
 ﻿#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QNetworkReply>
+#include <QTimer>
 
 #include "Util.h"
+
+namespace {
+static const int TIMEOUT_IN_MS = 10000;  // 10sec
+}
 
 namespace core {
 
@@ -48,6 +54,32 @@ std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
   }
 
   return list;
+}
+
+QNetworkReply* Util::sendGetRequest(QNetworkAccessManager* manager, const QString& url) {
+  return sendGetRequest(manager, QUrl(url));
+}
+
+// Note: QNetworkReply objects that are returned from QNetworkAccessManager have this object set
+// as their parents
+QNetworkReply* Util::sendGetRequest(QNetworkAccessManager* manager, const QUrl& url) {
+  Q_ASSERT(manager);
+  QNetworkReply* reply = manager->get(QNetworkRequest(url));
+  QObject::connect(reply, static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(
+                              &QNetworkReply::error),
+                   [=](QNetworkReply::NetworkError) {
+                     Q_ASSERT(reply);
+                     qWarning("network error: %s", qPrintable(reply->errorString()));
+                   });
+  QObject::connect(reply, &QNetworkReply::sslErrors, [=](QList<QSslError> errors) {
+    for (QSslError e : errors) {
+      qWarning("SSL error: %s", qPrintable(e.errorString()));
+    }
+  });
+
+  // set timeout
+  QTimer::singleShot(TIMEOUT_IN_MS, reply, &QNetworkReply::abort);
+  return reply;
 }
 
 }  // namespace core

@@ -9,7 +9,15 @@ core::Package::Package(const QJsonValue& jsonValue) {
   name = jsonObj["name"].toString();
   version = jsonObj["version"].toString();
   description = jsonObj["description"].toString();
-  repository = jsonObj["repository"].toString();
+  QJsonValue repoValue = jsonObj["repository"];
+  if (repoValue.isObject()) {
+    QJsonObject repoObj = repoValue.toObject();
+    // e.g., git+https://github.com/silkedit/hello.git
+    githubUrl = "git+" + repoObj["url"].toString();
+  } else {
+    // e.g., silkedit/hello
+    githubUrl = repoValue.toString();
+  }
 }
 
 QStringList core::Package::validate() {
@@ -18,7 +26,7 @@ QStringList core::Package::validate() {
     errors << "package name is empty";
   }
 
-  if (repository.isEmpty()) {
+  if (githubUrl.isEmpty()) {
     errors << "packgae repository is empty";
   }
 
@@ -27,18 +35,4 @@ QStringList core::Package::validate() {
   }
 
   return errors;
-}
-
-QString core::Package::tarballUrl() {
-  QString owner;
-  QString repo;
-  QRegularExpression regex(R"(^([^/]+)/([^/]+)$)");
-  QRegularExpressionMatch match = regex.match(repository);
-  if (!match.hasMatch()) {
-    qWarning("no match of owner and repo. reposiotry: %s", qPrintable(repository));
-    return "";
-  }
-  owner = match.captured(1);
-  repo = match.captured(2);
-  return QString("https://api.github.com/repos/%1/%2/tarball/%3").arg(owner, repo, version);
 }

@@ -2,8 +2,8 @@
 
 #include <unordered_map>
 #include <boost/optional.hpp>
-#include <QNetworkAccessManager>
 #include <QWidget>
+#include <QObject>
 #include <QLabel>
 #include <QJsonObject>
 #include <QAbstractTableModel>
@@ -23,44 +23,73 @@ class PackageTableModel;
 class PackageDelegate;
 class QFile;
 
+class PackagesViewModel : public QObject {
+  Q_OBJECT
+ public:
+  PackagesViewModel(QObject* parent);
+  virtual void loadPackages() = 0;
+  virtual QString buttonText() = 0;
+  virtual QString TextAfterProcess() = 0;
+  virtual void processWithPackage(const QModelIndex& index, const core::Package& pkg) = 0;
+
+signals:
+  void packagesLoaded(QList<core::Package> packages);
+  void processFailed(const QModelIndex& index);
+  void processSucceeded(const QModelIndex& index);
+};
+
+class AvailablePackagesViewModel : public PackagesViewModel {
+  Q_OBJECT
+ public:
+  AvailablePackagesViewModel(QObject* parent);
+  // load packages asynchronously
+  void loadPackages() override;
+  QString buttonText() override;
+  QString TextAfterProcess() override;
+  void processWithPackage(const QModelIndex& index, const core::Package& pkg) override;
+};
+
+class InstalledPackagesViewModel : public PackagesViewModel {
+  Q_OBJECT
+ public:
+  InstalledPackagesViewModel(QObject* parent);
+  void loadPackages() override;
+  QString buttonText() override;
+  QString TextAfterProcess() override;
+  void processWithPackage(const QModelIndex& index, const core::Package& pkg) override;
+};
+
 class PackagesView : public QWidget {
   Q_OBJECT
 
  public:
-  explicit PackagesView(QWidget* parent = 0);
+  PackagesView(PackagesViewModel* viewModel, QWidget* parent = 0);
   ~PackagesView();
-
-  void startLoading();
-
-signals:
-  void installationFailed(const QModelIndex& index);
-  void installationSucceeded(const QModelIndex& index, const QString& pkgName);
 
  protected:
   void showEvent(QShowEvent* event) override;
-  void hideEvent(QHideEvent* event) override;
 
  private:
   Ui::PackagesView* ui;
-  QNetworkAccessManager* m_accessManager;
-  QNetworkReply* m_reply;
   PackageTableModel* m_pkgsModel;
   PackageDelegate* m_delegate;
+  PackagesViewModel* m_viewModel;
 
-  void handleError(QNetworkReply* reply);
+  void startLoading();
   void startAnimation();
   void stopAnimation();
-  QNetworkReply* sendGetRequest(const QString& url);
-  QNetworkReply* sendGetRequest(const QUrl& url);
-  void startDownloadingPackage(const QModelIndex& index);
-  void installPackage(QNetworkReply* reply, const QModelIndex& index, const core::Package& pkg);
+  void processWithPackage(const QModelIndex& index);
+  void onProcessFailed(const QModelIndex& index);
+  void onProcessSucceeded(const QModelIndex& index);
 };
 
 class PackageDelegate : public QStyledItemDelegate {
   Q_OBJECT
  public:
   enum ButtonState { Raised, Pressed, Installing, Installed };
-  explicit PackageDelegate(QObject* parent = nullptr);
+  explicit PackageDelegate(const QString& buttonText,
+                           const QString& textAfterProcess,
+                           QObject* parent = nullptr);
 
   void setMovie(int row, std::unique_ptr<QMovie> movie);
   void stopMovie(int row);
@@ -81,6 +110,9 @@ signals:
 
  private:
   std::unordered_map<int, std::unique_ptr<QMovie>> m_rowMovieMap;
+  QString m_buttonText;
+  QString m_textAfterProcess;
+
   void initButtonStyleOption(const QModelIndex& index,
                              const QStyleOptionViewItem& option,
                              QStyleOptionButton* btnOption) const;

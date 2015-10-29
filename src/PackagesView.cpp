@@ -14,96 +14,58 @@
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
 #include "PluginManager.h"
+#include "SilkApp.h"
 #include "core/Constants.h"
 #include "core/scoped_guard.h"
+#include "core/Util.h"
 
 using core::Package;
 using core::Constants;
 using core::scoped_guard;
+using core::Util;
 
-namespace {
-static const int TIMEOUT_IN_MS = 10000;  // 10sec
-}
-
-PackagesView::PackagesView(QWidget* parent)
+PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
     : QWidget(parent),
       ui(new Ui::PackagesView),
-      m_accessManager(new QNetworkAccessManager(this)),
-      m_reply(nullptr),
       m_pkgsModel(new PackageTableModel(this)),
-      m_delegate(new PackageDelegate(this)) {
+      m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),
+      m_viewModel(viewModel) {
   ui->setupUi(this);
   QMovie* indicatorMovie = new QMovie(":/images/indicator.gif", QByteArray(), this);
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
   ui->tableView->setModel(m_pkgsModel);
   ui->tableView->setItemDelegate(m_delegate);
+  connect(m_viewModel, &PackagesViewModel::packagesLoaded, [=](QList<Package> packages) {
+    stopAnimation();
+    ui->tableView->show();
+    m_pkgsModel->setPackages(packages);
+  });
+  connect(m_viewModel, &PackagesViewModel::processFailed, this, &PackagesView::onProcessFailed);
+  connect(m_viewModel, &PackagesViewModel::processSucceeded, this,
+          &PackagesView::onProcessSucceeded);
   connect(m_delegate, &PackageDelegate::needsUpdate,
           [=](const QModelIndex& index) { ui->tableView->update(index); });
-  connect(m_delegate, &PackageDelegate::clicked, this, &PackagesView::startDownloadingPackage);
-  connect(this, &PackagesView::installationFailed, [&](const QModelIndex& index) {
-    qDebug("installation failed. row: %d", index.row());
-    m_delegate->stopMovie(index.row());
-    m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
-    ui->tableView->update(index);
-  });
-  connect(this, &PackagesView::installationSucceeded,
-          [&](const QModelIndex& index, const QString& pkgName) {
-            qDebug("installation succeeded. row: %d", index.row());
-            m_delegate->stopMovie(index.row());
-            m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
-            ui->tableView->update(index);
-            PluginManager::singleton().loadPackage(pkgName);
-          });
+  connect(m_delegate, &PackageDelegate::clicked, this, &PackagesView::processWithPackage);
   setLayout(ui->rootHLayout);
 }
 
 PackagesView::~PackagesView() {
   qDebug("~PackagesView");
+  // disconnect this manually because processFailed may be emitted in the destructor chain of
+  // ~PackagesView()
+  disconnect(m_viewModel, &PackagesViewModel::processFailed, this, &PackagesView::onProcessFailed);
   delete ui;
 }
 
 void PackagesView::startLoading() {
   ui->tableView->hide();
   startAnimation();
-
-  //   Note: QNetworkReply objects that are returned from QNetworkAccessManager have this object set
-  //   as their parents
-  // todo: make packages source configurable
-  QNetworkReply* reply =
-      sendGetRequest("https://raw.githubusercontent.com/silkedit/packages/master/packages.json");
-  connect(reply, &QNetworkReply::finished, this, [=] {
-    reply->deleteLater();
-    stopAnimation();
-
-    if (reply->error() != QNetworkReply::NoError) {
-      handleError(reply);
-      return;
-    }
-
-    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
-    if (!doc.isNull()) {
-      QJsonArray jsonPackages = doc.array();
-      QList<Package> packages;
-      std::transform(jsonPackages.constBegin(), jsonPackages.constEnd(),
-                     std::back_inserter(packages), &Package::fromJson);
-      ui->tableView->show();
-      m_pkgsModel->setPackages(packages);
-    }
-  });
+  m_viewModel->loadPackages();
 }
 
 void PackagesView::showEvent(QShowEvent*) {
   startLoading();
-}
-
-void PackagesView::hideEvent(QHideEvent*) {
-  // todo: Cancel requests
-}
-
-void PackagesView::handleError(QNetworkReply* reply) {
-  Q_ASSERT(reply);
-  qWarning("network error: %s", qPrintable(reply->errorString()));
 }
 
 void PackagesView::startAnimation() {
@@ -116,35 +78,15 @@ void PackagesView::stopAnimation() {
   ui->indicatorLabel->movie()->stop();
 }
 
-QNetworkReply* PackagesView::sendGetRequest(const QString& url) {
-  return sendGetRequest(QUrl(url));
-}
-
-QNetworkReply* PackagesView::sendGetRequest(const QUrl& url) {
-  QNetworkReply* reply = m_accessManager->get(QNetworkRequest(url));
-  connect(reply,
-          static_cast<void (QNetworkReply::*)(QNetworkReply::NetworkError)>(&QNetworkReply::error),
-          this, [=](QNetworkReply::NetworkError) { handleError(reply); });
-  connect(reply, &QNetworkReply::sslErrors, this, [=](QList<QSslError> errors) {
-    for (QSslError e : errors) {
-      qWarning("SSL error: %s", qPrintable(e.errorString()));
-    }
-  });
-
-  // set timeout
-  QTimer::singleShot(TIMEOUT_IN_MS, reply, &QNetworkReply::abort);
-  return reply;
-}
-
-void PackagesView::startDownloadingPackage(const QModelIndex& index) {
+void PackagesView::processWithPackage(const QModelIndex& index) {
   auto pkgOpt = m_pkgsModel->package(index.row());
   if (!pkgOpt) {
     qWarning("package not found. row: %d", index.row());
-    emit installationFailed(index);
+    emit m_viewModel->processFailed(index);
     return;
   }
 
-  std::unique_ptr<QMovie> indicatorMovie(new QMovie(":/images/indicator.gif", QByteArray(), this));
+  std::unique_ptr<QMovie> indicatorMovie(new QMovie(":/images/indicator.gif"));
   connect(indicatorMovie.get(), &QMovie::updated,
           [=](const QRect&) { ui->tableView->update(index); });
   indicatorMovie->start();
@@ -157,86 +99,25 @@ void PackagesView::startDownloadingPackage(const QModelIndex& index) {
     for (const QString& msg : validationErrors) {
       qWarning() << msg;
     }
-    emit installationFailed(index);
-    return;
-  }
-  QString tarballUrlStr = pkg.tarballUrl();
-  if (tarballUrlStr.isEmpty()) {
-    qWarning("tarball url is empty");
-    emit installationFailed(index);
+    emit m_viewModel->processFailed(index);
     return;
   }
 
-  // Start downloading a package content as tarball
-  qDebug("Github tarball url: %s", qPrintable(tarballUrlStr));
-  QNetworkReply* reply = sendGetRequest(tarballUrlStr);
-  connect(reply, &QNetworkReply::finished, this,
-          [this, reply, index, pkg] { installPackage(reply, index, pkg); });
+  m_viewModel->processWithPackage(index, pkg);
 }
 
-void PackagesView::installPackage(QNetworkReply* reply,
-                                  const QModelIndex& index,
-                                  const Package& pkg) {
-  qWarning("Finished getting redirect url");
-  reply->deleteLater();
+void PackagesView::onProcessFailed(const QModelIndex& index) {
+  qDebug("installation failed. row: %d", index.row());
+  m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
+  m_delegate->stopMovie(index.row());
+  ui->tableView->update(index);
+}
 
-  if (reply->error() != QNetworkReply::NoError) {
-    emit installationFailed(index);
-    return;
-  }
-
-  // Handle tarball url redirection.
-  // https://developer.github.com/v3/repos/contents/#get-archive-link
-  QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-  if (redirectUrl.isEmpty()) {
-    qWarning("redirectUrl is empty");
-    emit installationFailed(index);
-    return;
-  }
-  qDebug("redirect url: %s", qPrintable(redirectUrl.toString()));
-
-  auto npmProcess = new QProcess(this);
-  connect(npmProcess, &QProcess::readyReadStandardOutput, this,
-          [npmProcess] { qDebug() << npmProcess->readAllStandardOutput(); });
-  connect(npmProcess, &QProcess::readyReadStandardError, this,
-          [npmProcess] { qWarning() << npmProcess->readAllStandardOutput(); });
-  connect(npmProcess, static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
-          [=](QProcess::ProcessError error) { qWarning("npm error. %d", error); });
-  connect(npmProcess,
-          static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
-          [this, npmProcess, index, pkg](int exitCode, QProcess::ExitStatus exitStatus) {
-            npmProcess->deleteLater();
-
-            if (exitStatus == QProcess::CrashExit || exitCode != 0) {
-              qWarning("npm install failed");
-              emit installationFailed(index);
-              return;
-            }
-
-            QDir node_modules = QDir(QDir::tempPath() + "/node_modules");
-            if (!node_modules.exists()) {
-              qWarning("temp node_modules directory doesn't exist");
-              emit installationFailed(index);
-              return;
-            }
-
-            qDebug("npm install succeeded");
-            // move the installed package in tmp to user's packages directory
-            if (!QDir(Constants::userPackagesDirPath()).exists()) {
-              QDir(Constants::silkHomePath()).mkdir(Constants::packagesDirName());
-            }
-            bool success =
-                node_modules.rename(pkg.name, Constants::userPackagesDirPath() + "/" + pkg.name);
-            if (!success) {
-              qWarning("Failed to move %s", qPrintable(node_modules.filePath(pkg.name)));
-              emit installationFailed(index);
-              return;
-            }
-
-            emit installationSucceeded(index, pkg.name);
-          });
-  const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), redirectUrl.toString()};
-  npmProcess->start(Constants::npmPath(), args);
+void PackagesView::onProcessSucceeded(const QModelIndex& index) {
+  qDebug("installation succeeded. row: %d", index.row());
+  m_delegate->stopMovie(index.row());
+  m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
+  ui->tableView->update(index);
 }
 
 PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {
@@ -309,7 +190,10 @@ bool PackageTableModel::setData(const QModelIndex& index, const QVariant& value,
   }
 }
 
-PackageDelegate::PackageDelegate(QObject* parent) : QStyledItemDelegate(parent) {
+PackageDelegate::PackageDelegate(const QString& buttonText,
+                                 const QString& textAfterProcess,
+                                 QObject* parent)
+    : QStyledItemDelegate(parent), m_buttonText(buttonText), m_textAfterProcess(textAfterProcess) {
 }
 
 void PackageDelegate::setMovie(int row, std::unique_ptr<QMovie> movie) {
@@ -317,7 +201,9 @@ void PackageDelegate::setMovie(int row, std::unique_ptr<QMovie> movie) {
 }
 
 void PackageDelegate::stopMovie(int row) {
-  m_rowMovieMap.erase(row);
+  if (m_rowMovieMap.count(row) != 0) {
+    m_rowMovieMap.erase(row);
+  }
 }
 
 void PackageDelegate::paint(QPainter* painter,
@@ -351,7 +237,7 @@ void PackageDelegate::paint(QPainter* painter,
     case Installed: {
       int align = QStyle::visualAlignment(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignVCenter);
       QApplication::style()->drawItemText(painter, option.rect, align, option.palette, true,
-                                          tr("Installed"), QPalette::WindowText);
+                                          m_textAfterProcess, QPalette::WindowText);
       break;
     }
     default:
@@ -416,8 +302,140 @@ void PackageDelegate::initButtonStyleOption(const QModelIndex& index,
   }
   btnOption->state |= QStyle::State_Enabled;
   btnOption->rect = option.rect.adjusted(1, 1, -1, -1);
-  btnOption->text = tr("Install");
+  btnOption->text = m_buttonText;
   QPalette palette = QPalette();
   palette.setBrush(QPalette::ButtonText, Qt::black);
   btnOption->palette = palette;
+}
+
+AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
+    : PackagesViewModel(parent) {
+}
+
+void AvailablePackagesViewModel::loadPackages() {
+  // todo: make packages source configurable
+  QNetworkReply* reply = Util::sendGetRequest(
+      SilkApp::networkManager(),
+      "https://raw.githubusercontent.com/silkedit/packages/master/packages.json");
+  connect(reply, &QNetworkReply::finished, this, [=] {
+    reply->deleteLater();
+
+    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+    if (!doc.isNull()) {
+      QJsonArray jsonPackages = doc.array();
+      QList<Package> packages;
+      std::transform(jsonPackages.constBegin(), jsonPackages.constEnd(),
+                     std::back_inserter(packages), &Package::fromJson);
+      emit packagesLoaded(packages);
+    }
+  });
+}
+
+QString AvailablePackagesViewModel::buttonText() {
+  return tr("Install");
+}
+
+QString AvailablePackagesViewModel::TextAfterProcess() {
+  return tr("Installed");
+}
+
+void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
+                                                    const core::Package& pkg) {
+  // Install the package using npm
+  auto npmProcess = new QProcess(this);
+  connect(npmProcess, &QProcess::readyReadStandardOutput, this,
+          [npmProcess] { qDebug() << npmProcess->readAllStandardOutput(); });
+  connect(npmProcess, &QProcess::readyReadStandardError, this,
+          [npmProcess] { qWarning() << npmProcess->readAllStandardOutput(); });
+  connect(npmProcess, static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
+          [=](QProcess::ProcessError error) { qWarning("npm error. %d", error); });
+  connect(npmProcess,
+          static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
+          [this, npmProcess, index, pkg](int exitCode, QProcess::ExitStatus exitStatus) {
+            npmProcess->deleteLater();
+
+            if (exitStatus == QProcess::CrashExit || exitCode != 0) {
+              qWarning("npm install failed");
+              emit processFailed(index);
+              return;
+            }
+
+            QDir node_modules = QDir(QDir::tempPath() + "/node_modules");
+            if (!node_modules.exists()) {
+              qWarning("temp node_modules directory doesn't exist");
+              emit processFailed(index);
+              return;
+            }
+
+            qDebug("npm install succeeded");
+            // move the installed package in tmp to user's packages directory
+            if (!QDir(Constants::userPackagesDirPath()).exists()) {
+              QDir(Constants::silkHomePath()).mkdir(Constants::packagesDirName());
+            }
+            bool success =
+                node_modules.rename(pkg.name, Constants::userPackagesDirPath() + "/" + pkg.name);
+            if (!success) {
+              qWarning("Failed to move %s", qPrintable(node_modules.filePath(pkg.name)));
+              emit processFailed(index);
+              return;
+            }
+
+            emit processSucceeded(index);
+            PluginManager::singleton().loadPackage(pkg.name);
+          });
+  const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), pkg.githubUrl};
+  npmProcess->start(Constants::npmPath(), args);
+}
+
+PackagesViewModel::PackagesViewModel(QObject* parent) : QObject(parent) {
+}
+
+InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
+    : PackagesViewModel(parent) {
+}
+
+void InstalledPackagesViewModel::loadPackages() {
+  // load installed packages
+  QStringList directories =
+      QDir(Constants::userPackagesDirPath()).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+  QList<Package> packages;
+  for (const QString& dirName : directories) {
+    QFile packageJson(Constants::userPackagesDirPath() + "/" + dirName + "/package.json");
+    if (packageJson.exists() && packageJson.open(QIODevice::ReadOnly)) {
+      QJsonParseError error;
+      auto doc = QJsonDocument::fromJson(packageJson.readAll(), &error);
+      if (error.error != QJsonParseError::NoError) {
+        qWarning("error when loading package.json. %s", qPrintable(error.errorString()));
+        return;
+      }
+      packages.append(Package::fromJson(doc.object()));
+    }
+  }
+  emit packagesLoaded(packages);
+}
+
+QString InstalledPackagesViewModel::buttonText() {
+  return tr("Remove");
+}
+
+QString InstalledPackagesViewModel::TextAfterProcess() {
+  return tr("Removed");
+}
+
+void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index,
+                                                    const core::Package& pkg) {
+  QDir pkgDir(Constants::userPackagesDirPath() + "/" + pkg.name);
+  if (!pkgDir.exists()) {
+    qWarning("%s doesn't exist", qPrintable(pkgDir.absolutePath()));
+    emit processFailed(index);
+    return;
+  }
+
+  bool success = pkgDir.removeRecursively();
+  if (success) {
+    emit processSucceeded(index);
+  } else {
+    qWarning("Failed to remove directory: %s", qPrintable(pkgDir.absolutePath()));
+    emit processFailed(index);
+  }
 }
