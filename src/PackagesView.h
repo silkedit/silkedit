@@ -11,6 +11,7 @@
 #include <QModelIndex>
 #include <QMap>
 #include <QMovie>
+#include <QSortFilterProxyModel>
 
 #include "core/macros.h"
 #include "core/Package.h"
@@ -77,6 +78,7 @@ class PackagesView : public QWidget {
   PackageTableModel* m_pkgsModel;
   PackageDelegate* m_delegate;
   PackagesViewModel* m_viewModel;
+  QSortFilterProxyModel* m_proxyModel;
 
   void startLoading();
   void startAnimation();

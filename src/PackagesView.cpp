@@ -29,14 +29,19 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
       ui(new Ui::PackagesView),
       m_pkgsModel(new PackageTableModel(this)),
       m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),
-      m_viewModel(viewModel) {
+      m_viewModel(viewModel),
+      m_proxyModel(new QSortFilterProxyModel(this)) {
   ui->setupUi(this);
   ui->reloadButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_BrowserReload));
   QMovie* indicatorMovie = new QMovie(":/images/indicator.gif", QByteArray(), this);
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
-  ui->tableView->setModel(m_pkgsModel);
+  m_proxyModel->setSourceModel(m_pkgsModel);
+  m_proxyModel->setFilterKeyColumn(1);
+  ui->tableView->setModel(m_proxyModel);
   ui->tableView->setItemDelegate(m_delegate);
+  connect(ui->filterEdit, &QLineEdit::textChanged, m_proxyModel,
+          &QSortFilterProxyModel::setFilterFixedString);
   connect(ui->reloadButton, &QPushButton::clicked, [=] {
     SilkApp::networkManager()->clearAccessCache();
     startLoading();
@@ -112,14 +117,14 @@ void PackagesView::processWithPackage(const QModelIndex& index) {
 }
 
 void PackagesView::onProcessFailed(const QModelIndex& index) {
-  m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
+  m_proxyModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
   m_delegate->stopMovie(index.row());
   ui->tableView->update(index);
 }
 
 void PackagesView::onProcessSucceeded(const QModelIndex& index) {
+  m_proxyModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
   m_delegate->stopMovie(index.row());
-  m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
   ui->tableView->update(index);
 }
 
