@@ -36,6 +36,9 @@ signals:
   void packagesLoaded(QList<core::Package> packages);
   void processFailed(const QModelIndex& index);
   void processSucceeded(const QModelIndex& index);
+
+ protected:
+  QSet<core::Package> installedPackages();
 };
 
 class AvailablePackagesViewModel : public PackagesViewModel {

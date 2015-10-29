@@ -29,4 +29,12 @@ struct Package {
 
   QStringList validate();
 };
+
+inline bool operator==(const Package& e1, const Package& e2) {
+  return e1.name == e2.name;
+}
+
+inline uint qHash(const Package& key, uint seed) {
+  return qHash(key.name, seed);
+}
 }  // namespace core

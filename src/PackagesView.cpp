@@ -107,14 +107,12 @@ void PackagesView::processWithPackage(const QModelIndex& index) {
 }
 
 void PackagesView::onProcessFailed(const QModelIndex& index) {
-  qDebug("installation failed. row: %d", index.row());
   m_pkgsModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
   m_delegate->stopMovie(index.row());
   ui->tableView->update(index);
 }
 
 void PackagesView::onProcessSucceeded(const QModelIndex& index) {
-  qDebug("installation succeeded. row: %d", index.row());
   m_delegate->stopMovie(index.row());
   m_pkgsModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
   ui->tableView->update(index);
@@ -126,6 +124,7 @@ PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(pare
 void PackageTableModel::setPackages(const QList<Package>& packages) {
   beginResetModel();
   m_packages = packages;
+  m_buttonStateMap.clear();
   endResetModel();
 }
 
@@ -324,8 +323,13 @@ void AvailablePackagesViewModel::loadPackages() {
     if (!doc.isNull()) {
       QJsonArray jsonPackages = doc.array();
       QList<Package> packages;
-      std::transform(jsonPackages.constBegin(), jsonPackages.constEnd(),
-                     std::back_inserter(packages), &Package::fromJson);
+      QSet<Package> installedPkgs = installedPackages();
+      for (const QJsonValue& value : jsonPackages) {
+        const Package& pkg = Package::fromJson(value);
+        if (!installedPkgs.contains(pkg)) {
+          packages.append(pkg);
+        }
+      }
       emit packagesLoaded(packages);
     }
   });
@@ -380,6 +384,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
               return;
             }
 
+            qDebug("installation succeeded. row: %d", index.row());
             emit processSucceeded(index);
             PluginManager::singleton().loadPackage(pkg.name);
           });
@@ -390,15 +395,10 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
 PackagesViewModel::PackagesViewModel(QObject* parent) : QObject(parent) {
 }
 
-InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
-    : PackagesViewModel(parent) {
-}
-
-void InstalledPackagesViewModel::loadPackages() {
-  // load installed packages
+QSet<core::Package> PackagesViewModel::installedPackages() {
   QStringList directories =
       QDir(Constants::userPackagesDirPath()).entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-  QList<Package> packages;
+  QSet<Package> packages;
   for (const QString& dirName : directories) {
     QFile packageJson(Constants::userPackagesDirPath() + "/" + dirName + "/package.json");
     if (packageJson.exists() && packageJson.open(QIODevice::ReadOnly)) {
@@ -406,11 +406,22 @@ void InstalledPackagesViewModel::loadPackages() {
       auto doc = QJsonDocument::fromJson(packageJson.readAll(), &error);
       if (error.error != QJsonParseError::NoError) {
         qWarning("error when loading package.json. %s", qPrintable(error.errorString()));
-        return;
+        continue;
       }
-      packages.append(Package::fromJson(doc.object()));
+      packages.insert(Package::fromJson(doc.object()));
     }
   }
+  return packages;
+}
+
+InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
+    : PackagesViewModel(parent) {
+}
+
+void InstalledPackagesViewModel::loadPackages() {
+  QList<Package> packages = installedPackages().toList();
+  std::sort(packages.begin(), packages.end(),
+            [](const Package& p1, const Package& p2) { return p2.name.compare(p1.name); });
   emit packagesLoaded(packages);
 }
 
@@ -433,6 +444,7 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index,
 
   bool success = pkgDir.removeRecursively();
   if (success) {
+    qDebug("%s removed successfully", qPrintable(pkg.name));
     emit processSucceeded(index);
   } else {
     qWarning("Failed to remove directory: %s", qPrintable(pkgDir.absolutePath()));
