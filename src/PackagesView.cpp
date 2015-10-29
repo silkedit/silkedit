@@ -31,11 +31,16 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
       m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),
       m_viewModel(viewModel) {
   ui->setupUi(this);
+  ui->reloadButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_BrowserReload));
   QMovie* indicatorMovie = new QMovie(":/images/indicator.gif", QByteArray(), this);
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
   ui->tableView->setModel(m_pkgsModel);
   ui->tableView->setItemDelegate(m_delegate);
+  connect(ui->reloadButton, &QPushButton::clicked, [=] {
+    SilkApp::networkManager()->clearAccessCache();
+    startLoading();
+  });
   connect(m_viewModel, &PackagesViewModel::packagesLoaded, [=](QList<Package> packages) {
     stopAnimation();
     ui->tableView->show();
