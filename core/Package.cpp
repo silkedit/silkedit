@@ -18,6 +18,8 @@ core::Package::Package(const QJsonValue& jsonValue) {
     // e.g., silkedit/hello
     githubUrl = repoValue.toString();
   }
+
+  githubUrl += "#" + version;
 }
 
 QStringList core::Package::validate() {
