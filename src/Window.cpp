@@ -22,7 +22,7 @@
 #include "PluginManager.h"
 #include "PlatformUtil.h"
 
-QMap<std::string, std::string> Window::s_toolbarsDefinitions;
+QMap<QString, std::string> Window::s_toolbarsDefinitions;
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -73,8 +73,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
 
-void Window::loadToolbar(const std::string& pkgName, const std::string& ymlPath) {
-  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
+void Window::loadToolbar(const QString& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), ymlPath.c_str());
   foreach (Window* win, s_windows) { loadToolbar(win, pkgName, ymlPath); }
 }
 
@@ -133,8 +133,8 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   return w;
 }
 
-void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
-  qDebug("Start loading. pkg: %s, path: %s", pkgName.c_str(), ymlPath.c_str());
+void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), ymlPath.c_str());
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
     if (!rootNode.IsMap()) {
@@ -157,7 +157,7 @@ void Window::loadMenu(const std::string& pkgName, const std::string& ymlPath) {
   }
 }
 
-void Window::loadToolbar(Window* win, const std::string& pkgName, const std::string& ymlPath) {
+void Window::loadToolbar(Window* win, const QString& pkgName, const std::string& ymlPath) {
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
     if (!rootNode.IsMap()) {

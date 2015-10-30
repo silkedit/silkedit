@@ -4,6 +4,7 @@
 #include <tuple>
 #include <QString>
 #include <QJsonValue>
+#include <QHash>
 
 #include "macros.h"
 

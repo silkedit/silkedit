@@ -91,7 +91,7 @@ class PackagesView : public QWidget {
 class PackageDelegate : public QStyledItemDelegate {
   Q_OBJECT
  public:
-  enum ButtonState { Raised, Pressed, Installing, Installed };
+  enum ButtonState { Raised, Pressed, Processing, Processed };
   explicit PackageDelegate(const QString& buttonText,
                            const QString& textAfterProcess,
                            QObject* parent = nullptr);

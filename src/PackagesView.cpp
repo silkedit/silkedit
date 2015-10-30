@@ -18,11 +18,13 @@
 #include "core/Constants.h"
 #include "core/scoped_guard.h"
 #include "core/Util.h"
+#include "core/PackageManager.h"
 
 using core::Package;
 using core::Constants;
 using core::scoped_guard;
 using core::Util;
+using core::PackageManager;
 
 PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
     : QWidget(parent),
@@ -126,7 +128,7 @@ void PackagesView::onProcessFailed(const QModelIndex& index) {
 }
 
 void PackagesView::onProcessSucceeded(const QModelIndex& index) {
-  m_proxyModel->setData(index, (int)PackageDelegate::Installed, Qt::UserRole);
+  m_proxyModel->setData(index, (int)PackageDelegate::Processed, Qt::UserRole);
   m_delegate->stopMovie(index.row());
   ui->tableView->update(index);
 }
@@ -234,7 +236,7 @@ void PackageDelegate::paint(QPainter* painter,
       QApplication::style()->drawControl(QStyle::CE_PushButton, &opt, painter, 0);
       break;
     }
-    case Installing: {
+    case Processing: {
       // draw indicator
       if (m_rowMovieMap.count(index.row()) == 0) {
         qWarning("movie not found for row: %d", index.row());
@@ -246,7 +248,7 @@ void PackageDelegate::paint(QPainter* painter,
                                             m_rowMovieMap.at(index.row())->currentPixmap());
       break;
     }
-    case Installed: {
+    case Processed: {
       int align = QStyle::visualAlignment(Qt::LeftToRight, Qt::AlignHCenter | Qt::AlignVCenter);
       QApplication::style()->drawItemText(painter, option.rect, align, option.palette, true,
                                           m_textAfterProcess, QPalette::WindowText);
@@ -294,7 +296,7 @@ bool PackageDelegate::editorEvent(QEvent* event,
     if (index.isValid() && index.column() == PackageTableModel::BUTTON_COLUMN) {
       ButtonState s = (ButtonState)(index.data(Qt::UserRole).toInt());
       if (s == Pressed) {
-        model->setData(index, (int)Installing, Qt::UserRole);
+        model->setData(index, (int)Processing, Qt::UserRole);
         emit needsUpdate(index);
         emit clicked(index);
       }
@@ -459,19 +461,26 @@ QString InstalledPackagesViewModel::TextAfterProcess() {
   return tr("Removed");
 }
 
-void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index,
-                                                    const core::Package& pkg) {
-  QDir pkgDir(Constants::userPackagesDirPath() + "/" + pkg.name);
+void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, const Package& pkg) {
+  const QString& path = Constants::userPackagesDirPath() + "/" + pkg.name;
+  QDir pkgDir(path);
   if (!pkgDir.exists()) {
     qWarning("%s doesn't exist", qPrintable(pkgDir.absolutePath()));
     emit processFailed(index);
     return;
   }
 
-  bool success = pkgDir.removeRecursively();
+  bool success;
+  if (QFileInfo(path).isSymLink()) {
+    success = QFile(path).remove();
+  } else {
+    success = pkgDir.removeRecursively();
+  }
+
   if (success) {
     qDebug("%s removed successfully", qPrintable(pkg.name));
     emit processSucceeded(index);
+    emit PackageManager::singleton().packageRemoved(pkg);
   } else {
     qWarning("Failed to remove directory: %s", qPrintable(pkgDir.absolutePath()));
     emit processFailed(index);

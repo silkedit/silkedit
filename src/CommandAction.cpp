@@ -1,6 +1,11 @@
 ﻿#include "CommandAction.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
+#include "core/PackageManager.h"
+#include "core/Package.h"
+
+using core::PackageManager;
+using core::Package;
 
 void CommandAction::init(const QString& id, const QString& cmdName) {
   setObjectName(id);
@@ -8,21 +13,23 @@ void CommandAction::init(const QString& id, const QString& cmdName) {
   if (!key.isEmpty()) {
     setShortcut(key);
   }
-  QObject::connect(this, &QAction::triggered, [this] { CommandManager::runCommand(m_cmdName); });
+  connect(this, &QAction::triggered, [this] { CommandManager::runCommand(m_cmdName); });
 }
 
 CommandAction::CommandAction(const QString& id,
                              const QString& text,
                              const QString& cmdName,
-                             QObject* parent)
-    : QAction(text, parent), m_cmdName(cmdName) {
+                             QObject* parent,
+                             const QString& pkgName)
+    : PackageAction(text, pkgName, parent), m_cmdName(cmdName) {
   init(id, cmdName);
 }
 
 CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QIcon& icon,
-                             QObject* parent)
-    : QAction(icon, id, parent), m_cmdName(cmdName) {
+                             QObject* parent,
+                             const QString& pkgName)
+    : PackageAction(icon, id, pkgName, parent), m_cmdName(cmdName) {
   init(id, cmdName);
 }

@@ -11,9 +11,14 @@
 #include "CommandAction.h"
 #include "PluginManager.h"
 #include "Window.h"
-#include "ToolBar.h"
+#include "core/PackageToolBar.h"
+#include "core/PackageMenu.h"
+#include "core/PackageAction.h"
 
 using core::Operator;
+using core::PackageMenu;
+using core::PackageAction;
+using core::PackageToolBar;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -80,7 +85,7 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenusNode(const std::string& pkgName,
+void YamlUtils::parseMenusNode(const QString& pkgName,
                                QWidget* parent,
                                const YAML::Node& menusNode) {
   if (!menusNode.IsSequence()) {
@@ -121,7 +126,10 @@ void YamlUtils::parseMenusNode(const std::string& pkgName,
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
       label = PluginManager::singleton().translate(
-          pkgName + ":menu." + idNode.as<std::string>() + ".label", defaultLabel);
+          QString("%1:menu.%2.label")
+              .arg(pkgName)
+              .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+          defaultLabel);
     }
     YAML::Node commandNode = node["command"];
     YAML::Node submenusNode = node["menus"];
@@ -130,7 +138,7 @@ void YamlUtils::parseMenusNode(const std::string& pkgName,
       if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
       } else {
-        currentMenu = new QMenu(label, parent);
+        currentMenu = new PackageMenu(label, pkgName, parent);
         if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
           QAction* beforeAction =
               beforeId.isEmpty() ? nullptr : findAction(menuBar->actions(), beforeId);
@@ -163,12 +171,12 @@ void YamlUtils::parseMenusNode(const std::string& pkgName,
 
       QAction* action = nullptr;
       if (commandNode.IsDefined() && !label.isEmpty()) {
-        QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
-        action = new CommandAction(id, label, command);
+        const QString& command = QString::fromUtf8(commandNode.as<std::string>().c_str());
+        action = new CommandAction(id, label, command, nullptr, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
-        QString type = QString::fromUtf8(typeNode.as<std::string>().c_str());
+        const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
-          action = new QAction(QUuid::createUuid().toString(), parent);
+          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent);
           action->setObjectName(action->text());
           action->setSeparator(true);
         } else {
@@ -207,7 +215,7 @@ void YamlUtils::parseMenusNode(const std::string& pkgName,
   }
 }
 
-void YamlUtils::parseToolbarsNode(const std::string& pkgName,
+void YamlUtils::parseToolbarsNode(const QString& pkgName,
                                   const std::string& ymlPath,
                                   QWidget* parent,
                                   const YAML::Node& toolbarsNode) {
@@ -252,7 +260,10 @@ void YamlUtils::parseToolbarsNode(const std::string& pkgName,
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
       label = PluginManager::singleton().translate(
-          pkgName + ":toolbar." + idNode.as<std::string>() + ".label", defaultLabel);
+          QString("%1:toolbar.%2.label")
+              .arg(pkgName)
+              .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+          defaultLabel);
     }
     YAML::Node itemsNode = node["items"];
     Window* window = qobject_cast<Window*>(parent);
@@ -262,7 +273,7 @@ void YamlUtils::parseToolbarsNode(const std::string& pkgName,
       if (auto toolbar = window->findToolbar(id)) {
         currentToolbar = toolbar;
       } else {
-        currentToolbar = new ToolBar(id, label, parent);
+        currentToolbar = new PackageToolBar(id, label, parent, pkgName);
         auto beforeToolbar = beforeId.isEmpty() ? nullptr : window->findToolbar(beforeId);
         if (beforeToolbar) {
           window->insertToolBar(beforeToolbar, currentToolbar);
@@ -290,17 +301,20 @@ void YamlUtils::parseToolbarsNode(const std::string& pkgName,
         if (!iconPath.startsWith('/')) {
           iconPath = QFileInfo(QString::fromUtf8(ymlPath.c_str())).dir().absoluteFilePath(iconPath);
         }
-        action = new CommandAction(id, command, QIcon(iconPath));
+        action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = PluginManager::singleton().translate(
-              pkgName + ":toolbar." + idNode.as<std::string>() + ".tooltip", tooltip);
+              QString("%1:toolbar.%2.tooltip")
+                  .arg(pkgName)
+                  .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+              tooltip);
           action->setToolTip(tooltip);
         }
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         QString type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
-          action = new QAction(QUuid::createUuid().toString(), parent);
+          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent);
           action->setObjectName(action->text());
           action->setSeparator(true);
         } else {

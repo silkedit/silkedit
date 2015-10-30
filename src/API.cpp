@@ -99,7 +99,7 @@ void API::loadMenu(msgpack::object obj) {
     obj.convert(&params);
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
-    Window::loadMenu(pkgName, ymlPath);
+    Window::loadMenu(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
@@ -112,7 +112,7 @@ void API::loadToolbar(msgpack::v1::object obj) {
     obj.convert(&params);
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
-    Window::loadToolbar(pkgName, ymlPath);
+    Window::loadToolbar(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
