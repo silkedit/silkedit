@@ -6,6 +6,7 @@
 
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
+  ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
 
   connect(ui->listWidget, &QListWidget::currentItemChanged,
           [&](QListWidgetItem* current, QListWidgetItem* previous) {

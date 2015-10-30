@@ -41,6 +41,8 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
   m_proxyModel->setFilterKeyColumn(1);
   ui->tableView->setModel(m_proxyModel);
   ui->tableView->setItemDelegate(m_delegate);
+  ui->tableView->horizontalHeader()->setStretchLastSection(true);
+  ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   connect(ui->filterEdit, &QLineEdit::textChanged, m_proxyModel,
           &QSortFilterProxyModel::setFilterFixedString);
   connect(ui->reloadButton, &QPushButton::clicked, [=] {
@@ -299,6 +301,19 @@ bool PackageDelegate::editorEvent(QEvent* event,
     }
   }
   return QStyledItemDelegate::editorEvent(event, model, option, index);
+}
+
+QSize PackageDelegate::sizeHint(const QStyleOptionViewItem& option,
+                                const QModelIndex& index) const {
+  if (!index.isValid() || index.column() != PackageTableModel::BUTTON_COLUMN) {
+    return QStyledItemDelegate::sizeHint(option, index);
+  }
+
+  QStyleOptionButton opt;
+  initButtonStyleOption(index, option, &opt);
+  QSize textSize = opt.fontMetrics.size(Qt::TextShowMnemonic, m_textAfterProcess);
+  return (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
+      .expandedTo(QApplication::globalStrut());
 }
 
 void PackageDelegate::initButtonStyleOption(const QModelIndex& index,

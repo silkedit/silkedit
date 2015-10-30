@@ -112,6 +112,7 @@ signals:
                    QAbstractItemModel* model,
                    const QStyleOptionViewItem& option,
                    const QModelIndex& index) override;
+  QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
  private:
   std::unordered_map<int, std::unique_ptr<QMovie>> m_rowMovieMap;
