@@ -249,3 +249,11 @@ StatusBar QComboBox QAbstractItemView {
     border: 0;
     padding: 0 3px 0 3px;
 }
+
+
+/* Packages View */
+
+PackagesView #reloadButton {
+  border: none;
+  margin: 0px 5px 0px 5px;
+}

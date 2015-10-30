@@ -2,6 +2,19 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ja">
 <context>
+    <name>AvailablePackagesViewModel</name>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="349"/>
+        <source>Install</source>
+        <translation>インストール</translation>
+    </message>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="353"/>
+        <source>Installed</source>
+        <translation>インストール済み</translation>
+    </message>
+</context>
+<context>
     <name>ClearRecentItemListAction</name>
     <message>
         <location filename="../src/OpenRecentItemManager.cpp" line="101"/>
@@ -102,6 +115,19 @@
         <location filename="../src/FindReplaceView.cpp" line="26"/>
         <source>In Selection</source>
         <translation>選択した範囲内のみ</translation>
+    </message>
+</context>
+<context>
+    <name>InstalledPackagesViewModel</name>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="439"/>
+        <source>Remove</source>
+        <translation>削除</translation>
+    </message>
+    <message>
+        <location filename="../src/PackagesView.cpp" line="443"/>
+        <source>Removed</source>
+        <translation>削除済み</translation>
     </message>
 </context>
 <context>
@@ -233,15 +259,26 @@
 <context>
     <name>PackageDelegate</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="412"/>
         <source>Installed</source>
-        <translation>インストール済み</translation>
+        <translation type="vanished">インストール済み</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="426"/>
-        <location filename="../src/PackagesView.cpp" line="477"/>
+        <location filename="../src/PackagesView.cpp" line="263"/>
         <source>Install</source>
         <translation>インストール</translation>
+    </message>
+</context>
+<context>
+    <name>PackagesTabView</name>
+    <message>
+        <location filename="../src/PackagesTabView.cpp" line="5"/>
+        <source>Available</source>
+        <translation>入手可能</translation>
+    </message>
+    <message>
+        <location filename="../src/PackagesTabView.cpp" line="6"/>
+        <source>Installed</source>
+        <translation>インストール済み</translation>
     </message>
 </context>
 <context>

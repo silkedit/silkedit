@@ -32,7 +32,8 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
       m_viewModel(viewModel),
       m_proxyModel(new QSortFilterProxyModel(this)) {
   ui->setupUi(this);
-  ui->reloadButton->setIcon(QApplication::style()->standardIcon(QStyle::SP_BrowserReload));
+  QIcon icon = QApplication::style()->standardIcon(QStyle::SP_BrowserReload);
+  ui->reloadButton->setIcon(icon);
   QMovie* indicatorMovie = new QMovie(":/images/indicator.gif", QByteArray(), this);
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
