@@ -49,6 +49,7 @@ SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   s_manager = new QNetworkAccessManager(this);
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
+  setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #ifdef Q_OS_WIN
 // application font doesn't work with DirectWrite font engine
