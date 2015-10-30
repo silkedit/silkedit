@@ -9,3 +9,6 @@
 [submodule "Onigmo"]
 	path = Onigmo
 	url = git@github.com:k-takata/Onigmo.git
+[submodule "packages/vim"]
+	path = packages/vim
+	url = git@github.com:silkedit/vim.git
