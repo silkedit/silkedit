@@ -1,8 +1,0 @@
-{
-  "name": "vim",
-  "version": "0.1",
-  "description": "vim emulation package",
-  "main": "index.js",
-  "author": "SilkEdit dev team",
-  "license": "ISC"
-}
