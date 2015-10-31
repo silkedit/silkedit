@@ -129,23 +129,29 @@ Theme* Theme::loadTheme(const QString& filename) {
 
   // gutter settings (LineNumberArea)
   const QString gutterSettingsStr = "gutterSettings";
+  theme->gutterSettings.reset(new ColorSettings());
+
   if (rootMap.contains(gutterSettingsStr)) {
-    theme->gutterSettings.reset(new ColorSettings());
     parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
                   &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
   } else {
-    theme->gutterSettings.reset(new ColorSettings());
     QColor backgroundColor = QColor(Qt::gray);
     QColor foregroundColor = QColor(Qt::black);
-    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
-    if (textEditViewColorSettings->contains("background")) {
-      backgroundColor =
-          changeColorBrightness(textEditViewColorSettings->value("background").name());
-    }
-    if (textEditViewColorSettings->contains("foreground")) {
-      foregroundColor =
-          changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+    if (!theme->scopeSettings.isEmpty()) {
+      ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+      if (!textEditViewColorSettings->isEmpty()) {
+        if (textEditViewColorSettings->contains("background")) {
+          backgroundColor =
+              changeColorBrightness(textEditViewColorSettings->value("background").name());
+        }
+
+        if (textEditViewColorSettings->contains("foreground")) {
+          foregroundColor =
+              changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+        }
+      }
     }
 
     QHash<QString, QColor> defaultGutterColors = {{"background", backgroundColor},

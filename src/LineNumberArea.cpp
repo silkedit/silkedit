@@ -1,11 +1,9 @@
-#include <QStyleOption>
-#include <QPainter>
-#include <QDebug>
-
 #include "LineNumberArea.h"
 #include "TextEditView.h"
+#include "core/Theme.h"
 
 using core::ColorSettings;
+using core::Theme;
 
 LineNumberArea::LineNumberArea(TextEditView* editor) : QWidget(editor), m_codeEditor(editor) {}
 
@@ -14,6 +12,10 @@ QSize LineNumberArea::sizeHint() const {
 }
 
 void LineNumberArea::setTheme(Theme* theme) {
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
   if (theme->gutterSettings != nullptr) {
     ColorSettings* gutterSettings = theme->gutterSettings.get();
     if (gutterSettings->contains("background")) {

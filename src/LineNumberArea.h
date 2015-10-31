@@ -1,20 +1,18 @@
-#ifndef LINENUMBERAREA_H
-#define LINENUMBERAREA_H
+#pragma once
 
 #include <QWidget>
-#include <QObject>
-
-#include "core/Theme.h"
-using core::Theme;
 
 class TextEditView;
+namespace core {
+class Theme;
+}
 
 class LineNumberArea : public QWidget {
  public:
   static const int PADDING_RIGHT = 5;
   explicit LineNumberArea(TextEditView* editor);
   QSize sizeHint() const override;
-  void setTheme(Theme* theme);
+  void setTheme(core::Theme* theme);
 
   QColor lineNumberColor() const;
   void setLineNumberColor(QColor color);
@@ -29,5 +27,3 @@ class LineNumberArea : public QWidget {
   QColor m_lineNumberColor;
   QColor m_backgroundColor;
 };
-
-#endif  // LINENUMBERAREA_H
