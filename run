@@ -301,13 +301,13 @@ analyze() {
     fi
 
     build
-	tmpFile=/tmp/clang-check-err
-	find src -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
-	if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
-	  rm -rf $tmpFile
-		exit 1
-	fi
-	rm -rf $tmpFile
+    tmpFile=/tmp/clang-check-err
+    find src -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
+    if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
+      rm -rf $tmpFile
+      exit 1
+    fi
+    rm -rf $tmpFile
 }
 
 run_tests() {
