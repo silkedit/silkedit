@@ -65,6 +65,10 @@ ensure_dir() {
 clean() {
     # Somehow git clean fails to remove these directories, so remove them manually
     rm -rf build plugin_runner/bin
+    
+    # clean submodules
+    git submodule foreach git reset --hard HEAD
+    git submodule foreach git clean -xdf
 
     # remove everything not tracked in git
     git clean -xdf
