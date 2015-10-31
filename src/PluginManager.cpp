@@ -452,13 +452,10 @@ bool PluginManager::askExternalContext(const QString& name,
 
 QString PluginManager::translate(const QString& key, const QString& defaultValue) {
   try {
-    if (const boost::optional<std::string> result =
-            sendRequestOption<std::tuple<std::string>, std::string>(
-                "translate", std::make_tuple(key.toUtf8().constData()), msgpack::type::STR)) {
-      return QString::fromUtf8((*result).c_str());
-    } else {
-      return defaultValue;
-    }
+    const std::string& result = sendRequest<std::tuple<std::string, std::string>, std::string>(
+        "translate", std::make_tuple(key.toUtf8().constData(), defaultValue.toUtf8().constData()),
+        msgpack::type::STR);
+    return QString::fromUtf8(result.c_str());
   } catch (const std::exception& e) {
     qWarning() << e.what();
     return defaultValue;

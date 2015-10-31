@@ -163,8 +163,8 @@ const handler = {
       response.result([false, event.name, event.args])
     }
   }
-  ,"translate": (key, response) => {
-    response.result(silk.t(key, null))
+  ,"translate": (key, defaultText, response) => {
+    response.result(silk.t(key, defaultText))
   }
   ,"removePackage": (dir, response) => {
     var pjson, module;

@@ -547,7 +547,7 @@ const loadPackage = (dir) => {
         console.warn(e)
       }
 
-      return defaultValue
+      return defaultValue ? defaultValue : ""
     }
   }
 }
