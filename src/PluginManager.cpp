@@ -483,6 +483,19 @@ bool PluginManager::removePackage(const QString& pkgName) {
   }
 }
 
+boost::optional<QString> PluginManager::sendGetRequest(const QString& url, int timeoutInMs) {
+  const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
+
+  try {
+    const std::string& result = sendRequest<std::tuple<std::string>, std::string>(
+        "sendGetRequest", params, msgpack::type::STR, timeoutInMs);
+    return QString::fromUtf8(result.c_str());
+  } catch (const std::exception& e) {
+    qWarning() << e.what();
+    return boost::none;
+  }
+}
+
 PluginManager::PluginManager()
     : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 

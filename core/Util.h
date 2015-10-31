@@ -5,8 +5,6 @@
 #include <functional>
 #include <QStringList>
 #include <QTime>
-#include <QNetworkAccessManager>
-#include <QUrl>
 
 #include "macros.h"
 
@@ -32,9 +30,6 @@ class Util {
   static bool copy(const QString& source, const QString& dist);
 
   static std::list<std::string> toStdStringList(const QStringList& qStrList);
-
-  static QNetworkReply* sendGetRequest(QNetworkAccessManager* manager, const QString& url);
-  static QNetworkReply* sendGetRequest(QNetworkAccessManager* manager, const QUrl& url);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {

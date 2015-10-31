@@ -7,6 +7,7 @@ var path = require('path')
 var silkutil = require('./silkutil')
 var yaml = require('js-yaml')
 var InputDialog = require('./views/input_dialog')(null)
+var https = require('https')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -203,11 +204,27 @@ const handler = {
             response.result(true)
           } catch(e) {
             console.warn(e)
-            response.result(false)
+            response.error(e.message)
           }
         }
       })
     })
+  }
+  ,"sendGetRequest": (url, response) => {
+    https.get(url, function(res) {
+      var body = '';
+      res.setEncoding('utf8');
+ 
+      res.on('data', function(chunk){
+        body += chunk;
+      });
+ 
+      res.on('end', function(res){
+        response.result(body)
+      });
+    }).on('error', function(e) {
+      response.error(e.message)
+    });
   }
 }
 c.setHandler(handler);

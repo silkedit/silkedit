@@ -64,6 +64,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);
+  boost::optional<QString> sendGetRequest(const QString& url, int timeoutInMs);
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {

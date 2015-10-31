@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <QNetworkReply>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QAbstractTableModel>
@@ -25,6 +24,10 @@ using core::Constants;
 using core::scoped_guard;
 using core::Util;
 using core::PackageManager;
+
+namespace {
+const int TIMEOUT_IN_MS = 10000;  // 10sec
+}
 
 PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
     : QWidget(parent),
@@ -338,13 +341,9 @@ AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
 
 void AvailablePackagesViewModel::loadPackages() {
   // todo: make packages source configurable
-  QNetworkReply* reply = Util::sendGetRequest(
-      SilkApp::networkManager(),
-      "https://raw.githubusercontent.com/silkedit/packages/master/packages.json");
-  connect(reply, &QNetworkReply::finished, this, [=] {
-    reply->deleteLater();
-
-    QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+  if (const auto& result = PluginManager::singleton().sendGetRequest(
+          "https://raw.githubusercontent.com/silkedit/packages/master/packages.json", TIMEOUT_IN_MS)) {
+    QJsonDocument doc = QJsonDocument::fromJson((*result).toUtf8());
     if (!doc.isNull()) {
       QJsonArray jsonPackages = doc.array();
       QList<Package> packages;
@@ -357,7 +356,7 @@ void AvailablePackagesViewModel::loadPackages() {
       }
       emit packagesLoaded(packages);
     }
-  });
+  }
 }
 
 QString AvailablePackagesViewModel::buttonText() {
