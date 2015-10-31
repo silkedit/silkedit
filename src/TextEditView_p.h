@@ -12,6 +12,7 @@ class Document;
 }
 
 class TextEditView;
+class LineNumberArea;
 
 class TextEditViewPrivate {
   Q_DECLARE_PUBLIC(TextEditView)
@@ -19,7 +20,7 @@ class TextEditViewPrivate {
   explicit TextEditViewPrivate(TextEditView* q_ptr);
 
   TextEditView* q_ptr;
-  QWidget* m_lineNumberArea;
+  LineNumberArea* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;
   std::unique_ptr<QStringListModel> m_model;
@@ -30,7 +31,7 @@ class TextEditViewPrivate {
   void performCompletion(const QString& completionPrefix);
   void insertCompletion(const QString& completion);
   void insertCompletion(const QString& completion, bool singleWord);
-  void populateModel(const QString& completionPrefix );
+  void populateModel(const QString& completionPrefix);
   bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
