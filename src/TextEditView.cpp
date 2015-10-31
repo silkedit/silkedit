@@ -6,6 +6,7 @@
 
 #include "vi.h"
 #include "TextEditView_p.h"
+#include "LineNumberArea.h"
 #include "core/TextEditViewLogic.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
@@ -96,19 +97,6 @@ int toMoveOperation(std::string str) {
 }
 }
 
-class LineNumberArea : public QWidget {
- public:
-  LineNumberArea(TextEditView* editor) : QWidget(editor) { m_codeEditor = editor; }
-
-  QSize sizeHint() const override { return QSize(m_codeEditor->lineNumberAreaWidth(), 0); }
-
- protected:
-  void paintEvent(QPaintEvent* event) override { m_codeEditor->lineNumberAreaPaintEvent(event); }
-
- private:
-  TextEditView* m_codeEditor;
-};
-
 void TextEditViewPrivate::updateLineNumberAreaWidth(int /* newBlockCount */) {
   //  qDebug("updateLineNumberAreaWidth");
   q_ptr->setViewportMargins(q_ptr->lineNumberAreaWidth(), 0, 0, 0);
@@ -131,6 +119,8 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
     qWarning("theme is null");
     return;
   }
+
+  m_lineNumberArea->setTheme(theme);
 
   QString style;
   if (!theme->scopeSettings.isEmpty()) {
@@ -369,8 +359,7 @@ void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
  * @param currentVisibleCursor
  */
 TextEditViewPrivate::TextEditViewPrivate(TextEditView* q_ptr)
-    : q_ptr(q_ptr), m_document(nullptr), m_completedAndSelected(false) {
-}
+    : q_ptr(q_ptr), m_document(nullptr), m_completedAndSelected(false) {}
 
 void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   if (!m_document || !m_document->language()) {
@@ -588,12 +577,12 @@ void TextEditView::find(const QString& text,
 int TextEditView::lineNumberAreaWidth() {
   int digits = 1;
   int max = qMax(1, blockCount());
-  while (max >= 10) {
+  while (max >= 100) {
     max /= 10;
     ++digits;
   }
 
-  int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+  int space = 20 + fontMetrics().width(QLatin1Char('9')) * digits;
 
   return space;
 }
@@ -677,7 +666,7 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 
 void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   QPainter painter(d_ptr->m_lineNumberArea);
-  painter.fillRect(event->rect(), Qt::lightGray);
+  painter.fillRect(event->rect(), d_ptr->m_lineNumberArea->backgroundColor());
 
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
@@ -687,9 +676,10 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   while (block.isValid() && top <= event->rect().bottom()) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
-      painter.setPen(Qt::black);
-      painter.drawText(0, top, d_ptr->m_lineNumberArea->width(), fontMetrics().height(),
-                       Qt::AlignRight, number);
+      painter.setPen(d_ptr->m_lineNumberArea->lineNumberColor());
+      painter.drawText(0, top,
+                       d_ptr->m_lineNumberArea->width() - d_ptr->m_lineNumberArea->PADDING_RIGHT,
+                       fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();

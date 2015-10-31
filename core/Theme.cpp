@@ -45,6 +45,28 @@ void parseSettings(ColorSettings* settings,
   }
 }
 
+void parseSettings(ColorSettings* settings, QHash<QString, QColor> defaultColors) {
+  QHashIterator<QString, QColor> i(defaultColors);
+  while (i.hasNext()) {
+    i.next();
+    if (i.value().isValid()) {
+      (*settings)[i.key()] = i.value();
+    }
+  }
+}
+
+QColor changeColorBrightness(QColor const color, int threshold = 125) {
+  QColor newColor;
+
+  // 0 is black; 255 is as far from black as possible.
+  if (color.value() < threshold) {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 10);
+  } else {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 10);
+  }
+  return newColor;
+}
+
 ScopeSetting* toScopeSetting(QVariant var) {
   if (!var.canConvert<QVariantMap>()) {
     return nullptr;
@@ -94,23 +116,47 @@ Theme* Theme::loadTheme(const QString& filename) {
   Theme* theme = new Theme();
   QVariantMap rootMap = root.toMap();
 
-  // gutterSettings
-  const QString gutterSettingsStr = "gutterSettings";
-  if (rootMap.contains(gutterSettingsStr)) {
-    theme->gutterSettings.reset(new ColorSettings());
-    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
-                  &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
-  }
-
   // name
   if (rootMap.contains(nameStr)) {
     theme->name = rootMap.value(nameStr).toString();
   }
 
-  // settings
+  // main editor settings (TextEditView)
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
     foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
+  }
+
+  // gutter settings (LineNumberArea)
+  const QString gutterSettingsStr = "gutterSettings";
+  theme->gutterSettings.reset(new ColorSettings());
+
+  if (rootMap.contains(gutterSettingsStr)) {
+    parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
+                  &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
+  } else {
+    QColor backgroundColor = QColor(Qt::gray);
+    QColor foregroundColor = QColor(Qt::black);
+
+    if (!theme->scopeSettings.isEmpty()) {
+      ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+      if (!textEditViewColorSettings->isEmpty()) {
+        if (textEditViewColorSettings->contains("background")) {
+          backgroundColor =
+              changeColorBrightness(textEditViewColorSettings->value("background").name());
+        }
+
+        if (textEditViewColorSettings->contains("foreground")) {
+          foregroundColor =
+              changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+        }
+      }
+    }
+
+    QHash<QString, QColor> defaultGutterColors = {{"background", backgroundColor},
+                                                  {"foreground", foregroundColor}};
+    parseSettings(theme->gutterSettings.get(), defaultGutterColors);
   }
 
   return theme;
