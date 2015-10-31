@@ -63,6 +63,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   bool askExternalContext(const QString& name, core::Operator op, const QString& value);
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
+  bool removePackage(const QString& pkgName);
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {

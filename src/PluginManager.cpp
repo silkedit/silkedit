@@ -472,9 +472,22 @@ void PluginManager::loadPackage(const QString& pkgName) {
   sendNotification("loadPackage", params);
 }
 
-PluginManager::PluginManager()
-    : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {
+bool PluginManager::removePackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+  const std::tuple<std::string>& params =
+      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
+
+  try {
+    return sendRequest<std::tuple<std::string>, bool>("removePackage", params,
+                                                      msgpack::type::BOOLEAN);
+  } catch (const std::exception& e) {
+    qWarning() << e.what();
+    return false;
+  }
 }
+
+PluginManager::PluginManager()
+    : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 
 std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
     const std::string& name,
@@ -486,7 +499,7 @@ std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
                                  std::tuple<bool, std::string, CommandArgument>>(
         "cmdEventFilter", event, msgpack::type::ARRAY));
   } catch (const std::exception& e) {
-    qCritical() << e.what();
+    qWarning() << e.what();
     return std::make_tuple(false, "", CommandArgument());
   }
 }

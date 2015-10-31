@@ -31,6 +31,7 @@ class API {
   static void loadMenu(msgpack::object obj);
   static void loadToolbar(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
+  static void unregisterCommands(msgpack::object obj);
   static void registerContext(msgpack::object obj);
   static void unregisterContext(msgpack::object obj);
   static void open(msgpack::object obj);

@@ -166,5 +166,48 @@ const handler = {
   ,"translate": (key, response) => {
     response.result(silk.t(key, null))
   }
+  ,"removePackage": (dir, response) => {
+    var pjson, module;
+  
+    const packageJsonPath = path.join(dir, "package.json");
+    fs.open(packageJsonPath, 'r', (err, fd) => {
+      fd && fs.close(fd, (err) => {
+        pjson = require(packageJsonPath);
+        // unregister commands
+        if (pjson && pjson.main) {
+          try {
+            module = require(dir)
+            if (module.commands) {
+              if (pjson.name === 'silkedit') {
+                // don't add a package prefix for silkedit package
+                for (var prop in module.commands) {
+                  delete commands[prop]
+                }
+                silk.unregisterCommands(Object.keys(module.commands));
+              } else {
+                for (var prop in module.commands) {
+                  delete commands[pjson.name + '.' + prop]
+                }
+                silk.unregisterCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
+              }
+            } else {
+              console.log("no commands")
+            }
+
+            // call module's deactivate method
+            if (module.deactivate) {
+              silkutil.runInFiber(() => {
+                module.deactivate()
+              })
+            }
+            response.result(true)
+          } catch(e) {
+            console.warn(e)
+            response.result(false)
+          }
+        }
+      })
+    })
+  }
 }
 c.setHandler(handler);

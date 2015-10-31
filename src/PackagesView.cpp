@@ -133,8 +133,7 @@ void PackagesView::onProcessSucceeded(const QModelIndex& index) {
   ui->tableView->update(index);
 }
 
-PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {
-}
+PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {}
 
 void PackageTableModel::setPackages(const QList<Package>& packages) {
   beginResetModel();
@@ -207,8 +206,7 @@ bool PackageTableModel::setData(const QModelIndex& index, const QVariant& value,
 PackageDelegate::PackageDelegate(const QString& buttonText,
                                  const QString& textAfterProcess,
                                  QObject* parent)
-    : QStyledItemDelegate(parent), m_buttonText(buttonText), m_textAfterProcess(textAfterProcess) {
-}
+    : QStyledItemDelegate(parent), m_buttonText(buttonText), m_textAfterProcess(textAfterProcess) {}
 
 void PackageDelegate::setMovie(int row, std::unique_ptr<QMovie> movie) {
   m_rowMovieMap[row] = std::move(movie);
@@ -336,8 +334,7 @@ void PackageDelegate::initButtonStyleOption(const QModelIndex& index,
 }
 
 AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
-    : PackagesViewModel(parent) {
-}
+    : PackagesViewModel(parent) {}
 
 void AvailablePackagesViewModel::loadPackages() {
   // todo: make packages source configurable
@@ -420,8 +417,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
   npmProcess->start(Constants::npmPath(), args);
 }
 
-PackagesViewModel::PackagesViewModel(QObject* parent) : QObject(parent) {
-}
+PackagesViewModel::PackagesViewModel(QObject* parent) : QObject(parent) {}
 
 QSet<core::Package> PackagesViewModel::installedPackages() {
   QStringList directories =
@@ -443,8 +439,7 @@ QSet<core::Package> PackagesViewModel::installedPackages() {
 }
 
 InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
-    : PackagesViewModel(parent) {
-}
+    : PackagesViewModel(parent) {}
 
 void InstalledPackagesViewModel::loadPackages() {
   QList<Package> packages = installedPackages().toList();
@@ -462,6 +457,15 @@ QString InstalledPackagesViewModel::TextAfterProcess() {
 }
 
 void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, const Package& pkg) {
+  // Call removePackage in plugin_runner side first to unregister commands
+  bool success = PluginManager::singleton().removePackage(pkg.name);
+  if (!success) {
+    qWarning("Failed to remove package: %s", qPrintable(pkg.name));
+    emit processFailed(index);
+    return;
+  }
+
+  // Try to remove the package directory
   const QString& path = Constants::userPackagesDirPath() + "/" + pkg.name;
   QDir pkgDir(path);
   if (!pkgDir.exists()) {
@@ -470,14 +474,14 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
     return;
   }
 
-  bool success;
+  bool successOfRmdir;
   if (QFileInfo(path).isSymLink()) {
-    success = QFile(path).remove();
+    successOfRmdir = QFile(path).remove();
   } else {
-    success = pkgDir.removeRecursively();
+    successOfRmdir = pkgDir.removeRecursively();
   }
 
-  if (success) {
+  if (successOfRmdir) {
     qDebug("%s removed successfully", qPrintable(pkg.name));
     emit processSucceeded(index);
     emit PackageManager::singleton().packageRemoved(pkg);
