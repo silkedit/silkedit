@@ -30,7 +30,7 @@ class ResponseResult : public QObject {
 
  public:
   ResponseResult() = default;
-  ~ResponseResult() { qDebug("~ResponseResult"); }
+  ~ResponseResult() = default;
 
   bool isReady() { return m_isReady; }
   bool isSuccess() { return m_isSuccess; }

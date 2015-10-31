@@ -180,7 +180,7 @@ void PluginManagerPrivate::onFinished(int exitCode) {
 }
 
 void PluginManagerPrivate::readRequest() {
-  qDebug("readRequest");
+  //  qDebug("readRequest");
 
   msgpack::unpacker unpacker;
   std::size_t readSize = q->m_socket->bytesAvailable();
@@ -194,7 +194,7 @@ void PluginManagerPrivate::readRequest() {
     qint64 actual_read_size = q->m_socket->read(unpacker.buffer(), readSize);
     //    qDebug() << actual_read_size;
     QByteArray array(unpacker.buffer(), actual_read_size);
-    qDebug() << QString(array.toHex());
+    //    qDebug() << QString(array.toHex());
     if (actual_read_size == 0) {
       break;
     } else if (actual_read_size == -1) {
@@ -385,7 +385,7 @@ bool PluginManagerPrivate::keyEventFilter(QKeyEvent* event) {
 }
 
 void ResponseResult::setResult(std::unique_ptr<object_with_zone> obj) {
-  qDebug("setResult");
+  //  qDebug("setResult");
   m_isReady = true;
   m_isSuccess = true;
   m_result = std::move(obj);
