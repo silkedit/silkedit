@@ -79,6 +79,7 @@ class PackagesView : public QWidget {
   PackageDelegate* m_delegate;
   PackagesViewModel* m_viewModel;
   QSortFilterProxyModel* m_proxyModel;
+  int m_processingCount;
 
   void startLoading();
   void startAnimation();

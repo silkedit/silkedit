@@ -35,7 +35,8 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
       m_pkgsModel(new PackageTableModel(this)),
       m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),
       m_viewModel(viewModel),
-      m_proxyModel(new QSortFilterProxyModel(this)) {
+      m_proxyModel(new QSortFilterProxyModel(this)),
+      m_processingCount(0) {
   ui->setupUi(this);
   QIcon icon = QApplication::style()->standardIcon(QStyle::SP_BrowserReload);
   ui->reloadButton->setIcon(icon);
@@ -77,9 +78,13 @@ PackagesView::~PackagesView() {
 }
 
 void PackagesView::startLoading() {
-  ui->tableView->hide();
-  startAnimation();
-  m_viewModel->loadPackages();
+  if (m_processingCount == 0) {
+    ui->tableView->hide();
+    startAnimation();
+    m_viewModel->loadPackages();
+  } else {
+    qDebug("%d packages are processing", m_processingCount);
+  }
 }
 
 void PackagesView::showEvent(QShowEvent*) {
@@ -97,6 +102,7 @@ void PackagesView::stopAnimation() {
 }
 
 void PackagesView::processWithPackage(const QModelIndex& index) {
+  m_processingCount++;
   auto pkgOpt = m_pkgsModel->package(m_proxyModel->mapToSource(index).row());
   if (!pkgOpt) {
     qWarning("package not found. row: %d", index.row());
@@ -128,12 +134,14 @@ void PackagesView::onProcessFailed(const QModelIndex& index) {
   m_proxyModel->setData(index, (int)PackageDelegate::Raised, Qt::UserRole);
   m_delegate->stopMovie(index.row());
   ui->tableView->update(index);
+  m_processingCount--;
 }
 
 void PackagesView::onProcessSucceeded(const QModelIndex& index) {
   m_proxyModel->setData(index, (int)PackageDelegate::Processed, Qt::UserRole);
   m_delegate->stopMovie(index.row());
   ui->tableView->update(index);
+  m_processingCount--;
 }
 
 PackageTableModel::PackageTableModel(QObject* parent) : QAbstractTableModel(parent) {}
