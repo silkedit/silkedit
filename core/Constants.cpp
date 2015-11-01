@@ -76,7 +76,11 @@ QString Constants::pluginRunnerPath() {
 }
 
 QString Constants::npmPath() {
+#ifdef Q_OS_WIN
+  return pluginServerDir() + "/bin/npm.cmd";
+#else
   return pluginServerDir() + "/bin/npm";
+#endif
 }
 
 QString Constants::pluginServerSocketPath() {
