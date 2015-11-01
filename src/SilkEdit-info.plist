@@ -1,7 +1,7 @@
 {
 	CFBundleName = SilkEdit;
     CFBundleVersion = "0";
-	CFBundleShortVersionString = "0.5.0";
+	CFBundleShortVersionString = "0.6.0";
 	CFBundleIdentifier = "com.silksmiths.SilkEdit";
 	CFBundleDevelopmentRegion = English;
 	CFBundleExecutable = SilkEdit;
