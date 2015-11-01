@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QAbstractTableModel>
@@ -451,7 +451,7 @@ InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
 void InstalledPackagesViewModel::loadPackages() {
   QList<Package> packages = installedPackages().toList();
   std::sort(packages.begin(), packages.end(),
-            [](const Package& p1, const Package& p2) { return p2.name.compare(p1.name); });
+            [](const Package& p1, const Package& p2) { return p2.name.compare(p1.name) <= 0; });
   emit packagesLoaded(packages);
 }
 
