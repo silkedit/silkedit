@@ -33,8 +33,6 @@ int installFont(const QString& path) {
 #endif
 }
 
-QNetworkAccessManager* SilkApp::s_manager;
-
 TabBar* SilkApp::tabBarAt(int x, int y) {
   foreach (Window* window, Window::windows()) {
     if (TabBar* tabBar = window->tabViewGroup()->tabBarAt(x, y)) {
@@ -46,7 +44,6 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 }
 
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
-  s_manager = new QNetworkAccessManager(this);
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);

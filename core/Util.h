@@ -14,7 +14,6 @@ class Util {
   DISABLE_COPY_AND_MOVE(Util)
 
  public:
-  // todo: replace with std::binary_search?
   static size_t binarySearch(size_t last, std::function<bool(size_t)> fn);
   static void ensureDir(const QString& path);
 

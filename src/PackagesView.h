@@ -4,8 +4,6 @@
 #include <boost/optional.hpp>
 #include <QWidget>
 #include <QObject>
-#include <QLabel>
-#include <QJsonObject>
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
 #include <QModelIndex>
@@ -22,12 +20,13 @@ class PackagesView;
 
 class PackageTableModel;
 class PackageDelegate;
-class QFile;
 
 class PackagesViewModel : public QObject {
   Q_OBJECT
  public:
   PackagesViewModel(QObject* parent);
+  ~PackagesViewModel() = default;
+
   virtual void loadPackages() = 0;
   virtual QString buttonText() = 0;
   virtual QString TextAfterProcess() = 0;

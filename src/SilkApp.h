@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <QApplication>
-#include <QNetworkAccessManager>
 
 #include "core/macros.h"
 
@@ -20,14 +19,9 @@ class SilkApp : public QApplication {
   static TabView* activeTabView();
   static TabViewGroup* activeTabViewGroup();
   static Window* activeWindow();
-  static QNetworkAccessManager* networkManager() { return s_manager; }
 
   SilkApp(int& argc, char** argv);
   ~SilkApp() = default;
 
   bool event(QEvent*) override;
-
- private:
-  // One QNetworkAccessManager should be enough for the whole Qt application.
-  static QNetworkAccessManager* s_manager;
 };

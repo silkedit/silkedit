@@ -8,21 +8,17 @@
 #include <QMouseEvent>
 #include <QDir>
 #include <QProcess>
-#include <QTimer>
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
 #include "PluginManager.h"
-#include "SilkApp.h"
 #include "core/Constants.h"
 #include "core/scoped_guard.h"
-#include "core/Util.h"
 #include "core/PackageManager.h"
 
 using core::Package;
 using core::Constants;
 using core::scoped_guard;
-using core::Util;
 using core::PackageManager;
 
 namespace {
@@ -44,17 +40,14 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
   ui->indicatorLabel->setMovie(indicatorMovie);
   ui->indicatorLabel->hide();
   m_proxyModel->setSourceModel(m_pkgsModel);
-  m_proxyModel->setFilterKeyColumn(1);
+  m_proxyModel->setFilterKeyColumn(1);  // package name column
   ui->tableView->setModel(m_proxyModel);
   ui->tableView->setItemDelegate(m_delegate);
   ui->tableView->horizontalHeader()->setStretchLastSection(true);
   ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   connect(ui->filterEdit, &QLineEdit::textChanged, m_proxyModel,
           &QSortFilterProxyModel::setFilterFixedString);
-  connect(ui->reloadButton, &QPushButton::clicked, [=] {
-    SilkApp::networkManager()->clearAccessCache();
-    startLoading();
-  });
+  connect(ui->reloadButton, &QPushButton::clicked, [=] { startLoading(); });
   connect(m_viewModel, &PackagesViewModel::packagesLoaded, [=](QList<Package> packages) {
     stopAnimation();
     ui->tableView->show();
@@ -105,7 +98,7 @@ void PackagesView::processWithPackage(const QModelIndex& index) {
   m_processingCount++;
   auto pkgOpt = m_pkgsModel->package(m_proxyModel->mapToSource(index).row());
   if (!pkgOpt) {
-    qWarning("package not found. row: %d", index.row());
+    qWarning("package not found. row: %d", m_proxyModel->mapToSource(index).row());
     emit m_viewModel->processFailed(index);
     return;
   }
@@ -390,9 +383,14 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
   connect(npmProcess, &QProcess::readyReadStandardOutput, this,
           [npmProcess] { qDebug() << npmProcess->readAllStandardOutput(); });
   connect(npmProcess, &QProcess::readyReadStandardError, this,
-          [npmProcess] { qWarning() << npmProcess->readAllStandardOutput(); });
+          [npmProcess] { qWarning() << npmProcess->readAllStandardError(); });
   connect(npmProcess, static_cast<void (QProcess::*)(QProcess::ProcessError)>(&QProcess::error),
-          [=](QProcess::ProcessError error) { qWarning("npm error. %d", error); });
+          [=](QProcess::ProcessError error) {
+            qWarning("npm error. %d", error);
+            npmProcess->deleteLater();
+            npmProcess->terminate();
+            emit processFailed(index);
+          });
   connect(npmProcess,
           static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
           [this, npmProcess, index, pkg](int exitCode, QProcess::ExitStatus exitStatus) {
@@ -459,7 +457,7 @@ InstalledPackagesViewModel::InstalledPackagesViewModel(QObject* parent)
 void InstalledPackagesViewModel::loadPackages() {
   QList<Package> packages = installedPackages().toList();
   std::sort(packages.begin(), packages.end(),
-            [](const Package& p1, const Package& p2) { return p2.name.compare(p1.name) <= 0; });
+            [](const Package& p1, const Package& p2) { return p1.name.compare(p2.name) <= 0; });
   emit packagesLoaded(packages);
 }
 
