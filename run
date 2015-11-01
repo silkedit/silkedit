@@ -76,9 +76,12 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # msgpack-c and uchardet submodule
-    # Currently git submodule is disabled because it takes long time
-    # git submodule update --remote --init
+    # Update submodules
+    # Currently git submodule is disabled by default because it takes long time
+    if [ "$1" = '-submodule' ]; then
+      git submodule sync
+      git submodule update --init
+    fi
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
@@ -386,7 +389,7 @@ case "$1" in
         echo
         ;;
     resolve)
-        resolve
+        resolve $2
         echo
         ;;
     test)
@@ -413,13 +416,13 @@ case "$1" in
 
         cat << EOF
 analyze        static analysis
-build          build an app and an installer
+build          build an app and an installer (-edge: Edge build)
 clean          clean build dir
 format         format sources
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer
-rebuild        build from scratch
-resolve        resolve dependency
+rebuild        build from scratch (-edge: Edge build)
+resolve        resolve dependency (-submodule: update submodules)
 test           run tests
 set_version    set version number
 set_build      set build number
