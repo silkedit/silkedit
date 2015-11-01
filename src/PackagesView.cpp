@@ -342,7 +342,8 @@ AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
 void AvailablePackagesViewModel::loadPackages() {
   // todo: make packages source configurable
   if (const auto& result = PluginManager::singleton().sendGetRequest(
-          "https://raw.githubusercontent.com/silkedit/packages/master/packages.json", TIMEOUT_IN_MS)) {
+          "https://raw.githubusercontent.com/silkedit/packages/master/packages.json",
+          TIMEOUT_IN_MS)) {
     QJsonDocument doc = QJsonDocument::fromJson((*result).toUtf8());
     if (!doc.isNull()) {
       QJsonArray jsonPackages = doc.array();
@@ -370,6 +371,13 @@ QString AvailablePackagesViewModel::TextAfterProcess() {
 void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
                                                     const core::Package& pkg) {
   // Install the package using npm
+  const QString& tarballUrl = pkg.tarballUrl();
+  if (tarballUrl.isEmpty()) {
+    qWarning("tarball url is invalid");
+    emit processFailed(index);
+    return;
+  }
+
   auto npmProcess = new QProcess(this);
   connect(npmProcess, &QProcess::readyReadStandardOutput, this,
           [npmProcess] { qDebug() << npmProcess->readAllStandardOutput(); });
@@ -412,7 +420,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
             emit processSucceeded(index);
             PluginManager::singleton().loadPackage(pkg.name);
           });
-  const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), pkg.githubUrl};
+  const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), tarballUrl};
   npmProcess->start(Constants::npmPath(), args);
 }
 

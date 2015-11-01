@@ -19,16 +19,13 @@ struct Package {
   QString name;
   QString version;
   QString description;
-  /**
-   * @brief githubUrl used to install an npm package
-   * See npm help install for more detail
-   */
-  QString githubUrl;
+  QString repositoryUrl;
 
   explicit Package(const QJsonValue& jsonValue);
   ~Package() = default;
 
   QStringList validate();
+  QString tarballUrl() const;
 };
 
 inline bool operator==(const Package& e1, const Package& e2) {
