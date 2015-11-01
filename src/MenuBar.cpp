@@ -13,6 +13,7 @@
 #include "CommandManager.h"
 #include "core/ConfigManager.h"
 #include "version.h"
+#include "ConfigDialog.h"
 
 using core::ConfigManager;
 using core::ThemeProvider;
@@ -68,12 +69,22 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
       new CommandAction("new_package", tr("&New Package"), "new_package"));
   bundleDevelopmentMenu->setObjectName("package_development");
 
+  // Settings menu
+  const QString& settingsMenuStr =
+      ConfigManager::enableMnemonic() ? tr("&Settings") : tr("Settings");
+  auto settingsMenu = addMenu(settingsMenuStr);
+  settingsMenu->setObjectName("settings");
+  QAction* settingsAction = new QAction(settingsMenuStr, settingsMenu);
+  settingsAction->setMenuRole(QAction::PreferencesRole);
+  connect(settingsAction, &QAction::triggered, this, &MenuBar::showConfigDialog);
+  settingsMenu->addAction(settingsAction);
+
   // Help menu
   const QString& helpMenuStr = ConfigManager::enableMnemonic() ? tr("&Help") : tr("Help");
   auto helpMenu = addMenu(helpMenuStr);
   helpMenu->setObjectName("help");
-  const QString& abountMenuStr = ConfigManager::enableMnemonic() ? tr("&About") : tr("About");
-  QAction* aboutAction = new QAction(abountMenuStr, helpMenu);
+  const QString& aboutMenuStr = ConfigManager::enableMnemonic() ? tr("&About") : tr("About");
+  QAction* aboutAction = new QAction(aboutMenuStr, helpMenu);
   aboutAction->setMenuRole(QAction::AboutRole);
   connect(aboutAction, &QAction::triggered, this, &MenuBar::showAboutDialog);
   helpMenu->addAction(aboutAction);
@@ -89,6 +100,11 @@ void MenuBar::showAboutDialog() {
   QMessageBox::about(this, SilkApp::applicationName(), tr("version") + " " +
                                                            SilkApp::applicationVersion() + " (" +
                                                            tr("build") + ": " + BUILD + ")");
+}
+
+void MenuBar::showConfigDialog() {
+  ConfigDialog dialog(this);
+  dialog.exec();
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {

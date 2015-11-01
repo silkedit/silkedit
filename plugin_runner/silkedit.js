@@ -214,6 +214,10 @@ const registerCommands = (commands) => {
   client.notify('registerCommands', commands)
 }
 
+const unregisterCommands = (commands) => {
+  client.notify('unregisterCommands', commands)
+}
+
 const loadPackage = (dir) => {
     var pjson, configPath, doc, module
 
@@ -281,7 +285,12 @@ const loadPackage = (dir) => {
 
             // register commands
             if (pjson.main) {
-              module = require(dir)
+              try {
+                module = require(dir)
+              } catch(e) {
+                console.warn(e)
+                return
+              }
               if (module.commands) {
                 if (pjson.name === 'silkedit') {
                   // don't add a package prefix for silkedit package
@@ -312,7 +321,7 @@ const loadPackage = (dir) => {
     })
   }
 
-  // API
+  // API (everything is synchronous)
 
   return {
     alert: (msg) => {
@@ -324,6 +333,8 @@ const loadPackage = (dir) => {
     ,loadPackage: loadPackage
 
     ,registerCommands: registerCommands
+    
+    ,unregisterCommands: unregisterCommands
 
     ,registerContext: (name, func) => {
       contexts[name] = func
@@ -536,7 +547,7 @@ const loadPackage = (dir) => {
         console.warn(e)
       }
 
-      return defaultValue
+      return defaultValue ? defaultValue : ""
     }
   }
 }

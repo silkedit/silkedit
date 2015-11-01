@@ -22,6 +22,7 @@ T findParent(QWidget* widget) {
   return findParent<T>(widget->parentWidget());
 }
 
+#ifdef Q_OS_WIN
 int installFont(const QString& path) {
   auto result = QFontDatabase::addApplicationFont(path);
   if (result == -1) {
@@ -29,7 +30,7 @@ int installFont(const QString& path) {
   }
   return result;
 }
-
+#endif
 }
 
 TabBar* SilkApp::tabBarAt(int x, int y) {
@@ -45,11 +46,12 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
 SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
+  setAttribute(Qt::AA_UseHighDpiPixmaps);
 
 #ifdef Q_OS_WIN
-  // application font doesn't work with DirectWrite font engine
-  // https://bugreports.qt.io/browse/QTBUG-18711
-  // Install Source Han Code JP fonts
+// application font doesn't work with DirectWrite font engine
+// https://bugreports.qt.io/browse/QTBUG-18711
+// Install Source Han Code JP fonts
 //  installFont(":/SourceHanCodeJP-Normal.otf");
 //  installFont(":/SourceHanCodeJP-Regular.otf");
 //  installFont(":/SourceHanCodeJP-Bold.otf");

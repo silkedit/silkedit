@@ -14,6 +14,9 @@ void PackageManager::loadPackages() {
   foreach (const QString& path, Constants::packagePaths()) { loadPackages(path); }
 }
 
+PackageManager::PackageManager() {
+}
+
 void PackageManager::loadPackages(const QString& dirName) {
   QDir dir(dirName);
   if (!dir.exists())

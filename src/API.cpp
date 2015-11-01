@@ -40,6 +40,7 @@ void API::init() {
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
+  s_notifyFunctions.insert(std::make_pair("unregisterCommands", &unregisterCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
   s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
   s_notifyFunctions.insert(std::make_pair("unregisterContext", &unregisterContext));
@@ -99,7 +100,7 @@ void API::loadMenu(msgpack::object obj) {
     obj.convert(&params);
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
-    Window::loadMenu(pkgName, ymlPath);
+    Window::loadMenu(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
@@ -112,7 +113,7 @@ void API::loadToolbar(msgpack::v1::object obj) {
     obj.convert(&params);
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
-    Window::loadToolbar(pkgName, ymlPath);
+    Window::loadToolbar(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
@@ -123,9 +124,19 @@ void API::registerCommands(msgpack::object obj) {
   obj.convert(&params);
   std::vector<std::string> commands = std::get<0>(params);
   for (std::string& cmd : commands) {
-    qDebug("command: %s", cmd.c_str());
+    //    qDebug("command: %s", cmd.c_str());
     CommandManager::add(
         std::unique_ptr<ICommand>(new PluginCommand(QString::fromUtf8(cmd.c_str()))));
+  }
+}
+
+void API::unregisterCommands(msgpack::v1::object obj) {
+  msgpack::type::tuple<std::vector<std::string>> params;
+  obj.convert(&params);
+  std::vector<std::string> commands = std::get<0>(params);
+  for (std::string& cmd : commands) {
+    qDebug("unregisterCommand: %s", cmd.c_str());
+    CommandManager::remove(QString::fromUtf8(cmd.c_str()));
   }
 }
 

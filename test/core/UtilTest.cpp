@@ -20,7 +20,7 @@ void UtilTest::binarySearch() {
   QCOMPARE(idx, 70);
 
   // binarySearch returns vec.length if there's no element which returns f(i) == true
-  idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i < 0; });
+  idx = Util::binarySearch(vec.length(), [vec](size_t) { return false; });
   QCOMPARE(idx, vec.length());
 
   // binarySearch returns 0 if all the items satisfies the predicate.

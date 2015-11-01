@@ -215,7 +215,6 @@ module.exports = {
 						replaceFileContent(pkgPath + "/index.js", /<name>/g, path.basename(pkgPath), (err) => {
 							silk.open(pkgPath)
 							silk.open(pkgPath + '/package.json')
-							silk.loadPackage(pkgPath)
 						})
 					})
 				})

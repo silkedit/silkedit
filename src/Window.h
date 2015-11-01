@@ -28,14 +28,14 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   static Window* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<Window*> windows() { return s_windows; }
-  static void loadMenu(const std::string& pkgName, const std::string& ymlPath);
+  static void loadMenu(const QString& pkgName, const std::string& ymlPath);
 
   /**
    * @brief parse toolbars definition and create toolbars for all windows.
    * @param pkgName
    * @param ymlPath
    */
-  static void loadToolbar(const std::string& pkgName, const std::string& ymlPath);
+  static void loadToolbar(const QString& pkgName, const std::string& ymlPath);
 
   /**
    * @brief parse toolbars definition and create toolbars for a window.
@@ -43,7 +43,7 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
    * @param pkgName
    * @param ymlPath
    */
-  static void loadToolbar(Window* window, const std::string& pkgName, const std::string& ymlPath);
+  static void loadToolbar(Window* window, const QString& pkgName, const std::string& ymlPath);
 
   ~Window();
   DEFAULT_MOVE(Window)
@@ -80,7 +80,7 @@ signals:
    * @brief toolbars definitions
    * A new window can load toolbars using this toolbars definition map
    */
-  static QMap<std::string, std::string> s_toolbarsDefinitions;
+  static QMap<QString, std::string> s_toolbarsDefinitions;
 
   explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 

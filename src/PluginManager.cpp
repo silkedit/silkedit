@@ -180,7 +180,7 @@ void PluginManagerPrivate::onFinished(int exitCode) {
 }
 
 void PluginManagerPrivate::readRequest() {
-  qDebug("readRequest");
+  //  qDebug("readRequest");
 
   msgpack::unpacker unpacker;
   std::size_t readSize = q->m_socket->bytesAvailable();
@@ -194,7 +194,7 @@ void PluginManagerPrivate::readRequest() {
     qint64 actual_read_size = q->m_socket->read(unpacker.buffer(), readSize);
     //    qDebug() << actual_read_size;
     QByteArray array(unpacker.buffer(), actual_read_size);
-    qDebug() << QString(array.toHex());
+    //    qDebug() << QString(array.toHex());
     if (actual_read_size == 0) {
       break;
     } else if (actual_read_size == -1) {
@@ -385,7 +385,7 @@ bool PluginManagerPrivate::keyEventFilter(QKeyEvent* event) {
 }
 
 void ResponseResult::setResult(std::unique_ptr<object_with_zone> obj) {
-  qDebug("setResult");
+  //  qDebug("setResult");
   m_isReady = true;
   m_isSuccess = true;
   m_result = std::move(obj);
@@ -450,24 +450,54 @@ bool PluginManager::askExternalContext(const QString& name,
   }
 }
 
-QString PluginManager::translate(const std::string& key, const QString& defaultValue) {
+QString PluginManager::translate(const QString& key, const QString& defaultValue) {
   try {
-    if (const boost::optional<std::string> result =
-            sendRequestOption<std::tuple<std::string>, std::string>(
-                "translate", std::make_tuple(key), msgpack::type::STR)) {
-      return QString::fromUtf8((*result).c_str());
-    } else {
-      return defaultValue;
-    }
+    const std::string& result = sendRequest<std::tuple<std::string, std::string>, std::string>(
+        "translate", std::make_tuple(key.toUtf8().constData(), defaultValue.toUtf8().constData()),
+        msgpack::type::STR);
+    return QString::fromUtf8(result.c_str());
   } catch (const std::exception& e) {
     qWarning() << e.what();
     return defaultValue;
   }
 }
 
-PluginManager::PluginManager()
-    : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {
+void PluginManager::loadPackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+  const std::tuple<std::string>& params =
+      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
+  sendNotification("loadPackage", params);
 }
+
+bool PluginManager::removePackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+  const std::tuple<std::string>& params =
+      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
+
+  try {
+    return sendRequest<std::tuple<std::string>, bool>("removePackage", params,
+                                                      msgpack::type::BOOLEAN);
+  } catch (const std::exception& e) {
+    qWarning() << e.what();
+    return false;
+  }
+}
+
+boost::optional<QString> PluginManager::sendGetRequest(const QString& url, int timeoutInMs) {
+  const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
+
+  try {
+    const std::string& result = sendRequest<std::tuple<std::string>, std::string>(
+        "sendGetRequest", params, msgpack::type::STR, timeoutInMs);
+    return QString::fromUtf8(result.c_str());
+  } catch (const std::exception& e) {
+    qWarning() << e.what();
+    return boost::none;
+  }
+}
+
+PluginManager::PluginManager()
+    : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 
 std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
     const std::string& name,
@@ -479,7 +509,7 @@ std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
                                  std::tuple<bool, std::string, CommandArgument>>(
         "cmdEventFilter", event, msgpack::type::ARRAY));
   } catch (const std::exception& e) {
-    qCritical() << e.what();
+    qWarning() << e.what();
     return std::make_tuple(false, "", CommandArgument());
   }
 }

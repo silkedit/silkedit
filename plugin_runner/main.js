@@ -7,6 +7,7 @@ var path = require('path')
 var silkutil = require('./silkutil')
 var yaml = require('js-yaml')
 var InputDialog = require('./views/input_dialog')(null)
+var https = require('https')
 
 if (process.argv.length < 3) {
   console.log('missing argument.');
@@ -92,6 +93,9 @@ const handler = {
       })
     }
   }
+  ,"loadPackage": (path) => {
+    silk.loadPackage(path)
+  }
 
 
   // request handlers
@@ -160,8 +164,67 @@ const handler = {
       response.result([false, event.name, event.args])
     }
   }
-  ,"translate": (key, response) => {
-    response.result(silk.t(key, null))
+  ,"translate": (key, defaultText, response) => {
+    response.result(silk.t(key, defaultText))
+  }
+  ,"removePackage": (dir, response) => {
+    var pjson, module;
+  
+    const packageJsonPath = path.join(dir, "package.json");
+    fs.open(packageJsonPath, 'r', (err, fd) => {
+      fd && fs.close(fd, (err) => {
+        pjson = require(packageJsonPath);
+        // unregister commands
+        if (pjson && pjson.main) {
+          try {
+            module = require(dir)
+            if (module.commands) {
+              if (pjson.name === 'silkedit') {
+                // don't add a package prefix for silkedit package
+                for (var prop in module.commands) {
+                  delete commands[prop]
+                }
+                silk.unregisterCommands(Object.keys(module.commands));
+              } else {
+                for (var prop in module.commands) {
+                  delete commands[pjson.name + '.' + prop]
+                }
+                silk.unregisterCommands(Object.keys(module.commands).map(c => pjson.name + '.' + c));
+              }
+            } else {
+              console.log("no commands")
+            }
+
+            // call module's deactivate method
+            if (module.deactivate) {
+              silkutil.runInFiber(() => {
+                module.deactivate()
+              })
+            }
+            response.result(true)
+          } catch(e) {
+            console.warn(e)
+            response.error(e.message)
+          }
+        }
+      })
+    })
+  }
+  ,"sendGetRequest": (url, response) => {
+    https.get(url, function(res) {
+      var body = '';
+      res.setEncoding('utf8');
+ 
+      res.on('data', function(chunk){
+        body += chunk;
+      });
+ 
+      res.on('end', function(res){
+        response.result(body)
+      });
+    }).on('error', function(e) {
+      response.error(e.message)
+    });
   }
 }
 c.setHandler(handler);

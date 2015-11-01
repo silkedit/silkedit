@@ -65,6 +65,10 @@ ensure_dir() {
 clean() {
     # Somehow git clean fails to remove these directories, so remove them manually
     rm -rf build plugin_runner/bin
+    
+    # clean submodules
+    git submodule foreach git reset --hard HEAD
+    git submodule foreach git clean -xdf
 
     # remove everything not tracked in git
     git clean -xdf
@@ -119,9 +123,6 @@ resolve() {
       cd packages/silkedit
       ../../plugin_runner/bin/npm install
       cd ../..
-
-    elif [ $OS == 'Linux' ]; then
-      OS = 'Linux'
     else
         # yaml-cpp
         if [ ! -f lib/libyaml-cppmd.lib ]; then
@@ -218,7 +219,25 @@ build() {
         fi
 
         ninja
+    else
+        if [ "$1" = '-edge' ]; then
+          ../build.bat $VCVARSALL_ARG all edge
+        else
+          ../build.bat $VCVARSALL_ARG all
+        fi
+    fi
 
+    cd ..
+}
+
+make_installer() {
+    if [ ! -d build ]; then
+      build
+    fi
+    
+    cd build
+    
+    if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
         macdeployqt SilkEdit.app
         ensure_dir dmg
@@ -239,15 +258,7 @@ build() {
           echo "Failed to create DMG $MAX times"
 					exit 1
 				fi
-    elif [ $OS == 'Linux' ]; then
-      OS = 'Linux'
     else
-        if [ "$1" = '-edge' ]; then
-          ../build.bat $VCVARSALL_ARG all edge
-        else
-          ../build.bat $VCVARSALL_ARG all
-        fi
-
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
         cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
@@ -277,7 +288,7 @@ build() {
             iscc ../../silkedit.iss
         fi
     fi
-
+    
     cd ..
 }
 
@@ -294,13 +305,13 @@ analyze() {
     fi
 
     build
-	tmpFile=/tmp/clang-check-err
-	find src -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
-	if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
-	  rm -rf $tmpFile
-		exit 1
-	fi
-	rm -rf $tmpFile
+    tmpFile=/tmp/clang-check-err
+    find src core -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
+    if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
+      rm -rf $tmpFile
+      exit 1
+    fi
+    rm -rf $tmpFile
 }
 
 run_tests() {
@@ -394,19 +405,24 @@ case "$1" in
         localize
         echo
         ;;
+    make_installer)
+        make_installer
+        echo
+        ;;
     *)
 
         cat << EOF
-analyze      static analysis
-build        build an app and an installer
-clean        clean build dir
-format       format sources
-localize     run lupdate to generate a ts file for localization
-rebuild      build from scratch
-resolve      resolve dependency
-test         run tests
-set_version  set version number
-set_build    set build number
+analyze        static analysis
+build          build an app and an installer
+clean          clean build dir
+format         format sources
+localize       run lupdate to generate a ts file for localization
+make_installer make an installer
+rebuild        build from scratch
+resolve        resolve dependency
+test           run tests
+set_version    set version number
+set_build      set build number
 EOF
 
         exit 1

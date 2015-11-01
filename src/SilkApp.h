@@ -23,11 +23,5 @@ class SilkApp : public QApplication {
   SilkApp(int& argc, char** argv);
   ~SilkApp() = default;
 
-  // accessor
-  QString initialFile() { return m_initialFile; }
-
   bool event(QEvent*) override;
-
- private:
-  QString m_initialFile;
 };

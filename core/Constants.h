@@ -25,7 +25,10 @@ class Constants {
   static QStringList packagePaths();
   static QString userConfigPath();
   static QString userKeymapPath();
+  static QString userPackagesDirPath();
+  static QString packagesDirName();
   static QString pluginRunnerPath();
+  static QString npmPath();
   static QString pluginServerSocketPath();
   static QString translationDirPath();
   static QString pluginServerDir();

@@ -13,5 +13,6 @@
     <file>images/find-and-replace-left-arrow.png</file>
     <file>images/find-and-replace-right-arrow.png</file>
     <file>images/down-arrow.png</file>
+    <file>images/indicator.gif</file>
 </qresource>
 </RCC>

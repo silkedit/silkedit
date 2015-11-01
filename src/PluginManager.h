@@ -22,7 +22,6 @@
 #include "core/IContext.h"
 #include "CommandArgument.h"
 
-class QKeyEvent;
 class PluginManagerPrivate;
 
 class ResponseResult : public QObject {
@@ -31,7 +30,7 @@ class ResponseResult : public QObject {
 
  public:
   ResponseResult() = default;
-  ~ResponseResult() { qDebug("~ResponseResult"); }
+  ~ResponseResult() = default;
 
   bool isReady() { return m_isReady; }
   bool isSuccess() { return m_isSuccess; }
@@ -62,7 +61,10 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   void sendCommandEvent(const QString& command, const CommandArgument& args);
   void callExternalCommand(const QString& cmd, const CommandArgument& args);
   bool askExternalContext(const QString& name, core::Operator op, const QString& value);
-  QString translate(const std::string& key, const QString& defaultValue);
+  QString translate(const QString& key, const QString& defaultValue);
+  void loadPackage(const QString& pkgName);
+  bool removePackage(const QString& pkgName);
+  boost::optional<QString> sendGetRequest(const QString& url, int timeoutInMs);
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {
