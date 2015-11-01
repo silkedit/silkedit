@@ -85,7 +85,7 @@ resolve() {
     
     # vim package
     if [ ! -d packages/vim ]; then
-      npm i silkedit/vim
+      npm i https://api.github.com/repos/silkedit/vim/tarball/0.1.0
       mv node_modules/vim packages
       rm -rf node_modules
     fi
