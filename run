@@ -82,6 +82,13 @@ resolve() {
       git submodule sync
       git submodule update --init
     fi
+    
+    # vim package
+    if [ ! -d packages/vim ]; then
+      npm i silkedit/vim
+      mv node_modules/vim packages
+      rm -rf node_modules
+    fi
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
