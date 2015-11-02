@@ -1063,6 +1063,7 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
     case Qt::Key_Escape:
       API::hideActiveFindReplacePanel();
+      clearSelection();
       break;
   }
 
@@ -1083,5 +1084,14 @@ void TextEditView::mousePressEvent(QMouseEvent* event) {
 
   QPlainTextEdit::mousePressEvent(event);
 }
+
+void TextEditView::clearSelection() {
+    QTextCursor cursor = textCursor();
+    if (cursor.hasSelection()) {
+        cursor.clearSelection();
+        setTextCursor(cursor);
+    }
+}
+
 
 #include "moc_TextEditView.cpp"
