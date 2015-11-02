@@ -15,12 +15,12 @@
 #include "core/Session.h"
 #include "API.h"
 #include "PluginManager.h"
-#include "core/ConfigManager.h"
+#include "core/ConfigModel.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
 
-using core::ConfigManager;
+using core::ConfigModel;
 using core::Document;
 using core::Encoding;
 using core::Language;
@@ -711,8 +711,8 @@ void TextEditView::paintEvent(QPaintEvent* e) {
 
   // draw an end of line string
   const int bottom = viewport()->rect().height();
-  if (ConfigManager::endOfLineColor().isValid()) {
-    painter.setPen(ConfigManager::endOfLineColor());
+  if (ConfigModel::endOfLineColor().isValid()) {
+    painter.setPen(ConfigModel::endOfLineColor());
   }
   QTextCursor cur = textCursor();
   cur.movePosition(QTextCursor::End);
@@ -727,8 +727,8 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     QRect r = cursorRect(cur);
     if (r.top() >= bottom)
       break;
-    if (!ConfigManager::endOfLineStr().isEmpty()) {
-      painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfLineStr());
+    if (!ConfigModel::endOfLineStr().isEmpty()) {
+      painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfLineStr());
     }
     block = block.next();
   }
@@ -736,11 +736,11 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   QRect r = cursorRect(cur);
 
   // draw an end of file string
-  if (!ConfigManager::endOfFileStr().isEmpty()) {
-    if (ConfigManager::endOfFileColor().isValid()) {
-      painter.setPen(ConfigManager::endOfFileColor());
+  if (!ConfigModel::endOfFileStr().isEmpty()) {
+    if (ConfigModel::endOfFileColor().isValid()) {
+      painter.setPen(ConfigModel::endOfFileColor());
     }
-    painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfFileStr());
+    painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfFileStr());
   }
 }
 
@@ -1086,12 +1086,11 @@ void TextEditView::mousePressEvent(QMouseEvent* event) {
 }
 
 void TextEditView::clearSelection() {
-    QTextCursor cursor = textCursor();
-    if (cursor.hasSelection()) {
-        cursor.clearSelection();
-        setTextCursor(cursor);
-    }
+  QTextCursor cursor = textCursor();
+  if (cursor.hasSelection()) {
+    cursor.clearSelection();
+    setTextCursor(cursor);
+  }
 }
-
 
 #include "moc_TextEditView.cpp"

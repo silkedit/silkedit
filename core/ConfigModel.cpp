@@ -1,25 +1,26 @@
 ﻿#include <yaml-cpp/yaml.h>
 #include <string>
+#include <fstream>
 #include <QDebug>
 #include <QString>
 #include <QFile>
 
-#include "ConfigManager.h"
+#include "ConfigModel.h"
 #include "Constants.h"
 #include "Util.h"
 
 namespace {
 const QString END_OF_LINE_STR = "end_of_line_str";
 const QString END_OF_FILE_STR = "end_of_file_str";
+const QString THEME_KEY = "theme";
 }
 
 namespace core {
 
-std::unordered_map<QString, QString> ConfigManager::m_strConfigs;
-std::unordered_map<QString, std::unordered_map<std::string, std::string>>
-    ConfigManager::m_mapConfigs;
+std::unordered_map<QString, QString> ConfigModel::m_strConfigs;
+std::unordered_map<QString, std::unordered_map<std::string, std::string>> ConfigModel::m_mapConfigs;
 
-void ConfigManager::load(const QString& filename) {
+void ConfigModel::load(const QString& filename) {
   qDebug("loading configuration");
 
   if (!QFile(filename).exists())
@@ -60,7 +61,7 @@ void ConfigManager::load(const QString& filename) {
   }
 }
 
-void ConfigManager::load() {
+void ConfigModel::load() {
   QStringList existingConfigPaths;
   foreach (const QString& path, Constants::configPaths()) {
     if (QFile(path).exists()) {
@@ -86,7 +87,30 @@ void ConfigManager::load() {
   foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
-QString ConfigManager::strValue(const QString& key, const QString& defaultValue) {
+void ConfigModel::save(const QString& key, const QString& newValue) {
+  QString configFilePath = Constants::userConfigPath();
+
+  if (!QFile(configFilePath).exists())
+    return;
+
+  std::string name = configFilePath.toUtf8().constData();
+  try {
+    YAML::Node rootNode = YAML::LoadFile(name);
+
+    assert(rootNode.IsMap());
+    rootNode[key.toUtf8().constData()] = newValue.toUtf8().constData();
+
+    std::string configFileName = configFilePath.toUtf8().constData();
+    std::ofstream fout(configFileName);
+    fout << rootNode;  // dump it back into the file
+  } catch (const std::exception& e) {
+    qWarning() << "can't edit yaml file:" << configFilePath << ", reason: " << e.what();
+  } catch (...) {
+    qWarning() << "can't edit yaml file because of an unexpected exception: " << configFilePath;
+  }
+}
+
+QString ConfigModel::strValue(const QString& key, const QString& defaultValue) {
   if (m_strConfigs.count(key) != 0) {
     return m_strConfigs[key];
   }
@@ -94,7 +118,7 @@ QString ConfigManager::strValue(const QString& key, const QString& defaultValue)
   return defaultValue;
 }
 
-int ConfigManager::intValue(const QString& key, int defaultValue) {
+int ConfigModel::intValue(const QString& key, int defaultValue) {
   if (m_strConfigs.count(key) != 0) {
     bool ok;
     int value = m_strConfigs[key].toInt(&ok, 10);
@@ -104,7 +128,7 @@ int ConfigManager::intValue(const QString& key, int defaultValue) {
   return defaultValue;
 }
 
-bool ConfigManager::boolValue(const QString& key, bool defaultValue) {
+bool ConfigModel::boolValue(const QString& key, bool defaultValue) {
   if (m_strConfigs.count(key) != 0) {
     bool value = false;
     QString valueStr = m_strConfigs[key].trimmed();
@@ -119,7 +143,7 @@ bool ConfigManager::boolValue(const QString& key, bool defaultValue) {
   return defaultValue;
 }
 
-std::unordered_map<std::string, std::string> ConfigManager::mapValue(const QString& key) {
+std::unordered_map<std::string, std::string> ConfigModel::mapValue(const QString& key) {
   if (m_mapConfigs.count(key) != 0) {
     return m_mapConfigs[key];
   }
@@ -127,23 +151,28 @@ std::unordered_map<std::string, std::string> ConfigManager::mapValue(const QStri
   return std::unordered_map<std::string, std::string>();
 }
 
-bool ConfigManager::contains(const QString& key) {
+bool ConfigModel::contains(const QString& key) {
   return m_strConfigs.count(key) != 0;
 }
 
-QString ConfigManager::theme() {
-  return strValue("theme", "Solarized (light)");
+QString ConfigModel::themeName() {
+  return strValue(THEME_KEY, "Solarized (light)");
 }
 
-QString ConfigManager::fontFamily() {
+void ConfigModel::saveThemeName(const QString& newValue) {
+  m_strConfigs[THEME_KEY] = newValue;
+  save(THEME_KEY, newValue);
+}
+
+QString ConfigModel::fontFamily() {
   return strValue("font_family", Constants::defaultFontFamily);
 }
 
-int ConfigManager::fontSize() {
+int ConfigModel::fontSize() {
   return intValue("font_size", Constants::defaultFontSize);
 }
 
-QString ConfigManager::endOfLineStr() {
+QString ConfigModel::endOfLineStr() {
   if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
     if (map.count("str") != 0) {
@@ -154,7 +183,7 @@ QString ConfigManager::endOfLineStr() {
   return "";
 }
 
-QColor ConfigManager::endOfLineColor() {
+QColor ConfigModel::endOfLineColor() {
   if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
     if (map.count("color") != 0) {
@@ -165,7 +194,7 @@ QColor ConfigManager::endOfLineColor() {
   return QColor();
 }
 
-QString ConfigManager::endOfFileStr() {
+QString ConfigModel::endOfFileStr() {
   if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
     if (map.count("str") != 0) {
@@ -176,7 +205,7 @@ QString ConfigManager::endOfFileStr() {
   return "";
 }
 
-QColor ConfigManager::endOfFileColor() {
+QColor ConfigModel::endOfFileColor() {
   if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
     std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
     if (map.count("color") != 0) {
@@ -187,19 +216,19 @@ QColor ConfigManager::endOfFileColor() {
   return QColor();
 }
 
-int ConfigManager::tabWidth() {
+int ConfigModel::tabWidth() {
   return intValue("tab_width", 4);
 }
 
-bool ConfigManager::indentUsingSpaces() {
+bool ConfigModel::indentUsingSpaces() {
   return boolValue("indent_using_spaces", false);
 }
 
-bool ConfigManager::enableMnemonic() {
+bool ConfigModel::enableMnemonic() {
   return boolValue("enable_mnemonic", false);
 }
 
-QString ConfigManager::locale() {
+QString ConfigModel::locale() {
   return strValue("locale", QLocale::system().name());
 }
 

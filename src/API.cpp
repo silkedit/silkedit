@@ -22,13 +22,13 @@
 #include "Context.h"
 #include "PluginContext.h"
 #include "core/modifiers.h"
-#include "core/ConfigManager.h"
+#include "core/ConfigModel.h"
 #include "core/Session.h"
 #include "util/DialogUtils.h"
 #include "InputDialog.h"
 #include "core/IContext.h"
 
-using core::ConfigManager;
+using core::ConfigModel;
 using core::Session;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
@@ -253,8 +253,8 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     obj.convert(&params);
     std::string nameStr = std::get<0>(params);
     QString name = QString::fromUtf8(nameStr.c_str());
-    if (ConfigManager::contains(name)) {
-      QString value = ConfigManager::strValue(name);
+    if (ConfigModel::contains(name)) {
+      QString value = ConfigModel::strValue(name);
       std::string valueStr = value.toUtf8().constData();
       PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {

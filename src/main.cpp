@@ -8,7 +8,7 @@
 #include "TabView.h"
 #include "Window.h"
 #include "KeymapManager.h"
-#include "core/ConfigManager.h"
+#include "core/ConfigModel.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
 #include "core/Session.h"
@@ -22,7 +22,7 @@
 
 using core::Constants;
 
-using core::ConfigManager;
+using core::ConfigModel;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -34,7 +34,7 @@ int main(int argv, char** args) {
 
   core::PackageManager::loadPackages();
 
-  ConfigManager::load();
+  ConfigModel::load();
 
   // Populate session values after loading configs
   core::Session::singleton().init();
@@ -47,13 +47,13 @@ int main(int argv, char** args) {
   QTranslator qtTranslator;
   // Load silkedit_<locale>.qm to translate SilkEdit menu
   bool result =
-      translator.load("silkedit_" + ConfigManager::locale(), Constants::translationDirPath());
+      translator.load("silkedit_" + ConfigModel::locale(), Constants::translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("silkedit_");
   }
 
   // Load qt_<locale>.qm to translate Mac application menu
-  result = qtTranslator.load("qt_" + ConfigManager::locale(), Constants::translationDirPath());
+  result = qtTranslator.load("qt_" + ConfigModel::locale(), Constants::translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("qt_");
   }

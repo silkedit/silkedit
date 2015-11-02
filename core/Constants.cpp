@@ -30,10 +30,7 @@ const int Constants::defaultFontSize = 12;
 QStringList Constants::configPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
-    configPaths.append(path + "/config.yml");
-    configPaths.append(path + "/config.yaml");
-  }
+  foreach (const QString& path, dataDirectoryPaths()) { configPaths.append(path + "/config.yml"); }
 
   return configPaths;
 }
@@ -41,10 +38,7 @@ QStringList Constants::configPaths() {
 QStringList Constants::keymapPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
-    configPaths.append(path + "/keymap.yml");
-    configPaths.append(path + "/keymap.yaml");
-  }
+  foreach (const QString& path, dataDirectoryPaths()) { configPaths.append(path + "/keymap.yml"); }
 
   return configPaths;
 }

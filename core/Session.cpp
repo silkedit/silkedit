@@ -1,12 +1,13 @@
 ﻿#include "Session.h"
 #include "ThemeProvider.h"
-#include "ConfigManager.h"
+#include "ConfigModel.h"
 
 namespace core {
 
 void Session::setTheme(Theme* theme) {
   if (m_theme != theme) {
     m_theme = theme;
+    ConfigModel::saveThemeName(theme->name);
     emit themeChanged(theme);
   }
 }
@@ -37,14 +38,13 @@ void Session::setIndentUsingSpaces(bool value) {
 }
 
 void Session::init() {
-  setTheme(ThemeProvider::theme(ConfigManager::theme()));
-  QFont font(ConfigManager::fontFamily(), ConfigManager::fontSize());
+  setTheme(ThemeProvider::theme(ConfigModel::themeName()));
+  QFont font(ConfigModel::fontFamily(), ConfigModel::fontSize());
   setFont(font);
-  setTabWidth(ConfigManager::tabWidth());
-  setIndentUsingSpaces(ConfigManager::indentUsingSpaces());
+  setTabWidth(ConfigModel::tabWidth());
+  setIndentUsingSpaces(ConfigModel::indentUsingSpaces());
 }
 
-Session::Session() : m_theme(nullptr) {
-}
+Session::Session() : m_theme(nullptr) {}
 
 }  // namespace core
