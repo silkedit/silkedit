@@ -83,7 +83,7 @@ class TextEditView : public QPlainTextEdit,
                            bool preserveCase = false);
   void performCompletion();
   void insertNewLineWithIndent();
-  void clearHighlightText();
+  void clearSelection();
 
 signals:
   void destroying(const QString& path);
