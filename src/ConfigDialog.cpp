@@ -6,6 +6,9 @@
 
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
+  int sizeHint = ui->listWidget->sizeHintForColumn(0);
+  ui->listWidget->setFixedWidth(sizeHint);
+  ui->lineEdit->setFixedWidth(ui->listWidget->width());
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
 
   connect(ui->listWidget, &QListWidget::currentItemChanged,

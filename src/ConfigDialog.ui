@@ -23,9 +23,6 @@
     </rect>
    </property>
    <layout class="QHBoxLayout" name="rootHLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>

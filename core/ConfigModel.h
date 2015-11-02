@@ -1,11 +1,15 @@
 ﻿#pragma once
 
+#include <yaml-cpp/yaml.h>
 #include <unordered_map>
+#include <fstream>
 #include <QColor>
+#include <QFile>
 
 #include "macros.h"
 #include "Singleton.h"
 #include "stlSpecialization.h"
+#include "Constants.h"
 
 class QString;
 
@@ -30,7 +34,9 @@ class ConfigModel {
   static QString themeName();
   static void saveThemeName(const QString& newValue);
   static QString fontFamily();
+  static void saveFontFamily(const QString& newValue);
   static int fontSize();
+  static void saveFontSize(int newValue);
   static QString endOfLineStr();
   static QColor endOfLineColor();
   static QString endOfFileStr();
@@ -49,12 +55,38 @@ class ConfigModel {
 
   static void load(const QString& filename);
 
+  static void save(const QString& key, const QString& newValue) {
+    save(key, newValue.toUtf8().constData());
+  }
+
   /**
    * @brief save 'key: newValue' in config.yml
    * @param key
    * @param newValue
    */
-  static void save(const QString& key, const QString& newValue);
+  template <typename T>
+  static void save(const QString& key, const T& newValue) {
+    QString configFilePath = Constants::userConfigPath();
+
+    if (!QFile(configFilePath).exists())
+      return;
+
+    std::string name = configFilePath.toUtf8().constData();
+    try {
+      YAML::Node rootNode = YAML::LoadFile(name);
+
+      assert(rootNode.IsMap());
+      rootNode[key.toUtf8().constData()] = newValue;
+
+      std::string configFileName = configFilePath.toUtf8().constData();
+      std::ofstream fout(configFileName);
+      fout << rootNode;  // dump it back into the file
+    } catch (const std::exception& e) {
+      qWarning() << "can't edit yaml file:" << configFilePath << ", reason: " << e.what();
+    } catch (...) {
+      qWarning() << "can't edit yaml file because of an unexpected exception: " << configFilePath;
+    }
+  }
 };
 
 }  // namespace core

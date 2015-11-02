@@ -1,18 +1,16 @@
-﻿#include <yaml-cpp/yaml.h>
-#include <string>
-#include <fstream>
+﻿#include <string>
 #include <QDebug>
 #include <QString>
-#include <QFile>
 
 #include "ConfigModel.h"
-#include "Constants.h"
 #include "Util.h"
 
 namespace {
 const QString END_OF_LINE_STR = "end_of_line_str";
 const QString END_OF_FILE_STR = "end_of_file_str";
 const QString THEME_KEY = "theme";
+const QString FONT_FAMILY_KEY = "font_family";
+const QString FONT_SIZE_KEY = "font_size";
 }
 
 namespace core {
@@ -87,29 +85,6 @@ void ConfigModel::load() {
   foreach (const QString& path, existingConfigPaths) { load(path); }
 }
 
-void ConfigModel::save(const QString& key, const QString& newValue) {
-  QString configFilePath = Constants::userConfigPath();
-
-  if (!QFile(configFilePath).exists())
-    return;
-
-  std::string name = configFilePath.toUtf8().constData();
-  try {
-    YAML::Node rootNode = YAML::LoadFile(name);
-
-    assert(rootNode.IsMap());
-    rootNode[key.toUtf8().constData()] = newValue.toUtf8().constData();
-
-    std::string configFileName = configFilePath.toUtf8().constData();
-    std::ofstream fout(configFileName);
-    fout << rootNode;  // dump it back into the file
-  } catch (const std::exception& e) {
-    qWarning() << "can't edit yaml file:" << configFilePath << ", reason: " << e.what();
-  } catch (...) {
-    qWarning() << "can't edit yaml file because of an unexpected exception: " << configFilePath;
-  }
-}
-
 QString ConfigModel::strValue(const QString& key, const QString& defaultValue) {
   if (m_strConfigs.count(key) != 0) {
     return m_strConfigs[key];
@@ -165,11 +140,21 @@ void ConfigModel::saveThemeName(const QString& newValue) {
 }
 
 QString ConfigModel::fontFamily() {
-  return strValue("font_family", Constants::defaultFontFamily);
+  return strValue(FONT_FAMILY_KEY, Constants::defaultFontFamily);
+}
+
+void ConfigModel::saveFontFamily(const QString& newValue) {
+  m_strConfigs[FONT_FAMILY_KEY] = newValue;
+  save(FONT_FAMILY_KEY, newValue);
 }
 
 int ConfigModel::fontSize() {
-  return intValue("font_size", Constants::defaultFontSize);
+  return intValue(FONT_SIZE_KEY, Constants::defaultFontSize);
+}
+
+void ConfigModel::saveFontSize(int newValue) {
+  m_strConfigs[FONT_SIZE_KEY] = newValue;
+  save(FONT_SIZE_KEY, newValue);
 }
 
 QString ConfigModel::endOfLineStr() {

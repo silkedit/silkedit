@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>588</width>
     <height>300</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>60</x>
      <y>50</y>
-     <width>271</width>
+     <width>414</width>
      <height>181</height>
     </rect>
    </property>
@@ -29,12 +29,36 @@
     <item>
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Theme</string>
+       <string>Theme:</string>
       </property>
      </widget>
     </item>
     <item>
      <widget class="QComboBox" name="themeCombo"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Font:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QFontComboBox" name="fontComboBox"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Size:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="fontSizeSpin"/>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

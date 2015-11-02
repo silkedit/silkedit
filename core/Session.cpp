@@ -19,6 +19,8 @@ void Session::setFont(const QFont& font) {
     // On Windows, FullHinting makes some fonts ugly
     // On Mac, hintingPreference is ignored.
     m_font.setHintingPreference(QFont::PreferVerticalHinting);
+    ConfigModel::saveFontFamily(font.family());
+    ConfigModel::saveFontSize(font.pointSize());
     emit fontChanged(m_font);
   }
 }
