@@ -312,12 +312,16 @@ QSize PackageDelegate::sizeHint(const QStyleOptionViewItem& option,
   if (!index.isValid() || index.column() != PackageTableModel::BUTTON_COLUMN) {
     return QStyledItemDelegate::sizeHint(option, index);
   }
-
   QStyleOptionButton opt;
   initButtonStyleOption(index, option, &opt);
   QSize textSize = opt.fontMetrics.size(Qt::TextShowMnemonic, m_textAfterProcess);
-  return (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
+  QSize buttonSize = (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
       .expandedTo(QApplication::globalStrut());
+
+  QSize margin(10, 0);
+  QSize labelSize = option.fontMetrics.size(Qt::TextShowMnemonic, m_textAfterProcess) + margin;
+
+  return buttonSize.expandedTo(labelSize);
 }
 
 void PackageDelegate::initButtonStyleOption(const QModelIndex& index,
