@@ -283,8 +283,12 @@ void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator)
 }
 
 void TextEditViewPrivate::setTabStopWidthFromSession() {
-  QFontMetrics metrics(Session::singleton().font());
-  q_ptr->setTabStopWidth(Session::singleton().tabWidth() * metrics.width(" "));
+  qreal width = QFontMetricsF(Session::singleton().font()).width(QLatin1Char(' '));
+  if (q_ptr->document()) {
+    QTextOption option = q_ptr->document()->defaultTextOption();
+    option.setTabStop(width * Session::singleton().tabWidth());
+    q_ptr->document()->setDefaultTextOption(option);
+  }
 }
 
 void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
@@ -441,8 +445,6 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   Q_D(TextEditView);
 
-  d->setTabStopWidthFromSession();
-
   // Compare previous and current languages
   Language* prevLang = nullptr;
   Language* newLang = nullptr;
@@ -487,6 +489,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
+  d->setTabStopWidthFromSession();
 }
 
 Language* TextEditView::language() {
