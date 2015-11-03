@@ -13,6 +13,7 @@ const QString FONT_FAMILY_KEY = "font_family";
 const QString FONT_SIZE_KEY = "font_size";
 const QString INDENT_USING_SPACES_KEY = "indent_using_spaces";
 const QString TAB_WIDTH_KEY = "tab_width";
+const QString LOCALE_KEY = "locale";
 }
 
 namespace core {
@@ -62,6 +63,9 @@ void ConfigModel::load(const QString& filename) {
 }
 
 void ConfigModel::load() {
+  m_mapConfigs.clear();
+  m_strConfigs.clear();
+
   QStringList existingConfigPaths;
   foreach (const QString& path, Constants::configPaths()) {
     if (QFile(path).exists()) {
@@ -226,7 +230,17 @@ bool ConfigModel::enableMnemonic() {
 }
 
 QString ConfigModel::locale() {
-  return strValue("locale", QLocale::system().name());
+  const QString& systemLocale = QLocale::system().name();
+  const QString& locale = strValue(LOCALE_KEY, systemLocale);
+  if (locale == "system") {
+    return systemLocale;
+  }
+  return locale;
+}
+
+void ConfigModel::saveLocale(const QString& newValue) {
+  m_strConfigs[LOCALE_KEY] = newValue;
+  save(LOCALE_KEY, newValue);
 }
 
 }  // namespace core

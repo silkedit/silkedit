@@ -18,9 +18,6 @@
 #include "PluginManager.h"
 #include "Context.h"
 #include "MenuBar.h"
-#include "core/Constants.h"
-
-using core::Constants;
 
 using core::ConfigModel;
 
@@ -36,29 +33,14 @@ int main(int argv, char** args) {
 
   ConfigModel::load();
 
+  // Setup translator after initializing ConfigModel
+  app.setupTranslator(ConfigModel::locale());
+
   // Populate session values after loading configs
   core::Session::singleton().init();
 
   // Load keymap settings after registering commands
   KeymapManager::singleton().load();
-
-  // setup translators
-  QTranslator translator;
-  QTranslator qtTranslator;
-  // Load silkedit_<locale>.qm to translate SilkEdit menu
-  bool result =
-      translator.load("silkedit_" + ConfigModel::locale(), Constants::translationDirPath());
-  if (!result) {
-    qWarning() << "Failed to load" << qPrintable("silkedit_");
-  }
-
-  // Load qt_<locale>.qm to translate Mac application menu
-  result = qtTranslator.load("qt_" + ConfigModel::locale(), Constants::translationDirPath());
-  if (!result) {
-    qWarning() << "Failed to load" << qPrintable("qt_");
-  }
-  app.installTranslator(&translator);
-  app.installTranslator(&qtTranslator);
 
   // Create default menu bar before creating any new window
   MenuBar::init();

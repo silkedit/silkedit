@@ -47,6 +47,7 @@ class ConfigModel {
   static void saveIndentUsingSpaces(bool newValue);
   static bool enableMnemonic();
   static QString locale();
+  static void saveLocale(const QString& newValue);
 
  private:
   ConfigModel() = delete;

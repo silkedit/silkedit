@@ -36,6 +36,9 @@ std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::o
     API::s_requestFunctions;
 
 void API::init() {
+  s_notifyFunctions.clear();
+  s_requestFunctions.clear();
+
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));

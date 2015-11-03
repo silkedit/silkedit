@@ -10,16 +10,13 @@
     <height>300</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>60</x>
      <y>50</y>
      <width>414</width>
-     <height>181</height>
+     <height>240</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -80,6 +77,23 @@
        <widget class="QSpinBox" name="tabWidthSpin"/>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Language:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QComboBox" name="langCombo"/>
+    </item>
+    <item>
+     <widget class="QPushButton" name="restartButton">
+      <property name="text">
+       <string>Restart to Apply Change</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -4,12 +4,12 @@
 <context>
     <name>AvailablePackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="349"/>
+        <location filename="../src/PackagesView.cpp" line="369"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="353"/>
+        <location filename="../src/PackagesView.cpp" line="373"/>
         <source>Installed</source>
         <translation>インストール済み</translation>
     </message>
@@ -30,7 +30,12 @@
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/ConfigDialog.ui" line="39"/>
+        <location filename="../src/ConfigDialog.ui" line="38"/>
+        <source>General</source>
+        <translation>全般</translation>
+    </message>
+    <message>
+        <location filename="../src/ConfigDialog.ui" line="43"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
@@ -118,14 +123,67 @@
     </message>
 </context>
 <context>
+    <name>GeneralSettingsView</name>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="29"/>
+        <source>Theme:</source>
+        <translation>テーマ:</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="41"/>
+        <source>Font:</source>
+        <translation>フォント:</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="51"/>
+        <source>Size:</source>
+        <translation>サイズ:</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="63"/>
+        <source>Indent using spaces</source>
+        <translation>スペースでインデント</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="72"/>
+        <source>Tab Width:</source>
+        <translation>タブ幅:</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="84"/>
+        <source>Language:</source>
+        <translation>言語:</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.ui" line="94"/>
+        <source>Restart to Apply Change</source>
+        <translation>再起動して適用</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.cpp" line="56"/>
+        <source>System Language</source>
+        <translation>システムの言語</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.cpp" line="57"/>
+        <source>English</source>
+        <translation>英語</translation>
+    </message>
+    <message>
+        <location filename="../src/GeneralSettingsView.cpp" line="58"/>
+        <source>Japanese</source>
+        <translation>日本語</translation>
+    </message>
+</context>
+<context>
     <name>InstalledPackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="439"/>
+        <location filename="../src/PackagesView.cpp" line="469"/>
         <source>Remove</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="443"/>
+        <location filename="../src/PackagesView.cpp" line="473"/>
         <source>Removed</source>
         <translation>削除済み</translation>
     </message>
@@ -183,62 +241,62 @@
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="64"/>
+        <location filename="../src/MenuBar.cpp" line="63"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="64"/>
+        <location filename="../src/MenuBar.cpp" line="63"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="67"/>
+        <location filename="../src/MenuBar.cpp" line="66"/>
         <source>Package Development</source>
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="69"/>
+        <location filename="../src/MenuBar.cpp" line="68"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="74"/>
+        <location filename="../src/MenuBar.cpp" line="72"/>
         <source>&amp;Settings</source>
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="74"/>
+        <location filename="../src/MenuBar.cpp" line="72"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="83"/>
+        <location filename="../src/MenuBar.cpp" line="81"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="83"/>
+        <location filename="../src/MenuBar.cpp" line="81"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="86"/>
+        <location filename="../src/MenuBar.cpp" line="84"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="86"/>
+        <location filename="../src/MenuBar.cpp" line="84"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="100"/>
+        <location filename="../src/MenuBar.cpp" line="98"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="102"/>
+        <location filename="../src/MenuBar.cpp" line="100"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>
@@ -263,7 +321,7 @@
         <translation type="vanished">インストール済み</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="263"/>
+        <location filename="../src/PackagesView.cpp" line="270"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
