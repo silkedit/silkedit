@@ -63,7 +63,7 @@ int Config::tabWidth() {
 }
 
 void Config::setTabWidth(int tabWidth) {
-  if (m_scalarConfigs.count(TAB_WIDTH_KEY) != 0 && m_scalarConfigs[TAB_WIDTH_KEY] != tabWidth) {
+  if (m_scalarConfigs.count(TAB_WIDTH_KEY) == 0 || m_scalarConfigs[TAB_WIDTH_KEY] != tabWidth) {
     m_scalarConfigs[TAB_WIDTH_KEY] = QVariant(tabWidth);
     save(TAB_WIDTH_KEY, tabWidth);
     emit tabWidthChanged(tabWidth);
@@ -75,7 +75,7 @@ bool Config::indentUsingSpaces() {
 }
 
 void Config::setIndentUsingSpaces(bool value) {
-  if (m_scalarConfigs.count(INDENT_USING_SPACES_KEY) != 0 &&
+  if (m_scalarConfigs.count(INDENT_USING_SPACES_KEY) == 0 ||
       m_scalarConfigs[INDENT_USING_SPACES_KEY] != value) {
     m_scalarConfigs[INDENT_USING_SPACES_KEY] = QVariant(value);
     save(INDENT_USING_SPACES_KEY, value);
@@ -137,7 +137,7 @@ QString Config::endOfLineStr() {
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {
-  if (m_scalarConfigs.count(END_OF_LINE_STR) != 0 && m_scalarConfigs[END_OF_LINE_STR] != newValue) {
+  if (m_scalarConfigs.count(END_OF_LINE_STR) == 0 || m_scalarConfigs[END_OF_LINE_STR] != newValue) {
     m_scalarConfigs[END_OF_LINE_STR] = QVariant(newValue);
     save(END_OF_LINE_STR, newValue);
     emit endOfLineStrChanged(newValue);
@@ -171,7 +171,7 @@ bool Config::showInvisibles() {
 }
 
 void Config::setShowInvisibles(bool newValue) {
-  if (m_scalarConfigs.count(SHOW_INVISIBLES_KEY) != 0 &&
+  if (m_scalarConfigs.count(SHOW_INVISIBLES_KEY) == 0 ||
       m_scalarConfigs[SHOW_INVISIBLES_KEY] != newValue) {
     m_scalarConfigs[SHOW_INVISIBLES_KEY] = QVariant(newValue);
     save(SHOW_INVISIBLES_KEY, newValue);
@@ -186,21 +186,6 @@ void Config::load() {
   foreach (const QString& path, Constants::configPaths()) {
     if (QFile(path).exists()) {
       existingConfigPaths.append(path);
-    }
-  }
-
-  if (existingConfigPaths.isEmpty()) {
-    qDebug("copying default config.yml");
-    if (Util::copy(":/config.yml", Constants::userConfigPath())) {
-      existingConfigPaths.append(Constants::userConfigPath());
-      if (!QFile(Constants::userConfigPath())
-               .setPermissions(
-                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
-        qWarning("failed to set permission to %s", qPrintable(Constants::userKeymapPath()));
-      }
-    } else {
-      qDebug("failed to copy default config.yml");
     }
   }
 
@@ -264,7 +249,7 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return strValue(THEME_KEY, "Solarized (light)");
+  return strValue(THEME_KEY, "Solarized (dark)");
 }
 
 QString Config::fontFamily() {

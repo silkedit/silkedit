@@ -97,14 +97,15 @@ class Config : public QObject, public Singleton<Config> {
   void save(const QString& key, const T& newValue) {
     QString configFilePath = Constants::userConfigPath();
 
-    if (!QFile(configFilePath).exists())
-      return;
-
-    std::string name = configFilePath.toUtf8().constData();
     try {
-      YAML::Node rootNode = YAML::LoadFile(name);
+      YAML::Node rootNode;
+      if (QFile(configFilePath).exists()) {
+        std::string name = configFilePath.toUtf8().constData();
+        rootNode = YAML::LoadFile(name);
+      } else {
+        rootNode = YAML::Load("");
+      }
 
-      assert(rootNode.IsMap());
       rootNode[key.toUtf8().constData()] = newValue;
 
       std::string configFileName = configFilePath.toUtf8().constData();
