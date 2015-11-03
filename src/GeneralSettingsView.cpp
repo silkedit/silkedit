@@ -67,6 +67,18 @@ GeneralSettingsView::GeneralSettingsView(QWidget* parent)
             ui->restartButton->setVisible(true);
           });
 
+  // Show invisibles combo box
+  ui->showInvisiblesCheck->setChecked(ConfigModel::showInvisibles());
+  connect(ui->showInvisiblesCheck, &QCheckBox::toggled, [=](bool checked) {
+    ConfigModel::saveShowInvisibles(checked);
+    // todo: Update TextEditView to reflect this setting
+  });
+
+  // EOL text
+  ui->eolEdit->setText(ConfigModel::endOfLineStr());
+  connect(ui->eolEdit, &QLineEdit::textEdited, this,
+          [=](const QString& text) { ConfigModel::saveEndOfLineStr(text); });
+
   // Restart button to apply change
   connect(ui->restartButton, &QPushButton::clicked, this, [=] { SilkApp::restart(); });
 }

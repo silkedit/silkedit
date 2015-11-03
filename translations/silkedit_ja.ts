@@ -162,7 +162,7 @@
     <message>
         <location filename="../src/GeneralSettingsView.cpp" line="56"/>
         <source>System Language</source>
-        <translation>システムの言語</translation>
+        <translation>&lt;システム言語&gt;</translation>
     </message>
     <message>
         <location filename="../src/GeneralSettingsView.cpp" line="57"/>

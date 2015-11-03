@@ -5,16 +5,16 @@
 #include <fstream>
 #include <QColor>
 #include <QFile>
+#include <QString>
 
 #include "macros.h"
 #include "Singleton.h"
 #include "stlSpecialization.h"
 #include "Constants.h"
 
-class QString;
-
 namespace core {
 
+// todo: merge this class into Session
 /**
  * @brief ConfigModel represents static configurations (load from or save to a config file)
  */
@@ -38,9 +38,8 @@ class ConfigModel {
   static int fontSize();
   static void saveFontSize(int newValue);
   static QString endOfLineStr();
-  static QColor endOfLineColor();
+  static void saveEndOfLineStr(const QString& newValue);
   static QString endOfFileStr();
-  static QColor endOfFileColor();
   static int tabWidth();
   static void saveTabWidth(int newValue);
   static bool indentUsingSpaces();
@@ -48,13 +47,15 @@ class ConfigModel {
   static bool enableMnemonic();
   static QString locale();
   static void saveLocale(const QString& newValue);
+  static bool showInvisibles();
+  static void saveShowInvisibles(bool newValue);
 
  private:
   ConfigModel() = delete;
   ~ConfigModel() = delete;
 
-  static std::unordered_map<QString, QString> m_strConfigs;
-  static std::unordered_map<QString, std::unordered_map<std::string, std::string>> m_mapConfigs;
+  static std::unordered_map<QString, QVariant> s_scalarConfigs;
+  static std::unordered_map<QString, std::unordered_map<std::string, std::string>> s_mapConfigs;
 
   static void load(const QString& filename);
 

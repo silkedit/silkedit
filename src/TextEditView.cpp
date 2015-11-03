@@ -95,6 +95,19 @@ int toMoveOperation(std::string str) {
     return QTextCursor::NoMove;
   }
 }
+
+QColor adjustForEOL(QColor const color, int threshold = 125) {
+  QColor newColor;
+
+  // 0 is black; 255 is as far from black as possible.
+  if (color.value() < threshold) {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 30);
+  } else {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 30);
+  }
+  newColor.setAlpha(128);
+  return newColor;
+}
 }
 
 void TextEditViewPrivate::updateLineNumberAreaWidth(int /* newBlockCount */) {
@@ -712,38 +725,38 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     painter.drawRoundedRect(lineRect, 3.0, 3.0);
   }
 
-  // draw an end of line string
-  const int bottom = viewport()->rect().height();
-  if (ConfigModel::endOfLineColor().isValid()) {
-    painter.setPen(ConfigModel::endOfLineColor());
-  }
-  QTextCursor cur = textCursor();
-  cur.movePosition(QTextCursor::End);
-  const int posEOF = cur.position();
-  QTextBlock block = firstVisibleBlock();
-  while (block.isValid()) {
-    cur.setPosition(block.position());
-    cur.movePosition(QTextCursor::EndOfBlock);
-    if (cur.position() == posEOF) {
-      break;
-    }
-    QRect r = cursorRect(cur);
-    if (r.top() >= bottom)
-      break;
-    if (!ConfigModel::endOfLineStr().isEmpty()) {
-      painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfLineStr());
-    }
-    block = block.next();
-  }
-  cur.movePosition(QTextCursor::End);
-  QRect r = cursorRect(cur);
+  if (ConfigModel::showInvisibles()) {
+    // draw an EOL string
+    const int bottom = viewport()->rect().height();
 
-  // draw an end of file string
-  if (!ConfigModel::endOfFileStr().isEmpty()) {
-    if (ConfigModel::endOfFileColor().isValid()) {
-      painter.setPen(ConfigModel::endOfFileColor());
+    QColor invisibleColor = adjustForEOL(palette().foreground().color());
+    painter.setPen(invisibleColor);
+
+    QTextCursor cur = textCursor();
+    cur.movePosition(QTextCursor::End);
+    const int posEOF = cur.position();
+    QTextBlock block = firstVisibleBlock();
+    while (block.isValid()) {
+      cur.setPosition(block.position());
+      cur.movePosition(QTextCursor::EndOfBlock);
+      if (cur.position() == posEOF) {
+        break;
+      }
+      QRect r = cursorRect(cur);
+      if (r.top() >= bottom)
+        break;
+      if (!ConfigModel::endOfLineStr().isEmpty()) {
+        painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfLineStr());
+      }
+      block = block.next();
     }
-    painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfFileStr());
+    cur.movePosition(QTextCursor::End);
+    QRect r = cursorRect(cur);
+
+    // draw an end of file string
+    if (!ConfigModel::endOfFileStr().isEmpty()) {
+      painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfFileStr());
+    }
   }
 }
 

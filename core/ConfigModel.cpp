@@ -1,6 +1,6 @@
 ﻿#include <string>
 #include <QDebug>
-#include <QString>
+#include <QVariant>
 
 #include "ConfigModel.h"
 #include "Util.h"
@@ -14,21 +14,21 @@ const QString FONT_SIZE_KEY = "font_size";
 const QString INDENT_USING_SPACES_KEY = "indent_using_spaces";
 const QString TAB_WIDTH_KEY = "tab_width";
 const QString LOCALE_KEY = "locale";
+const QString SHOW_INVISIBLES_KEY = "show_invisibles";
+
+QHash<QString, QVariant::Type> keyTypeHash;
 }
 
 namespace core {
 
-std::unordered_map<QString, QString> ConfigModel::m_strConfigs;
-std::unordered_map<QString, std::unordered_map<std::string, std::string>> ConfigModel::m_mapConfigs;
+std::unordered_map<QString, QVariant> ConfigModel::s_scalarConfigs;
+std::unordered_map<QString, std::unordered_map<std::string, std::string>> ConfigModel::s_mapConfigs;
 
 void ConfigModel::load(const QString& filename) {
   qDebug("loading configuration");
 
   if (!QFile(filename).exists())
     return;
-
-  m_strConfigs.clear();
-  m_mapConfigs.clear();
 
   std::string name = filename.toUtf8().constData();
   try {
@@ -39,9 +39,27 @@ void ConfigModel::load(const QString& filename) {
     for (auto it = rootNode.begin(); it != rootNode.end(); ++it) {
       QString key = QString::fromUtf8(it->first.as<std::string>().c_str()).trimmed();
       if (it->second.IsScalar()) {
-        QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
-        qDebug() << key << ":" << value;
-        m_strConfigs[key] = value;
+        if (keyTypeHash.contains(key)) {
+          switch (keyTypeHash[key]) {
+            case QVariant::Bool:
+              s_scalarConfigs[key] = QVariant(it->second.as<bool>());
+              break;
+            case QVariant::Int:
+              s_scalarConfigs[key] = QVariant(it->second.as<int>());
+              break;
+            case QVariant::String: {
+              QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
+              s_scalarConfigs[key] = value;
+              break;
+            }
+            default:
+              qWarning("Invalid type %d. key: %s", keyTypeHash[key], qPrintable(key));
+              break;
+          }
+        } else {
+          QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
+          s_scalarConfigs[key] = value;
+        }
       } else if (it->second.IsMap()) {
         YAML::Node mapNode = it->second;
         std::unordered_map<std::string, std::string> map;
@@ -52,7 +70,7 @@ void ConfigModel::load(const QString& filename) {
             map.insert(std::make_pair(mapKey, mapValue));
           }
         }
-        m_mapConfigs[key] = map;
+        s_mapConfigs[key] = map;
       }
     }
   } catch (const std::exception& e) {
@@ -63,8 +81,19 @@ void ConfigModel::load(const QString& filename) {
 }
 
 void ConfigModel::load() {
-  m_mapConfigs.clear();
-  m_strConfigs.clear();
+  s_mapConfigs.clear();
+  s_scalarConfigs.clear();
+
+  // Init keyTypeHash
+  keyTypeHash[END_OF_LINE_STR] = QVariant::String;
+  keyTypeHash[END_OF_FILE_STR] = QVariant::String;
+  keyTypeHash[THEME_KEY] = QVariant::String;
+  keyTypeHash[FONT_FAMILY_KEY] = QVariant::String;
+  keyTypeHash[FONT_SIZE_KEY] = QVariant::Int;
+  keyTypeHash[INDENT_USING_SPACES_KEY] = QVariant::Bool;
+  keyTypeHash[TAB_WIDTH_KEY] = QVariant::Int;
+  keyTypeHash[LOCALE_KEY] = QVariant::String;
+  keyTypeHash[SHOW_INVISIBLES_KEY] = QVariant::Bool;
 
   QStringList existingConfigPaths;
   foreach (const QString& path, Constants::configPaths()) {
@@ -92,48 +121,39 @@ void ConfigModel::load() {
 }
 
 QString ConfigModel::strValue(const QString& key, const QString& defaultValue) {
-  if (m_strConfigs.count(key) != 0) {
-    return m_strConfigs[key];
+  if (s_scalarConfigs.count(key) != 0) {
+    return s_scalarConfigs[key].toString();
   }
 
   return defaultValue;
 }
 
 int ConfigModel::intValue(const QString& key, int defaultValue) {
-  if (m_strConfigs.count(key) != 0) {
-    bool ok;
-    int value = m_strConfigs[key].toInt(&ok, 10);
-    return ok ? value : defaultValue;
+  if (s_scalarConfigs.count(key) != 0 && s_scalarConfigs[key].canConvert<int>()) {
+    return s_scalarConfigs[key].toInt();
   }
 
   return defaultValue;
 }
 
 bool ConfigModel::boolValue(const QString& key, bool defaultValue) {
-  if (m_strConfigs.count(key) != 0) {
-    bool value = false;
-    QString valueStr = m_strConfigs[key].trimmed();
-    if (valueStr == "true") {
-      value = true;
-    } else if (valueStr != "false") {
-      qWarning("%s is not recognized as boolean value", qPrintable(valueStr));
-    }
-    return value;
+  if (s_scalarConfigs.count(key) != 0 && s_scalarConfigs[key].canConvert<bool>()) {
+    return s_scalarConfigs[key].toBool();
   }
 
   return defaultValue;
 }
 
 std::unordered_map<std::string, std::string> ConfigModel::mapValue(const QString& key) {
-  if (m_mapConfigs.count(key) != 0) {
-    return m_mapConfigs[key];
+  if (s_mapConfigs.count(key) != 0) {
+    return s_mapConfigs[key];
   }
 
   return std::unordered_map<std::string, std::string>();
 }
 
 bool ConfigModel::contains(const QString& key) {
-  return m_strConfigs.count(key) != 0;
+  return s_scalarConfigs.count(key) != 0;
 }
 
 QString ConfigModel::themeName() {
@@ -141,7 +161,7 @@ QString ConfigModel::themeName() {
 }
 
 void ConfigModel::saveThemeName(const QString& newValue) {
-  m_strConfigs[THEME_KEY] = newValue;
+  s_scalarConfigs[THEME_KEY] = QVariant(newValue);
   save(THEME_KEY, newValue);
 }
 
@@ -150,7 +170,7 @@ QString ConfigModel::fontFamily() {
 }
 
 void ConfigModel::saveFontFamily(const QString& newValue) {
-  m_strConfigs[FONT_FAMILY_KEY] = newValue;
+  s_scalarConfigs[FONT_FAMILY_KEY] = QVariant(newValue);
   save(FONT_FAMILY_KEY, newValue);
 }
 
@@ -159,52 +179,21 @@ int ConfigModel::fontSize() {
 }
 
 void ConfigModel::saveFontSize(int newValue) {
-  m_strConfigs[FONT_SIZE_KEY] = newValue;
+  s_scalarConfigs[FONT_SIZE_KEY] = QVariant(newValue);
   save(FONT_SIZE_KEY, newValue);
 }
 
 QString ConfigModel::endOfLineStr() {
-  if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
-    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
-    if (map.count("str") != 0) {
-      return QString::fromUtf8(map["str"].c_str());
-    }
-  }
-
-  return "";
+  return strValue(END_OF_LINE_STR, "¬");
 }
 
-QColor ConfigModel::endOfLineColor() {
-  if (m_mapConfigs.count(END_OF_LINE_STR) != 0) {
-    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_LINE_STR];
-    if (map.count("color") != 0) {
-      return QColor(QString::fromUtf8(map["color"].c_str()));
-    }
-  }
-
-  return QColor();
+void ConfigModel::saveEndOfLineStr(const QString& newValue) {
+  s_scalarConfigs[END_OF_LINE_STR] = QVariant(newValue);
+  save(END_OF_LINE_STR, newValue);
 }
 
 QString ConfigModel::endOfFileStr() {
-  if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
-    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
-    if (map.count("str") != 0) {
-      return QString::fromUtf8(map["str"].c_str());
-    }
-  }
-
-  return "";
-}
-
-QColor ConfigModel::endOfFileColor() {
-  if (m_mapConfigs.count(END_OF_FILE_STR) != 0) {
-    std::unordered_map<std::string, std::string> map = m_mapConfigs[END_OF_FILE_STR];
-    if (map.count("color") != 0) {
-      return QColor(QString::fromUtf8(map["color"].c_str()));
-    }
-  }
-
-  return QColor();
+  return strValue(END_OF_FILE_STR, "");
 }
 
 int ConfigModel::tabWidth() {
@@ -212,7 +201,7 @@ int ConfigModel::tabWidth() {
 }
 
 void ConfigModel::saveTabWidth(int newValue) {
-  m_strConfigs[TAB_WIDTH_KEY] = newValue;
+  s_scalarConfigs[TAB_WIDTH_KEY] = QVariant(newValue);
   save(TAB_WIDTH_KEY, newValue);
 }
 
@@ -221,7 +210,7 @@ bool ConfigModel::indentUsingSpaces() {
 }
 
 void ConfigModel::saveIndentUsingSpaces(bool newValue) {
-  m_strConfigs[INDENT_USING_SPACES_KEY] = newValue;
+  s_scalarConfigs[INDENT_USING_SPACES_KEY] = QVariant(newValue);
   save(INDENT_USING_SPACES_KEY, newValue);
 }
 
@@ -239,8 +228,17 @@ QString ConfigModel::locale() {
 }
 
 void ConfigModel::saveLocale(const QString& newValue) {
-  m_strConfigs[LOCALE_KEY] = newValue;
+  s_scalarConfigs[LOCALE_KEY] = QVariant(newValue);
   save(LOCALE_KEY, newValue);
+}
+
+bool ConfigModel::showInvisibles() {
+  return boolValue(SHOW_INVISIBLES_KEY, false);
+}
+
+void ConfigModel::saveShowInvisibles(bool newValue) {
+  s_scalarConfigs[SHOW_INVISIBLES_KEY] = QVariant(newValue);
+  save(SHOW_INVISIBLES_KEY, newValue);
 }
 
 }  // namespace core

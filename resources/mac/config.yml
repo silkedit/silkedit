@@ -8,10 +8,4 @@ font_size: 13
 
 # indent_using_spaces: false
 
-# end_of_line_str:
-#   str: '←'
-#   color: '#0000ff'
-
-# end_of_file_str:
-#   str: '[EOF]'
-#   color: '#ff0000'
+# end_of_line_str: ¬

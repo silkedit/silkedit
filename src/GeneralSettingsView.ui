@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
-    <height>300</height>
+    <width>591</width>
+    <height>627</height>
    </rect>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
@@ -16,7 +16,7 @@
      <x>60</x>
      <y>50</y>
      <width>414</width>
-     <height>240</height>
+     <height>347</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -87,6 +87,30 @@
     </item>
     <item>
      <widget class="QComboBox" name="langCombo"/>
+    </item>
+    <item>
+     <widget class="QCheckBox" name="showInvisiblesCheck">
+      <property name="text">
+       <string>Show Invisibles</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_6">
+      <property name="text">
+       <string>End of Line string:</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="eolEdit">
+      <property name="text">
+       <string/>
+      </property>
+      <property name="placeholderText">
+       <string>e.g. ¬</string>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="QPushButton" name="restartButton">
