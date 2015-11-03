@@ -11,6 +11,8 @@ const QString END_OF_FILE_STR = "end_of_file_str";
 const QString THEME_KEY = "theme";
 const QString FONT_FAMILY_KEY = "font_family";
 const QString FONT_SIZE_KEY = "font_size";
+const QString INDENT_USING_SPACES_KEY = "indent_using_spaces";
+const QString TAB_WIDTH_KEY = "tab_width";
 }
 
 namespace core {
@@ -202,11 +204,21 @@ QColor ConfigModel::endOfFileColor() {
 }
 
 int ConfigModel::tabWidth() {
-  return intValue("tab_width", 4);
+  return intValue(TAB_WIDTH_KEY, 4);
+}
+
+void ConfigModel::saveTabWidth(int newValue) {
+  m_strConfigs[TAB_WIDTH_KEY] = newValue;
+  save(TAB_WIDTH_KEY, newValue);
 }
 
 bool ConfigModel::indentUsingSpaces() {
-  return boolValue("indent_using_spaces", false);
+  return boolValue(INDENT_USING_SPACES_KEY, false);
+}
+
+void ConfigModel::saveIndentUsingSpaces(bool newValue) {
+  m_strConfigs[INDENT_USING_SPACES_KEY] = newValue;
+  save(INDENT_USING_SPACES_KEY, newValue);
 }
 
 bool ConfigModel::enableMnemonic() {

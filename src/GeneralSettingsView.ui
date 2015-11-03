@@ -60,6 +60,27 @@
       </item>
      </layout>
     </item>
+    <item>
+     <widget class="QCheckBox" name="indentUsingSpacesCheck">
+      <property name="text">
+       <string>Indent using spaces</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Tab Width:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="tabWidthSpin"/>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
  </widget>

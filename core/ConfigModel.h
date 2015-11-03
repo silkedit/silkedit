@@ -42,7 +42,9 @@ class ConfigModel {
   static QString endOfFileStr();
   static QColor endOfFileColor();
   static int tabWidth();
+  static void saveTabWidth(int newValue);
   static bool indentUsingSpaces();
+  static void saveIndentUsingSpaces(bool newValue);
   static bool enableMnemonic();
   static QString locale();
 

@@ -38,6 +38,16 @@ GeneralSettingsView::GeneralSettingsView(QWidget* parent)
             Session::singleton().setFont(font);
           });
   ui->fontSizeSpin->setValue(Session::singleton().font().pointSize());
+
+  // Init indent using spaces checkbox
+  connect(ui->indentUsingSpacesCheck, &QCheckBox::toggled,
+          [=](bool checked) { Session::singleton().setIndentUsingSpaces(checked); });
+  ui->indentUsingSpacesCheck->setChecked(Session::singleton().indentUsingSpaces());
+
+  // Init tab width spin box
+  connect(ui->tabWidthSpin, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
+          [=](int value) { Session::singleton().setTabWidth(value); });
+  ui->tabWidthSpin->setValue(Session::singleton().tabWidth());
 }
 
 GeneralSettingsView::~GeneralSettingsView() {

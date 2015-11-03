@@ -28,6 +28,7 @@ void Session::setFont(const QFont& font) {
 void Session::setTabWidth(int tabWidth) {
   if (m_tabWidth != tabWidth) {
     m_tabWidth = tabWidth;
+    ConfigModel::saveTabWidth(tabWidth);
     emit tabWidthChanged(tabWidth);
   }
 }
@@ -35,6 +36,7 @@ void Session::setTabWidth(int tabWidth) {
 void Session::setIndentUsingSpaces(bool value) {
   if (m_indentUsingSpaces != value) {
     m_indentUsingSpaces = value;
+    ConfigModel::saveIndentUsingSpaces(value);
     emit indentUsingSpacesChanged(value);
   }
 }
