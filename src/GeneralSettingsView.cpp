@@ -2,13 +2,11 @@
 #include "ui_GeneralSettingsView.h"
 #include "SilkApp.h"
 #include "core/ThemeProvider.h"
-#include "core/Session.h"
-#include "core/ConfigModel.h"
+#include "core/Config.h"
 
 using core::ThemeProvider;
 using core::Theme;
-using core::Session;
-using core::ConfigModel;
+using core::Config;
 
 GeneralSettingsView::GeneralSettingsView(QWidget* parent)
     : QWidget(parent), ui(new Ui::GeneralSettingsView) {
@@ -17,67 +15,67 @@ GeneralSettingsView::GeneralSettingsView(QWidget* parent)
 
   // Theme combo box
   ui->themeCombo->addItems(ThemeProvider::sortedThemeNames());
-  if (Session::singleton().theme()) {
-    ui->themeCombo->setCurrentText(Session::singleton().theme()->name);
+  if (Config::singleton().theme()) {
+    ui->themeCombo->setCurrentText(Config::singleton().theme()->name);
   }
   connect(ui->themeCombo,
           static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
           [=](const QString& text) {
             //            qDebug("themeSelected: %s", qPrintable(text));
             Theme* theme = ThemeProvider::theme(text);
-            Session::singleton().setTheme(theme);
+            Config::singleton().setTheme(theme);
           });
 
   // Font combo box
-  ui->fontComboBox->setCurrentFont(Session::singleton().font());
+  ui->fontComboBox->setCurrentFont(Config::singleton().font());
   connect(ui->fontComboBox, &QFontComboBox::currentFontChanged,
-          [=](const QFont& font) { Session::singleton().setFont(font); });
+          [=](const QFont& font) { Config::singleton().setFont(font); });
 
   // Font size spin box
-  ui->fontSizeSpin->setValue(Session::singleton().font().pointSize());
+  ui->fontSizeSpin->setValue(Config::singleton().font().pointSize());
   connect(ui->fontSizeSpin, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
           [=](int value) {
-            QFont font = Session::singleton().font();
+            QFont font = Config::singleton().font();
             font.setPointSize(value);
-            Session::singleton().setFont(font);
+            Config::singleton().setFont(font);
           });
 
   // Indent using spaces checkbox
-  ui->indentUsingSpacesCheck->setChecked(Session::singleton().indentUsingSpaces());
+  ui->indentUsingSpacesCheck->setChecked(Config::singleton().indentUsingSpaces());
   connect(ui->indentUsingSpacesCheck, &QCheckBox::toggled,
-          [=](bool checked) { Session::singleton().setIndentUsingSpaces(checked); });
+          [=](bool checked) { Config::singleton().setIndentUsingSpaces(checked); });
 
   // Tab width spin box
-  ui->tabWidthSpin->setValue(Session::singleton().tabWidth());
+  ui->tabWidthSpin->setValue(Config::singleton().tabWidth());
   connect(ui->tabWidthSpin, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged),
-          [=](int value) { Session::singleton().setTabWidth(value); });
+          [=](int value) { Config::singleton().setTabWidth(value); });
 
   // Language combo box
   ui->langCombo->addItem(tr("System Language"), "system");
   ui->langCombo->addItem(tr("English"), "en");
   ui->langCombo->addItem(tr("Japanese"), "ja");
-  int index = ui->langCombo->findData(ConfigModel::locale());
+  int index = ui->langCombo->findData(Config::singleton().locale());
   if (index == -1) {
     index = 0;
   }
   ui->langCombo->setCurrentIndex(index);
   connect(ui->langCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           [=](int) {
-            ConfigModel::saveLocale(ui->langCombo->currentData().toString());
+            Config::singleton().setLocale(ui->langCombo->currentData().toString());
             ui->restartButton->setVisible(true);
           });
 
   // Show invisibles combo box
-  ui->showInvisiblesCheck->setChecked(ConfigModel::showInvisibles());
+  ui->showInvisiblesCheck->setChecked(Config::singleton().showInvisibles());
   connect(ui->showInvisiblesCheck, &QCheckBox::toggled, [=](bool checked) {
-    ConfigModel::saveShowInvisibles(checked);
+    Config::singleton().setShowInvisibles(checked);
     // todo: Update TextEditView to reflect this setting
   });
 
   // EOL text
-  ui->eolEdit->setText(ConfigModel::endOfLineStr());
+  ui->eolEdit->setText(Config::singleton().endOfLineStr());
   connect(ui->eolEdit, &QLineEdit::textEdited, this,
-          [=](const QString& text) { ConfigModel::saveEndOfLineStr(text); });
+          [=](const QString& text) { Config::singleton().setEndOfLineStr(text); });
 
   // Restart button to apply change
   connect(ui->restartButton, &QPushButton::clicked, this, [=] { SilkApp::restart(); });

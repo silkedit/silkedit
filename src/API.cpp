@@ -22,14 +22,12 @@
 #include "Context.h"
 #include "PluginContext.h"
 #include "core/modifiers.h"
-#include "core/ConfigModel.h"
-#include "core/Session.h"
+#include "core/Config.h"
 #include "util/DialogUtils.h"
 #include "InputDialog.h"
 #include "core/IContext.h"
 
-using core::ConfigModel;
-using core::Session;
+using core::Config;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -256,8 +254,8 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     obj.convert(&params);
     std::string nameStr = std::get<0>(params);
     QString name = QString::fromUtf8(nameStr.c_str());
-    if (ConfigModel::contains(name)) {
-      QString value = ConfigModel::strValue(name);
+    if (Config::singleton().contains(name)) {
+      QString value = Config::singleton().strValue(name);
       std::string valueStr = value.toUtf8().constData();
       PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {
@@ -278,7 +276,7 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   bool ok;
   // If the user clicks OK, the selected font is returned. If the user clicks Cancel, the initial
   // font is returned.
-  QFont font = QFontDialog::getFont(&ok, Session::singleton().font());
+  QFont font = QFontDialog::getFont(&ok, Config::singleton().font());
   std::string family = font.family().toUtf8().constData();
   auto fontParams = std::make_tuple(family, font.pointSize());
   if (ok) {
@@ -390,7 +388,7 @@ void API::setFont(msgpack::object obj) {
     std::string family = std::get<0>(params);
     int size = std::get<1>(params);
     QFont font(QString::fromUtf8(family.c_str()), size);
-    Session::singleton().setFont(font);
+    Config::singleton().setFont(font);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }

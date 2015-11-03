@@ -13,11 +13,11 @@
 #include "SilkApp.h"
 #include "DocumentManager.h"
 #include "PluginManager.h"
-#include "core/Session.h"
+#include "core/Config.h"
 #include "core/Theme.h"
 
 using core::Document;
-using core::Session;
+using core::Config;
 using core::Theme;
 using core::ColorSettings;
 
@@ -42,7 +42,7 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  changeTabStyle(Session::singleton().theme());
+  changeTabStyle(Config::singleton().theme());
   // Note: setDocumentMode also calls setDrawBase
   tabBar()->setDrawBase(false);
 
@@ -52,7 +52,7 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveEditView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
-  connect(&Session::singleton(), &Session::themeChanged, this, &TabView::changeTabStyle);
+  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::changeTabStyle);
 }
 
 TabView::~TabView() {

@@ -5,7 +5,7 @@
 
 #include "Document.h"
 #include "LineSeparator.h"
-#include "Session.h"
+#include "Config.h"
 #include "LanguageParser.h"
 #include "Regexp.h"
 #include "SyntaxHighlighter.h"
@@ -49,7 +49,7 @@ Document::Document(const QString& path,
       m_encoding(encoding),
       m_lineSeparator(separator),
       m_syntaxHighlighter(nullptr) {
-  setDefaultFont(Session::singleton().font());
+  setDefaultFont(Config::singleton().font());
   setupLayout();
 
   int dotPos = path.lastIndexOf('.');
@@ -61,7 +61,7 @@ Document::Document(const QString& path,
     qDebug("extension not found. path: %s", qPrintable(path));
   }
 
-  connect(&Session::singleton(), &Session::fontChanged, this, &QTextDocument::setDefaultFont);
+  connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
 }
 
 Document::Document()

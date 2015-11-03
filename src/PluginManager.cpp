@@ -21,7 +21,7 @@
 #include "TabViewGroup.h"
 #include "core/Constants.h"
 #include "core/modifiers.h"
-#include "core/ConfigModel.h"
+#include "core/Config.h"
 #include "core/IContext.h"
 #include "core/Util.h"
 
@@ -30,7 +30,7 @@
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
 
 using core::Constants;
-using core::ConfigModel;
+using core::Config;
 using core::Util;
 
 namespace {
@@ -46,7 +46,7 @@ QStringList pluginRunnerArgs() {
   // second argument is a socket path
   args << Constants::pluginServerSocketPath();
   // third argument is locale
-  args << ConfigModel::locale();
+  args << Config::singleton().locale();
   // remaining arguments are paths to be loaded in a plugin server
   args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
   args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");

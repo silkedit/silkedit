@@ -4,7 +4,7 @@
 #include "SyntaxHighlighter.h"
 #include "PListParser.h"
 #include "Util.h"
-#include "Session.h"
+#include "Config.h"
 #include "LanguageParser.h"
 #include "Theme.h"
 
@@ -23,13 +23,13 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser)
   //  auto conn = connect(doc, &QTextDocument::contentsChange, this,
   // &SyntaxHighlighter::updateNode);
   connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
-  connect(&Session::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
-  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this, SLOT(changeFont(QFont)));
+  connect(&Config::singleton(), SIGNAL(themeChanged(Theme*)), this, SLOT(changeTheme(Theme*)));
+  connect(&Config::singleton(), SIGNAL(fontChanged(QFont)), this, SLOT(changeFont(QFont)));
 
   setDocument(doc);
   setParent(doc);
-  changeTheme(Session::singleton().theme());
-  changeFont(Session::singleton().font());
+  changeTheme(Config::singleton().theme());
+  changeFont(Config::singleton().font());
 }
 
 SyntaxHighlighter::~SyntaxHighlighter() {

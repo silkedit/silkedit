@@ -12,21 +12,19 @@
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
-#include "core/Session.h"
+#include "core/Config.h"
 #include "API.h"
 #include "PluginManager.h"
-#include "core/ConfigModel.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
 
-using core::ConfigModel;
 using core::Document;
 using core::Encoding;
 using core::Language;
 using core::Region;
 using core::Metadata;
-using core::Session;
+using core::Config;
 using core::TextEditViewLogic;
 using core::Theme;
 using core::ColorSettings;
@@ -296,10 +294,10 @@ void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator)
 }
 
 void TextEditViewPrivate::setTabStopWidthFromSession() {
-  qreal width = QFontMetricsF(Session::singleton().font()).width(QLatin1Char(' '));
+  qreal width = QFontMetricsF(Config::singleton().font()).width(QLatin1Char(' '));
   if (q_ptr->document()) {
     QTextOption option = q_ptr->document()->defaultTextOption();
-    option.setTabStop(width * Session::singleton().tabWidth());
+    option.setTabStop(width * Config::singleton().tabWidth());
     q_ptr->document()->setDefaultTextOption(option);
   }
 }
@@ -335,7 +333,7 @@ void TextEditViewPrivate::highlightCurrentLine() {
     return;
   }
 
-  Theme* theme = Session::singleton().theme();
+  Theme* theme = Config::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
     ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("lineHighlight")) {
@@ -367,8 +365,8 @@ void TextEditViewPrivate::highlightCurrentLine() {
  * @param currentVisibleCursor
  */
 void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Session::singleton().indentUsingSpaces(),
-                                    Session::singleton().tabWidth());
+  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
+                                    Config::singleton().tabWidth());
 }
 
 /**
@@ -392,9 +390,9 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   const QString& prevLineString = prevLineText();
   if (TextEditViewLogic::isOutdentNecessary(
           metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
-          prevLineString, currentVisibleCursor.atBlockEnd(), Session::singleton().tabWidth())) {
+          prevLineString, currentVisibleCursor.atBlockEnd(), Config::singleton().tabWidth())) {
     TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
-                               Session::singleton().tabWidth());
+                               Config::singleton().tabWidth());
   }
 }
 
@@ -411,20 +409,23 @@ TextEditView::TextEditView(QWidget* parent)
           &OpenRecentItemManager::addOpenRecentItem);
   // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider
   // namespace).
-  // Session::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
-  connect(&Session::singleton(), &Session::themeChanged, this, &TextEditView::setTheme);
+  // Config::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
+  connect(&Config::singleton(), &Config::themeChanged, this, &TextEditView::setTheme);
+  connect(&Config::singleton(), &Config::showInvisiblesChanged, this, [=](bool) { update(); });
+  connect(&Config::singleton(), &Config::endOfLineStrChanged, this,
+          [=](const QString&) { update(); });
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
   connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(toggleHighlightingCurrentLine(bool)));
-  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this,
+  connect(&Config::singleton(), SIGNAL(fontChanged(QFont)), this,
           SLOT(setTabStopWidthFromSession()));
-  connect(&Session::singleton(), SIGNAL(tabWidthChanged(int)), this,
+  connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
           SLOT(setTabStopWidthFromSession()));
 
   d->updateLineNumberAreaWidth(0);
 
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
-  d_ptr->setTheme(Session::singleton().theme());
+  d_ptr->setTheme(Config::singleton().theme());
 
   // setup for completion
   d_ptr->m_model.reset(new QStringListModel(this));
@@ -725,7 +726,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     painter.drawRoundedRect(lineRect, 3.0, 3.0);
   }
 
-  if (ConfigModel::showInvisibles()) {
+  if (Config::singleton().showInvisibles()) {
     // draw an EOL string
     const int bottom = viewport()->rect().height();
 
@@ -745,8 +746,8 @@ void TextEditView::paintEvent(QPaintEvent* e) {
       QRect r = cursorRect(cur);
       if (r.top() >= bottom)
         break;
-      if (!ConfigModel::endOfLineStr().isEmpty()) {
-        painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfLineStr());
+      if (!Config::singleton().endOfLineStr().isEmpty()) {
+        painter.drawText(QPointF(r.left(), r.bottom()), Config::singleton().endOfLineStr());
       }
       block = block.next();
     }
@@ -754,8 +755,8 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     QRect r = cursorRect(cur);
 
     // draw an end of file string
-    if (!ConfigModel::endOfFileStr().isEmpty()) {
-      painter.drawText(QPointF(r.left(), r.bottom()), ConfigModel::endOfFileStr());
+    if (!Config::singleton().endOfFileStr().isEmpty()) {
+      painter.drawText(QPointF(r.left(), r.bottom()), Config::singleton().endOfFileStr());
     }
   }
 }
@@ -895,8 +896,8 @@ void TextEditView::insertNewLineWithIndent() {
   } else {
     prevPrevLineText = boost::none;
   }
-  bool indentUsingSpaces = Session::singleton().indentUsingSpaces();
-  int tabWidth = Session::singleton().tabWidth();
+  bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
+  int tabWidth = Config::singleton().tabWidth();
   auto cursor = textCursor();
   TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
                                        prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
