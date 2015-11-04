@@ -363,15 +363,19 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std
         QString configName = QString::fromUtf8(configIter->first.as<std::string>().c_str());
         YAML::Node defNode = configIter->second;
         if (!defNode.IsMap()) {
-          qWarning("%s must be a map", qPrintable(configName));
+          qWarning("%s node must be a map", qPrintable(configName));
           return QList<ConfigDefinition>();
         }
 
         QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
+        title = PluginManager::singleton().translate(
+            QString("%1:config.%2.title").arg(pkgName).arg(configName), title);
         QString description;
         // description is optional
         if (defNode["description"].IsScalar()) {
           description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
+          description = PluginManager::singleton().translate(
+              QString("%1:config.%2.description").arg(pkgName).arg(configName), description);
         }
         QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());
         QVariant defaultValue;
