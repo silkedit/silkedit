@@ -6,13 +6,15 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
+#include "Filtering.h"
 #include "core/macros.h"
 
 namespace core {
 struct ConfigDefinition;
 }
 
-class PackageConfigView : public QWidget {
+class PackageConfigView : public QWidget, public Filtering {
+  Q_OBJECT
   DISABLE_COPY(PackageConfigView)
 
  public:

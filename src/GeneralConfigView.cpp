@@ -11,6 +11,9 @@ using core::Config;
 GeneralConfigView::GeneralConfigView(QWidget* parent)
     : QWidget(parent), ui(new Ui::GeneralConfigView) {
   ui->setupUi(this);
+  addTargetObjects(QObjectList{ui->themeLabel, ui->fontLayout, ui->indentUsingSpacesCheck,
+                               ui->tabWidthLabel, ui->langLabel, ui->showInvisiblesCheck,
+                               ui->eolLabel});
   ui->restartButton->setVisible(false);
 
   // Theme combo box

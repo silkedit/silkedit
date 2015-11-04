@@ -19,10 +19,13 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
   ui->setupUi(this);
   int sizeHint = ui->listWidget->sizeHintForColumn(0);
   ui->listWidget->setFixedWidth(sizeHint);
-  ui->lineEdit->setFixedWidth(ui->listWidget->width());
+  ui->filterLine->setFixedWidth(ui->listWidget->width());
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
 
   ui->listWidget->addItems(s_packageConfigs.keys());
+  for (const auto& pkgDef : s_packageConfigs.values()) {
+    ui->stackedWidget->addWidget(new PackageConfigView(pkgDef));
+  }
 
   ui->listWidget->setCurrentRow(0);
   connect(ui->listWidget, &QListWidget::currentItemChanged,
@@ -31,17 +34,49 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
               current = previous;
             }
             int index = ui->listWidget->row(current);
-            const QString& name = ui->listWidget->currentItem()->text();
-            // create PackageConfigView for the first time
-            if (!ui->stackedWidget->widget(index) && s_packageConfigs.contains(name)) {
-              ui->stackedWidget->insertWidget(index, new PackageConfigView(s_packageConfigs[name]));
-            }
             ui->stackedWidget->setCurrentIndex(index);
           });
 
+  connect(ui->filterLine, &QLineEdit::textEdited, this, &ConfigDialog::filterConfigs);
   setLayout(ui->rootHLayout);
 }
 
 ConfigDialog::~ConfigDialog() {
   delete ui;
+}
+
+void ConfigDialog::filterConfigs(const QString& text) {
+  bool hasMatch = false;
+  Filtering* filteringView = nullptr;
+  for (int i = 0; i < ui->stackedWidget->count(); i++) {
+    filteringView = nullptr;
+    if (auto view = qobject_cast<PackageConfigView*>(ui->stackedWidget->widget(i))) {
+      filteringView = view;
+    } else if (auto view = qobject_cast<GeneralConfigView*>(ui->stackedWidget->widget(i))) {
+      filteringView = view;
+    }
+
+    hasMatch = false;
+    // If label of ListWidget matches, show all its configs
+    if (Filtering::contains(ui->listWidget->item(i)->text(), text)) {
+      hasMatch = true;
+      if (filteringView) {
+        filteringView->resetFilter();
+      }
+      // If label of ListWidget doesn't match, filter its configs
+    } else if (filteringView) {
+      hasMatch = filteringView->filter(text);
+    }
+
+    // If neither label of ListWidget nor any its configs match, hide it completely.
+    ui->listWidget->item(i)->setHidden(!hasMatch);
+  }
+
+  // Move focus to the first visible row
+  int row = 0;
+  while (row < ui->listWidget->count() && ui->listWidget->item(row)->isHidden())
+    row++;
+  if (row < ui->listWidget->count()) {
+    ui->listWidget->setCurrentRow(row);
+  }
 }

@@ -25,4 +25,6 @@ class ConfigDialog : public QDialog {
   Ui::ConfigDialog* ui;
   PackagesView* m_packagesView;
   static QMap<QString, QList<core::ConfigDefinition>> s_packageConfigs;
+
+  void filterConfigs(const QString& text);
 };

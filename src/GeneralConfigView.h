@@ -2,11 +2,13 @@
 
 #include <QWidget>
 
+#include "Filtering.h"
+
 namespace Ui {
 class GeneralConfigView;
 }
 
-class GeneralConfigView : public QWidget {
+class GeneralConfigView : public QWidget, public Filtering {
   Q_OBJECT
 
  public:
