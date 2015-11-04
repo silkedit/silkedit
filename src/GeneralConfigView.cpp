@@ -1,5 +1,5 @@
-#include "GeneralSettingsView.h"
-#include "ui_GeneralSettingsView.h"
+#include "GeneralConfigView.h"
+#include "ui_GeneralConfigView.h"
 #include "SilkApp.h"
 #include "core/ThemeProvider.h"
 #include "core/Config.h"
@@ -8,8 +8,8 @@ using core::ThemeProvider;
 using core::Theme;
 using core::Config;
 
-GeneralSettingsView::GeneralSettingsView(QWidget* parent)
-    : QWidget(parent), ui(new Ui::GeneralSettingsView) {
+GeneralConfigView::GeneralConfigView(QWidget* parent)
+    : QWidget(parent), ui(new Ui::GeneralConfigView) {
   ui->setupUi(this);
   ui->restartButton->setVisible(false);
 
@@ -81,6 +81,6 @@ GeneralSettingsView::GeneralSettingsView(QWidget* parent)
   connect(ui->restartButton, &QPushButton::clicked, this, [=] { SilkApp::restart(); });
 }
 
-GeneralSettingsView::~GeneralSettingsView() {
+GeneralConfigView::~GeneralConfigView() {
   delete ui;
 }

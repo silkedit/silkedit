@@ -55,8 +55,29 @@ class Config : public QObject, public Singleton<Config> {
   void setShowInvisibles(bool newValue);
 
   void init();
-  QString strValue(const QString& key, const QString& defaultValue = "");
   bool contains(const QString& key);
+
+  // specialization of QString for convenience
+  QString value(const QString& key, const QString& defaultValue = "") {
+    return value<QString>(key, defaultValue);
+  }
+
+  template <typename T>
+  T value(const QString& key, const T& defaultValue) {
+    if (m_scalarConfigs.count(key) != 0 && m_scalarConfigs[key].canConvert<T>()) {
+      return m_scalarConfigs[key].value<T>();
+    }
+
+    return defaultValue;
+  }
+
+  template <typename T>
+  void setValue(const QString& key, T value) {
+    if (m_scalarConfigs.count(key) == 0 || m_scalarConfigs[key] != value) {
+      m_scalarConfigs[key] = QVariant(value);
+      save(key, value);
+    }
+  }
 
  signals:
   void themeChanged(Theme* newTheme);
@@ -75,8 +96,6 @@ class Config : public QObject, public Singleton<Config> {
   friend class Singleton<Config>;
   Config();
 
-  int intValue(const QString& key, int defaultValue);
-  bool boolValue(const QString& key, bool defaultValue);
   std::unordered_map<std::string, std::string> mapValue(const QString& key);
   void load();
   void load(const QString& filename);

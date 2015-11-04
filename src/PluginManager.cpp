@@ -226,7 +226,7 @@ void PluginManagerPrivate::readRequest() {
             obj.convert(&res);
             auto found = PluginManager::s_eventLoopMap.find(res.msgid);
             if (found != PluginManager::s_eventLoopMap.end()) {
-              qDebug("result of %d arrived", res.msgid);
+              //              qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
                 found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
                     new object_with_zone(res.result, std::move(result.zone())))));

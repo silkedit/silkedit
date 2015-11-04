@@ -39,7 +39,7 @@ class ResponseResult : public QObject {
   void setResult(std::unique_ptr<object_with_zone> obj);
   void setError(std::unique_ptr<object_with_zone> obj);
 
-signals:
+ signals:
   void ready();
 
  private:
@@ -172,7 +172,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
       throw std::runtime_error("plugin runner is not running");
     }
 
-    qDebug("sendRequest. method: %s", method.c_str());
+    //    qDebug("sendRequest. method: %s", method.c_str());
     msgpack::sbuffer sbuf;
     msgpack::rpc::msg_request<std::string, Parameter> request;
     request.method = method;

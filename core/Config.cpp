@@ -59,7 +59,7 @@ void Config::setFont(const QFont& font) {
 }
 
 int Config::tabWidth() {
-  return intValue(TAB_WIDTH_KEY, 4);
+  return value(TAB_WIDTH_KEY, 4);
 }
 
 void Config::setTabWidth(int tabWidth) {
@@ -71,7 +71,7 @@ void Config::setTabWidth(int tabWidth) {
 }
 
 bool Config::indentUsingSpaces() {
-  return boolValue(INDENT_USING_SPACES_KEY, false);
+  return value(INDENT_USING_SPACES_KEY, false);
 }
 
 void Config::setIndentUsingSpaces(bool value) {
@@ -96,30 +96,6 @@ void Config::init() {
   setFont(font);
 }
 
-QString Config::strValue(const QString& key, const QString& defaultValue) {
-  if (m_scalarConfigs.count(key) != 0) {
-    return m_scalarConfigs[key].toString();
-  }
-
-  return defaultValue;
-}
-
-int Config::intValue(const QString& key, int defaultValue) {
-  if (m_scalarConfigs.count(key) != 0 && m_scalarConfigs[key].canConvert<int>()) {
-    return m_scalarConfigs[key].toInt();
-  }
-
-  return defaultValue;
-}
-
-bool Config::boolValue(const QString& key, bool defaultValue) {
-  if (m_scalarConfigs.count(key) != 0 && m_scalarConfigs[key].canConvert<bool>()) {
-    return m_scalarConfigs[key].toBool();
-  }
-
-  return defaultValue;
-}
-
 std::unordered_map<std::string, std::string> Config::mapValue(const QString& key) {
   if (m_mapConfigs.count(key) != 0) {
     return m_mapConfigs[key];
@@ -133,7 +109,7 @@ bool Config::contains(const QString& key) {
 }
 
 QString Config::endOfLineStr() {
-  return strValue(END_OF_LINE_STR, "¬");
+  return value(END_OF_LINE_STR, "¬");
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {
@@ -145,16 +121,16 @@ void Config::setEndOfLineStr(const QString& newValue) {
 }
 
 QString Config::endOfFileStr() {
-  return strValue(END_OF_FILE_STR, "");
+  return value(END_OF_FILE_STR, "");
 }
 
 bool Config::enableMnemonic() {
-  return boolValue("enable_mnemonic", false);
+  return value("enable_mnemonic", false);
 }
 
 QString Config::locale() {
   const QString& systemLocale = QLocale::system().name();
-  const QString& locale = strValue(LOCALE_KEY, systemLocale);
+  const QString& locale = value(LOCALE_KEY, systemLocale);
   if (locale == "system") {
     return systemLocale;
   }
@@ -167,7 +143,7 @@ void Config::setLocale(const QString& newValue) {
 }
 
 bool Config::showInvisibles() {
-  return boolValue(SHOW_INVISIBLES_KEY, false);
+  return value(SHOW_INVISIBLES_KEY, false);
 }
 
 void Config::setShowInvisibles(bool newValue) {
@@ -249,15 +225,15 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return strValue(THEME_KEY, "Solarized (dark)");
+  return value(THEME_KEY, "Solarized (dark)");
 }
 
 QString Config::fontFamily() {
-  return strValue(FONT_FAMILY_KEY, Constants::defaultFontFamily);
+  return value(FONT_FAMILY_KEY, Constants::defaultFontFamily);
 }
 
 int Config::fontSize() {
-  return intValue(FONT_SIZE_KEY, Constants::defaultFontSize);
+  return value(FONT_SIZE_KEY, Constants::defaultFontSize);
 }
 
 }  // namespace core

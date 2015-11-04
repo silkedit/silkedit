@@ -21,11 +21,12 @@
 #include "KeymapManager.h"
 #include "Context.h"
 #include "PluginContext.h"
-#include "core/modifiers.h"
-#include "core/Config.h"
-#include "util/DialogUtils.h"
 #include "InputDialog.h"
+#include "ConfigDialog.h"
+#include "core/Config.h"
+#include "core/modifiers.h"
 #include "core/IContext.h"
+#include "util/DialogUtils.h"
 
 using core::Config;
 
@@ -40,6 +41,7 @@ void API::init() {
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
+  s_notifyFunctions.insert(std::make_pair("loadConfig", &loadConfig));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("unregisterCommands", &unregisterCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
@@ -115,6 +117,19 @@ void API::loadToolbar(msgpack::v1::object obj) {
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
     Window::loadToolbar(QString::fromUtf8(pkgName.c_str()), ymlPath);
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
+}
+
+void API::loadConfig(msgpack::v1::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    ConfigDialog::loadConfig(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
@@ -255,7 +270,7 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     std::string nameStr = std::get<0>(params);
     QString name = QString::fromUtf8(nameStr.c_str());
     if (Config::singleton().contains(name)) {
-      QString value = Config::singleton().strValue(name);
+      QString value = Config::singleton().value(name);
       std::string valueStr = value.toUtf8().constData();
       PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {
