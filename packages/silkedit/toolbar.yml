@@ -1,4 +1,4 @@
-toolbars:
+toolbar:
 - label: File
   id: file
   items:

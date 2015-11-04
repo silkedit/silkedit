@@ -85,18 +85,16 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenusNode(const QString& pkgName,
-                               QWidget* parent,
-                               const YAML::Node& menusNode) {
-  if (!menusNode.IsSequence()) {
-    qWarning("menusNode must be a sequence.");
+void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode) {
+  if (!menuNode.IsSequence()) {
+    qWarning("menuNode must be a sequence.");
     return;
   }
 
   // Reverse node order to handle 'before' correctly.
   // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
-  for (auto it = menusNode.begin(); it != menusNode.end(); it++) {
+  for (auto it = menuNode.begin(); it != menuNode.end(); it++) {
     nodes.push(*it);
   }
 
@@ -132,8 +130,8 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
           defaultLabel);
     }
     YAML::Node commandNode = node["command"];
-    YAML::Node submenusNode = node["menus"];
-    if (submenusNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
+    YAML::Node submenuNode = node["menu"];
+    if (submenuNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
       QMenu* currentMenu = nullptr;
       if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
@@ -157,7 +155,7 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
           }
         }
       }
-      parseMenusNode(pkgName, currentMenu, submenusNode);
+      parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {
       // Check context
@@ -215,19 +213,19 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
   }
 }
 
-void YamlUtils::parseToolbarsNode(const QString& pkgName,
-                                  const std::string& ymlPath,
-                                  QWidget* parent,
-                                  const YAML::Node& toolbarsNode) {
-  if (!toolbarsNode.IsSequence()) {
-    qWarning("toolbarsNode must be a sequence.");
+void YamlUtils::parseToolbarNode(const QString& pkgName,
+                                 const std::string& ymlPath,
+                                 QWidget* parent,
+                                 const YAML::Node& toolbarNode) {
+  if (!toolbarNode.IsSequence()) {
+    qWarning("toolbarNode must be a sequence.");
     return;
   }
 
   // Reverse node order to handle 'before' correctly.
   // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
-  for (auto it = toolbarsNode.begin(); it != toolbarsNode.end(); it++) {
+  for (auto it = toolbarNode.begin(); it != toolbarNode.end(); it++) {
     nodes.push(*it);
   }
 
@@ -282,7 +280,7 @@ void YamlUtils::parseToolbarsNode(const QString& pkgName,
         }
       }
       Q_ASSERT(currentToolbar);
-      parseToolbarsNode(pkgName, ymlPath, currentToolbar, itemsNode);
+      parseToolbarNode(pkgName, ymlPath, currentToolbar, itemsNode);
       prevId = id;
     } else {
       // Check context
@@ -342,4 +340,14 @@ void YamlUtils::parseToolbarsNode(const QString& pkgName,
       prevId = id.isEmpty() ? action->objectName() : id;
     }
   }
+}
+
+void YamlUtils::parseConfigs(const std::string& ymlPath) {
+  YAML::Node rootNode = YAML::LoadFile(ymlPath);
+  if (!rootNode.IsMap()) {
+    qWarning("root node must be a map");
+    return;
+  }
+
+  YAML::Node configNode = rootNode["config"];
 }

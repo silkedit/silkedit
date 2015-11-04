@@ -242,7 +242,7 @@ const loadPackage = (dir) => {
           packageDirMap[pjson.name] = dir
 
           // load menus
-          const menuFilePath = path.join(dir, "menus.yml");
+          const menuFilePath = path.join(dir, "menu.yml");
           fs.open(menuFilePath, 'r', (err, fd) => {
             fd && fs.close(fd, (err) => {
               loadMenu(pjson.name, menuFilePath);
@@ -250,7 +250,7 @@ const loadPackage = (dir) => {
           })
           
           // load toolbars
-          const toolbarFilePath = path.join(dir, "toolbars.yml");
+          const toolbarFilePath = path.join(dir, "toolbar.yml");
           fs.open(toolbarFilePath, 'r', (err, fd) => {
             fd && fs.close(fd, (err) => {
               loadToolbar(pjson.name, toolbarFilePath);
