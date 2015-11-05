@@ -14,7 +14,7 @@ class ThemeProvider {
 
  public:
   // accessor
-  static QVector<QString> sortedThemeNames();
+  static QStringList sortedThemeNames();
   static void loadTheme(const QString& fileName);
   static Theme* theme(const QString& name);
 

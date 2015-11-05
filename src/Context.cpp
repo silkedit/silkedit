@@ -9,6 +9,7 @@ using core::OSContext;
 std::unordered_map<QString, std::unique_ptr<IContext>> Context::s_contexts;
 
 void Context::init() {
+  s_contexts.clear();
   // register default contexts
   add(OSContext::name, std::move(std::unique_ptr<IContext>(new OSContext())));
 }
@@ -22,8 +23,7 @@ void Context::remove(const QString& key) {
 }
 
 Context::Context(const QString& key, Operator op, const QString& value)
-    : m_key(key), m_op(op), m_value(value) {
-}
+    : m_key(key), m_op(op), m_value(value) {}
 
 bool Context::isSatisfied() {
   if (s_contexts.find(m_key) == s_contexts.end())

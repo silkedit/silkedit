@@ -68,7 +68,7 @@ struct UniqueObject {
  protected:
   virtual ~UniqueObject()  // objects should never be removed through pointers of this type
   {
-    qDebug("~UniqueObject");
+    //    qDebug("~UniqueObject");
     if (m_id >= 0) {
       QMutexLocker locker(&s_mutex);
       s_objects.remove(m_id);

@@ -6,7 +6,7 @@
 #include "Constants.h"
 
 namespace {
-#ifdef Q_OS_WIN32
+#ifdef Q_OS_WIN
 const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
 #else
 const QString serverSocketPath = QDir::tempPath() + "/silkedit.sock";
@@ -25,15 +25,16 @@ const QString Constants::defaultFontFamily = "Source Han Code JP";
 const QString Constants::defaultFontFamily = "Consolas";
 #endif
 
+#ifdef Q_OS_MAC
+const int Constants::defaultFontSize = 13;
+#else
 const int Constants::defaultFontSize = 12;
+#endif
 
 QStringList Constants::configPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
-    configPaths.append(path + "/config.yml");
-    configPaths.append(path + "/config.yaml");
-  }
+  foreach (const QString& path, dataDirectoryPaths()) { configPaths.append(path + "/config.yml"); }
 
   return configPaths;
 }
@@ -41,10 +42,7 @@ QStringList Constants::configPaths() {
 QStringList Constants::keymapPaths() {
   QStringList configPaths;
 
-  foreach (const QString& path, dataDirectoryPaths()) {
-    configPaths.append(path + "/keymap.yml");
-    configPaths.append(path + "/keymap.yaml");
-  }
+  foreach (const QString& path, dataDirectoryPaths()) { configPaths.append(path + "/keymap.yml"); }
 
   return configPaths;
 }

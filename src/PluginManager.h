@@ -15,12 +15,12 @@
 #include <QEventLoop>
 #include <QTimer>
 
+#include "CommandArgument.h"
 #include "core/macros.h"
 #include "core/msgpackHelper.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
 #include "core/IContext.h"
-#include "CommandArgument.h"
 
 class PluginManagerPrivate;
 
@@ -39,13 +39,27 @@ class ResponseResult : public QObject {
   void setResult(std::unique_ptr<object_with_zone> obj);
   void setError(std::unique_ptr<object_with_zone> obj);
 
-signals:
+ signals:
   void ready();
 
  private:
   bool m_isReady;
   bool m_isSuccess;
   std::unique_ptr<object_with_zone> m_result;
+};
+
+class GetRequestResponse : public QObject {
+  Q_OBJECT
+  DISABLE_COPY(GetRequestResponse)
+
+ public:
+  GetRequestResponse() = default;
+  ~GetRequestResponse() { qDebug("~GetRequestResponse"); }
+  DEFAULT_MOVE(GetRequestResponse)
+
+ signals:
+  void onSucceeded(const QString& body);
+  void onFailed(const QString& error);
 };
 
 class PluginManager : public QObject, public core::Singleton<PluginManager> {
@@ -64,7 +78,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);
-  boost::optional<QString> sendGetRequest(const QString& url, int timeoutInMs);
+  GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {
@@ -106,6 +120,34 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
     } else {
       throw std::runtime_error("unexpected result type");
     }
+  }
+
+  /**
+   * @brief Send a requesta asynchronously via msgpack rpc.
+   */
+  template <typename Parameter, typename Result>
+  void sendRequestAsync(const std::string& method,
+                        const Parameter& params,
+                        msgpack::type::object_type type,
+                        std::function<void(const Result&)> onSuccess,
+                        std::function<void(const QString&)> onFailure,
+                        int timeoutInMs = TIMEOUT_IN_MS) {
+    msgpack::rpc::msgid_t msgId = sendRequestInternalAsync<Parameter>(method, params);
+    assert(s_eventLoopMap.count(msgId) != 0);
+    ResponseResult* result = s_eventLoopMap[msgId];
+    assert(result);
+    QTimer::singleShot(timeoutInMs, result, [=] {
+      result->deleteLater();
+      onFailure("timeout");
+    });
+    connect(result, &ResponseResult::ready, [=] {
+      result->deleteLater();
+      if (result->result().type == type) {
+        onSuccess(result->result().as<Result>());
+      } else {
+        onFailure("unexpected result type");
+      }
+    });
   }
 
   /**
@@ -172,10 +214,11 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
       throw std::runtime_error("plugin runner is not running");
     }
 
-    qDebug("sendRequest. method: %s", method.c_str());
+    //    qDebug("sendRequest. method: %s", method.c_str());
     msgpack::sbuffer sbuf;
     msgpack::rpc::msg_request<std::string, Parameter> request;
     request.method = method;
+    // todo: check overlow
     msgpack::rpc::msgid_t msgId = s_msgId++;
     request.msgid = msgId;
     request.param = params;
@@ -211,6 +254,36 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
     } else {
       throw std::runtime_error("timeout for waiting the result");
     }
+  }
+
+  // Send a request asynchronously via msgpack rpc.
+  template <typename Parameter>
+  msgpack::rpc::msgid_t sendRequestInternalAsync(const std::string& method,
+                                                 const Parameter& params) {
+    if (m_isStopped) {
+      throw std::runtime_error("plugin runner is not running");
+    }
+
+    msgpack::sbuffer sbuf;
+    msgpack::rpc::msg_request<std::string, Parameter> request;
+    request.method = method;
+    // todo: Check overflow
+    msgpack::rpc::msgid_t msgId = s_msgId++;
+    request.msgid = msgId;
+    request.param = params;
+    msgpack::pack(sbuf, request);
+
+    if (!m_socket) {
+      throw std::runtime_error("socket has not been initialized yet");
+    }
+    m_socket->write(sbuf.data(), sbuf.size());
+
+    ResponseResult* result = new ResponseResult();
+
+    s_eventLoopMap.insert(std::make_pair(msgId, result));
+    connect(result, &ResponseResult::destroyed, [=] { s_eventLoopMap.erase(msgId); });
+
+    return msgId;
   }
 
   std::tuple<bool, std::string, CommandArgument> cmdEventFilter(const std::string& name,

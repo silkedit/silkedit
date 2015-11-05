@@ -142,14 +142,14 @@ void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
       return;
     }
 
-    YAML::Node menusNode = rootNode["menus"];
+    YAML::Node menuNode = rootNode["menu"];
 #ifdef Q_OS_MAC
     // There's only 1 global menu bar on Mac.
-    YamlUtils::parseMenusNode(pkgName, MenuBar::globalMenuBar(), menusNode);
+    YamlUtils::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
     foreach (Window* win, s_windows) {
-      YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode);
+      YamlUtils::parseMenuNode(pkgName, win->menuBar(), menuNode);
     }
 #endif
   } catch (const YAML::ParserException& ex) {
@@ -157,6 +157,7 @@ void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
   }
 }
 
+// todo: remove yaml-cpp dependency in Window class
 void Window::loadToolbar(Window* win, const QString& pkgName, const std::string& ymlPath) {
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath);
@@ -167,8 +168,8 @@ void Window::loadToolbar(Window* win, const QString& pkgName, const std::string&
 
     s_toolbarsDefinitions.insert(pkgName, ymlPath);
 
-    YAML::Node toolbarsNode = rootNode["toolbars"];
-    YamlUtils::parseToolbarsNode(pkgName, ymlPath, win, toolbarsNode);
+    YAML::Node toolbarsNode = rootNode["toolbar"];
+    YamlUtils::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
   }

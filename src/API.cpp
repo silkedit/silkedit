@@ -21,24 +21,27 @@
 #include "KeymapManager.h"
 #include "Context.h"
 #include "PluginContext.h"
-#include "core/modifiers.h"
-#include "core/ConfigManager.h"
-#include "core/Session.h"
-#include "util/DialogUtils.h"
 #include "InputDialog.h"
+#include "ConfigDialog.h"
+#include "core/Config.h"
+#include "core/modifiers.h"
 #include "core/IContext.h"
+#include "util/DialogUtils.h"
 
-using core::ConfigManager;
-using core::Session;
+using core::Config;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
     API::s_requestFunctions;
 
 void API::init() {
+  s_notifyFunctions.clear();
+  s_requestFunctions.clear();
+
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
+  s_notifyFunctions.insert(std::make_pair("loadConfig", &loadConfig));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("unregisterCommands", &unregisterCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
@@ -114,6 +117,19 @@ void API::loadToolbar(msgpack::v1::object obj) {
     std::string pkgName = std::get<0>(params);
     std::string ymlPath = std::get<1>(params);
     Window::loadToolbar(QString::fromUtf8(pkgName.c_str()), ymlPath);
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
+}
+
+void API::loadConfig(msgpack::v1::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    ConfigDialog::loadConfig(QString::fromUtf8(pkgName.c_str()), ymlPath);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }
@@ -253,8 +269,8 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     obj.convert(&params);
     std::string nameStr = std::get<0>(params);
     QString name = QString::fromUtf8(nameStr.c_str());
-    if (ConfigManager::contains(name)) {
-      QString value = ConfigManager::strValue(name);
+    if (Config::singleton().contains(name)) {
+      QString value = Config::singleton().value(name);
       std::string valueStr = value.toUtf8().constData();
       PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {
@@ -275,7 +291,7 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   bool ok;
   // If the user clicks OK, the selected font is returned. If the user clicks Cancel, the initial
   // font is returned.
-  QFont font = QFontDialog::getFont(&ok, Session::singleton().font());
+  QFont font = QFontDialog::getFont(&ok, Config::singleton().font());
   std::string family = font.family().toUtf8().constData();
   auto fontParams = std::make_tuple(family, font.pointSize());
   if (ok) {
@@ -387,7 +403,7 @@ void API::setFont(msgpack::object obj) {
     std::string family = std::get<0>(params);
     int size = std::get<1>(params);
     QFont font(QString::fromUtf8(family.c_str()), size);
-    Session::singleton().setFont(font);
+    Config::singleton().setFont(font);
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
   }

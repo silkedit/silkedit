@@ -7,8 +7,8 @@ namespace core {
 
 std::unordered_map<QString, std::unique_ptr<Theme>> ThemeProvider::s_nameThemeMap;
 
-QVector<QString> ThemeProvider::sortedThemeNames() {
-  QVector<QString> names(0);
+QStringList ThemeProvider::sortedThemeNames() {
+  QStringList names;
   for (auto& pair : s_nameThemeMap) {
     names.push_back(pair.first);
   }

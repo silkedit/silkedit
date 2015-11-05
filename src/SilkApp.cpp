@@ -1,4 +1,5 @@
 ﻿#include <QWidget>
+#include <QTranslator>
 
 #include "SilkApp.h"
 #include "TabViewGroup.h"
@@ -9,6 +10,11 @@
 #include "PluginManager.h"
 #include "version.h"
 #include "SilkStyle.h"
+#include "core/Constants.h"
+
+using core::Constants;
+
+SilkApp* SilkApp::s_app = nullptr;
 
 namespace {
 template <typename T>
@@ -43,10 +49,12 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
   return nullptr;
 }
 
-SilkApp::SilkApp(int& argc, char** argv) : QApplication(argc, argv) {
+SilkApp::SilkApp(int& argc, char** argv)
+    : QApplication(argc, argv), m_translator(nullptr), m_qtTranslator(nullptr) {
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);
+  s_app = this;
 
 #ifdef Q_OS_WIN
 // application font doesn't work with DirectWrite font engine
@@ -96,6 +104,33 @@ bool SilkApp::event(QEvent* event) {
   }
 }
 
+void SilkApp::setupTranslator(const QString& locale) {
+  if (m_translator) {
+    m_translator->deleteLater();
+    removeTranslator(m_translator);
+  }
+  if (m_qtTranslator) {
+    m_qtTranslator->deleteLater();
+    removeTranslator(m_qtTranslator);
+  }
+
+  m_translator = new QTranslator(this);
+  m_qtTranslator = new QTranslator(this);
+  // Load silkedit_<locale>.qm to translate SilkEdit menu
+  bool result = m_translator->load("silkedit_" + locale, Constants::translationDirPath());
+  if (!result) {
+    qWarning() << "Failed to load" << qPrintable("silkedit_");
+  }
+
+  // Load qt_<locale>.qm to translate Mac application menu
+  result = m_qtTranslator->load("qt_" + locale, Constants::translationDirPath());
+  if (!result) {
+    qWarning() << "Failed to load" << qPrintable("qt_");
+  }
+  installTranslator(m_translator);
+  installTranslator(m_qtTranslator);
+}
+
 TextEditView* SilkApp::activeEditView() {
   TabView* tabView = activeTabView();
   if (tabView) {
@@ -128,4 +163,11 @@ TabViewGroup* SilkApp::activeTabViewGroup() {
 
 Window* SilkApp::activeWindow() {
   return qobject_cast<Window*>(QApplication::activeWindow());
+}
+
+void SilkApp::restart() {
+  if (s_app) {
+    QProcess::startDetached(QApplication::applicationFilePath());
+    s_app->exit();
+  }
 }

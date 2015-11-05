@@ -210,6 +210,10 @@ const loadToolbar = (pkgName, ymlPath) => {
   client.notify('loadToolbar', pkgName, ymlPath)
 }
 
+const loadConfig = (pkgName, ymlPath) => {
+  client.notify('loadConfig', pkgName, ymlPath)
+}
+
 const registerCommands = (commands) => {
   client.notify('registerCommands', commands)
 }
@@ -241,27 +245,30 @@ const loadPackage = (dir) => {
           // cache a package directory path
           packageDirMap[pjson.name] = dir
 
-          // load menus
-          const menuFilePath = path.join(dir, "menus.yml");
+          // load menu
+          const menuFilePath = path.join(dir, "menu.yml");
           fs.open(menuFilePath, 'r', (err, fd) => {
             fd && fs.close(fd, (err) => {
               loadMenu(pjson.name, menuFilePath);
             })
           })
           
-          // load toolbars
-          const toolbarFilePath = path.join(dir, "toolbars.yml");
+          // load toolbar
+          const toolbarFilePath = path.join(dir, "toolbar.yml");
           fs.open(toolbarFilePath, 'r', (err, fd) => {
             fd && fs.close(fd, (err) => {
               loadToolbar(pjson.name, toolbarFilePath);
             })
           })
 
-          // load configs
+          // load config
           configPath = path.join(dir, "config.yml")
           fs.open(configPath, 'r', (err, fd) => {
             if (fd) {
               try {
+                if (pjson.name != 'silkedit') {
+                  loadConfig(pjson.name, configPath)
+                }
                 doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
                 // console.log(doc)
                 if ('config' in doc) {

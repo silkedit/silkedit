@@ -12,21 +12,19 @@
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
-#include "core/Session.h"
+#include "core/Config.h"
 #include "API.h"
 #include "PluginManager.h"
-#include "core/ConfigManager.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
 
-using core::ConfigManager;
 using core::Document;
 using core::Encoding;
 using core::Language;
 using core::Region;
 using core::Metadata;
-using core::Session;
+using core::Config;
 using core::TextEditViewLogic;
 using core::Theme;
 using core::ColorSettings;
@@ -94,6 +92,19 @@ int toMoveOperation(std::string str) {
   } else {
     return QTextCursor::NoMove;
   }
+}
+
+QColor adjustForEOL(QColor const color, int threshold = 125) {
+  QColor newColor;
+
+  // 0 is black; 255 is as far from black as possible.
+  if (color.value() < threshold) {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 30);
+  } else {
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 30);
+  }
+  newColor.setAlpha(128);
+  return newColor;
 }
 }
 
@@ -283,8 +294,12 @@ void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator)
 }
 
 void TextEditViewPrivate::setTabStopWidthFromSession() {
-  QFontMetrics metrics(Session::singleton().font());
-  q_ptr->setTabStopWidth(Session::singleton().tabWidth() * metrics.width(" "));
+  qreal width = QFontMetricsF(Config::singleton().font()).width(QLatin1Char(' '));
+  if (q_ptr->document()) {
+    QTextOption option = q_ptr->document()->defaultTextOption();
+    option.setTabStop(width * Config::singleton().tabWidth());
+    q_ptr->document()->setDefaultTextOption(option);
+  }
 }
 
 void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
@@ -318,7 +333,7 @@ void TextEditViewPrivate::highlightCurrentLine() {
     return;
   }
 
-  Theme* theme = Session::singleton().theme();
+  Theme* theme = Config::singleton().theme();
   if (theme && !theme->scopeSettings.isEmpty()) {
     ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("lineHighlight")) {
@@ -350,8 +365,8 @@ void TextEditViewPrivate::highlightCurrentLine() {
  * @param currentVisibleCursor
  */
 void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Session::singleton().indentUsingSpaces(),
-                                    Session::singleton().tabWidth());
+  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
+                                    Config::singleton().tabWidth());
 }
 
 /**
@@ -375,9 +390,9 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   const QString& prevLineString = prevLineText();
   if (TextEditViewLogic::isOutdentNecessary(
           metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
-          prevLineString, currentVisibleCursor.atBlockEnd(), Session::singleton().tabWidth())) {
+          prevLineString, currentVisibleCursor.atBlockEnd(), Config::singleton().tabWidth())) {
     TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
-                               Session::singleton().tabWidth());
+                               Config::singleton().tabWidth());
   }
 }
 
@@ -394,20 +409,23 @@ TextEditView::TextEditView(QWidget* parent)
           &OpenRecentItemManager::addOpenRecentItem);
   // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider
   // namespace).
-  // Session::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
-  connect(&Session::singleton(), &Session::themeChanged, this, &TextEditView::setTheme);
+  // Config::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
+  connect(&Config::singleton(), &Config::themeChanged, this, &TextEditView::setTheme);
+  connect(&Config::singleton(), &Config::showInvisiblesChanged, this, [=](bool) { update(); });
+  connect(&Config::singleton(), &Config::endOfLineStrChanged, this,
+          [=](const QString&) { update(); });
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
   connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(toggleHighlightingCurrentLine(bool)));
-  connect(&Session::singleton(), SIGNAL(fontChanged(QFont)), this,
+  connect(&Config::singleton(), SIGNAL(fontChanged(QFont)), this,
           SLOT(setTabStopWidthFromSession()));
-  connect(&Session::singleton(), SIGNAL(tabWidthChanged(int)), this,
+  connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
           SLOT(setTabStopWidthFromSession()));
 
   d->updateLineNumberAreaWidth(0);
 
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
-  d_ptr->setTheme(Session::singleton().theme());
+  d_ptr->setTheme(Config::singleton().theme());
 
   // setup for completion
   d_ptr->m_model.reset(new QStringListModel(this));
@@ -440,8 +458,6 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
 
   Q_D(TextEditView);
-
-  d->setTabStopWidthFromSession();
 
   // Compare previous and current languages
   Language* prevLang = nullptr;
@@ -487,6 +503,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
+  d->setTabStopWidthFromSession();
 }
 
 Language* TextEditView::language() {
@@ -709,38 +726,38 @@ void TextEditView::paintEvent(QPaintEvent* e) {
     painter.drawRoundedRect(lineRect, 3.0, 3.0);
   }
 
-  // draw an end of line string
-  const int bottom = viewport()->rect().height();
-  if (ConfigManager::endOfLineColor().isValid()) {
-    painter.setPen(ConfigManager::endOfLineColor());
-  }
-  QTextCursor cur = textCursor();
-  cur.movePosition(QTextCursor::End);
-  const int posEOF = cur.position();
-  QTextBlock block = firstVisibleBlock();
-  while (block.isValid()) {
-    cur.setPosition(block.position());
-    cur.movePosition(QTextCursor::EndOfBlock);
-    if (cur.position() == posEOF) {
-      break;
-    }
-    QRect r = cursorRect(cur);
-    if (r.top() >= bottom)
-      break;
-    if (!ConfigManager::endOfLineStr().isEmpty()) {
-      painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfLineStr());
-    }
-    block = block.next();
-  }
-  cur.movePosition(QTextCursor::End);
-  QRect r = cursorRect(cur);
+  if (Config::singleton().showInvisibles()) {
+    // draw an EOL string
+    const int bottom = viewport()->rect().height();
 
-  // draw an end of file string
-  if (!ConfigManager::endOfFileStr().isEmpty()) {
-    if (ConfigManager::endOfFileColor().isValid()) {
-      painter.setPen(ConfigManager::endOfFileColor());
+    QColor invisibleColor = adjustForEOL(palette().foreground().color());
+    painter.setPen(invisibleColor);
+
+    QTextCursor cur = textCursor();
+    cur.movePosition(QTextCursor::End);
+    const int posEOF = cur.position();
+    QTextBlock block = firstVisibleBlock();
+    while (block.isValid()) {
+      cur.setPosition(block.position());
+      cur.movePosition(QTextCursor::EndOfBlock);
+      if (cur.position() == posEOF) {
+        break;
+      }
+      QRect r = cursorRect(cur);
+      if (r.top() >= bottom)
+        break;
+      if (!Config::singleton().endOfLineStr().isEmpty()) {
+        painter.drawText(QPointF(r.left(), r.bottom()), Config::singleton().endOfLineStr());
+      }
+      block = block.next();
     }
-    painter.drawText(QPointF(r.left(), r.bottom()), ConfigManager::endOfFileStr());
+    cur.movePosition(QTextCursor::End);
+    QRect r = cursorRect(cur);
+
+    // draw an end of file string
+    if (!Config::singleton().endOfFileStr().isEmpty()) {
+      painter.drawText(QPointF(r.left(), r.bottom()), Config::singleton().endOfFileStr());
+    }
   }
 }
 
@@ -879,8 +896,8 @@ void TextEditView::insertNewLineWithIndent() {
   } else {
     prevPrevLineText = boost::none;
   }
-  bool indentUsingSpaces = Session::singleton().indentUsingSpaces();
-  int tabWidth = Session::singleton().tabWidth();
+  bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
+  int tabWidth = Config::singleton().tabWidth();
   auto cursor = textCursor();
   TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
                                        prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
@@ -1086,12 +1103,11 @@ void TextEditView::mousePressEvent(QMouseEvent* event) {
 }
 
 void TextEditView::clearSelection() {
-    QTextCursor cursor = textCursor();
-    if (cursor.hasSelection()) {
-        cursor.clearSelection();
-        setTextCursor(cursor);
-    }
+  QTextCursor cursor = textCursor();
+  if (cursor.hasSelection()) {
+    cursor.clearSelection();
+    setTextCursor(cursor);
+  }
 }
-
 
 #include "moc_TextEditView.cpp"

@@ -4,6 +4,8 @@
 #include <QWidget>
 
 #include "core/macros.h"
+#include "core/Config.h"
+#include "core/ConfigDefinition.h"
 
 class Context;
 class Window;
@@ -13,11 +15,13 @@ class YamlUtils {
 
  public:
   static Context* parseContext(const YAML::Node& contextNode);
-  static void parseMenusNode(const QString& pkgName, QWidget* parent, const YAML::Node& menusNode);
-  static void parseToolbarsNode(const QString& pkgName,
-                                const std::string& ymlPath,
-                                QWidget* window,
-                                const YAML::Node& toolbarsNode);
+  static void parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode);
+  static void parseToolbarNode(const QString& pkgName,
+                               const std::string& ymlPath,
+                               QWidget* window,
+                               const YAML::Node& toolbarNode);
+  static QList<core::ConfigDefinition> parseConfig(const QString& pkgName,
+                                                   const std::string& ymlPath);
 
  private:
   YamlUtils() = delete;

@@ -21,7 +21,7 @@
 #include "TabViewGroup.h"
 #include "core/Constants.h"
 #include "core/modifiers.h"
-#include "core/ConfigManager.h"
+#include "core/Config.h"
 #include "core/IContext.h"
 #include "core/Util.h"
 
@@ -30,7 +30,7 @@
   s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
 
 using core::Constants;
-using core::ConfigManager;
+using core::Config;
 using core::Util;
 
 namespace {
@@ -46,7 +46,7 @@ QStringList pluginRunnerArgs() {
   // second argument is a socket path
   args << Constants::pluginServerSocketPath();
   // third argument is locale
-  args << ConfigManager::locale();
+  args << Config::singleton().locale();
   // remaining arguments are paths to be loaded in a plugin server
   args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
   args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");
@@ -226,7 +226,7 @@ void PluginManagerPrivate::readRequest() {
             obj.convert(&res);
             auto found = PluginManager::s_eventLoopMap.find(res.msgid);
             if (found != PluginManager::s_eventLoopMap.end()) {
-              qDebug("result of %d arrived", res.msgid);
+              //              qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
                 found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
                     new object_with_zone(res.result, std::move(result.zone())))));
@@ -483,17 +483,22 @@ bool PluginManager::removePackage(const QString& pkgName) {
   }
 }
 
-boost::optional<QString> PluginManager::sendGetRequest(const QString& url, int timeoutInMs) {
+GetRequestResponse* PluginManager::sendGetRequest(const QString& url, int timeoutInMs) {
   const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
 
   try {
-    const std::string& result = sendRequest<std::tuple<std::string>, std::string>(
-        "sendGetRequest", params, msgpack::type::STR, timeoutInMs);
-    return QString::fromUtf8(result.c_str());
+    GetRequestResponse* response = new GetRequestResponse();
+    sendRequestAsync<std::tuple<std::string>, std::string>(
+        "sendGetRequest", params, msgpack::type::STR,
+        [=](const std::string& body) {
+          emit response->onSucceeded(QString::fromUtf8(body.c_str()));
+        },
+        [=](const QString& error) { emit response->onFailed(error); }, timeoutInMs);
+    return response;
   } catch (const std::exception& e) {
     qWarning() << e.what();
-    return boost::none;
   }
+  return nullptr;
 }
 
 PluginManager::PluginManager()

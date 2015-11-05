@@ -19,6 +19,7 @@ using core::Operator;
 using core::PackageMenu;
 using core::PackageAction;
 using core::PackageToolBar;
+using core::ConfigDefinition;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -85,18 +86,16 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenusNode(const QString& pkgName,
-                               QWidget* parent,
-                               const YAML::Node& menusNode) {
-  if (!menusNode.IsSequence()) {
-    qWarning("menusNode must be a sequence.");
+void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode) {
+  if (!menuNode.IsSequence()) {
+    qWarning("menuNode must be a sequence.");
     return;
   }
 
   // Reverse node order to handle 'before' correctly.
   // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
-  for (auto it = menusNode.begin(); it != menusNode.end(); it++) {
+  for (auto it = menuNode.begin(); it != menuNode.end(); it++) {
     nodes.push(*it);
   }
 
@@ -132,8 +131,8 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
           defaultLabel);
     }
     YAML::Node commandNode = node["command"];
-    YAML::Node submenusNode = node["menus"];
-    if (submenusNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
+    YAML::Node submenuNode = node["menu"];
+    if (submenuNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
       QMenu* currentMenu = nullptr;
       if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
@@ -157,7 +156,7 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
           }
         }
       }
-      parseMenusNode(pkgName, currentMenu, submenusNode);
+      parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {
       // Check context
@@ -215,19 +214,19 @@ void YamlUtils::parseMenusNode(const QString& pkgName,
   }
 }
 
-void YamlUtils::parseToolbarsNode(const QString& pkgName,
-                                  const std::string& ymlPath,
-                                  QWidget* parent,
-                                  const YAML::Node& toolbarsNode) {
-  if (!toolbarsNode.IsSequence()) {
-    qWarning("toolbarsNode must be a sequence.");
+void YamlUtils::parseToolbarNode(const QString& pkgName,
+                                 const std::string& ymlPath,
+                                 QWidget* parent,
+                                 const YAML::Node& toolbarNode) {
+  if (!toolbarNode.IsSequence()) {
+    qWarning("toolbarNode must be a sequence.");
     return;
   }
 
   // Reverse node order to handle 'before' correctly.
   // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
-  for (auto it = toolbarsNode.begin(); it != toolbarsNode.end(); it++) {
+  for (auto it = toolbarNode.begin(); it != toolbarNode.end(); it++) {
     nodes.push(*it);
   }
 
@@ -282,7 +281,7 @@ void YamlUtils::parseToolbarsNode(const QString& pkgName,
         }
       }
       Q_ASSERT(currentToolbar);
-      parseToolbarsNode(pkgName, ymlPath, currentToolbar, itemsNode);
+      parseToolbarNode(pkgName, ymlPath, currentToolbar, itemsNode);
       prevId = id;
     } else {
       // Check context
@@ -342,4 +341,82 @@ void YamlUtils::parseToolbarsNode(const QString& pkgName,
       prevId = id.isEmpty() ? action->objectName() : id;
     }
   }
+}
+
+QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std::string& ymlPath) {
+  QList<ConfigDefinition> defs;
+  try {
+    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    if (!rootNode.IsMap()) {
+      qWarning("root node must be a map");
+      return QList<ConfigDefinition>();
+    }
+
+    YAML::Node configNode = rootNode["config"];
+    if (!configNode.IsMap()) {
+      qWarning("config node must be a map");
+      return QList<ConfigDefinition>();
+    }
+
+    for (auto configIter = configNode.begin(); configIter != configNode.end(); ++configIter) {
+      if (configIter->first.IsScalar() && configIter->second.IsMap()) {
+        QString configName = QString::fromUtf8(configIter->first.as<std::string>().c_str());
+        YAML::Node defNode = configIter->second;
+        if (!defNode.IsMap()) {
+          qWarning("%s node must be a map", qPrintable(configName));
+          return QList<ConfigDefinition>();
+        }
+
+        QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
+        title = PluginManager::singleton().translate(
+            QString("%1:config.%2.title").arg(pkgName).arg(configName), title);
+        QString description;
+        // description is optional
+        if (defNode["description"].IsScalar()) {
+          description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
+          description = PluginManager::singleton().translate(
+              QString("%1:config.%2.description").arg(pkgName).arg(configName), description);
+        }
+        QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());
+        QVariant defaultValue;
+
+        // default is optional
+        YAML::Node defaultNode = defNode["default"];
+        if (type == "string") {
+          if (defaultNode.IsScalar()) {
+            defaultValue = QVariant(QString::fromUtf8(defaultNode.as<std::string>().c_str()));
+          } else {
+            defaultValue = QVariant("");
+          }
+        } else if (type == "integer") {
+          if (defaultNode.IsScalar()) {
+            defaultValue = QVariant(defaultNode.as<int>());
+          } else {
+            defaultValue = QVariant(0);
+          }
+        } else if (type == "number") {
+          if (defaultNode.IsScalar()) {
+            defaultValue = QVariant(defaultNode.as<double>());
+          } else {
+            defaultValue = QVariant(0.0);
+          }
+        } else if (type == "boolean") {
+          if (defaultNode.IsScalar()) {
+            defaultValue = QVariant(defaultNode.as<bool>());
+          } else {
+            defaultValue = QVariant(false);
+          }
+        } else {
+          qWarning("invalid tyep: %s", qPrintable(type));
+          continue;
+        }
+        assert(defaultValue.isValid());
+        defs.append(ConfigDefinition{pkgName + "." + configName, title, description, defaultValue});
+      }
+    }
+  } catch (const std::runtime_error& ex) {
+    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+  }
+
+  return defs;
 }

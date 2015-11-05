@@ -201,6 +201,9 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 }
 
 void KeymapManager::load() {
+  m_cmdShortcuts.clear();
+  m_keymaps.clear();
+
   QStringList existingKeymapPaths;
   foreach (const QString& path, Constants::keymapPaths()) {
     if (QFile(path).exists()) {
