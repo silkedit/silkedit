@@ -149,7 +149,7 @@ void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
     foreach (Window* win, s_windows) {
-      YamlUtils::parseMenusNode(pkgName, win->menuBar(), menusNode);
+      YamlUtils::parseMenuNode(pkgName, win->menuBar(), menuNode);
     }
 #endif
   } catch (const YAML::ParserException& ex) {
