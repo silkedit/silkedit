@@ -70,8 +70,19 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // Settings menu
   const QString& settingsMenuStr =
       Config::singleton().enableMnemonic() ? tr("&Settings") : tr("Settings");
+// Qt doc says the merging functionality is based on string matching the title of a QMenu entry.
+// But QMenu can't trigger an action (QMenu::triggered doesn't work).
+// So On Mac, we need to create both top level QMenu and child Settings QAction.
+#ifdef Q_OS_MAC
+  auto settingsMenu = addMenu(settingsMenuStr);
+  settingsMenu->setObjectName("settings");
+  QAction* settingsAction = new QAction(settingsMenuStr, settingsMenu);
+  settingsMenu->addAction(settingsAction);
+#else
+  // On Windows, create a top level Settings menu.
   QAction* settingsAction = addAction(settingsMenuStr);
   settingsAction->setObjectName("settings");
+#endif
   settingsAction->setMenuRole(QAction::PreferencesRole);
   connect(settingsAction, &QAction::triggered, this, &MenuBar::showConfigDialog);
 
