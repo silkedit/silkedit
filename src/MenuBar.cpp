@@ -70,12 +70,10 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // Settings menu
   const QString& settingsMenuStr =
       Config::singleton().enableMnemonic() ? tr("&Settings") : tr("Settings");
-  auto settingsMenu = addMenu(settingsMenuStr);
-  settingsMenu->setObjectName("settings");
-  QAction* settingsAction = new QAction(settingsMenuStr, settingsMenu);
+  QAction* settingsAction = addAction(settingsMenuStr);
+  settingsAction->setObjectName("settings");
   settingsAction->setMenuRole(QAction::PreferencesRole);
   connect(settingsAction, &QAction::triggered, this, &MenuBar::showConfigDialog);
-  settingsMenu->addAction(settingsAction);
 
   // Help menu
   const QString& helpMenuStr = Config::singleton().enableMnemonic() ? tr("&Help") : tr("Help");
