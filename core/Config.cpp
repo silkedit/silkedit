@@ -109,7 +109,7 @@ bool Config::contains(const QString& key) {
 }
 
 QString Config::endOfLineStr() {
-  return value(END_OF_LINE_STR, "¬");
+  return value(END_OF_LINE_STR, u8"\u00AC"); // U+00AC is '¬'
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {
