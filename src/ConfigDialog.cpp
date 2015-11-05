@@ -11,8 +11,10 @@ using core::ConfigDefinition;
 QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 
 void ConfigDialog::loadConfig(const QString& pkgName, const std::string& configPath) {
-  s_packageConfigs[pkgName] = YamlUtils::parseConfig(pkgName, configPath);
-  ;
+  auto configList = YamlUtils::parseConfig(pkgName, configPath);
+  if (!configList.isEmpty()) {
+    s_packageConfigs[pkgName] = configList;
+  }
 }
 
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
