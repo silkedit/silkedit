@@ -36,6 +36,7 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
         addTargetObject(layout);
         layout->addWidget(new QLabel(def.title + ":"));
         layout->addWidget(new ConfigSpinBox(def));
+        layout->addStretch();
         rootLayout->addLayout(layout);
         break;
       }
@@ -44,6 +45,7 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
         addTargetObject(layout);
         layout->addWidget(new QLabel(def.title + ":"));
         layout->addWidget(new ConfigDoubleSpinBox(def));
+        layout->addStretch();
         rootLayout->addLayout(layout);
         break;
       }
@@ -53,6 +55,7 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
     }
   }
 
+  rootLayout->addStretch();
   setLayout(rootLayout);
 }
 

@@ -54,7 +54,7 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
           [=](int value) { Config::singleton().setTabWidth(value); });
 
   // Language combo box
-  ui->langCombo->addItem(tr("System Language"), "system");
+  ui->langCombo->addItem(tr("<System Language>"), "system");
   ui->langCombo->addItem(tr("English"), "en");
   ui->langCombo->addItem(tr("Japanese"), "ja");
   int index = ui->langCombo->findData(Config::singleton().locale());
@@ -82,6 +82,8 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
 
   // Restart button to apply change
   connect(ui->restartButton, &QPushButton::clicked, this, [=] { SilkApp::restart(); });
+
+  setLayout(ui->rootLayout);
 }
 
 GeneralConfigView::~GeneralConfigView() {

@@ -17,10 +17,10 @@ void ConfigDialog::loadConfig(const QString& pkgName, const std::string& configP
 
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
-  int sizeHint = ui->listWidget->sizeHintForColumn(0);
-  ui->listWidget->setFixedWidth(sizeHint);
-  ui->filterLine->setFixedWidth(ui->listWidget->width());
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
+  ui->contentLayout->setStretchFactor(ui->stackedWidget, 1);
+  ui->contentLayout->addStretch();
+  setLayout(ui->rootLayout);
 
   ui->listWidget->addItems(s_packageConfigs.keys());
   for (const auto& pkgDef : s_packageConfigs.values()) {
@@ -38,7 +38,7 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
           });
 
   connect(ui->filterLine, &QLineEdit::textEdited, this, &ConfigDialog::filterConfigs);
-  setLayout(ui->rootHLayout);
+  connect(ui->okButton, &QPushButton::clicked, this, &ConfigDialog::close);
 }
 
 ConfigDialog::~ConfigDialog() {
