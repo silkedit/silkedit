@@ -315,8 +315,9 @@ QSize PackageDelegate::sizeHint(const QStyleOptionViewItem& option,
   QStyleOptionButton opt;
   initButtonStyleOption(index, option, &opt);
   QSize textSize = opt.fontMetrics.size(Qt::TextShowMnemonic, m_textAfterProcess);
-  QSize buttonSize = (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
-      .expandedTo(QApplication::globalStrut());
+  QSize buttonSize =
+      (QApplication::style()->sizeFromContents(QStyle::CT_PushButton, &opt, textSize, nullptr))
+          .expandedTo(QApplication::globalStrut());
 
   QSize margin(10, 0);
   QSize labelSize = option.fontMetrics.size(Qt::TextShowMnemonic, m_textAfterProcess) + margin;
@@ -346,22 +347,31 @@ AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
 
 void AvailablePackagesViewModel::loadPackages() {
   // todo: make packages source configurable
-  if (const auto& result = PluginManager::singleton().sendGetRequest(
-          "https://raw.githubusercontent.com/silkedit/packages/master/packages.json",
-          TIMEOUT_IN_MS)) {
-    QJsonDocument doc = QJsonDocument::fromJson((*result).toUtf8());
-    if (!doc.isNull()) {
-      QJsonArray jsonPackages = doc.array();
-      QList<Package> packages;
-      QSet<Package> installedPkgs = installedPackages();
-      for (const QJsonValue& value : jsonPackages) {
-        const Package& pkg = Package::fromJson(value);
-        if (!installedPkgs.contains(pkg)) {
-          packages.append(pkg);
+  GetRequestResponse* response = PluginManager::singleton().sendGetRequest(
+      "https://raw.githubusercontent.com/silkedit/packages/master/packages.json", TIMEOUT_IN_MS);
+  if (response) {
+    connect(response, &GetRequestResponse::onFailed, this, [=](const QString& error) {
+      response->deleteLater();
+      qDebug("getRequestFailed. cause: %s", qPrintable(error));
+      emit packagesLoaded(QList<core::Package>());
+    });
+
+    connect(response, &GetRequestResponse::onSucceeded, this, [=](const QString& result) {
+      response->deleteLater();
+      QJsonDocument doc = QJsonDocument::fromJson(result.toUtf8());
+      if (!doc.isNull()) {
+        QJsonArray jsonPackages = doc.array();
+        QList<Package> packages;
+        QSet<Package> installedPkgs = installedPackages();
+        for (const QJsonValue& value : jsonPackages) {
+          const Package& pkg = Package::fromJson(value);
+          if (!installedPkgs.contains(pkg)) {
+            packages.append(pkg);
+          }
         }
+        emit packagesLoaded(packages);
       }
-      emit packagesLoaded(packages);
-    }
+    });
   }
 }
 
