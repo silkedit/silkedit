@@ -2,10 +2,10 @@
 
 - context: os == mac
   keymap:
-    ctrl+b: { command: move_cursor, args: { operation: left }}
-    ctrl+f: { command: move_cursor, args: { operation: right }}
-    ctrl+p: { command: move_cursor, args: { operation: up }}
-    ctrl+n: { command: move_cursor, args: { operation: down }}
+    ctrl+b: move_cursor_left
+    ctrl+f: move_cursor_right
+    ctrl+p: move_cursor_up
+    ctrl+n: move_cursor_down
     cmd+n: new_file
     cmd+o: open
     cmd+s: save

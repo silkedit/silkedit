@@ -16,6 +16,14 @@ function replaceFileContent(file, oldexp, newStr, cb) {
 	})
 }
 
+function move_cursor(args) {
+  const editView = silk.activeView()
+  const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
+  if (editView != null && 'operation' in args) {
+    editView.moveCursor(args['operation'], repeat)
+  }
+}
+
 module.exports = {
 	activate: () => {
 		const fontFamily = silk.config.get('font_family')
@@ -139,19 +147,51 @@ module.exports = {
 			const editView = silk.activeView()
 			if (editView != null) {
 				const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
-				if (args['direction'] == 'backward') {
-					editView.delete(-1 * repeat)
-				} else {
-					editView.delete(repeat)
-				}
+				editView.delete(repeat)
 			}
 		}
-		,"move_cursor": (args) => {
+		,"delete_backward": (args) => {
 			const editView = silk.activeView()
-			const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
-			if (editView != null && 'operation' in args) {
-				editView.moveCursor(args['operation'], repeat)
+			if (editView != null) {
+				const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
+				editView.delete(-1 * repeat)
 			}
+		}
+		,"move_cursor_up": (args) => {
+			args["operation"] = "up"
+			move_cursor(args)
+		}
+		,"move_cursor_down": (args) => {
+			args["operation"] = "down"
+			move_cursor(args)
+		}
+		,"move_cursor_left": (args) => {
+			args["operation"] = "left"
+			move_cursor(args)
+		}
+		,"move_cursor_right": (args) => {
+			args["operation"] = "right"
+			move_cursor(args)
+		}
+		,"move_cursor_start_of_block": (args) => {
+			args["operation"] = "start_of_block"
+			move_cursor(args)
+		}
+		,"move_cursor_first_non_blank_char": (args) => {
+			args["operation"] = "first_non_blank_char"
+			move_cursor(args)
+		}
+		,"move_cursor_last_char": (args) => {
+			args["operation"] = "last_char"
+			move_cursor(args)
+		}
+		,"move_cursor_next_line": (args) => {
+			args["operation"] = "next_line"
+			move_cursor(args)
+		}
+		,"move_cursor_prev_line": (args) => {
+			args["operation"] = "prev_line"
+			move_cursor(args)
 		}
 		,"open_find_panel": () => {
 			const win = silk.activeWindow()
