@@ -72,11 +72,13 @@ class Config : public QObject, public Singleton<Config> {
   }
 
   template <typename T>
-  void setValue(const QString& key, T value) {
+  bool setValue(const QString& key, T value) {
     if (m_scalarConfigs.count(key) == 0 || m_scalarConfigs[key] != value) {
       m_scalarConfigs[key] = QVariant(value);
       save(key, value);
+      return true;
     }
+    return false;
   }
 
  signals:

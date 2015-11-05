@@ -33,7 +33,7 @@ int main(int argv, char** args) {
 
   Config::singleton().init();
 
-  // Setup translator after initializing ConfigModel
+  // Setup translator after initializing Config
   app.setupTranslator(Config::singleton().locale());
 
   // Load keymap settings after registering commands

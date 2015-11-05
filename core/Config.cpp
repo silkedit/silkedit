@@ -7,8 +7,8 @@
 #include "Util.h"
 
 namespace {
-const QString END_OF_LINE_STR = "end_of_line_str";
-const QString END_OF_FILE_STR = "end_of_file_str";
+const QString END_OF_LINE_STR_KEY = "end_of_line_str";
+const QString END_OF_FILE_STR_KEY = "end_of_file_str";
 const QString THEME_KEY = "theme";
 const QString FONT_FAMILY_KEY = "font_family";
 const QString FONT_SIZE_KEY = "font_size";
@@ -20,8 +20,8 @@ const QString SHOW_INVISIBLES_KEY = "show_invisibles";
 QHash<QString, QVariant::Type> keyTypeHash;
 
 void initKeyTypeHash() {
-  keyTypeHash[END_OF_LINE_STR] = QVariant::String;
-  keyTypeHash[END_OF_FILE_STR] = QVariant::String;
+  keyTypeHash[END_OF_LINE_STR_KEY] = QVariant::String;
+  keyTypeHash[END_OF_FILE_STR_KEY] = QVariant::String;
   keyTypeHash[THEME_KEY] = QVariant::String;
   keyTypeHash[FONT_FAMILY_KEY] = QVariant::String;
   keyTypeHash[FONT_SIZE_KEY] = QVariant::Int;
@@ -63,9 +63,7 @@ int Config::tabWidth() {
 }
 
 void Config::setTabWidth(int tabWidth) {
-  if (m_scalarConfigs.count(TAB_WIDTH_KEY) == 0 || m_scalarConfigs[TAB_WIDTH_KEY] != tabWidth) {
-    m_scalarConfigs[TAB_WIDTH_KEY] = QVariant(tabWidth);
-    save(TAB_WIDTH_KEY, tabWidth);
+  if (setValue(TAB_WIDTH_KEY, tabWidth)) {
     emit tabWidthChanged(tabWidth);
   }
 }
@@ -75,10 +73,7 @@ bool Config::indentUsingSpaces() {
 }
 
 void Config::setIndentUsingSpaces(bool value) {
-  if (m_scalarConfigs.count(INDENT_USING_SPACES_KEY) == 0 ||
-      m_scalarConfigs[INDENT_USING_SPACES_KEY] != value) {
-    m_scalarConfigs[INDENT_USING_SPACES_KEY] = QVariant(value);
-    save(INDENT_USING_SPACES_KEY, value);
+  if (setValue(INDENT_USING_SPACES_KEY, value)) {
     emit indentUsingSpacesChanged(value);
   }
 }
@@ -109,19 +104,17 @@ bool Config::contains(const QString& key) {
 }
 
 QString Config::endOfLineStr() {
-  return value(END_OF_LINE_STR, u8"\u00AC"); // U+00AC is '¬'
+  return value(END_OF_LINE_STR_KEY, u8"\u00AC");  // U+00AC is '¬'
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {
-  if (m_scalarConfigs.count(END_OF_LINE_STR) == 0 || m_scalarConfigs[END_OF_LINE_STR] != newValue) {
-    m_scalarConfigs[END_OF_LINE_STR] = QVariant(newValue);
-    save(END_OF_LINE_STR, newValue);
+  if (setValue(END_OF_LINE_STR_KEY, newValue)) {
     emit endOfLineStrChanged(newValue);
   }
 }
 
 QString Config::endOfFileStr() {
-  return value(END_OF_FILE_STR, "");
+  return value(END_OF_FILE_STR_KEY, "");
 }
 
 bool Config::enableMnemonic() {
@@ -138,8 +131,7 @@ QString Config::locale() {
 }
 
 void Config::setLocale(const QString& newValue) {
-  m_scalarConfigs[LOCALE_KEY] = QVariant(newValue);
-  save(LOCALE_KEY, newValue);
+  setValue(LOCALE_KEY, newValue);
 }
 
 bool Config::showInvisibles() {
@@ -147,10 +139,7 @@ bool Config::showInvisibles() {
 }
 
 void Config::setShowInvisibles(bool newValue) {
-  if (m_scalarConfigs.count(SHOW_INVISIBLES_KEY) == 0 ||
-      m_scalarConfigs[SHOW_INVISIBLES_KEY] != newValue) {
-    m_scalarConfigs[SHOW_INVISIBLES_KEY] = QVariant(newValue);
-    save(SHOW_INVISIBLES_KEY, newValue);
+  if (setValue(SHOW_INVISIBLES_KEY, newValue)) {
     emit showInvisiblesChanged(newValue);
   }
 }
@@ -178,11 +167,14 @@ void Config::load(const QString& filename) {
   try {
     YAML::Node rootNode = YAML::LoadFile(name);
 
-    assert(rootNode.IsMap());
+    if (!rootNode.IsMap()) {
+      throw std::runtime_error("root node must be a map");
+    }
 
     for (auto it = rootNode.begin(); it != rootNode.end(); ++it) {
       QString key = QString::fromUtf8(it->first.as<std::string>().c_str()).trimmed();
       if (it->second.IsScalar()) {
+        // If key is predefined, save it as an appropriate type.
         if (keyTypeHash.contains(key)) {
           switch (keyTypeHash[key]) {
             case QVariant::Bool:
@@ -200,6 +192,7 @@ void Config::load(const QString& filename) {
               qWarning("Invalid type %d. key: %s", keyTypeHash[key], qPrintable(key));
               break;
           }
+          // If key is defined in a package, save it as string.
         } else {
           QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
           m_scalarConfigs[key] = value;

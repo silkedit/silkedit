@@ -2,7 +2,6 @@
 
 #include <QString>
 #include <QVariant>
-#include "core/macros.h"
 
 namespace core {
 

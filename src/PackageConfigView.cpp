@@ -15,15 +15,13 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
   for (const ConfigDefinition& def : defs) {
     switch (def.type()) {
       case QVariant::Bool: {
-        // Note: The ownership of item is transferred to the layout, and it's the layout's
-        // responsibility to delete it.
         auto check = new ConfigCheckBox(def);
         addTargetObject(check);
         rootLayout->addWidget(check);
         break;
       }
       case QVariant::String: {
-        auto label = new QLabel(def.title);
+        auto label = new QLabel(def.title + ":");
         auto lineEdit = new ConfigLineEdit(def);
         label->setBuddy(lineEdit);
         addTargetObject(label);
@@ -34,8 +32,11 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
       case QVariant::Int: {
         QHBoxLayout* layout = new QHBoxLayout();
         addTargetObject(layout);
-        layout->addWidget(new QLabel(def.title + ":"));
-        layout->addWidget(new ConfigSpinBox(def));
+        auto label = new QLabel(def.title + ":");
+        auto spin = new ConfigSpinBox(def);
+        label->setBuddy(spin);
+        layout->addWidget(label);
+        layout->addWidget(spin);
         layout->addStretch();
         rootLayout->addLayout(layout);
         break;
@@ -43,8 +44,11 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
       case QVariant::Double: {
         QHBoxLayout* layout = new QHBoxLayout();
         addTargetObject(layout);
-        layout->addWidget(new QLabel(def.title + ":"));
-        layout->addWidget(new ConfigDoubleSpinBox(def));
+        auto label = new QLabel(def.title + ":");
+        auto spin = new ConfigDoubleSpinBox(def);
+        label->setBuddy(spin);
+        layout->addWidget(label);
+        layout->addWidget(spin);
         layout->addStretch();
         rootLayout->addLayout(layout);
         break;

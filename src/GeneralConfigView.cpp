@@ -70,10 +70,8 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
 
   // Show invisibles combo box
   ui->showInvisiblesCheck->setChecked(Config::singleton().showInvisibles());
-  connect(ui->showInvisiblesCheck, &QCheckBox::toggled, [=](bool checked) {
-    Config::singleton().setShowInvisibles(checked);
-    // todo: Update TextEditView to reflect this setting
-  });
+  connect(ui->showInvisiblesCheck, &QCheckBox::toggled,
+          [=](bool checked) { Config::singleton().setShowInvisibles(checked); });
 
   // EOL text
   ui->eolEdit->setText(Config::singleton().endOfLineStr());
