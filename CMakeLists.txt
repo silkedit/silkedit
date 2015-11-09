@@ -31,6 +31,7 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 find_package(Boost REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
@@ -93,7 +94,7 @@ add_subdirectory(core)
 add_subdirectory(crashreporter)
 add_subdirectory(test)
 
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})
+target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml Qt5::WebEngineWidgets ${YAML_CPP_LIBRARY})
 # brakpad lib/framework
 if(APPLE)
   target_link_libraries(${PROJECT_NAME}
