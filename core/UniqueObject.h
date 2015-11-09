@@ -92,6 +92,7 @@ struct UniqueObject {
     return s_count;
   }
 
+  // todo: use UUID
   int m_id;
 };
 
