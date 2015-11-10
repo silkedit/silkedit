@@ -17,14 +17,16 @@ class ConfigDialog : public QDialog {
 
  public:
   static void loadConfig(const QString& pkgName, const std::string& configPath);
+  static void showModeless();
+
+ private:
+  static QMap<QString, QList<core::ConfigDefinition>> s_packageConfigs;
+  static ConfigDialog* s_dialog;
+
+  Ui::ConfigDialog* ui;
+  PackagesView* m_packagesView;
 
   explicit ConfigDialog(QWidget* parent = 0);
   ~ConfigDialog();
-
- private:
-  Ui::ConfigDialog* ui;
-  PackagesView* m_packagesView;
-  static QMap<QString, QList<core::ConfigDefinition>> s_packageConfigs;
-
   void filterConfigs(const QString& text);
 };

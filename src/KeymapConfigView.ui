@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>695</width>
     <height>300</height>
    </rect>
   </property>
@@ -18,13 +18,31 @@
     <rect>
      <x>70</x>
      <y>50</y>
-     <width>251</width>
+     <width>609</width>
      <height>181</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="rootLayout">
     <item>
      <widget class="QLineEdit" name="filterLine"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>To override a keymap, right click a row, copy and paste it in keymap.yml</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="openKeymapFileButton">
+        <property name="text">
+         <string>Open keymap.yml</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QTableWidget" name="keymapTable">

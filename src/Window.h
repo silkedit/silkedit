@@ -45,6 +45,8 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
    */
   static void loadToolbar(Window* window, const QString& pkgName, const std::string& ymlPath);
 
+  static void showFirst();
+
   ~Window();
   DEFAULT_MOVE(Window)
 
@@ -61,7 +63,7 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
 
-signals:
+ signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
  protected:

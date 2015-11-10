@@ -9,6 +9,7 @@
 using core::ConfigDefinition;
 
 QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
+ConfigDialog* ConfigDialog::s_dialog = nullptr;
 
 void ConfigDialog::loadConfig(const QString& pkgName, const std::string& configPath) {
   auto configList = YamlUtils::parseConfig(pkgName, configPath);
@@ -17,8 +18,18 @@ void ConfigDialog::loadConfig(const QString& pkgName, const std::string& configP
   }
 }
 
+void ConfigDialog::showModeless() {
+  if (!s_dialog) {
+    s_dialog = new ConfigDialog();
+  }
+  s_dialog->show();
+  s_dialog->activateWindow();
+  s_dialog->raise();
+}
+
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
+  setAttribute(Qt::WA_DeleteOnClose);
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
   ui->contentLayout->setStretchFactor(ui->stackedWidget, 1);
   ui->contentLayout->addStretch();
@@ -40,10 +51,12 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
           });
 
   connect(ui->filterLine, &QLineEdit::textEdited, this, &ConfigDialog::filterConfigs);
-  connect(ui->okButton, &QPushButton::clicked, this, &ConfigDialog::close);
+  connect(ui->okButton, &QPushButton::clicked, this, &ConfigDialog::done);
+  connect(this, &ConfigDialog::finished, this, [=] { s_dialog = nullptr; });
 }
 
 ConfigDialog::~ConfigDialog() {
+  qDebug("~ConfigDialog");
   delete ui;
 }
 
