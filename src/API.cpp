@@ -151,13 +151,13 @@ void API::loadConfig(msgpack::v1::object obj) {
 }
 
 void API::registerCommands(msgpack::object obj) {
-  msgpack::type::tuple<std::vector<std::string>> params;
+  msgpack::type::tuple<std::vector<std::tuple<std::string, std::string>>> params;
   obj.convert(&params);
-  std::vector<std::string> commands = std::get<0>(params);
-  for (std::string& cmd : commands) {
+  std::vector<std::tuple<std::string, std::string>> commands = std::get<0>(params);
+  for (const std::tuple<std::string, std::string>& cmd : commands) {
     //    qDebug("command: %s", cmd.c_str());
-    CommandManager::add(
-        std::unique_ptr<ICommand>(new PluginCommand(QString::fromUtf8(cmd.c_str()))));
+    CommandManager::add(std::unique_ptr<ICommand>(
+        new PluginCommand(QString::fromUtf8(std::get<0>(cmd).c_str()), std::get<1>(cmd).c_str())));
   }
 }
 

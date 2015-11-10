@@ -6,6 +6,14 @@
 std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::s_commands;
 std::vector<CommandManager::CmdEventHandler> CommandManager::s_cmdEventFilters;
 
+QString CommandManager::cmdDescription(const QString& name) {
+  if (s_commands.count(name) != 0) {
+    return s_commands[name]->description();
+  }
+
+  return "";
+}
+
 void CommandManager::runCommand(const QString& name, const CommandArgument& args, int repeat) {
   // Copy command name and argument.
   std::string cmdName = name.toUtf8().constData();

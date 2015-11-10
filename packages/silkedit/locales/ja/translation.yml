@@ -61,3 +61,7 @@ toolbar:
     tooltip: やり直し
   save_all:
     tooltip: 全て保存
+    
+command:
+  new_file:
+    description: 新規作成

@@ -21,6 +21,7 @@ class CommandManager {
       CmdEventHandler;
 
  public:
+  static QString cmdDescription(const QString& name);
   static void runCommand(const QString& name,
                          const CommandArgument& args = CommandArgument(),
                          int repeat = 1);

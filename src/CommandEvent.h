@@ -26,6 +26,7 @@ class CommandEvent {
   DEFAULT_MOVE(CommandEvent)
 
   QString cmdName() const { return m_cmdName; }
+  QString cmdDescription() const;
   ConditionExpression* condition() const { return m_condition.get(); }
   QString source() const { return m_source; }
 

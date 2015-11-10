@@ -23,7 +23,8 @@ std::string toString(const CommandArgument& arg) {
 class ICommand {
   DISABLE_COPY_AND_MOVE(ICommand)
  public:
-  explicit ICommand(QString name) : m_name(name) {}
+  explicit ICommand(const QString& name, const QString& description = "")
+      : m_name(name), m_description(description) {}
   virtual ~ICommand() = default;
 
   inline void run(const CommandArgument& args, int repeat = 1) {
@@ -33,10 +34,12 @@ class ICommand {
     qDebug() << "End command: " << m_name;
   }
 
-  inline QString name() { return m_name; }
+  QString name() { return m_name; }
+  QString description() { return m_description; }
 
  private:
   virtual void doRun(const CommandArgument& args, int repeat = 1) = 0;
 
   QString m_name;
+  QString m_description;
 };

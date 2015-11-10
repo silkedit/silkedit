@@ -18,6 +18,10 @@ CommandEvent::CommandEvent(const QString& name,
                            const QString& source)
     : m_cmdName(name), m_args(std::move(args)), m_condition(condition), m_source(source) {}
 
+QString CommandEvent::cmdDescription() const {
+  return CommandManager::cmdDescription(m_cmdName);
+}
+
 bool CommandEvent::execute(int repeat) {
   if (!m_condition || m_condition->isSatisfied()) {
     CommandManager::runCommand(m_cmdName, m_args, repeat);
