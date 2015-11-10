@@ -1,18 +1,22 @@
 ﻿#include "CommandEvent.h"
 #include "CommandManager.h"
 
-CommandEvent::CommandEvent(const QString& name) : CommandEvent(name, CommandArgument(), nullptr) {}
+CommandEvent::CommandEvent(const QString& name, const QString& source)
+    : CommandEvent(name, CommandArgument(), nullptr, source) {}
 
-CommandEvent::CommandEvent(const QString& name, const CommandArgument& args)
-    : CommandEvent(name, args, nullptr) {}
+CommandEvent::CommandEvent(const QString& name, const CommandArgument& args, const QString& source)
+    : CommandEvent(name, args, nullptr, source) {}
 
-CommandEvent::CommandEvent(const QString& name, std::shared_ptr<ConditionExpression> condition)
-    : CommandEvent(name, CommandArgument(), condition) {}
+CommandEvent::CommandEvent(const QString& name,
+                           std::shared_ptr<ConditionExpression> condition,
+                           const QString& source)
+    : CommandEvent(name, CommandArgument(), condition, source) {}
 
 CommandEvent::CommandEvent(const QString& name,
                            const CommandArgument& args,
-                           std::shared_ptr<ConditionExpression> condition)
-    : m_cmdName(name), m_args(std::move(args)), m_condition(condition) {}
+                           std::shared_ptr<ConditionExpression> condition,
+                           const QString& source)
+    : m_cmdName(name), m_args(std::move(args)), m_condition(condition), m_source(source) {}
 
 bool CommandEvent::execute(int repeat) {
   if (!m_condition || m_condition->isSatisfied()) {

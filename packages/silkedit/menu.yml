@@ -8,16 +8,16 @@ menu:
   - label: 'Open'
     id: open
     command: open
-    context: os != windows
+    if: os != windows
     before: open_recent
   - label: 'Open File'
     id: open_file
     command: open_file
-    context: os == windows
+    if: os == windows
   - label: 'Open Folder'
     id: open_folder
     command: open_folder
-    context: os == windows
+    if: os == windows
     before: open_recent
   - label: 'Save'
     id: save
@@ -42,7 +42,7 @@ menu:
   id: edit
   menu:
   # - type: separator
-  #   context: os == mac
+  #   if: os == mac
   # - label: 'Undo'
   #   command: undo
   - label: 'Redo'

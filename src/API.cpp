@@ -39,6 +39,7 @@ void API::init() {
   s_requestFunctions.clear();
 
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
+  s_notifyFunctions.insert(std::make_pair("loadKeymap", &loadKeymap));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
   s_notifyFunctions.insert(std::make_pair("loadConfig", &loadConfig));
@@ -94,6 +95,20 @@ void API::alert(msgpack::object obj) {
   QMessageBox msgBox;
   msgBox.setText(QString::fromUtf8(msg.c_str()));
   msgBox.exec();
+}
+
+void API::loadKeymap(msgpack::v1::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    KeymapManager::singleton().load(QString::fromUtf8(ymlPath.c_str()),
+                                    QString::fromUtf8(pkgName.c_str()));
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
 }
 
 void API::loadMenu(msgpack::object obj) {

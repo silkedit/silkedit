@@ -37,7 +37,7 @@ int main(int argv, char** args) {
   app.setupTranslator(Config::singleton().locale());
 
   // Load keymap settings after registering commands
-  KeymapManager::singleton().load();
+  KeymapManager::singleton().loadUserKeymap();
 
   // Create default menu bar before creating any new window
   MenuBar::init();

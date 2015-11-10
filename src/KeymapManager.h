@@ -15,26 +15,34 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEventFilter {
+class KeymapManager : public QObject,
+                      public core::Singleton<KeymapManager>,
+                      public core::IKeyEventFilter {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
   ~KeymapManager() = default;
 
-  void load();
+  void loadUserKeymap();
+  void load(const QString& filename, const QString& source = "");
   QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
+  const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
+
+ signals:
+  void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
 
  private:
   friend class core::Singleton<KeymapManager>;
   KeymapManager() = default;
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
-  void clear();
-  void load(const QString& filename);
-  void handleImports(const YAML::Node& node);
-  void handleKeymap(const std::shared_ptr<ConditionExpression>& condition, const YAML::Node& node);
+  void handleImports(const YAML::Node& node, const QString& source);
+  void handleKeymap(const std::shared_ptr<ConditionExpression>& condition,
+                    const YAML::Node& node,
+                    const QString& source);
 
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition

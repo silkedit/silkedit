@@ -21,7 +21,7 @@ class Constants {
   static const int defaultFontSize;
 
   static QStringList configPaths();
-  static QStringList keymapPaths();
+  static QStringList userKeymapPaths();
   static QStringList packagePaths();
   static QString userConfigPath();
   static QString userKeymapPath();

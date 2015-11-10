@@ -202,6 +202,10 @@ const packageDir = () => {
   return path.normalize(home + '/.silk/packages')
 }
 
+const loadKeymap = (pkgName, ymlPath) => {
+  client.notify('loadKeymap', pkgName, ymlPath)
+}
+
 const loadMenu = (pkgName, ymlPath) => {
   client.notify('loadMenu', pkgName, ymlPath)
 }
@@ -244,6 +248,14 @@ const loadPackage = (dir) => {
 
           // cache a package directory path
           packageDirMap[pjson.name] = dir
+          
+          // load keymap
+          const keymapPath = path.join(dir, "keymap.yml");
+          fs.open(keymapPath, 'r', (err, fd) => {
+            fd && fs.close(fd, (err) => {
+              loadKeymap(pjson.name, keymapPath);
+            })
+          })
 
           // load menu
           const menuFilePath = path.join(dir, "menu.yml");
@@ -334,6 +346,8 @@ const loadPackage = (dir) => {
     alert: (msg) => {
       client.notify('alert', msg);
     }
+    
+    ,loadKeymap: loadKeymap
 
     ,loadMenu: loadMenu
 

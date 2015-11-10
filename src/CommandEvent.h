@@ -13,23 +13,35 @@
 class CommandEvent {
   DISABLE_COPY(CommandEvent)
  public:
-  explicit CommandEvent(const QString& name);
-  CommandEvent(const QString& name, const CommandArgument& args);
-  CommandEvent(const QString& name, std::shared_ptr<ConditionExpression> condition);
+  CommandEvent(const QString& name, const QString& source);
+  CommandEvent(const QString& name, const CommandArgument& args, const QString& source);
+  CommandEvent(const QString& name,
+               std::shared_ptr<ConditionExpression> condition,
+               const QString& source);
   CommandEvent(const QString& name,
                const CommandArgument& args,
-               std::shared_ptr<ConditionExpression> condition);
+               std::shared_ptr<ConditionExpression> condition,
+               const QString& source);
   ~CommandEvent() = default;
   DEFAULT_MOVE(CommandEvent)
 
-  QString cmdName() { return m_cmdName; }
-  ConditionExpression* condition() { return m_condition.get(); }
+  QString cmdName() const { return m_cmdName; }
+  ConditionExpression* condition() const { return m_condition.get(); }
+  QString source() const { return m_source; }
 
   bool execute(int repeat = 1);
   bool hascondition();
+  void clearCondition() { m_condition.reset(); }
 
  private:
   QString m_cmdName;
   CommandArgument m_args;
   std::shared_ptr<ConditionExpression> m_condition;
+
+  /**
+   * @brief The source where this command event is defined.
+   * Empty if defined in .silk/keymap.yml
+   * Package name if defined in a package keymap.yml
+   */
+  QString m_source;
 };

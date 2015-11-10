@@ -159,10 +159,10 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
       parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {
-      // Check condition
-      YAML::Node conditionNode = node["condition"];
-      if (conditionNode.IsDefined()) {
-        ConditionExpression* condition = parseCondition(conditionNode);
+      // Check if condition
+      YAML::Node ifNode = node["if"];
+      if (ifNode.IsDefined()) {
+        ConditionExpression* condition = parseCondition(ifNode);
         if (!condition || !condition->isSatisfied()) {
           continue;
         }
@@ -284,10 +284,10 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       parseToolbarNode(pkgName, ymlPath, currentToolbar, itemsNode);
       prevId = id;
     } else {
-      // Check condition
-      YAML::Node conditionNode = node["condition"];
-      if (conditionNode.IsDefined()) {
-        ConditionExpression* condition = parseCondition(conditionNode);
+      // Check if condition
+      YAML::Node ifNode = node["if"];
+      if (ifNode.IsDefined()) {
+        ConditionExpression* condition = parseCondition(ifNode);
         if (!condition || !condition->isSatisfied()) {
           continue;
         }

@@ -19,6 +19,7 @@ class ConditionExpression {
 
   ConditionExpression(const QString& key, core::Operator op, const QString& value);
   bool isSatisfied();
+  QString toString();
 
   /**
    * @brief check if condition is static (e.g., os == mac)

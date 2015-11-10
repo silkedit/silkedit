@@ -63,6 +63,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Keymap</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Packages</string>
            </property>
           </item>
@@ -72,7 +77,11 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="GeneralConfigView" name="generalConfigView"/>
+        <widget class="KeymapConfigView" name="keymapConfigView"/>
         <widget class="PackagesTabView" name="packagesView"/>
        </widget>
       </item>
@@ -116,6 +125,12 @@
    <class>GeneralConfigView</class>
    <extends>QWidget</extends>
    <header>GeneralConfigView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>KeymapConfigView</class>
+   <extends>QWidget</extends>
+   <header>KeymapConfigView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -33,6 +33,10 @@ bool ConditionExpression::isSatisfied() {
   return s_conditions.at(m_key)->isSatisfied(m_op, m_value);
 }
 
+QString ConditionExpression::toString() {
+  return QString("%1 %2 %3").arg(m_key).arg(ICondition::operatorString(m_op)).arg(m_value);
+}
+
 bool ConditionExpression::isStatic() {
   if (s_conditions.find(m_key) == s_conditions.end())
     return false;
