@@ -7,7 +7,7 @@
 
 #include "core/stlSpecialization.h"
 #include "core/macros.h"
-#include "Context.h"
+#include "ConditionExpression.h"
 #include "CommandArgument.h"
 
 class CommandEvent {
@@ -15,19 +15,21 @@ class CommandEvent {
  public:
   explicit CommandEvent(const QString& name);
   CommandEvent(const QString& name, const CommandArgument& args);
-  CommandEvent(const QString& name, std::shared_ptr<Context> context);
-  CommandEvent(const QString& name, const CommandArgument& args, std::shared_ptr<Context> context);
+  CommandEvent(const QString& name, std::shared_ptr<ConditionExpression> condition);
+  CommandEvent(const QString& name,
+               const CommandArgument& args,
+               std::shared_ptr<ConditionExpression> condition);
   ~CommandEvent() = default;
   DEFAULT_MOVE(CommandEvent)
 
   QString cmdName() { return m_cmdName; }
-  Context* context() { return m_context.get(); }
+  ConditionExpression* condition() { return m_condition.get(); }
 
   bool execute(int repeat = 1);
-  bool hasContext();
+  bool hascondition();
 
  private:
   QString m_cmdName;
   CommandArgument m_args;
-  std::shared_ptr<Context> m_context;
+  std::shared_ptr<ConditionExpression> m_condition;
 };

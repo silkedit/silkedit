@@ -19,13 +19,13 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "Context.h"
-#include "PluginContext.h"
+#include "ConditionExpression.h"
+#include "PluginCondition.h"
 #include "InputDialog.h"
 #include "ConfigDialog.h"
 #include "core/Config.h"
 #include "core/modifiers.h"
-#include "core/IContext.h"
+#include "core/ICondition.h"
 #include "util/DialogUtils.h"
 
 using core::Config;
@@ -45,8 +45,8 @@ void API::init() {
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("unregisterCommands", &unregisterCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
-  s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
-  s_notifyFunctions.insert(std::make_pair("unregisterContext", &unregisterContext));
+  s_notifyFunctions.insert(std::make_pair("registerCondition", &registerCondition));
+  s_notifyFunctions.insert(std::make_pair("unregisterCondition", &unregisterCondition));
   s_notifyFunctions.insert(std::make_pair("dispatchCommand", &dispatchCommand));
   s_notifyFunctions.insert(std::make_pair("setFont", &setFont));
 
@@ -156,23 +156,24 @@ void API::unregisterCommands(msgpack::v1::object obj) {
   }
 }
 
-void API::registerContext(msgpack::object obj) {
+void API::registerCondition(msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 1) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
-    QString context = QString::fromUtf8(std::get<0>(params).c_str());
-    Context::add(context, std::move(std::unique_ptr<core::IContext>(new PluginContext(context))));
+    QString condition = QString::fromUtf8(std::get<0>(params).c_str());
+    ConditionExpression::add(
+        condition, std::move(std::unique_ptr<core::ICondition>(new PluginCondition(condition))));
   }
 }
 
-void API::unregisterContext(msgpack::object obj) {
+void API::unregisterCondition(msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 1) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
-    QString context = QString::fromUtf8(std::get<0>(params).c_str());
-    Context::remove(context);
+    QString condition = QString::fromUtf8(std::get<0>(params).c_str());
+    ConditionExpression::remove(condition);
   }
 }
 

@@ -1,14 +1,14 @@
 ﻿#pragma once
 
 #include <QString>
-#include "core/IContext.h"
+#include "core/ICondition.h"
 
-class PluginContext : public core::IContext {
-  DISABLE_COPY(PluginContext)
+class PluginCondition : public core::ICondition {
+  DISABLE_COPY(PluginCondition)
 
  public:
-  PluginContext(const QString& key);
-  ~PluginContext() = default;
+  PluginCondition(const QString& key);
+  ~PluginCondition() = default;
 
   bool isSatisfied(core::Operator op, const QString& operand) override;
   bool isStatic() override { return false; }

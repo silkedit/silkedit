@@ -7,7 +7,7 @@
 #include <QDir>
 
 #include "YamlUtils.h"
-#include "Context.h"
+#include "ConditionExpression.h"
 #include "CommandAction.h"
 #include "PluginManager.h"
 #include "Window.h"
@@ -37,11 +37,11 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
-Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
-  QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
-  QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
+ConditionExpression* YamlUtils::parseCondition(const YAML::Node& conditionNode) {
+  QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
+  QStringList list = conditionStr.trimmed().split(" ", QString::SkipEmptyParts);
   if (list.size() != 3) {
-    qWarning() << "context must be \"key operator operand\". size: " << list.size();
+    qWarning() << "condition must be \"key operator operand\". size: " << list.size();
   } else {
     QString key = list[0];
 
@@ -59,9 +59,9 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
 
     QString value = list[2];
 
-    Context* context = new Context(key, op, value);
-    if (context) {
-      return context;
+    ConditionExpression* condition = new ConditionExpression(key, op, value);
+    if (condition) {
+      return condition;
     }
   }
 
@@ -71,7 +71,7 @@ Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
 /**
  * @brief YamlUtils::parseMenuNode
  *
- * 'context' decides whether the menu item is shown or not.
+ * 'condition' decides whether the menu item is shown or not.
  * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted
  above 'Open...', 'Open...' is inserted above 'Open Recent', 'Save' is inserted below 'Open Recent'
  *
@@ -159,11 +159,11 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
       parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {
-      // Check context
-      YAML::Node contextNode = node["context"];
-      if (contextNode.IsDefined()) {
-        Context* context = parseContext(contextNode);
-        if (!context || !context->isSatisfied()) {
+      // Check condition
+      YAML::Node conditionNode = node["condition"];
+      if (conditionNode.IsDefined()) {
+        ConditionExpression* condition = parseCondition(conditionNode);
+        if (!condition || !condition->isSatisfied()) {
           continue;
         }
       }
@@ -284,11 +284,11 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       parseToolbarNode(pkgName, ymlPath, currentToolbar, itemsNode);
       prevId = id;
     } else {
-      // Check context
-      YAML::Node contextNode = node["context"];
-      if (contextNode.IsDefined()) {
-        Context* context = parseContext(contextNode);
-        if (!context || !context->isSatisfied()) {
+      // Check condition
+      YAML::Node conditionNode = node["condition"];
+      if (conditionNode.IsDefined()) {
+        ConditionExpression* condition = parseCondition(conditionNode);
+        if (!condition || !condition->isSatisfied()) {
           continue;
         }
       }

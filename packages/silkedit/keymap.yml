@@ -1,6 +1,6 @@
 # Default keymap for OSX
 
-- context: os == mac
+- if: os == mac
   keymap:
     ctrl+b: move_cursor_left
     ctrl+f: move_cursor_right
@@ -31,7 +31,7 @@
 
 # Default keymap for Windows
     
-- context: os == windows
+- if: os == windows
   keymap:
     ctrl+n: new_file
     ctrl+o: open_file

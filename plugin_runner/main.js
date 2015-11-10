@@ -18,7 +18,7 @@ const socketFile = process.argv[2];
 const locale = process.argv[3];
 const packagesBeginIndex = 4
 var commands = {}
-var contexts = {}
+var conditions = {}
 var eventFilters = {}
 var configs = {}
 
@@ -38,7 +38,7 @@ function getDirs(dir) {
 
 const c = rpc.createClient(socketFile, () => {
   const packagePaths = process.argv.slice(packagesBeginIndex)
-  GLOBAL.silk = require('./silkedit')(c, locale, contexts, eventFilters, configs, commands);
+  GLOBAL.silk = require('./silkedit')(c, locale, conditions, eventFilters, configs, commands);
 
   sync(c, 'invoke');
   
@@ -111,10 +111,10 @@ const handler = {
     }
   }
 
-  ,"askContext": (name, operator, value, response) => {
-    if (name in contexts) {
+  ,"askCondition": (name, operator, value, response) => {
+    if (name in conditions) {
       silkutil.runInFiber(() => {
-        response.result(contexts[name](operator, value))
+        response.result(conditions[name](operator, value))
       })
     } else {
       response.result(false)

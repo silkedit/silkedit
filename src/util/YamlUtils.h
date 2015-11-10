@@ -7,14 +7,14 @@
 #include "core/Config.h"
 #include "core/ConfigDefinition.h"
 
-class Context;
+class ConditionExpression;
 class Window;
 
 class YamlUtils {
   DISABLE_COPY_AND_MOVE(YamlUtils)
 
  public:
-  static Context* parseContext(const YAML::Node& contextNode);
+  static ConditionExpression* parseCondition(const YAML::Node& conditionNode);
   static void parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode);
   static void parseToolbarNode(const QString& pkgName,
                                const std::string& ymlPath,

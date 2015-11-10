@@ -8,7 +8,7 @@ var path = require('path')
 
 var packageDirMap = {}
 
-module.exports = (client, locale, contexts, eventFilters, configs, commands) => {
+module.exports = (client, locale, conditions, eventFilters, configs, commands) => {
 
   var InputDialog = require('./views/input_dialog')(client)
 
@@ -343,14 +343,14 @@ const loadPackage = (dir) => {
     
     ,unregisterCommands: unregisterCommands
 
-    ,registerContext: (name, func) => {
-      contexts[name] = func
-      client.notify('registerContext', name)
+    ,registerCondition: (name, func) => {
+      conditions[name] = func
+      client.notify('registerCondition', name)
     }
 
-    ,unregisterContext: (name) => {
-      delete contexts[name]
-      client.notify('unregisterContext', name)
+    ,unregisterCondition: (name) => {
+      delete conditions[name]
+      client.notify('unregisterCondition', name)
     }
 
     ,activeView: () => {
@@ -400,7 +400,7 @@ const loadPackage = (dir) => {
       }
     }
 
-    ,contextUtils: {
+    ,conditionUtils: {
       isSatisfied: (key, operator, value) => {
         switch(operator) {
           case '==':

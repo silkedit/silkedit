@@ -1,19 +1,19 @@
 ﻿#pragma once
 
-#include "IContext.h"
+#include "ICondition.h"
 #include "macros.h"
 
 namespace core {
 
-class OSContext : public IContext {
-  DISABLE_COPY(OSContext)
+class OSCondition : public ICondition {
+  DISABLE_COPY(OSCondition)
 
  public:
   static const QString name;
 
-  OSContext() = default;
-  ~OSContext() = default;
-  DEFAULT_MOVE(OSContext)
+  OSCondition() = default;
+  ~OSCondition() = default;
+  DEFAULT_MOVE(OSCondition)
 
   bool isStatic() override { return true; }
 

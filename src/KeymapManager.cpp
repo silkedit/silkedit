@@ -91,7 +91,8 @@ void KeymapManager::handleImports(const YAML::Node& node) {
   }
 }
 
-void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node) {
+void KeymapManager::handleKeymap(const std::shared_ptr<ConditionExpression>& condition,
+                                 const YAML::Node& node) {
   YAML::Node keymap = node["keymap"];
   if (keymap.IsDefined()) {
     for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); ++keymapIter) {
@@ -102,7 +103,7 @@ void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const 
         case YAML::NodeType::Scalar: {
           QString command = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
           qDebug() << "key: " << key << ", command: " << command;
-          add(key, CommandEvent(command, context));
+          add(key, CommandEvent(command, condition));
           break;
         }
         case YAML::NodeType::Map: {
@@ -114,9 +115,9 @@ void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const 
           if (argsNode.IsMap()) {
             assert(argsNode.IsMap());
             CommandArgument args = parseArgs(argsNode);
-            add(key, CommandEvent(command, args, context));
+            add(key, CommandEvent(command, args, condition));
           } else {
-            add(key, CommandEvent(command, context));
+            add(key, CommandEvent(command, condition));
           }
 
           break;
@@ -141,18 +142,18 @@ void KeymapManager::load(const QString& filename) {
 
       handleImports(node);
 
-      YAML::Node contextNode = node["context"];
-      std::shared_ptr<Context> context;
-      if (contextNode.IsDefined()) {
-        context.reset(YamlUtils::parseContext(contextNode));
-        if (!context) {
-          qWarning() << "can't find a context: "
-                     << QString::fromUtf8(contextNode.as<std::string>().c_str());
+      YAML::Node conditionNode = node["if"];
+      std::shared_ptr<ConditionExpression> condition;
+      if (conditionNode.IsDefined()) {
+        condition.reset(YamlUtils::parseCondition(conditionNode));
+        if (!condition) {
+          qWarning() << "can't find a condition: "
+                     << QString::fromUtf8(conditionNode.as<std::string>().c_str());
           continue;
         }
       }
 
-      handleKeymap(context, node);
+      handleKeymap(condition, node);
     }
   } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
@@ -234,12 +235,13 @@ QKeySequence KeymapManager::findShortcut(QString cmdName) {
   if (foundIter != m_cmdShortcuts.end()) {
     auto range = m_keymaps.equal_range(foundIter->second);
     for (auto it = range.first; it != range.second; it++) {
-      // Set shortcut if command event has no context or it has static context and it's satisfied
-      if (!it->second.hasContext()) {
+      // Set shortcut if command event has no condition or it has static condition and it's
+      // satisfied
+      if (!it->second.hascondition()) {
         return m_cmdShortcuts.at(cmdName);
       } else {
-        Context* context = it->second.context();
-        if (context->isStatic() && context->isSatisfied()) {
+        ConditionExpression* condition = it->second.condition();
+        if (condition->isStatic() && condition->isSatisfied()) {
           return m_cmdShortcuts.at(cmdName);
         }
       }
@@ -253,10 +255,10 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 }
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
-  // If cmdEvent has static context, evaluate it immediately
-  if (cmdEvent.hasContext()) {
-    Context* context = cmdEvent.context();
-    if (context->isStatic() && !context->isSatisfied()) {
+  // If cmdEvent has static condition, evaluate it immediately
+  if (cmdEvent.hascondition()) {
+    ConditionExpression* condition = cmdEvent.condition();
+    if (condition->isStatic() && !condition->isSatisfied()) {
       return;
     }
   }
@@ -264,8 +266,8 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
-    if (cmdEvent.context() == ev.context()) {
-      // Remove registered keymap if both key and context match
+    if (cmdEvent.condition() == ev.condition()) {
+      // Remove registered keymap if both key and condition match
       if (m_cmdShortcuts.count(ev.cmdName()) != 0) {
         m_cmdShortcuts.erase(ev.cmdName());
       }
@@ -274,12 +276,12 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  // Don't register shortcut if cmdEvent has dynamic context
-  if (!cmdEvent.hasContext()) {
+  // Don't register shortcut if cmdEvent has dynamic condition
+  if (!cmdEvent.hascondition()) {
     m_cmdShortcuts[cmdEvent.cmdName()] = key;
   } else {
-    Context* context = cmdEvent.context();
-    if (context->isStatic()) {
+    ConditionExpression* condition = cmdEvent.condition();
+    if (condition->isStatic()) {
       m_cmdShortcuts[cmdEvent.cmdName()] = key;
     }
   }

@@ -18,7 +18,6 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
-#include "Context.h"
 #include "PluginManager.h"
 #include "PlatformUtil.h"
 

@@ -1,11 +1,11 @@
 ﻿#include <QString>
-#include "OSContext.h"
+#include "OSCondition.h"
 
 namespace core {
 
-const QString OSContext::name = "os";
+const QString OSCondition::name = "os";
 
-QString OSContext::key() {
+QString OSCondition::key() {
 #if defined Q_OS_WIN
   return "windows";
 #elif defined Q_OS_LINUX

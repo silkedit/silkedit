@@ -34,10 +34,10 @@ class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEv
   void clear();
   void load(const QString& filename);
   void handleImports(const YAML::Node& node);
-  void handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node);
+  void handleKeymap(const std::shared_ptr<ConditionExpression>& condition, const YAML::Node& node);
 
   // use multimap to store multiple keymaps that have same key combination but with different
-  // context
+  // condition
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
   QString m_partiallyMatchedKeyString;

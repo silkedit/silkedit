@@ -59,7 +59,7 @@ FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::
   connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
   connect(ui->nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
 
-  // todo: configure mnemonic in keymap.yml using context
+  // todo: configure mnemonic in keymap.yml using condition
   ui->prevButton->setToolTip(tr(PREVIOUS_MATCH_TEXT));
   ui->nextButton->setToolTip(tr(NEXT_MATCH_TEXT));
   ui->regexChk->setToolTip(tr(REGEX_TEXT));
@@ -71,8 +71,7 @@ FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::
   setLayout(ui->layout);
 }
 
-FindReplaceView::~FindReplaceView() {
-}
+FindReplaceView::~FindReplaceView() {}
 
 void FindReplaceView::show() {
   if (isVisible()) {

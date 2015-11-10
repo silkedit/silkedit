@@ -13,7 +13,7 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
-#include "Context.h"
+#include "ConditionExpression.h"
 #include "MenuBar.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
@@ -27,7 +27,7 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
-  Context::init();
+  ConditionExpression::init();
 
   PackageManager::loadPackages();
 
