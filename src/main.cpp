@@ -13,13 +13,14 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
-#include "ConditionExpression.h"
+#include "core/ConditionManager.h"
 #include "MenuBar.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
 
 using core::PackageManager;
 using core::Config;
+using core::ConditionManager;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -27,7 +28,7 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
-  ConditionExpression::init();
+  ConditionManager::init();
 
   PackageManager::loadPackages();
 

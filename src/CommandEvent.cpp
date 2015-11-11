@@ -1,6 +1,8 @@
 ﻿#include "CommandEvent.h"
 #include "CommandManager.h"
 
+using core::ConditionExpression;
+
 CommandEvent::CommandEvent(const QString& name, const QString& source)
     : CommandEvent(name, CommandArgument(), boost::none, source) {}
 

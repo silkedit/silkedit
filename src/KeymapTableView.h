@@ -3,15 +3,10 @@
 #include <boost/optional.hpp>
 #include <QAbstractTableModel>
 #include <QTableView>
-#include <QKeySequence>
 
 #include "CommandEvent.h"
+#include "Keymap.h"
 #include "core/macros.h"
-
-struct Keymap {
-  QKeySequence key;
-  CommandEvent cmd;
-};
 
 class KeymapTableModel : public QAbstractTableModel {
  public:

@@ -7,7 +7,7 @@
 #include <QDir>
 
 #include "YamlUtils.h"
-#include "ConditionExpression.h"
+#include "core/ConditionExpression.h"
 #include "CommandAction.h"
 #include "PluginManager.h"
 #include "Window.h"
@@ -20,6 +20,7 @@ using core::PackageMenu;
 using core::PackageAction;
 using core::PackageToolBar;
 using core::ConfigDefinition;
+using core::ConditionExpression;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {

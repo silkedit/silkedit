@@ -19,7 +19,7 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "ConditionExpression.h"
+#include "core/ConditionManager.h"
 #include "PluginCondition.h"
 #include "InputDialog.h"
 #include "ConfigDialog.h"
@@ -29,6 +29,7 @@
 #include "util/DialogUtils.h"
 
 using core::Config;
+using core::ConditionManager;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -177,7 +178,7 @@ void API::registerCondition(msgpack::object obj) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
     QString condition = QString::fromUtf8(std::get<0>(params).c_str());
-    ConditionExpression::add(
+    ConditionManager::add(
         condition, std::move(std::unique_ptr<core::ICondition>(new PluginCondition(condition))));
   }
 }
@@ -188,7 +189,7 @@ void API::unregisterCondition(msgpack::object obj) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
     QString condition = QString::fromUtf8(std::get<0>(params).c_str());
-    ConditionExpression::remove(condition);
+    ConditionManager::remove(condition);
   }
 }
 

@@ -4,14 +4,12 @@
 #include <unordered_map>
 #include <QString>
 
-#include "core/ICondition.h"
-#include "core/stlSpecialization.h"
+#include "ICondition.h"
+#include "stlSpecialization.h"
+
+namespace core {
 
 struct ConditionExpression {
-  static void init();
-  static void add(const QString& key, std::unique_ptr<core::ICondition> condition);
-  static void remove(const QString& key);
-
   QString m_key;
   core::Operator m_op;
   QString m_value;
@@ -28,7 +26,6 @@ struct ConditionExpression {
   bool operator==(const ConditionExpression& other) const;
 
   bool operator!=(const ConditionExpression& other) const { return !(*this == other); }
-
- private:
-  static std::unordered_map<QString, std::unique_ptr<core::ICondition>> s_conditions;
 };
+
+}  // namespace core

@@ -6,8 +6,9 @@
 #include <QObject>
 #include <QFileSystemWatcher>
 
-#include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
+#include "Keymap.h"
+#include "core/IKeyEventFilter.h"
 #include "core/macros.h"
 #include "core/Singleton.h"
 #include "core/stlSpecialization.h"
@@ -45,7 +46,7 @@ class KeymapManager : public QObject,
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
-  std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
+  std::unordered_map<QString, Keymap> m_cmdKeymapHash;
   QString m_partiallyMatchedKeyString;
   void removeUserKeymap();
 };

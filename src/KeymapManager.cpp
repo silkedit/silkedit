@@ -12,11 +12,13 @@
 #include "CommandEvent.h"
 #include "core/Constants.h"
 #include "core/Util.h"
+#include "core/ConditionExpression.h"
 #include "util/YamlUtils.h"
 
 using core::Constants;
 using core::IKeyEventFilter;
 using core::Util;
+using core::ConditionExpression;
 
 namespace {
 
@@ -148,6 +150,10 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 void KeymapManager::removeUserKeymap() {
   for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
     if (it->second.source().isEmpty()) {
+      if (m_cmdKeymapHash.count(it->second.cmdName()) != 0 &&
+          m_cmdKeymapHash.at(it->second.cmdName()).cmd.source().isEmpty()) {
+        m_cmdKeymapHash.erase(it->second.cmdName());
+      }
       it = m_keymaps.erase(it);
     } else {
       it++;
@@ -170,18 +176,18 @@ void KeymapManager::loadUserKeymap() {
 }
 
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
-  auto foundIter = m_cmdShortcuts.find(cmdName);
-  if (foundIter != m_cmdShortcuts.end()) {
-    auto range = m_keymaps.equal_range(foundIter->second);
+  auto foundIter = m_cmdKeymapHash.find(cmdName);
+  if (foundIter != m_cmdKeymapHash.end()) {
+    auto range = m_keymaps.equal_range(foundIter->second.key);
     for (auto it = range.first; it != range.second; it++) {
       // Set shortcut if command event has no condition or it has static condition and it's
       // satisfied
       if (!it->second.hasCondition()) {
-        return m_cmdShortcuts.at(cmdName);
+        return m_cmdKeymapHash.at(cmdName).key;
       } else {
         auto condition = it->second.condition();
         if (condition->isStatic() && condition->isSatisfied()) {
-          return m_cmdShortcuts.at(cmdName);
+          return m_cmdKeymapHash.at(cmdName).key;
         }
       }
     }
@@ -207,11 +213,11 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     CommandEvent& ev = it->second;
     if (cmdEvent.condition() == ev.condition()) {
       if (ev.source().isEmpty()) {
+        if (m_cmdKeymapHash.count(ev.cmdName()) != 0) {
+          m_cmdKeymapHash.erase(ev.cmdName());
+        }
         // If source is empty (means coming from user keymap.yml), override existing keymap by
         // removing registered keymap
-        if (m_cmdShortcuts.count(ev.cmdName()) != 0) {
-          m_cmdShortcuts.erase(ev.cmdName());
-        }
         m_keymaps.erase(it);
         break;
       } else {
@@ -221,9 +227,9 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  // todo: consider condition
-  if (!cmdEvent.hasCondition()) {
-    m_cmdShortcuts[cmdEvent.cmdName()] = key;
+  // todo: compare condition
+  if (!cmdEvent.condition()) {
+    m_cmdKeymapHash.insert(std::make_pair(cmdEvent.cmdName(), Keymap{key, cmdEvent}));
     emit shortcutUpdated(cmdEvent.cmdName(), key);
   }
 
