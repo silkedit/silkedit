@@ -10,13 +10,13 @@ CommandEvent::CommandEvent(const QString& name, const CommandArgument& args, con
     : CommandEvent(name, args, boost::none, source) {}
 
 CommandEvent::CommandEvent(const QString& name,
-                           boost::optional<ConditionExpression> condition,
+                           boost::optional<core::AndConditionExpression> condition,
                            const QString& source)
     : CommandEvent(name, CommandArgument(), condition, source) {}
 
 CommandEvent::CommandEvent(const QString& name,
                            const CommandArgument& args,
-                           boost::optional<ConditionExpression> condition,
+                           boost::optional<core::AndConditionExpression> condition,
                            const QString& source)
     : m_cmdName(name), m_args(args), m_condition(condition), m_source(source) {}
 

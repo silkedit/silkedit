@@ -21,6 +21,7 @@ using core::PackageAction;
 using core::PackageToolBar;
 using core::ConfigDefinition;
 using core::ConditionExpression;
+using core::AndConditionExpression;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -38,32 +39,48 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
-boost::optional<ConditionExpression> YamlUtils::parseCondition(const YAML::Node& conditionNode) {
+boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::Node& conditionNode) {
   QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
-  QStringList list = conditionStr.trimmed().split(" ", QString::SkipEmptyParts);
-  if (list.size() != 3) {
-    qWarning() << "condition must be \"key operator operand\". size: " << list.size();
-  } else {
-    QString key = list[0];
-
-    // Parse operator expression
-    QString opStr = list[1];
-    Operator op;
-    if (opStr == "==") {
-      op = Operator::EQUALS;
-    } else if (opStr == "!=") {
-      op = Operator::NOT_EQUALS;
-    } else {
-      qWarning("%s is not supported", qPrintable(opStr));
-      return boost::none;
+  QStringList strList = conditionStr.trimmed().split("&&", QString::SkipEmptyParts);
+  QSet<ConditionExpression> conSet;
+  for (const auto& str : strList) {
+    if (auto cond = parseValueCondition(str)) {
+      conSet.insert(*cond);
     }
-
-    QString value = list[2];
-
-    return ConditionExpression(key, op, value);
   }
 
-  return boost::none;
+  if (conSet.isEmpty()) {
+    return boost::none;
+  } else {
+    return AndConditionExpression(conSet);
+  }
+}
+
+// todo: support bool condition
+boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QString& str) {
+  QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
+  if (list.size() != 3) {
+    qWarning() << "condition must be \"key operator operand\". size: " << list.size();
+    return boost::none;
+  }
+
+  QString key = list[0];
+
+  // Parse operator expression
+  QString opStr = list[1];
+  Operator op;
+  if (opStr == "==") {
+    op = Operator::EQUALS;
+  } else if (opStr == "!=") {
+    op = Operator::NOT_EQUALS;
+  } else {
+    qWarning("%s is not supported", qPrintable(opStr));
+    return boost::none;
+  }
+
+  QString value = list[2];
+
+  return ConditionExpression(key, op, value);
 }
 
 /**

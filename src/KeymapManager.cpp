@@ -12,13 +12,13 @@
 #include "CommandEvent.h"
 #include "core/Constants.h"
 #include "core/Util.h"
-#include "core/ConditionExpression.h"
+#include "core/AndConditionExpression.h"
 #include "util/YamlUtils.h"
 
 using core::Constants;
 using core::IKeyEventFilter;
 using core::Util;
-using core::ConditionExpression;
+using core::AndConditionExpression;
 
 namespace {
 
@@ -80,7 +80,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
       //      qDebug() << "key: " << key << ", command: " << command;
 
       YAML::Node ifNode = keymapDefNode["if"];
-      boost::optional<ConditionExpression> condition;
+      boost::optional<AndConditionExpression> condition;
       if (ifNode.IsDefined()) {
         YAML::Node conditionNode = keymapDefNode["if"];
         if (conditionNode.IsDefined()) {

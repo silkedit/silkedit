@@ -10,15 +10,15 @@ core::ConditionExpression::ConditionExpression(const QString& key,
                                                const QString& value)
     : m_key(key), m_op(op), m_value(value) {}
 
-bool core::ConditionExpression::isSatisfied() {
+bool core::ConditionExpression::isSatisfied() const {
   return ConditionManager::isSatisfied(m_key, m_op, m_value);
 }
 
-QString core::ConditionExpression::toString() {
+QString core::ConditionExpression::toString() const {
   return QString("%1 %2 %3").arg(m_key).arg(ICondition::operatorString(m_op)).arg(m_value);
 }
 
-bool core::ConditionExpression::isStatic() {
+bool core::ConditionExpression::isStatic() const {
   return ConditionManager::isStatic(m_key);
 }
 
