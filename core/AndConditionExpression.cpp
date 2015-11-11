@@ -27,6 +27,10 @@ bool core::AndConditionExpression::isStatic() const {
                      [=](const ConditionExpression& cond) { return cond.isStatic(); });
 }
 
+int core::AndConditionExpression::size() {
+  return m_condSet.size();
+}
+
 bool core::AndConditionExpression::operator==(const core::AndConditionExpression& other) const {
   return m_condSet == other.m_condSet;
 }

@@ -20,6 +20,7 @@ class AndConditionExpression {
    * @return
    */
   bool isStatic() const;
+  int size();
   bool operator==(const AndConditionExpression& other) const;
 
   bool operator!=(const AndConditionExpression& other) const { return !(*this == other); }

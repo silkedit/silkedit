@@ -56,7 +56,6 @@ boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::No
   }
 }
 
-// todo: support bool condition
 boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QString& str) {
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
 

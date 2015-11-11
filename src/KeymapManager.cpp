@@ -227,8 +227,12 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  // todo: compare condition
-  if (!cmdEvent.condition()) {
+  if (m_cmdKeymapHash.count(cmdEvent.cmdName()) == 0 || !cmdEvent.condition() ||
+      (m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition() &&
+       // shorter AND condition has higher priority
+       // e.g. 'onMac' has higher priority than 'onMac && vim.mode == normal'
+       cmdEvent.condition()->size() <
+           m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition()->size())) {
     m_cmdKeymapHash.insert(std::make_pair(cmdEvent.cmdName(), Keymap{key, cmdEvent}));
     emit shortcutUpdated(cmdEvent.cmdName(), key);
   }
