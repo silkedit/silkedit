@@ -1,8 +1,21 @@
 ﻿#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
+#include <QRegularExpression>
 
 #include "Util.h"
+
+namespace {
+
+void replace(QString& str, const QString& regex, const QString& after) {
+  QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
+  QRegularExpressionMatchIterator iter = re.globalMatch(str);
+  while (iter.hasNext()) {
+    QRegularExpressionMatch match = iter.next();
+    str = str.replace(match.capturedStart(), match.capturedLength(), after);
+  }
+}
+}
 
 namespace core {
 
@@ -48,6 +61,31 @@ std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
   }
 
   return list;
+}
+
+QKeySequence Util::toSequence(QString& str) {
+#ifdef Q_OS_MAC
+  replace(str, "ctrl|control", "meta");
+  replace(str, "cmd|command", "ctrl");
+  replace(str, "opt|option", "alt");
+#endif
+
+  replace(str, "enter", "return");
+
+  return str;
+}
+
+QString Util::toString(const QKeySequence& keySeq) {
+  QString str = keySeq.toString();
+
+#ifdef Q_OS_MAC
+  replace(str, "meta", "ctrl");
+  replace(str, "ctrl", "cmd");
+  replace(str, "alt", "opt");
+#endif
+
+  replace(str, "return", "enter");
+  return str;
 }
 
 }  // namespace core

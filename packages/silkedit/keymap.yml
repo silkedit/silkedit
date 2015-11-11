@@ -1,57 +1,26 @@
-# Default keymap for OSX
-
-- if: os == mac
-  keymap:
-    ctrl+b: move_cursor_left
-    ctrl+f: move_cursor_right
-    ctrl+p: move_cursor_up
-    ctrl+n: move_cursor_down
-    cmd+n: new_file
-    cmd+o: open
-    cmd+s: save
-    shift+cmd+s: save_as
-    opt+cmd+s: save_all
-    cmd+w: close_tab
-    shift+cmd+t: reopen_last_closed_file
-    ctrl+w, s: split_horizontally
-    ctrl+w, v: split_vertically
-    cmd+z: undo
-    cmd+shift+z: redo
-    cmd+x: cut
-    cmd+c: copy
-    cmd+v: paste
-    cmd+a: select_all
-    cmd+f: open_find_panel
-    ctrl+shift+p: show_scope
-    ctrl+space: complete
-    return: newline
-    tab: indent
-    cmd+shift+]: select_next_tab
-    cmd+shift+[: select_previous_tab
-
-# Default keymap for Windows
-    
-- if: os == windows
-  keymap:
-    ctrl+n: new_file
-    ctrl+o: open_file
-    ctrl+s: save
-    shift+ctrl+s: save_as
-    alt+ctrl+s: save_all
-    ctrl+w: close_tab
-    shift+ctrl+t: reopen_last_closed_file
-    ctrl+w, s: split_horizontally
-    ctrl+w, v: split_vertically
-    ctrl+z: undo
-    ctrl+shift+z: redo
-    ctrl+x: cut
-    ctrl+c: copy
-    ctrl+v: paste
-    ctrl+a: select_all
-    ctrl+f: open_find_panel
-    ctrl+shift+p: show_scope
-    ctrl+space: complete
-    enter: newline
-    tab: indent
-    ctrl+tab: select_next_tab
-    ctrl+shift+tab: select_previous_tab
+- { key: ctrl+b, command: move_cursor_left }
+- { key: ctrl+f, command: move_cursor_right }
+- { key: ctrl+p, command: move_cursor_up }
+- { key: ctrl+n, command: move_cursor_down }
+- { key: cmd+n, command: new_file }
+- { key: cmd+o, command: open }
+- { key: cmd+s, command: save }
+- { key: shift+cmd+s, command: save_as }
+- { key: opt+cmd+s, command: save_all }
+- { key: cmd+w, command: close_tab }
+- { key: shift+cmd+t, command: reopen_last_closed_file }
+- { key: 'ctrl+w, s', command: split_horizontally }
+- { key: 'ctrl+w, v', command: split_vertically }
+- { key: cmd+z, command: undo }
+- { key: cmd+shift+z, command: redo }
+- { key: cmd+x, command: cut }
+- { key: cmd+c, command: copy }
+- { key: cmd+v, command: paste }
+- { key: cmd+a, command: select_all }
+- { key: cmd+f, command: open_find_panel }
+- { key: ctrl+shift+p, command: show_scope }
+- { key: ctrl+space, command: complete }
+- { key: return, command: newline }
+- { key: tab, command: indent }
+- { key: 'cmd+shift+]', command: select_next_tab }
+- { key: 'cmd+shift+[', command: select_previous_tab }

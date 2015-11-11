@@ -1,4 +1,5 @@
-﻿#include <string>
+﻿#include <boost/optional.hpp>
+#include <string>
 #include <QDebug>
 #include <QShortcut>
 #include <QList>
@@ -42,27 +43,6 @@ QKeySequence toSequence(const QKeyEvent& ev) {
   return QKeySequence(keyInt);
 }
 
-void replace(QString& str, const QString& regex, const QString& after) {
-  QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
-  QRegularExpressionMatchIterator iter = re.globalMatch(str);
-  while (iter.hasNext()) {
-    QRegularExpressionMatch match = iter.next();
-    str = str.replace(match.capturedStart(), match.capturedLength(), after);
-  }
-}
-
-QKeySequence toSequence(QString& str) {
-#ifdef Q_OS_MAC
-  replace(str, "ctrl|control", "meta");
-  replace(str, "cmd|command", "ctrl");
-  replace(str, "opt|option", "alt");
-#endif
-
-  replace(str, "enter", "return");
-
-  return str;
-}
-
 CommandArgument parseArgs(const YAML::Node& argsNode) {
   CommandArgument args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
@@ -75,92 +55,49 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 }
 
-void KeymapManager::handleImports(const YAML::Node& node, const QString& source) {
-  YAML::Node importsNode = node["imports"];
-  if (importsNode.IsDefined() && importsNode.IsSequence()) {
-    for (std::size_t i = 0; i < importsNode.size(); i++) {
-      QString keymapFile = QString::fromUtf8(importsNode[i].as<std::string>().c_str());
-      foreach (const QString& packageDir, Constants::packagePaths()) {
-        QString replacedKeymapFile = keymapFile.replace("$silk_package_dir", packageDir);
-        if (QFile(replacedKeymapFile).exists()) {
-          load(replacedKeymapFile, source);
-          break;
-        }
-      }
-    }
-  }
-}
-
-void KeymapManager::handleKeymap(const std::shared_ptr<ConditionExpression>& condition,
-                                 const YAML::Node& node,
-                                 const QString& source) {
-  YAML::Node keymap = node["keymap"];
-  if (keymap.IsDefined()) {
-    for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); keymapIter++) {
-      QString keyStr = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
-      QKeySequence key = toSequence(keyStr);
-      YAML::Node valueNode = keymapIter->second;
-      switch (valueNode.Type()) {
-        case YAML::NodeType::Scalar: {
-          QString command = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
-          qDebug() << "key: " << key << ", command: " << command;
-          add(key, CommandEvent(command, condition, source));
-          break;
-        }
-        case YAML::NodeType::Map: {
-          std::string commandStr = valueNode["command"].as<std::string>();
-          QString command = QString::fromUtf8(commandStr.c_str());
-          qDebug() << "key: " << key << ", command: " << command;
-
-          YAML::Node argsNode = valueNode["args"];
-          if (argsNode.IsMap()) {
-            assert(argsNode.IsMap());
-            CommandArgument args = parseArgs(argsNode);
-            add(key, CommandEvent(command, args, condition, source));
-          } else {
-            add(key, CommandEvent(command, condition, source));
-          }
-
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  }
-}
-
 void KeymapManager::load(const QString& filename, const QString& source) {
-  std::string name = filename.toUtf8().constData();
+  const std::string& name = filename.toUtf8().constData();
   try {
-    YAML::Node keymaps = YAML::LoadFile(name);
-
-    if (!keymaps.IsSequence()) {
-      qWarning("root must be a sequence.");
+    YAML::Node keymapNode = YAML::LoadFile(name);
+    if (!keymapNode.IsSequence()) {
+      qWarning("keymap value must be sequence");
       return;
     }
 
-    for (auto it = keymaps.begin(); it != keymaps.end(); ++it) {
-      YAML::Node node = *it;
-      if (!node.IsMap()) {
-        qWarning("keymap must be a map.");
+    for (std::size_t i = 0; i < keymapNode.size(); i++) {
+      YAML::Node keymapDefNode = keymapNode[i];
+      if (!keymapDefNode.IsMap()) {
+        qWarning("keymap definition must be a map");
         continue;
       }
 
-      handleImports(node, source);
+      QString keyStr = QString::fromUtf8(keymapDefNode["key"].as<std::string>().c_str());
+      QKeySequence key = Util::toSequence(keyStr);
+      std::string commandStr = keymapDefNode["command"].as<std::string>();
+      QString command = QString::fromUtf8(commandStr.c_str());
+      //      qDebug() << "key: " << key << ", command: " << command;
 
-      YAML::Node conditionNode = node["if"];
-      std::shared_ptr<ConditionExpression> condition;
-      if (conditionNode.IsDefined()) {
-        condition.reset(YamlUtils::parseCondition(conditionNode));
-        if (!condition) {
-          qWarning() << "can't find a condition: "
-                     << QString::fromUtf8(conditionNode.as<std::string>().c_str());
-          continue;
+      YAML::Node ifNode = keymapDefNode["if"];
+      boost::optional<ConditionExpression> condition;
+      if (ifNode.IsDefined()) {
+        YAML::Node conditionNode = keymapDefNode["if"];
+        if (conditionNode.IsDefined()) {
+          condition = YamlUtils::parseCondition(conditionNode);
+          if (!condition) {
+            qWarning() << "can't find a condition: "
+                       << QString::fromUtf8(conditionNode.as<std::string>().c_str());
+          }
         }
       }
 
-      handleKeymap(condition, node, source);
+      YAML::Node argsNode = keymapDefNode["args"];
+      if (argsNode.IsMap()) {
+        assert(argsNode.IsMap());
+        CommandArgument args = parseArgs(argsNode);
+        add(key, CommandEvent(command, args, condition, source));
+      } else {
+        add(key, CommandEvent(command, condition, source));
+      }
     }
   } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
@@ -229,10 +166,10 @@ QKeySequence KeymapManager::findShortcut(QString cmdName) {
     for (auto it = range.first; it != range.second; it++) {
       // Set shortcut if command event has no condition or it has static condition and it's
       // satisfied
-      if (!it->second.hascondition()) {
+      if (!it->second.hasCondition()) {
         return m_cmdShortcuts.at(cmdName);
       } else {
-        ConditionExpression* condition = it->second.condition();
+        auto condition = it->second.condition();
         if (condition->isStatic() && condition->isSatisfied()) {
           return m_cmdShortcuts.at(cmdName);
         }
@@ -248,14 +185,11 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   // If cmdEvent has static condition, evaluate it immediately
-  ConditionExpression* condition = cmdEvent.condition();
+  auto condition = cmdEvent.condition();
   if (condition && condition->isStatic()) {
     if (!condition->isSatisfied()) {
       return;
     }
-
-    // remove static condition after evaluation
-    cmdEvent.clearCondition();
   }
 
   auto range = m_keymaps.equal_range(key);
@@ -267,7 +201,7 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  if (!cmdEvent.hascondition()) {
+  if (!cmdEvent.hasCondition()) {
     m_cmdShortcuts[cmdEvent.cmdName()] = key;
     emit shortcutUpdated(cmdEvent.cmdName(), key);
   }

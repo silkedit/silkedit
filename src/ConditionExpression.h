@@ -7,8 +7,7 @@
 #include "core/ICondition.h"
 #include "core/stlSpecialization.h"
 
-class ConditionExpression {
- public:
+struct ConditionExpression {
   static void init();
   static void add(const QString& key, std::unique_ptr<core::ICondition> condition);
   static void remove(const QString& key);

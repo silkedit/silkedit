@@ -37,7 +37,7 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
-ConditionExpression* YamlUtils::parseCondition(const YAML::Node& conditionNode) {
+boost::optional<ConditionExpression> YamlUtils::parseCondition(const YAML::Node& conditionNode) {
   QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
   QStringList list = conditionStr.trimmed().split(" ", QString::SkipEmptyParts);
   if (list.size() != 3) {
@@ -54,18 +54,15 @@ ConditionExpression* YamlUtils::parseCondition(const YAML::Node& conditionNode) 
       op = Operator::NOT_EQUALS;
     } else {
       qWarning("%s is not supported", qPrintable(opStr));
-      return nullptr;
+      return boost::none;
     }
 
     QString value = list[2];
 
-    ConditionExpression* condition = new ConditionExpression(key, op, value);
-    if (condition) {
-      return condition;
-    }
+    return ConditionExpression(key, op, value);
   }
 
-  return nullptr;
+  return boost::none;
 }
 
 /**
@@ -162,7 +159,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
       // Check if condition
       YAML::Node ifNode = node["if"];
       if (ifNode.IsDefined()) {
-        ConditionExpression* condition = parseCondition(ifNode);
+        auto condition = parseCondition(ifNode);
         if (!condition || !condition->isSatisfied()) {
           continue;
         }
@@ -287,7 +284,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       // Check if condition
       YAML::Node ifNode = node["if"];
       if (ifNode.IsDefined()) {
-        ConditionExpression* condition = parseCondition(ifNode);
+        auto condition = parseCondition(ifNode);
         if (!condition || !condition->isSatisfied()) {
           continue;
         }

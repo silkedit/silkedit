@@ -337,7 +337,7 @@ void PluginManagerPrivate::callNotifyFunc(const QString& methodName, const msgpa
 }
 
 bool PluginManagerPrivate::keyEventFilter(QKeyEvent* event) {
-  qDebug("keyEventFilter");
+  //  qDebug("keyEventFilter");
   std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
   bool isModifierKey = false;
   std::string key;

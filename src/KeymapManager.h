@@ -39,10 +39,6 @@ class KeymapManager : public QObject,
   KeymapManager() = default;
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
-  void handleImports(const YAML::Node& node, const QString& source);
-  void handleKeymap(const std::shared_ptr<ConditionExpression>& condition,
-                    const YAML::Node& node,
-                    const QString& source);
 
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition

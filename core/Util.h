@@ -5,6 +5,7 @@
 #include <functional>
 #include <QStringList>
 #include <QTime>
+#include <QKeySequence>
 
 #include "macros.h"
 
@@ -29,6 +30,9 @@ class Util {
   static bool copy(const QString& source, const QString& dist);
 
   static std::list<std::string> toStdStringList(const QStringList& qStrList);
+
+  static QKeySequence toSequence(QString& str);
+  static QString toString(const QKeySequence& keySeq);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
