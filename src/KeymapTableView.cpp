@@ -42,10 +42,18 @@ void KeymapTableView::contextMenuEvent(QContextMenuEvent* event) {
   menu.exec(event->globalPos());
 }
 
-KeymapTableModel::KeymapTableModel(QObject* parent) : QAbstractTableModel(parent) {
+void KeymapTableModel::init() {
   for (const auto& it : KeymapManager::singleton().keymaps()) {
     m_keymaps.append(Keymap{it.first, it.second});
   }
+}
+
+KeymapTableModel::KeymapTableModel(QObject* parent) : QAbstractTableModel(parent) {
+  init();
+  connect(&KeymapManager::singleton(), &KeymapManager::keymapUpdated, this, [=] {
+    m_keymaps.clear();
+    init();
+  });
 }
 
 int KeymapTableModel::rowCount(const QModelIndex&) const {

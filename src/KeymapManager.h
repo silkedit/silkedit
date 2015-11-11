@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <QObject>
+#include <QFileSystemWatcher>
 
 #include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
@@ -33,6 +34,7 @@ class KeymapManager : public QObject,
 
  signals:
   void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
+  void keymapUpdated();
 
  private:
   friend class core::Singleton<KeymapManager>;
@@ -45,6 +47,7 @@ class KeymapManager : public QObject,
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
   QString m_partiallyMatchedKeyString;
+  void removeUserKeymap();
 };
 
 class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {

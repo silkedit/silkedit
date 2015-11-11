@@ -145,9 +145,18 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
+void KeymapManager::removeUserKeymap() {
+  for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+    if (it->second.source().isEmpty()) {
+      it = m_keymaps.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
 void KeymapManager::loadUserKeymap() {
-  m_cmdShortcuts.clear();
-  m_keymaps.clear();
+  removeUserKeymap();
 
   QStringList existingKeymapPaths;
   foreach (const QString& path, Constants::userKeymapPaths()) {
@@ -157,6 +166,7 @@ void KeymapManager::loadUserKeymap() {
   }
 
   foreach (const QString& path, existingKeymapPaths) { load(path, ""); }
+  emit keymapUpdated();
 }
 
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
@@ -195,12 +205,23 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
-    // Ignore if both key and conditon match
     if (cmdEvent.condition() == ev.condition()) {
-      return;
+      if (ev.source().isEmpty()) {
+        // If source is empty (means coming from user keymap.yml), override existing keymap by
+        // removing registered keymap
+        if (m_cmdShortcuts.count(ev.cmdName()) != 0) {
+          m_cmdShortcuts.erase(ev.cmdName());
+        }
+        m_keymaps.erase(it);
+        break;
+      } else {
+        // Ignore keymap defined in package keymap.yml
+        return;
+      }
     }
   }
 
+  // todo: consider condition
   if (!cmdEvent.hasCondition()) {
     m_cmdShortcuts[cmdEvent.cmdName()] = key;
     emit shortcutUpdated(cmdEvent.cmdName(), key);

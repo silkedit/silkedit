@@ -27,6 +27,7 @@ class KeymapTableModel : public QAbstractTableModel {
 
  private:
   QList<Keymap> m_keymaps;
+  void init();
 };
 
 class KeymapTableView : public QTableView {

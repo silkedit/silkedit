@@ -18,6 +18,7 @@
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
+#include "core/Constants.h"
 
 using core::Document;
 using core::Encoding;
@@ -29,6 +30,7 @@ using core::TextEditViewLogic;
 using core::Theme;
 using core::ColorSettings;
 using core::Regexp;
+using core::Constants;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -504,6 +506,12 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
   d->setTabStopWidthFromSession();
+
+  // Special handling for user keymap.yml
+  if (document->path() == Constants::userKeymapPath()) {
+    connect(this, &TextEditView::saved, &KeymapManager::singleton(),
+            &KeymapManager::loadUserKeymap);
+  }
 }
 
 Language* TextEditView::language() {
