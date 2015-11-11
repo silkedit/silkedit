@@ -9,6 +9,8 @@ void core::ConditionManager::init() {
   s_conditions.clear();
   // register default conditions
   add(OSCondition::name, std::move(std::unique_ptr<ICondition>(new OSCondition())));
+  add(OnMacCondition::name, std::move(std::unique_ptr<ICondition>(new OnMacCondition())));
+  add(OnWindowsCondition::name, std::move(std::unique_ptr<ICondition>(new OnWindowsCondition())));
 }
 
 void core::ConditionManager::add(const QString& key, std::unique_ptr<core::ICondition> condition) {
@@ -22,8 +24,10 @@ void core::ConditionManager::remove(const QString& key) {
 bool core::ConditionManager::isSatisfied(const QString& key,
                                          core::Operator op,
                                          const QString& value) {
-  if (s_conditions.find(key) == s_conditions.end())
+  if (s_conditions.find(key) == s_conditions.end()) {
+    qWarning("%s not found", qPrintable(key));
     return false;
+  }
 
   return s_conditions.at(key)->isSatisfied(op, value);
 }

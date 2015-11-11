@@ -59,26 +59,33 @@ boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::No
 // todo: support bool condition
 boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QString& str) {
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
-  if (list.size() != 3) {
+
+  QString key;
+  Operator op;
+  QString value;
+  if (list.size() == 1) {
+    key = list[0];
+    op = Operator::EQUALS;
+    value = "true";
+  } else if (list.size() == 3) {
+    key = list[0];
+
+    // Parse operator expression
+    QString opStr = list[1];
+    if (opStr == "==") {
+      op = Operator::EQUALS;
+    } else if (opStr == "!=") {
+      op = Operator::NOT_EQUALS;
+    } else {
+      qWarning("%s is not supported", qPrintable(opStr));
+      return boost::none;
+    }
+
+    value = list[2];
+  } else {
     qWarning() << "condition must be \"key operator operand\". size: " << list.size();
     return boost::none;
   }
-
-  QString key = list[0];
-
-  // Parse operator expression
-  QString opStr = list[1];
-  Operator op;
-  if (opStr == "==") {
-    op = Operator::EQUALS;
-  } else if (opStr == "!=") {
-    op = Operator::NOT_EQUALS;
-  } else {
-    qWarning("%s is not supported", qPrintable(opStr));
-    return boost::none;
-  }
-
-  QString value = list[2];
 
   return ConditionExpression(key, op, value);
 }

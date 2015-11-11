@@ -15,4 +15,24 @@ QString OSCondition::key() {
 #endif
 }
 
+const QString OnMacCondition::name = "onMac";
+
+QString OnMacCondition::key() {
+#if defined Q_OS_MAC
+  return "true";
+#else
+  return "false";
+#endif
+}
+
+const QString OnWindowsCondition::name = "onWindows";
+
+QString OnWindowsCondition::key() {
+#if defined Q_OS_WIN
+  return "true";
+#else
+  return "false";
+#endif
+}
+
 }  // namespace core

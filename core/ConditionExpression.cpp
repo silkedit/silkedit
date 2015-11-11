@@ -15,7 +15,11 @@ bool core::ConditionExpression::isSatisfied() const {
 }
 
 QString core::ConditionExpression::toString() const {
-  return QString("%1 %2 %3").arg(m_key).arg(ICondition::operatorString(m_op)).arg(m_value);
+  if (m_op == Operator::EQUALS && m_value == "true") {
+    return QString("%1").arg(m_key);
+  } else {
+    return QString("%1 %2 %3").arg(m_key).arg(ICondition::operatorString(m_op)).arg(m_value);
+  }
 }
 
 bool core::ConditionExpression::isStatic() const {
