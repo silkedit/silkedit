@@ -81,7 +81,7 @@ QVariant KeymapTableModel::data(const QModelIndex& index, int role) const {
     const Keymap& keymap = m_keymaps[index.row()];
     switch (index.column()) {
       case 0:
-        return QString(keymap.cmd.cmdName());
+        return keymap.cmd.cmdName();
       case 1:
         return keymap.cmd.cmdDescription();
       case 2:

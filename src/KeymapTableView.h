@@ -23,6 +23,7 @@ class KeymapSortFilterProxyModel : public QSortFilterProxyModel {
  protected:
   bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
 
+ private:
   QString m_filterText;
 };
 

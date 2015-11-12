@@ -4,7 +4,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <QObject>
-#include <QFileSystemWatcher>
 
 #include "CommandEvent.h"
 #include "Keymap.h"
