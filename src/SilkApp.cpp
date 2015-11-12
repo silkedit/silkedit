@@ -109,26 +109,29 @@ void SilkApp::setupTranslator(const QString& locale) {
     m_translator->deleteLater();
     removeTranslator(m_translator);
   }
-  if (m_qtTranslator) {
-    m_qtTranslator->deleteLater();
-    removeTranslator(m_qtTranslator);
-  }
 
   m_translator = new QTranslator(this);
-  m_qtTranslator = new QTranslator(this);
   // Load silkedit_<locale>.qm to translate SilkEdit menu
   bool result = m_translator->load("silkedit_" + locale, Constants::translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("silkedit_");
   }
+  installTranslator(m_translator);
 
+#ifdef Q_OS_MAC
   // Load qt_<locale>.qm to translate Mac application menu
+  if (m_qtTranslator) {
+    m_qtTranslator->deleteLater();
+    removeTranslator(m_qtTranslator);
+  }
+
+  m_qtTranslator = new QTranslator(this);
   result = m_qtTranslator->load("qt_" + locale, Constants::translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("qt_");
   }
-  installTranslator(m_translator);
   installTranslator(m_qtTranslator);
+#endif
 }
 
 TextEditView* SilkApp::activeEditView() {

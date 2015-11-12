@@ -10,6 +10,9 @@ using core::Package;
 void CommandAction::init(const QString& id, const QString& cmdName) {
   setObjectName(id);
   QKeySequence key = KeymapManager::singleton().findShortcut(cmdName);
+  // WidgetShortcut makes QAction's shortcut disabled but visible in a menu
+  // Shortcut is handled by TextEditViewKeyHandler.
+  setShortcutContext(Qt::WidgetShortcut);
   // todo: make reactive based on an associated condition
   if (!key.isEmpty()) {
     setShortcut(key);

@@ -37,7 +37,7 @@ class CommandManager : public QObject, public core::Singleton<CommandManager> {
   void commandRemoved(const QString& name);
 
  private:
-  friend class Singleton<CommandManager>;
+  friend class core::Singleton<CommandManager>;
   CommandManager() = default;
 
   // QHash doesn't like unique_ptr (probably lack of move semantics),

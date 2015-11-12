@@ -1085,6 +1085,7 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
     }
   }
 
+  // todo: define this behavior in keymap.yml
   switch (event->key()) {
     case Qt::Key_Escape:
       API::hideActiveFindReplacePanel();
