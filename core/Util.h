@@ -31,7 +31,7 @@ class Util {
 
   static std::list<std::string> toStdStringList(const QStringList& qStrList);
 
-  static QKeySequence toSequence(QString& str);
+  static QKeySequence toSequence(const QString& str);
   static QString toString(const QKeySequence& keySeq);
 
   template <typename Func>

@@ -14,8 +14,10 @@ using core::Util;
 KeymapTableView::KeymapTableView(QWidget* parent)
     : QTableView(parent),
       m_model(new KeymapTableModel(this)),
-      m_copy(new QAction(tr("Copy"), this)) {
-  setModel(m_model);
+      m_copy(new QAction(tr("Copy"), this)),
+      m_proxyModel(new KeymapSortFilterProxyModel(m_model, this)) {
+  setModel(m_proxyModel);
+  horizontalHeader()->setSortIndicator(KeymapTableModel::SOURCE_INDEX, Qt::AscendingOrder);
   horizontalHeader()->setStretchLastSection(true);
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   connect(m_copy, &QAction::triggered, this, [=] {
@@ -34,6 +36,10 @@ KeymapTableView::KeymapTableView(QWidget* parent)
       }
     }
   });
+}
+
+void KeymapTableView::setFilterText(const QString& text) {
+  m_proxyModel->setFilterText(text);
 }
 
 void KeymapTableView::contextMenuEvent(QContextMenuEvent* event) {
@@ -101,15 +107,15 @@ QVariant KeymapTableModel::headerData(int section, Qt::Orientation orientation, 
   }
 
   switch (section) {
-    case 0:
+    case COMMAND_INDEX:
       return tr("Command");
-    case 1:
+    case DESCRIPTION_INDEX:
       return tr("Description");
-    case 2:
+    case KEY_INDEX:
       return tr("Key");
-    case 3:
+    case IF_INDEX:
       return tr("If");
-    case 4:
+    case SOURCE_INDEX:
       return tr("Source");
     default:
       return QVariant();
@@ -121,4 +127,36 @@ boost::optional<Keymap> KeymapTableModel::keymapAt(int row) {
     return m_keymaps.at(row);
   }
   return boost::none;
+}
+
+KeymapSortFilterProxyModel::KeymapSortFilterProxyModel(KeymapTableModel* model, QObject* parent)
+    : QSortFilterProxyModel(parent) {
+  setSourceModel(model);
+}
+
+void KeymapSortFilterProxyModel::setFilterText(const QString& text) {
+  m_filterText = text;
+  invalidateFilter();
+}
+
+bool KeymapSortFilterProxyModel::filterAcceptsRow(int sourceRow,
+                                                  const QModelIndex& sourceParent) const {
+  if (m_filterText.isEmpty())
+    return true;
+
+  QModelIndex cmdIndex =
+      sourceModel()->index(sourceRow, KeymapTableModel::COMMAND_INDEX, sourceParent);
+  QModelIndex descIndex =
+      sourceModel()->index(sourceRow, KeymapTableModel::DESCRIPTION_INDEX, sourceParent);
+  QModelIndex keyIndex = sourceModel()->index(sourceRow, KeymapTableModel::KEY_INDEX, sourceParent);
+  QModelIndex ifIndex = sourceModel()->index(sourceRow, KeymapTableModel::IF_INDEX, sourceParent);
+  QModelIndex sourceIndex =
+      sourceModel()->index(sourceRow, KeymapTableModel::SOURCE_INDEX, sourceParent);
+  QString keyText = Util::toString(QKeySequence(sourceModel()->data(keyIndex).toString()));
+
+  return sourceModel()->data(cmdIndex).toString().contains(m_filterText, Qt::CaseInsensitive) ||
+         sourceModel()->data(descIndex).toString().contains(m_filterText, Qt::CaseInsensitive) ||
+         (keyText.contains(m_filterText, Qt::CaseInsensitive)) ||
+         sourceModel()->data(ifIndex).toString().contains(m_filterText, Qt::CaseInsensitive) ||
+         sourceModel()->data(sourceIndex).toString().contains(m_filterText, Qt::CaseInsensitive);
 }

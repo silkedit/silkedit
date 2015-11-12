@@ -63,7 +63,8 @@ std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
   return list;
 }
 
-QKeySequence Util::toSequence(QString& str) {
+QKeySequence Util::toSequence(const QString& aStr) {
+  QString str = aStr;
 #ifdef Q_OS_MAC
   replace(str, "ctrl|control", "meta");
   replace(str, "cmd|command", "ctrl");
@@ -79,8 +80,8 @@ QString Util::toString(const QKeySequence& keySeq) {
   QString str = keySeq.toString();
 
 #ifdef Q_OS_MAC
-  replace(str, "meta", "ctrl");
   replace(str, "ctrl", "cmd");
+  replace(str, "meta", "ctrl");
   replace(str, "alt", "opt");
 #endif
 

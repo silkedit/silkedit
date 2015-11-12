@@ -46,7 +46,11 @@
          <number>8</number>
         </property>
         <item>
-         <widget class="QLineEdit" name="filterLine"/>
+         <widget class="QLineEdit" name="filterLine">
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QListWidget" name="listWidget">

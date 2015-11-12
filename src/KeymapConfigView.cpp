@@ -15,6 +15,7 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
     : QWidget(parent), ui(new Ui::KeymapConfigView) {
   ui->setupUi(this);
 
+  connect(ui->filterLine, &QLineEdit::textEdited, ui->keymapTable, &KeymapTableView::setFilterText);
   connect(ui->openKeymapFileButton, &QPushButton::clicked, this, [=] {
     QFile keymapFile(Constants::userKeymapPath());
     if (!keymapFile.exists()) {
