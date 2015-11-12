@@ -39,7 +39,7 @@ class KeymapManager : public QObject,
 
  private:
   friend class core::Singleton<KeymapManager>;
-  KeymapManager() = default;
+  KeymapManager();
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
 

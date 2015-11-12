@@ -21,12 +21,12 @@ CommandEvent::CommandEvent(const QString& name,
     : m_cmdName(name), m_args(args), m_condition(condition), m_source(source) {}
 
 QString CommandEvent::cmdDescription() const {
-  return CommandManager::cmdDescription(m_cmdName);
+  return CommandManager::singleton().cmdDescription(m_cmdName);
 }
 
 bool CommandEvent::execute(int repeat) {
   if (!m_condition || m_condition->isSatisfied()) {
-    CommandManager::runCommand(m_cmdName, m_args, repeat);
+    CommandManager::singleton().runCommand(m_cmdName, m_args, repeat);
     return true;
   }
 

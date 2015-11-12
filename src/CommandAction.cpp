@@ -14,7 +14,7 @@ void CommandAction::init(const QString& id, const QString& cmdName) {
   if (!key.isEmpty()) {
     setShortcut(key);
   }
-  connect(this, &QAction::triggered, [this] { CommandManager::runCommand(m_cmdName); });
+  connect(this, &QAction::triggered, [this] { CommandManager::singleton().runCommand(m_cmdName); });
   connect(&KeymapManager::singleton(), &KeymapManager::shortcutUpdated, this,
           [=](const QString& cmdName, const QKeySequence& key) {
             if (cmdName == m_cmdName) {

@@ -80,8 +80,8 @@ void PluginManagerPrivate::init() {
   Q_ASSERT(!m_pluginProcess);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
-  CommandManager::addEventFilter(std::bind(&PluginManagerPrivate::cmdEventFilter, this,
-                                           std::placeholders::_1, std::placeholders::_2));
+  CommandManager::singleton().addEventFilter(std::bind(
+      &PluginManagerPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::pluginServerSocketPath());

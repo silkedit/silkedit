@@ -157,7 +157,7 @@ void API::registerCommands(msgpack::object obj) {
   std::vector<std::tuple<std::string, std::string>> commands = std::get<0>(params);
   for (const std::tuple<std::string, std::string>& cmd : commands) {
     //    qDebug("command: %s", cmd.c_str());
-    CommandManager::add(std::unique_ptr<ICommand>(
+    CommandManager::singleton().add(std::unique_ptr<ICommand>(
         new PluginCommand(QString::fromUtf8(std::get<0>(cmd).c_str()), std::get<1>(cmd).c_str())));
   }
 }
@@ -168,7 +168,7 @@ void API::unregisterCommands(msgpack::v1::object obj) {
   std::vector<std::string> commands = std::get<0>(params);
   for (std::string& cmd : commands) {
     qDebug("unregisterCommand: %s", cmd.c_str());
-    CommandManager::remove(QString::fromUtf8(cmd.c_str()));
+    CommandManager::singleton().remove(QString::fromUtf8(cmd.c_str()));
   }
 }
 

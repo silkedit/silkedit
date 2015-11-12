@@ -10,15 +10,20 @@
 
 #include "KeymapManager.h"
 #include "CommandEvent.h"
+#include "CommandManager.h"
 #include "core/Constants.h"
 #include "core/Util.h"
 #include "core/AndConditionExpression.h"
+#include "core/PackageManager.h"
+#include "core/Package.h"
 #include "util/YamlUtils.h"
 
 using core::Constants;
 using core::IKeyEventFilter;
 using core::Util;
 using core::AndConditionExpression;
+using core::PackageManager;
+using core::Package;
 
 namespace {
 
@@ -145,6 +150,23 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 
   // no match
   return false;
+}
+
+KeymapManager::KeymapManager() {
+  connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
+          [=](const Package& pkg) {
+            for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+              if (it->second.source() == pkg.name) {
+                it = m_keymaps.erase(it);
+              } else {
+                ++it;
+              }
+            }
+            emit keymapUpdated();
+          });
+
+  connect(&CommandManager::singleton(), &CommandManager::commandRemoved, this,
+          [=](const QString& name) { m_cmdKeymapHash.erase(name); });
 }
 
 void KeymapManager::removeUserKeymap() {

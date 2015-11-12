@@ -62,7 +62,8 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
 
   updateOpenRecentItems();
 
-  CommandManager::add(std::move(std::unique_ptr<ICommand>(new ReopenLastClosedFileCommand)));
+  CommandManager::singleton().add(
+      std::move(std::unique_ptr<ICommand>(new ReopenLastClosedFileCommand)));
 }
 
 void OpenRecentItemManager::updateOpenRecentItems() {
