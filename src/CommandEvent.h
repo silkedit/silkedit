@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <boost/optional.hpp>
 #include <unordered_map>
 #include <memory>
 #include <QString>
@@ -7,27 +8,40 @@
 
 #include "core/stlSpecialization.h"
 #include "core/macros.h"
-#include "Context.h"
+#include "core/AndConditionExpression.h"
 #include "CommandArgument.h"
 
 class CommandEvent {
-  DISABLE_COPY(CommandEvent)
  public:
-  explicit CommandEvent(const QString& name);
-  CommandEvent(const QString& name, const CommandArgument& args);
-  CommandEvent(const QString& name, std::shared_ptr<Context> context);
-  CommandEvent(const QString& name, const CommandArgument& args, std::shared_ptr<Context> context);
+  CommandEvent(const QString& name, const QString& source);
+  CommandEvent(const QString& name, const CommandArgument& args, const QString& source);
+  CommandEvent(const QString& name,
+               boost::optional<core::AndConditionExpression> condition,
+               const QString& source);
+  CommandEvent(const QString& name,
+               const CommandArgument& args,
+               boost::optional<core::AndConditionExpression> condition,
+               const QString& source);
   ~CommandEvent() = default;
-  DEFAULT_MOVE(CommandEvent)
+  DEFAULT_COPY_AND_MOVE(CommandEvent)
 
-  QString cmdName() { return m_cmdName; }
-  Context* context() { return m_context.get(); }
+  QString cmdName() const { return m_cmdName; }
+  QString cmdDescription() const;
+  boost::optional<core::AndConditionExpression> condition() const { return m_condition; }
+  QString source() const { return m_source; }
 
   bool execute(int repeat = 1);
-  bool hasContext();
+  bool hasCondition();
 
  private:
   QString m_cmdName;
   CommandArgument m_args;
-  std::shared_ptr<Context> m_context;
+  boost::optional<core::AndConditionExpression> m_condition;
+
+  /**
+   * @brief The source where this command event is defined.
+   * Empty if defined in .silk/keymap.yml
+   * Package name if defined in a package keymap.yml
+   */
+  QString m_source;
 };

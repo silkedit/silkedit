@@ -18,7 +18,6 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
-#include "Context.h"
 #include "PluginManager.h"
 #include "PlatformUtil.h"
 
@@ -172,6 +171,15 @@ void Window::loadToolbar(Window* win, const QString& pkgName, const std::string&
     YamlUtils::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+  }
+}
+
+void Window::showFirst() {
+  if (s_windows.size() > 0) {
+    Window* win = s_windows.first();
+    win->show();
+    win->raise();
+    win->activateWindow();
   }
 }
 

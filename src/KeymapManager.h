@@ -5,8 +5,9 @@
 #include <unordered_set>
 #include <QObject>
 
-#include "core/IKeyEventFilter.h"
 #include "CommandEvent.h"
+#include "Keymap.h"
+#include "core/IKeyEventFilter.h"
 #include "core/macros.h"
 #include "core/Singleton.h"
 #include "core/stlSpecialization.h"
@@ -15,32 +16,38 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public core::Singleton<KeymapManager>, public core::IKeyEventFilter {
+class KeymapManager : public QObject,
+                      public core::Singleton<KeymapManager>,
+                      public core::IKeyEventFilter {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
   ~KeymapManager() = default;
 
-  void load();
+  void loadUserKeymap();
+  void load(const QString& filename, const QString& source = "");
   QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
+  const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
+
+ signals:
+  void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
+  void keymapUpdated();
 
  private:
   friend class core::Singleton<KeymapManager>;
-  KeymapManager() = default;
+  KeymapManager();
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
-  void clear();
-  void load(const QString& filename);
-  void handleImports(const YAML::Node& node);
-  void handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node);
 
   // use multimap to store multiple keymaps that have same key combination but with different
-  // context
+  // condition
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
-  std::unordered_map<QString, QKeySequence> m_cmdShortcuts;
+  std::unordered_map<QString, Keymap> m_cmdKeymapHash;
   QString m_partiallyMatchedKeyString;
+  void removeUserKeymap();
 };
 
 class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {

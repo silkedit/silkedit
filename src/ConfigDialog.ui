@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>746</width>
-    <height>530</height>
+    <width>1056</width>
+    <height>599</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -46,7 +46,11 @@
          <number>8</number>
         </property>
         <item>
-         <widget class="QLineEdit" name="filterLine"/>
+         <widget class="QLineEdit" name="filterLine">
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QListWidget" name="listWidget">
@@ -63,6 +67,11 @@
           </item>
           <item>
            <property name="text">
+            <string>Keymap</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>Packages</string>
            </property>
           </item>
@@ -72,7 +81,11 @@
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="GeneralConfigView" name="generalConfigView"/>
+        <widget class="KeymapConfigView" name="keymapConfigView"/>
         <widget class="PackagesTabView" name="packagesView"/>
        </widget>
       </item>
@@ -116,6 +129,12 @@
    <class>GeneralConfigView</class>
    <extends>QWidget</extends>
    <header>GeneralConfigView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>KeymapConfigView</class>
+   <extends>QWidget</extends>
+   <header>KeymapConfigView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

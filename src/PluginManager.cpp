@@ -22,7 +22,7 @@
 #include "core/Constants.h"
 #include "core/modifiers.h"
 #include "core/Config.h"
-#include "core/IContext.h"
+#include "core/Icondition.h"
 #include "core/Util.h"
 
 #define REGISTER_FUNC(type)                                                 \
@@ -80,8 +80,8 @@ void PluginManagerPrivate::init() {
   Q_ASSERT(!m_pluginProcess);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
-  CommandManager::addEventFilter(std::bind(&PluginManagerPrivate::cmdEventFilter, this,
-                                           std::placeholders::_1, std::placeholders::_2));
+  CommandManager::singleton().addEventFilter(std::bind(
+      &PluginManagerPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::pluginServerSocketPath());
@@ -337,7 +337,7 @@ void PluginManagerPrivate::callNotifyFunc(const QString& methodName, const msgpa
 }
 
 bool PluginManagerPrivate::keyEventFilter(QKeyEvent* event) {
-  qDebug("keyEventFilter");
+  //  qDebug("keyEventFilter");
   std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
   bool isModifierKey = false;
   std::string key;
@@ -433,17 +433,17 @@ void PluginManager::callExternalCommand(const QString& cmd, const CommandArgumen
   }, cmd + " time");
 }
 
-bool PluginManager::askExternalContext(const QString& name,
-                                       core::Operator op,
-                                       const QString& value) {
-  qDebug("askExternalContext");
+bool PluginManager::askExternalCondition(const QString& name,
+                                         core::Operator op,
+                                         const QString& value) {
+  qDebug("askExternalCondition");
   std::tuple<std::string, std::string, std::string> params = std::make_tuple(
-      name.toUtf8().constData(), core::IContext::operatorString(op).toUtf8().constData(),
+      name.toUtf8().constData(), core::ICondition::operatorString(op).toUtf8().constData(),
       value.toUtf8().constData());
 
   try {
     return sendRequest<std::tuple<std::string, std::string, std::string>, bool>(
-        "askContext", params, msgpack::type::BOOLEAN);
+        "askCondition", params, msgpack::type::BOOLEAN);
   } catch (const std::exception& e) {
     qWarning() << e.what();
     return false;

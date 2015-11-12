@@ -39,7 +39,7 @@ QStringList Constants::configPaths() {
   return configPaths;
 }
 
-QStringList Constants::keymapPaths() {
+QStringList Constants::userKeymapPaths() {
   QStringList configPaths;
 
   foreach (const QString& path, dataDirectoryPaths()) { configPaths.append(path + "/keymap.yml"); }

@@ -3,15 +3,20 @@
 #include "CommandManager.h"
 #include "PluginManager.h"
 
-std::unordered_map<QString, std::unique_ptr<ICommand>> CommandManager::s_commands;
-std::vector<CommandManager::CmdEventHandler> CommandManager::s_cmdEventFilters;
+QString CommandManager::cmdDescription(const QString& name) {
+  if (m_commands.count(name) != 0) {
+    return m_commands[name]->description();
+  }
+
+  return "";
+}
 
 void CommandManager::runCommand(const QString& name, const CommandArgument& args, int repeat) {
   // Copy command name and argument.
   std::string cmdName = name.toUtf8().constData();
   CommandArgument cmdArg = args;
 
-  for (const CmdEventHandler& handler : s_cmdEventFilters) {
+  for (const CmdEventHandler& handler : m_cmdEventFilters) {
     std::tuple<bool, std::string, CommandArgument> resultTuple = handler(cmdName, cmdArg);
     if (std::get<0>(resultTuple)) {
       return;
@@ -22,8 +27,8 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
 
   QString qCmdName = QString::fromUtf8(cmdName.c_str());
   //  qDebug("qCmdName: %s", qPrintable(qCmdName));
-  if (s_commands.find(qCmdName) != s_commands.end()) {
-    s_commands[qCmdName]->run(cmdArg, repeat);
+  if (m_commands.find(qCmdName) != m_commands.end()) {
+    m_commands[qCmdName]->run(cmdArg, repeat);
     PluginManager::singleton().sendCommandEvent(qCmdName, cmdArg);
   } else {
     qDebug() << "Can't find a command: " << qCmdName;
@@ -31,13 +36,14 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
 }
 
 void CommandManager::add(std::unique_ptr<ICommand> cmd) {
-  s_commands[cmd->name()] = std::move(cmd);
+  m_commands[cmd->name()] = std::move(cmd);
 }
 
 void CommandManager::remove(const QString& name) {
-  s_commands.erase(name);
+  m_commands.erase(name);
+  emit commandRemoved(name);
 }
 
 void CommandManager::addEventFilter(CommandManager::CmdEventHandler handler) {
-  s_cmdEventFilters.push_back(handler);
+  m_cmdEventFilters.push_back(handler);
 }

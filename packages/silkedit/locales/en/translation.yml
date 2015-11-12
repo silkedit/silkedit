@@ -1,0 +1,79 @@
+command:
+  new_file:
+    description: New File
+  open:
+    description: Open
+  open_file:
+    description: Open File
+  open_folder:
+    description: Open Folder
+  save:
+    description: Save
+  save_as:
+    description: Save As
+  save_all:
+    description: Save All
+  close_all_tabs:
+    description: Close All Tabs
+  close_other_tabs:
+    description: Close Other Tabs
+  close_tab:
+    description: Close Tab
+  undo:
+    description: Undo
+  redo:
+    description: Redo
+  cut:
+    description: Cut
+  copy:
+    description: Copy
+  paste:
+    description: Paste
+  select_all:
+    description: Select All
+  complete:
+    description: Complete
+  delete:
+    description: Delete
+  delete_backward:
+    description: Backspace
+  move_cursor_up:
+    description: Up
+  move_cursor_down:
+    description: Down
+  move_cursor_left:
+    description: Left
+  move_cursor_right:
+    description: Right
+  move_cursor_start_of_line:
+    description: Start of Line
+  move_cursor_first_non_blank_char:
+    description: First Non Blank Character
+  move_cursor_last_char:
+    description: Last Character
+  move_cursor_next_line:
+    description: Next Line
+  move_cursor_prev_line:
+    description: Previous Line
+  find_and_replace:
+    description: Find and Replace
+  split_horizontally:
+    description: Split Horizontally
+  split_vertically:
+    description: Split Vertically
+  show_fonts:
+    description: Show Font Dialog
+  show_scope:
+    description: Show Scope
+  show_scope_tree:
+    description: Show Scope Tree
+  new_package:
+    description: New Package
+  newline:
+    description: Newline
+  indent:
+    description: Indent
+  select_next_tab:
+    description: Next Tab
+  select_previous_tab:
+    description: Previous Tab

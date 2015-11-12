@@ -13,13 +13,14 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "PluginManager.h"
-#include "Context.h"
+#include "core/ConditionManager.h"
 #include "MenuBar.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
 
 using core::PackageManager;
 using core::Config;
+using core::ConditionManager;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -27,7 +28,7 @@ int main(int argv, char** args) {
 
   SilkApp app(argv, args);
 
-  Context::init();
+  ConditionManager::init();
 
   PackageManager::loadPackages();
 
@@ -37,7 +38,7 @@ int main(int argv, char** args) {
   app.setupTranslator(Config::singleton().locale());
 
   // Load keymap settings after registering commands
-  KeymapManager::singleton().load();
+  KeymapManager::singleton().loadUserKeymap();
 
   // Create default menu bar before creating any new window
   MenuBar::init();

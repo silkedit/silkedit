@@ -18,6 +18,7 @@
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
+#include "core/Constants.h"
 
 using core::Document;
 using core::Encoding;
@@ -29,6 +30,7 @@ using core::TextEditViewLogic;
 using core::Theme;
 using core::ColorSettings;
 using core::Regexp;
+using core::Constants;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -79,7 +81,7 @@ int toMoveOperation(std::string str) {
     return QTextCursor::Left;
   } else if (str == "right") {
     return QTextCursor::Right;
-  } else if (str == "start_of_block") {
+  } else if (str == "start_of_line") {
     return QTextCursor::StartOfBlock;
   } else if (str == "first_non_blank_char") {
     return ViMoveOperation::FirstNonBlankChar;
@@ -504,6 +506,12 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
   d->setTabStopWidthFromSession();
+
+  // Special handling for user keymap.yml
+  if (document->path() == Constants::userKeymapPath()) {
+    connect(this, &TextEditView::saved, &KeymapManager::singleton(),
+            &KeymapManager::loadUserKeymap);
+  }
 }
 
 Language* TextEditView::language() {
@@ -1077,6 +1085,7 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
     }
   }
 
+  // todo: define this behavior in keymap.yml
   switch (event->key()) {
     case Qt::Key_Escape:
       API::hideActiveFindReplacePanel();

@@ -84,7 +84,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   settingsAction->setObjectName("settings");
 #endif
   settingsAction->setMenuRole(QAction::PreferencesRole);
-  connect(settingsAction, &QAction::triggered, this, &MenuBar::showConfigDialog);
+  connect(settingsAction, &QAction::triggered, this, [] { ConfigDialog::showModeless(); });
 
   // Help menu
   const QString& helpMenuStr = Config::singleton().enableMnemonic() ? tr("&Help") : tr("Help");
@@ -107,11 +107,6 @@ void MenuBar::showAboutDialog() {
   QMessageBox::about(this, SilkApp::applicationName(), tr("version") + " " +
                                                            SilkApp::applicationVersion() + " (" +
                                                            tr("build") + ": " + BUILD + ")");
-}
-
-void MenuBar::showConfigDialog() {
-  ConfigDialog dialog(this);
-  dialog.exec();
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {

@@ -7,7 +7,7 @@
 
 class PluginCommand : public ICommand {
  public:
-  PluginCommand(const QString& name);
+  PluginCommand(const QString& name, const QString& description);
   ~PluginCommand() = default;
   DEFAULT_COPY_AND_MOVE(PluginCommand)
 

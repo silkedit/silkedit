@@ -28,13 +28,14 @@ class API {
 
   // notify functions
   static void alert(msgpack::object obj);
+  static void loadKeymap(msgpack::object obj);
   static void loadMenu(msgpack::object obj);
   static void loadToolbar(msgpack::object obj);
   static void loadConfig(msgpack::object obj);
   static void registerCommands(msgpack::object obj);
   static void unregisterCommands(msgpack::object obj);
-  static void registerContext(msgpack::object obj);
-  static void unregisterContext(msgpack::object obj);
+  static void registerCondition(msgpack::object obj);
+  static void unregisterCondition(msgpack::object obj);
   static void open(msgpack::object obj);
   static void dispatchCommand(msgpack::object obj);
   static void setFont(msgpack::object obj);

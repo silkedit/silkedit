@@ -21,6 +21,7 @@ class Theme;
 
 /**
  * @brief Model class for config.yml
+ * We don't use QSettings to support if condition
  */
 class Config : public QObject, public Singleton<Config> {
   Q_OBJECT

@@ -7,7 +7,7 @@
 #include <QDir>
 
 #include "YamlUtils.h"
-#include "Context.h"
+#include "core/ConditionExpression.h"
 #include "CommandAction.h"
 #include "PluginManager.h"
 #include "Window.h"
@@ -20,6 +20,8 @@ using core::PackageMenu;
 using core::PackageAction;
 using core::PackageToolBar;
 using core::ConfigDefinition;
+using core::ConditionExpression;
+using core::AndConditionExpression;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -37,41 +39,60 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
-Context* YamlUtils::parseContext(const YAML::Node& contextNode) {
-  QString contextStr = QString::fromUtf8(contextNode.as<std::string>().c_str());
-  QStringList list = contextStr.trimmed().split(" ", QString::SkipEmptyParts);
-  if (list.size() != 3) {
-    qWarning() << "context must be \"key operator operand\". size: " << list.size();
+boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::Node& conditionNode) {
+  QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
+  QStringList strList = conditionStr.trimmed().split("&&", QString::SkipEmptyParts);
+  QSet<ConditionExpression> conSet;
+  for (const auto& str : strList) {
+    if (auto cond = parseValueCondition(str)) {
+      conSet.insert(*cond);
+    }
+  }
+
+  if (conSet.isEmpty()) {
+    return boost::none;
   } else {
-    QString key = list[0];
+    return AndConditionExpression(conSet);
+  }
+}
+
+boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QString& str) {
+  QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
+
+  QString key;
+  Operator op;
+  QString value;
+  if (list.size() == 1) {
+    key = list[0];
+    op = Operator::EQUALS;
+    value = "true";
+  } else if (list.size() == 3) {
+    key = list[0];
 
     // Parse operator expression
     QString opStr = list[1];
-    Operator op;
     if (opStr == "==") {
       op = Operator::EQUALS;
     } else if (opStr == "!=") {
       op = Operator::NOT_EQUALS;
     } else {
       qWarning("%s is not supported", qPrintable(opStr));
-      return nullptr;
+      return boost::none;
     }
 
-    QString value = list[2];
-
-    Context* context = new Context(key, op, value);
-    if (context) {
-      return context;
-    }
+    value = list[2];
+  } else {
+    qWarning() << "condition must be \"key operator operand\". size: " << list.size();
+    return boost::none;
   }
 
-  return nullptr;
+  return ConditionExpression(key, op, value);
 }
 
 /**
  * @brief YamlUtils::parseMenuNode
  *
- * 'context' decides whether the menu item is shown or not.
+ * 'condition' decides whether the menu item is shown or not.
  * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted
  above 'Open...', 'Open...' is inserted above 'Open Recent', 'Save' is inserted below 'Open Recent'
  *
@@ -159,11 +180,11 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
       parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {
-      // Check context
-      YAML::Node contextNode = node["context"];
-      if (contextNode.IsDefined()) {
-        Context* context = parseContext(contextNode);
-        if (!context || !context->isSatisfied()) {
+      // Check if condition
+      YAML::Node ifNode = node["if"];
+      if (ifNode.IsDefined()) {
+        auto condition = parseCondition(ifNode);
+        if (!condition || !condition->isSatisfied()) {
           continue;
         }
       }
@@ -284,11 +305,11 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       parseToolbarNode(pkgName, ymlPath, currentToolbar, itemsNode);
       prevId = id;
     } else {
-      // Check context
-      YAML::Node contextNode = node["context"];
-      if (contextNode.IsDefined()) {
-        Context* context = parseContext(contextNode);
-        if (!context || !context->isSatisfied()) {
+      // Check if condition
+      YAML::Node ifNode = node["if"];
+      if (ifNode.IsDefined()) {
+        auto condition = parseCondition(ifNode);
+        if (!condition || !condition->isSatisfied()) {
           continue;
         }
       }

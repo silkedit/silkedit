@@ -1,4 +1,5 @@
-﻿#include <string>
+﻿#include <boost/optional.hpp>
+#include <string>
 #include <QDebug>
 #include <QShortcut>
 #include <QList>
@@ -9,13 +10,20 @@
 
 #include "KeymapManager.h"
 #include "CommandEvent.h"
+#include "CommandManager.h"
 #include "core/Constants.h"
 #include "core/Util.h"
+#include "core/AndConditionExpression.h"
+#include "core/PackageManager.h"
+#include "core/Package.h"
 #include "util/YamlUtils.h"
 
 using core::Constants;
 using core::IKeyEventFilter;
 using core::Util;
+using core::AndConditionExpression;
+using core::PackageManager;
+using core::Package;
 
 namespace {
 
@@ -42,27 +50,6 @@ QKeySequence toSequence(const QKeyEvent& ev) {
   return QKeySequence(keyInt);
 }
 
-void replace(QString& str, const QString& regex, const QString& after) {
-  QRegularExpression re(regex, QRegularExpression::CaseInsensitiveOption);
-  QRegularExpressionMatchIterator iter = re.globalMatch(str);
-  while (iter.hasNext()) {
-    QRegularExpressionMatch match = iter.next();
-    str = str.replace(match.capturedStart(), match.capturedLength(), after);
-  }
-}
-
-QKeySequence toSequence(QString& str) {
-#ifdef Q_OS_MAC
-  replace(str, "ctrl|control", "meta");
-  replace(str, "cmd|command", "ctrl");
-  replace(str, "opt|option", "alt");
-#endif
-
-  replace(str, "enter", "return");
-
-  return str;
-}
-
 CommandArgument parseArgs(const YAML::Node& argsNode) {
   CommandArgument args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
@@ -75,84 +62,49 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 }
 
-void KeymapManager::handleImports(const YAML::Node& node) {
-  YAML::Node importsNode = node["imports"];
-  if (importsNode.IsDefined() && importsNode.IsSequence()) {
-    for (std::size_t i = 0; i < importsNode.size(); i++) {
-      QString keymapFile = QString::fromUtf8(importsNode[i].as<std::string>().c_str());
-      foreach (const QString& packageDir, Constants::packagePaths()) {
-        QString replacedKeymapFile = keymapFile.replace("$silk_package_dir", packageDir);
-        if (QFile(replacedKeymapFile).exists()) {
-          load(replacedKeymapFile);
-          break;
-        }
-      }
-    }
-  }
-}
-
-void KeymapManager::handleKeymap(const std::shared_ptr<Context>& context, const YAML::Node& node) {
-  YAML::Node keymap = node["keymap"];
-  if (keymap.IsDefined()) {
-    for (auto keymapIter = keymap.begin(); keymapIter != keymap.end(); ++keymapIter) {
-      QString keyStr = QString::fromUtf8(keymapIter->first.as<std::string>().c_str());
-      QKeySequence key = toSequence(keyStr);
-      YAML::Node valueNode = keymapIter->second;
-      switch (valueNode.Type()) {
-        case YAML::NodeType::Scalar: {
-          QString command = QString::fromUtf8(keymapIter->second.as<std::string>().c_str());
-          qDebug() << "key: " << key << ", command: " << command;
-          add(key, CommandEvent(command, context));
-          break;
-        }
-        case YAML::NodeType::Map: {
-          std::string commandStr = valueNode["command"].as<std::string>();
-          QString command = QString::fromUtf8(commandStr.c_str());
-          qDebug() << "key: " << key << ", command: " << command;
-
-          YAML::Node argsNode = valueNode["args"];
-          if (argsNode.IsMap()) {
-            assert(argsNode.IsMap());
-            CommandArgument args = parseArgs(argsNode);
-            add(key, CommandEvent(command, args, context));
-          } else {
-            add(key, CommandEvent(command, context));
-          }
-
-          break;
-        }
-        default:
-          break;
-      }
-    }
-  }
-}
-
-void KeymapManager::load(const QString& filename) {
-  std::string name = filename.toUtf8().constData();
+void KeymapManager::load(const QString& filename, const QString& source) {
+  const std::string& name = filename.toUtf8().constData();
   try {
-    YAML::Node keymaps = YAML::LoadFile(name);
+    YAML::Node keymapNode = YAML::LoadFile(name);
+    if (!keymapNode.IsSequence()) {
+      qWarning("keymap value must be sequence");
+      return;
+    }
 
-    assert(keymaps.IsSequence());
+    for (std::size_t i = 0; i < keymapNode.size(); i++) {
+      YAML::Node keymapDefNode = keymapNode[i];
+      if (!keymapDefNode.IsMap()) {
+        qWarning("keymap definition must be a map");
+        continue;
+      }
 
-    for (auto it = keymaps.begin(); it != keymaps.end(); ++it) {
-      YAML::Node node = *it;
-      assert(node.IsMap());
+      QString keyStr = QString::fromUtf8(keymapDefNode["key"].as<std::string>().c_str());
+      QKeySequence key = Util::toSequence(keyStr);
+      std::string commandStr = keymapDefNode["command"].as<std::string>();
+      QString command = QString::fromUtf8(commandStr.c_str());
+      //      qDebug() << "key: " << key << ", command: " << command;
 
-      handleImports(node);
-
-      YAML::Node contextNode = node["context"];
-      std::shared_ptr<Context> context;
-      if (contextNode.IsDefined()) {
-        context.reset(YamlUtils::parseContext(contextNode));
-        if (!context) {
-          qWarning() << "can't find a context: "
-                     << QString::fromUtf8(contextNode.as<std::string>().c_str());
-          continue;
+      YAML::Node ifNode = keymapDefNode["if"];
+      boost::optional<AndConditionExpression> condition;
+      if (ifNode.IsDefined()) {
+        YAML::Node conditionNode = keymapDefNode["if"];
+        if (conditionNode.IsDefined()) {
+          condition = YamlUtils::parseCondition(conditionNode);
+          if (!condition) {
+            qWarning() << "can't find a condition: "
+                       << QString::fromUtf8(conditionNode.as<std::string>().c_str());
+          }
         }
       }
 
-      handleKeymap(context, node);
+      YAML::Node argsNode = keymapDefNode["args"];
+      if (argsNode.IsMap()) {
+        assert(argsNode.IsMap());
+        CommandArgument args = parseArgs(argsNode);
+        add(key, CommandEvent(command, args, condition, source));
+      } else {
+        add(key, CommandEvent(command, condition, source));
+      }
     }
   } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
@@ -200,47 +152,64 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
-void KeymapManager::load() {
-  m_cmdShortcuts.clear();
-  m_keymaps.clear();
+KeymapManager::KeymapManager() {
+  connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
+          [=](const Package& pkg) {
+            for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+              if (it->second.source() == pkg.name) {
+                it = m_keymaps.erase(it);
+              } else {
+                ++it;
+              }
+            }
+            emit keymapUpdated();
+          });
+
+  connect(&CommandManager::singleton(), &CommandManager::commandRemoved, this,
+          [=](const QString& name) { m_cmdKeymapHash.erase(name); });
+}
+
+void KeymapManager::removeUserKeymap() {
+  for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+    if (it->second.source().isEmpty()) {
+      if (m_cmdKeymapHash.count(it->second.cmdName()) != 0 &&
+          m_cmdKeymapHash.at(it->second.cmdName()).cmd.source().isEmpty()) {
+        m_cmdKeymapHash.erase(it->second.cmdName());
+      }
+      it = m_keymaps.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
+void KeymapManager::loadUserKeymap() {
+  removeUserKeymap();
 
   QStringList existingKeymapPaths;
-  foreach (const QString& path, Constants::keymapPaths()) {
+  foreach (const QString& path, Constants::userKeymapPaths()) {
     if (QFile(path).exists()) {
       existingKeymapPaths.append(path);
     }
   }
 
-  if (existingKeymapPaths.isEmpty()) {
-    qDebug("copying default user keymap.yml");
-    if (Util::copy(":/keymap.yml", Constants::userKeymapPath())) {
-      existingKeymapPaths.append(Constants::userKeymapPath());
-      if (!QFile(Constants::userKeymapPath())
-               .setPermissions(
-                   QFileDevice::Permission::ReadOwner | QFileDevice::Permission::WriteOwner |
-                   QFileDevice::Permission::ReadGroup | QFileDevice::Permission::ReadOther)) {
-        qWarning("failed to set permission to %s", qPrintable(Constants::userKeymapPath()));
-      }
-    } else {
-      qWarning("failed to copy default keymap.yml");
-    }
-  }
-
-  foreach (const QString& path, existingKeymapPaths) { load(path); }
+  foreach (const QString& path, existingKeymapPaths) { load(path, ""); }
+  emit keymapUpdated();
 }
 
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
-  auto foundIter = m_cmdShortcuts.find(cmdName);
-  if (foundIter != m_cmdShortcuts.end()) {
-    auto range = m_keymaps.equal_range(foundIter->second);
+  auto foundIter = m_cmdKeymapHash.find(cmdName);
+  if (foundIter != m_cmdKeymapHash.end()) {
+    auto range = m_keymaps.equal_range(foundIter->second.key);
     for (auto it = range.first; it != range.second; it++) {
-      // Set shortcut if command event has no context or it has static context and it's satisfied
-      if (!it->second.hasContext()) {
-        return m_cmdShortcuts.at(cmdName);
+      // Set shortcut if command event has no condition or it has static condition and it's
+      // satisfied
+      if (!it->second.hasCondition()) {
+        return m_cmdKeymapHash.at(cmdName).key;
       } else {
-        Context* context = it->second.context();
-        if (context->isStatic() && context->isSatisfied()) {
-          return m_cmdShortcuts.at(cmdName);
+        auto condition = it->second.condition();
+        if (condition->isStatic() && condition->isSatisfied()) {
+          return m_cmdKeymapHash.at(cmdName).key;
         }
       }
     }
@@ -253,10 +222,10 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
 }
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
-  // If cmdEvent has static context, evaluate it immediately
-  if (cmdEvent.hasContext()) {
-    Context* context = cmdEvent.context();
-    if (context->isStatic() && !context->isSatisfied()) {
+  // If cmdEvent has static condition, evaluate it immediately
+  auto condition = cmdEvent.condition();
+  if (condition && condition->isStatic()) {
+    if (!condition->isSatisfied()) {
       return;
     }
   }
@@ -264,32 +233,33 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
-    if (cmdEvent.context() == ev.context()) {
-      // Remove registered keymap if both key and context match
-      if (m_cmdShortcuts.count(ev.cmdName()) != 0) {
-        m_cmdShortcuts.erase(ev.cmdName());
+    if (cmdEvent.condition() == ev.condition()) {
+      if (ev.source().isEmpty()) {
+        if (m_cmdKeymapHash.count(ev.cmdName()) != 0) {
+          m_cmdKeymapHash.erase(ev.cmdName());
+        }
+        // If source is empty (means coming from user keymap.yml), override existing keymap by
+        // removing registered keymap
+        m_keymaps.erase(it);
+        break;
+      } else {
+        // Ignore keymap defined in package keymap.yml
+        return;
       }
-      m_keymaps.erase(it);
-      break;
     }
   }
 
-  // Don't register shortcut if cmdEvent has dynamic context
-  if (!cmdEvent.hasContext()) {
-    m_cmdShortcuts[cmdEvent.cmdName()] = key;
-  } else {
-    Context* context = cmdEvent.context();
-    if (context->isStatic()) {
-      m_cmdShortcuts[cmdEvent.cmdName()] = key;
-    }
+  if (m_cmdKeymapHash.count(cmdEvent.cmdName()) == 0 || !cmdEvent.condition() ||
+      (m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition() &&
+       // shorter AND condition has higher priority
+       // e.g. 'onMac' has higher priority than 'onMac && vim.mode == normal'
+       cmdEvent.condition()->size() <
+           m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition()->size())) {
+    m_cmdKeymapHash.insert(std::make_pair(cmdEvent.cmdName(), Keymap{key, cmdEvent}));
+    emit shortcutUpdated(cmdEvent.cmdName(), key);
   }
 
   m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
-}
-
-void KeymapManager::clear() {
-  m_keymaps.clear();
-  m_cmdShortcuts.clear();
 }
 
 TextEditViewKeyHandler::TextEditViewKeyHandler() {

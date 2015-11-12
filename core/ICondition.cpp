@@ -1,10 +1,10 @@
 ﻿#include <QString>
 
-#include "IContext.h"
+#include "ICondition.h"
 
 namespace core {
 
-QString IContext::operatorString(Operator op) {
+QString ICondition::operatorString(Operator op) {
   switch (op) {
     case Operator::EQUALS:
       return "==";
@@ -15,7 +15,7 @@ QString IContext::operatorString(Operator op) {
   }
 }
 
-bool IContext::isSatisfied(Operator op, const QString& operand) {
+bool ICondition::isSatisfied(Operator op, const QString& operand) {
   switch (op) {
     case Operator::EQUALS:
       return key() == operand;

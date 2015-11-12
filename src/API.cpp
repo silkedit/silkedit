@@ -19,16 +19,17 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "Context.h"
-#include "PluginContext.h"
+#include "core/ConditionManager.h"
+#include "PluginCondition.h"
 #include "InputDialog.h"
 #include "ConfigDialog.h"
 #include "core/Config.h"
 #include "core/modifiers.h"
-#include "core/IContext.h"
+#include "core/ICondition.h"
 #include "util/DialogUtils.h"
 
 using core::Config;
+using core::ConditionManager;
 
 std::unordered_map<QString, std::function<void(msgpack::object)>> API::s_notifyFunctions;
 std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
@@ -39,14 +40,15 @@ void API::init() {
   s_requestFunctions.clear();
 
   s_notifyFunctions.insert(std::make_pair("alert", &alert));
+  s_notifyFunctions.insert(std::make_pair("loadKeymap", &loadKeymap));
   s_notifyFunctions.insert(std::make_pair("loadMenu", &loadMenu));
   s_notifyFunctions.insert(std::make_pair("loadToolbar", &loadToolbar));
   s_notifyFunctions.insert(std::make_pair("loadConfig", &loadConfig));
   s_notifyFunctions.insert(std::make_pair("registerCommands", &registerCommands));
   s_notifyFunctions.insert(std::make_pair("unregisterCommands", &unregisterCommands));
   s_notifyFunctions.insert(std::make_pair("open", &open));
-  s_notifyFunctions.insert(std::make_pair("registerContext", &registerContext));
-  s_notifyFunctions.insert(std::make_pair("unregisterContext", &unregisterContext));
+  s_notifyFunctions.insert(std::make_pair("registerCondition", &registerCondition));
+  s_notifyFunctions.insert(std::make_pair("unregisterCondition", &unregisterCondition));
   s_notifyFunctions.insert(std::make_pair("dispatchCommand", &dispatchCommand));
   s_notifyFunctions.insert(std::make_pair("setFont", &setFont));
 
@@ -96,6 +98,20 @@ void API::alert(msgpack::object obj) {
   msgBox.exec();
 }
 
+void API::loadKeymap(msgpack::v1::object obj) {
+  int numArgs = obj.via.array.size;
+  if (numArgs == 2) {
+    msgpack::type::tuple<std::string, std::string> params;
+    obj.convert(&params);
+    std::string pkgName = std::get<0>(params);
+    std::string ymlPath = std::get<1>(params);
+    KeymapManager::singleton().load(QString::fromUtf8(ymlPath.c_str()),
+                                    QString::fromUtf8(pkgName.c_str()));
+  } else {
+    qWarning("invalid arguments. numArgs: %d", numArgs);
+  }
+}
+
 void API::loadMenu(msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 2) {
@@ -136,13 +152,13 @@ void API::loadConfig(msgpack::v1::object obj) {
 }
 
 void API::registerCommands(msgpack::object obj) {
-  msgpack::type::tuple<std::vector<std::string>> params;
+  msgpack::type::tuple<std::vector<std::tuple<std::string, std::string>>> params;
   obj.convert(&params);
-  std::vector<std::string> commands = std::get<0>(params);
-  for (std::string& cmd : commands) {
+  std::vector<std::tuple<std::string, std::string>> commands = std::get<0>(params);
+  for (const std::tuple<std::string, std::string>& cmd : commands) {
     //    qDebug("command: %s", cmd.c_str());
-    CommandManager::add(
-        std::unique_ptr<ICommand>(new PluginCommand(QString::fromUtf8(cmd.c_str()))));
+    CommandManager::singleton().add(std::unique_ptr<ICommand>(
+        new PluginCommand(QString::fromUtf8(std::get<0>(cmd).c_str()), std::get<1>(cmd).c_str())));
   }
 }
 
@@ -152,27 +168,28 @@ void API::unregisterCommands(msgpack::v1::object obj) {
   std::vector<std::string> commands = std::get<0>(params);
   for (std::string& cmd : commands) {
     qDebug("unregisterCommand: %s", cmd.c_str());
-    CommandManager::remove(QString::fromUtf8(cmd.c_str()));
+    CommandManager::singleton().remove(QString::fromUtf8(cmd.c_str()));
   }
 }
 
-void API::registerContext(msgpack::object obj) {
+void API::registerCondition(msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 1) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
-    QString context = QString::fromUtf8(std::get<0>(params).c_str());
-    Context::add(context, std::move(std::unique_ptr<core::IContext>(new PluginContext(context))));
+    QString condition = QString::fromUtf8(std::get<0>(params).c_str());
+    ConditionManager::add(
+        condition, std::move(std::unique_ptr<core::ICondition>(new PluginCondition(condition))));
   }
 }
 
-void API::unregisterContext(msgpack::object obj) {
+void API::unregisterCondition(msgpack::object obj) {
   int numArgs = obj.via.array.size;
   if (numArgs == 1) {
     msgpack::type::tuple<std::string> params;
     obj.convert(&params);
-    QString context = QString::fromUtf8(std::get<0>(params).c_str());
-    Context::remove(context);
+    QString condition = QString::fromUtf8(std::get<0>(params).c_str());
+    ConditionManager::remove(condition);
   }
 }
 

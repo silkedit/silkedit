@@ -6,6 +6,7 @@
 #include "TabView.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
+#include "CommandManager.h"
 
 void OpenRecentItemManager::clear() {
   m_recentItems.clear();
@@ -60,6 +61,9 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   updateOpenRecentItems();
+
+  CommandManager::singleton().add(
+      std::move(std::unique_ptr<ICommand>(new ReopenLastClosedFileCommand)));
 }
 
 void OpenRecentItemManager::updateOpenRecentItems() {

@@ -65,7 +65,7 @@ ensure_dir() {
 clean() {
     # Somehow git clean fails to remove these directories, so remove them manually
     rm -rf build plugin_runner/bin
-    
+
     # clean submodules
     git submodule foreach git reset --hard HEAD
     git submodule foreach git clean -xdf
@@ -82,10 +82,10 @@ resolve() {
       git submodule sync
       git submodule update --init
     fi
-    
+
     # vim package
     if [ ! -d packages/vim ]; then
-      npm i https://api.github.com/repos/silkedit/vim/tarball/0.1.1
+      npm i https://api.github.com/repos/silkedit/vim/tarball/0.1.2
       mv node_modules/vim packages
       rm -rf node_modules
     fi
@@ -104,7 +104,7 @@ resolve() {
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list uchardet || brew install uchardet
       brew list boost || brew install boost --c++11
-      
+
       # Onigmo
       if [ ! -f /usr/local/lib/libonig.a ]; then
         cd Onigmo
@@ -244,9 +244,9 @@ make_installer() {
     if [ ! -d build ]; then
       build
     fi
-    
+
     cd build
-    
+
     if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
         macdeployqt SilkEdit.app
@@ -298,7 +298,7 @@ make_installer() {
             iscc ../../silkedit.iss
         fi
     fi
-    
+
     cd ..
 }
 

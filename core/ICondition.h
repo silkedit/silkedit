@@ -11,23 +11,23 @@ enum class Operator {
   NOT_EQUALS,
 };
 
-class IContext {
-  DISABLE_COPY_AND_MOVE(IContext)
+class ICondition {
+  DISABLE_COPY_AND_MOVE(ICondition)
  public:
   static QString operatorString(Operator op);
 
-  virtual ~IContext() = default;
+  virtual ~ICondition() = default;
 
   virtual bool isSatisfied(Operator op, const QString& operand);
 
   /**
-   * @brief if context is static or not
+   * @brief if condition is static or not
    * @return
    */
   virtual bool isStatic() = 0;
 
  protected:
-  IContext() = default;
+  ICondition() = default;
 
  private:
   virtual QString key() = 0;

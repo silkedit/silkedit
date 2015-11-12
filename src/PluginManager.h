@@ -20,7 +20,7 @@
 #include "core/msgpackHelper.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
-#include "core/IContext.h"
+#include "core/Icondition.h"
 
 class PluginManagerPrivate;
 
@@ -74,7 +74,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   void sendFocusChangedEvent(const QString& viewType);
   void sendCommandEvent(const QString& command, const CommandArgument& args);
   void callExternalCommand(const QString& cmd, const CommandArgument& args);
-  bool askExternalContext(const QString& name, core::Operator op, const QString& value);
+  bool askExternalCondition(const QString& name, core::Operator op, const QString& value);
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);

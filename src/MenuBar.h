@@ -26,7 +26,6 @@ class MenuBar : public QMenuBar {
 
   void themeActionTriggered(QAction* action);
   void showAboutDialog();
-  void showConfigDialog();
 };
 
 class ThemeMenu : public QMenu {
