@@ -77,7 +77,7 @@ QKeySequence Util::toSequence(const QString& aStr) {
 }
 
 QString Util::toString(const QKeySequence& keySeq) {
-  QString str = keySeq.toString();
+  QString str = keySeq.toString().toLower();
 
 #ifdef Q_OS_MAC
   replace(str, "ctrl", "cmd");

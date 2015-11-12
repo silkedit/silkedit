@@ -17,7 +17,7 @@
 <context>
     <name>ClearRecentItemListAction</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="101"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="105"/>
         <source>Clear List</source>
         <translation>履歴をクリア</translation>
     </message>
@@ -30,14 +30,24 @@
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/ConfigDialog.ui" line="38"/>
+        <location filename="../src/ConfigDialog.ui" line="65"/>
         <source>General</source>
         <translation>全般</translation>
     </message>
     <message>
-        <location filename="../src/ConfigDialog.ui" line="43"/>
+        <location filename="../src/ConfigDialog.ui" line="70"/>
+        <source>Keymap</source>
+        <translation>キーマップ</translation>
+    </message>
+    <message>
+        <location filename="../src/ConfigDialog.ui" line="75"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
+    </message>
+    <message>
+        <location filename="../src/ConfigDialog.ui" line="112"/>
+        <source>OK</source>
+        <translation>OK</translation>
     </message>
 </context>
 <context>
@@ -130,47 +140,47 @@
         <translation>テーマ:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="44"/>
+        <location filename="../src/GeneralConfigView.ui" line="57"/>
         <source>Font:</source>
         <translation>フォント:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="57"/>
+        <location filename="../src/GeneralConfigView.ui" line="70"/>
         <source>Size:</source>
         <translation>サイズ:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="72"/>
+        <location filename="../src/GeneralConfigView.ui" line="128"/>
         <source>Indent using spaces</source>
         <translation>スペースでインデント</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="81"/>
+        <location filename="../src/GeneralConfigView.ui" line="100"/>
         <source>Tab Width:</source>
         <translation>タブ幅:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="96"/>
+        <location filename="../src/GeneralConfigView.ui" line="42"/>
         <source>Language:</source>
         <translation>言語:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="109"/>
+        <location filename="../src/GeneralConfigView.ui" line="135"/>
         <source>Show Invisibles</source>
         <translation>改行文字を表示</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="116"/>
+        <location filename="../src/GeneralConfigView.ui" line="142"/>
         <source>End of Line string:</source>
         <translation>改行文字:</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="129"/>
+        <location filename="../src/GeneralConfigView.ui" line="155"/>
         <source>e.g. ¬</source>
         <translation>例 ¬</translation>
     </message>
     <message>
-        <location filename="../src/GeneralConfigView.ui" line="149"/>
+        <location filename="../src/GeneralConfigView.ui" line="175"/>
         <source>Restart to Apply Change</source>
         <translation>再起動して適用</translation>
     </message>
@@ -244,6 +254,55 @@
         <location filename="../src/PackagesView.cpp" line="483"/>
         <source>Removed</source>
         <translation>削除済み</translation>
+    </message>
+</context>
+<context>
+    <name>KeymapConfigView</name>
+    <message>
+        <location filename="../src/KeymapConfigView.ui" line="38"/>
+        <source>To override a keymap, right click a row, copy and paste it in keymap.yml</source>
+        <translation>編集するには右クリックでキーマップをコピーして、keymap.ymlに貼り付けて下さい</translation>
+    </message>
+    <message>
+        <location filename="../src/KeymapConfigView.ui" line="58"/>
+        <source>Open keymap.yml</source>
+        <translation>keymap.ymlを開く</translation>
+    </message>
+</context>
+<context>
+    <name>KeymapTableModel</name>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="111"/>
+        <source>Command</source>
+        <translation>コマンド</translation>
+    </message>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="113"/>
+        <source>Description</source>
+        <translation>説明</translation>
+    </message>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="115"/>
+        <source>Key</source>
+        <translation>キー</translation>
+    </message>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="117"/>
+        <source>If</source>
+        <translation>条件</translation>
+    </message>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="119"/>
+        <source>Source</source>
+        <translation>ソース</translation>
+    </message>
+</context>
+<context>
+    <name>KeymapTableView</name>
+    <message>
+        <location filename="../src/KeymapTableView.cpp" line="17"/>
+        <source>Copy</source>
+        <translation>コピー</translation>
     </message>
 </context>
 <context>
@@ -329,32 +388,32 @@
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="81"/>
+        <location filename="../src/MenuBar.cpp" line="90"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="81"/>
+        <location filename="../src/MenuBar.cpp" line="90"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="84"/>
+        <location filename="../src/MenuBar.cpp" line="93"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="84"/>
+        <location filename="../src/MenuBar.cpp" line="93"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="98"/>
+        <location filename="../src/MenuBar.cpp" line="107"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="100"/>
+        <location filename="../src/MenuBar.cpp" line="109"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>
@@ -362,12 +421,12 @@
 <context>
     <name>OpenRecentItemManager</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="43"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="44"/>
         <source>Open Recent</source>
         <translation>最近開いたファイル</translation>
     </message>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="45"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="46"/>
         <source>&amp;Reopen Last Closed File</source>
         <translation>最後に閉じたファイルを開く(&amp;R)</translation>
     </message>
@@ -671,6 +730,14 @@ Convert: convert current text in %1</source>
         <location filename="../src/ReloadEncodingDialog.cpp" line="52"/>
         <source>Current document is changed. This change will be lost after reloading. Do you want to continue?</source>
         <translation>ファイルが変更されています。再読み込みするとこの変更が破棄されますが、実行しますか？</translation>
+    </message>
+</context>
+<context>
+    <name>ReopenLastClosedFileCommand</name>
+    <message>
+        <location filename="../src/commands/ReopenLastClosedFileCommand.cpp" line="9"/>
+        <source>Reopen Last Closed File</source>
+        <translation>最後に閉じたファイルを開く</translation>
     </message>
 </context>
 <context>

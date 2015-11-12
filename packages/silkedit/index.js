@@ -173,8 +173,8 @@ module.exports = {
 			args["operation"] = "right"
 			move_cursor(args)
 		}
-		,"move_cursor_start_of_block": (args) => {
-			args["operation"] = "start_of_block"
+		,"move_cursor_start_of_line": (args) => {
+			args["operation"] = "start_of_line"
 			move_cursor(args)
 		}
 		,"move_cursor_first_non_blank_char": (args) => {
@@ -193,7 +193,7 @@ module.exports = {
 			args["operation"] = "prev_line"
 			move_cursor(args)
 		}
-		,"open_find_panel": () => {
+		,"find_and_replace": () => {
 			const win = silk.activeWindow()
 			if (win != null) {
 				win.openFindPanel()

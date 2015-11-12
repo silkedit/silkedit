@@ -10,19 +10,19 @@
     <height>300</height>
    </rect>
   </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>70</x>
      <y>50</y>
-     <width>617</width>
+     <width>621</width>
      <height>181</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="rootLayout">
+    <property name="leftMargin">
+     <number>5</number>
+    </property>
     <item>
      <widget class="QLineEdit" name="filterLine">
       <property name="clearButtonEnabled">

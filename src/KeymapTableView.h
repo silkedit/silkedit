@@ -27,6 +27,7 @@ class KeymapSortFilterProxyModel : public QSortFilterProxyModel {
 };
 
 class KeymapTableModel : public QAbstractTableModel {
+  Q_OBJECT
  public:
   static constexpr int COMMAND_INDEX = 0;
   static constexpr int DESCRIPTION_INDEX = 1;

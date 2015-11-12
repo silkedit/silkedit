@@ -21,7 +21,7 @@ KeymapTableView::KeymapTableView(QWidget* parent)
   horizontalHeader()->setStretchLastSection(true);
   horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
   connect(m_copy, &QAction::triggered, this, [=] {
-    if (const auto& keymap = m_model->keymapAt(currentIndex().row())) {
+    if (const auto& keymap = m_model->keymapAt(m_proxyModel->mapToSource(currentIndex()).row())) {
       QClipboard* clipboard = QApplication::clipboard();
       assert(clipboard);
       if (keymap->cmd.condition()) {
@@ -76,7 +76,7 @@ QVariant KeymapTableModel::data(const QModelIndex& index, int role) const {
   }
 
   if (role == Qt::TextAlignmentRole) {
-    return int(Qt::AlignHCenter | Qt::AlignVCenter);
+    return int(Qt::AlignVCenter);
   } else if (role == Qt::DisplayRole) {
     const Keymap& keymap = m_keymaps[index.row()];
     switch (index.column()) {

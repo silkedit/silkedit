@@ -65,3 +65,79 @@ toolbar:
 command:
   new_file:
     description: 新規作成
+  open:
+    description: 開く
+  open_file:
+    description: ファイルを開く
+  open_folder:
+    description: フォルダを開く
+  save:
+    description: 保存
+  save_as:
+    description: 名前を付けて保存
+  save_all:
+    description: 全て保存
+  close_all_tabs:
+    description: 全てのタブを閉じる
+  close_other_tabs:
+    description: 他のタブを閉じる
+  close_tab:
+    description: タブを閉じる
+  undo:
+    description: 元に戻す
+  redo:
+    description: やり直し
+  cut:
+    description: 切り取り
+  copy:
+    description: コピー
+  paste:
+    description: 貼り付け
+  select_all:
+    description: 全て選択
+  complete:
+    description: 補完
+  delete:
+    description: 1文字後を削除
+  delete_backward:
+    description: 1文字前を削除
+  move_cursor_up:
+    description: 上に移動
+  move_cursor_down:
+    description: 下に移動
+  move_cursor_left:
+    description: 左に移動
+  move_cursor_right:
+    description: 右に移動
+  move_cursor_start_of_line:
+    description: 行頭に移動
+  move_cursor_first_non_blank_char:
+    description: 行の最初の非空白文字に移動
+  move_cursor_last_char:
+    description: 行の最後の文字に移動
+  move_cursor_next_line:
+    description: 次の行に移動
+  move_cursor_prev_line:
+    description: 前の行に移動
+  find_and_replace:
+    description: 検索・置換
+  split_horizontally:
+    description: 水平方向に分割
+  split_vertically:
+    description: 垂直方向に分割
+  show_fonts:
+    description: フォントダイアログを表示
+  show_scope:
+    description: スコープを表示
+  show_scope_tree:
+    description: スコープをツリー形式で表示
+  new_package:
+    description: 新しいパッケージ
+  newline:
+    description: 改行
+  indent:
+    description: インデント
+  select_next_tab:
+    description: 次のタブ
+  select_previous_tab:
+    description: 前のタブ

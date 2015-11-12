@@ -81,7 +81,7 @@ int toMoveOperation(std::string str) {
     return QTextCursor::Left;
   } else if (str == "right") {
     return QTextCursor::Right;
-  } else if (str == "start_of_block") {
+  } else if (str == "start_of_line") {
     return QTextCursor::StartOfBlock;
   } else if (str == "first_non_blank_char") {
     return ViMoveOperation::FirstNonBlankChar;

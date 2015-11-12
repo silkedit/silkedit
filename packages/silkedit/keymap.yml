@@ -17,7 +17,7 @@
 - { key: cmd+c, command: copy }
 - { key: cmd+v, command: paste }
 - { key: cmd+a, command: select_all }
-- { key: cmd+f, command: open_find_panel }
+- { key: cmd+f, command: find_and_replace }
 - { key: ctrl+shift+p, command: show_scope }
 - { key: ctrl+space, command: complete }
 - { key: return, command: newline }
