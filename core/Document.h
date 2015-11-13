@@ -78,7 +78,7 @@ class Document : public QTextDocument {
    */
   void reload(const Encoding& encoding);
 
-signals:
+ signals:
   void pathUpdated(const QString& path);
   void languageChanged(const QString& scopeName);
   void encodingChanged(const Encoding& encoding);
@@ -99,6 +99,7 @@ signals:
 
   void setupLayout();
   void setupSyntaxHighlighter(Language* lang, const QString& text = "");
+  void init();
 };
 
 }  // namespace core

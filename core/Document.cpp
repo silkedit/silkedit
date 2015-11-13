@@ -49,8 +49,7 @@ Document::Document(const QString& path,
       m_encoding(encoding),
       m_lineSeparator(separator),
       m_syntaxHighlighter(nullptr) {
-  setDefaultFont(Config::singleton().font());
-  setupLayout();
+  init();
 
   int dotPos = path.lastIndexOf('.');
   if (dotPos >= 0) {
@@ -64,11 +63,16 @@ Document::Document(const QString& path,
   connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
 }
 
+void Document::init() {
+  setDefaultFont(Config::singleton().font());
+  setupLayout();
+}
+
 Document::Document()
     : m_encoding(Encoding::defaultEncoding()),
       m_lineSeparator(LineSeparator::defaultLineSeparator().separatorStr()),
       m_syntaxHighlighter(nullptr) {
-  setupLayout();
+  init();
   setupSyntaxHighlighter(LanguageProvider::defaultLanguage());
 }
 
