@@ -7,6 +7,7 @@
 
 #include "KeymapTableView.h"
 #include "KeymapManager.h"
+#include "CommandManager.h"
 #include "core/Util.h"
 
 using core::Util;
@@ -49,8 +50,17 @@ void KeymapTableView::contextMenuEvent(QContextMenuEvent* event) {
 }
 
 void KeymapTableModel::init() {
+  QSet<QString> keymapedCommands;
   for (const auto& it : KeymapManager::singleton().keymaps()) {
     m_keymaps.append(Keymap{it.first, it.second});
+    keymapedCommands.insert(it.second.cmdName());
+  }
+
+  // Add commands which doesn't have any keymap
+  for (const auto& it : CommandManager::singleton().commands()) {
+    if (!keymapedCommands.contains(it.first)) {
+      m_keymaps.append(Keymap{QKeySequence(), CommandEvent(it.first, "")});
+    }
   }
 }
 

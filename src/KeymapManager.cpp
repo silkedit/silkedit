@@ -101,9 +101,10 @@ void KeymapManager::load(const QString& filename, const QString& source) {
       if (argsNode.IsMap()) {
         assert(argsNode.IsMap());
         CommandArgument args = parseArgs(argsNode);
-        add(key, CommandEvent(command, args, condition, source));
+        add(key,
+            CommandEvent(command, args, condition, source, CommandEvent::USER_KEYMAP_PRIORITY));
       } else {
-        add(key, CommandEvent(command, condition, source));
+        add(key, CommandEvent(command, condition, source, CommandEvent::USER_KEYMAP_PRIORITY));
       }
     }
   } catch (const std::exception& e) {
@@ -169,12 +170,18 @@ KeymapManager::KeymapManager() {
           [=](const QString& name) { m_cmdKeymapHash.erase(name); });
 }
 
+void KeymapManager::removeShortcut(const QString& cmdName) {
+  m_cmdKeymapHash.erase(cmdName);
+  emit shortcutUpdated(cmdName, QKeySequence());
+}
+
 void KeymapManager::removeUserKeymap() {
   for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
-    if (it->second.source().isEmpty()) {
+    if (it->second.source() == CommandEvent::USER_KEYMAP_SOURCE) {
       if (m_cmdKeymapHash.count(it->second.cmdName()) != 0 &&
-          m_cmdKeymapHash.at(it->second.cmdName()).cmd.source().isEmpty()) {
-        m_cmdKeymapHash.erase(it->second.cmdName());
+          m_cmdKeymapHash.at(it->second.cmdName()).cmd.source() ==
+              CommandEvent::USER_KEYMAP_SOURCE) {
+        removeShortcut(it->second.cmdName());
       }
       it = m_keymaps.erase(it);
     } else {
@@ -193,7 +200,9 @@ void KeymapManager::loadUserKeymap() {
     }
   }
 
-  foreach (const QString& path, existingKeymapPaths) { load(path, ""); }
+  foreach (const QString& path, existingKeymapPaths) {
+    load(path, CommandEvent::USER_KEYMAP_SOURCE);
+  }
   emit keymapUpdated();
 }
 
@@ -221,6 +230,11 @@ bool KeymapManager::keyEventFilter(QKeyEvent* event) {
   return dispatch(event);
 }
 
+void KeymapManager::addShortcut(const QKeySequence& key, CommandEvent cmdEvent) {
+  m_cmdKeymapHash.insert(std::make_pair(cmdEvent.cmdName(), Keymap{key, cmdEvent}));
+  emit shortcutUpdated(cmdEvent.cmdName(), key);
+}
+
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   // If cmdEvent has static condition, evaluate it immediately
   auto condition = cmdEvent.condition();
@@ -234,12 +248,10 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
     if (cmdEvent.condition() == ev.condition()) {
-      if (ev.source().isEmpty()) {
+      if (ev.priority() < cmdEvent.priority()) {
         if (m_cmdKeymapHash.count(ev.cmdName()) != 0) {
           m_cmdKeymapHash.erase(ev.cmdName());
         }
-        // If source is empty (means coming from user keymap.yml), override existing keymap by
-        // removing registered keymap
         m_keymaps.erase(it);
         break;
       } else {
@@ -255,8 +267,7 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
        // e.g. 'onMac' has higher priority than 'onMac && vim.mode == normal'
        cmdEvent.condition()->size() <
            m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition()->size())) {
-    m_cmdKeymapHash.insert(std::make_pair(cmdEvent.cmdName(), Keymap{key, cmdEvent}));
-    emit shortcutUpdated(cmdEvent.cmdName(), key);
+    addShortcut(key, cmdEvent);
   }
 
   m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));

@@ -26,7 +26,7 @@ class KeymapManager : public QObject,
   ~KeymapManager() = default;
 
   void loadUserKeymap();
-  void load(const QString& filename, const QString& source = "");
+  void load(const QString& filename, const QString& source);
   QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
@@ -48,6 +48,8 @@ class KeymapManager : public QObject,
   std::unordered_map<QString, Keymap> m_cmdKeymapHash;
   QString m_partiallyMatchedKeyString;
   void removeUserKeymap();
+  void removeShortcut(const QString& cmdName);
+  void addShortcut(const QKeySequence& key, CommandEvent cmdEvent);
 };
 
 class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {
