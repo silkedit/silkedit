@@ -59,13 +59,13 @@ Document::Document(const QString& path,
   } else {
     qDebug("extension not found. path: %s", qPrintable(path));
   }
-
-  connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
 }
 
 void Document::init() {
+  // This font is used for an empty line because SyntaxHilighter can't set font in am empty line
   setDefaultFont(Config::singleton().font());
   setupLayout();
+  connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
 }
 
 Document::Document()

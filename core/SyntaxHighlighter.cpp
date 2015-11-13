@@ -118,6 +118,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
     if (format) {
+      // This font must match the Document default font
       format->setFont(m_font);
       if (m_lastScopeNode->isLeaf()) {
         Region region = m_lastScopeNode->region;
