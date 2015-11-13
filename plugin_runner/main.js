@@ -111,7 +111,6 @@ const handler = {
         }
 
         const packageJsonPath = path.join(dir, "package.json");
-        //console.log(packageJsonPath);
         // check if packageJsonPath exists by opening it. fs.exists is deprecated.
         fs.open(packageJsonPath, 'r', (err, fd) => {
           fd && fs.close(fd, (err) => {
