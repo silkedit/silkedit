@@ -47,7 +47,9 @@ class KeymapManager : public QObject,
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
   std::unordered_map<QString, Keymap> m_cmdKeymapHash;
   QString m_partiallyMatchedKeyString;
-  void removeUserKeymap();
+  std::unordered_map<QKeySequence, CommandEvent> m_emptyCmdKeymap;
+
+  void removeKeymap();
   void removeShortcut(const QString& cmdName);
   void addShortcut(const QKeySequence& key, CommandEvent cmdEvent);
 };

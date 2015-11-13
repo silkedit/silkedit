@@ -94,6 +94,18 @@ struct msg_notify {
   MSGPACK_DEFINE(type, method, param);
 };
 
+template <typename Method>
+struct msg_notify_no_param {
+  msg_notify_no_param() : type(NOTIFY) {}
+
+  msg_notify_no_param(Method method) : type(NOTIFY), method(method) {}
+
+  message_type_t type;
+  Method method;
+
+  MSGPACK_DEFINE(type, method);
+};
+
 }  // namespace rpc
 }  // namespace msgpack
 

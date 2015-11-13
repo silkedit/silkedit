@@ -79,6 +79,25 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
+  void reloadKeymaps();
+
+  void sendNotification(const std::string& method) {
+    if (m_isStopped) {
+      return;
+    }
+
+    if (!m_socket) {
+      qWarning("socket has not been initialized yet");
+      return;
+    }
+
+    msgpack::sbuffer sbuf;
+    msgpack::rpc::msg_notify_no_param<std::string> notify;
+    notify.method = method;
+    msgpack::pack(sbuf, notify);
+
+    m_socket->write(sbuf.data(), sbuf.size());
+  }
 
   template <typename Parameter>
   void sendNotification(const std::string& method, const Parameter& params) {

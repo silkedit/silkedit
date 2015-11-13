@@ -501,6 +501,10 @@ GetRequestResponse* PluginManager::sendGetRequest(const QString& url, int timeou
   return nullptr;
 }
 
+void PluginManager::reloadKeymaps() {
+  sendNotification("reloadKeymaps");
+}
+
 PluginManager::PluginManager()
     : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 

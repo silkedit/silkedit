@@ -11,6 +11,7 @@
 #include "KeymapManager.h"
 #include "CommandEvent.h"
 #include "CommandManager.h"
+#include "PluginManager.h"
 #include "core/Constants.h"
 #include "core/Util.h"
 #include "core/AndConditionExpression.h"
@@ -78,10 +79,19 @@ void KeymapManager::load(const QString& filename, const QString& source) {
         continue;
       }
 
-      QString keyStr = QString::fromUtf8(keymapDefNode["key"].as<std::string>().c_str());
+      YAML::Node keyNode = keymapDefNode["key"];
+      if (!keyNode.IsScalar()) {
+        qWarning("key is not defined");
+        continue;
+      }
+      QString keyStr = QString::fromUtf8(keyNode.as<std::string>().c_str());
       QKeySequence key = Util::toSequence(keyStr);
-      std::string commandStr = keymapDefNode["command"].as<std::string>();
-      QString command = QString::fromUtf8(commandStr.c_str());
+      YAML::Node commandNode = keymapDefNode["command"];
+      QString command = "";
+      if (commandNode.IsScalar()) {
+        const std::string& commandStr = commandNode.as<std::string>();
+        command = QString::fromUtf8(commandStr.c_str());
+      }
       //      qDebug() << "key: " << key << ", command: " << command;
 
       YAML::Node ifNode = keymapDefNode["if"];
@@ -107,6 +117,8 @@ void KeymapManager::load(const QString& filename, const QString& source) {
         add(key, CommandEvent(command, condition, source, CommandEvent::USER_KEYMAP_PRIORITY));
       }
     }
+
+    emit keymapUpdated();
   } catch (const std::exception& e) {
     qWarning() << "can't load yaml file: " << filename << ", reason: " << e.what();
   } catch (...) {
@@ -175,23 +187,16 @@ void KeymapManager::removeShortcut(const QString& cmdName) {
   emit shortcutUpdated(cmdName, QKeySequence());
 }
 
-void KeymapManager::removeUserKeymap() {
-  for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
-    if (it->second.source() == CommandEvent::USER_KEYMAP_SOURCE) {
-      if (m_cmdKeymapHash.count(it->second.cmdName()) != 0 &&
-          m_cmdKeymapHash.at(it->second.cmdName()).cmd.source() ==
-              CommandEvent::USER_KEYMAP_SOURCE) {
-        removeShortcut(it->second.cmdName());
-      }
-      it = m_keymaps.erase(it);
-    } else {
-      it++;
-    }
-  }
+void KeymapManager::removeKeymap() {
+  m_emptyCmdKeymap.clear();
+  m_cmdKeymapHash.clear();
+  m_keymaps.clear();
 }
 
 void KeymapManager::loadUserKeymap() {
-  removeUserKeymap();
+  bool firstTime = m_keymaps.empty();
+
+  removeKeymap();
 
   QStringList existingKeymapPaths;
   foreach (const QString& path, Constants::userKeymapPaths()) {
@@ -203,7 +208,11 @@ void KeymapManager::loadUserKeymap() {
   foreach (const QString& path, existingKeymapPaths) {
     load(path, CommandEvent::USER_KEYMAP_SOURCE);
   }
-  emit keymapUpdated();
+
+  // When reloading user keymap, reload package keymaps again
+  if (!firstTime) {
+    PluginManager::singleton().reloadKeymaps();
+  }
 }
 
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
@@ -244,6 +253,21 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
+  // Empty command keymap is for disabling default keymap
+  // If you want to disable '- { key: esc, command: vim.command_mode, if: vim.mode == insert }',
+  // you need to define this empty command keymap - { key: esc, command: , if: vim.mode ==
+  // insert }
+  if (cmdEvent.cmdName().isEmpty()) {
+    m_emptyCmdKeymap.insert(
+        std::make_pair(key, CommandEvent("", condition, CommandEvent::USER_KEYMAP_SOURCE,
+                                         CommandEvent::USER_KEYMAP_PRIORITY)));
+    return;
+  } else if (m_emptyCmdKeymap.count(key) != 0 &&
+             m_emptyCmdKeymap.at(key).condition() == condition) {
+    return;
+  }
+
+  // Remove existing keymap if its priority is lower
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
@@ -270,7 +294,7 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     addShortcut(key, cmdEvent);
   }
 
-  m_keymaps.insert(std::make_pair(key, std::move(cmdEvent)));
+  m_keymaps.insert(std::make_pair(key, cmdEvent));
 }
 
 TextEditViewKeyHandler::TextEditViewKeyHandler() {
