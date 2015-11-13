@@ -21,6 +21,7 @@ var commands = {}
 var conditions = {}
 var eventFilters = {}
 var configs = {}
+var packagePaths = []
 
 function getDirs(dir) {
   const files = fs.readdirSync(dir)
@@ -36,23 +37,25 @@ function getDirs(dir) {
   return dirs;
 }
 
-const c = rpc.createClient(socketFile, () => {
-  const packagePaths = process.argv.slice(packagesBeginIndex)
-  GLOBAL.silk = require('./silkedit')(c, locale, conditions, eventFilters, configs, commands);
-
-  sync(c, 'invoke');
-  
+function callForeachPackageDir(fn) {
   packagePaths.forEach((dirPath) => {
     fs.open(dirPath, 'r', (err, fd) => {
       fd && fs.close(fd, (err) => {
         const dirs = getDirs(dirPath);
         dirs.forEach((dir) => {
-          silk.loadPackage(path.join(dirPath, dir));
+          fn(path.join(dirPath, dir));
         });    
       })
     })
+  })  
+}
 
-  })
+const c = rpc.createClient(socketFile, () => {
+  packagePaths = process.argv.slice(packagesBeginIndex)
+  GLOBAL.silk = require('./silkedit')(c, locale, conditions, eventFilters, configs, commands);
+
+  sync(c, 'invoke');
+  callForeachPackageDir(silk.loadPackage)
 });
 
 // Call user's package code in runInFiber!!
@@ -95,6 +98,41 @@ const handler = {
   }
   ,"loadPackage": (path) => {
     silk.loadPackage(path)
+  }
+  ,"reloadKeymaps": () => {
+    
+    const loadKeymap = (dir) => {
+      var pjson, configPath, doc, module
+
+      fs.readdir(dir, (err, files) => {
+        if (err) {
+          console.warn(err.message);
+          return;
+        }
+
+        const packageJsonPath = path.join(dir, "package.json");
+        // check if packageJsonPath exists by opening it. fs.exists is deprecated.
+        fs.open(packageJsonPath, 'r', (err, fd) => {
+          fd && fs.close(fd, (err) => {
+            pjson = require(packageJsonPath);
+            if (pjson.name == null) {
+              console.warn('missing package name')
+              return
+            }
+         
+            // load keymap
+            const keymapPath = path.join(dir, "keymap.yml");
+            fs.open(keymapPath, 'r', (err, fd) => {
+              fd && fs.close(fd, (err) => {
+                silk.loadKeymap(pjson.name, keymapPath);
+              })
+            })
+          })
+        })
+      })
+    }
+    
+    callForeachPackageDir(loadKeymap)
   }
 
 
