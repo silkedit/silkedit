@@ -607,7 +607,7 @@ int TextEditView::lineNumberAreaWidth() {
     ++digits;
   }
 
-  int space = 20 + fontMetrics().width(QLatin1Char('9')) * digits;
+  int space = 20 + Config::singleton().fontMetrics().width(QLatin1Char('9')) * digits;
 
   return space;
 }
@@ -705,7 +705,7 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
       painter.setPen(d_ptr->m_lineNumberArea->lineNumberColor());
       painter.drawText(0, top,
                        d_ptr->m_lineNumberArea->width() - d_ptr->m_lineNumberArea->PADDING_RIGHT,
-                       fontMetrics().height(), Qt::AlignRight, number);
+                       Config::singleton().fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();
