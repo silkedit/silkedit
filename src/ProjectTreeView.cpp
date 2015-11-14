@@ -50,15 +50,17 @@ bool ProjectTreeView::open(const QString& dirPath) {
     m_model = new MyFileSystemModel(this);
     connect(m_model, &QFileSystemModel::directoryLoaded, this,
             &ProjectTreeView::focusRootDirectory);
-    m_model->setRootPath(dirPath);
 
     FilterModel* const filter = new FilterModel(this, dirPath);
     filter->setSourceModel(m_model);
 
     setModel(filter);
     if (targetDir.isRoot()) {
-      setRootIndex(m_model->index(dirPath));
+      // To show all drives on Windows, set "" as root path
+      m_model->setRootPath("");
+      setRootIndex(filter->mapFromSource(m_model->index(m_model->rootPath())));
     } else {
+      m_model->setRootPath(dirPath);
       QDir parentDir(dirPath);
       parentDir.cdUp();
       QModelIndex rootIndex = filter->mapFromSource(m_model->index(parentDir.absolutePath()));
@@ -224,23 +226,9 @@ ProjectTreeView::~ProjectTreeView() {
   qDebug("~ProjectTreeView");
 }
 
+// Show only specific directory content
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
-  QString path;
-  QModelIndex pathIndex = sourceParent.child(sourceRow, 0);
-  while (pathIndex.parent().isValid()) {
-    path = sourceModel()->data(pathIndex).toString() + "/" + path;
-    pathIndex = pathIndex.parent();
-  }
-
-#if defined(Q_OS_MAC) || defined(Q_OS_LINUX)
-  // Get the leading "/" on Mac and Linux.
-  path = sourceModel()->data(pathIndex).toString() + path;
-#else
-  // Get the drive on Windows. This becomes like "C:", so append "/".
-  path = sourceModel()->data(pathIndex).toString() + "/" + path;
-#endif
-
-  // First test matches paths before we've reached the target directory.
-  // Second test matches paths after we've passed the target directory.
-  return dir.startsWith(path) || path.startsWith(dir);
+  QModelIndex pathIndex = sourceModel()->index(sourceRow, 0, sourceParent);
+  QString path = sourceModel()->data(pathIndex, QFileSystemModel::FilePathRole).toString();
+  return dir.startsWith(path, Qt::CaseInsensitive) || path.startsWith(dir, Qt::CaseInsensitive);
 }
