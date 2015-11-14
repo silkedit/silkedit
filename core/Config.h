@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <fstream>
 #include <QColor>
+#include <QFontMetrics>
 #include <QFile>
 #include <QString>
 #include <QObject>
@@ -35,6 +36,8 @@ class Config : public QObject, public Singleton<Config> {
 
   QFont font() { return m_font; }
   void setFont(const QFont& font);
+
+  QFontMetrics fontMetrics() { return QFontMetrics(m_font); }
 
   int tabWidth();
   void setTabWidth(int tabWidth);

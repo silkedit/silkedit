@@ -600,14 +600,14 @@ void TextEditView::find(const QString& text,
 }
 
 int TextEditView::lineNumberAreaWidth() {
-  int digits = 1;
+  int digits = 3;
   int max = qMax(1, blockCount());
-  while (max >= 100) {
+  while (max >= 1000) {
     max /= 10;
     ++digits;
   }
 
-  int space = 20 + fontMetrics().width(QLatin1Char('9')) * digits;
+  int space = 10 + Config::singleton().fontMetrics().width(QLatin1Char('9')) * digits;
 
   return space;
 }
@@ -701,10 +701,11 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   while (block.isValid() && top <= event->rect().bottom()) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
+      painter.setFont(Config::singleton().font());
       painter.setPen(d_ptr->m_lineNumberArea->lineNumberColor());
       painter.drawText(0, top,
                        d_ptr->m_lineNumberArea->width() - d_ptr->m_lineNumberArea->PADDING_RIGHT,
-                       fontMetrics().height(), Qt::AlignRight, number);
+                       Config::singleton().fontMetrics().height(), Qt::AlignRight, number);
     }
 
     block = block.next();
