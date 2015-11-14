@@ -36,6 +36,7 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(n
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
+  setFocusPolicy(Qt::ClickFocus);
   connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(open(QModelIndex)));
 }
 
