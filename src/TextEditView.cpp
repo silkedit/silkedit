@@ -701,6 +701,7 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   while (block.isValid() && top <= event->rect().bottom()) {
     if (block.isVisible() && bottom >= event->rect().top()) {
       QString number = QString::number(blockNumber + 1);
+      painter.setFont(Config::singleton().font());
       painter.setPen(d_ptr->m_lineNumberArea->lineNumberColor());
       painter.drawText(0, top,
                        d_ptr->m_lineNumberArea->width() - d_ptr->m_lineNumberArea->PADDING_RIGHT,
