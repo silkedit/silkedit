@@ -600,14 +600,14 @@ void TextEditView::find(const QString& text,
 }
 
 int TextEditView::lineNumberAreaWidth() {
-  int digits = 1;
+  int digits = 3;
   int max = qMax(1, blockCount());
-  while (max >= 100) {
+  while (max >= 1000) {
     max /= 10;
     ++digits;
   }
 
-  int space = 20 + Config::singleton().fontMetrics().width(QLatin1Char('9')) * digits;
+  int space = 10 + Config::singleton().fontMetrics().width(QLatin1Char('9')) * digits;
 
   return space;
 }
