@@ -28,6 +28,9 @@ StatusBar::StatusBar(QMainWindow* window)
   // Mac
   setSizeGripEnabled(false);
 #endif
+  m_langComboBox->setFocusPolicy(Qt::NoFocus);
+  m_separatorComboBox->setFocusPolicy(Qt::NoFocus);
+  m_encComboBox->setFocusPolicy(Qt::NoFocus);
 
   // StatusBar becomes the owner of these widgets
   addPermanentWidget(m_separatorComboBox);
