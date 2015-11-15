@@ -14,7 +14,7 @@
 #include "DocumentManager.h"
 #include "core/Config.h"
 #include "API.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
@@ -953,19 +953,19 @@ void TextEditView::request(TextEditView* view,
                            msgpack::rpc::msgid_t msgId,
                            const msgpack::object&) {
   if (method == "text") {
-    PluginManager::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
+    HelperProxy::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
                                             msgpack::type::nil(), msgId);
   } else if (method == "scopeName") {
     QString scope = view->d_ptr->m_document->scopeName(view->textCursor().position());
-    PluginManager::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
+    HelperProxy::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
                                             msgId);
   } else if (method == "scopeTree") {
     QString scopeTree = view->d_ptr->m_document->scopeTree();
-    PluginManager::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
+    HelperProxy::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
                                             msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 

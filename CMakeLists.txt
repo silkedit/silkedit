@@ -108,8 +108,8 @@ if(APPLE)
   # bundle packages
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
-  # bundle plugin runner (node.js)
-  file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  # bundle silkedit_helper (node.js)
+  file(COPY ${PROJECT_SOURCE_DIR}/helper DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
@@ -137,8 +137,8 @@ else (APPLE)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
 
-  # Copy plugin_runner (node.js)
-  file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION .)
+  # Copy silkedit_helper (node.js)
+  file(COPY ${PROJECT_SOURCE_DIR}/helper DESTINATION .)
 
   # Copy onig.dll
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)

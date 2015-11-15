@@ -22,7 +22,7 @@
 #include "core/Singleton.h"
 #include "core/Icondition.h"
 
-class PluginManagerPrivate;
+class HelperProxyPrivate;
 
 class ResponseResult : public QObject {
   Q_OBJECT
@@ -62,12 +62,15 @@ class GetRequestResponse : public QObject {
   void onFailed(const QString& error);
 };
 
-class PluginManager : public QObject, public core::Singleton<PluginManager> {
+/**
+ * @brief Proxy object to interact with silkedit_helper Node.js process
+ */
+class HelperProxy : public QObject, public core::Singleton<HelperProxy> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(PluginManager)
+  DISABLE_COPY_AND_MOVE(HelperProxy)
 
  public:
-  ~PluginManager();
+  ~HelperProxy();
 
   void init();
 
@@ -216,13 +219,13 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   static std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> s_eventLoopMap;
   static const int TIMEOUT_IN_MS = 1000;
 
-  std::unique_ptr<PluginManagerPrivate> d;
+  std::unique_ptr<HelperProxyPrivate> d;
   bool m_isStopped;
   QLocalSocket* m_socket;
 
-  friend class PluginManagerPrivate;
-  friend class core::Singleton<PluginManager>;
-  PluginManager();
+  friend class HelperProxyPrivate;
+  friend class core::Singleton<HelperProxy>;
+  HelperProxy();
 
   // Send a request via msgpack rpc.
   template <typename Parameter, typename Result>
@@ -230,7 +233,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
                                                       const Parameter& params,
                                                       int timeoutInMs) {
     if (m_isStopped) {
-      throw std::runtime_error("plugin runner is not running");
+      throw std::runtime_error("silkedit_helper is not running");
     }
 
     //    qDebug("sendRequest. method: %s", method.c_str());
@@ -260,7 +263,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
     if (timeoutInMs > 0) {
       timer.start(timeoutInMs);
     }
-    // start a local event loop to wait until plugin runner returns response or timeout occurs
+    // start a local event loop to wait until helper returns response or timeout occurs
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
     if (result->isReady()) {
@@ -280,7 +283,7 @@ class PluginManager : public QObject, public core::Singleton<PluginManager> {
   msgpack::rpc::msgid_t sendRequestInternalAsync(const std::string& method,
                                                  const Parameter& params) {
     if (m_isStopped) {
-      throw std::runtime_error("plugin runner is not running");
+      throw std::runtime_error("silkedit_helper is not running");
     }
 
     msgpack::sbuffer sbuf;

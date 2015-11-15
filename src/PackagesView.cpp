@@ -11,7 +11,7 @@
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "core/Constants.h"
 #include "core/scoped_guard.h"
 #include "core/PackageManager.h"
@@ -347,7 +347,7 @@ AvailablePackagesViewModel::AvailablePackagesViewModel(QObject* parent)
 
 void AvailablePackagesViewModel::loadPackages() {
   // todo: make packages source configurable
-  GetRequestResponse* response = PluginManager::singleton().sendGetRequest(
+  GetRequestResponse* response = HelperProxy::singleton().sendGetRequest(
       "https://raw.githubusercontent.com/silkedit/packages/master/packages.json", TIMEOUT_IN_MS);
   if (response) {
     connect(response, &GetRequestResponse::onFailed, this, [=](const QString& error) {
@@ -438,7 +438,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
 
             qDebug("installation succeeded. row: %d", index.row());
             emit processSucceeded(index);
-            PluginManager::singleton().loadPackage(pkg.name);
+            HelperProxy::singleton().loadPackage(pkg.name);
           });
   const QStringList args{"i", "--production", "--prefix", QDir::tempPath(), tarballUrl};
   npmProcess->start(Constants::npmPath(), args);
@@ -484,8 +484,8 @@ QString InstalledPackagesViewModel::TextAfterProcess() {
 }
 
 void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, const Package& pkg) {
-  // Call removePackage in plugin_runner side first to unregister commands
-  bool success = PluginManager::singleton().removePackage(pkg.name);
+  // Call removePackage in silkedit_helper side first to unregister commands
+  bool success = HelperProxy::singleton().removePackage(pkg.name);
   if (!success) {
     qWarning("Failed to remove package: %s", qPrintable(pkg.name));
     emit processFailed(index);

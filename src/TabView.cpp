@@ -12,7 +12,7 @@
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
 #include "DocumentManager.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Constants.h"
@@ -366,9 +366,9 @@ void TabView::request(TabView* view,
                       msgpack::rpc::msgid_t msgId,
                       const msgpack::object&) {
   if (method == "count") {
-    PluginManager::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
   } else if (method == "currentIndex") {
-    PluginManager::singleton().sendResponse(view->currentIndex(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(view->currentIndex(), msgpack::type::nil(), msgId);
   } else {
     qDebug("method: %s not found", qPrintable(method));
   }

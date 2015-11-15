@@ -12,7 +12,7 @@
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "core/ConditionManager.h"
 #include "MenuBar.h"
 #include "core/PackageManager.h"
@@ -56,7 +56,7 @@ int main(int argv, char** args) {
   }
 
   API::init();
-  PluginManager::singleton().init();
+  HelperProxy::singleton().init();
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {

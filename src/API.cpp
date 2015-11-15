@@ -10,8 +10,8 @@
 #include "API.h"
 #include "Window.h"
 #include "CommandManager.h"
-#include "commands/PluginCommand.h"
-#include "PluginManager.h"
+#include "commands/PackageCommand.h"
+#include "HelperProxy.h"
 #include "TextEditView.h"
 #include "SilkApp.h"
 #include "TabView.h"
@@ -20,7 +20,7 @@
 #include "ProjectManager.h"
 #include "KeymapManager.h"
 #include "core/ConditionManager.h"
-#include "PluginCondition.h"
+#include "PackageCondition.h"
 #include "InputDialog.h"
 #include "ConfigDialog.h"
 #include "core/Config.h"
@@ -158,7 +158,7 @@ void API::registerCommands(msgpack::object obj) {
   for (const std::tuple<std::string, std::string>& cmd : commands) {
     //    qDebug("command: %s", cmd.c_str());
     CommandManager::singleton().add(std::unique_ptr<ICommand>(
-        new PluginCommand(QString::fromUtf8(std::get<0>(cmd).c_str()), std::get<1>(cmd).c_str())));
+        new PackageCommand(QString::fromUtf8(std::get<0>(cmd).c_str()), std::get<1>(cmd).c_str())));
   }
 }
 
@@ -179,7 +179,7 @@ void API::registerCondition(msgpack::object obj) {
     obj.convert(&params);
     QString condition = QString::fromUtf8(std::get<0>(params).c_str());
     ConditionManager::add(
-        condition, std::move(std::unique_ptr<core::ICondition>(new PluginCondition(condition))));
+        condition, std::move(std::unique_ptr<core::ICondition>(new PackageCondition(condition))));
   }
 }
 
@@ -196,36 +196,36 @@ void API::unregisterCondition(msgpack::object obj) {
 void API::activeView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TextEditView* editView = SilkApp::activeEditView();
   if (editView) {
-    PluginManager::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(editView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
 void API::activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TabView* tabView = SilkApp::activeTabView();
   if (tabView) {
-    PluginManager::singleton().sendResponse(tabView->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(tabView->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
 void API::activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object) {
   TabViewGroup* tabViewGroup = SilkApp::activeTabViewGroup();
   if (tabViewGroup) {
-    PluginManager::singleton().sendResponse(tabViewGroup->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(tabViewGroup->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
 void API::activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object) {
   Window* window = SilkApp::activeWindow();
   if (window) {
-    PluginManager::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(window->id(), msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
@@ -248,9 +248,9 @@ void API::showFolderDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
       qDebug() << path.c_str();
     }
     if (paths.empty()) {
-      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
     } else {
-      PluginManager::singleton().sendResponse(paths.front(), msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(paths.front(), msgpack::type::nil(), msgId);
     }
   }
 }
@@ -267,7 +267,7 @@ void API::showDialogImpl(msgpack::rpc::msgid_t msgId,
     for (std::string& path : paths) {
       qDebug() << path.c_str();
     }
-    PluginManager::singleton().sendResponse(paths, msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(paths, msgpack::type::nil(), msgId);
   }
 }
 
@@ -276,7 +276,7 @@ void API::windows(msgpack::rpc::msgid_t msgId, msgpack::object) {
   for (Window* w : Window::windows()) {
     ids.push_back(w->id());
   }
-  PluginManager::singleton().sendResponse(ids, msgpack::type::nil(), msgId);
+  HelperProxy::singleton().sendResponse(ids, msgpack::type::nil(), msgId);
 }
 
 void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
@@ -289,19 +289,19 @@ void API::getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj) {
     if (Config::singleton().contains(name)) {
       QString value = Config::singleton().value(name);
       std::string valueStr = value.toUtf8().constData();
-      PluginManager::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(valueStr, msgpack::type::nil(), msgId);
     } else {
-      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
     }
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
 void API::version(msgpack::rpc::msgid_t msgId, msgpack::object) {
   std::string version = SilkApp::applicationVersion().toUtf8().constData();
-  PluginManager::singleton().sendResponse(version, msgpack::type::nil(), msgId);
+  HelperProxy::singleton().sendResponse(version, msgpack::type::nil(), msgId);
 }
 
 void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
@@ -312,9 +312,9 @@ void API::showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object) {
   std::string family = font.family().toUtf8().constData();
   auto fontParams = std::make_tuple(family, font.pointSize());
   if (ok) {
-    PluginManager::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(fontParams, msgpack::type::nil(), msgId);
   } else {
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
@@ -340,19 +340,19 @@ void API::showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object obj) 
     if (result == QDialog::Accepted) {
       QString text = dialog.textValue();
       std::string textStr = text.toUtf8().constData();
-      PluginManager::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
     } else {
-      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
     }
   } else {
     qWarning("invalid arguments. numArgs: %d", numArgs);
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
 void API::newInputDialog(msgpack::rpc::msgid_t msgId, msgpack::v1::object) {
   InputDialog* dialog = new InputDialog();
-  PluginManager::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
+  HelperProxy::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
 }
 
 void API::open(msgpack::object obj) {

@@ -9,7 +9,7 @@
 #include "core/ThemeProvider.h"
 #include "core/Config.h"
 #include "SilkApp.h"
-#include "commands/PluginCommand.h"
+#include "commands/PackageCommand.h"
 #include "CommandManager.h"
 #include "version.h"
 #include "ConfigDialog.h"

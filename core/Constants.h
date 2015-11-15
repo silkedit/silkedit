@@ -27,11 +27,11 @@ class Constants {
   static QString userKeymapPath();
   static QString userPackagesDirPath();
   static QString packagesDirName();
-  static QString pluginRunnerPath();
+  static QString helperPath();
   static QString npmPath();
-  static QString pluginServerSocketPath();
+  static QString helperSocketPath();
   static QString translationDirPath();
-  static QString pluginServerDir();
+  static QString helperDir();
   static QString silkHomePath();
   static QString recentOpenHistoryPath();
   static QString tabViewInformationPath();

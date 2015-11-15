@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ja">
+<TS version="2.0" language="ja">
 <context>
     <name>AvailablePackagesViewModel</name>
     <message>
@@ -66,19 +66,19 @@
     </message>
     <message>
         <source>Re&amp;gex</source>
-        <translation type="vanished">正規表現(&amp;G)</translation>
+        <translation>正規表現(&amp;G)</translation>
     </message>
     <message>
         <source>&amp;Whole Word</source>
-        <translation type="vanished">単語の検索(&amp;W)</translation>
+        <translation>単語の検索(&amp;W)</translation>
     </message>
     <message>
         <source>&amp;Preserve Case</source>
-        <translation type="vanished">大文字小文字の違いを保存(&amp;P)</translation>
+        <translation>大文字小文字の違いを保存(&amp;P)</translation>
     </message>
     <message>
         <source>In &amp;Selection</source>
-        <translation type="vanished">選択した範囲内のみ(&amp;S)</translation>
+        <translation>選択した範囲内のみ(&amp;S)</translation>
     </message>
     <message>
         <location filename="../src/FindReplaceView.ui" line="26"/>
@@ -204,43 +204,51 @@
     <name>GeneralSettingsView</name>
     <message>
         <source>Theme:</source>
-        <translation type="vanished">テーマ:</translation>
+        <translation>テーマ:</translation>
     </message>
     <message>
         <source>Font:</source>
-        <translation type="vanished">フォント:</translation>
+        <translation>フォント:</translation>
     </message>
     <message>
         <source>Size:</source>
-        <translation type="vanished">サイズ:</translation>
+        <translation>サイズ:</translation>
     </message>
     <message>
         <source>Indent using spaces</source>
-        <translation type="vanished">スペースでインデント</translation>
+        <translation>スペースでインデント</translation>
     </message>
     <message>
         <source>Tab Width:</source>
-        <translation type="vanished">タブ幅:</translation>
+        <translation>タブ幅:</translation>
     </message>
     <message>
         <source>Language:</source>
-        <translation type="vanished">言語:</translation>
+        <translation>言語:</translation>
     </message>
     <message>
         <source>Restart to Apply Change</source>
-        <translation type="vanished">再起動して適用</translation>
+        <translation>再起動して適用</translation>
     </message>
     <message>
         <source>System Language</source>
-        <translation type="vanished">&lt;システム言語&gt;</translation>
+        <translation>&lt;システム言語&gt;</translation>
     </message>
     <message>
         <source>English</source>
-        <translation type="vanished">英語</translation>
+        <translation>英語</translation>
     </message>
     <message>
         <source>Japanese</source>
-        <translation type="vanished">日本語</translation>
+        <translation>日本語</translation>
+    </message>
+</context>
+<context>
+    <name>HelperProxyPrivate</name>
+    <message>
+        <location filename="../src/HelperProxy.cpp" line="174"/>
+        <source>silkedit_helper process has crashed. SilkEdit can continue to run but you can&apos;t use any packages. Do you want to restart the silkedit_helper process?</source>
+        <translation>silkedit_helperプロセスがクラッシュしました。SilkEditはこのままでも動作しますが、パッケージを利用することができません。silkedit_helperプロセスを再起動しますか？</translation>
     </message>
 </context>
 <context>
@@ -435,7 +443,7 @@
     <name>PackageDelegate</name>
     <message>
         <source>Installed</source>
-        <translation type="vanished">インストール済み</translation>
+        <translation>インストール済み</translation>
     </message>
     <message>
         <location filename="../src/PackagesView.cpp" line="270"/>

@@ -8,8 +8,8 @@ node_modules
 /lib/
 /build/
 /include/
-/plugin_runner/bin
-/plugin_runner/lib
-/plugin_runner/nodejs
+/helper/bin
+/helper/lib
+/helper/nodejs
 /yaml-cpp-*
 /packages/vim

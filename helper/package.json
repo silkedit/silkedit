@@ -1,0 +1,14 @@
+{
+  "name": "silkedit_helper",
+  "version": "1.0.0",
+  "description": "Helper to load and run SilkEdit packages, run Node.js code",
+  "main": "main.js",
+  "dependencies": {
+    "js-yaml": "^3.2.7",
+    "silk-msgpack-rpc": "0.0.3",
+    "synchronize": "^0.9.9",
+    "node-proxy": "1.0.0"
+  },
+  "devDependencies": {},
+  "author": "SilkEdit team"
+}

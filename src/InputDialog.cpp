@@ -2,7 +2,7 @@
 
 #include "InputDialog.h"
 #include "ui_InputDialog.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 
 InputDialog::InputDialog(QWidget* parent) : QDialog(parent), ui(new Ui::InputDialog) {
   ui->setupUi(this);
@@ -40,20 +40,20 @@ void InputDialog::request(InputDialog* view,
                           const msgpack::v1::object&) {
   if (method == "new") {
     InputDialog* dialog = new InputDialog();
-    PluginManager::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
   } else if (method == "show") {
     view->ui->lineEdit->selectAll();
     int result = view->exec();
     if (result == QDialog::Accepted) {
       QString text = view->textValue();
       std::string textStr = text.toUtf8().constData();
-      PluginManager::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
     } else {
-      PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+      HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
     }
   } else {
     qWarning("%s is not supported", qPrintable(method));
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 
@@ -83,5 +83,5 @@ void InputDialog::notify(InputDialog* view, const QString& method, const msgpack
 void InputDialog::textChanged(const QString& text) {
   std::string type = text.toUtf8().constData();
   std::tuple<int, std::string> params = std::make_tuple(id(), type);
-  PluginManager::singleton().sendNotification("InputDialog.textValueChanged", params);
+  HelperProxy::singleton().sendNotification("InputDialog.textValueChanged", params);
 }

@@ -18,7 +18,7 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "PlatformUtil.h"
 
 QMap<QString, std::string> Window::s_toolbarsDefinitions;
@@ -264,10 +264,10 @@ void Window::request(Window* window,
                      msgpack::rpc::msgid_t msgId,
                      const msgpack::object&) {
   if (method == "statusBar") {
-    PluginManager::singleton().sendResponse(window->statusBar()->id(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(window->statusBar()->id(), msgpack::type::nil(), msgId);
   } else {
     qWarning("%s is not supported", qPrintable(method));
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
   }
 }
 

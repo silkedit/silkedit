@@ -9,7 +9,7 @@
 #include "YamlUtils.h"
 #include "core/ConditionExpression.h"
 #include "CommandAction.h"
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "Window.h"
 #include "core/PackageToolBar.h"
 #include "core/PackageMenu.h"
@@ -145,7 +145,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
                      : "";
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = PluginManager::singleton().translate(
+      label = HelperProxy::singleton().translate(
           QString("%1:menu.%2.label")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -279,7 +279,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
                      : "";
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = PluginManager::singleton().translate(
+      label = HelperProxy::singleton().translate(
           QString("%1:toolbar.%2.label")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -324,7 +324,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
         action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
-          tooltip = PluginManager::singleton().translate(
+          tooltip = HelperProxy::singleton().translate(
               QString("%1:toolbar.%2.tooltip")
                   .arg(pkgName)
                   .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -389,13 +389,13 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std
         }
 
         QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
-        title = PluginManager::singleton().translate(
+        title = HelperProxy::singleton().translate(
             QString("%1:config.%2.title").arg(pkgName).arg(configName), title);
         QString description;
         // description is optional
         if (defNode["description"].IsScalar()) {
           description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
-          description = PluginManager::singleton().translate(
+          description = HelperProxy::singleton().translate(
               QString("%1:config.%2.description").arg(pkgName).arg(configName), description);
         }
         QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());

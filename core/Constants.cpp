@@ -9,7 +9,7 @@ namespace {
 #ifdef Q_OS_WIN
 const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
 #else
-const QString serverSocketPath = QDir::tempPath() + "/silkedit.sock";
+const QString socketPath = QDir::tempPath() + "/silkedit.sock";
 #endif
 
 const QString PACKAGES_NAME = "packages";
@@ -69,20 +69,20 @@ QString Constants::packagesDirName() {
   return PACKAGES_NAME;
 }
 
-QString Constants::pluginRunnerPath() {
-  return pluginServerDir() + "/bin/node";
+QString Constants::helperPath() {
+  return helperDir() + "/bin/node";
 }
 
 QString Constants::npmPath() {
 #ifdef Q_OS_WIN
-  return pluginServerDir() + "/bin/npm.cmd";
+  return helperDir() + "/bin/npm.cmd";
 #else
-  return pluginServerDir() + "/bin/npm";
+  return helperDir() + "/bin/npm";
 #endif
 }
 
-QString Constants::pluginServerSocketPath() {
-  return serverSocketPath;
+QString Constants::helperSocketPath() {
+  return socketPath;
 }
 
 QString Constants::translationDirPath() {
@@ -101,8 +101,8 @@ QStringList Constants::dataDirectoryPaths() {
   return paths;
 }
 
-QString Constants::pluginServerDir() {
-  return QApplication::applicationDirPath() + "/plugin_runner";
+QString Constants::helperDir() {
+  return QApplication::applicationDirPath() + "/helper";
 }
 
 QString Constants::silkHomePath() {

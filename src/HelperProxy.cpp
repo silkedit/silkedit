@@ -8,7 +8,7 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 
-#include "PluginManager_p.h"
+#include "HelperProxy_p.h"
 #include "SilkApp.h"
 #include "API.h"
 #include "KeymapManager.h"
@@ -35,19 +35,19 @@ using core::Util;
 
 namespace {
 
-QStringList pluginRunnerArgs() {
+QStringList helperArgs() {
   QStringList args;
   // stop Node in debug mode
   //  args << "--debug-brk";
   // add --harmony option first
   args << "--harmony";
   // first argument is main script
-  args << Constants::pluginServerDir() + "/main.js";
+  args << Constants::helperDir() + "/main.js";
   // second argument is a socket path
-  args << Constants::pluginServerSocketPath();
+  args << Constants::helperSocketPath();
   // third argument is locale
   args << Config::singleton().locale();
-  // remaining arguments are paths to be loaded in a plugin server
+  // remaining arguments are paths to be loaded in silkedit_helper
   args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
   args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");
   return args;
@@ -55,63 +55,63 @@ QStringList pluginRunnerArgs() {
 }
 
 std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
-    PluginManagerPrivate::s_notifyFunctions;
+    HelperProxyPrivate::s_notifyFunctions;
 std::unordered_map<
     QString,
     std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
-    PluginManagerPrivate::s_requestFunctions;
-msgpack::rpc::msgid_t PluginManager::s_msgId = 0;
-std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> PluginManager::s_eventLoopMap;
+    HelperProxyPrivate::s_requestFunctions;
+msgpack::rpc::msgid_t HelperProxy::s_msgId = 0;
+std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> HelperProxy::s_eventLoopMap;
 
-PluginManagerPrivate::~PluginManagerPrivate() {
-  qDebug("~PluginManagerPrivate");
-  if (m_pluginProcess) {
-    disconnect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-               this, &PluginManagerPrivate::onFinished);
-    m_pluginProcess->terminate();
+HelperProxyPrivate::~HelperProxyPrivate() {
+  qDebug("~HelperProxyPrivate");
+  if (m_helperProcess) {
+    disconnect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+               this, &HelperProxyPrivate::onFinished);
+    m_helperProcess->terminate();
   }
 }
 
-void PluginManagerPrivate::startPluginRunnerProcess() {
-  m_pluginProcess->start(Constants::pluginRunnerPath(), pluginRunnerArgs());
+void HelperProxyPrivate::startPluginRunnerProcess() {
+  m_helperProcess->start(Constants::helperPath(), helperArgs());
 }
 
-void PluginManagerPrivate::init() {
-  Q_ASSERT(!m_pluginProcess);
+void HelperProxyPrivate::init() {
+  Q_ASSERT(!m_helperProcess);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
   CommandManager::singleton().addEventFilter(std::bind(
-      &PluginManagerPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
+      &HelperProxyPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
-  QFile socketFile(Constants::pluginServerSocketPath());
+  QFile socketFile(Constants::helperSocketPath());
   if (socketFile.exists()) {
     socketFile.remove();
   }
 
-  if (!m_server->listen(Constants::pluginServerSocketPath())) {
+  if (!m_server->listen(Constants::helperSocketPath())) {
     qCritical("Unable to start the server: %s", qPrintable(m_server->errorString()));
     return;
   }
 
   connect(m_server, &QLocalServer::newConnection, this,
-          &PluginManagerPrivate::pluginRunnerConnected);
+          &HelperProxyPrivate::helperConnected);
 
-  m_pluginProcess.reset(new QProcess(this));
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardOutput, this,
-          &PluginManagerPrivate::readStdout);
-  connect(m_pluginProcess.get(), &QProcess::readyReadStandardError, this,
-          &PluginManagerPrivate::readStderr);
-  connect(m_pluginProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-          &PluginManagerPrivate::onFinished);
-  qDebug("plugin runner: %s", qPrintable(Constants::pluginRunnerPath()));
-  qDebug() << "args:" << pluginRunnerArgs();
+  m_helperProcess.reset(new QProcess(this));
+  connect(m_helperProcess.get(), &QProcess::readyReadStandardOutput, this,
+          &HelperProxyPrivate::readStdout);
+  connect(m_helperProcess.get(), &QProcess::readyReadStandardError, this,
+          &HelperProxyPrivate::readStderr);
+  connect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
+          &HelperProxyPrivate::onFinished);
+  qDebug("helper: %s", qPrintable(Constants::helperPath()));
+  qDebug() << "args:" << helperArgs();
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
-  m_pluginProcess->setStandardOutputFile(QProcess::nullDevice());
+  m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
   startPluginRunnerProcess();
 }
 
-void PluginManagerPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
+void HelperProxyPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
   if (q->m_isStopped)
     return;
 
@@ -126,8 +126,8 @@ void PluginManagerPrivate::sendError(const std::string& err, msgpack::rpc::msgid
   q->m_socket->write(sbuf.data(), sbuf.size());
 }
 
-PluginManagerPrivate::PluginManagerPrivate(PluginManager* q_ptr)
-    : q(q_ptr), m_pluginProcess(nullptr), m_server(nullptr) {
+HelperProxyPrivate::HelperProxyPrivate(HelperProxy* q_ptr)
+    : q(q_ptr), m_helperProcess(nullptr), m_server(nullptr) {
   REGISTER_FUNC(TextEditView)
   REGISTER_FUNC(TabView)
   REGISTER_FUNC(TabViewGroup)
@@ -136,20 +136,20 @@ PluginManagerPrivate::PluginManagerPrivate(PluginManager* q_ptr)
   REGISTER_FUNC(InputDialog)
 }
 
-void PluginManagerPrivate::readStdout() {
+void HelperProxyPrivate::readStdout() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardOutput();
   qDebug() << buf;
 }
 
-void PluginManagerPrivate::readStderr() {
+void HelperProxyPrivate::readStderr() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardError();
   qWarning() << buf;
 }
 
-void PluginManagerPrivate::pluginRunnerConnected() {
-  qDebug() << "new Plugin runner connected";
+void HelperProxyPrivate::helperConnected() {
+  qDebug() << "new helper process connected";
 
   q->m_socket = m_server->nextPendingConnection();
   Q_ASSERT(q->m_socket);
@@ -159,27 +159,27 @@ void PluginManagerPrivate::pluginRunnerConnected() {
   // > readyRead() is not emitted recursively; if you reenter the event loop or call
   // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
   // reemitted (although waitForReadyRead() may still return true).
-  connect(q->m_socket, &QLocalSocket::readyRead, this, &PluginManagerPrivate::readRequest,
+  connect(q->m_socket, &QLocalSocket::readyRead, this, &HelperProxyPrivate::readRequest,
           Qt::QueuedConnection);
   connect(q->m_socket,
           static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
-          this, &PluginManagerPrivate::displayError);
+          this, &HelperProxyPrivate::displayError);
 }
 
-void PluginManagerPrivate::onFinished(int exitCode) {
-  qWarning("plugin runner has stopped working. exit code: %d", exitCode);
+void HelperProxyPrivate::onFinished(int exitCode) {
+  qWarning("silkedit_helper has stopped working. exit code: %d", exitCode);
   q->m_isStopped = true;
   auto reply =
       QMessageBox::question(nullptr, "Error",
-                            "Plugin runner has stopped working. SilkEdit can continue to run but "
-                            "you can't use any plugins. Do you want to restart the plugin runner?");
+                            tr("silkedit_helper process has crashed. SilkEdit can continue to run but "
+                            "you can't use any packages. Do you want to restart the silkedit_helper process?"));
   if (reply == QMessageBox::Yes) {
     startPluginRunnerProcess();
     q->m_isStopped = false;
   }
 }
 
-void PluginManagerPrivate::readRequest() {
+void HelperProxyPrivate::readRequest() {
   //  qDebug("readRequest");
 
   msgpack::unpacker unpacker;
@@ -224,8 +224,8 @@ void PluginManagerPrivate::readRequest() {
           case msgpack::rpc::RESPONSE: {
             msgpack::rpc::msg_response<msgpack::object, msgpack::object> res;
             obj.convert(&res);
-            auto found = PluginManager::s_eventLoopMap.find(res.msgid);
-            if (found != PluginManager::s_eventLoopMap.end()) {
+            auto found = HelperProxy::s_eventLoopMap.find(res.msgid);
+            if (found != HelperProxy::s_eventLoopMap.end()) {
               //              qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
                 found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
@@ -256,7 +256,7 @@ void PluginManagerPrivate::readRequest() {
   }
 }
 
-void PluginManagerPrivate::displayError(QLocalSocket::LocalSocketError socketError) {
+void HelperProxyPrivate::displayError(QLocalSocket::LocalSocketError socketError) {
   switch (socketError) {
     case QLocalSocket::ServerNotFoundError:
       qWarning("The host was not found.");
@@ -272,7 +272,7 @@ void PluginManagerPrivate::displayError(QLocalSocket::LocalSocketError socketErr
   }
 }
 
-std::tuple<bool, std::string, CommandArgument> PluginManagerPrivate::cmdEventFilter(
+std::tuple<bool, std::string, CommandArgument> HelperProxyPrivate::cmdEventFilter(
     const std::string& name,
     const CommandArgument& arg) {
   qDebug("cmdEventFilter");
@@ -287,7 +287,7 @@ std::tuple<bool, std::string, CommandArgument> PluginManagerPrivate::cmdEventFil
   }
 }
 
-void PluginManagerPrivate::callRequestFunc(const QString& methodName,
+void HelperProxyPrivate::callRequestFunc(const QString& methodName,
                                            msgpack::rpc::msgid_t msgId,
                                            const msgpack::object& obj) {
   qDebug() << "method:" << qPrintable(methodName);
@@ -310,7 +310,7 @@ void PluginManagerPrivate::callRequestFunc(const QString& methodName,
   }
 }
 
-void PluginManagerPrivate::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
+void HelperProxyPrivate::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
   qDebug() << "method:" << qPrintable(methodName);
   if (obj.type != msgpack::type::ARRAY) {
     qWarning("params must be an array");
@@ -336,7 +336,7 @@ void PluginManagerPrivate::callNotifyFunc(const QString& methodName, const msgpa
   }
 }
 
-bool PluginManagerPrivate::keyEventFilter(QKeyEvent* event) {
+bool HelperProxyPrivate::keyEventFilter(QKeyEvent* event) {
   //  qDebug("keyEventFilter");
   std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
   bool isModifierKey = false;
@@ -400,27 +400,27 @@ void ResponseResult::setError(std::unique_ptr<object_with_zone> obj) {
   emit ready();
 }
 
-PluginManager::~PluginManager() {
-  qDebug("~PluginManager");
+HelperProxy::~HelperProxy() {
+  qDebug("~HelperProxy");
 }
 
-void PluginManager::init() {
+void HelperProxy::init() {
   d->init();
 }
 
-void PluginManager::sendFocusChangedEvent(const QString& viewType) {
+void HelperProxy::sendFocusChangedEvent(const QString& viewType) {
   std::string type = viewType.toUtf8().constData();
   std::tuple<std::string> params = std::make_tuple(type);
   sendNotification("focusChanged", params);
 }
 
-void PluginManager::sendCommandEvent(const QString& command, const CommandArgument& args) {
+void HelperProxy::sendCommandEvent(const QString& command, const CommandArgument& args) {
   std::string methodName = command.toUtf8().constData();
   std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
   sendNotification("commandEvent", params);
 }
 
-void PluginManager::callExternalCommand(const QString& cmd, const CommandArgument& args) {
+void HelperProxy::callExternalCommand(const QString& cmd, const CommandArgument& args) {
   Util::stopWatch([&] {
     std::string methodName = cmd.toUtf8().constData();
     std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
@@ -433,7 +433,7 @@ void PluginManager::callExternalCommand(const QString& cmd, const CommandArgumen
   }, cmd + " time");
 }
 
-bool PluginManager::askExternalCondition(const QString& name,
+bool HelperProxy::askExternalCondition(const QString& name,
                                          core::Operator op,
                                          const QString& value) {
   qDebug("askExternalCondition");
@@ -450,7 +450,7 @@ bool PluginManager::askExternalCondition(const QString& name,
   }
 }
 
-QString PluginManager::translate(const QString& key, const QString& defaultValue) {
+QString HelperProxy::translate(const QString& key, const QString& defaultValue) {
   try {
     const std::string& result = sendRequest<std::tuple<std::string, std::string>, std::string>(
         "translate", std::make_tuple(key.toUtf8().constData(), defaultValue.toUtf8().constData()),
@@ -462,14 +462,14 @@ QString PluginManager::translate(const QString& key, const QString& defaultValue
   }
 }
 
-void PluginManager::loadPackage(const QString& pkgName) {
+void HelperProxy::loadPackage(const QString& pkgName) {
   const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
   sendNotification("loadPackage", params);
 }
 
-bool PluginManager::removePackage(const QString& pkgName) {
+bool HelperProxy::removePackage(const QString& pkgName) {
   const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
@@ -483,7 +483,7 @@ bool PluginManager::removePackage(const QString& pkgName) {
   }
 }
 
-GetRequestResponse* PluginManager::sendGetRequest(const QString& url, int timeoutInMs) {
+GetRequestResponse* HelperProxy::sendGetRequest(const QString& url, int timeoutInMs) {
   const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
 
   try {
@@ -501,14 +501,14 @@ GetRequestResponse* PluginManager::sendGetRequest(const QString& url, int timeou
   return nullptr;
 }
 
-void PluginManager::reloadKeymaps() {
+void HelperProxy::reloadKeymaps() {
   sendNotification("reloadKeymaps");
 }
 
-PluginManager::PluginManager()
-    : d(new PluginManagerPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
+HelperProxy::HelperProxy()
+    : d(new HelperProxyPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 
-std::tuple<bool, std::string, CommandArgument> PluginManager::cmdEventFilter(
+std::tuple<bool, std::string, CommandArgument> HelperProxy::cmdEventFilter(
     const std::string& name,
     const CommandArgument& arg) {
   qDebug("cmdEventFilter");

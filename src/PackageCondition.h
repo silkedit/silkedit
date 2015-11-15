@@ -3,12 +3,12 @@
 #include <QString>
 #include "core/ICondition.h"
 
-class PluginCondition : public core::ICondition {
-  DISABLE_COPY(PluginCondition)
+class PackageCondition : public core::ICondition {
+  DISABLE_COPY(PackageCondition)
 
  public:
-  PluginCondition(const QString& key);
-  ~PluginCondition() = default;
+  PackageCondition(const QString& key);
+  ~PackageCondition() = default;
 
   bool isSatisfied(core::Operator op, const QString& operand) override;
   bool isStatic() override { return false; }

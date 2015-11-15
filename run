@@ -64,7 +64,7 @@ ensure_dir() {
 
 clean() {
     # Somehow git clean fails to remove these directories, so remove them manually
-    rm -rf build plugin_runner/bin
+    rm -rf build helper/bin
 
     # clean submodules
     git submodule foreach git reset --hard HEAD
@@ -115,7 +115,7 @@ resolve() {
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
         echo 'Building Breakpad client ...'
-        
+
         cd breakpad
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Debug
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
@@ -123,25 +123,25 @@ resolve() {
       fi
 
       # node
-      if [ ! -d plugin_runner/bin ]; then
+      if [ ! -d helper/bin ]; then
         node=node-v0.12.0-darwin-x64
         echo "Downloading $node"
         curl -O http://nodejs.org/dist/v0.12.0/$node.tar.gz
         tar zxf $node.tar.gz
         # -R keeps symlink intact
-        cp -R $node/bin $node/lib plugin_runner
+        cp -R $node/bin $node/lib helper
         rm -rf $node $node.tar.gz
       fi
 
       # npm install for plugin runner
-      cd plugin_runner
+      cd helper
       PATH=$(pwd)/bin:$PATH
       bin/npm install
       cd ..
 
       # npm install for silkedit package
       cd packages/silkedit
-      ../../plugin_runner/bin/npm install
+      ../../helper/bin/npm install
       cd ../..
     else
         # yaml-cpp
@@ -174,21 +174,21 @@ resolve() {
         fi
 
         # node
-        if [ ! -d plugin_runner/bin ]; then
-            cp -r "C:\Program Files\nodejs" plugin_runner
-            cd plugin_runner
+        if [ ! -d helper/bin ]; then
+            cp -r "C:\Program Files\nodejs" helper
+            cd helper
             mv nodejs bin
             cd ..
         fi
 
         # npm install for plugin runner
-        cd plugin_runner
+        cd helper
         node bin/node_modules/npm/bin/npm-cli.js install
         cd ..
 
         # npm install for silkedit package
         cd packages/silkedit
-        node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
+        node ../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
         cd ../..
 
         # uchardet
@@ -228,7 +228,7 @@ resolve() {
 
 			/c/tools/python2/Scripts/gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
 
-			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
+      # //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
             mkdir -p ../lib/breakpad/Debug
 			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
 			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
@@ -284,7 +284,7 @@ build() {
         fi
 
         ninja
-        
+
 		# crashreporter
         cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
         cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
@@ -336,9 +336,9 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
-        rm -rf silkedit.exe onig.dll packages plugin_runner
-		#crashreporter
+        cp -r silkedit.exe onig.dll packages helper silkedit_ja.qm Release
+        rm -rf silkedit.exe onig.dll packages helper
+        #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
 

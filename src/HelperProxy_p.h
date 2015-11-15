@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "PluginManager.h"
+#include "HelperProxy.h"
 #include "core/IKeyEventFilter.h"
 
-class PluginManagerPrivate : public QObject, public core::IKeyEventFilter {
+class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
   Q_OBJECT
  public:
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
@@ -13,12 +13,12 @@ class PluginManagerPrivate : public QObject, public core::IKeyEventFilter {
       std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
       s_requestFunctions;
 
-  PluginManager* q;
-  std::unique_ptr<QProcess> m_pluginProcess;
+  HelperProxy* q;
+  std::unique_ptr<QProcess> m_helperProcess;
   QLocalServer* m_server;
 
-  explicit PluginManagerPrivate(PluginManager* q_ptr);
-  ~PluginManagerPrivate();
+  explicit HelperProxyPrivate(HelperProxy* q_ptr);
+  ~HelperProxyPrivate();
 
   void init();
 
@@ -26,7 +26,7 @@ class PluginManagerPrivate : public QObject, public core::IKeyEventFilter {
   bool keyEventFilter(QKeyEvent* event) override;
   void readStdout();
   void readStderr();
-  void pluginRunnerConnected();
+  void helperConnected();
   void onFinished(int exitCode);
   void readRequest();
   void displayError(QLocalSocket::LocalSocketError);
