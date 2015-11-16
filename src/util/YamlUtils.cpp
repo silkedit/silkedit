@@ -236,7 +236,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
 }
 
 void YamlUtils::parseToolbarNode(const QString& pkgName,
-                                 const std::string& ymlPath,
+                                 const QString& ymlPath,
                                  QWidget* parent,
                                  const YAML::Node& toolbarNode) {
   if (!toolbarNode.IsSequence()) {
@@ -319,7 +319,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         QString iconPath = QString::fromUtf8(iconNode.as<std::string>().c_str());
         if (!iconPath.startsWith('/')) {
-          iconPath = QFileInfo(QString::fromUtf8(ymlPath.c_str())).dir().absoluteFilePath(iconPath);
+          iconPath = QFileInfo(ymlPath).dir().absoluteFilePath(iconPath);
         }
         action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
         if (tooltipNode.IsDefined()) {
@@ -364,10 +364,10 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
   }
 }
 
-QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std::string& ymlPath) {
+QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const QString& ymlPath) {
   QList<ConfigDefinition> defs;
   try {
-    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());
     if (!rootNode.IsMap()) {
       qWarning("root node must be a map");
       return QList<ConfigDefinition>();
@@ -436,7 +436,7 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std
       }
     }
   } catch (const std::runtime_error& ex) {
-    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+    qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
   }
 
   return defs;

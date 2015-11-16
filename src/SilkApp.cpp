@@ -134,7 +134,7 @@ void SilkApp::setupTranslator(const QString& locale) {
 #endif
 }
 
-TextEditView* SilkApp::activeEditView() {
+TextEditView* SilkApp::activeTextEditView() {
   TabView* tabView = activeTabView();
   if (tabView) {
     return tabView->activeEditView();

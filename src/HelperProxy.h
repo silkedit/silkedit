@@ -21,6 +21,7 @@
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
 #include "core/Icondition.h"
+#include "qvariant_adapter.h"
 
 class HelperProxyPrivate;
 
@@ -226,6 +227,11 @@ class HelperProxy : public QObject, public core::Singleton<HelperProxy> {
   friend class HelperProxyPrivate;
   friend class core::Singleton<HelperProxy>;
   HelperProxy();
+
+  void callNotifyFunc(const QString& method, const msgpack::object& obj);
+  void callRequestFunc(msgpack::rpc::msgid_t msgId,
+                       const QString& method,
+                       const msgpack::object& obj);
 
   // Send a request via msgpack rpc.
   template <typename Parameter, typename Result>

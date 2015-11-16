@@ -13,12 +13,12 @@ class DialogUtils {
  public:
   enum class MODE { FileAndDirectory, Files, Directory };
 
-  static std::list<std::string> showDialog(const QString& caption, MODE mode);
+  static QStringList showDialog(const QString& caption, MODE mode);
 
  private:
-  static std::list<std::string> showDialogImpl(const QString& caption,
-                                               QFileDialog::FileMode fileMode,
-                                               QFileDialog::Options options = 0);
+  static QStringList showDialogImpl(const QString& caption,
+                                    QFileDialog::FileMode fileMode,
+                                    QFileDialog::Options options = 0);
 
   DialogUtils() = delete;
   ~DialogUtils() = delete;

@@ -55,7 +55,6 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  API::init();
   HelperProxy::singleton().init();
 
   QStringList arguments = app.arguments();

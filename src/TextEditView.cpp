@@ -73,25 +73,25 @@ void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
   }
 }
 
-int toMoveOperation(std::string str) {
-  std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-  if (str == "up") {
+int toMoveOperation(const QString& str) {
+  const QString& opStr = str.toLower();
+  if (opStr == "up") {
     return QTextCursor::Up;
-  } else if (str == "down") {
+  } else if (opStr == "down") {
     return QTextCursor::Down;
-  } else if (str == "left") {
+  } else if (opStr == "left") {
     return QTextCursor::Left;
-  } else if (str == "right") {
+  } else if (opStr == "right") {
     return QTextCursor::Right;
-  } else if (str == "start_of_line") {
+  } else if (opStr == "start_of_line") {
     return QTextCursor::StartOfBlock;
-  } else if (str == "first_non_blank_char") {
+  } else if (opStr == "first_non_blank_char") {
     return ViMoveOperation::FirstNonBlankChar;
-  } else if (str == "last_char") {
+  } else if (opStr == "last_char") {
     return ViMoveOperation::LastChar;
-  } else if (str == "next_line") {
+  } else if (opStr == "next_line") {
     return ViMoveOperation::NextLine;
-  } else if (str == "prev_line") {
+  } else if (opStr == "prev_line") {
     return ViMoveOperation::PrevLine;
   } else {
     return QTextCursor::NoMove;
@@ -162,8 +162,10 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
                       .arg(settings->value("selection").name());
     }
 
-    // for selection foreground color, we use foreground color if selectionForeground is not found.
-    // The reason is that Qt ignores syntax highlighted color for a selected text and sets selection
+    // for selection foreground color, we use foreground color if selectionForeground is not
+    // found.
+    // The reason is that Qt ignores syntax highlighted color for a selected text and sets
+    // selection
     // foreground color something.
     // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
     // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
@@ -648,7 +650,8 @@ int TextEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void TextEditView::moveCursor(int mv, int n) {
+void TextEditView::moveCursor(const QString& op, int n) {
+  int mv = toMoveOperation(op);
   QTextCursor cur = textCursor();
   const int pos = cur.position();
   QTextBlock block = cur.block();
@@ -948,83 +951,74 @@ void TextEditView::insertNewLineWithIndent() {
                                        prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
 }
 
-void TextEditView::request(TextEditView* view,
-                           const QString& method,
-                           msgpack::rpc::msgid_t msgId,
-                           const msgpack::object&) {
-  if (method == "text") {
-    HelperProxy::singleton().sendResponse(view->toPlainText().toUtf8().constData(),
-                                            msgpack::type::nil(), msgId);
-  } else if (method == "scopeName") {
-    QString scope = view->d_ptr->m_document->scopeName(view->textCursor().position());
-    HelperProxy::singleton().sendResponse(scope.toUtf8().constData(), msgpack::type::nil(),
-                                            msgId);
-  } else if (method == "scopeTree") {
-    QString scopeTree = view->d_ptr->m_document->scopeTree();
-    HelperProxy::singleton().sendResponse(scopeTree.toUtf8().constData(), msgpack::type::nil(),
-                                            msgId);
-  } else {
-    qWarning("%s is not supported", qPrintable(method));
-    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
-  }
-}
+// QVariant TextEditView::request(TextEditView* view, const QString& method, const QVariantList&) {
+//  if (method == "text") {
+//    return view->toPlainText().toUtf8();
+//  } else if (method == "scopeName") {
+//    return view->d_ptr->m_document->scopeName(view->textCursor().position());
+//  } else if (method == "scopeTree") {
+//    return view->d_ptr->m_document->scopeTree();
+//  } else {
+//    qWarning("%s is not supported", qPrintable(method));
+//    return QVariant();
+//  }
+//}
 
-void TextEditView::notify(TextEditView* view, const QString& method, const msgpack::object& obj) {
-  int numArgs = obj.via.array.size;
-  if (method == "save") {
-    view->save();
-  } else if (method == "saveAs") {
-    view->saveAs();
-  } else if (method == "undo") {
-    view->undo();
-  } else if (method == "redo") {
-    view->redo();
-  } else if (method == "cut") {
-    view->cut();
-  } else if (method == "copy") {
-    view->copy();
-  } else if (method == "paste") {
-    view->paste();
-  } else if (method == "selectAll") {
-    view->selectAll();
-  } else if (method == "complete") {
-    view->performCompletion();
-  } else if (method == "delete") {
-    std::tuple<int, int> params;
-    obj.convert(&params);
-    int repeat = std::get<1>(params);
-    qDebug("repeat: %d", repeat);
-    view->doDelete(repeat);
-  } else if (method == "moveCursor") {
-    if (numArgs == 3) {
-      std::tuple<int, std::string, int> params;
-      obj.convert(&params);
-      std::string operation = std::get<1>(params);
-      int repeat = std::get<2>(params);
-      qDebug("operation: %s", operation.c_str());
-      qDebug("repeat: %d", repeat);
-      view->moveCursor(toMoveOperation(std::move(operation)), repeat);
-    } else {
-      qWarning("invalid numArgs: %d", numArgs);
-    }
-  } else if (method == "setThinCursor") {
-    if (numArgs == 2) {
-      std::tuple<int, bool> params;
-      obj.convert(&params);
-      bool isThin = std::get<1>(params);
-      view->setThinCursor(isThin);
-    } else {
-      qWarning("invalid numArgs: %d", numArgs);
-    }
-  } else if (method == "insertNewLine") {
-    view->insertNewLineWithIndent();
-  } else if (method == "indent") {
-    auto cursor = view->textCursor();
-    view->d_ptr->indentOneLevel(cursor);
-  } else {
-    qWarning("%s is not support", qPrintable(method));
-  }
-}
+// void TextEditView::notify(TextEditView* view, const QString& method, const QVariantList& obj) {
+//  //  int numArgs = obj.via.array.size;
+//  int numArgs = obj.size();
+//  if (method == "save") {
+//    view->save();
+//  } else if (method == "saveAs") {
+//    view->saveAs();
+//  } else if (method == "undo") {
+//    view->undo();
+//  } else if (method == "redo") {
+//    view->redo();
+//  } else if (method == "cut") {
+//    view->cut();
+//  } else if (method == "copy") {
+//    view->copy();
+//  } else if (method == "paste") {
+//    view->paste();
+//  } else if (method == "selectAll") {
+//    view->selectAll();
+//  } else if (method == "complete") {
+//    view->performCompletion();
+//  } else if (method == "delete" && obj.size() == 1 && obj.at(0).canConvert(QMetaType::Int)) {
+//    int repeat = obj.at(0).toInt();
+//    qDebug("repeat: %d", repeat);
+//    view->doDelete(repeat);
+//  } else if (method == "moveCursor") {
+//    if (numArgs == 3) {
+//      //      std::tuple<int, std::string, int> params;
+//      //      obj.convert(&params);
+//      //      std::string operation = std::get<1>(params);
+//      //      int repeat = std::get<2>(params);
+//      //      qDebug("operation: %s", operation.c_str());
+//      //      qDebug("repeat: %d", repeat);
+//      //      view->moveCursor(toMoveOperation(std::move(operation)), repeat);
+//    } else {
+//      qWarning("invalid numArgs: %d", numArgs);
+//    }
+//  } else if (method == "setThinCursor") {
+//    //    if (numArgs == 2) {
+//    //      std::tuple<int, bool> params;
+//    //      obj.convert(&params);
+//    //      bool isThin = std::get<1>(params);
+//    //      view->setThinCursor(isThin);
+//    //    } else {
+//    //      qWarning("invalid numArgs: %d", numArgs);
+//    //    }
+//  } else if (method == "insertNewLine") {
+//    view->insertNewLineWithIndent();
+//  } else if (method == "indent") {
+//    auto cursor = view->textCursor();
+//    view->d_ptr->indentOneLevel(cursor);
+//  } else {
+//    qWarning("%s is not support", qPrintable(method));
+//  }
+//}
 
 TextEditView* TextEditView::clone() {
   TextEditView* editView = new TextEditView(this);
@@ -1071,18 +1065,6 @@ void TextEditView::doDelete(int n) {
   cur.deleteChar();
 }
 
-void TextEditView::doUndo(int n) {
-  for (int i = 0; i < n; i++) {
-    undo();
-  }
-}
-
-void TextEditView::doRedo(int n) {
-  for (int i = 0; i < n; i++) {
-    redo();
-  }
-}
-
 bool TextEditView::isThinCursor() {
   return !overwriteMode();
 }
@@ -1125,7 +1107,7 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
   // todo: define this behavior in keymap.yml
   switch (event->key()) {
     case Qt::Key_Escape:
-      API::hideActiveFindReplacePanel();
+      API::singleton().hideActiveFindReplacePanel();
       clearSelection();
       break;
   }
@@ -1156,4 +1138,45 @@ void TextEditView::clearSelection() {
   }
 }
 
+QString TextEditView::scopeName() {
+  Q_D(TextEditView);
+  return d->m_document->scopeName(textCursor().position());
+}
+
+QString TextEditView::scopeTree() {
+  Q_D(TextEditView);
+  return d->m_document->scopeTree();
+}
+
+void TextEditView::undo() {
+  QPlainTextEdit::undo();
+}
+
+void TextEditView::redo() {
+  QPlainTextEdit::redo();
+}
+
+void TextEditView::cut() {
+  QPlainTextEdit::cut();
+}
+
+void TextEditView::copy() {
+  QPlainTextEdit::copy();
+}
+
+void TextEditView::paste() {
+  QPlainTextEdit::paste();
+}
+
+void TextEditView::selectAll() {
+  QPlainTextEdit::selectAll();
+}
+
+void TextEditView::indent() {
+  Q_D(TextEditView);
+  auto cursor = textCursor();
+  d->indentOneLevel(cursor);
+}
+
+// Necessary for Q_PRIVATE_SLOT
 #include "moc_TextEditView.cpp"

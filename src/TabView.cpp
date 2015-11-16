@@ -188,6 +188,18 @@ int TabView::indexOfPath(const QString& path) {
   return -1;
 }
 
+int TabView::count() {
+  return QTabWidget::count();
+}
+
+int TabView::currentIndex() {
+  return QTabWidget::currentIndex();
+}
+
+void TabView::setCurrentIndex(int index) {
+  QTabWidget::setCurrentIndex(index);
+}
+
 void TabView::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;
@@ -361,40 +373,6 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1);
 }
 
-void TabView::request(TabView* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object&) {
-  if (method == "count") {
-    HelperProxy::singleton().sendResponse(view->count(), msgpack::type::nil(), msgId);
-  } else if (method == "currentIndex") {
-    HelperProxy::singleton().sendResponse(view->currentIndex(), msgpack::type::nil(), msgId);
-  } else {
-    qDebug("method: %s not found", qPrintable(method));
-  }
-}
-
-void TabView::notify(TabView* view, const QString& method, const msgpack::object& obj) {
-  int numArgs = obj.via.array.size;
-  if (method == "closeAllTabs") {
-    view->closeAllTabs();
-  } else if (method == "closeActiveTab") {
-    view->closeActiveTab();
-  } else if (method == "closeOtherTabs") {
-    view->closeOtherTabs();
-  } else if (method == "addNew") {
-    view->addNew();
-  } else if (method == "setCurrentIndex") {
-    if (numArgs == 2) {
-      std::tuple<int, int> params;
-      obj.convert(&params);
-      int index = std::get<1>(params);
-      view->setCurrentIndex(index);
-    } else {
-      qWarning("invalid numArgs: %d", numArgs);
-    }
-  }
-}
 int TabView::insertTabInformation( const int index ){
   TextEditView* v = qobject_cast<TextEditView*>(widget(index));
   if (!v) {
@@ -446,3 +424,35 @@ bool TabView::createWithSavedTabs( void ){
   
   return true;
 }
+// QVariant TabView::request(TabView* view, const QString& method, const msgpack::object&) {
+//  if (method == "count") {
+//    return view->count();
+//  } else if (method == "currentIndex") {
+//    return view->currentIndex();
+//  } else {
+//    qDebug("method: %s not found", qPrintable(method));
+//    return QVariant();
+//  }
+//}
+
+// void TabView::notify(TabView* view, const QString& method, const msgpack::object& obj) {
+//  int numArgs = obj.via.array.size;
+//  if (method == "closeAllTabs") {
+//    view->closeAllTabs();
+//  } else if (method == "closeActiveTab") {
+//    view->closeActiveTab();
+//  } else if (method == "closeOtherTabs") {
+//    view->closeOtherTabs();
+//  } else if (method == "addNew") {
+//    view->addNew();
+//  } else if (method == "setCurrentIndex") {
+//    if (numArgs == 2) {
+//      std::tuple<int, int> params;
+//      obj.convert(&params);
+//      int index = std::get<1>(params);
+//      view->setCurrentIndex(index);
+//    } else {
+//      qWarning("invalid numArgs: %d", numArgs);
+//    }
+//  }
+//}

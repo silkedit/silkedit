@@ -11,7 +11,7 @@ class TabView;
 class TabBar;
 class Splitter;
 
-class TabViewGroup : public QWidget, public core::UniqueObject<TabViewGroup> {
+class TabViewGroup : public QWidget, public core::UniqueObject {
   Q_OBJECT
   DISABLE_COPY(TabViewGroup)
 
@@ -24,23 +24,14 @@ class TabViewGroup : public QWidget, public core::UniqueObject<TabViewGroup> {
   TabView* activeTab();
   void setActiveTab(TabView* tab);
 
-  void saveAllTabs();
+  Q_INVOKABLE void saveAllTabs();
   bool closeAllTabs();
-  void splitTabHorizontally();
-  void splitTabVertically();
+  Q_INVOKABLE void splitTabHorizontally();
+  Q_INVOKABLE void splitTabVertically();
   TabBar* tabBarAt(int screenX, int screenY);
 
-signals:
+ signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
-
- protected:
-  friend struct core::UniqueObject<TabViewGroup>;
-
-  static void request(TabViewGroup* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(TabViewGroup* view, const QString& method, const msgpack::object& obj);
 
  private:
   /**
@@ -61,3 +52,5 @@ signals:
                   Qt::Orientation newDirection);
   void splitTab(std::function<void(QWidget*, const QString&)> func);
 };
+
+Q_DECLARE_METATYPE(TabViewGroup*)

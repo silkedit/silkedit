@@ -140,9 +140,14 @@ const handler = {
   
   ,"runCommand": (cmd, args, response) => {
     if (cmd in commands) {
-      silkutil.runInFiber(() =>{
-        commands[cmd](args)
-        response.result(true)
+      sync.fiber(() => {
+        try {
+          commands[cmd](args)
+          response.result(true)
+        } catch(e) {
+          console.error(e)
+          response.result(false)
+        }
       })
     } else {
       response.result(false)

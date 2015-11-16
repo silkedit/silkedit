@@ -34,49 +34,13 @@ void InputDialog::enableOK() {
   ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(false);
 }
 
-void InputDialog::request(InputDialog* view,
-                          const QString& method,
-                          msgpack::rpc::msgid_t msgId,
-                          const msgpack::v1::object&) {
-  if (method == "new") {
-    InputDialog* dialog = new InputDialog();
-    HelperProxy::singleton().sendResponse(dialog->id(), msgpack::type::nil(), msgId);
-  } else if (method == "show") {
-    view->ui->lineEdit->selectAll();
-    int result = view->exec();
-    if (result == QDialog::Accepted) {
-      QString text = view->textValue();
-      std::string textStr = text.toUtf8().constData();
-      HelperProxy::singleton().sendResponse(textStr, msgpack::type::nil(), msgId);
-    } else {
-      HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
-    }
+boost::optional<QString> InputDialog::show() {
+  ui->lineEdit->selectAll();
+  int result = exec();
+  if (result == QDialog::Accepted) {
+    return textValue();
   } else {
-    qWarning("%s is not supported", qPrintable(method));
-    HelperProxy::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
-  }
-}
-
-void InputDialog::notify(InputDialog* view, const QString& method, const msgpack::v1::object& obj) {
-  int numArgs = obj.via.array.size;
-  if (method == "setLabelText" && numArgs == 2) {
-    std::tuple<int, std::string> params;
-    obj.convert(&params);
-    std::string text = std::get<1>(params);
-    view->setLabelText(QString(text.c_str()));
-  } else if (method == "setTextValue" && numArgs == 2) {
-    std::tuple<int, std::string> params;
-    obj.convert(&params);
-    std::string text = std::get<1>(params);
-    view->setTextValue(QString::fromUtf8(text.c_str()));
-  } else if (method == "delete") {
-    delete view;
-  } else if (method == "disableOK") {
-    view->disableOK();
-  } else if (method == "enableOK") {
-    view->enableOK();
-  } else {
-    qWarning("%s is not supported", qPrintable(method));
+    return boost::none;
   }
 }
 

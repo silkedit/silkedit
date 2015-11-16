@@ -31,7 +31,7 @@ class BOM;
 }
 
 class TextEditView : public QPlainTextEdit,
-                     public core::UniqueObject<TextEditView>,
+                     public core::UniqueObject,
                      public core::ICloneable<TextEditView> {
   Q_OBJECT
   Q_DECLARE_PRIVATE(TextEditView)
@@ -52,15 +52,13 @@ class TextEditView : public QPlainTextEdit,
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
-  void moveCursor(int mv, int = 1);
-  void doDelete(int n);
-  void doUndo(int n);
-  void doRedo(int n);
-  bool isThinCursor();
-  void setThinCursor(bool on);
+  Q_INVOKABLE void moveCursor(const QString& op, int);
+  Q_INVOKABLE void doDelete(int n);
+  Q_INVOKABLE bool isThinCursor();
+  Q_INVOKABLE void setThinCursor(bool on);
   TextEditView* clone() override;
-  void save();
-  void saveAs();
+  Q_INVOKABLE void save();
+  Q_INVOKABLE void saveAs();
   void setPath(const QString& path);
   void find(const QString& text, int begin = 0, int end = -1, core::Document::FindFlags flags = 0);
   void find(const QString& text,
@@ -85,29 +83,31 @@ class TextEditView : public QPlainTextEdit,
                            int end,
                            core::Document::FindFlags flags = 0,
                            bool preserveCase = false);
-  void performCompletion();
-  void insertNewLineWithIndent();
+  Q_INVOKABLE void performCompletion();
+  Q_INVOKABLE void insertNewLineWithIndent();
   void clearSelection();
+  Q_INVOKABLE QString scopeName();
+  Q_INVOKABLE QString scopeTree();
+  Q_INVOKABLE void undo();
+  Q_INVOKABLE void redo();
+  Q_INVOKABLE void cut();
+  Q_INVOKABLE void copy();
+  Q_INVOKABLE void paste();
+  Q_INVOKABLE void selectAll();
+  Q_INVOKABLE void indent();
 
  signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
+
   // emitted when underlying document's encoding is changed.
   void encodingChanged(const core::Encoding& encoding);
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
 
  protected:
-  friend struct core::UniqueObject<TextEditView>;
-
-  static void request(TextEditView* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(TextEditView* view, const QString& method, const msgpack::object& obj);
-
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
@@ -136,3 +136,5 @@ class TextEditView : public QPlainTextEdit,
  private slots:
   void setTheme(core::Theme* theme);
 };
+
+Q_DECLARE_METATYPE(TextEditView*)

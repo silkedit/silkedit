@@ -62,16 +62,6 @@ menu:
     id: select_all
     command: select_all
 
-- label: View
-  id: view
-  menu:
-  - label: 'Font'
-    id: font
-    menu:
-    - label: 'Show Fonts'
-      id: show_fonts
-      command: show_fonts
-
 - label: Packages
   id: packages
   menu:

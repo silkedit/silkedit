@@ -17,7 +17,7 @@ class Encoding;
 class BOM;
 }
 
-class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
+class StatusBar : public QStatusBar, public core::UniqueObject {
   Q_OBJECT
   DISABLE_COPY(StatusBar)
 
@@ -35,18 +35,10 @@ class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
+  Q_INVOKABLE void showMessage(const QString& text, int timeout);
 
-signals:
+ signals:
   void languageChanged(const QString& scopeName);
-
- protected:
-  friend struct core::UniqueObject<StatusBar>;
-
-  static void request(StatusBar* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(StatusBar* view, const QString& method, const msgpack::object& obj);
 
  private:
   LanguageComboBox* m_langComboBox;
@@ -56,3 +48,5 @@ signals:
 
   void setCurrentLanguage(core::Language* lang);
 };
+
+Q_DECLARE_METATYPE(StatusBar*)

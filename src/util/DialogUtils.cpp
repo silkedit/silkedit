@@ -6,7 +6,7 @@
 
 using core::Util;
 
-std::list<std::string> DialogUtils::showDialog(const QString& caption, DialogUtils::MODE mode) {
+QStringList DialogUtils::showDialog(const QString& caption, DialogUtils::MODE mode) {
   switch (mode) {
     case MODE::FileAndDirectory:
       return showDialogImpl(caption, QFileDialog::AnyFile);
@@ -16,13 +16,13 @@ std::list<std::string> DialogUtils::showDialog(const QString& caption, DialogUti
       return showDialogImpl(caption, QFileDialog::Directory, QFileDialog::ShowDirsOnly);
     default:
       qWarning("invalid mode: %d", static_cast<int>(mode));
-      return std::list<std::string>();
+      return QStringList();
   }
 }
 
-std::list<std::string> DialogUtils::showDialogImpl(const QString& caption,
-                                                   QFileDialog::FileMode fileMode,
-                                                   QFileDialog::Options options) {
+QStringList DialogUtils::showDialogImpl(const QString& caption,
+                                        QFileDialog::FileMode fileMode,
+                                        QFileDialog::Options options) {
   // On Windows, native dialog sets QApplication::activeWindow() to NULL. We need to store and
   // restore it after closing the dialog.
   // https://bugreports.qt.io/browse/QTBUG-38414
@@ -37,7 +37,7 @@ std::list<std::string> DialogUtils::showDialogImpl(const QString& caption,
     foreach (const QString& path, dialog.selectedFiles()) {
       paths.append(QDir::toNativeSeparators(path));
     }
-    return Util::toStdStringList(paths);
+    return paths;
   }
-  return std::list<std::string>();
+  return QStringList();
 }

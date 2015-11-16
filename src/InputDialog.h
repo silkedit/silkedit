@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <boost/optional.hpp>
 #include <QDialog>
 
 #include "core/UniqueObject.h"
@@ -10,7 +11,7 @@ class InputDialog;
 }
 
 // QInputDialog doesn't have validation capability. So we created custom InputDialog.
-class InputDialog : public QDialog, public core::UniqueObject<InputDialog> {
+class InputDialog : public QDialog, public core::UniqueObject {
   Q_OBJECT
 
  public:
@@ -18,23 +19,17 @@ class InputDialog : public QDialog, public core::UniqueObject<InputDialog> {
   ~InputDialog();
   DEFAULT_COPY_AND_MOVE(InputDialog)
 
-  void setLabelText(const QString& label);
-  QString textValue();
-  void setTextValue(const QString& text);
-  void disableOK();
-  void enableOK();
-
- protected:
-  friend struct core::UniqueObject<InputDialog>;
-
-  static void request(InputDialog* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(InputDialog* view, const QString& method, const msgpack::object& obj);
+  Q_INVOKABLE void setLabelText(const QString& label);
+  Q_INVOKABLE void setTextValue(const QString& text);
+  Q_INVOKABLE void disableOK();
+  Q_INVOKABLE void enableOK();
+  Q_INVOKABLE boost::optional<QString> show();
 
  private:
   Ui::InputDialog* ui;
 
+  QString textValue();
   void textChanged(const QString& text);
 };
+
+Q_DECLARE_METATYPE(InputDialog*)

@@ -1,7 +1,7 @@
-menus:
+menu:
   - label: Packages
     id: packages
-    menus:
+    menu:
       - label: 'Say Hello!'
         id: hello
         command: <name>.hello

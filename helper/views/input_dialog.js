@@ -41,30 +41,30 @@ module.exports = (client) => {
       const id = this.id
       this.validateFunc(text, (result) => {
         if (result) {
-          client.notify('InputDialog.enableOK', id)
+          client.notify('enableOK', id)
         } else {
-          client.notify('InputDialog.disableOK', id)
+          client.notify('disableOK', id)
         }
       })
     }
   }
 
   InputDialog.prototype.show = () => {
-    const id = client.invoke('newInputDialog')
+    const id = client.invoke('newInputDialog', -1)
     this.id = id
     InputDialog.setInstance(id, this)
     
     if (this.labelText != null) {
-      client.notify('InputDialog.setLabelText', this.id, this.labelText)
+      client.notify('setLabelText', this.id, this.labelText)
     }
     if (this.textValue != null) {
-      client.notify('InputDialog.setTextValue', this.id, this.textValue)
+      client.notify('setTextValue', this.id, this.textValue)
     }
 
-    const text = client.invoke('InputDialog.show', this.id)
+    const text = client.invoke('show', this.id)
     
     // clean up
-    client.notify('InputDialog.delete', this.id)
+    client.notify('deleteLater', this.id)
     InputDialog.removeInstance(id)
     
     return text

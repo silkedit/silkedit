@@ -17,7 +17,7 @@ function replaceFileContent(file, oldexp, newStr, cb) {
 }
 
 function move_cursor(args) {
-  const editView = silk.activeView()
+  const editView = silk.activeTextEditView()
   const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
   if (editView != null && 'operation' in args) {
     editView.moveCursor(args['operation'], repeat)
@@ -59,13 +59,13 @@ module.exports = {
 			}
 		}
 		,"save": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.save()
 			}
 		}
 		,"save_as": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.saveAs()
 			}
@@ -102,56 +102,56 @@ module.exports = {
 			}
 		}
 		,"undo": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.undo()
 			}
 		}
 		,"redo": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.redo()
 			}
 		}
 		,"cut": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.cut()
 			}
 		}
 		,"copy": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.copy()
 			}
 		}
 		,"paste": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.paste()
 			}
 		}
 		,"select_all": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.selectAll()
 			}
 		}
 		,"complete": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.complete()
 			}
 		}
 		,"delete": (args) => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 				editView.delete(repeat)
 			}
 		}
 		,"delete_backward": (args) => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				const repeat = 'repeat' in args ? Number.parseInt(args.repeat) : 1
 				editView.delete(-1 * repeat)
@@ -211,22 +211,16 @@ module.exports = {
 				tabViewGroup.splitVertically();
 			}
 		}
-		,"show_fonts": () => {
-			const font = silk.showFontDialog()
-			if (font != null) {
-				silk.setFont(font.family, font.size)
-			}
-		}
 		,"show_scope": () => {
 			const win = silk.activeWindow()
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (win != null && editView != null) {
 				win.statusBar().showMessage(editView.scopeName())
 			}
 		}
 		,"show_scope_tree": () => {
 			const win = silk.activeWindow()
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (win != null && editView != null) {
 				silk.alert(editView.scopeTree())
 			}
@@ -261,13 +255,13 @@ module.exports = {
 			})
 		}
 		,"newline": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.insertNewLine()
 			}
 		}
 		,"indent": () => {
-			const editView = silk.activeView()
+			const editView = silk.activeTextEditView()
 			if (editView != null) {
 				editView.indent()
 			}

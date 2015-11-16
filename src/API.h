@@ -1,60 +1,69 @@
 ﻿#pragma once
 
+#include <boost/optional.hpp>
 #include <msgpack/rpc/protocol.h>
 #include <functional>
 #include <unordered_map>
 #include <string>
+#include <QObject>
 
 #include "core/macros.h"
 #include "core/stlSpecialization.h"
+#include "core/Singleton.h"
 #include "util/DialogUtils.h"
 
-class API {
+class TextEditView;
+class TabView;
+class TabViewGroup;
+class Window;
+class InputDialog;
+
+class API : public QObject, public core::Singleton<API> {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(API)
 
  public:
-  static void init();
-  static void hideActiveFindReplacePanel();
-  static void call(const QString& method, const msgpack::object& obj);
-  static void call(const QString& method, msgpack::rpc::msgid_t msgId, const msgpack::object& obj);
-
- private:
-  API() = delete;
-  ~API() = delete;
-
-  static std::unordered_map<QString, std::function<void(msgpack::object)>> s_notifyFunctions;
-  static std::unordered_map<QString, std::function<void(msgpack::rpc::msgid_t, msgpack::object)>>
-      s_requestFunctions;
+  ~API() = default;
 
   // notify functions
-  static void alert(msgpack::object obj);
-  static void loadKeymap(msgpack::object obj);
-  static void loadMenu(msgpack::object obj);
-  static void loadToolbar(msgpack::object obj);
-  static void loadConfig(msgpack::object obj);
-  static void registerCommands(msgpack::object obj);
-  static void unregisterCommands(msgpack::object obj);
-  static void registerCondition(msgpack::object obj);
-  static void unregisterCondition(msgpack::object obj);
-  static void open(msgpack::object obj);
-  static void dispatchCommand(msgpack::object obj);
-  static void setFont(msgpack::object obj);
+  Q_INVOKABLE void alert(const QString& msg);
+  Q_INVOKABLE void loadKeymap(const QString& pkgName, const QString& ymlPath);
+  Q_INVOKABLE void loadMenu(const QString& pkgName, const QString& ymlPath);
+  Q_INVOKABLE void loadToolbar(const QString& pkgName, const QString& ymlPath);
+  Q_INVOKABLE void loadConfig(const QString& pkgName, const QString& ymlPath);
+  Q_INVOKABLE void registerCommands(QVariantList commands);
+  Q_INVOKABLE void unregisterCommands(QList<QString> commands);
+  Q_INVOKABLE void registerCondition(const QString& condition);
+  Q_INVOKABLE void unregisterCondition(const QString& condition);
+  Q_INVOKABLE void open(const QString& pathStr);
+  Q_INVOKABLE void dispatchCommand(const QString& typeStr,
+                                   const QString& key,
+                                   bool autorep,
+                                   bool altKey,
+                                   bool ctrlKey,
+                                   bool metaKey,
+                                   bool shiftKey);
+  Q_INVOKABLE void setFont(const QString& family, int size);
+  Q_INVOKABLE void hideActiveFindReplacePanel();
 
   // request functions
-  static void activeView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void activeTabView(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void activeTabViewGroup(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void activeWindow(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showFileAndFolderDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showFilesDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showFolderDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showDialogImpl(msgpack::rpc::msgid_t msgId,
-                             const msgpack::object& obj,
-                             DialogUtils::MODE mode);
-  static void windows(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void getConfig(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void version(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showFontDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void showInputDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
-  static void newInputDialog(msgpack::rpc::msgid_t msgId, msgpack::object obj);
+  Q_INVOKABLE TextEditView* activeTextEditView();
+  Q_INVOKABLE TabView* activeTabView();
+  Q_INVOKABLE TabViewGroup* activeTabViewGroup();
+  Q_INVOKABLE Window* activeWindow();
+  Q_INVOKABLE QStringList showFileAndFolderDialog(const QString& caption);
+  Q_INVOKABLE QStringList showFilesDialog(const QString& caption);
+  Q_INVOKABLE boost::optional<QString> showFolderDialog(const QString& caption);
+  Q_INVOKABLE QList<Window*> windows();
+  Q_INVOKABLE boost::optional<QString> getConfig(const QString& name);
+  Q_INVOKABLE QString version();
+  Q_INVOKABLE InputDialog* newInputDialog();
+
+ private:
+  friend class core::Singleton<API>;
+  API();
+
+  QStringList showDialogImpl(const QString& caption, DialogUtils::MODE mode);
 };
+
+Q_DECLARE_METATYPE(boost::optional<QString>)

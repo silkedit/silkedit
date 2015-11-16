@@ -15,7 +15,7 @@ namespace core {
 class Theme;
 }
 
-class TabView : public QTabWidget, public core::UniqueObject<TabView> {
+class TabView : public QTabWidget, public core::UniqueObject {
   Q_OBJECT
   DISABLE_COPY(TabView)
 
@@ -26,19 +26,22 @@ class TabView : public QTabWidget, public core::UniqueObject<TabView> {
 
   int addTab(QWidget* page, const QString& label);
   int insertTab(int index, QWidget* w, const QString& label);
-  int open(const QString& path);
-  void addNew();
+  Q_INVOKABLE int open(const QString& path);
+  Q_INVOKABLE void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
   bool tabDragging() { return m_tabDragging; }
   void saveAllTabs();
-  void closeActiveTab();
-  bool closeAllTabs();
-  void closeOtherTabs();
+  Q_INVOKABLE void closeActiveTab();
+  Q_INVOKABLE bool closeAllTabs();
+  Q_INVOKABLE void closeOtherTabs();
   int indexOfPath(const QString& path);
   bool createWithSavedTabs( void );
   int insertTabInformation( const int index );
+  Q_INVOKABLE int count();
+  Q_INVOKABLE int currentIndex();
+  Q_INVOKABLE void setCurrentIndex(int index);
 
-signals:
+ signals:
   void allTabRemoved();
   void activeTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
@@ -47,15 +50,6 @@ signals:
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
-
- protected:
-  friend struct core::UniqueObject<TabView>;
-
-  static void request(TabView* window,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(TabView* window, const QString& method, const msgpack::object& obj);
 
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
@@ -78,3 +72,5 @@ signals:
   void changeTabText(const QString& path);
   void changeTabStyle(core::Theme* theme);
 };
+
+Q_DECLARE_METATYPE(TabView*)

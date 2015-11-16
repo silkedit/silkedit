@@ -7,33 +7,102 @@
 #include <QFile>
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QObject>
 
 #include "HelperProxy_p.h"
 #include "SilkApp.h"
 #include "API.h"
-#include "KeymapManager.h"
 #include "CommandManager.h"
-#include "InputDialog.h"
-#include "TextEditView.h"
-#include "TabView.h"
-#include "Window.h"
-#include "StatusBar.h"
-#include "TabViewGroup.h"
+#include "KeymapManager.h"
 #include "core/Constants.h"
 #include "core/modifiers.h"
 #include "core/Config.h"
 #include "core/Icondition.h"
 #include "core/Util.h"
 
-#define REGISTER_FUNC(type)                                                 \
-  s_requestFunctions.insert(std::make_pair(#type, &type::callRequestFunc)); \
-  s_notifyFunctions.insert(std::make_pair(#type, &type::callNotifyFunc));
-
 using core::Constants;
 using core::Config;
 using core::Util;
+using core::ArgumentArray;
+using core::UniqueObject;
 
 namespace {
+
+struct QVariantArgument {
+  operator QGenericArgument() const {
+    if (value.isValid()) {
+      return QGenericArgument(value.typeName(), value.constData());
+    } else {
+      return QGenericArgument();
+    }
+  }
+
+  QVariant value;
+};
+
+QVariant invokeMethod(QObject* object, const QString& methodName, QVariantList args) {
+  if (args.size() > 10) {
+    qWarning() << "Can't invoke method with more than 10 arguments. args:" << args.size();
+    return QVariant();
+  }
+
+  if (!object) {
+    QString errMsg = QString("can't convert to QObject");
+    qWarning() << qPrintable(errMsg);
+    return QVariant();
+  }
+
+  // todo: cache method name in hash
+  int methodIndex = -1;
+  for (int i = 0; i < object->metaObject()->methodCount(); i++) {
+    const QString& name = QString::fromLatin1(object->metaObject()->method(i).name());
+    if (name == methodName) {
+      methodIndex = i;
+    }
+  }
+  if (methodIndex == -1) {
+    QString errMsg = QString("method: %1 not found").arg(methodName);
+    qWarning() << qPrintable(errMsg);
+    return QVariant();
+  }
+
+  QMetaMethod method = object->metaObject()->method(methodIndex);
+
+  if (!method.isValid()) {
+    qWarning() << "Invalid method. name:" << method.name() << "index:" << methodIndex;
+    return QVariant();
+  } else if (method.access() != QMetaMethod::Public) {
+    qWarning() << "Can't invoke non-public method. name:" << method.name()
+               << "index:" << methodIndex;
+    return QVariant();
+  } else if (args.size() > method.parameterCount()) {
+    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
+               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
+  }
+
+  QVariantArgument varArgs[10];
+  for (int i = 0; i < args.size(); i++) {
+    varArgs[i].value = args[i];
+  }
+
+  // Init return value
+  QVariant returnValue;
+  // If we pass nullptr as QVariant data, the function with QList<Window*> return type crashes.
+  if (method.returnType() == qMetaTypeId<QList<Window*>>()) {
+    returnValue = QVariant::fromValue(QList<Window*>());
+  } else if (method.returnType() != qMetaTypeId<QVariant>() &&
+             method.returnType() != qMetaTypeId<void>()) {
+    returnValue = QVariant(method.returnType(), nullptr);
+  }
+
+  bool result = method.invoke(object, QGenericReturnArgument(method.typeName(), returnValue.data()),
+                              varArgs[0], varArgs[1], varArgs[2], varArgs[3], varArgs[4],
+                              varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
+  if (!result) {
+    qWarning("invoke %s failed", qPrintable(methodName));
+  }
+  return returnValue;
+}
 
 QStringList helperArgs() {
   QStringList args;
@@ -41,6 +110,7 @@ QStringList helperArgs() {
   //  args << "--debug-brk";
   // add --harmony option first
   args << "--harmony";
+  args << "--harmony_proxies";
   // first argument is main script
   args << Constants::helperDir() + "/main.js";
   // second argument is a socket path
@@ -94,8 +164,7 @@ void HelperProxyPrivate::init() {
     return;
   }
 
-  connect(m_server, &QLocalServer::newConnection, this,
-          &HelperProxyPrivate::helperConnected);
+  connect(m_server, &QLocalServer::newConnection, this, &HelperProxyPrivate::helperConnected);
 
   m_helperProcess.reset(new QProcess(this));
   connect(m_helperProcess.get(), &QProcess::readyReadStandardOutput, this,
@@ -106,6 +175,7 @@ void HelperProxyPrivate::init() {
           &HelperProxyPrivate::onFinished);
   qDebug("helper: %s", qPrintable(Constants::helperPath()));
   qDebug() << "args:" << helperArgs();
+  // todo: fix this issue
   // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
   m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
   startPluginRunnerProcess();
@@ -127,14 +197,7 @@ void HelperProxyPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t
 }
 
 HelperProxyPrivate::HelperProxyPrivate(HelperProxy* q_ptr)
-    : q(q_ptr), m_helperProcess(nullptr), m_server(nullptr) {
-  REGISTER_FUNC(TextEditView)
-  REGISTER_FUNC(TabView)
-  REGISTER_FUNC(TabViewGroup)
-  REGISTER_FUNC(Window)
-  REGISTER_FUNC(StatusBar)
-  REGISTER_FUNC(InputDialog)
-}
+    : q(q_ptr), m_helperProcess(nullptr), m_server(nullptr) {}
 
 void HelperProxyPrivate::readStdout() {
   QProcess* p = (QProcess*)sender();
@@ -169,10 +232,10 @@ void HelperProxyPrivate::helperConnected() {
 void HelperProxyPrivate::onFinished(int exitCode) {
   qWarning("silkedit_helper has stopped working. exit code: %d", exitCode);
   q->m_isStopped = true;
-  auto reply =
-      QMessageBox::question(nullptr, "Error",
-                            tr("silkedit_helper process has crashed. SilkEdit can continue to run but "
-                            "you can't use any packages. Do you want to restart the silkedit_helper process?"));
+  auto reply = QMessageBox::question(
+      nullptr, "Error",
+      tr("silkedit_helper process has crashed. SilkEdit can continue to run but "
+         "you can't use any packages. Do you want to restart the silkedit_helper process?"));
   if (reply == QMessageBox::Yes) {
     startPluginRunnerProcess();
     q->m_isStopped = false;
@@ -249,7 +312,7 @@ void HelperProxyPrivate::readRequest() {
             qCritical("invalid rpc type");
         }
       } catch (msgpack::v1::type_error e) {
-        qCritical() << "type error. bad cast.";
+        qCritical() << "type error. bad cast. cause: " << e.what();
         continue;
       }
     }
@@ -284,55 +347,6 @@ std::tuple<bool, std::string, CommandArgument> HelperProxyPrivate::cmdEventFilte
   } catch (const std::exception& e) {
     qCritical() << e.what();
     return std::make_tuple(false, "", CommandArgument());
-  }
-}
-
-void HelperProxyPrivate::callRequestFunc(const QString& methodName,
-                                           msgpack::rpc::msgid_t msgId,
-                                           const msgpack::object& obj) {
-  qDebug() << "method:" << qPrintable(methodName);
-  int dotIndex = methodName.indexOf(".");
-  if (dotIndex >= 0) {
-    QString type = methodName.mid(0, dotIndex);
-    QString method = methodName.mid(dotIndex + 1);
-    if (type.isEmpty() || method.isEmpty()) {
-      return;
-    }
-
-    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
-    if (s_requestFunctions.count(type) != 0) {
-      s_requestFunctions.at(type)(msgId, method, obj);
-    } else {
-      qWarning("type: %s not supported", qPrintable(type));
-    }
-  } else {
-    API::call(methodName, msgId, obj);
-  }
-}
-
-void HelperProxyPrivate::callNotifyFunc(const QString& methodName, const msgpack::object& obj) {
-  qDebug() << "method:" << qPrintable(methodName);
-  if (obj.type != msgpack::type::ARRAY) {
-    qWarning("params must be an array");
-    return;
-  }
-
-  int dotIndex = methodName.indexOf(".");
-  if (dotIndex >= 0) {
-    QString type = methodName.mid(0, dotIndex);
-    QString method = methodName.mid(dotIndex + 1);
-    if (type.isEmpty() || method.isEmpty()) {
-      return;
-    }
-
-    qDebug("type: %s, method: %s", qPrintable(type), qPrintable(method));
-    if (s_notifyFunctions.count(type) != 0) {
-      s_notifyFunctions.at(type)(method, obj);
-    } else {
-      qWarning("type: %s not supported", qPrintable(type));
-    }
-  } else {
-    API::call(methodName, obj);
   }
 }
 
@@ -434,8 +448,8 @@ void HelperProxy::callExternalCommand(const QString& cmd, const CommandArgument&
 }
 
 bool HelperProxy::askExternalCondition(const QString& name,
-                                         core::Operator op,
-                                         const QString& value) {
+                                       core::Operator op,
+                                       const QString& value) {
   qDebug("askExternalCondition");
   std::tuple<std::string, std::string, std::string> params = std::make_tuple(
       name.toUtf8().constData(), core::ICondition::operatorString(op).toUtf8().constData(),
@@ -507,6 +521,52 @@ void HelperProxy::reloadKeymaps() {
 
 HelperProxy::HelperProxy()
     : d(new HelperProxyPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
+
+void HelperProxyPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
+  ArgumentArray params;
+  obj.convert(&params);
+  int id = params.id();
+
+  QObject* view;
+  // API id is -1
+  if (id == -1) {
+    view = &API::singleton();
+  } else {
+    view = UniqueObject::find(id);
+  }
+
+  if (view) {
+    invokeMethod(view, method, params.args());
+  } else {
+    qWarning("id: %d not found", id);
+  }
+}
+
+void HelperProxyPrivate::callRequestFunc(const QString& method,
+                                         msgpack::rpc::msgid_t msgId,
+                                         const msgpack::v1::object& obj) {
+  ArgumentArray params;
+  obj.convert(&params);
+  int id = params.id();
+
+  QObject* view;
+  // API id is -1
+  if (id == -1) {
+    view = &API::singleton();
+  } else {
+    view = UniqueObject::find(id);
+  }
+
+  if (view) {
+    const QVariant& returnValue = invokeMethod(view, method, params.args());
+    HelperProxy::singleton().sendResponse(returnValue, msgpack::type::nil(), msgId);
+  } else {
+    QString errMsg = QString("id: %1 not found").arg(id);
+    qWarning() << qPrintable(errMsg);
+    HelperProxy::singleton().sendResponse(msgpack::type::nil(),
+                                          ((std::string)errMsg.toUtf8().constData()), msgId);
+  }
+}
 
 std::tuple<bool, std::string, CommandArgument> HelperProxy::cmdEventFilter(
     const std::string& name,

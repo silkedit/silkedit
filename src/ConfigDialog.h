@@ -16,7 +16,7 @@ class ConfigDialog : public QDialog {
   Q_OBJECT
 
  public:
-  static void loadConfig(const QString& pkgName, const std::string& configPath);
+  static void loadConfig(const QString& pkgName, const QString& configPath);
   static void showModeless();
 
  private:
