@@ -5,6 +5,7 @@
 
 class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
   Q_OBJECT
+
  public:
   static std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
       s_notifyFunctions;
@@ -16,6 +17,7 @@ class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
   HelperProxy* q;
   std::unique_ptr<QProcess> m_helperProcess;
   QLocalServer* m_server;
+  QHash<QString, QHash<QString, int>> m_classMethodHash;
 
   explicit HelperProxyPrivate(HelperProxy* q_ptr);
   ~HelperProxyPrivate();
@@ -40,4 +42,6 @@ class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
   void sendError(const std::string& err, msgpack::rpc::msgid_t id);
 
   void startPluginRunnerProcess();
+  QVariant invokeMethod(QObject* object, const QString& methodName, QVariantList args);
+  void cacheMethods(const QString& className, const QMetaObject* object);
 };

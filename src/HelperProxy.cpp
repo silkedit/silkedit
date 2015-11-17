@@ -40,70 +40,6 @@ struct QVariantArgument {
   QVariant value;
 };
 
-QVariant invokeMethod(QObject* object, const QString& methodName, QVariantList args) {
-  if (args.size() > 10) {
-    qWarning() << "Can't invoke method with more than 10 arguments. args:" << args.size();
-    return QVariant();
-  }
-
-  if (!object) {
-    QString errMsg = QString("can't convert to QObject");
-    qWarning() << qPrintable(errMsg);
-    return QVariant();
-  }
-
-  // todo: cache method name in hash
-  int methodIndex = -1;
-  for (int i = 0; i < object->metaObject()->methodCount(); i++) {
-    const QString& name = QString::fromLatin1(object->metaObject()->method(i).name());
-    if (name == methodName) {
-      methodIndex = i;
-    }
-  }
-  if (methodIndex == -1) {
-    QString errMsg = QString("method: %1 not found").arg(methodName);
-    qWarning() << qPrintable(errMsg);
-    return QVariant();
-  }
-
-  QMetaMethod method = object->metaObject()->method(methodIndex);
-
-  if (!method.isValid()) {
-    qWarning() << "Invalid method. name:" << method.name() << "index:" << methodIndex;
-    return QVariant();
-  } else if (method.access() != QMetaMethod::Public) {
-    qWarning() << "Can't invoke non-public method. name:" << method.name()
-               << "index:" << methodIndex;
-    return QVariant();
-  } else if (args.size() > method.parameterCount()) {
-    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
-               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
-  }
-
-  QVariantArgument varArgs[10];
-  for (int i = 0; i < args.size(); i++) {
-    varArgs[i].value = args[i];
-  }
-
-  // Init return value
-  QVariant returnValue;
-  // If we pass nullptr as QVariant data, the function with QList<Window*> return type crashes.
-  if (method.returnType() == qMetaTypeId<QList<Window*>>()) {
-    returnValue = QVariant::fromValue(QList<Window*>());
-  } else if (method.returnType() != qMetaTypeId<QVariant>() &&
-             method.returnType() != qMetaTypeId<void>()) {
-    returnValue = QVariant(method.returnType(), nullptr);
-  }
-
-  bool result = method.invoke(object, QGenericReturnArgument(method.typeName(), returnValue.data()),
-                              varArgs[0], varArgs[1], varArgs[2], varArgs[3], varArgs[4],
-                              varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
-  if (!result) {
-    qWarning("invoke %s failed", qPrintable(methodName));
-  }
-  return returnValue;
-}
-
 QStringList helperArgs() {
   QStringList args;
   // stop Node in debug mode
@@ -197,7 +133,10 @@ void HelperProxyPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t
 }
 
 HelperProxyPrivate::HelperProxyPrivate(HelperProxy* q_ptr)
-    : q(q_ptr), m_helperProcess(nullptr), m_server(nullptr) {}
+    : q(q_ptr),
+      m_helperProcess(nullptr),
+      m_server(nullptr),
+      m_classMethodHash(QHash<QString, QHash<QString, int>>()) {}
 
 void HelperProxyPrivate::readStdout() {
   QProcess* p = (QProcess*)sender();
@@ -521,6 +460,83 @@ void HelperProxy::reloadKeymaps() {
 
 HelperProxy::HelperProxy()
     : d(new HelperProxyPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
+
+void HelperProxyPrivate::cacheMethods(const QString& className, const QMetaObject* metaObj) {
+  QHash<QString, int> methodNameIndexHash;
+  for (int i = 0; i < metaObj->methodCount(); i++) {
+    const QString& name = QString::fromLatin1(metaObj->method(i).name());
+    methodNameIndexHash.insert(name, i);
+  }
+  m_classMethodHash.insert(className, methodNameIndexHash);
+}
+
+QVariant HelperProxyPrivate::invokeMethod(QObject* object,
+                                          const QString& methodName,
+                                          QVariantList args) {
+  if (args.size() > 10) {
+    qWarning() << "Can't invoke method with more than 10 arguments. args:" << args.size();
+    return QVariant();
+  }
+
+  if (!object) {
+    QString errMsg = QString("can't convert to QObject");
+    qWarning() << qPrintable(errMsg);
+    return QVariant();
+  }
+
+  int methodIndex = -1;
+  const QString& className = object->metaObject()->className();
+  if (!m_classMethodHash.contains(className)) {
+    cacheMethods(className, object->metaObject());
+  }
+
+  if (m_classMethodHash.value(className).contains(methodName)) {
+    methodIndex = m_classMethodHash.value(className).value(methodName);
+  }
+
+  if (methodIndex == -1) {
+    QString errMsg = QString("method: %1 not found").arg(methodName);
+    qWarning() << qPrintable(errMsg);
+    return QVariant();
+  }
+
+  QMetaMethod method = object->metaObject()->method(methodIndex);
+
+  if (!method.isValid()) {
+    qWarning() << "Invalid method. name:" << method.name() << "index:" << methodIndex;
+    return QVariant();
+  } else if (method.access() != QMetaMethod::Public) {
+    qWarning() << "Can't invoke non-public method. name:" << method.name()
+               << "index:" << methodIndex;
+    return QVariant();
+  } else if (args.size() > method.parameterCount()) {
+    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
+               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
+  }
+
+  QVariantArgument varArgs[10];
+  for (int i = 0; i < args.size(); i++) {
+    varArgs[i].value = args[i];
+  }
+
+  // Init return value
+  QVariant returnValue;
+  // If we pass nullptr as QVariant data, the function with QList<Window*> return type crashes.
+  if (method.returnType() == qMetaTypeId<QList<Window*>>()) {
+    returnValue = QVariant::fromValue(QList<Window*>());
+  } else if (method.returnType() != qMetaTypeId<QVariant>() &&
+             method.returnType() != qMetaTypeId<void>()) {
+    returnValue = QVariant(method.returnType(), nullptr);
+  }
+
+  bool result = method.invoke(object, QGenericReturnArgument(method.typeName(), returnValue.data()),
+                              varArgs[0], varArgs[1], varArgs[2], varArgs[3], varArgs[4],
+                              varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
+  if (!result) {
+    qWarning("invoke %s failed", qPrintable(methodName));
+  }
+  return returnValue;
+}
 
 void HelperProxyPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
   ArgumentArray params;
