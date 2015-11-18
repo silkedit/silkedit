@@ -95,6 +95,7 @@ class TextEditView : public QPlainTextEdit,
   Q_INVOKABLE void paste();
   Q_INVOKABLE void selectAll();
   Q_INVOKABLE void indent();
+  Q_INVOKABLE QString text();
 
  signals:
   void destroying(const QString& path);

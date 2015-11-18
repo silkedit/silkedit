@@ -77,7 +77,7 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
 
   TextEditView.prototype = {
     text: function() {
-      return client.invoke('toPlainText', this.id)
+      return client.invoke('text', this.id)
     }
     ,save: function() {
       client.notify('save', this.id)

@@ -1178,5 +1178,9 @@ void TextEditView::indent() {
   d->indentOneLevel(cursor);
 }
 
+QString TextEditView::text() {
+  return QPlainTextEdit::toPlainText();
+}
+
 // Necessary for Q_PRIVATE_SLOT
 #include "moc_TextEditView.cpp"
