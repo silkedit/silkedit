@@ -7,7 +7,7 @@
 
 namespace {
 #ifdef Q_OS_WIN
-const QString serverSocketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
+const QString socketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
 #else
 const QString socketPath = QDir::tempPath() + "/silkedit.sock";
 #endif
