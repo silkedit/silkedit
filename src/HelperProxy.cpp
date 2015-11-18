@@ -111,9 +111,6 @@ void HelperProxyPrivate::init() {
           &HelperProxyPrivate::onFinished);
   qDebug("helper: %s", qPrintable(Constants::helperPath()));
   qDebug() << "args:" << helperArgs();
-  // todo: fix this issue
-  // Disable stdout. With stdout, main.js (Node 0.12) doesn't work correctly on Windows 7 64 bit.
-  m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
   startPluginRunnerProcess();
 }
 
