@@ -124,9 +124,9 @@ resolve() {
 
       # node
       if [ ! -d helper/bin ]; then
-        node=node-v0.12.0-darwin-x64
+        node=node-v5.1.0-darwin-x64
         echo "Downloading $node"
-        curl -O http://nodejs.org/dist/v0.12.0/$node.tar.gz
+        curl -O http://nodejs.org/dist/v5.1.0/$node.tar.gz
         tar zxf $node.tar.gz
         # -R keeps symlink intact
         cp -R $node/bin $node/lib helper

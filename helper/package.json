@@ -5,9 +5,9 @@
   "main": "main.js",
   "dependencies": {
     "js-yaml": "^3.2.7",
-    "silk-msgpack-rpc": "0.0.3",
-    "synchronize": "^0.9.9",
-    "node-proxy": "1.0.0"
+    "silk-msgpack-rpc": "0.1.0",
+    "synchronize": "^0.9.14",
+    "harmony-reflect": "^1.4.2"
   },
   "devDependencies": {},
   "author": "SilkEdit team"

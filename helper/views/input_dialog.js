@@ -1,14 +1,14 @@
 'use strict'
 
-var EventEmitter = require('events').EventEmitter;
-var util = require('util')
+const EventEmitter = require('events');
+const util = require('util')
 
 var instances = {}
 
 module.exports = (client) => {
 
   // class InputDialog
-  const InputDialog = () => {
+  function InputDialog() {
     this.id = null
     this.validateFunc = null
     this.labelText = null
@@ -19,23 +19,23 @@ module.exports = (client) => {
 
   // static members
 
-  InputDialog.getInstance = (id) => {
+  InputDialog.getInstance = function(id) {
     return id in instances ? instances[id] : null
   }
 
-  InputDialog.setInstance = (id, instance) => {
+  InputDialog.setInstance = function(id, instance) {
     if (id != null) {
       instances[id] = instance
     }
   }
 
-  InputDialog.removeInstance = (id) => {
+  InputDialog.removeInstance = function(id) {
     delete instances[id]
   }
 
   // instance members
 
-  InputDialog.prototype.textValueChanged = (text) => {
+  InputDialog.prototype.textValueChanged = function(text) {
     // Validate input
     if (this.validateFunc != null) {
       const id = this.id
@@ -49,7 +49,7 @@ module.exports = (client) => {
     }
   }
 
-  InputDialog.prototype.show = () => {
+  InputDialog.prototype.show = function() {
     const id = client.invoke('newInputDialog', -1)
     this.id = id
     InputDialog.setInstance(id, this)

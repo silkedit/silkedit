@@ -17,6 +17,7 @@ if (process.argv.length < 3) {
 const socketFile = process.argv[2];
 const locale = process.argv[3];
 const packagesBeginIndex = 4
+const timeoutInMS = 1000
 var commands = {}
 var conditions = {}
 var eventFilters = {}
@@ -57,6 +58,12 @@ const c = rpc.createClient(socketFile, () => {
   sync(c, 'invoke');
   callForeachPackageDir(silk.loadPackage)
 });
+
+c.setTimeout(timeoutInMS);  // Setting this will cause requests to fail with err "timeout" if they don't recieve a response for the specified period
+
+c.on('error', (err) => {
+  console.error(err);
+})
 
 // Call user's package code in runInFiber!!
 const handler = {
@@ -156,8 +163,13 @@ const handler = {
 
   ,"askCondition": (name, operator, value, response) => {
     if (name in conditions) {
-      silkutil.runInFiber(() => {
-        response.result(conditions[name](operator, value))
+      sync.fiber(() => {
+        try {
+          response.result(conditions[name](operator, value))
+        } catch (err) {
+          console.error(err)
+          response.result(false)
+        }
       })
     } else {
       response.result(false)
@@ -166,8 +178,13 @@ const handler = {
   ,"eventFilter": (type, event, response) => {
     // console.log('eventFilter. type: %s', type)
     if (type in eventFilters) {
-      silkutil.runInFiber(() => {
-        response.result(eventFilters[type].some(fn => { return fn(event)}))
+      sync.fiber(() => {
+        try {
+          response.result(eventFilters[type].some(fn => { return fn(event)}))
+        } catch (err) {
+          console.error(err)
+          response.result(false)
+        }
       })
     } else {
       response.result(false)
@@ -185,8 +202,13 @@ const handler = {
       ,"shiftKey": shiftKey
     }
     if (type in eventFilters) {
-      silkutil.runInFiber(() => {
-        response.result(eventFilters[type].some((fn) => { return fn(event)}))
+      sync.fiber(() => {
+        try {
+          response.result(eventFilters[type].some((fn) => { return fn(event)}))
+        } catch (err) {
+          console.error(err)
+          response.result(false)
+        }
       })
     } else {
       response.result(false)
@@ -199,9 +221,14 @@ const handler = {
     }
     const type = "runCommand"
     if (type in eventFilters) {
-      silkutil.runInFiber(() => {
-        const result = eventFilters[type].some(fn => { return fn(event)})
-        response.result([result, event.name, event.args])
+      sync.fiber(() => {
+        try {
+          const result = eventFilters[type].some(fn => { return fn(event)})
+          response.result([result, event.name, event.args])
+        } catch (err) {
+          console.error(err)
+          response.result([false, event.name, event.args])
+        }
       })
     } else {
       response.result([false, event.name, event.args])

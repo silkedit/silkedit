@@ -13,39 +13,39 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
   var InputDialog = require('./views/input_dialog')(client)
 
   // class TabView
-  const TabView = (id) => {
+  function TabView(id) {
     this.id = id
   }
 
-  TabView.prototype.closeAllTabs = () => {
+  TabView.prototype.closeAllTabs = function() {
     client.notify('closeAllTabs', this.id)
   }
 
-  TabView.prototype.closeOtherTabs = () => {
+  TabView.prototype.closeOtherTabs = function() {
     client.notify('closeOtherTabs', this.id)
   }
 
-  TabView.prototype.closeActiveTab = () => {
+  TabView.prototype.closeActiveTab = function() {
     client.notify('closeActiveTab', this.id)
   }
 
 
-  TabView.prototype.addNew = () => {
+  TabView.prototype.addNew = function() {
     client.notify('addNew', this.id)
   }
 
   // This property holds the number of tabs in the tab bar.
-  TabView.prototype.count = () => {
+  TabView.prototype.count = function() {
     return client.invoke('count', this.id)
   }
   
   // This property holds the index of the tab bar's visible tab.
   // The current index is -1 if there is no current tab.
-  TabView.prototype.currentIndex = () => {
+  TabView.prototype.currentIndex = function() {
     return client.invoke('currentIndex', this.id)
   }
   
-  TabView.prototype.setCurrentIndex = (index) => {
+  TabView.prototype.setCurrentIndex = function(index) {
     if (typeof(index) == 'number') {
       client.notify('setCurrentIndex', this.id, index)
     }
@@ -53,134 +53,134 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
 
 
   // class TabViewGroup
-  const TabViewGroup = (id) => {
+  function TabViewGroup(id) {
     this.id = id
   }
 
-  TabViewGroup.prototype.saveAll = () => {
+  TabViewGroup.prototype.saveAll = function() {
     client.notify('saveAllTabs', this.id)
   }
 
-  TabViewGroup.prototype.splitHorizontally = () => {
+  TabViewGroup.prototype.splitHorizontally = function() {
     client.notify('splitHorizontally', this.id)
   }
 
-  TabViewGroup.prototype.splitVertically = () => {
+  TabViewGroup.prototype.splitVertically = function() {
     client.notify('splitVertically', this.id)
   }
 
 
   // class TextEditView
-  const TextEditView = function (id) {
+  function TextEditView(id) {
     this.id = id;
   }
 
   TextEditView.prototype = {
-    text: () => {
+    text: function() {
       return client.invoke('toPlainText', this.id)
     }
-    ,save: () => {
+    ,save: function() {
       client.notify('save', this.id)
     }
   }
 
   // todo: Put these functions into a single object like above
-  TextEditView.prototype.saveAs = () => {
+  TextEditView.prototype.saveAs = function() {
     client.notify('saveAs', this.id)
   }
 
-  TextEditView.prototype.undo = () => {
+  TextEditView.prototype.undo = function() {
     client.notify('undo', this.id)
   }
 
-  TextEditView.prototype.redo = () => {
+  TextEditView.prototype.redo = function() {
     client.notify('redo', this.id)
   }
 
-  TextEditView.prototype.cut = () => {
+  TextEditView.prototype.cut = function() {
     client.notify('cut', this.id)
   }
 
-  TextEditView.prototype.copy = () => {
+  TextEditView.prototype.copy = function() {
     client.notify('copy', this.id)
   }
 
-  TextEditView.prototype.paste = () => {
+  TextEditView.prototype.paste = function() {
     client.notify('paste', this.id)
   }
 
-  TextEditView.prototype.selectAll = () => {
+  TextEditView.prototype.selectAll = function() {
     client.notify('selectAll', this.id)
   }
 
-  TextEditView.prototype.delete =  (repeat) => {
+  TextEditView.prototype.delete = function(repeat) {
     repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
     client.notify('doDelete', this.id, repeat)
   }
 
-  TextEditView.prototype.moveCursor =  (operation, repeat) => {
+  TextEditView.prototype.moveCursor = function(operation, repeat) {
     repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
     if (operation != null && typeof(operation) == 'string') {
       client.notify('moveCursor', this.id, operation, repeat)
     }
   }
 
-  TextEditView.prototype.setThinCursor = (isThin) => {
+  TextEditView.prototype.setThinCursor = function(isThin) {
     client.notify('setThinCursor', this.id, isThin)
   }
 
-  TextEditView.prototype.scopeName = () => {
+  TextEditView.prototype.scopeName = function() {
     return client.invoke('scopeName', this.id)
   }
 
-  TextEditView.prototype.scopeTree = () => {
+  TextEditView.prototype.scopeTree = function() {
     return client.invoke('scopeTree', this.id)
   }
 
-  TextEditView.prototype.complete = () => {
+  TextEditView.prototype.complete = function() {
     return client.notify('performCompletion', this.id)
   }
   
-  TextEditView.prototype.insertNewLine = () => {
+  TextEditView.prototype.insertNewLine = function() {
     client.notify('insertNewLineWithIndent', this.id)
   }
   
-  TextEditView.prototype.indent = () => {
+  TextEditView.prototype.indent = function() {
     client.notify('indent', this.id)
   }
 
   // class Window
-  const Window = (id) => {
+  function Window(id) {
     this.id = id
   }
 
-  Window.prototype.close = () => {
+  Window.prototype.close = function() {
     client.notify('close', this.id)
   }
 
-  Window.prototype.openFindPanel = () => {
+  Window.prototype.openFindPanel = function() {
     client.notify('openFindAndReplacePanel', this.id)
   }
 
-  Window.prototype.statusBar = () => {
+  Window.prototype.statusBar = function() {
     const id = client.invoke('statusBar', this.id)
     return id != null ? new StatusBar(id) : null
   }
 
 
   // class StatusBar
-  const StatusBar = (id) => {
+  function StatusBar(id) {
     this.id = id
   }
 
-  StatusBar.prototype.showMessage = (message, timeout) => {
+  StatusBar.prototype.showMessage = function(message, timeout) {
     if (message != null) {
       var timeout = timeout || 0 // ms
       client.notify('showMessage', this.id, message, timeout)
     }
   }
 
-  StatusBar.prototype.clearMessage = () => {
+  StatusBar.prototype.clearMessage = function() {
     client.notify('clearMessage', this.id)
   }
 
