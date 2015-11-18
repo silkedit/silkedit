@@ -59,7 +59,8 @@ const c = rpc.createClient(socketFile, () => {
   callForeachPackageDir(silk.loadPackage)
 });
 
-c.setTimeout(timeoutInMS);  // Setting this will cause requests to fail with err "timeout" if they don't recieve a response for the specified period
+// Don't set timeout because some operation like opening a dialog requires long time
+// c.setTimeout(timeoutInMS);
 
 c.on('error', (err) => {
   console.error(err);
