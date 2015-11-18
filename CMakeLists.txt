@@ -31,7 +31,9 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
-find_package(Qt5WebEngineWidgets REQUIRED)
+if (APPLE)
+  find_package(Qt5WebEngineWidgets REQUIRED)
+endif (APPLE)
 find_package(Boost REQUIRED)
 
 qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
@@ -94,15 +96,17 @@ add_subdirectory(core)
 add_subdirectory(crashreporter)
 add_subdirectory(test)
 
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml Qt5::WebEngineWidgets ${YAML_CPP_LIBRARY})
-# brakpad lib/framework
 if(APPLE)
+  target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml Qt5::WebEngineWidgets ${YAML_CPP_LIBRARY})
+  # brakpad lib/framework
   target_link_libraries(${PROJECT_NAME}
     "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
     "-framework Breakpad")
-else (APPLE)
+else(APPLE)
+  # Don't include WebEngineWidgets on Windows because it needs MSVC 2013
+  target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})
   target_link_libraries(${PROJECT_NAME} ${BREAKPAD_LIBS}/common ${BREAKPAD_LIBS}/exception_handler ${BREAKPAD_LIBS}/crash_generation_client)
-ENDIF(APPLE)
+endif(APPLE)
 
 if(APPLE)
   # bundle packages
