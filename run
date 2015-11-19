@@ -8,14 +8,14 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
   if [ "$(uname -m)" == "x86_64" ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
-    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "D:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     VCVARSALL_ARG=amd64
     PROGRAM_FILES="Program Files (x86)"
     ARCH=x64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
-    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "D:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     VCVARSALL_ARG=x86
     ARCH=x86
     PROGRAM_FILES="Program Files"
@@ -109,6 +109,26 @@ resolve() {
       if [ ! -f /usr/local/lib/libonig.a ]; then
         cd Onigmo
         ./configure && make && make install
+        cd ..
+      fi
+
+      # breakpad
+      if [ ! -f /usr/local/bin/minidump_stackwalk ]; then
+        echo 'Building Breakpad ...'
+        cd breakpad
+
+        ./configure
+        make
+        make install
+
+        cd ..
+      fi
+      if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
+        echo 'Building Breakpad client ...'
+        
+        cd breakpad
+        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Debug
+        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
         cd ..
       fi
 
@@ -206,6 +226,72 @@ resolve() {
             cp onig.lib onig.dll ../lib
             cd ..
         fi
+
+		#breakpad
+		if [ ! -f /usr/local/bin/minidump_stackwalk.exe ]; then
+			echo 'Building Breakpad ...'
+			cd breakpad
+
+			./configure
+
+			patch -p1 --binary -N < ../crashview/patch/breakpad_googletest_include.h.patch
+			patch -p1 --binary -N < ../crashview/patch/symbolic_constants_win.cc.patch
+
+			make
+			make install
+
+			cd ..
+		fi
+
+		if [ ! -f lib/breakpad/Release/common.lib ]; then
+			echo 'Building Breakpad client ...'
+
+			cd breakpad
+			export GYP_MSVS_VERSION=2013
+
+			gyp --no-circular-check ./src/client/windows/breakpad_client.gyp
+			
+			"/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/devenv.exe" ./src/client/windows/breakpad_client.sln //upgrade
+			
+			echo 'Breakpad patch'
+			# configurate compile options
+			patch -p1 --binary -N < ../crashview/patch/common.patch
+			patch -p1 --binary -N < ../crashview/patch/exception_handler.patch
+			patch -p1 --binary -N < ../crashview/patch/crash_report_sender.patch
+			patch -p1 --binary -N < ../crashview/patch/crash_generation_client.patch
+			patch -p1 --binary -N < ../crashview/patch/crash_generation_server.patch
+
+			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
+            mkdir -p ../lib/breakpad/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
+			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
+			cp ./src/client/windows/handler/Debug/lib/exception_handler.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
+			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_client.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
+			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_server.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
+			cp ./src/client/windows/sender/Debug/lib/crash_report_sender.lib ./src/client/windows/Debug
+
+            cp ./src/client/windows/Debug/common.lib ./src/client/windows/Debug/exception_handler.lib ./src/client/windows/Debug/crash_generation_client.lib ./src/client/windows/Debug/crash_generation_server.lib ./src/client/windows/Debug/crash_report_sender.lib ../lib/breakpad/Debug/
+
+            mkdir -p ../lib/breakpad/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
+			cp ./src/client/windows/Release/lib/common.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
+			cp ./src/client/windows/handler/Release/lib/exception_handler.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
+			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_client.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
+			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_server.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
+			cp ./src/client/windows/sender/Release/lib/crash_report_sender.lib ./src/client/windows/Release
+
+            cp ./src/client/windows/Release/common.lib ./src/client/windows/Release/exception_handler.lib ./src/client/windows/Release/crash_generation_client.lib ./src/client/windows/Release/crash_generation_server.lib ./src/client/windows/Release/crash_report_sender.lib ../lib/breakpad/Release/
+
+			cd ..
+		fi
     fi
 }
 
@@ -222,6 +308,15 @@ build() {
 
 
     if [ $OS == 'Mac' ]; then
+
+		# crashview
+		mkdir -p crashview
+		cd crashview
+		echo 'Building CrashView ...'
+		cmake -GNinja ../../crashview -DCMAKE_BUILD_TYPE=Release
+		ninja
+		cd ..
+
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
         else
@@ -229,12 +324,30 @@ build() {
         fi
 
         ninja
+        
+        mkdir -p SilkEdit.app/Contents/MacOS/CrashView
+        cp -r crashview/CrashView.app SilkEdit.app/Contents/MacOS/CrashView/CrashView.app        
     else
+
+		# crashview
+		mkdir -p crashview
+		cd crashview
+		echo 'Building CrashView ...'
+		cmake -G "$MSVC" ../../crashview -DCMAKE_BUILD_TYPE=Release
+		#msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
+		msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
+		cd ..
+
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
         fi
+
+		# copy crashview support files
+        cp /usr/local/bin/minidump_stackwalk.exe /usr/bin/msys-2.0.dll /usr/bin/msys-gcc_s-seh-1.dll /usr/bin/msys-stdc++-6.dll crashview/Release
+		mkdir -p Release/CrashView
+        cp -r crashview/Release/* Release/CrashView/
     fi
 
     cd ..
@@ -273,6 +386,8 @@ make_installer() {
         # Can't use mv because mv fails when Release/packages already exists
         cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
         rm -rf silkedit.exe onig.dll packages plugin_runner
+		mkdir -p Release/CrashView
+        cp -r crashview/Release/* Release/CrashView/
         cd Release
 
         windeployqt --release --no-compiler-runtime silkedit.exe

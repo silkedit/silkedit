@@ -1,0 +1,119 @@
+--- ./src/client/windows/crash_generation/crash_generation_client.vcxproj.origin	2015-11-15 17:47:23.609974100 +0900
++++ ./src/client/windows/crash_generation/crash_generation_client.vcxproj	2015-11-16 17:33:37.438687100 +0900
+@@ -66,15 +66,15 @@
+       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+       <BufferSecurityCheck>true</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <MinimalRebuild>false</MinimalRebuild>
+       <Optimization>Disabled</Optimization>
+       <PreprocessorDefinitions>_DEBUG;_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+     </ClCompile>
+     <Lib>
+@@ -117,15 +117,15 @@
+       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+       <BufferSecurityCheck>true</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <MinimalRebuild>false</MinimalRebuild>
+       <Optimization>Disabled</Optimization>
+       <PreprocessorDefinitions>_DEBUG;_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;NO_TCMALLOC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+     </ClCompile>
+     <Lib>
+@@ -166,15 +166,15 @@
+       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+       <BufferSecurityCheck>true</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <MinimalRebuild>false</MinimalRebuild>
+       <Optimization>MaxSpeed</Optimization>
+       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;NDEBUG;NVALGRIND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+     </ClCompile>
+     <Lib>
+@@ -216,15 +216,15 @@
+       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+       <BufferSecurityCheck>false</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <MinimalRebuild>false</MinimalRebuild>
+       <Optimization>Disabled</Optimization>
+       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;NO_TCMALLOC;NDEBUG;NVALGRIND;PURIFY;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+     </ClCompile>
+     <Lib>
+@@ -266,7 +266,7 @@
+       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+       <BufferSecurityCheck>true</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
+@@ -277,10 +277,10 @@
+       <OmitFramePointers>true</OmitFramePointers>
+       <Optimization>Full</Optimization>
+       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;NDEBUG;NVALGRIND;OFFICIAL_BUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+       <StringPooling>true</StringPooling>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+       <WholeProgramOptimization>true</WholeProgramOptimization>
+     </ClCompile>
+@@ -326,15 +326,15 @@
+       <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+       <BufferSecurityCheck>true</BufferSecurityCheck>
+       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+-      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
++      <DisableSpecificWarnings>4100;4127;4396;4503;4512;4819;4995;4702;4800;4091;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+       <ExceptionHandling>false</ExceptionHandling>
+       <FunctionLevelLinking>true</FunctionLevelLinking>
+       <MinimalRebuild>false</MinimalRebuild>
+       <Optimization>MaxSpeed</Optimization>
+       <PreprocessorDefinitions>_WIN32_WINNT=0x0600;WINVER=0x0600;WIN32;_WINDOWS;_HAS_EXCEPTIONS=0;NOMINMAX;_CRT_RAND_S;CERT_CHAIN_PARA_HAS_EXTRA_FIELDS;WIN32_LEAN_AND_MEAN;_SECURE_ATL;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_WARNINGS;_CRT_NONSTDC_NO_DEPRECATE;_USING_V110_SDK71_;NO_TCMALLOC;NDEBUG;NVALGRIND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
++      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+       <RuntimeTypeInfo>false</RuntimeTypeInfo>
+-      <TreatWarningAsError>true</TreatWarningAsError>
++      <TreatWarningAsError>false</TreatWarningAsError>
+       <WarningLevel>Level4</WarningLevel>
+     </ClCompile>
+     <Lib>
