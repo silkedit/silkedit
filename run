@@ -84,8 +84,8 @@ resolve() {
     fi
 
     # vim package
-    if [ ! -d node_modules/vim ]; then
-      npm i https://github.com/silkedit/vim/tarball/0.1.3
+    if [ ! -d packages/node_modules/vim ]; then
+      npm i --prefix packages https://github.com/silkedit/vim/tarball/0.1.3
     fi
 
     # Source Han Code JP font
@@ -185,9 +185,9 @@ resolve() {
         cd ..
 
         # npm install for silkedit package
-        cd node_modules/silkedit
-        node ../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
-        cd ../..
+        cd packages/node_modules/silkedit
+        node ../../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
+        cd ../../..
 
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
