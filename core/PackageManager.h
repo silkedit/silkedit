@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <boost/optional.hpp>
 #include <QObject>
 #include <QString>
 
@@ -15,18 +16,19 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
   DISABLE_COPY_AND_MOVE(PackageManager)
 
  public:
-  static void loadPackages();
+  static void loadGrammers();
+  static boost::optional<QList<Package>> loadPackagesJson(const QByteArray& json);
 
   ~PackageManager() = default;
 
-signals:
+ signals:
   void packageRemoved(const Package& pkg);
 
  private:
   friend class Singleton<PackageManager>;
   PackageManager();
 
-  static void loadPackages(const QString& dirName);
+  static void loadGrammers(const QString& path);
 };
 
 }  // namespace core

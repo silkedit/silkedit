@@ -109,7 +109,10 @@ else(APPLE)
 endif(APPLE)
 
 if(APPLE)
-  # bundle packages
+  # bundle themes
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+
+  # bundle builtin packages
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
   # bundle silkedit_helper (node.js)
@@ -138,6 +141,9 @@ if(APPLE)
   file(COPY ${BREAKPAD_LIBS}/breakpad.framework DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
 
 else (APPLE)
+  # Copy themes
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION .)
+
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
 

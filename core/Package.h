@@ -26,6 +26,7 @@ struct Package {
 
   QStringList validate();
   QString tarballUrl() const;
+  QJsonObject toJson() const;
 };
 
 inline bool operator==(const Package& e1, const Package& e2) {

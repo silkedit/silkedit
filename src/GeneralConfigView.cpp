@@ -1,10 +1,10 @@
 #include "GeneralConfigView.h"
 #include "ui_GeneralConfigView.h"
 #include "SilkApp.h"
-#include "core/ThemeProvider.h"
+#include "core/ThemeManager.h"
 #include "core/Config.h"
 
-using core::ThemeProvider;
+using core::ThemeManager;
 using core::Theme;
 using core::Config;
 
@@ -17,7 +17,7 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
   ui->restartButton->setVisible(false);
 
   // Theme combo box
-  ui->themeCombo->addItems(ThemeProvider::sortedThemeNames());
+  ui->themeCombo->addItems(ThemeManager::sortedThemeNames());
   if (Config::singleton().theme()) {
     ui->themeCombo->setCurrentText(Config::singleton().theme()->name);
   }
@@ -25,7 +25,7 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
           static_cast<void (QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
           [=](const QString& text) {
             //            qDebug("themeSelected: %s", qPrintable(text));
-            Theme* theme = ThemeProvider::theme(text);
+            Theme* theme = ThemeManager::theme(text);
             Config::singleton().setTheme(theme);
           });
 

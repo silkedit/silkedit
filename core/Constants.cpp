@@ -12,7 +12,7 @@ const QString socketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toStrin
 const QString socketPath = QDir::tempPath() + "/silkedit.sock";
 #endif
 
-const QString PACKAGES_NAME = "packages";
+const QString PACKAGES_NAME = "node_modules";
 }
 
 namespace core {
@@ -47,12 +47,6 @@ QStringList Constants::userKeymapPaths() {
   return configPaths;
 }
 
-QStringList Constants::packagePaths() {
-  QStringList packagePaths;
-  foreach (const QString& path, dataDirectoryPaths()) { packagePaths.append(path + "/packages"); }
-  return packagePaths;
-}
-
 QString Constants::userConfigPath() {
   return silkHomePath() + "/config.yml";
 }
@@ -61,12 +55,16 @@ QString Constants::userKeymapPath() {
   return silkHomePath() + "/keymap.yml";
 }
 
-QString Constants::userPackagesDirPath() {
-  return silkHomePath() + "/" + PACKAGES_NAME;
+QString Constants::userPackagesRootPath() {
+  return silkHomePath() + "/packages";
 }
 
-QString Constants::packagesDirName() {
-  return PACKAGES_NAME;
+QString Constants::userNodeModulesPath() {
+  return userPackagesRootPath() + "/" + PACKAGES_NAME;
+}
+
+QString Constants::userPackagesJsonPath() {
+  return userPackagesRootPath() + "/packages.json";
 }
 
 QString Constants::helperPath() {
@@ -117,5 +115,16 @@ QString Constants::tabViewInformationPath() {
   return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/tabViewInformation.ini";
 }
 
+QStringList Constants::themePaths() {
+  QStringList themePaths;
+  foreach (const QString& path, dataDirectoryPaths()) { themePaths.append(path + "/themes"); }
+  return themePaths;
+}
+
+QStringList Constants::packagesPaths() {
+  QStringList packagesPaths;
+  foreach (const QString& path, dataDirectoryPaths()) { packagesPaths.append(path + "/packages"); }
+  return packagesPaths;
+}
 
 }  // namespace core

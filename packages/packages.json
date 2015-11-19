@@ -1,0 +1,19 @@
+[
+{
+  "name": "silkedit",
+  "version": "0.6.0",
+  "description": "SilkEdit default package",
+  "main": "index.js",
+  "author": "SilkEdit team",
+  "license": "SilkEdit license"
+}
+,{
+  "name": "vim",
+  "version": "0.1.3",
+  "description": "Vim emulation package",
+  "main": "index.js",
+  "repository": "silkedit/vim",
+  "author": "SilkEdit team",
+  "license": "MIT"
+}
+]

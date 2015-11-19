@@ -9,7 +9,7 @@
 #include <QMessageBox>
 #include <QObject>
 
-#include "HelperProxy_p.h"
+#include "Helper_p.h"
 #include "SilkApp.h"
 #include "API.h"
 #include "CommandManager.h"
@@ -61,33 +61,33 @@ QStringList helperArgs() {
 }
 
 std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
-    HelperProxyPrivate::s_notifyFunctions;
+    HelperPrivate::s_notifyFunctions;
 std::unordered_map<
     QString,
     std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
-    HelperProxyPrivate::s_requestFunctions;
-msgpack::rpc::msgid_t HelperProxy::s_msgId = 0;
-std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> HelperProxy::s_eventLoopMap;
+    HelperPrivate::s_requestFunctions;
+msgpack::rpc::msgid_t Helper::s_msgId = 0;
+std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> Helper::s_eventLoopMap;
 
-HelperProxyPrivate::~HelperProxyPrivate() {
-  qDebug("~HelperProxyPrivate");
+HelperPrivate::~HelperPrivate() {
+  qDebug("~HelperPrivate");
   if (m_helperProcess) {
     disconnect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-               this, &HelperProxyPrivate::onFinished);
+               this, &HelperPrivate::onFinished);
     m_helperProcess->terminate();
   }
 }
 
-void HelperProxyPrivate::startPluginRunnerProcess() {
+void HelperPrivate::startPluginRunnerProcess() {
   m_helperProcess->start(Constants::helperPath(), helperArgs());
 }
 
-void HelperProxyPrivate::init() {
+void HelperPrivate::init() {
   Q_ASSERT(!m_helperProcess);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
   CommandManager::singleton().addEventFilter(std::bind(
-      &HelperProxyPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
+      &HelperPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
   QFile socketFile(Constants::helperSocketPath());
@@ -100,21 +100,21 @@ void HelperProxyPrivate::init() {
     return;
   }
 
-  connect(m_server, &QLocalServer::newConnection, this, &HelperProxyPrivate::helperConnected);
+  connect(m_server, &QLocalServer::newConnection, this, &HelperPrivate::helperConnected);
 
   m_helperProcess.reset(new QProcess(this));
   connect(m_helperProcess.get(), &QProcess::readyReadStandardOutput, this,
-          &HelperProxyPrivate::readStdout);
+          &HelperPrivate::readStdout);
   connect(m_helperProcess.get(), &QProcess::readyReadStandardError, this,
-          &HelperProxyPrivate::readStderr);
+          &HelperPrivate::readStderr);
   connect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-          &HelperProxyPrivate::onFinished);
+          &HelperPrivate::onFinished);
   qDebug("helper: %s", qPrintable(Constants::helperPath()));
   qDebug() << "args:" << helperArgs();
   startPluginRunnerProcess();
 }
 
-void HelperProxyPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
+void HelperPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
   if (q->m_isStopped)
     return;
 
@@ -129,25 +129,25 @@ void HelperProxyPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t
   q->m_socket->write(sbuf.data(), sbuf.size());
 }
 
-HelperProxyPrivate::HelperProxyPrivate(HelperProxy* q_ptr)
+HelperPrivate::HelperPrivate(Helper* q_ptr)
     : q(q_ptr),
       m_helperProcess(nullptr),
       m_server(nullptr),
       m_classMethodHash(QHash<QString, QHash<QString, int>>()) {}
 
-void HelperProxyPrivate::readStdout() {
+void HelperPrivate::readStdout() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardOutput();
   qDebug() << buf;
 }
 
-void HelperProxyPrivate::readStderr() {
+void HelperPrivate::readStderr() {
   QProcess* p = (QProcess*)sender();
   QByteArray buf = p->readAllStandardError();
   qWarning() << buf;
 }
 
-void HelperProxyPrivate::helperConnected() {
+void HelperPrivate::helperConnected() {
   qDebug() << "new helper process connected";
 
   q->m_socket = m_server->nextPendingConnection();
@@ -158,14 +158,14 @@ void HelperProxyPrivate::helperConnected() {
   // > readyRead() is not emitted recursively; if you reenter the event loop or call
   // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
   // reemitted (although waitForReadyRead() may still return true).
-  connect(q->m_socket, &QLocalSocket::readyRead, this, &HelperProxyPrivate::readRequest,
+  connect(q->m_socket, &QLocalSocket::readyRead, this, &HelperPrivate::readRequest,
           Qt::QueuedConnection);
   connect(q->m_socket,
           static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
-          this, &HelperProxyPrivate::displayError);
+          this, &HelperPrivate::displayError);
 }
 
-void HelperProxyPrivate::onFinished(int exitCode) {
+void HelperPrivate::onFinished(int exitCode) {
   qWarning("silkedit_helper has stopped working. exit code: %d", exitCode);
   q->m_isStopped = true;
   auto reply = QMessageBox::question(
@@ -178,7 +178,7 @@ void HelperProxyPrivate::onFinished(int exitCode) {
   }
 }
 
-void HelperProxyPrivate::readRequest() {
+void HelperPrivate::readRequest() {
   //  qDebug("readRequest");
 
   msgpack::unpacker unpacker;
@@ -223,8 +223,8 @@ void HelperProxyPrivate::readRequest() {
           case msgpack::rpc::RESPONSE: {
             msgpack::rpc::msg_response<msgpack::object, msgpack::object> res;
             obj.convert(&res);
-            auto found = HelperProxy::s_eventLoopMap.find(res.msgid);
-            if (found != HelperProxy::s_eventLoopMap.end()) {
+            auto found = Helper::s_eventLoopMap.find(res.msgid);
+            if (found != Helper::s_eventLoopMap.end()) {
               //              qDebug("result of %d arrived", res.msgid);
               if (res.error.type == msgpack::type::NIL) {
                 found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
@@ -255,7 +255,7 @@ void HelperProxyPrivate::readRequest() {
   }
 }
 
-void HelperProxyPrivate::displayError(QLocalSocket::LocalSocketError socketError) {
+void HelperPrivate::displayError(QLocalSocket::LocalSocketError socketError) {
   switch (socketError) {
     case QLocalSocket::ServerNotFoundError:
       qWarning("The host was not found.");
@@ -271,7 +271,7 @@ void HelperProxyPrivate::displayError(QLocalSocket::LocalSocketError socketError
   }
 }
 
-std::tuple<bool, std::string, CommandArgument> HelperProxyPrivate::cmdEventFilter(
+std::tuple<bool, std::string, CommandArgument> HelperPrivate::cmdEventFilter(
     const std::string& name,
     const CommandArgument& arg) {
   qDebug("cmdEventFilter");
@@ -286,7 +286,7 @@ std::tuple<bool, std::string, CommandArgument> HelperProxyPrivate::cmdEventFilte
   }
 }
 
-bool HelperProxyPrivate::keyEventFilter(QKeyEvent* event) {
+bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
   //  qDebug("keyEventFilter");
   std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
   bool isModifierKey = false;
@@ -350,27 +350,27 @@ void ResponseResult::setError(std::unique_ptr<object_with_zone> obj) {
   emit ready();
 }
 
-HelperProxy::~HelperProxy() {
-  qDebug("~HelperProxy");
+Helper::~Helper() {
+  qDebug("~Helper");
 }
 
-void HelperProxy::init() {
+void Helper::init() {
   d->init();
 }
 
-void HelperProxy::sendFocusChangedEvent(const QString& viewType) {
+void Helper::sendFocusChangedEvent(const QString& viewType) {
   std::string type = viewType.toUtf8().constData();
   std::tuple<std::string> params = std::make_tuple(type);
   sendNotification("focusChanged", params);
 }
 
-void HelperProxy::sendCommandEvent(const QString& command, const CommandArgument& args) {
+void Helper::sendCommandEvent(const QString& command, const CommandArgument& args) {
   std::string methodName = command.toUtf8().constData();
   std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
   sendNotification("commandEvent", params);
 }
 
-void HelperProxy::callExternalCommand(const QString& cmd, const CommandArgument& args) {
+void Helper::callExternalCommand(const QString& cmd, const CommandArgument& args) {
   Util::stopWatch([&] {
     std::string methodName = cmd.toUtf8().constData();
     std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
@@ -383,9 +383,7 @@ void HelperProxy::callExternalCommand(const QString& cmd, const CommandArgument&
   }, cmd + " time");
 }
 
-bool HelperProxy::askExternalCondition(const QString& name,
-                                       core::Operator op,
-                                       const QString& value) {
+bool Helper::askExternalCondition(const QString& name, core::Operator op, const QString& value) {
   qDebug("askExternalCondition");
   std::tuple<std::string, std::string, std::string> params = std::make_tuple(
       name.toUtf8().constData(), core::ICondition::operatorString(op).toUtf8().constData(),
@@ -400,7 +398,7 @@ bool HelperProxy::askExternalCondition(const QString& name,
   }
 }
 
-QString HelperProxy::translate(const QString& key, const QString& defaultValue) {
+QString Helper::translate(const QString& key, const QString& defaultValue) {
   try {
     const std::string& result = sendRequest<std::tuple<std::string, std::string>, std::string>(
         "translate", std::make_tuple(key.toUtf8().constData(), defaultValue.toUtf8().constData()),
@@ -412,28 +410,28 @@ QString HelperProxy::translate(const QString& key, const QString& defaultValue) 
   }
 }
 
-void HelperProxy::loadPackage(const QString& pkgName) {
-  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+void Helper::loadPackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
   sendNotification("loadPackage", params);
 }
 
-bool HelperProxy::removePackage(const QString& pkgName) {
-  const QString& pkgDirPath = Constants::userPackagesDirPath() + QDir::separator() + pkgName;
+bool Helper::removePackage(const QString& pkgName) {
+  const QString& pkgDirPath = Constants::userNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
 
   try {
     return sendRequest<std::tuple<std::string>, bool>("removePackage", params,
-                                                      msgpack::type::BOOLEAN);
+                                                      msgpack::type::BOOLEAN, 0);
   } catch (const std::exception& e) {
     qWarning() << e.what();
     return false;
   }
 }
 
-GetRequestResponse* HelperProxy::sendGetRequest(const QString& url, int timeoutInMs) {
+GetRequestResponse* Helper::sendGetRequest(const QString& url, int timeoutInMs) {
   const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
 
   try {
@@ -451,14 +449,13 @@ GetRequestResponse* HelperProxy::sendGetRequest(const QString& url, int timeoutI
   return nullptr;
 }
 
-void HelperProxy::reloadKeymaps() {
+void Helper::reloadKeymaps() {
   sendNotification("reloadKeymaps");
 }
 
-HelperProxy::HelperProxy()
-    : d(new HelperProxyPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
+Helper::Helper() : d(new HelperPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 
-void HelperProxyPrivate::cacheMethods(const QString& className, const QMetaObject* metaObj) {
+void HelperPrivate::cacheMethods(const QString& className, const QMetaObject* metaObj) {
   QHash<QString, int> methodNameIndexHash;
   for (int i = 0; i < metaObj->methodCount(); i++) {
     const QString& name = QString::fromLatin1(metaObj->method(i).name());
@@ -467,9 +464,9 @@ void HelperProxyPrivate::cacheMethods(const QString& className, const QMetaObjec
   m_classMethodHash.insert(className, methodNameIndexHash);
 }
 
-QVariant HelperProxyPrivate::invokeMethod(QObject* object,
-                                          const QString& methodName,
-                                          QVariantList args) {
+QVariant HelperPrivate::invokeMethod(QObject* object,
+                                     const QString& methodName,
+                                     QVariantList args) {
   if (args.size() > 10) {
     qWarning() << "Can't invoke method with more than 10 arguments. args:" << args.size();
     return QVariant();
@@ -535,7 +532,7 @@ QVariant HelperProxyPrivate::invokeMethod(QObject* object,
   return returnValue;
 }
 
-void HelperProxyPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
+void HelperPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
   ArgumentArray params;
   obj.convert(&params);
   int id = params.id();
@@ -555,9 +552,9 @@ void HelperProxyPrivate::callNotifyFunc(const QString& method, const msgpack::v1
   }
 }
 
-void HelperProxyPrivate::callRequestFunc(const QString& method,
-                                         msgpack::rpc::msgid_t msgId,
-                                         const msgpack::v1::object& obj) {
+void HelperPrivate::callRequestFunc(const QString& method,
+                                    msgpack::rpc::msgid_t msgId,
+                                    const msgpack::v1::object& obj) {
   ArgumentArray params;
   obj.convert(&params);
   int id = params.id();
@@ -572,18 +569,17 @@ void HelperProxyPrivate::callRequestFunc(const QString& method,
 
   if (view) {
     const QVariant& returnValue = invokeMethod(view, method, params.args());
-    HelperProxy::singleton().sendResponse(returnValue, msgpack::type::nil(), msgId);
+    Helper::singleton().sendResponse(returnValue, msgpack::type::nil(), msgId);
   } else {
     QString errMsg = QString("id: %1 not found").arg(id);
     qWarning() << qPrintable(errMsg);
-    HelperProxy::singleton().sendResponse(msgpack::type::nil(),
-                                          ((std::string)errMsg.toUtf8().constData()), msgId);
+    Helper::singleton().sendResponse(msgpack::type::nil(),
+                                     ((std::string)errMsg.toUtf8().constData()), msgId);
   }
 }
 
-std::tuple<bool, std::string, CommandArgument> HelperProxy::cmdEventFilter(
-    const std::string& name,
-    const CommandArgument& arg) {
+std::tuple<bool, std::string, CommandArgument> Helper::cmdEventFilter(const std::string& name,
+                                                                      const CommandArgument& arg) {
   qDebug("cmdEventFilter");
   std::tuple<std::string, CommandArgument> event = std::make_tuple(name, arg);
   try {

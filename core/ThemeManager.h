@@ -9,20 +9,22 @@
 
 namespace core {
 
-class ThemeProvider {
-  DISABLE_COPY_AND_MOVE(ThemeProvider)
+class ThemeManager {
+  DISABLE_COPY_AND_MOVE(ThemeManager)
 
  public:
   // accessor
   static QStringList sortedThemeNames();
   static void loadTheme(const QString& fileName);
   static Theme* theme(const QString& name);
+  static void load();
 
  private:
   static std::unordered_map<QString, std::unique_ptr<Theme>> s_nameThemeMap;
+  static void load(const QString& path);
 
-  ThemeProvider() = delete;
-  ~ThemeProvider() = delete;
+  ThemeManager() = delete;
+  ~ThemeManager() = delete;
 };
 
 }  // namespace core

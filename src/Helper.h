@@ -23,7 +23,7 @@
 #include "core/Icondition.h"
 #include "qvariant_adapter.h"
 
-class HelperProxyPrivate;
+class HelperPrivate;
 
 class ResponseResult : public QObject {
   Q_OBJECT
@@ -66,12 +66,12 @@ class GetRequestResponse : public QObject {
 /**
  * @brief Proxy object to interact with silkedit_helper Node.js process
  */
-class HelperProxy : public QObject, public core::Singleton<HelperProxy> {
+class Helper : public QObject, public core::Singleton<Helper> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(HelperProxy)
+  DISABLE_COPY_AND_MOVE(Helper)
 
  public:
-  ~HelperProxy();
+  ~Helper();
 
   void init();
 
@@ -220,13 +220,13 @@ class HelperProxy : public QObject, public core::Singleton<HelperProxy> {
   static std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> s_eventLoopMap;
   static const int TIMEOUT_IN_MS = 1000;
 
-  std::unique_ptr<HelperProxyPrivate> d;
+  std::unique_ptr<HelperPrivate> d;
   bool m_isStopped;
   QLocalSocket* m_socket;
 
-  friend class HelperProxyPrivate;
-  friend class core::Singleton<HelperProxy>;
-  HelperProxy();
+  friend class HelperPrivate;
+  friend class core::Singleton<Helper>;
+  Helper();
 
   void callNotifyFunc(const QString& method, const msgpack::object& obj);
   void callRequestFunc(msgpack::rpc::msgid_t msgId,

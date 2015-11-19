@@ -12,16 +12,18 @@
 #include "TextEditView.h"
 #include "PlatformUtil.h"
 #include "TestUtil.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "core/ConditionManager.h"
 #include "MenuBar.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
+#include "core/ThemeManager.h"
 #include "breakpad/crash_handler.h"
 
 using core::PackageManager;
 using core::Config;
 using core::ConditionManager;
+using core::ThemeManager;
 
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
@@ -34,7 +36,8 @@ int main(int argv, char** args) {
 
   ConditionManager::init();
 
-  PackageManager::loadPackages();
+  PackageManager::loadGrammers();
+  ThemeManager::load();
 
   Config::singleton().init();
 
@@ -55,7 +58,7 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  HelperProxy::singleton().init();
+  Helper::singleton().init();
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {

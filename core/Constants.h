@@ -22,11 +22,11 @@ class Constants {
 
   static QStringList configPaths();
   static QStringList userKeymapPaths();
-  static QStringList packagePaths();
   static QString userConfigPath();
   static QString userKeymapPath();
-  static QString userPackagesDirPath();
-  static QString packagesDirName();
+  static QString userPackagesRootPath();
+  static QString userNodeModulesPath();
+  static QString userPackagesJsonPath();
   static QString helperPath();
   static QString npmPath();
   static QString helperSocketPath();
@@ -35,6 +35,9 @@ class Constants {
   static QString silkHomePath();
   static QString recentOpenHistoryPath();
   static QString tabViewInformationPath();
+  static QStringList themePaths();
+  static QStringList packagesPaths();
+
  private:
   Constants() = delete;
   ~Constants() = delete;

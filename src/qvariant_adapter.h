@@ -17,29 +17,34 @@ namespace msgpack {
 MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
   namespace adaptor {
 
+  template <typename Stream, typename T>
+  packer<Stream>& packUniqueObject(msgpack::packer<Stream>& o, const QVariant& v) {
+    T obj = v.value<T>();
+    if (obj) {
+      o.pack(obj->id());
+    } else {
+      o.pack_nil();
+    }
+    return o;
+  }
+
   template <>
   struct pack<QVariant> {
     template <typename Stream>
     packer<Stream>& operator()(msgpack::packer<Stream>& o, QVariant const& v) const {
       // todo: is there better way?
       if (v.canConvert<StatusBar*>()) {
-        o.pack(v.value<StatusBar*>()->id());
-        return o;
+        return packUniqueObject<Stream, StatusBar*>(o, v);
       } else if (v.canConvert<TextEditView*>()) {
-        o.pack(v.value<TextEditView*>()->id());
-        return o;
+        return packUniqueObject<Stream, TextEditView*>(o, v);
       } else if (v.canConvert<TabView*>()) {
-        o.pack(v.value<TabView*>()->id());
-        return o;
+        return packUniqueObject<Stream, TabView*>(o, v);
       } else if (v.canConvert<TabViewGroup*>()) {
-        o.pack(v.value<TabViewGroup*>()->id());
-        return o;
+        return packUniqueObject<Stream, TabViewGroup*>(o, v);
       } else if (v.canConvert<Window*>()) {
-        o.pack(v.value<Window*>()->id());
-        return o;
+        return packUniqueObject<Stream, Window*>(o, v);
       } else if (v.canConvert<InputDialog*>()) {
-        o.pack(v.value<InputDialog*>()->id());
-        return o;
+        return packUniqueObject<Stream, InputDialog*>(o, v);
       } else if (v.canConvert<boost::optional<QString>>()) {
         const auto& strOpt = v.value<boost::optional<QString>>();
         if (strOpt) {

@@ -3,7 +3,7 @@
 #include <QVariant>
 
 #include "Config.h"
-#include "ThemeProvider.h"
+#include "ThemeManager.h"
 #include "Util.h"
 
 namespace {
@@ -86,7 +86,7 @@ void Config::init() {
 
   load();
 
-  setTheme(ThemeProvider::theme(themeName()));
+  setTheme(ThemeManager::theme(themeName()));
   QFont font(fontFamily(), fontSize());
   setFont(font);
 }

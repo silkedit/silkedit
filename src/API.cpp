@@ -11,7 +11,7 @@
 #include "Window.h"
 #include "CommandManager.h"
 #include "commands/PackageCommand.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "TextEditView.h"
 #include "SilkApp.h"
 #include "TabView.h"
@@ -75,10 +75,12 @@ void API::registerCommands(QVariantList commands) {
   }
 }
 
-void API::unregisterCommands(QList<QString> commands) {
-  for (const QString& cmd : commands) {
-    qDebug("unregisterCommand: %s", qPrintable(cmd));
-    CommandManager::singleton().remove(cmd);
+void API::unregisterCommands(QVariantList commands) {
+  for (const QVariant& cmd : commands) {
+    if (cmd.canConvert<QString>()) {
+      qDebug() << "unregisterCommand: %s" << cmd.toString();
+      CommandManager::singleton().remove(cmd.toString());
+    }
   }
 }
 

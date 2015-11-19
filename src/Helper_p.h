@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "core/IKeyEventFilter.h"
 
-class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
+class HelperPrivate : public QObject, public core::IKeyEventFilter {
   Q_OBJECT
 
  public:
@@ -14,13 +14,13 @@ class HelperProxyPrivate : public QObject, public core::IKeyEventFilter {
       std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
       s_requestFunctions;
 
-  HelperProxy* q;
+  Helper* q;
   std::unique_ptr<QProcess> m_helperProcess;
   QLocalServer* m_server;
   QHash<QString, QHash<QString, int>> m_classMethodHash;
 
-  explicit HelperProxyPrivate(HelperProxy* q_ptr);
-  ~HelperProxyPrivate();
+  explicit HelperPrivate(Helper* q_ptr);
+  ~HelperPrivate();
 
   void init();
 

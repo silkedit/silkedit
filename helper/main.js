@@ -17,12 +17,11 @@ if (process.argv.length < 3) {
 const socketFile = process.argv[2];
 const locale = process.argv[3];
 const packagesBeginIndex = 4
-const timeoutInMS = 1000
 var commands = {}
 var conditions = {}
 var eventFilters = {}
 var configs = {}
-var packagePaths = []
+var packageRootPaths = []
 
 function getDirs(dir) {
   const files = fs.readdirSync(dir)
@@ -39,20 +38,31 @@ function getDirs(dir) {
 }
 
 function callForeachPackageDir(fn) {
-  packagePaths.forEach((dirPath) => {
+  packageRootPaths.forEach((dirPath) => {
     fs.open(dirPath, 'r', (err, fd) => {
+      // load each package in node_modules
       fd && fs.close(fd, (err) => {
-        const dirs = getDirs(dirPath);
-        dirs.forEach((dir) => {
-          fn(path.join(dirPath, dir));
-        });    
+        // find packages.json
+        fs.readFile(path.join(dirPath, 'packages.json'), 'utf-8', (err, data) => {
+          if (err) {
+            return;
+          }
+          
+          try {
+            JSON.parse(data).forEach((pkg) => {
+              fn(path.join(dirPath, 'node_modules', pkg.name))
+            })
+          } catch(err) {
+            console.error(err)
+          }
+        })
       })
     })
   })  
 }
 
 const c = rpc.createClient(socketFile, () => {
-  packagePaths = process.argv.slice(packagesBeginIndex)
+  packageRootPaths = process.argv.slice(packagesBeginIndex)
   GLOBAL.silk = require('./silkedit')(c, locale, conditions, eventFilters, configs, commands);
 
   sync(c, 'invoke');
@@ -243,6 +253,12 @@ const handler = {
   
     const packageJsonPath = path.join(dir, "package.json");
     fs.open(packageJsonPath, 'r', (err, fd) => {
+      if (err) {
+        console.log(dir + ' is already deleted')
+        response.result(true)
+        return
+      }
+      
       fd && fs.close(fd, (err) => {
         pjson = require(packageJsonPath);
         // unregister commands

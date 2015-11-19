@@ -32,7 +32,7 @@ class API : public QObject, public core::Singleton<API> {
   Q_INVOKABLE void loadToolbar(const QString& pkgName, const QString& ymlPath);
   Q_INVOKABLE void loadConfig(const QString& pkgName, const QString& ymlPath);
   Q_INVOKABLE void registerCommands(QVariantList commands);
-  Q_INVOKABLE void unregisterCommands(QList<QString> commands);
+  Q_INVOKABLE void unregisterCommands(QVariantList commands);
   Q_INVOKABLE void registerCondition(const QString& condition);
   Q_INVOKABLE void unregisterCondition(const QString& condition);
   Q_INVOKABLE void open(const QString& pathStr);

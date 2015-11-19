@@ -84,10 +84,8 @@ resolve() {
     fi
 
     # vim package
-    if [ ! -d packages/vim ]; then
+    if [ ! -d node_modules/vim ]; then
       npm i https://github.com/silkedit/vim/tarball/0.1.3
-      mv node_modules/vim packages
-      rm -rf node_modules
     fi
 
     # Source Han Code JP font
@@ -140,7 +138,7 @@ resolve() {
       cd ..
 
       # npm install for silkedit package
-      cd packages/silkedit
+      cd node_modules/silkedit
       ../../helper/bin/npm install
       cd ../..
     else
@@ -187,7 +185,7 @@ resolve() {
         cd ..
 
         # npm install for silkedit package
-        cd packages/silkedit
+        cd node_modules/silkedit
         node ../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
         cd ../..
 
@@ -336,8 +334,8 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll packages helper silkedit_ja.qm Release
-        rm -rf silkedit.exe onig.dll packages helper
+        cp -r silkedit.exe onig.dll node_modules helper silkedit_ja.qm Release
+        rm -rf silkedit.exe onig.dll node_modules helper
         #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
