@@ -1,7 +1,7 @@
 ﻿#include <QDebug>
 
 #include "CommandManager.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 
 QString CommandManager::cmdDescription(const QString& name) {
   if (m_commands.count(name) != 0) {
@@ -29,7 +29,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   //  qDebug("qCmdName: %s", qPrintable(qCmdName));
   if (m_commands.find(qCmdName) != m_commands.end()) {
     m_commands[qCmdName]->run(cmdArg, repeat);
-    HelperProxy::singleton().sendCommandEvent(qCmdName, cmdArg);
+    Helper::singleton().sendCommandEvent(qCmdName, cmdArg);
   } else {
     qDebug() << "Can't find a command: " << qCmdName;
   }

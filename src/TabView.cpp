@@ -12,7 +12,7 @@
 #include "DraggingTabInfo.h"
 #include "SilkApp.h"
 #include "DocumentManager.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Constants.h"

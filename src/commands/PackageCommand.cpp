@@ -1,11 +1,9 @@
 ﻿#include "PackageCommand.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 
-PackageCommand::PackageCommand(const QString &name, const QString &description): ICommand(name, description)
-{
-
-}
+PackageCommand::PackageCommand(const QString& name, const QString& description)
+    : ICommand(name, description) {}
 
 void PackageCommand::doRun(const CommandArgument& args, int) {
-  HelperProxy::singleton().callExternalCommand(name(), std::move(args));
+  Helper::singleton().callExternalCommand(name(), std::move(args));
 }

@@ -11,7 +11,7 @@
 #include "KeymapManager.h"
 #include "CommandEvent.h"
 #include "CommandManager.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "core/Constants.h"
 #include "core/Util.h"
 #include "core/AndConditionExpression.h"
@@ -211,7 +211,7 @@ void KeymapManager::loadUserKeymap() {
 
   // When reloading user keymap, reload package keymaps again
   if (!firstTime) {
-    HelperProxy::singleton().reloadKeymaps();
+    Helper::singleton().reloadKeymaps();
   }
 }
 

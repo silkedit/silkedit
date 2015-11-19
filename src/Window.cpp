@@ -18,7 +18,7 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "PlatformUtil.h"
 
 QMap<QString, QString> Window::s_toolbarsDefinitions;

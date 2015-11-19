@@ -4,7 +4,7 @@
 #include "KeymapConfigView.h"
 #include "ui_KeymapConfigView.h"
 #include "KeymapManager.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "DocumentManager.h"
 #include "Window.h"
 #include "core/Constants.h"

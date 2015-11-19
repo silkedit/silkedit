@@ -7,7 +7,7 @@
 #include "TextEditView.h"
 #include "TabView.h"
 #include "Window.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "version.h"
 #include "SilkStyle.h"
 #include "core/Constants.h"
@@ -80,7 +80,7 @@ SilkApp::SilkApp(int& argc, char** argv)
           tabViewGroup->setActiveTab(tabView);
 
           // send focusChangedEvent to silkedit_helper
-          HelperProxy::singleton().sendFocusChangedEvent("TextEditView");
+          Helper::singleton().sendFocusChangedEvent("TextEditView");
         } else {
           qDebug("unable to find the parent TabViewGroup");
         }

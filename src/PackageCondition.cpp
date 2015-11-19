@@ -1,12 +1,12 @@
 ﻿#include "PackageCondition.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 
 using core::Operator;
 
 PackageCondition::PackageCondition(const QString& key) : m_key(key) {}
 
 bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
-  return HelperProxy::singleton().askExternalCondition(m_key, op, operand);
+  return Helper::singleton().askExternalCondition(m_key, op, operand);
 }
 
 QString PackageCondition::key() {

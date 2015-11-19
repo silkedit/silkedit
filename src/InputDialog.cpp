@@ -2,7 +2,7 @@
 
 #include "InputDialog.h"
 #include "ui_InputDialog.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 
 InputDialog::InputDialog(QWidget* parent) : QDialog(parent), ui(new Ui::InputDialog) {
   ui->setupUi(this);
@@ -47,5 +47,5 @@ boost::optional<QString> InputDialog::show() {
 void InputDialog::textChanged(const QString& text) {
   std::string type = text.toUtf8().constData();
   std::tuple<int, std::string> params = std::make_tuple(id(), type);
-  HelperProxy::singleton().sendNotification("InputDialog.textValueChanged", params);
+  Helper::singleton().sendNotification("InputDialog.textValueChanged", params);
 }

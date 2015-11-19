@@ -14,7 +14,7 @@
 #include "DocumentManager.h"
 #include "core/Config.h"
 #include "API.h"
-#include "HelperProxy.h"
+#include "Helper.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
