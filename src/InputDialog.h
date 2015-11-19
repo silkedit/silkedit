@@ -23,7 +23,7 @@ class InputDialog : public QDialog, public core::UniqueObject {
   Q_INVOKABLE void setTextValue(const QString& text);
   Q_INVOKABLE void disableOK();
   Q_INVOKABLE void enableOK();
-  Q_INVOKABLE boost::optional<QString> show();
+  Q_INVOKABLE boost::optional<QString> showDialog();
 
  private:
   Ui::InputDialog* ui;

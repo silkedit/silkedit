@@ -6,7 +6,6 @@ var sync = require('synchronize')
 var path = require('path')
 var silkutil = require('./silkutil')
 var yaml = require('js-yaml')
-var InputDialog = require('./views/input_dialog')(null)
 var https = require('https')
 
 if (process.argv.length < 3) {
@@ -107,7 +106,7 @@ const handler = {
   }
   
   ,"InputDialog.textValueChanged": (id, text) => {
-    const dialog = InputDialog.getInstance(id)
+    const dialog = require('./views/input_dialog').getInstance(id)
     if (dialog != null) {
       silkutil.runInFiber(() => {
         dialog.textValueChanged(text)

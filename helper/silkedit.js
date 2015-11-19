@@ -10,157 +10,42 @@ var packageDirMap = {}
 
 module.exports = (client, locale, conditions, eventFilters, configs, commands) => {
 
-  var InputDialog = require('./views/input_dialog')(client)
+  var ObjectProxy = require('./core/object_proxy')(client)
+  var InputDialog = require('./views/input_dialog').InputDialog(ObjectProxy)
+  var API = require('./core/api')(ObjectProxy)
 
   // class TabView
   function TabView(id) {
     this.id = id
-  }
-
-  TabView.prototype.closeAllTabs = function() {
-    client.notify('closeAllTabs', this.id)
-  }
-
-  TabView.prototype.closeOtherTabs = function() {
-    client.notify('closeOtherTabs', this.id)
-  }
-
-  TabView.prototype.closeActiveTab = function() {
-    client.notify('closeActiveTab', this.id)
-  }
-
-
-  TabView.prototype.addNew = function() {
-    client.notify('addNew', this.id)
-  }
-
-  // This property holds the number of tabs in the tab bar.
-  TabView.prototype.count = function() {
-    return client.invoke('count', this.id)
+    this.notifyMethods = new Set(['closeAllTabs', 'closeOtherTabs', 'closeActiveTab', 'addNew', 'setCurrentIndex'])
   }
   
-  // This property holds the index of the tab bar's visible tab.
-  // The current index is -1 if there is no current tab.
-  TabView.prototype.currentIndex = function() {
-    return client.invoke('currentIndex', this.id)
-  }
-  
-  TabView.prototype.setCurrentIndex = function(index) {
-    if (typeof(index) == 'number') {
-      client.notify('setCurrentIndex', this.id, index)
-    }
-  }
-
+  TabView.prototype = Object.create(ObjectProxy)
 
   // class TabViewGroup
   function TabViewGroup(id) {
     this.id = id
+    this.notifyMethods = new Set(['saveAll', 'splitHorizontally', 'splitVertically'])
   }
-
-  TabViewGroup.prototype.saveAll = function() {
-    client.notify('saveAllTabs', this.id)
-  }
-
-  TabViewGroup.prototype.splitHorizontally = function() {
-    client.notify('splitHorizontally', this.id)
-  }
-
-  TabViewGroup.prototype.splitVertically = function() {
-    client.notify('splitVertically', this.id)
-  }
+  
+  TabViewGroup.prototype = Object.create(ObjectProxy)
 
 
   // class TextEditView
   function TextEditView(id) {
     this.id = id;
+    this.notifyMethods = new Set(['save', 'saveAs', 'undo', 'redo', 'cut', 'copy', 'paste', 'selectAll', 'doDelete', 'moveCursor', 'setThinCursor', 'performCompletion', 'insertNewLineWithIndent', 'indent'])
   }
 
-  TextEditView.prototype = {
-    text: function() {
-      return client.invoke('text', this.id)
-    }
-    ,save: function() {
-      client.notify('save', this.id)
-    }
-  }
-
-  // todo: Put these functions into a single object like above
-  TextEditView.prototype.saveAs = function() {
-    client.notify('saveAs', this.id)
-  }
-
-  TextEditView.prototype.undo = function() {
-    client.notify('undo', this.id)
-  }
-
-  TextEditView.prototype.redo = function() {
-    client.notify('redo', this.id)
-  }
-
-  TextEditView.prototype.cut = function() {
-    client.notify('cut', this.id)
-  }
-
-  TextEditView.prototype.copy = function() {
-    client.notify('copy', this.id)
-  }
-
-  TextEditView.prototype.paste = function() {
-    client.notify('paste', this.id)
-  }
-
-  TextEditView.prototype.selectAll = function() {
-    client.notify('selectAll', this.id)
-  }
-
-  TextEditView.prototype.delete = function(repeat) {
-    repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
-    client.notify('doDelete', this.id, repeat)
-  }
-
-  TextEditView.prototype.moveCursor = function(operation, repeat) {
-    repeat = repeat == null ? 1 : typeof(repeat) == 'number' ? repeat : 1
-    if (operation != null && typeof(operation) == 'string') {
-      client.notify('moveCursor', this.id, operation, repeat)
-    }
-  }
-
-  TextEditView.prototype.setThinCursor = function(isThin) {
-    client.notify('setThinCursor', this.id, isThin)
-  }
-
-  TextEditView.prototype.scopeName = function() {
-    return client.invoke('scopeName', this.id)
-  }
-
-  TextEditView.prototype.scopeTree = function() {
-    return client.invoke('scopeTree', this.id)
-  }
-
-  TextEditView.prototype.complete = function() {
-    return client.notify('performCompletion', this.id)
-  }
-  
-  TextEditView.prototype.insertNewLine = function() {
-    client.notify('insertNewLineWithIndent', this.id)
-  }
-  
-  TextEditView.prototype.indent = function() {
-    client.notify('indent', this.id)
-  }
+  TextEditView.prototype = Object.create(ObjectProxy)
 
   // class Window
   function Window(id) {
     this.id = id
+    this.notifyMethods = new Set(['close', 'openFindAndReplacePanel'])
   }
-
-  Window.prototype.close = function() {
-    client.notify('close', this.id)
-  }
-
-  Window.prototype.openFindPanel = function() {
-    client.notify('openFindAndReplacePanel', this.id)
-  }
+  
+  Window.prototype = Object.create(ObjectProxy)
 
   Window.prototype.statusBar = function() {
     const id = client.invoke('statusBar', this.id)
@@ -171,18 +56,18 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
   // class StatusBar
   function StatusBar(id) {
     this.id = id
+    this.notifyMethods = new Set(['clearMessage', 'showMessageWithTimeout'])
   }
+  
+  StatusBar.prototype = Object.create(ObjectProxy)
 
   StatusBar.prototype.showMessage = function(message, timeout) {
     if (message != null) {
       var timeout = timeout || 0 // ms
-      client.notify('showMessage', this.id, message, timeout)
+      this.showMessageWithTimeout(message, timeout)
     }
   }
 
-  StatusBar.prototype.clearMessage = function() {
-    client.notify('clearMessage', this.id)
-  }
 
   // private utility functions
 
@@ -202,31 +87,6 @@ const packageDir = () => {
   const home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']
   return path.normalize(home + '/.silk/packages')
 }
-
-const loadKeymap = (pkgName, ymlPath) => {
-  client.notify('loadKeymap', -1, pkgName, ymlPath)
-}
-
-const loadMenu = (pkgName, ymlPath) => {
-  client.notify('loadMenu', -1, pkgName, ymlPath)
-}
-
-const loadToolbar = (pkgName, ymlPath) => {
-  client.notify('loadToolbar', -1, pkgName, ymlPath)
-}
-
-const loadConfig = (pkgName, ymlPath) => {
-  client.notify('loadConfig', -1, pkgName, ymlPath)
-}
-
-const registerCommands = (commands) => {
-  client.notify('registerCommands', -1, commands)
-}
-
-const unregisterCommands = (commands) => {
-  client.notify('unregisterCommands', -1, commands)
-}
-
 
 // translate
 const t = (key, defaultValue) => {
@@ -316,7 +176,7 @@ const loadPackage = (dir) => {
         const keymapPath = path.join(dir, "keymap.yml");
         fs.open(keymapPath, 'r', (err, fd) => {
           fd && fs.close(fd, (err) => {
-            loadKeymap(pjson.name, keymapPath);
+            API.loadKeymap(pjson.name, keymapPath);
           })
         })
 
@@ -324,7 +184,7 @@ const loadPackage = (dir) => {
         const menuFilePath = path.join(dir, "menu.yml");
         fs.open(menuFilePath, 'r', (err, fd) => {
           fd && fs.close(fd, (err) => {
-            loadMenu(pjson.name, menuFilePath);
+            API.loadMenu(pjson.name, menuFilePath);
           })
         })
           
@@ -332,7 +192,7 @@ const loadPackage = (dir) => {
         const toolbarFilePath = path.join(dir, "toolbar.yml");
         fs.open(toolbarFilePath, 'r', (err, fd) => {
           fd && fs.close(fd, (err) => {
-            loadToolbar(pjson.name, toolbarFilePath);
+            API.loadToolbar(pjson.name, toolbarFilePath);
           })
         })
 
@@ -342,7 +202,7 @@ const loadPackage = (dir) => {
           if (fd) {
             try {
               if (pjson.name != 'silkedit') {
-                loadConfig(pjson.name, configPath)
+                API.loadConfig(pjson.name, configPath)
               }
               doc = yaml.safeLoad(fs.readFileSync(configPath, 'utf8'))
               // console.log(doc)
@@ -383,14 +243,14 @@ const loadPackage = (dir) => {
                     commands[prop[0]] = module.commands[prop];
                   }
                 }
-                registerCommands(Object.keys(module.commands).map((cmd) => {
+                API.registerCommands(Object.keys(module.commands).map((cmd) => {
                   return [cmd, t("command." + cmd + ".description")]
                 }));
               } else {
                 for (var prop in module.commands) {
                   commands[pjson.name + '.' + prop] = module.commands[prop];
                 }
-                registerCommands(Object.keys(module.commands).map(cmd => {
+                API.registerCommands(Object.keys(module.commands).map(cmd => {
                 	  return [pjson.name + '.' + cmd, t(pjson.name + ":command." + cmd + ".description")]
                 	}));
               }
@@ -415,73 +275,73 @@ const loadPackage = (dir) => {
 
   return {
     alert: (msg) => {
-      client.notify('alert', -1, msg);
+      API.alert(msg);
     }
     
-    ,loadKeymap: loadKeymap
+    ,loadKeymap: API.loadKeymap
 
-    ,loadMenu: loadMenu
+    ,loadMenu: API.loadMenu
 
     ,loadPackage: loadPackage
 
-    ,registerCommands: registerCommands
+    ,registerCommands: API.registerCommands
     
-    ,unregisterCommands: unregisterCommands
+    ,unregisterCommands: API.unregisterCommands
 
     ,registerCondition: (name, func) => {
       conditions[name] = func
-      client.notify('registerCondition', -1, name)
+      API.registerCondition(name)
     }
 
     ,unregisterCondition: (name) => {
       delete conditions[name]
-      client.notify('unregisterCondition', -1, name)
+      API.unregisterCondition(name)
     }
 
     ,activeTextEditView: () => {
-      const id = client.invoke('activeTextEditView', -1)
+      const id = API.activeTextEditView()
       return id != null ? new TextEditView(id) : null
     }
 
     ,activeTabView: () => {
-      const id = client.invoke('activeTabView', -1)
+      const id = API.activeTabView()
       return id != null ? new TabView(id) : null
     }
 
     ,activeTabViewGroup: () => {
-      const id = client.invoke('activeTabViewGroup', -1)
+      const id = API.activeTabViewGroup()
       return id != null ? new TabViewGroup(id) : null
     }
 
     ,activeWindow: () => {
-      const id = client.invoke('activeWindow', -1)
+      const id = API.activeWindow()
       return id != null ? new Window(id) : null
     }
 
     ,showFileAndFolderDialog: (caption) => {
       caption = caption == null ? 'Open' : caption
-      return client.invoke('showFileAndFolderDialog', -1, caption)
+      return API.showFileAndFolderDialog(caption)
     }
 
     ,showFilesDialog: (caption) => {
       caption = caption == null ? 'Open Files' : caption
-      return client.invoke('showFilesDialog', -1, caption)
+      return API.showFilesDialog(caption)
     }
 
     ,showFolderDialog: (caption) => {
       caption = caption == null ? 'Open Folder' : caption
-      return client.invoke('showFolderDialog', -1, caption)
+      return API.showFolderDialog(caption)
     }
 
     ,open: (path) => {
       if (path != null) {
-        client.notify('open', -1, path)
+        API.open(path)
       }
     }
 
     ,dispatchCommand: (keyEvent) => {
       if (keyEvent != null) {
-        client.notify('dispatchCommand', -1, keyEvent.type, keyEvent.key, keyEvent.repeat, keyEvent.altKey, keyEvent.ctrlKey, keyEvent.metaKey, keyEvent.shiftKey)
+        API.dispatchCommand(keyEvent.type, keyEvent.key, keyEvent.repeat, keyEvent.altKey, keyEvent.ctrlKey, keyEvent.metaKey, keyEvent.shiftKey)
       }
     }
 
@@ -524,15 +384,14 @@ const loadPackage = (dir) => {
     }
     
     ,windows: () => {
-      const ids = client.invoke('windows', -1)
-      console.log('windows ' + ids)
+      const ids = API.windows()
       return ids != null ? ids.map(id => new Window(id)) : []
     }
 
     ,config:  {
       get: (name) => {
         if (name in configs) {
-          const value = client.invoke('getConfig', -1, name)
+          const value = API.getConfig(name)
           const type = configs[name].type
           switch(type) {
             case 'bool':
@@ -569,7 +428,7 @@ const loadPackage = (dir) => {
     ,setFont: (family, size) => {
       family = family == null ? '' : family
       size = size == null ? 0 : size
-      client.notify('setFont', -1, family, size)
+      API.setFont(family, size)
     }
     ,t: t
   }

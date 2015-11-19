@@ -111,6 +111,9 @@ void HelperPrivate::init() {
           &HelperPrivate::onFinished);
   qDebug("helper: %s", qPrintable(Constants::helperPath()));
   qDebug() << "args:" << helperArgs();
+  // Disable stdout to speed up calling external command
+  //  m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
+
   startPluginRunnerProcess();
 }
 

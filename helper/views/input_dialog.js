@@ -5,11 +5,31 @@ const util = require('util')
 
 var instances = {}
 
-module.exports = (client) => {
+function setInstance(id, instance) {
+  if (id != null) {
+    instances[id] = instance
+  }
+}
+
+function removeInstance(id) {
+  delete instances[id]
+}
+
+module.exports = {   
+  // static members
+
+  "getInstance": (id) => {
+    return id in instances ? instances[id] : null
+  }
+  
+  ,"InputDialog": (ObjectProxy) => {
+
+  const API = require('../core/api')(ObjectProxy)
 
   // class InputDialog
   function InputDialog() {
     this.id = null
+    this.notifyMethods = new Set(['enableOK', 'disableOK', 'setLabelText', 'setTextValue', 'setCurrentIndex'])
     this.validateFunc = null
     this.labelText = null
     this.textValue = null
@@ -17,58 +37,45 @@ module.exports = (client) => {
 
   util.inherits(InputDialog, EventEmitter);
 
-  // static members
-
-  InputDialog.getInstance = function(id) {
-    return id in instances ? instances[id] : null
-  }
-
-  InputDialog.setInstance = function(id, instance) {
-    if (id != null) {
-      instances[id] = instance
-    }
-  }
-
-  InputDialog.removeInstance = function(id) {
-    delete instances[id]
-  }
-
   // instance members
+  
+  InputDialog.prototype = Object.create(ObjectProxy)
 
   InputDialog.prototype.textValueChanged = function(text) {
     // Validate input
     if (this.validateFunc != null) {
-      const id = this.id
+      const self = this
       this.validateFunc(text, (result) => {
         if (result) {
-          client.notify('enableOK', id)
+          self.enableOK()
         } else {
-          client.notify('disableOK', id)
+          self.disableOK()
         }
       })
     }
   }
 
   InputDialog.prototype.show = function() {
-    const id = client.invoke('newInputDialog', -1)
+    const id = API.newInputDialog()
     this.id = id
-    InputDialog.setInstance(id, this)
+    setInstance(id, this)
     
     if (this.labelText != null) {
-      client.notify('setLabelText', this.id, this.labelText)
+      this.setLabelText(this.labelText)
     }
     if (this.textValue != null) {
-      client.notify('setTextValue', this.id, this.textValue)
+      this.setTextValue(this.textValue)
     }
 
-    const text = client.invoke('show', this.id)
+    const text = this.showDialog()
     
     // clean up
-    client.notify('deleteLater', this.id)
-    InputDialog.removeInstance(id)
+    this.deleteLater()
+    removeInstance(id)
     
     return text
   }
 
   return InputDialog
+}
 }

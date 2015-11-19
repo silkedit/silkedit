@@ -34,7 +34,7 @@ void InputDialog::enableOK() {
   ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(false);
 }
 
-boost::optional<QString> InputDialog::show() {
+boost::optional<QString> InputDialog::showDialog() {
   ui->lineEdit->selectAll();
   int result = exec();
   if (result == QDialog::Accepted) {

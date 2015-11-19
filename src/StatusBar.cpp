@@ -181,7 +181,7 @@ void StatusBar::setActiveTextEditViewBOM() {
   }
 }
 
-void StatusBar::showMessage(const QString& text, int timeout) {
+void StatusBar::showMessageWithTimeout(const QString& text, int timeout) {
   QStatusBar::showMessage(text, timeout);
 }
 

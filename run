@@ -138,9 +138,9 @@ resolve() {
       cd ..
 
       # npm install for silkedit package
-      cd node_modules/silkedit
-      ../../helper/bin/npm install
-      cd ../..
+      cd packages/node_modules/silkedit
+      ../../../helper/bin/npm install
+      cd ../../..
     else
         # yaml-cpp
         if [ ! -f lib/libyaml-cppmd.lib ]; then

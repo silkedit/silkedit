@@ -35,7 +35,7 @@ class StatusBar : public QStatusBar, public core::UniqueObject {
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
-  Q_INVOKABLE void showMessage(const QString& text, int timeout);
+  Q_INVOKABLE void showMessageWithTimeout(const QString& text, int timeout);
 
  signals:
   void languageChanged(const QString& scopeName);

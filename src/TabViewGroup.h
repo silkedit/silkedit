@@ -24,7 +24,7 @@ class TabViewGroup : public QWidget, public core::UniqueObject {
   TabView* activeTab();
   void setActiveTab(TabView* tab);
 
-  Q_INVOKABLE void saveAllTabs();
+  Q_INVOKABLE void saveAll();
   bool closeAllTabs();
   Q_INVOKABLE void splitTabHorizontally();
   Q_INVOKABLE void splitTabVertically();

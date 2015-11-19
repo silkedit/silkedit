@@ -51,7 +51,7 @@ void TabViewGroup::setActiveTab(TabView* tabView) {
   }
 }
 
-void TabViewGroup::saveAllTabs() {
+void TabViewGroup::saveAll() {
   for (auto tabView : m_tabViews) {
     tabView->saveAllTabs();
   }

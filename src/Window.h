@@ -59,7 +59,7 @@ class Window : public QMainWindow, public core::UniqueObject {
   void show();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
-  void openFindAndReplacePanel();
+  Q_INVOKABLE void openFindAndReplacePanel();
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
 
