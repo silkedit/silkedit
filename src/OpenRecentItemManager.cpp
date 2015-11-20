@@ -60,6 +60,16 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_clearRecentItemListAction = new ClearRecentItemListAction(m_openRecentMenu.get());
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
+  // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
+  QSettings m_recentOpenHistory(QApplication::applicationDirPath() + "/recentOpenHistory.ini",
+                                QSettings::IniFormat);
+
+  m_recentOpenHistory.beginGroup("recentOpenFileHistory");
+  QStringList m_recentOpenFiles = m_recentOpenHistory.allKeys();
+  for (auto& item : m_recentOpenFiles) {
+    m_recentItems.push_back(item);
+  }
+
   updateOpenRecentItems();
 
   CommandManager::singleton().add(
@@ -75,11 +85,17 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_clearRecentItemListAction->setEnabled(m_recentItems.empty() ? false : true);
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
+  // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
+  QSettings m_recentOpenHistory(QApplication::applicationDirPath() + "/recentOpenHistory.ini",
+                                QSettings::IniFormat);
+  m_recentOpenHistory.clear();
+
   int index = 0;
   for (auto& item : m_recentItems) {
     m_recentItemActions[index]->setText(item);
     m_recentItemActions[index]->setData(item);
     m_recentItemActions[index]->setVisible(true);
+    m_recentOpenHistory.setValue("recentOpenFileHistory/" + item, "");
     index++;
   }
 
