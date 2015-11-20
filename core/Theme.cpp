@@ -45,8 +45,8 @@ void parseSettings(ColorSettings* settings,
   }
 }
 
-void parseSettings(ColorSettings* settings, QHash<QString, QColor> defaultColors) {
-  QHashIterator<QString, QColor> i(defaultColors);
+void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
+  QMapIterator<QString, QColor> i(defaultColors);
   while (i.hasNext()) {
     i.next();
     if (i.value().isValid()) {
@@ -154,10 +154,13 @@ Theme* Theme::loadTheme(const QString& filename) {
       }
     }
 
-    QHash<QString, QColor> defaultGutterColors = {{"background", backgroundColor},
-                                                  {"foreground", foregroundColor}};
+    ColorSettings defaultGutterColors = {{"background", backgroundColor},
+                                         {"foreground", foregroundColor}};
     parseSettings(theme->gutterSettings.get(), defaultGutterColors);
   }
+
+  // status bar settings(StatusBar)
+  theme->statusBarSettings.reset(new ColorSettings());
 
   return theme;
 }
