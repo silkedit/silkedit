@@ -1,17 +1,23 @@
 #include "LineNumberArea.h"
 #include "TextEditView.h"
 #include "core/Theme.h"
+#include "core/Config.h"
 
 using core::ColorSettings;
 using core::Theme;
+using core::Config;
 
-LineNumberArea::LineNumberArea(TextEditView* editor) : QWidget(editor), m_codeEditor(editor) {}
+LineNumberArea::LineNumberArea(TextEditView* editor) : QWidget(editor), m_codeEditor(editor) {
+  this->setTheme(Config::singleton().theme());
+  connect(&Config::singleton(), &Config::themeChanged, this, &LineNumberArea::setTheme);
+}
 
 QSize LineNumberArea::sizeHint() const {
   return QSize(m_codeEditor->lineNumberAreaWidth(), 0);
 }
 
 void LineNumberArea::setTheme(Theme* theme) {
+  qDebug("LineNumberArea theme is changed");
   if (!theme) {
     qWarning("theme is null");
     return;
