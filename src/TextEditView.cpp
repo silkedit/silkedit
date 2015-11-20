@@ -127,13 +127,11 @@ void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
 }
 
 void TextEditViewPrivate::setTheme(Theme* theme) {
-  qDebug("changeTheme");
+  qDebug("TextEditView theme is changed");
   if (!theme) {
     qWarning("theme is null");
     return;
   }
-
-  m_lineNumberArea->setTheme(theme);
 
   QString style;
   if (!theme->scopeSettings.isEmpty()) {
@@ -400,6 +398,7 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
 
 TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)) {
+  d_ptr->setTheme(Config::singleton().theme());
   d_ptr->m_lineNumberArea = new LineNumberArea(this);
 
   Q_D(TextEditView);
@@ -427,7 +426,6 @@ TextEditView::TextEditView(QWidget* parent)
 
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
-  d_ptr->setTheme(Config::singleton().theme());
 
   // setup for completion
   d_ptr->m_model.reset(new QStringListModel(this));
