@@ -8,8 +8,9 @@ using core::Theme;
 using core::Config;
 
 LineNumberArea::LineNumberArea(TextEditView* editor) : QWidget(editor), m_codeEditor(editor) {
-  this->setTheme(Config::singleton().theme());
   connect(&Config::singleton(), &Config::themeChanged, this, &LineNumberArea::setTheme);
+  // Set default values
+  setTheme(Config::singleton().theme());
 }
 
 QSize LineNumberArea::sizeHint() const {
