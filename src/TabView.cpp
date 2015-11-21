@@ -44,7 +44,7 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  changeTabStyle(Config::singleton().theme());
+  setTheme(Config::singleton().theme());
   // Note: setDocumentMode also calls setDrawBase
   tabBar()->setDrawBase(false);
 
@@ -54,7 +54,7 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
-  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::changeTabStyle);
+  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::setTheme);
 }
 
 TabView::~TabView() {
@@ -270,7 +270,7 @@ void TabView::setActiveView(QWidget* activeView) {
   }
 }
 
-void TabView::changeTabStyle(Theme* theme) {
+void TabView::setTheme(Theme* theme) {
   if (theme) {
     ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
     if (settings->contains("background")) {
