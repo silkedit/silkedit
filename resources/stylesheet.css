@@ -230,8 +230,6 @@ StatusBar {
 }
 
 StatusBar QComboBox {
-    background: palette(window);
-    color: black;
     outline: 0;
     border: 0;
 }
@@ -245,6 +243,7 @@ StatusBar QComboBox::down-arrow {
 }
 
 StatusBar QComboBox QAbstractItemView {
+    background: palette(window);
     color: black;
     border: 0;
     padding: 0 3px 0 3px;

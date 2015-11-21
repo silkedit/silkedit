@@ -13,6 +13,7 @@ class QMainWindow;
 namespace core {
 struct Language;
 class Encoding;
+class Theme;
 }
 
 class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
@@ -31,8 +32,9 @@ class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   void setActiveTextEditViewLanguage();
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
+  void setTheme(const core::Theme* theme);
 
-signals:
+ signals:
   void languageChanged(const QString& scopeName);
 
  protected:

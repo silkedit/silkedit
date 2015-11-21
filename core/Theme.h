@@ -32,7 +32,10 @@ class Theme {
   DISABLE_COPY(Theme)
 
  public:
-  Theme() : gutterSettings(nullptr), scopeSettings(QVector<ScopeSetting*>(0)) {}
+  Theme()
+      : gutterSettings(nullptr),
+        statusBarSettings(nullptr),
+        scopeSettings(QVector<ScopeSetting*>(0)) {}
   ~Theme() = default;
   DEFAULT_MOVE(Theme)
 
@@ -42,6 +45,8 @@ class Theme {
   std::shared_ptr<QTextCharFormat> getFormat(const QString& scope);
 
   std::unique_ptr<ColorSettings> gutterSettings;
+  std::unique_ptr<ColorSettings> statusBarSettings;
+
   QFont::Weight gutterFontWeight;
   bool isGutterItalic;
   bool isGutterUnderline;
@@ -50,10 +55,11 @@ class Theme {
 
  private:
   static ScopeSetting* matchedSetting(const QString& scope);
-
   QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
-
   QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
+  static ColorSettings createGutterSettingsColors(const Theme* theme);
+  static ColorSettings createStatusBarSettingsColors(const Theme* theme);
+
 };
 
 class Rank {
