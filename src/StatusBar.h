@@ -14,6 +14,7 @@ namespace core {
 struct Language;
 class Encoding;
 class BOM;
+class Theme;
 }
 
 class StatusBar : public QStatusBar{
@@ -34,6 +35,7 @@ class StatusBar : public QStatusBar{
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
+  void setTheme(const core::Theme* theme);
 
  signals:
   void languageChanged(const QString& scopeName);

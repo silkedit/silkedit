@@ -55,15 +55,21 @@ void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
   }
 }
 
-QColor changeColorBrightness(QColor const color, int threshold = 125) {
+QColor changeColorBrightness(QColor const color, int value = 10, int threshold = 125) {
   QColor newColor;
 
   // 0 is black; 255 is as far from black as possible.
   if (color.value() < threshold) {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 10);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + value);
   } else {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 10);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
   }
+  return newColor;
+}
+
+QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
+  QColor newColor;
+  newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
   return newColor;
 }
 
@@ -135,34 +141,62 @@ Theme* Theme::loadTheme(const QString& filename) {
     parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
                   &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
   } else {
-    QColor backgroundColor = QColor(Qt::gray);
-    QColor foregroundColor = QColor(Qt::black);
-
-    if (!theme->scopeSettings.isEmpty()) {
-      ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
-
-      if (!textEditViewColorSettings->isEmpty()) {
-        if (textEditViewColorSettings->contains("background")) {
-          backgroundColor =
-              changeColorBrightness(textEditViewColorSettings->value("background").name());
-        }
-
-        if (textEditViewColorSettings->contains("foreground")) {
-          foregroundColor =
-              changeColorBrightness(textEditViewColorSettings->value("foreground").name());
-        }
-      }
-    }
-
-    ColorSettings defaultGutterColors = {{"background", backgroundColor},
-                                         {"foreground", foregroundColor}};
-    parseSettings(theme->gutterSettings.get(), defaultGutterColors);
+    parseSettings(theme->gutterSettings.get(), createGutterSettingsColors(theme));
   }
 
   // status bar settings(StatusBar)
   theme->statusBarSettings.reset(new ColorSettings());
+  parseSettings(theme->statusBarSettings.get(), createStatusBarSettingsColors(theme));
 
   return theme;
+}
+
+ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
+  ColorSettings defaultGutterColors;
+  QColor backgroundColor = QColor(Qt::gray);
+  QColor foregroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (!textEditViewColorSettings->isEmpty()) {
+      if (textEditViewColorSettings->contains("background")) {
+        backgroundColor =
+            changeColorBrightness(textEditViewColorSettings->value("background").name());
+      }
+
+      if (textEditViewColorSettings->contains("foreground")) {
+        foregroundColor =
+            changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+      }
+    }
+  }
+
+  return defaultGutterColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+}
+
+ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
+  ColorSettings defaultStatusBarSettingsColors;
+  QColor backgroundColor = QColor(Qt::Window);
+  QColor foregroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (textEditViewColorSettings->contains("background")) {
+      backgroundColor =
+          changeColorBrightnessDarker(textEditViewColorSettings->value("background").name(), 20);
+    }
+    if (textEditViewColorSettings->contains("foreground")) {
+      foregroundColor =
+          changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+    }
+  }
+
+  return defaultStatusBarSettingsColors = {
+    {"background", backgroundColor},
+    {"foreground", foregroundColor}
+  };
 }
 
 // Return the rank of scopeSelector for scope
