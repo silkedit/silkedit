@@ -398,7 +398,6 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
 
 TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)) {
-  d_ptr->setTheme(Config::singleton().theme());
   d_ptr->m_lineNumberArea = new LineNumberArea(this);
 
   Q_D(TextEditView);
@@ -422,8 +421,9 @@ TextEditView::TextEditView(QWidget* parent)
   connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
           SLOT(setTabStopWidthFromSession()));
 
+  // Set default values
   d->updateLineNumberAreaWidth(0);
-
+  d_ptr->setTheme(Config::singleton().theme());
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
 
