@@ -9,16 +9,22 @@
 #include "TabView.h"
 #include "TextEditView.h"
 #include "ReloadEncodingDialog.h"
+#include "core/Config.h"
+#include "core/Theme.h"
 #include "core/LanguageParser.h"
 #include "core/LineSeparator.h"
 #include "core/BOM.h"
 
 using core::Encoding;
+using core::Config;
+using core::Theme;
 using core::Language;
 using core::LanguageParser;
 using core::LanguageProvider;
 using core::LineSeparator;
 using core::BOM;
+using core::ColorSettings;
+
 
 StatusBar::StatusBar(QMainWindow* window)
     : QStatusBar(window),
@@ -32,6 +38,7 @@ StatusBar::StatusBar(QMainWindow* window)
   // Mac
   setSizeGripEnabled(false);
 #endif
+
   m_langComboBox->setFocusPolicy(Qt::NoFocus);
   m_separatorComboBox->setFocusPolicy(Qt::NoFocus);
   m_encComboBox->setFocusPolicy(Qt::NoFocus);
@@ -43,6 +50,7 @@ StatusBar::StatusBar(QMainWindow* window)
   addPermanentWidget(m_encComboBox);
   addPermanentWidget(m_langComboBox);
 
+  connect(&Config::singleton(), &Config::themeChanged, this, &StatusBar::setTheme);
   connect(m_langComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
           this, &StatusBar::setActiveTextEditViewLanguage);
   connect(m_encComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
@@ -55,6 +63,7 @@ StatusBar::StatusBar(QMainWindow* window)
           &StatusBar::setActiveTextEditViewBOM);
 
   // Set default values
+  setTheme(Config::singleton().theme());
   setCurrentLanguage(LanguageProvider::defaultLanguage());
   setEncoding(Encoding::defaultEncoding());
   setLineSeparator(LineSeparator::defaultLineSeparator().separatorStr());
@@ -179,6 +188,23 @@ void StatusBar::setActiveTextEditViewBOM() {
     }
   } else {
     qDebug("active tab widget is null");
+  }
+}
+
+void StatusBar::setTheme(const Theme* theme) {
+  qDebug("StatusBar theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->statusBarSettings != nullptr) {
+    QString style;
+    ColorSettings* statusBarSettings = theme->statusBarSettings.get();
+
+    style = QString("background-color: %1;").arg(statusBarSettings->value("background").name());
+    style += QString("color: %1;").arg(statusBarSettings->value("foreground").name());
+    this->setStyleSheet(QString("StatusBar, StatusBar QComboBox{%1}").arg(style));
   }
 }
 
