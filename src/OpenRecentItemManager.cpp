@@ -7,6 +7,9 @@
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "CommandManager.h"
+#include "core/Constants.h"
+
+using core::Constants;
 
 void OpenRecentItemManager::clear() {
   m_recentItems.clear();
@@ -61,8 +64,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
-  QSettings m_recentOpenHistory(QApplication::applicationDirPath() + "/recentOpenHistory.ini",
-                                QSettings::IniFormat);
+  QSettings m_recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
 
   m_recentOpenHistory.beginGroup("recentOpenFileHistory");
   QStringList m_recentOpenFiles = m_recentOpenHistory.allKeys();
@@ -86,8 +88,8 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
-  QSettings m_recentOpenHistory(QApplication::applicationDirPath() + "/recentOpenHistory.ini",
-                                QSettings::IniFormat);
+  QSettings m_recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  
   m_recentOpenHistory.clear();
 
   int index = 0;

@@ -6,7 +6,7 @@
 #include <QAction>
 #include <QObject>
 #include <QMenu>
-
+#include <QSettings>
 #include "OpenRecentItemManager.h"
 #include "core/macros.h"
 #include "core/Singleton.h"

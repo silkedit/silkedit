@@ -109,4 +109,8 @@ QString Constants::silkHomePath() {
   return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }
 
+QString Constants::recentOpenHistoryPath() {
+  return QApplication::applicationDirPath() + "/recentOpenHistory.ini";
+}
+	
 }  // namespace core
