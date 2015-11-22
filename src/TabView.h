@@ -73,5 +73,5 @@ signals:
   void updateTabTextBasedOn(bool changed);
   void changeActiveEditView(int index);
   void changeTabText(const QString& path);
-  void changeTabStyle(core::Theme* theme);
+  void setTheme(const core::Theme* theme);
 };

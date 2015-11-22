@@ -8,14 +8,54 @@
 #include "API.h"
 #include "Window.h"
 #include "SilkApp.h"
+#include "core/Config.h"
+#include "core/Theme.h"
+
+using core::Config;
+using core::Theme;
+using core::ColorSettings;
 
 TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
+  setTheme(Config::singleton().theme());
   setAcceptDrops(true);
   setElideMode(Qt::ElideRight);
   setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
   setMouseTracking(true);
   hideAllCloseButtons();
+
+  connect(&Config::singleton(), &Config::themeChanged, this, &TabBar::setTheme);
+}
+
+void TabBar::setTheme(const Theme* theme) {
+  qDebug("TabBar theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->tabBarSettings != nullptr) {
+    QString style;
+    ColorSettings* tabBarSettings = theme->tabBarSettings.get();
+
+    style = QString(
+                "TabBar::tab {"
+                "background-color: %1;"
+                "color: %2;"
+                "}")
+                .arg(tabBarSettings->value("background").name(),
+                     tabBarSettings->value("foreground").name());
+
+    style += QString(
+                 "TabBar::tab:selected {"
+                 "background-color: %1;"
+                 "color:%2"
+                 "}")
+                 .arg(tabBarSettings->value("selected").name(),
+                       tabBarSettings->value("foreground").name());
+
+    this->setStyleSheet(style);
+  }
 }
 
 void TabBar::startMovingTab(const QPoint& tabPos) {
