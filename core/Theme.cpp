@@ -148,11 +148,19 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->statusBarSettings.reset(new ColorSettings());
   parseSettings(theme->statusBarSettings.get(), createStatusBarSettingsColors(theme));
 
+  // tab bar settings(TabBar)
+  theme->tabBarSettings.reset(new ColorSettings());
+  parseSettings(theme->tabBarSettings.get(), createTabBarSettingsColors(theme));
+
+  // tab view settings(TabView)
+  theme->tabViewSettings.reset(new ColorSettings());
+  parseSettings(theme->tabViewSettings.get(), createTabViewSettingsColors(theme));
+
   return theme;
 }
 
 ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
-  ColorSettings defaultGutterColors;
+  ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::gray);
   QColor foregroundColor = QColor(Qt::black);
 
@@ -172,11 +180,11 @@ ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
     }
   }
 
-  return defaultGutterColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
 }
 
 ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
-  ColorSettings defaultStatusBarSettingsColors;
+  ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::Window);
   QColor foregroundColor = QColor(Qt::black);
 
@@ -193,10 +201,38 @@ ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
     }
   }
 
-  return defaultStatusBarSettingsColors = {
-    {"background", backgroundColor},
-    {"foreground", foregroundColor}
-  };
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+}
+
+ColorSettings Theme::createTabViewSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
+}
+
+ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::Window);
+  QColor foregroundColor = QColor(Qt::gray);
+  QColor selectedColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (!textEditViewColorSettings->isEmpty()) {
+      if (textEditViewColorSettings->contains("background")) {
+        selectedColor = textEditViewColorSettings->value("background").name();
+        backgroundColor =
+            changeColorBrightness(textEditViewColorSettings->value("background").name());
+      }
+
+      if (textEditViewColorSettings->contains("foreground")) {
+        foregroundColor =
+            changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+      }
+    }
+  }
+  return defaultColors = {{"background", backgroundColor},
+                          {"foreground", foregroundColor},
+                          {"selected", selectedColor}};
 }
 
 // Return the rank of scopeSelector for scope

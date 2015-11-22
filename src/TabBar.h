@@ -7,6 +7,10 @@
 class QMouseEvent;
 class QWindow;
 class FakeWindow;
+namespace core {
+    class Theme;
+}
+
 
 class TabBar : public QTabBar {
   Q_OBJECT
@@ -18,6 +22,7 @@ class TabBar : public QTabBar {
   DEFAULT_MOVE(TabBar)
 
   void startMovingTab(const QPoint& tabPos);
+  void setTheme(const core::Theme* theme);
 
  protected:
   void mousePressEvent(QMouseEvent* event) override;
