@@ -69,7 +69,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_recentOpenHistory.beginGroup("recentOpenFileHistory");
   QStringList m_recentOpenFiles = m_recentOpenHistory.allKeys();
   for (auto& item : m_recentOpenFiles) {
-    m_recentItems.push_back(item);
+    m_recentItems.push_front(item);
   }
 
   updateOpenRecentItems();
