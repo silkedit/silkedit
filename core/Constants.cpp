@@ -110,7 +110,7 @@ QString Constants::silkHomePath() {
 }
 
 QString Constants::recentOpenHistoryPath() {
-  return QApplication::applicationDirPath() + "/recentOpenHistory.ini";
+  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/recentOpenHistory.ini";
 }
 	
 }  // namespace core
