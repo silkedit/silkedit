@@ -33,7 +33,7 @@ class Constants {
   static QString translationDirPath();
   static QString pluginServerDir();
   static QString silkHomePath();
-  static QString Constants::recentOpenHistoryPath();
+  static QString recentOpenHistoryPath();
  
  private:
   Constants() = delete;

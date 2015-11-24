@@ -11,6 +11,11 @@
 
 using core::Constants;
 
+namespace {
+  constexpr const char* PREFIX = "recentOpenFileHistory";
+  constexpr const char* PATH_KEY = "path";
+}
+
 void OpenRecentItemManager::clear() {
   m_recentItems.clear();
   updateOpenRecentItems();
@@ -64,12 +69,15 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
-  QSettings m_recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
 
-  m_recentOpenHistory.beginGroup("recentOpenFileHistory");
-  QStringList m_recentOpenFiles = m_recentOpenHistory.allKeys();
-  for (auto& item : m_recentOpenFiles) {
-    m_recentItems.push_front(item);
+  int size = recentOpenHistory.beginReadArray(PREFIX);
+  for (int i = 0; i < size; i++) {
+    recentOpenHistory.setArrayIndex(i);
+    const QVariant& value = recentOpenHistory.value(PATH_KEY);
+    if (value.canConvert<QString>()) {
+      m_recentItems.push_front(value.toString());
+    }
   }
 
   updateOpenRecentItems();
@@ -88,18 +96,21 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
-  QSettings m_recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
   
-  m_recentOpenHistory.clear();
+  recentOpenHistory.clear();
 
   int index = 0;
+  recentOpenHistory.beginWriteArray(PREFIX);
   for (auto& item : m_recentItems) {
+    recentOpenHistory.setArrayIndex(index);
     m_recentItemActions[index]->setText(item);
     m_recentItemActions[index]->setData(item);
     m_recentItemActions[index]->setVisible(true);
-    m_recentOpenHistory.setValue("recentOpenFileHistory/" + item, "");
+    recentOpenHistory.setValue(PATH_KEY, item);
     index++;
   }
+  recentOpenHistory.endArray();
 
   // Hide empty recent item actions
   for (int i = index; i < MAX_RECENT_ITEMS; i++) {
