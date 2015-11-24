@@ -76,7 +76,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
     recentOpenHistory.setArrayIndex(i);
     const QVariant& value = recentOpenHistory.value(PATH_KEY);
     if (value.canConvert<QString>()) {
-      m_recentItems.push_front(value.toString());
+      m_recentItems.push_back(value.toString());
     }
   }
 
