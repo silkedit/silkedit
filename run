@@ -315,6 +315,7 @@ build() {
 		echo 'Building CrashView ...'
 		cmake -GNinja ../../crashview -DCMAKE_BUILD_TYPE=Release
 		ninja
+        macdeployqt CrashView.app
 		cd ..
 
         if [ "$1" = '-edge' ]; then
@@ -388,6 +389,7 @@ make_installer() {
         rm -rf silkedit.exe onig.dll packages plugin_runner
 		mkdir -p Release/CrashView
         cp -r crashview/Release/* Release/CrashView/
+        windeployqt --release --no-compiler-runtime Release/CrashView/CrashView.exe
         cd Release
 
         windeployqt --release --no-compiler-runtime silkedit.exe

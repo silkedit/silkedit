@@ -2,7 +2,6 @@
 #include <qdebug.h>
 #include <qprocess.h>
 #include <qstring.h>
-#include <qtemporaryfile.h>
 #include <qfile.h>
 #include <qtextstream.h>
 #include <qstringlist.h>
@@ -24,40 +23,26 @@ void CrashReport::setToolPath(const QString& path) {
 QString CrashReport::report() const {
   QString rep = "";
 
-  QTemporaryFile tempFile;
-  QString tempFileName = tempFile.fileTemplate();
-
   // command
-  //[cmd.exe /c | sh -c] minidump_stackwalk <dumpFile> > <tempFile>
+  //minidump_stackwalk <dumpFile>
   QString exec;
   QStringList arg;
   QProcess process;
-#if defined(Q_OS_MAC)
-  // exec = "sh -c \"" + toolPath + "/minidump_stackwalk " + filePath + " > " + tempFileName + "\"";
-  exec = "sh";
-  arg << "-c";
-#elif defined(Q_OS_WIN)
-  exec = "cmd.exe";
-  arg << "/c";
-#endif
-  arg << "\"";
-  arg << toolPath + "/minidump_stackwalk";
+
+  exec = toolPath + "/minidump_stackwalk";
   arg << filePath;
-  arg << ">";
-  arg << tempFileName;
-  arg << "\"";
   qDebug() << "exec" << exec << arg;
 
-  int ret = process.execute(exec, arg);
+  //do not use 'execute'. becose can not read output.
+  process.start(exec,arg);
+  process.waitForFinished();
+  int ret = process.exitCode();
   if (ret < 0) {
     qDebug() << "Error execute : " << ret;
     return rep;
   }
-  process.waitForFinished();
-  // can not open device
-  // rep = process.readAll();
+  rep = process.readAllStandardOutput();
 
-  rep = loadFile(tempFileName);
   return rep;
 }
 
