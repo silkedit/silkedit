@@ -7,6 +7,9 @@
 #include "core/macros.h"
 
 class MyFileSystemModel;
+namespace core {
+    class Theme;
+}
 
 class ProjectTreeView : public QTreeView {
   Q_OBJECT
@@ -19,6 +22,9 @@ class ProjectTreeView : public QTreeView {
 
   bool open(const QString& dirName);
   void edit(const QModelIndex& index);
+  void setTheme(const core::Theme* theme);
+  void setFont(const QFont& font);
+
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
