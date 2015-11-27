@@ -156,6 +156,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->tabViewSettings.reset(new ColorSettings());
   parseSettings(theme->tabViewSettings.get(), createTabViewSettingsColors(theme));
 
+  // project tree view settings(ProjectTreeView)
+  theme->projectTreeViewSettings.reset(new ColorSettings());
+  parseSettings(theme->projectTreeViewSettings.get(), createProjectTreeViewSettingsColors(theme));
+
   return theme;
 }
 
@@ -233,6 +237,10 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
   return defaultColors = {{"background", backgroundColor},
                           {"foreground", foregroundColor},
                           {"selected", selectedColor}};
+}
+
+ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
 }
 
 // Return the rank of scopeSelector for scope
