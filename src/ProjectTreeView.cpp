@@ -8,6 +8,12 @@
 #include "ProjectTreeView.h"
 #include "DocumentManager.h"
 #include "PlatformUtil.h"
+#include "core/Config.h"
+#include "core/Theme.h"
+
+using core::Config;
+using core::Theme;
+using core::ColorSettings;
 
 namespace {
 
@@ -33,11 +39,18 @@ QString getUniqueDirName(const QString& baseNewDirPath) {
 }
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(nullptr) {
+  setTheme(Config::singleton().theme());
+  setFont(Config::singleton().font());
+
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
   setFocusPolicy(Qt::ClickFocus);
+
   connect(this, &ProjectTreeView::activated, this, &ProjectTreeView::openOrExpand);
+  connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(open(QModelIndex)));
+  connect(&Config::singleton(), &Config::themeChanged, this, &ProjectTreeView::setTheme);
+  connect(&Config::singleton(), &Config::fontChanged, this, &ProjectTreeView::setFont);
 }
 
 bool ProjectTreeView::openDirOrExpand(const QString& dirPath) {
@@ -82,6 +95,37 @@ bool ProjectTreeView::openDirOrExpand(const QString& dirPath) {
 
 void ProjectTreeView::edit(const QModelIndex& index) {
   QTreeView::edit(index);
+}
+
+void ProjectTreeView::setTheme(const core::Theme* theme) {
+  qDebug("ProjectTreeView theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->projectTreeViewSettings != nullptr) {
+    QString style;
+    ColorSettings* tabBarSettings = theme->projectTreeViewSettings.get();
+
+    style = QString(
+                "ProjectTreeView {"
+                "background-color: %1;"
+                "color: %2;"
+                "}")
+                .arg(tabBarSettings->value("background").name(),
+                     tabBarSettings->value("foreground").name());
+
+    this->setStyleSheet(style);
+  }
+}
+
+void ProjectTreeView::setFont(const QFont& font) {
+  int decreaseFontSize = 2;
+  QFont projectTreeFont = font;
+
+  projectTreeFont.setPointSize(font.pointSize() - decreaseFontSize);
+  QTreeView::setFont(projectTreeFont);
 }
 
 void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
