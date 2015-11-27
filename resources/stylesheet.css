@@ -1,6 +1,12 @@
+/* ProjectTreeView */
+
+ProjectTreeView {
+    border: none;
+}
+
 /* Tabbar */
 QPlainTextEdit {
-  border: 0;
+  border: none;
 }
 
 /*TabView::pane {
