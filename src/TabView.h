@@ -62,11 +62,8 @@ class TabView : public QTabWidget {
   bool closeTab(QWidget* w);
   void focusTabContent(int index);
   void updateTabTextBasedOn(bool changed);
-
   void changeActiveView(int index);
-  void changeTabText(const QString& path);
   void setTheme(const core::Theme* theme);
-  void changeTabStyle(core::Theme* theme);
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
