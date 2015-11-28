@@ -100,15 +100,15 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
 
   if (theme->projectTreeViewSettings != nullptr) {
     QString style;
-    ColorSettings* tabBarSettings = theme->projectTreeViewSettings.get();
+    ColorSettings* projectTreeViewSettings = theme->projectTreeViewSettings.get();
 
     style = QString(
                 "ProjectTreeView {"
                 "background-color: %1;"
                 "color: %2;"
                 "}")
-                .arg(tabBarSettings->value("background").name(),
-                     tabBarSettings->value("foreground").name());
+                .arg(projectTreeViewSettings->value("background").name(),
+                     projectTreeViewSettings->value("foreground").name());
 
     this->setStyleSheet(style);
   }
