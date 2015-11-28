@@ -22,9 +22,6 @@ class ProjectTreeView : public QTreeView {
 
   bool open(const QString& dirName);
   void edit(const QModelIndex& index);
-  void setTheme(const core::Theme* theme);
-  void setFont(const QFont& font);
-
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
@@ -33,6 +30,8 @@ class ProjectTreeView : public QTreeView {
  private:
   MyFileSystemModel* m_model;
 
+  void setTheme(const core::Theme* theme);
+  void setFont(const QFont& font);
   void createNewFile(const QDir& dir);
   void createNewDir(const QDir& dir);
 

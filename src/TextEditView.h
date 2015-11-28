@@ -117,6 +117,7 @@ signals:
  private:
   TextEditViewPrivate* d_ptr;
   void setViewportMargins(int left, int top, int right, int bottom);
+  void setTheme(core::Theme *theme);
 
   Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
   Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion))
@@ -128,6 +129,4 @@ signals:
   Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
   Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
 
- private slots:
-  void setTheme(core::Theme *theme);
 };

@@ -68,10 +68,10 @@ signals:
   void removeTabAndWidget(int index);
   bool closeTab(QWidget* w);
   void focusTabContent(int index);
+  void setTheme(const core::Theme* theme);
 
  private slots:
   void updateTabTextBasedOn(bool changed);
   void changeActiveEditView(int index);
   void changeTabText(const QString& path);
-  void setTheme(const core::Theme* theme);
 };

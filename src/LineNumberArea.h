@@ -12,7 +12,6 @@ class LineNumberArea : public QWidget {
   static const int PADDING_RIGHT = 5;
   explicit LineNumberArea(TextEditView* editor);
   QSize sizeHint() const override;
-  void setTheme(core::Theme* theme);
 
   QColor lineNumberColor() const;
   void setLineNumberColor(QColor color);
@@ -23,6 +22,7 @@ class LineNumberArea : public QWidget {
   void paintEvent(QPaintEvent* event) override;
 
  private:
+  void setTheme(core::Theme* theme);
   TextEditView* m_codeEditor;
   QColor m_lineNumberColor;
   QColor m_backgroundColor;

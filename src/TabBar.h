@@ -22,7 +22,6 @@ class TabBar : public QTabBar {
   DEFAULT_MOVE(TabBar)
 
   void startMovingTab(const QPoint& tabPos);
-  void setTheme(const core::Theme* theme);
 
  protected:
   void mousePressEvent(QMouseEvent* event) override;
@@ -50,4 +49,5 @@ signals:
   void grabMouse();
   void hideAllCloseButtons();
   void showCloseButtonOnActiveTab(const QPoint& pos);
+  void setTheme(const core::Theme* theme);
 };
