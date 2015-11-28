@@ -74,11 +74,29 @@ QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
   return newColor;
 }
 
-QColor getSelectedTabBorderColor(QColor const color) {
+QColor getAppropriateGrey(QColor const color) {
   QColor newColor;
+  int brightness = color.value();
   // use material color
   //  - http://www.materialui.co/colors
-  if (color.value() < 170) {
+  if (brightness < 60) {
+    newColor.setRgb(224, 224, 224);  // 300
+  } else if (brightness < 120) {
+    newColor.setRgb(158, 158, 158);  // 500
+  } else if (brightness < 180) {
+    newColor.setRgb(97, 97, 97);  // 700
+  } else {
+    newColor.setRgb(33, 33, 33);  // 900
+  }
+  return newColor;
+}
+
+QColor getSelectedTabBorderColor(QColor const color) {
+  QColor newColor;
+  int brightness = color.value();
+  // use material color
+  //  - http://www.materialui.co/colors
+  if (brightness < 170) {
     newColor.setRgb(130, 177, 255);  // Blue A100
   } else {
     newColor.setRgb(41, 98, 255);  // Blue A700
@@ -173,6 +191,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->projectTreeViewSettings.reset(new ColorSettings());
   parseSettings(theme->projectTreeViewSettings.get(), createProjectTreeViewSettingsColors(theme));
 
+  // window settings(window)
+  theme->windowSettings.reset(new ColorSettings());
+  parseSettings(theme->windowSettings.get(), createWindowSettingsColors(theme));
+
   return theme;
 }
 
@@ -258,6 +280,22 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
 
 ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
   return createStatusBarSettingsColors(theme);
+}
+
+ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(33, 33, 33);     // Grey 900
+  QColor foregroundColor = QColor(117, 117, 117);  // Grey 600
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (textEditViewColorSettings->contains("background")) {
+      backgroundColor = textEditViewColorSettings->value("background").name();
+      foregroundColor = getAppropriateGrey(textEditViewColorSettings->value("background").name());
+    }
+  }
+  return defaultColors = { {"background", backgroundColor}, {"foreground", foregroundColor} };
 }
 
 // Return the rank of scopeSelector for scope

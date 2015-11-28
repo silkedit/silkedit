@@ -24,6 +24,9 @@ class Document;
 namespace Ui {
 class Window;
 }
+namespace core {
+  class Theme;
+}
 
 class Window : public QMainWindow {
   Q_OBJECT
@@ -99,6 +102,8 @@ class Window : public QMainWindow {
   bool m_firstPaintEventFired;
 
   static bool closeTabIncludingDocInternal(core::Document* doc);
+
+  void setTheme(const core::Theme* theme);
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
