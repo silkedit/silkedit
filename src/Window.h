@@ -19,6 +19,9 @@ class Toolbar;
 namespace Ui {
 class Window;
 }
+namespace core {
+  class Theme;
+}
 
 class Window : public QMainWindow, public core::UniqueObject<Window> {
   Q_OBJECT
@@ -90,6 +93,8 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   TabViewGroup* m_tabViewGroup;
   ProjectTreeView* m_projectView;
   FindReplaceView* m_findReplaceView;
+
+  void setTheme(const core::Theme* theme);
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);

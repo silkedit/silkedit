@@ -20,6 +20,12 @@
 #include "util/YamlUtils.h"
 #include "PluginManager.h"
 #include "PlatformUtil.h"
+#include "core/Config.h"
+#include "core/Theme.h"
+
+using core::Config;
+using core::Theme;
+using core::ColorSettings;
 
 QMap<QString, std::string> Window::s_toolbarsDefinitions;
 
@@ -61,6 +67,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   editorWidget->setLayout(layout);
 
   ui->rootSplitter->addWidget(editorWidget);
+  setTheme(Config::singleton().theme());
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
@@ -69,7 +76,31 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   connect(this, &Window::activeEditViewChanged, ui->statusBar,
           &StatusBar::onActiveTextEditViewChanged);
 
-  updateConnection(nullptr, m_tabViewGroup->activeTab());
+   updateConnection(nullptr, m_tabViewGroup->activeTab());
+   connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
+}
+
+void Window::setTheme(const core::Theme *theme){
+  qDebug("Window theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->windowSettings != nullptr) {
+    QString style;
+    ColorSettings* windowSettings = theme->windowSettings.get();
+
+    style = QString(
+          "Window {"
+          "background-color: %1;"
+          "color: %2;"
+          "}")
+        .arg(windowSettings->value("background").name(),
+             windowSettings->value("foregound").name());
+
+       this->setStyleSheet(style);
+  }
 }
 
 void Window::loadToolbar(const QString& pkgName, const std::string& ymlPath) {
