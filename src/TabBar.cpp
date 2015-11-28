@@ -49,10 +49,13 @@ void TabBar::setTheme(const Theme* theme) {
     style += QString(
                  "TabBar::tab:selected {"
                  "background-color: %1;"
-                 "color:%2"
+                 "color: %2;"
+                 "border-left: 2px solid;"
+                 "border-color: %3;"
                  "}")
                  .arg(tabBarSettings->value("selected").name(),
-                       tabBarSettings->value("foreground").name());
+                      tabBarSettings->value("foreground").name(),
+                      tabBarSettings->value("selectedBorder").name());
 
     this->setStyleSheet(style);
   }
