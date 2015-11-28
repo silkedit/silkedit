@@ -48,7 +48,7 @@ if (APPLE)
 
   # set where in the bundle to put the icns files
 #  set_source_files_properties( ${OSX_ICON_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION res)
-  set_source_files_properties( ${QM_FILES1} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/translations)
+  set_source_files_properties( ${CRASHREPORTER_QM_FILES} PROPERTIES MACOSX_PACKAGE_LOCATION Resources/translations)
 
   # include the icns files in the target
 #  set( CRASHREPORTER_SOURCES ${CRASHREPORTER_SOURCES} ${OSX_ICON_FILES} )
