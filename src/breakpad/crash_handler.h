@@ -1,9 +1,6 @@
 ﻿#pragma once
 #include <QtCore/QString>
 
-#ifndef CRASH_HANDLER
-#define CRASH_HANDLER
-
 namespace Breakpad {
 class CrashHandlerPrivate;
 class CrashHandler {
@@ -22,4 +19,3 @@ class CrashHandler {
 };
 }
 
-#endif  // CRASH_HANDLER

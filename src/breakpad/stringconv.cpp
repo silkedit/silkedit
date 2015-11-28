@@ -2,9 +2,6 @@
 #include "stringconv.h"
 
 namespace string_util {
-//#undef _MSC_VER
-// extern "C"
-//{
 
 /*! Convert a QString to an std::wstring */
 std::wstring qToStdWString(const QString& str) {
@@ -23,7 +20,5 @@ QString stdWToQString(const std::wstring& str) {
   return QString::fromStdWString(str);
 #endif
 }
-
-//}//extern
 
 }  // namespace

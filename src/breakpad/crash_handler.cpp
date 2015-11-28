@@ -51,8 +51,6 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
 {
   Q_UNUSED(context);
 #if defined(Q_OS_WIN32)
-  // Q_UNUSED(_dump_dir);
-  // Q_UNUSED(_minidump_id);
   Q_UNUSED(assertion);
   Q_UNUSED(exinfo);
 #endif
