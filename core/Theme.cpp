@@ -1,4 +1,5 @@
-﻿#include "Theme.h"
+﻿#include <QDebug>
+#include "Theme.h"
 #include "PListParser.h"
 
 namespace core {
@@ -70,6 +71,18 @@ QColor changeColorBrightness(QColor const color, int value = 10, int threshold =
 QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
   QColor newColor;
   newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
+  return newColor;
+}
+
+QColor getSelectedTabBorderColor(QColor const color) {
+  QColor newColor;
+  // use material color
+  //  - http://www.materialui.co/colors
+  if (color.value() < 170) {
+    newColor.setRgb(130, 177, 255);  // Blue A100
+  } else {
+    newColor.setRgb(41, 98, 255);  // Blue A700
+  }
   return newColor;
 }
 
@@ -217,6 +230,7 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
   QColor backgroundColor = QColor(Qt::Window);
   QColor foregroundColor = QColor(Qt::gray);
   QColor selectedColor = QColor(Qt::black);
+  QColor selectedBorderColor = QColor(Qt::white);
 
   if (!theme->scopeSettings.isEmpty()) {
     ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
@@ -224,6 +238,8 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
     if (!textEditViewColorSettings->isEmpty()) {
       if (textEditViewColorSettings->contains("background")) {
         selectedColor = textEditViewColorSettings->value("background").name();
+        selectedBorderColor =
+            getSelectedTabBorderColor(textEditViewColorSettings->value("background").name());
         backgroundColor =
             changeColorBrightness(textEditViewColorSettings->value("background").name());
       }
@@ -236,7 +252,8 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
   }
   return defaultColors = {{"background", backgroundColor},
                           {"foreground", foregroundColor},
-                          {"selected", selectedColor}};
+                          {"selected", selectedColor},
+                          {"selectedBorder", selectedBorderColor}};
 }
 
 ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
