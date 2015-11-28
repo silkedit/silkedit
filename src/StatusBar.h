@@ -35,7 +35,6 @@ class StatusBar : public QStatusBar{
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
-  void setTheme(const core::Theme* theme);
 
  signals:
   void languageChanged(const QString& scopeName);
@@ -46,6 +45,7 @@ class StatusBar : public QStatusBar{
   EncodingComboBox* m_encComboBox;
   BOMComboBox* m_bomComboBox;
 
+  void setTheme(const core::Theme* theme);
   void setCurrentLanguage(core::Language* lang);
 };
 

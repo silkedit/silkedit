@@ -120,6 +120,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   std::unique_ptr<TextEditViewPrivate> d_ptr;
 
   void setViewportMargins(int left, int top, int right, int bottom);
+  void setTheme(core::Theme *theme);
 
   inline TextEditViewPrivate* d_func() { return d_ptr.get(); }
   inline const TextEditViewPrivate* d_func() const { return d_ptr.get(); }
@@ -133,9 +134,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   Q_PRIVATE_SLOT(d_func(), void clearDirtyMarker())
   Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
   Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
-
- private slots:
-  void setTheme(core::Theme* theme);
 };
 
 Q_DECLARE_METATYPE(TextEditView*)
