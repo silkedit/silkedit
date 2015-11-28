@@ -5,7 +5,7 @@
   "main": "main.js",
   "dependencies": {
     "js-yaml": "^3.2.7",
-    "silk-msgpack-rpc": "0.0.3",
+    "silk-msgpack-rpc": "0.1.0",
     "synchronize": "^0.9.9"
   },
   "devDependencies": {},

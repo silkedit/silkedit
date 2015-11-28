@@ -7,6 +7,14 @@
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "CommandManager.h"
+#include "core/Constants.h"
+
+using core::Constants;
+
+namespace {
+  constexpr const char* PREFIX = "recentOpenFileHistory";
+  constexpr const char* PATH_KEY = "path";
+}
 
 void OpenRecentItemManager::clear() {
   m_recentItems.clear();
@@ -60,6 +68,18 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_clearRecentItemListAction = new ClearRecentItemListAction(m_openRecentMenu.get());
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
+  // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
+  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+
+  int size = recentOpenHistory.beginReadArray(PREFIX);
+  for (int i = 0; i < size; i++) {
+    recentOpenHistory.setArrayIndex(i);
+    const QVariant& value = recentOpenHistory.value(PATH_KEY);
+    if (value.canConvert<QString>()) {
+      m_recentItems.push_back(value.toString());
+    }
+  }
+
   updateOpenRecentItems();
 
   CommandManager::singleton().add(
@@ -75,13 +95,22 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_clearRecentItemListAction->setEnabled(m_recentItems.empty() ? false : true);
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
+  // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
+  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  
+  recentOpenHistory.clear();
+
   int index = 0;
+  recentOpenHistory.beginWriteArray(PREFIX);
   for (auto& item : m_recentItems) {
+    recentOpenHistory.setArrayIndex(index);
     m_recentItemActions[index]->setText(item);
     m_recentItemActions[index]->setData(item);
     m_recentItemActions[index]->setVisible(true);
+    recentOpenHistory.setValue(PATH_KEY, item);
     index++;
   }
+  recentOpenHistory.endArray();
 
   // Hide empty recent item actions
   for (int i = index; i < MAX_RECENT_ITEMS; i++) {
