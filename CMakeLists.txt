@@ -90,6 +90,7 @@ INCLUDE(Dart)
 # enable_testing should be in the root
 enable_testing()
 add_subdirectory(core)
+add_subdirectory(crashreporter)
 add_subdirectory(test)
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})

@@ -8,14 +8,14 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
   if [ "$(uname -m)" == "x86_64" ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
-    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "D:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     VCVARSALL_ARG=amd64
     PROGRAM_FILES="Program Files (x86)"
     ARCH=x64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
-    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "D:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     VCVARSALL_ARG=x86
     ARCH=x86
     PROGRAM_FILES="Program Files"
@@ -234,8 +234,8 @@ resolve() {
 
 			./configure
 
-			patch -p1 --binary -N < ../crashview/patch/breakpad_googletest_include.h.patch
-			patch -p1 --binary -N < ../crashview/patch/symbolic_constants_win.cc.patch
+			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
+			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
 
 			make
 			make install
@@ -255,11 +255,11 @@ resolve() {
 			
 			echo 'Breakpad patch'
 			# configurate compile options
-			patch -p1 --binary -N < ../crashview/patch/common.patch
-			patch -p1 --binary -N < ../crashview/patch/exception_handler.patch
-			patch -p1 --binary -N < ../crashview/patch/crash_report_sender.patch
-			patch -p1 --binary -N < ../crashview/patch/crash_generation_client.patch
-			patch -p1 --binary -N < ../crashview/patch/crash_generation_server.patch
+			patch -p1 --binary -N < ../crashreporter/patch/common.patch
+			patch -p1 --binary -N < ../crashreporter/patch/exception_handler.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_report_sender.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_client.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_server.patch
 
 			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
             mkdir -p ../lib/breakpad/Debug
@@ -309,14 +309,6 @@ build() {
 
     if [ $OS == 'Mac' ]; then
 
-		# crashview
-		mkdir -p crashview
-		cd crashview
-		echo 'Building CrashView ...'
-		cmake -GNinja ../../crashview -DCMAKE_BUILD_TYPE=Release
-		ninja
-        macdeployqt CrashView.app
-		cd ..
 
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
@@ -326,18 +318,11 @@ build() {
 
         ninja
         
-        mkdir -p SilkEdit.app/Contents/MacOS/CrashView
-        cp -r crashview/CrashView.app SilkEdit.app/Contents/MacOS/CrashView/CrashView.app        
+		# crashreporter
+        cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
+        cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else
 
-		# crashview
-		mkdir -p crashview
-		cd crashview
-		echo 'Building CrashView ...'
-		cmake -G "$MSVC" ../../crashview -DCMAKE_BUILD_TYPE=Release
-		#msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
-		msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
-		cd ..
 
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
@@ -345,10 +330,9 @@ build() {
           ../build.bat $VCVARSALL_ARG all
         fi
 
-		# copy crashview support files
-        cp /usr/local/bin/minidump_stackwalk.exe /usr/bin/msys-2.0.dll /usr/bin/msys-gcc_s-seh-1.dll /usr/bin/msys-stdc++-6.dll crashview/Release
-		mkdir -p Release/CrashView
-        cp -r crashview/Release/* Release/CrashView/
+		# crashreporter
+        cp crashreporter/crashreporter.exe .
+        cp crashreporter/crashreporter_*.qm .
     fi
 
     cd ..
@@ -387,9 +371,8 @@ make_installer() {
         # Can't use mv because mv fails when Release/packages already exists
         cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
         rm -rf silkedit.exe onig.dll packages plugin_runner
-		mkdir -p Release/CrashView
-        cp -r crashview/Release/* Release/CrashView/
-        windeployqt --release --no-compiler-runtime Release/CrashView/CrashView.exe
+		#crashreporter
+        cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
 
         windeployqt --release --no-compiler-runtime silkedit.exe
@@ -484,6 +467,8 @@ set_build() {
 
 localize() {
     lupdate src core -ts translations/silkedit_ja.ts
+	#CrashReporter
+	lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
 
 # -e: stops if any command returns non zero value
