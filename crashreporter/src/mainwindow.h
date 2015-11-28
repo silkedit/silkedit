@@ -1,6 +1,4 @@
-﻿#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
+﻿#pragma once
 #include <QMainWindow>
 
 namespace Ui {
@@ -14,13 +12,8 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
 
- protected:
-  void changeEvent(QEvent* e);
-
  private:
   Ui::MainWindow* ui;
 
   void showDump(const QString& fileName);
 };
-
-#endif  // MAINWINDOW_H

@@ -113,16 +113,6 @@ resolve() {
       fi
 
       # breakpad
-      if [ ! -f /usr/local/bin/minidump_stackwalk ]; then
-        echo 'Building Breakpad ...'
-        cd breakpad
-
-        ./configure
-        make
-        make install
-
-        cd ..
-      fi
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
         echo 'Building Breakpad client ...'
         
@@ -228,25 +218,13 @@ resolve() {
         fi
 
 		#breakpad
-		if [ ! -f /usr/local/bin/minidump_stackwalk.exe ]; then
-			echo 'Building Breakpad ...'
-			cd breakpad
-
-			./configure
-
-			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
-			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
-
-			make
-			make install
-
-			cd ..
-		fi
-
 		if [ ! -f lib/breakpad/Release/common.lib ]; then
 			echo 'Building Breakpad client ...'
 
 			cd breakpad
+			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
+			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
+
 			export GYP_MSVS_VERSION=2013
 
 			gyp --no-circular-check ./src/client/windows/breakpad_client.gyp

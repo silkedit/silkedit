@@ -1,8 +1,6 @@
 #define VER_VERSION             0,1,0
 #define VER_VERSION_STR         "0.1.0\0"
 
-IDI_ICON1               ICON    DISCARDABLE     "crashview.ico"
-
 1 VERSIONINFO
 FILEVERSION VER_VERSION
 PRODUCTVERSION VER_VERSION
@@ -13,9 +11,9 @@ PRODUCTVERSION VER_VERSION
 		 {
 			 VALUE "CompanyName", "SilkEdit dev team"
 			 VALUE "FileVersion", VER_VERSION_STR
-			 VALUE "FileDescription", "CrashView"
+			 VALUE "FileDescription", "CrashReporter"
 			 VALUE "LegalCopyright", "Copyright (C) 2014-2015 Shinichi Katayama"
-			 VALUE "OriginalFilename", "crashview.exe"
+			 VALUE "OriginalFilename", "crashreporter.exe"
 			 VALUE "ProductName", "SilkEdit"
 			 VALUE "ProductVersion", VER_VERSION_STR
 		 }
