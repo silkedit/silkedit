@@ -1,5 +1,11 @@
 ﻿#include "PackageToolBar.h"
 #include "PackageParent.h"
+#include "Config.h"
+#include "Theme.h"
+
+using core::Config;
+using core::Theme;
+using core::ColorSettings;
 
 core::PackageToolBar::PackageToolBar(const QString& objectName,
                                      const QString& title,
@@ -7,4 +13,29 @@ core::PackageToolBar::PackageToolBar(const QString& objectName,
                                      const QString& pkgName)
     : QToolBar(title, parent), m_pkgParent(new PackageParent(pkgName, this)) {
   setObjectName(objectName);
+  setTheme(Config::singleton().theme());
+  connect(&Config::singleton(), &Config::themeChanged, this, &core::PackageToolBar::setTheme);
+}
+
+void core::PackageToolBar::setTheme(const core::Theme* theme) {
+  qDebug("PackageToolBar theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->packageToolBarSettings != nullptr) {
+    QString style;
+    ColorSettings* packageToolBarSettings = theme->packageToolBarSettings.get();
+
+    style = QString(
+                "QToolBar {"
+                "background-color: %1;"
+                "color: %2;"
+                "}")
+                .arg(packageToolBarSettings->value("background").name(),
+                     packageToolBarSettings->value("foreground").name());
+
+    this->setStyleSheet(style);
+  }
 }
