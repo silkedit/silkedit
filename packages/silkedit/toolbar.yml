@@ -2,28 +2,28 @@ toolbar:
 - label: File
   id: file
   items:
-  - icon: resources/images/new.png
+  - icon: resources/images/ic_insert_drive_file_black.svg
     command: new_file
     tooltip: "New File"
     id: new_file
-  - icon: resources/images/open.png
+  - icon: resources/images/ic_folder_open_black.svg
     command: open
     tooltip: Open
     id: open
     context: os != windows
-  - icon: resources/images/save.png
+  - icon: resources/images/ic_save_black.svg
     command: save
     tooltip: Save
     id: save
-  - icon: resources/images/cut.png
+  - icon: resources/images/ic_content_cut_black.svg
     tooltip: Cut
     id: cut
     command: cut
-  - icon: resources/images/copy.png
+  - icon: resources/images/ic_content_copy_black.svg
     tooltip: Copy
     id: copy
     command: copy
-  - icon: resources/images/paste.png
+  - icon: resources/images/ic_content_paste_black.svg
     tooltip: Paste
     id: paste
     command: paste

@@ -39,6 +39,7 @@ class Theme {
         tabViewSettings(nullptr),
         projectTreeViewSettings(nullptr),
         windowSettings(nullptr),
+        packageToolBarSettings(nullptr),
         scopeSettings(QVector<ScopeSetting*>(0)) {}
   ~Theme() = default;
   DEFAULT_MOVE(Theme)
@@ -54,6 +55,7 @@ class Theme {
   std::unique_ptr<ColorSettings> tabViewSettings;
   std::unique_ptr<ColorSettings> projectTreeViewSettings;
   std::unique_ptr<ColorSettings> windowSettings;
+  std::unique_ptr<ColorSettings> packageToolBarSettings;
 
   QFont::Weight gutterFontWeight;
   bool isGutterItalic;
@@ -65,12 +67,14 @@ class Theme {
   static ScopeSetting* matchedSetting(const QString& scope);
   QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
   QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
+
   static ColorSettings createGutterSettingsColors(const Theme* theme);
   static ColorSettings createStatusBarSettingsColors(const Theme* theme);
   static ColorSettings createTabBarSettingsColors(const Theme* theme);
   static ColorSettings createTabViewSettingsColors(const Theme* theme);
   static ColorSettings createProjectTreeViewSettingsColors(const Theme* theme);
   static ColorSettings createWindowSettingsColors(const Theme* theme);
+  static ColorSettings createPackageToolBarSettingsColors(const Theme* theme);
 };
 
 class Rank {

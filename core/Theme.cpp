@@ -195,6 +195,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->windowSettings.reset(new ColorSettings());
   parseSettings(theme->windowSettings.get(), createWindowSettingsColors(theme));
 
+  // package tool bar settings(PackageToolBar)
+  theme->packageToolBarSettings.reset(new ColorSettings());
+  parseSettings(theme->packageToolBarSettings.get(), createPackageToolBarSettingsColors(theme));
+
   return theme;
 }
 
@@ -296,6 +300,10 @@ ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
     }
   }
   return defaultColors = { {"background", backgroundColor}, {"foreground", foregroundColor} };
+}
+
+ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
 }
 
 // Return the rank of scopeSelector for scope
