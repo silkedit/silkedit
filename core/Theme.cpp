@@ -211,17 +211,17 @@ ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
   QColor foregroundColor = QColor(Qt::black);
 
   if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
-    if (!textEditViewColorSettings->isEmpty()) {
-      if (textEditViewColorSettings->contains("background")) {
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("background")) {
         backgroundColor =
-            changeColorBrightness(textEditViewColorSettings->value("background").name());
+            changeColorBrightness(baseColorSettings->value("background").name());
       }
 
-      if (textEditViewColorSettings->contains("foreground")) {
+      if (baseColorSettings->contains("foreground")) {
         foregroundColor =
-            changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+            changeColorBrightness(baseColorSettings->value("foreground").name());
       }
     }
   }
@@ -235,15 +235,15 @@ ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
   QColor foregroundColor = QColor(Qt::black);
 
   if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
-    if (textEditViewColorSettings->contains("background")) {
+    if (baseColorSettings->contains("background")) {
       backgroundColor =
-          changeColorBrightnessDarker(textEditViewColorSettings->value("background").name(), 20);
+          changeColorBrightnessDarker(baseColorSettings->value("background").name(), 20);
     }
-    if (textEditViewColorSettings->contains("foreground")) {
+    if (baseColorSettings->contains("foreground")) {
       foregroundColor =
-          changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+          changeColorBrightness(baseColorSettings->value("foreground").name());
     }
   }
 
@@ -262,20 +262,20 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
   QColor selectedBorderColor = QColor(Qt::white);
 
   if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
-    if (!textEditViewColorSettings->isEmpty()) {
-      if (textEditViewColorSettings->contains("background")) {
-        selectedColor = textEditViewColorSettings->value("background").name();
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("background")) {
+        selectedColor = baseColorSettings->value("background").name();
         selectedBorderColor =
-            getSelectedTabBorderColor(textEditViewColorSettings->value("background").name());
+            getSelectedTabBorderColor(baseColorSettings->value("background").name());
         backgroundColor =
-            changeColorBrightness(textEditViewColorSettings->value("background").name());
+            changeColorBrightness(baseColorSettings->value("background").name());
       }
 
-      if (textEditViewColorSettings->contains("foreground")) {
+      if (baseColorSettings->contains("foreground")) {
         foregroundColor =
-            changeColorBrightness(textEditViewColorSettings->value("foreground").name());
+            changeColorBrightness(baseColorSettings->value("foreground").name());
       }
     }
   }
@@ -295,11 +295,11 @@ ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
   QColor foregroundColor = QColor(117, 117, 117);  // Grey 600
 
   if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
-    if (textEditViewColorSettings->contains("background")) {
-      backgroundColor = textEditViewColorSettings->value("background").name();
-      foregroundColor = getAppropriateGrey(textEditViewColorSettings->value("background").name());
+    if (baseColorSettings->contains("background")) {
+      backgroundColor = baseColorSettings->value("background").name();
+      foregroundColor = getAppropriateGrey(baseColorSettings->value("background").name());
     }
   }
   return defaultColors = { {"background", backgroundColor}, {"foreground", foregroundColor} };
