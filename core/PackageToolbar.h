@@ -5,7 +5,7 @@
 #include "macros.h"
 
 namespace core {
-
+class Theme;
 class PackageParent;
 
 class PackageToolBar : public QToolBar {
@@ -20,6 +20,7 @@ class PackageToolBar : public QToolBar {
   DEFAULT_MOVE(PackageToolBar)
 
  private:
+  void setTheme(const Theme* theme);
   PackageParent* m_pkgParent;
 };
 
