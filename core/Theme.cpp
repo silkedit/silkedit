@@ -11,6 +11,9 @@ const QString scopeStr = "scope";
 const QString settingsStr = "settings";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
+const int brightnessThresholdWhite = 180;
+const int brightnessThresholdGrey = 125;
+const int brightnessThresholdBlack = 60;
 
 void parseSettings(ColorSettings* settings,
                    QFont::Weight* fontWeight,
@@ -56,7 +59,7 @@ void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
   }
 }
 
-QColor changeColorBrightness(QColor const color, int value = 10, int threshold = 125) {
+QColor changeColorBrightness(QColor const color, int value = 10, int threshold = brightnessThresholdGrey) {
   QColor newColor;
 
   // 0 is black; 255 is as far from black as possible.
@@ -79,11 +82,11 @@ QColor getAppropriateGrey(QColor const color) {
   int brightness = color.value();
   // use material color
   //  - http://www.materialui.co/colors
-  if (brightness < 60) {
+  if (brightness < brightnessThresholdBlack) {
     newColor.setRgb(224, 224, 224);  // 300
-  } else if (brightness < 120) {
+  } else if (brightness < brightnessThresholdGrey) {
     newColor.setRgb(158, 158, 158);  // 500
-  } else if (brightness < 180) {
+  } else if (brightness < brightnessThresholdWhite) {
     newColor.setRgb(97, 97, 97);  // 700
   } else {
     newColor.setRgb(33, 33, 33);  // 900
@@ -96,7 +99,7 @@ QColor getSelectedTabBorderColor(QColor const color) {
   int brightness = color.value();
   // use material color
   //  - http://www.materialui.co/colors
-  if (brightness < 170) {
+  if (brightness < brightnessThresholdGrey) {
     newColor.setRgb(130, 177, 255);  // Blue A100
   } else {
     newColor.setRgb(41, 98, 255);  // Blue A700
