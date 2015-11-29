@@ -2,8 +2,6 @@
 # CrashReporter cmake file
 #
 
-cmake_minimum_required(VERSION 3.0.2)
-
 project(CrashReporter)
 
 file(GLOB_RECURSE CRASHREPORTER_SOURCES src/*.cpp src/*.c)
