@@ -246,7 +246,6 @@ class Helper : public QObject, public core::Singleton<Helper> {
     msgpack::sbuffer sbuf;
     msgpack::rpc::msg_request<std::string, Parameter> request;
     request.method = method;
-    // todo: check overlow
     msgpack::rpc::msgid_t msgId = s_msgId++;
     request.msgid = msgId;
     request.param = params;

@@ -6,7 +6,7 @@ module.exports = (ObjectProxy) => {
   }
 
   newConstants.prototype = Object.create(ObjectProxy);
-  newConstants.prototype.id = -2;
+  newConstants.prototype.id = new Buffer('7b36336433393166332d653764382d343261342d393339622d3435373934663265333532367d', 'hex');
   newConstants.prototype.notifyMethods = new Set([]);
   const Constants = new newConstants;
 

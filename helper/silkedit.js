@@ -3,7 +3,7 @@
 var fs = require('fs')
 var path = require('path')
 var yaml = require('js-yaml');
-var silkutil = require('./silkutil')
+var silkutil = require('./core/silkutil')
 var path = require('path')
 
 var packageDirMap = {}
@@ -49,7 +49,7 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
   Window.prototype = Object.create(ObjectProxy)
 
   Window.prototype.statusBar = function() {
-    const id = client.invoke('statusBar', this.id)
+    const id = silkutil.callExternalMethod(client, 'statusBar', this.id)
     return id != null ? new StatusBar(id) : null
   }
 
@@ -255,9 +255,7 @@ const loadPackage = (dir) => {
 
             // call module's activate method
             if (module.activate) {
-              silkutil.runInFiber(() => {
-                module.activate()
-              })
+              module.activate()
             }
           }
         })

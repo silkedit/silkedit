@@ -36,9 +36,10 @@ MSGPACK_API_VERSION_NAMESPACE(v1) {
   struct pack<QString> {
     template <typename Stream>
     msgpack::packer<Stream>& operator()(msgpack::packer<Stream>& o, const QString& v) const {
-      uint32_t size = checked_get_container_size(v.size());
+      const QByteArray& bytes = v.toUtf8();
+      uint32_t size = checked_get_container_size(bytes.size());
       o.pack_str(size);
-      o.pack_str_body(v.toUtf8().constData(), size);
+      o.pack_str_body(bytes.constData(), size);
       return o;
     }
   };
@@ -46,9 +47,10 @@ MSGPACK_API_VERSION_NAMESPACE(v1) {
   template <>
   struct object<QString> {
     void operator()(msgpack::object& o, const QString& v) const {
-      uint32_t size = checked_get_container_size(v.size());
+      const QByteArray& bytes = v.toUtf8();
+      uint32_t size = checked_get_container_size(bytes.size());
       o.type = msgpack::type::STR;
-      o.via.str.ptr = v.toUtf8().constData();
+      o.via.str.ptr = bytes.constData();
       o.via.str.size = size;
     }
   };
@@ -56,12 +58,13 @@ MSGPACK_API_VERSION_NAMESPACE(v1) {
   template <>
   struct object_with_zone<QString> {
     void operator()(msgpack::object::with_zone& o, const QString& v) const {
-      uint32_t size = checked_get_container_size(v.size());
+      const QByteArray& bytes = v.toUtf8();
+      uint32_t size = checked_get_container_size(bytes.size());
       o.type = msgpack::type::STR;
       char* ptr = static_cast<char*>(o.zone.allocate_align(size));
       o.via.str.ptr = ptr;
       o.via.str.size = size;
-      std::memcpy(ptr, v.toUtf8().constData(), v.size());
+      std::memcpy(ptr, bytes.constData(), bytes.size());
     }
   };
 

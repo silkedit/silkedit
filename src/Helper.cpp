@@ -28,6 +28,9 @@ using core::UniqueObject;
 
 namespace {
 
+const QUuid API_UUID = QUuid(QByteArray::fromHex("7b32626237643730372d343265332d346265322d613766632d3363363566393937646534307d"));
+const QUuid Constants_UUID = QUuid(QByteArray::fromHex("7b36336433393166332d653764382d343261342d393339622d3435373934663265333532367d"));
+
 struct QVariantArgument {
   operator QGenericArgument() const {
     if (value.isValid()) {
@@ -83,6 +86,9 @@ void HelperPrivate::startPluginRunnerProcess() {
 }
 
 void HelperPrivate::init() {
+  UniqueObject::registerObj(API_UUID, &API::singleton());
+  UniqueObject::registerObj(Constants_UUID, &Constants::singleton());
+
   Q_ASSERT(!m_helperProcess);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
@@ -538,23 +544,14 @@ QVariant HelperPrivate::invokeMethod(QObject* object,
 void HelperPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
   ArgumentArray params;
   obj.convert(&params);
-  int id = params.id();
+  QUuid id = params.id();
 
-  QObject* view;
-  // API id is -1
-  if (id == -1) {
-    view = &API::singleton();
-    // Constants id is -2
-  } else if (id == -2) {
-    view = &Constants::singleton();
-  } else {
-    view = UniqueObject::find(id);
-  }
+  QObject* view = UniqueObject::find(id);
 
   if (view) {
     invokeMethod(view, method, params.args());
   } else {
-    qWarning("id: %d not found", id);
+    qWarning() << "id:" << id << "not found";
   }
 }
 
@@ -563,24 +560,15 @@ void HelperPrivate::callRequestFunc(const QString& method,
                                     const msgpack::v1::object& obj) {
   ArgumentArray params;
   obj.convert(&params);
-  int id = params.id();
+  QUuid id = params.id();
 
-  QObject* view;
-  // API id is -1
-  if (id == -1) {
-    view = &API::singleton();
-    // Constants id is -2
-  } else if (id == -2) {
-    view = &Constants::singleton();
-  } else {
-    view = UniqueObject::find(id);
-  }
+  QObject* view = UniqueObject::find(id);
 
   if (view) {
     const QVariant& returnValue = invokeMethod(view, method, params.args());
     Helper::singleton().sendResponse(returnValue, msgpack::type::nil(), msgId);
   } else {
-    QString errMsg = QString("id: %1 not found").arg(id);
+    QString errMsg = QString("id: %1 not found").arg(id.toString());
     qWarning() << qPrintable(errMsg);
     Helper::singleton().sendResponse(msgpack::type::nil(),
                                      ((std::string)errMsg.toUtf8().constData()), msgId);

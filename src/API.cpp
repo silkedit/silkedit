@@ -19,14 +19,14 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "core/ConditionManager.h"
 #include "PackageCondition.h"
 #include "InputDialog.h"
 #include "ConfigDialog.h"
+#include "util/DialogUtils.h"
+#include "core/ConditionManager.h"
 #include "core/Config.h"
 #include "core/modifiers.h"
 #include "core/ICondition.h"
-#include "util/DialogUtils.h"
 
 using core::Config;
 using core::ConditionManager;

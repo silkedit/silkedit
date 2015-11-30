@@ -46,6 +46,6 @@ boost::optional<QString> InputDialog::showDialog() {
 
 void InputDialog::textChanged(const QString& text) {
   std::string type = text.toUtf8().constData();
-  std::tuple<int, std::string> params = std::make_tuple(id(), type);
+  std::tuple<QUuid, std::string> params = std::make_tuple(id(), type);
   Helper::singleton().sendNotification("InputDialog.textValueChanged", params);
 }

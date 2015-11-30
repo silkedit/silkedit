@@ -4,6 +4,7 @@
 #include <QVariantList>
 
 #include "qstring_adapter.h"
+#include "quuid_adapter.h"
 
 namespace {
 QVariant toVariant(const msgpack::object& obj) {
@@ -37,13 +38,13 @@ class ArgumentArray {
   // When you want to convert from msgpack::object to ArgumentArray, ArgumentArray should be default
   // constractible.
   ArgumentArray() {}
-  ArgumentArray(int id, QVariantList args) : m_id(id), m_args(args) {}
-  int id() { return m_id; }
+  ArgumentArray(const QUuid& id, const QVariantList& args) : m_id(id), m_args(args) {}
+  QUuid id() { return m_id; }
   QVariantList args() { return m_args; }
   int size() { return 1 + m_args.size(); }
 
  private:
-  int m_id;
+  QUuid m_id;
   QVariantList m_args;
 };
 
@@ -59,11 +60,10 @@ MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
     msgpack::object const& operator()(msgpack::object const& o, core::ArgumentArray& v) const {
       QVariantList varArgs;
       if (o.type != msgpack::type::ARRAY || o.via.array.size == 0 ||
-          !(o.via.array.ptr[0].type == msgpack::type::POSITIVE_INTEGER ||
-            o.via.array.ptr[0].type == msgpack::type::NEGATIVE_INTEGER)) {
+          o.via.array.ptr[0].type != msgpack::type::BIN) {
         throw msgpack::type_error();
       }
-      int id = o.via.array.ptr[0].as<int>();
+      QUuid id = o.via.array.ptr[0].as<QUuid>();
       for (uint32_t i = 1; i < o.via.array.size; i++) {
         varArgs.append(toVariant(o.via.array.ptr[i]));
       }

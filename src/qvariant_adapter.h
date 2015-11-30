@@ -58,7 +58,7 @@ MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
         uint32_t size = checked_get_container_size(windows.size());
         o.pack_array(size);
         for (Window* win : windows) {
-          o.pack_int(win->id());
+          o.pack<QUuid>(win->id());
         }
         return o;
       }

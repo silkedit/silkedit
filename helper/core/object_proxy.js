@@ -2,6 +2,7 @@
 
 var Reflect = require('harmony-reflect');
 var deasync = require('deasync')
+var silkutil = require('./silkutil')
 
 module.exports = (client) => {
   return new Proxy({}, {
@@ -14,23 +15,7 @@ module.exports = (client) => {
       if (receiver.notifyMethods && receiver.notifyMethods.has(name)) {
         return (...args) => client.notify.apply(client, [name, receiver.id, ...args])
       } else {
-        return (...args) => {
-          var done = false
-          var result, error
-          client.invoke.apply(client, [name, receiver.id, ...args, (err, res) => {
-            done = true;
-            if (err) {
-              error = err
-            } else {
-              result = res
-            }
-          }])
-          deasync.loopWhile(() => !done)
-          if (error) {
-            throw error
-          }
-          return result
-        }
+        return (...args) => silkutil.callExternalMethod(client, name, receiver.id, ...args)
       }
     }
   });
