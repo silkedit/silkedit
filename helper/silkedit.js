@@ -4,6 +4,7 @@ var fs = require('fs')
 var path = require('path')
 var yaml = require('js-yaml');
 var silkutil = require('./core/silkutil')
+var objectStore = require('./core/object_store')
 var path = require('path')
 
 var packageDirMap = {}
@@ -50,7 +51,7 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
 
   Window.prototype.statusBar = function() {
     const id = silkutil.callExternalMethod(client, 'statusBar', this.id)
-    return id != null ? new StatusBar(id) : null
+    return id != null ? objectStore.getOrCreate(id, StatusBar) : null
   }
 
 
@@ -266,6 +267,7 @@ const loadPackage = (dir) => {
 
   // API (everything is synchronous)
 
+  // replace these methods with API class methods
   return {
     alert: (msg) => {
       API.alert(msg);
@@ -293,22 +295,22 @@ const loadPackage = (dir) => {
 
     ,activeTextEditView: () => {
       const id = API.activeTextEditView()
-      return id != null ? new TextEditView(id) : null
+      return objectStore.getOrCreate(id, TextEditView)
     }
 
     ,activeTabView: () => {
       const id = API.activeTabView()
-      return id != null ? new TabView(id) : null
+      return objectStore.getOrCreate(id, TabView)
     }
 
     ,activeTabViewGroup: () => {
       const id = API.activeTabViewGroup()
-      return id != null ? new TabViewGroup(id) : null
+      return objectStore.getOrCreate(id, TabViewGroup)
     }
 
     ,activeWindow: () => {
       const id = API.activeWindow()
-      return id != null ? new Window(id) : null
+      return objectStore.getOrCreate(id, Window)
     }
 
     ,showFileAndFolderDialog: (caption) => {
@@ -378,7 +380,7 @@ const loadPackage = (dir) => {
     
     ,windows: () => {
       const ids = API.windows()
-      return ids != null ? ids.map(id => new Window(id)) : []
+      return ids != null ? ids.map(id => objectStore.getOrCreate(id, Window)) : []
     }
 
     ,config:  {
