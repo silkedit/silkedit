@@ -2,7 +2,6 @@
 CMakeLists.txt.user
 *.autosave
 .idea/
-node_modules
 *.otf
 
 /lib/
@@ -10,6 +9,8 @@ node_modules
 /include/
 /helper/bin
 /helper/lib
+/helper/node_modules
 /helper/nodejs
 /yaml-cpp-*
-/packages/vim
+/packages/node_modules/vim
+/packages/node_modules/silkedit/node_modules

@@ -414,7 +414,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
               return;
             }
 
-            QDir node_modules = QDir(Constants::singleton().userNodeModulesPath() + "/" + pkg.name);
+            QDir node_modules = QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
             if (!node_modules.exists()) {
               qWarning() << node_modules.absolutePath() << "doesn't exist";
               emit processFailed(index);
@@ -439,7 +439,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
             emit processSucceeded(index);
             Helper::singleton().loadPackage(pkg.name);
           });
-  const QStringList args{"i", "--production", "--prefix", Constants::singleton().userPackagesRootPath(),
+  const QStringList args{"i", "--production", "--prefix", Constants::singleton().userPackagesRootDirPath(),
                          tarballUrl};
   npmProcess->start(Constants::singleton().npmPath(), args);
 }
@@ -509,7 +509,7 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
           return;
         }
 
-        QDir node_modules = QDir(Constants::singleton().userNodeModulesPath() + "/" + pkg.name);
+        QDir node_modules = QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
         if (node_modules.exists()) {
           qWarning() << node_modules.absolutePath() << "still exists";
           emit processFailed(index);
@@ -541,6 +541,6 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
         emit processSucceeded(index);
         emit PackageManager::singleton().packageRemoved(pkg);
       });
-  const QStringList args{"r", "--prefix", Constants::singleton().userPackagesRootPath(), pkg.name};
+  const QStringList args{"r", "--prefix", Constants::singleton().userPackagesRootDirPath(), pkg.name};
   npmProcess->start(Constants::singleton().npmPath(), args);
 }

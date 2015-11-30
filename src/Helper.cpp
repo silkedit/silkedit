@@ -413,7 +413,7 @@ QString Helper::translate(const QString& key, const QString& defaultValue) {
 
 void Helper::loadPackage(const QString& pkgName) {
   const QString& pkgDirPath =
-      Constants::singleton().userNodeModulesPath() + QDir::separator() + pkgName;
+      Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
   sendNotification("loadPackage", params);
@@ -421,7 +421,7 @@ void Helper::loadPackage(const QString& pkgName) {
 
 bool Helper::removePackage(const QString& pkgName) {
   const QString& pkgDirPath =
-      Constants::singleton().userNodeModulesPath() + QDir::separator() + pkgName;
+      Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
 

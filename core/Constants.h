@@ -29,8 +29,8 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QStringList userKeymapPaths();
   QString userConfigPath();
   QString userKeymapPath();
-  QString userPackagesRootPath();
-  QString userNodeModulesPath();
+  QString userPackagesRootDirPath();
+  Q_INVOKABLE QString userPackagesNodeModulesPath();
   Q_INVOKABLE QString userPackagesJsonPath();
   QString helperPath();
   QString npmPath();

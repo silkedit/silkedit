@@ -83,12 +83,6 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
 
 // These functions are defined here because this is used by other API.
 
-// Returns SilkEdit package directory path.
-const packageDir = () => {
-  const home = process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME']
-  return path.normalize(home + '/.silk/packages')
-}
-
 // translate
 const t = (key, defaultValue) => {
   var i, j, packageName, currentObj, fd, translationPaths;
@@ -413,8 +407,6 @@ const loadPackage = (dir) => {
         }
       }
     }
-
-    ,"packageDir": packageDir
 
     ,showInputDialog: (label, initialText, validateFunc) => {
       const dialog = new InputDialog

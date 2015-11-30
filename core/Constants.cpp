@@ -11,8 +11,6 @@ const QString socketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toStrin
 #else
 const QString socketPath = QDir::tempPath() + "/silkedit.sock";
 #endif
-
-const QString PACKAGES_NAME = "node_modules";
 }
 
 namespace core {
@@ -55,16 +53,16 @@ QString Constants::userKeymapPath() {
   return silkHomePath() + "/keymap.yml";
 }
 
-QString Constants::userPackagesRootPath() {
+QString Constants::userPackagesRootDirPath() {
   return silkHomePath() + "/packages";
 }
 
-QString Constants::userNodeModulesPath() {
-  return userPackagesRootPath() + "/" + PACKAGES_NAME;
+QString Constants::userPackagesNodeModulesPath() {
+  return userPackagesRootDirPath() + "/node_modules";
 }
 
 QString Constants::userPackagesJsonPath() {
-  return userPackagesRootPath() + "/packages.json";
+  return userPackagesRootDirPath() + "/packages.json";
 }
 
 QString Constants::helperPath() {
