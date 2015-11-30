@@ -148,7 +148,7 @@ Config::Config() : m_theme(nullptr) {}
 
 void Config::load() {
   QStringList existingConfigPaths;
-  foreach (const QString& path, Constants::configPaths()) {
+  foreach (const QString& path, Constants::singleton().configPaths()) {
     if (QFile(path).exists()) {
       existingConfigPaths.append(path);
     }
@@ -222,11 +222,11 @@ QString Config::themeName() {
 }
 
 QString Config::fontFamily() {
-  return value(FONT_FAMILY_KEY, Constants::defaultFontFamily);
+  return value(FONT_FAMILY_KEY, Constants::singleton().defaultFontFamily);
 }
 
 int Config::fontSize() {
-  return value(FONT_SIZE_KEY, Constants::defaultFontSize);
+  return value(FONT_SIZE_KEY, Constants::singleton().defaultFontSize);
 }
 
 }  // namespace core

@@ -48,14 +48,14 @@ QStringList helperArgs() {
   args << "--harmony";
   args << "--harmony_proxies";
   // first argument is main script
-  args << Constants::helperDir() + "/main.js";
+  args << Constants::singleton().helperDir() + "/main.js";
   // second argument is a socket path
-  args << Constants::helperSocketPath();
+  args << Constants::singleton().helperSocketPath();
   // third argument is locale
   args << Config::singleton().locale();
   // remaining arguments are paths to be loaded in silkedit_helper
   args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
-  args << QDir::toNativeSeparators(Constants::silkHomePath() + "/packages");
+  args << QDir::toNativeSeparators(Constants::singleton().silkHomePath() + "/packages");
   return args;
 }
 }
@@ -79,7 +79,7 @@ HelperPrivate::~HelperPrivate() {
 }
 
 void HelperPrivate::startPluginRunnerProcess() {
-  m_helperProcess->start(Constants::helperPath(), helperArgs());
+  m_helperProcess->start(Constants::singleton().helperPath(), helperArgs());
 }
 
 void HelperPrivate::init() {
@@ -90,12 +90,12 @@ void HelperPrivate::init() {
       &HelperPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   m_server = new QLocalServer(this);
-  QFile socketFile(Constants::helperSocketPath());
+  QFile socketFile(Constants::singleton().helperSocketPath());
   if (socketFile.exists()) {
     socketFile.remove();
   }
 
-  if (!m_server->listen(Constants::helperSocketPath())) {
+  if (!m_server->listen(Constants::singleton().helperSocketPath())) {
     qCritical("Unable to start the server: %s", qPrintable(m_server->errorString()));
     return;
   }
@@ -109,7 +109,7 @@ void HelperPrivate::init() {
           &HelperPrivate::readStderr);
   connect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
           &HelperPrivate::onFinished);
-  qDebug("helper: %s", qPrintable(Constants::helperPath()));
+  qDebug("helper: %s", qPrintable(Constants::singleton().helperPath()));
   qDebug() << "args:" << helperArgs();
   // Disable stdout to speed up calling external command
   //  m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
@@ -374,16 +374,14 @@ void Helper::sendCommandEvent(const QString& command, const CommandArgument& arg
 }
 
 void Helper::callExternalCommand(const QString& cmd, const CommandArgument& args) {
-  Util::stopWatch([&] {
-    std::string methodName = cmd.toUtf8().constData();
-    std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-    try {
-      sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
-                                                                  msgpack::type::BOOLEAN, -1);
-    } catch (const std::exception& e) {
-      qWarning("cmd: %s:, cause: %s", qPrintable(cmd), e.what());
-    }
-  }, cmd + " time");
+  std::string methodName = cmd.toUtf8().constData();
+  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
+  try {
+    sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
+                                                                msgpack::type::BOOLEAN, -1);
+  } catch (const std::exception& e) {
+    qWarning("cmd: %s:, cause: %s", qPrintable(cmd), e.what());
+  }
 }
 
 bool Helper::askExternalCondition(const QString& name, core::Operator op, const QString& value) {
@@ -414,14 +412,16 @@ QString Helper::translate(const QString& key, const QString& defaultValue) {
 }
 
 void Helper::loadPackage(const QString& pkgName) {
-  const QString& pkgDirPath = Constants::userNodeModulesPath() + QDir::separator() + pkgName;
+  const QString& pkgDirPath =
+      Constants::singleton().userNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
   sendNotification("loadPackage", params);
 }
 
 bool Helper::removePackage(const QString& pkgName) {
-  const QString& pkgDirPath = Constants::userNodeModulesPath() + QDir::separator() + pkgName;
+  const QString& pkgDirPath =
+      Constants::singleton().userNodeModulesPath() + QDir::separator() + pkgName;
   const std::tuple<std::string>& params =
       std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
 
@@ -544,6 +544,9 @@ void HelperPrivate::callNotifyFunc(const QString& method, const msgpack::v1::obj
   // API id is -1
   if (id == -1) {
     view = &API::singleton();
+    // Constants id is -2
+  } else if (id == -2) {
+    view = &Constants::singleton();
   } else {
     view = UniqueObject::find(id);
   }
@@ -566,6 +569,9 @@ void HelperPrivate::callRequestFunc(const QString& method,
   // API id is -1
   if (id == -1) {
     view = &API::singleton();
+    // Constants id is -2
+  } else if (id == -2) {
+    view = &Constants::singleton();
   } else {
     view = UniqueObject::find(id);
   }

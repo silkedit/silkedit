@@ -19,7 +19,7 @@ QStringList filters{QString("*%1").arg(tmLanguage), QString("*%1").arg(tmPrefere
 namespace core {
 
 void PackageManager::loadGrammers() {
-  for (const QString& path : Constants::packagesPaths()) {
+  for (const QString& path : Constants::singleton().packagesPaths()) {
     QFile packagesJson(path + "/packages.json");
     if (!packagesJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
       //    qDebug() << "Can't open" << dirName + "/packages.json";

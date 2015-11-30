@@ -533,7 +533,7 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
   d->setTabStopWidthFromSession();
 
   // Special handling for user keymap.yml
-  if (document->path() == Constants::userKeymapPath()) {
+  if (document->path() == Constants::singleton().userKeymapPath()) {
     connect(this, &TextEditView::saved, &KeymapManager::singleton(),
             &KeymapManager::loadUserKeymap);
   }

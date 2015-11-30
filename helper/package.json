@@ -6,8 +6,8 @@
   "dependencies": {
     "js-yaml": "^3.2.7",
     "silk-msgpack-rpc": "0.1.0",
-    "synchronize": "^0.9.14",
-    "harmony-reflect": "^1.4.2"
+    "harmony-reflect": "^1.4.2",
+    "deasync": "0.1.4"
   },
   "devDependencies": {},
   "author": "SilkEdit team"

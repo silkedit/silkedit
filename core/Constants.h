@@ -1,15 +1,20 @@
 ﻿#pragma once
 
 #include <QStringList>
+#include <QObject>
 
 #include "macros.h"
+#include "Singleton.h"
 
 namespace core {
 
-class Constants {
+class Constants : public QObject, public core::Singleton<Constants> {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 
  public:
+  ~Constants() = default;
+
 #ifdef Q_OS_MAC
   static const QString defaultFontFamily;
 #endif
@@ -20,29 +25,29 @@ class Constants {
 
   static const int defaultFontSize;
 
-  static QStringList configPaths();
-  static QStringList userKeymapPaths();
-  static QString userConfigPath();
-  static QString userKeymapPath();
-  static QString userPackagesRootPath();
-  static QString userNodeModulesPath();
-  static QString userPackagesJsonPath();
-  static QString helperPath();
-  static QString npmPath();
-  static QString helperSocketPath();
-  static QString translationDirPath();
-  static QString helperDir();
-  static QString silkHomePath();
-  static QString recentOpenHistoryPath();
-  static QString tabViewInformationPath();
-  static QStringList themePaths();
-  static QStringList packagesPaths();
+  QStringList configPaths();
+  QStringList userKeymapPaths();
+  QString userConfigPath();
+  QString userKeymapPath();
+  QString userPackagesRootPath();
+  QString userNodeModulesPath();
+  Q_INVOKABLE QString userPackagesJsonPath();
+  QString helperPath();
+  QString npmPath();
+  QString helperSocketPath();
+  QString translationDirPath();
+  QString helperDir();
+  QString silkHomePath();
+  QString recentOpenHistoryPath();
+  QString tabViewInformationPath();
+  QStringList themePaths();
+  QStringList packagesPaths();
 
  private:
-  Constants() = delete;
-  ~Constants() = delete;
+  friend class core::Singleton<Constants>;
+  Constants() = default;
 
-  static QStringList dataDirectoryPaths();
+  QStringList dataDirectoryPaths();
 };
 
 }  // namespace core

@@ -38,7 +38,7 @@ Theme* ThemeManager::theme(const QString& name) {
 }
 
 void ThemeManager::load() {
-  for (const QString& path : Constants::themePaths()) {
+  for (const QString& path : Constants::singleton().themePaths()) {
     load(path);
   }
 }

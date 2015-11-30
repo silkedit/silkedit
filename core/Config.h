@@ -120,7 +120,7 @@ class Config : public QObject, public Singleton<Config> {
    */
   template <typename T>
   void save(const QString& key, const T& newValue) {
-    QString configFilePath = Constants::userConfigPath();
+    QString configFilePath = Constants::singleton().userConfigPath();
 
     try {
       YAML::Node rootNode;

@@ -199,7 +199,7 @@ void KeymapManager::loadUserKeymap() {
   removeKeymap();
 
   QStringList existingKeymapPaths;
-  foreach (const QString& path, Constants::userKeymapPaths()) {
+  foreach (const QString& path, Constants::singleton().userKeymapPaths()) {
     if (QFile(path).exists()) {
       existingKeymapPaths.append(path);
     }

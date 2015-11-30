@@ -13,6 +13,7 @@ module.exports = (client, locale, conditions, eventFilters, configs, commands) =
   var ObjectProxy = require('./core/object_proxy')(client)
   var InputDialog = require('./views/input_dialog').InputDialog(ObjectProxy)
   var API = require('./core/api')(ObjectProxy)
+  var Constants = require('./core/constants')(ObjectProxy)
 
   // class TabView
   function TabView(id) {
@@ -431,5 +432,6 @@ const loadPackage = (dir) => {
       API.setFont(family, size)
     }
     ,t: t
+    ,Constants: Constants
   }
 }

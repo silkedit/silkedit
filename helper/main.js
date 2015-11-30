@@ -2,7 +2,6 @@
 
 var rpc = require('silk-msgpack-rpc');
 var fs = require('fs')
-var sync = require('synchronize')
 var path = require('path')
 var silkutil = require('./silkutil')
 var yaml = require('js-yaml')
@@ -64,7 +63,6 @@ const c = rpc.createClient(socketFile, () => {
   packageRootPaths = process.argv.slice(packagesBeginIndex)
   GLOBAL.silk = require('./silkedit')(c, locale, conditions, eventFilters, configs, commands);
 
-  sync(c, 'invoke');
   callForeachPackageDir(silk.loadPackage)
 });
 
@@ -87,9 +85,7 @@ const handler = {
     }
     const type = "command"
     if (type in eventFilters) {
-      silkutil.runInFiber(() =>{
-        eventFilters[type].forEach(fn => fn(event))
-      })
+      eventFilters[type].forEach(fn => fn(event))
     }
   }
 
@@ -99,18 +95,14 @@ const handler = {
     }
     const type = "focusChanged"
     if (type in eventFilters) {
-      silkutil.runInFiber(() => {
-        eventFilters[type].forEach(fn => fn(event))
-      })
+      eventFilters[type].forEach(fn => fn(event))
     }
   }
   
   ,"InputDialog.textValueChanged": (id, text) => {
     const dialog = require('./views/input_dialog').getInstance(id)
     if (dialog != null) {
-      silkutil.runInFiber(() => {
-        dialog.textValueChanged(text)
-      })
+      dialog.textValueChanged(text)
     }
   }
   ,"loadPackage": (path) => {
@@ -157,7 +149,6 @@ const handler = {
   
   ,"runCommand": (cmd, args, response) => {
     if (cmd in commands) {
-      sync.fiber(() => {
         try {
           commands[cmd](args)
           response.result(true)
@@ -165,7 +156,6 @@ const handler = {
           console.error(e)
           response.result(false)
         }
-      })
     } else {
       response.result(false)
     }
@@ -173,14 +163,12 @@ const handler = {
 
   ,"askCondition": (name, operator, value, response) => {
     if (name in conditions) {
-      sync.fiber(() => {
         try {
           response.result(conditions[name](operator, value))
         } catch (err) {
           console.error(err)
           response.result(false)
         }
-      })
     } else {
       response.result(false)
     }
@@ -188,14 +176,12 @@ const handler = {
   ,"eventFilter": (type, event, response) => {
     // console.log('eventFilter. type: %s', type)
     if (type in eventFilters) {
-      sync.fiber(() => {
         try {
           response.result(eventFilters[type].some(fn => { return fn(event)}))
         } catch (err) {
           console.error(err)
           response.result(false)
         }
-      })
     } else {
       response.result(false)
     }
@@ -212,14 +198,12 @@ const handler = {
       ,"shiftKey": shiftKey
     }
     if (type in eventFilters) {
-      sync.fiber(() => {
         try {
           response.result(eventFilters[type].some((fn) => { return fn(event)}))
         } catch (err) {
           console.error(err)
           response.result(false)
         }
-      })
     } else {
       response.result(false)
     }
@@ -231,7 +215,6 @@ const handler = {
     }
     const type = "runCommand"
     if (type in eventFilters) {
-      sync.fiber(() => {
         try {
           const result = eventFilters[type].some(fn => { return fn(event)})
           response.result([result, event.name, event.args])
@@ -239,7 +222,6 @@ const handler = {
           console.error(err)
           response.result([false, event.name, event.args])
         }
-      })
     } else {
       response.result([false, event.name, event.args])
     }

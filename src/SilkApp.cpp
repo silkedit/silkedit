@@ -112,7 +112,7 @@ void SilkApp::setupTranslator(const QString& locale) {
 
   m_translator = new QTranslator(this);
   // Load silkedit_<locale>.qm to translate SilkEdit menu
-  bool result = m_translator->load("silkedit_" + locale, Constants::translationDirPath());
+  bool result = m_translator->load("silkedit_" + locale, Constants::singleton().translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("silkedit_");
   }
@@ -126,7 +126,7 @@ void SilkApp::setupTranslator(const QString& locale) {
   }
 
   m_qtTranslator = new QTranslator(this);
-  result = m_qtTranslator->load("qt_" + locale, Constants::translationDirPath());
+  result = m_qtTranslator->load("qt_" + locale, Constants::singleton().translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("qt_");
   }
