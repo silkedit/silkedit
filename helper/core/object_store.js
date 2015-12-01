@@ -14,4 +14,5 @@ module.exports = {
       return null
     }
   }
+  ,'delete': (id) => { delete objects[id] }
 }

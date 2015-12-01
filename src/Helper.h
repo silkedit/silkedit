@@ -21,6 +21,7 @@
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
 #include "core/Icondition.h"
+#include "core/quuid_adapter.h"
 #include "qvariant_adapter.h"
 
 class HelperPrivate;
@@ -84,6 +85,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   bool removePackage(const QString& pkgName);
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
   void reloadKeymaps();
+  void notifyObjectRemoved(const QUuid& id);
 
   void sendNotification(const std::string& method) {
     if (m_isStopped) {

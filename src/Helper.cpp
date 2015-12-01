@@ -8,9 +8,11 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QObject>
+#include <QApplication>
+#include <QMetaObject>
+#include <QMetaMethod>
 
 #include "Helper_p.h"
-#include "SilkApp.h"
 #include "API.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
@@ -19,12 +21,14 @@
 #include "core/Config.h"
 #include "core/Icondition.h"
 #include "core/Util.h"
+#include "core/ObjectStore.h"
+#include "core/ArgumentArray.h"
 
 using core::Constants;
 using core::Config;
 using core::Util;
 using core::ArgumentArray;
-using core::UniqueObject;
+using core::ObjectStore;
 
 namespace {
 
@@ -86,8 +90,10 @@ void HelperPrivate::startPluginRunnerProcess() {
 }
 
 void HelperPrivate::init() {
-  UniqueObject::registerObj(API_UUID, &API::singleton());
-  UniqueObject::registerObj(Constants_UUID, &Constants::singleton());
+  connect(&ObjectStore::singleton(), &ObjectStore::objectRemoved, q, &Helper::notifyObjectRemoved);
+
+  ObjectStore::singleton().insert(API_UUID, &API::singleton());
+  ObjectStore::singleton().insert(Constants_UUID, &Constants::singleton());
 
   Q_ASSERT(!m_helperProcess);
 
@@ -462,6 +468,12 @@ void Helper::reloadKeymaps() {
   sendNotification("reloadKeymaps");
 }
 
+void Helper::notifyObjectRemoved(const QUuid &id)
+{
+  std::tuple<QUuid> params = std::make_tuple(id);
+  sendNotification("objectRemoved", params);
+}
+
 Helper::Helper() : d(new HelperPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
 
 void HelperPrivate::cacheMethods(const QString& className, const QMetaObject* metaObj) {
@@ -546,7 +558,7 @@ void HelperPrivate::callNotifyFunc(const QString& method, const msgpack::v1::obj
   obj.convert(&params);
   QUuid id = params.id();
 
-  QObject* view = UniqueObject::find(id);
+  QObject* view = ObjectStore::singleton().find(id);
 
   if (view) {
     invokeMethod(view, method, params.args());
@@ -562,7 +574,7 @@ void HelperPrivate::callRequestFunc(const QString& method,
   obj.convert(&params);
   QUuid id = params.id();
 
-  QObject* view = UniqueObject::find(id);
+  QObject* view = ObjectStore::singleton().find(id);
 
   if (view) {
     const QVariant& returnValue = invokeMethod(view, method, params.args());

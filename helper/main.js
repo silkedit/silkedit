@@ -3,7 +3,7 @@
 var rpc = require('silk-msgpack-rpc');
 var fs = require('fs')
 var path = require('path')
-var silkutil = require('./silkutil')
+var objectStore = require('./core/object_store')
 var yaml = require('js-yaml')
 var https = require('https')
 
@@ -143,6 +143,9 @@ const handler = {
     
     callForeachPackageDir(loadKeymap)
   }
+  ,"objectRemoved": (id) => {
+    objectStore.delete(id)
+  }
 
 
   // request handlers
@@ -265,9 +268,7 @@ const handler = {
 
             // call module's deactivate method
             if (module.deactivate) {
-              silkutil.runInFiber(() => {
-                module.deactivate()
-              })
+              module.deactivate()
             }
             response.result(true)
           } catch(e) {
