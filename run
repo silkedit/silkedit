@@ -132,13 +132,13 @@ resolve() {
       fi
 
       # npm install for plugin runner
-      cd helper
-      PATH=$(pwd)/bin:$PATH
-      bin/npm install
-      cd ..
+      cd helper/node_modules/silkedit
+      PATH=$(pwd)/../../bin:$PATH
+      ../../bin/npm install
+      cd ../../..
 
-      # npm install for silkedit package
-      cd packages/node_modules/silkedit
+      # npm install for default package
+      cd packages/node_modules/default
       ../../../helper/bin/npm install
       cd ../../..
     else
@@ -180,12 +180,12 @@ resolve() {
         fi
 
         # npm install for plugin runner
-        cd helper
-        node bin/node_modules/npm/bin/npm-cli.js install
-        cd ..
+        cd helper/node_modules/silkedit
+        node ../../bin/node_modules/npm/bin/npm-cli.js install
+        cd ../../..
 
-        # npm install for silkedit package
-        cd packages/node_modules/silkedit
+        # npm install for default package
+        cd packages/node_modules/default
         node ../../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
         cd ../../..
 

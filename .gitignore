@@ -10,7 +10,8 @@ CMakeLists.txt.user
 /helper/bin
 /helper/lib
 /helper/node_modules
+/helper/node_modules/silkedit/node_modules/
 /helper/nodejs
 /yaml-cpp-*
 /packages/node_modules/vim
-/packages/node_modules/silkedit/node_modules
+/packages/node_modules/default/node_modules

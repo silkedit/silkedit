@@ -1,6 +1,6 @@
 [
 {
-  "name": "silkedit",
+  "name": "default",
   "version": "0.6.0",
   "description": "SilkEdit default package",
   "main": "index.js",

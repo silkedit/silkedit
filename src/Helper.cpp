@@ -86,6 +86,9 @@ HelperPrivate::~HelperPrivate() {
 }
 
 void HelperPrivate::startPluginRunnerProcess() {
+  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+  env.insert("NODE_PATH", QApplication::applicationDirPath() + "/helper/node_modules");
+  m_helperProcess->setProcessEnvironment(env);
   m_helperProcess->start(Constants::singleton().helperPath(), helperArgs());
 }
 
