@@ -26,9 +26,10 @@ using core::ConditionManager;
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
+#ifdef QT_NO_DEBUG
   // crash dumps output location setting.
   Breakpad::CrashHandler::instance()->Init(QDir::tempPath());
-
+#endif
   SilkApp app(argv, args);
 
   ConditionManager::init();
