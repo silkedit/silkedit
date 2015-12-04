@@ -1,0 +1,11 @@
+--- ./src/processor/symbolic_constants_win.cc.origin	2015-11-15 17:42:11.063765800 +0900
++++ ./src/processor/symbolic_constants_win.cc	2015-11-16 18:31:09.303608700 +0900
+@@ -6406,7 +6406,7 @@
+       break;
+     default: {
+       char reason_string[11];
+-      std::snprintf(reason_string, sizeof(reason_string), "0x%08x", ntstatus);
++      ::snprintf(reason_string, sizeof(reason_string), "0x%08x", ntstatus);
+       reason = reason_string;
+       break;
+     }

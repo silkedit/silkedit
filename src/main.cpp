@@ -17,6 +17,7 @@
 #include "MenuBar.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
+#include "breakpad/crash_handler.h"
 
 using core::PackageManager;
 using core::Config;
@@ -25,7 +26,10 @@ using core::ConditionManager;
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
-
+#ifdef QT_NO_DEBUG
+  // crash dumps output location setting.
+  Breakpad::CrashHandler::instance()->Init(QDir::tempPath());
+#endif
   SilkApp app(argv, args);
 
   ConditionManager::init();
