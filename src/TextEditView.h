@@ -14,6 +14,7 @@
 #include "core/ICloneable.h"
 #include "core/Document.h"
 #include "core/UniqueObject.h"
+#include "core/BOM.h"
 
 class QPaintEvent;
 class QResizeEvent;
@@ -26,6 +27,7 @@ namespace core {
 struct Language;
 class Encoding;
 class Theme;
+class BOM;
 }
 
 class TextEditView : public QPlainTextEdit,
@@ -45,6 +47,8 @@ class TextEditView : public QPlainTextEdit,
   boost::optional<core::Encoding> encoding();
   boost::optional<QString> lineSeparator();
   void setLineSeparator(const QString& lineSeparator);
+  boost::optional<core::BOM> BOM();
+  void setBOM(const core::BOM& bom);
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
@@ -85,7 +89,7 @@ class TextEditView : public QPlainTextEdit,
   void insertNewLineWithIndent();
   void clearSelection();
 
-signals:
+ signals:
   void destroying(const QString& path);
   void pathUpdated(const QString& path);
   void saved();
@@ -93,6 +97,7 @@ signals:
   // emitted when underlying document's encoding is changed.
   void encodingChanged(const core::Encoding& encoding);
   void lineSeparatorChanged(const QString& separator);
+  void bomChanged(const core::BOM& bom);
 
  protected:
   friend struct core::UniqueObject<TextEditView>;
@@ -129,5 +134,5 @@ signals:
   Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
 
  private slots:
-  void setTheme(core::Theme *theme);
+  void setTheme(core::Theme* theme);
 };

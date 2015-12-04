@@ -39,6 +39,7 @@ bool DocumentManager::save(Document* doc) {
   if (outFile.open(QIODevice::WriteOnly)) {
     QTextStream out(&outFile);
     out.setCodec(doc->encoding().codec());
+    out.setGenerateByteOrderMark(doc->bom().bomSwitch());
     for (int i = 0; i < doc->blockCount(); i++) {
       if (i < doc->blockCount() - 1) {
         out << doc->findBlockByNumber(i).text() << doc->lineSeparator() << flush;
