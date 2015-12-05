@@ -3,7 +3,12 @@
 #include "KeymapManager.h"
 #include "core/PackageManager.h"
 #include "core/Package.h"
+#include "core/Config.h"
+#include "core/Theme.h"
 
+using core::Config;
+using core::Theme;
+using core::ColorSettings;
 using core::PackageManager;
 using core::Package;
 
@@ -56,3 +61,23 @@ void CommandAction::updateVisibilityAndShortcut()
   PackageAction::updateVisibilityAndShortcut();
   updateShortcut();
 }
+
+CommandAction::CommandAction(const QString& id,
+                             const QString& cmdName,
+                             const QMap<QString, QString>& icons,
+                             QObject* parent,
+                             const QString& pkgName)
+    : PackageAction(id, pkgName, parent), m_icons(icons), m_cmdName(cmdName) {
+  init(id, cmdName);
+  setTheme();
+  connect(&Config::singleton(), &Config::themeChanged, this, &CommandAction::setTheme);
+}
+
+void CommandAction::setTheme() {
+  if(Config::singleton().theme()->isDarkTheme()){
+    setIcon(QIcon(m_icons.value("light", NULL)));
+  } else {
+    setIcon(QIcon(m_icons.value("dark", NULL)));
+  }
+}
+
