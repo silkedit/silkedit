@@ -59,7 +59,9 @@ void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
   }
 }
 
-QColor changeColorBrightness(QColor const color, int value = 10, int threshold = brightnessThresholdGrey) {
+QColor changeColorBrightness(QColor const color,
+                             int value = 10,
+                             int threshold = brightnessThresholdGrey) {
   QColor newColor;
 
   // 0 is black; 255 is as far from black as possible.
@@ -164,7 +166,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   // main editor settings (TextEditView)
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
+    foreach (const QVariant& var, settingList) {
+      // This is the base color In the following process,
+      theme->scopeSettings.append(toScopeSetting(var));
+    }
   }
 
   // gutter settings (LineNumberArea)
@@ -237,13 +242,11 @@ ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
 
     if (!baseColorSettings->isEmpty()) {
       if (baseColorSettings->contains("background")) {
-        backgroundColor =
-            changeColorBrightness(baseColorSettings->value("background").name());
+        backgroundColor = changeColorBrightness(baseColorSettings->value("background").name());
       }
 
       if (baseColorSettings->contains("foreground")) {
-        foregroundColor =
-            changeColorBrightness(baseColorSettings->value("foreground").name());
+        foregroundColor = changeColorBrightness(baseColorSettings->value("foreground").name());
       }
     }
   }
@@ -264,8 +267,7 @@ ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
           changeColorBrightnessDarker(baseColorSettings->value("background").name(), 20);
     }
     if (baseColorSettings->contains("foreground")) {
-      foregroundColor =
-          changeColorBrightness(baseColorSettings->value("foreground").name());
+      foregroundColor = changeColorBrightness(baseColorSettings->value("foreground").name());
     }
   }
 
@@ -291,13 +293,11 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
         selectedColor = baseColorSettings->value("background").name();
         selectedBorderColor =
             getSelectedTabBorderColor(baseColorSettings->value("background").name());
-        backgroundColor =
-            changeColorBrightness(baseColorSettings->value("background").name());
+        backgroundColor = changeColorBrightness(baseColorSettings->value("background").name());
       }
 
       if (baseColorSettings->contains("foreground")) {
-        foregroundColor =
-            changeColorBrightness(baseColorSettings->value("foreground").name());
+        foregroundColor = changeColorBrightness(baseColorSettings->value("foreground").name());
       }
     }
   }
@@ -324,7 +324,7 @@ ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
       foregroundColor = getAppropriateGrey(baseColorSettings->value("background").name());
     }
   }
-  return defaultColors = { {"background", backgroundColor}, {"foreground", foregroundColor} };
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
 }
 
 ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
