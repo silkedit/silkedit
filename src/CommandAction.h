@@ -13,16 +13,25 @@ class CommandAction : public core::PackageAction {
                 const QString& cmdName,
                 QObject* parent = nullptr,
                 const QString& pkgName = "");
+
   CommandAction(const QString& id,
                 const QString& cmdName,
                 const QIcon& icon,
                 QObject* parent = nullptr,
                 const QString& pkgName = "");
+
+  CommandAction(const QString& id,
+                const QString& cmdName,
+                const QMap<QString, QString>& icons,
+                QObject* parent = nullptr,
+                const QString& pkgName = "");
+
   ~CommandAction() = default;
   DEFAULT_COPY_AND_MOVE(CommandAction)
 
  private:
+  QMap<QString, QString> m_icons;
   QString m_cmdName;
-
+  void setTheme();
   void init(const QString& id, const QString& cmdName);
 };

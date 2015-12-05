@@ -24,6 +24,16 @@ using core::ConditionExpression;
 using core::AndConditionExpression;
 
 namespace {
+
+QString getAbsolutePath(const std::string& ymlPath, const std::string& path) {
+  QString targetPath = QString::fromUtf8(path.c_str());
+  if (!targetPath.startsWith('/')) {
+    QString basePath = QString::fromUtf8(ymlPath.c_str());
+    targetPath = QFileInfo(basePath).dir().absoluteFilePath(targetPath);
+  }
+  return targetPath;
+}
+
 QAction* findAction(QList<QAction*> actions, const QString& id) {
   if (id.isEmpty())
     return nullptr;
@@ -317,11 +327,21 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       QAction* action = nullptr;
       if (commandNode.IsDefined() && iconNode.IsDefined()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
-        QString iconPath = QString::fromUtf8(iconNode.as<std::string>().c_str());
-        if (!iconPath.startsWith('/')) {
-          iconPath = QFileInfo(QString::fromUtf8(ymlPath.c_str())).dir().absoluteFilePath(iconPath);
+
+        if (iconNode.Type() == YAML::NodeType::Scalar) {
+            QString iconPath = getAbsolutePath(ymlPath, iconNode.as<std::string>());
+            action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
+
+        } else if (iconNode.Type() == YAML::NodeType::Map) {
+          QMap<QString, QString> icons;
+          for (auto it = iconNode.begin(); it != iconNode.end(); ++it) {
+            YAML::Node key = it->first;
+            YAML::Node value = it->second;
+            icons.insert(QString::fromUtf8(key.as<std::string>().c_str()), getAbsolutePath(ymlPath, value.as<std::string>()));
+          }
+          action = new CommandAction(id, command, icons, nullptr, pkgName);
         }
-        action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
+
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = PluginManager::singleton().translate(
