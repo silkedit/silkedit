@@ -205,6 +205,28 @@ Theme* Theme::loadTheme(const QString& filename) {
   return theme;
 }
 
+bool Theme::isDarkTheme() {
+  bool ret = false;
+  if (scopeSettings.isEmpty()) {
+    return ret;
+  }
+
+  ColorSettings* baseColorSettings = scopeSettings.first()->colorSettings.get();
+  if (baseColorSettings->isEmpty()) {
+    return ret;
+  }
+
+  if (!baseColorSettings->contains("background")) {
+    return ret;
+  }
+
+  QColor backgroundColor = baseColorSettings->value("background").name();
+  if (backgroundColor.value() < brightnessThresholdGrey) {
+    ret = true;
+  }
+  return ret;
+}
+
 ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
   ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::gray);
