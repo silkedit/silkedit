@@ -1,4 +1,4 @@
-include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/core)
+﻿include_directories(SYSTEM ${CMAKE_SOURCE_DIR}/core)
 
 file(COPY "testdata" DESTINATION .)
 if(MSVC)
@@ -21,3 +21,4 @@ add_unittest(RegionTest)
 add_unittest(TextEditViewLogicTest)
 add_unittest(LineSeparatorTest)
 add_unittest(PackageTest)
+add_unittest(BOMTest)

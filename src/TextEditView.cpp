@@ -19,6 +19,7 @@
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
 #include "core/Constants.h"
+#include "core/BOM.h"
 
 using core::Document;
 using core::Encoding;
@@ -31,6 +32,7 @@ using core::Theme;
 using core::ColorSettings;
 using core::Regexp;
 using core::Constants;
+using core::BOM;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -295,6 +297,10 @@ void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator)
   emit q_ptr->lineSeparatorChanged(lineSeparator);
 }
 
+void TextEditViewPrivate::emitBOMChanged(const core::BOM& bom) {
+  emit q_ptr->bomChanged(bom);
+}
+
 void TextEditViewPrivate::setTabStopWidthFromSession() {
   qreal width = QFontMetricsF(Config::singleton().font()).width(QLatin1Char(' '));
   if (q_ptr->document()) {
@@ -316,6 +322,8 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
                         &TextEditView::encodingChanged);
     QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
                         &TextEditView::lineSeparatorChanged);
+    QObject::disconnect(m_document.get(), &Document::bomChanged, q,
+                        &TextEditView::bomChanged);
     QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
                         SLOT(outdentCurrentLineIfNecessary()));
   }
@@ -326,6 +334,8 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
   QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
   QObject::connect(m_document.get(), &Document::lineSeparatorChanged, q,
                    &TextEditView::lineSeparatorChanged);
+  QObject::connect(m_document.get(), &Document::bomChanged, q,
+                   &TextEditView::bomChanged);
   QObject::connect(m_document.get(), SIGNAL(contentsChanged()), q,
                    SLOT(outdentCurrentLineIfNecessary()));
 }
@@ -503,6 +513,19 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
     emit lineSeparatorChanged(*newSeparator);
   }
 
+  // Compare previous and current BOM
+  boost::optional<core::BOM> prevBOM = boost::none;
+  boost::optional<core::BOM> newBOM = boost::none;
+  if (d_ptr->m_document && document) {
+    prevBOM = d_ptr->m_document->bom();
+  }
+  if (document) {
+    newBOM = document->bom();
+  }
+  if (prevBOM != newBOM && newBOM) {
+    emit bomChanged(*newBOM);
+  }
+
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
   d->setTabStopWidthFromSession();
@@ -544,6 +567,19 @@ void TextEditView::setLineSeparator(const QString& lineSeparator) {
 void TextEditView::setLanguage(const QString& scopeName) {
   if (d_ptr->m_document) {
     d_ptr->m_document->setLanguage(scopeName);
+  }
+}
+
+boost::optional<core::BOM> TextEditView::BOM() {
+  if (d_ptr->m_document) {
+    return d_ptr->m_document->bom();
+  }
+  return boost::none;
+}
+
+void TextEditView::setBOM(const core::BOM& bom) {
+  if (d_ptr->m_document) {
+    d_ptr->m_document->setBOM(bom);
   }
 }
 

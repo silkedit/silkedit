@@ -45,6 +45,7 @@ class TextEditViewPrivate {
   void emitLanguageChanged(const QString& scope);
   void emitEncodingChanged(const core::Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);
+  void emitBOMChanged(const core::BOM& bom);
   void setTabStopWidthFromSession();
   void setupConnections(std::shared_ptr<core::Document> document);
 };

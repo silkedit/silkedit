@@ -5,6 +5,7 @@
 
 #include "macros.h"
 #include "Encoding.h"
+#include "BOM.h"
 
 namespace core {
 
@@ -43,6 +44,9 @@ class Document : public QTextDocument {
 
   QString lineSeparator() { return m_lineSeparator; }
   void setLineSeparator(const QString& lineSeparator);
+
+  BOM bom() { return m_bom; }
+  void setBOM(const BOM& bom);
 
   QTextCursor find(const QString& subString,
                    int from = 0,
@@ -83,18 +87,21 @@ class Document : public QTextDocument {
   void languageChanged(const QString& scopeName);
   void encodingChanged(const Encoding& encoding);
   void lineSeparatorChanged(const QString& lineSeparator);
+  void bomChanged(const BOM& bom);
 
  private:
   QString m_path;
   std::unique_ptr<Language> m_lang;
   Encoding m_encoding;
   QString m_lineSeparator;
+  BOM m_bom;
   SyntaxHighlighter* m_syntaxHighlighter;
 
   Document(const QString& path,
            const QString& text,
            const Encoding& encoding,
-           const QString& separator);
+           const QString& separator,
+           const BOM& bom);
   Document();
 
   void setupLayout();
