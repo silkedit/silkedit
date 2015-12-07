@@ -69,7 +69,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
-  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
 
   int size = recentOpenHistory.beginReadArray(PREFIX);
   for (int i = 0; i < size; i++) {
@@ -96,7 +96,7 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
-  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
   
   recentOpenHistory.clear();
 
