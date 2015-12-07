@@ -32,7 +32,7 @@ const BOM BOM::guessBOM(const QByteArray& array) {
 }
 
 const BOM BOM::defaultBOM() {
-  return getBOM(BOMSwitch::On);
+  return getBOM(BOMSwitch::Off);
 }
 
 const boost::optional<BOM> BOM::bomForName(const QString& name) {

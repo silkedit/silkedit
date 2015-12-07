@@ -266,24 +266,24 @@ QString Document::scopeTree() const {
 }
 
 void Document::reload() {
-  if (const boost::optional<std::tuple<QString, Encoding, QString, BOM>> textAndEncAndSeparator =
+  if (const boost::optional<std::tuple<QString, Encoding, QString, BOM>> textAndEncAndSeparatorAndBOM =
           load(m_path)) {
-    setPlainText(std::get<0>(*textAndEncAndSeparator));
-    setEncoding(std::get<1>(*textAndEncAndSeparator));
-    setLineSeparator(std::get<2>(*textAndEncAndSeparator));
-    setBOM(std::get<3>(*textAndEncAndSeparator));
+    setPlainText(std::get<0>(*textAndEncAndSeparatorAndBOM));
+    setEncoding(std::get<1>(*textAndEncAndSeparatorAndBOM));
+    setLineSeparator(std::get<2>(*textAndEncAndSeparatorAndBOM));
+    setBOM(std::get<3>(*textAndEncAndSeparatorAndBOM));
     setModified(false);
     emit modificationChanged(false);
   }
 }
 
 void Document::reload(const Encoding& encoding) {
-  if (const boost::optional<std::tuple<QString, QString, BOM>> textAndSeparator =
+  if (const boost::optional<std::tuple<QString, QString, BOM>> textAndSeparatorAndBOM =
           load(m_path, encoding)) {
-    setPlainText(std::get<0>(*textAndSeparator));
+    setPlainText(std::get<0>(*textAndSeparatorAndBOM));
     setEncoding(encoding);
-    setLineSeparator(std::get<1>(*textAndSeparator));
-    setBOM(std::get<2>(*textAndSeparator));
+    setLineSeparator(std::get<1>(*textAndSeparatorAndBOM));
+    setBOM(std::get<2>(*textAndSeparatorAndBOM));
     setModified(false);
     emit modificationChanged(false);
   }
