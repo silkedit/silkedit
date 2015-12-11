@@ -16,10 +16,13 @@
      <x>20</x>
      <y>20</y>
      <width>621</width>
-     <height>81</height>
+     <height>85</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="layout">
+    <property name="topMargin">
+     <number>0</number>
+    </property>
     <item row="0" column="0">
      <widget class="LineEdit" name="lineEditForFind">
       <property name="placeholderText">
@@ -107,16 +110,6 @@
        </widget>
       </item>
       <item>
-       <widget class="CheckBox" name="preserveCaseChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="CheckBox" name="inSelectionChk">
         <property name="focusPolicy">
          <enum>Qt::NoFocus</enum>
@@ -141,6 +134,16 @@
        <widget class="QPushButton" name="replaceAllButton">
         <property name="text">
          <string>Replace All</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="CheckBox" name="preserveCaseChk">
+        <property name="focusPolicy">
+         <enum>Qt::NoFocus</enum>
+        </property>
+        <property name="text">
+         <string/>
         </property>
        </widget>
       </item>
