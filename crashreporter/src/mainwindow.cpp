@@ -1,30 +1,44 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "HttpSendDump.h"
 #include <qdebug.h>
 #include <qstring.h>
+#include <qmessagebox.h>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
+  Qt::WindowFlags flags = Qt::Window
+                        | Qt::MSWindowsFixedSizeDialogHint;
+                  flags &= ~Qt::WindowMaximizeButtonHint;
+  setWindowFlags(flags);
+
   ui->setupUi(this);
 
-  QString fileName = "";
   if(qApp->arguments().count() >= 2) {
     fileName = qApp->arguments().at(1);
   }
-  showDump(fileName);
 }
 
 MainWindow::~MainWindow() {
   delete ui;
 }
 
-void MainWindow::showDump(const QString& fileName) {
+void MainWindow::on_pushButton_send_clicked() {
+  if(fileName.isEmpty()) {
+    qDebug() << "FileName empty";
+    return;
+  }
 
-  QString msg = tr("Silkedit crashed.") + "\n" + fileName;
+  comment = ui->plainTextEdit->toPlainText();
 
-  QFont f;
-  f.setPointSize(12);
-  ui->label->setFont(f);
+  CrashReport::HttpSendDump sender(fileName,comment,CRASH_APP_VERSION);
+  QString ret = sender.sendDump();
 
-  ui->label->setText(msg);
+  QMessageBox msgBox(this);
+  msgBox.setText(ret);
+  msgBox.exec();
+}
+
+void MainWindow::on_pushButton_exit_clicked() {
+  qApp->quit();
 }

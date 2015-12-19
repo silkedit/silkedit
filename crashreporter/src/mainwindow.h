@@ -1,5 +1,13 @@
 ﻿#pragma once
 #include <QMainWindow>
+#include <QString>
+
+// Version information is supplied from the build command line.
+#ifndef CRASH_APP_VERSION
+  // Version information from version.h
+  #include "../src/version.h"
+  #define CRASH_APP_VERSION VERSION
+#endif
 
 namespace Ui {
 class MainWindow;
@@ -12,8 +20,12 @@ class MainWindow : public QMainWindow {
   explicit MainWindow(QWidget* parent = 0);
   ~MainWindow();
 
+ private slots:
+  void on_pushButton_send_clicked();
+  void on_pushButton_exit_clicked();
+
  private:
   Ui::MainWindow* ui;
-
-  void showDump(const QString& fileName);
+  QString fileName;
+  QString comment;
 };

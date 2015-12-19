@@ -449,6 +449,20 @@ localize() {
 	lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
 
+send_symbol() {
+    if [ ! -d build ]; then
+      build
+    fi
+
+    version=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+
+    if [ $OS == 'Mac' ]; then
+      echo 'Not support OSX'
+    else
+      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe 'http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=Silkedit&appVer='$version
+    fi
+}
+
 # -e: stops if any command returns non zero value
 set -e
 
@@ -499,6 +513,10 @@ case "$1" in
         make_installer
         echo
         ;;
+    send_symbol)
+        send_symbol
+        echo
+        ;;
     *)
 
         cat << EOF
@@ -513,6 +531,7 @@ resolve        resolve dependency (-submodule: update submodules)
 test           run tests
 set_version    set version number
 set_build      set build number
+send_symbol    send application symbol to server
 EOF
 
         exit 1
