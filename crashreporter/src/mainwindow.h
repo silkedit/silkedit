@@ -4,9 +4,9 @@
 
 // Version information is supplied from the build command line.
 #ifndef CRASH_APP_VERSION
-  // Version information from version.h
-  #include "../src/version.h"
-  #define CRASH_APP_VERSION VERSION
+// Version information from version.h
+#include "../src/version.h"
+#define CRASH_APP_VERSION VERSION
 #endif
 
 namespace Ui {

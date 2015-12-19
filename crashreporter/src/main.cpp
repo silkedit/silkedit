@@ -11,8 +11,8 @@ int main(int argc, char* argv[]) {
 #ifdef Q_OS_MAC
   QString path = QCoreApplication::applicationDirPath() + "/../Resources/translations";
   QDir dir(path);
-  if( !dir.exists()) {
-      path = QApplication::applicationDirPath() + "/../Resources/translations";
+  if (!dir.exists()) {
+    path = QApplication::applicationDirPath() + "/../Resources/translations";
   }
 #elif defined Q_OS_WIN
   QString path = QApplication::applicationDirPath();
@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
 #endif
   QTranslator trans;
   QString file = "crashreporter_" + QLocale::system().name();
-  bool b = trans.load(file,path);
-  if(!b) {
-      qDebug() << "No translation file:" << path << "/" << file;
+  bool b = trans.load(file, path);
+  if (!b) {
+    qDebug() << "No translation file:" << path << "/" << file;
   }
   app.installTranslator(&trans);
 

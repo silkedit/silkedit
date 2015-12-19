@@ -7,14 +7,13 @@
 #include <qmessagebox.h>
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
-  Qt::WindowFlags flags = Qt::Window
-                        | Qt::MSWindowsFixedSizeDialogHint;
-                  flags &= ~Qt::WindowMaximizeButtonHint;
+  Qt::WindowFlags flags = Qt::Window | Qt::MSWindowsFixedSizeDialogHint;
+  flags &= ~Qt::WindowMaximizeButtonHint;
   setWindowFlags(flags);
 
   ui->setupUi(this);
 
-  if(qApp->arguments().count() >= 2) {
+  if (qApp->arguments().count() >= 2) {
     fileName = qApp->arguments().at(1);
   }
 }
@@ -24,14 +23,14 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::on_pushButton_send_clicked() {
-  if(fileName.isEmpty()) {
+  if (fileName.isEmpty()) {
     qDebug() << "FileName empty";
     return;
   }
 
   comment = ui->plainTextEdit->toPlainText();
 
-  CrashReport::HttpSendDump sender(fileName,comment,CRASH_APP_VERSION);
+  CrashReport::HttpSendDump sender(fileName, comment, CRASH_APP_VERSION);
   QString ret = sender.sendDump();
 
   QMessageBox msgBox(this);
