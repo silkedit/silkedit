@@ -112,6 +112,16 @@ resolve() {
         cd ..
       fi
 
+      # breakpad
+      if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
+        echo 'Building Breakpad client ...'
+        
+        cd breakpad
+        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Debug
+        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
+        cd ..
+      fi
+
       # node
       if [ ! -d plugin_runner/bin ]; then
         node=node-v0.12.0-darwin-x64
@@ -206,6 +216,60 @@ resolve() {
             cp onig.lib onig.dll ../lib
             cd ..
         fi
+
+		#breakpad
+		if [ ! -f lib/breakpad/Release/common.lib ]; then
+			echo 'Building Breakpad client ...'
+
+			cd breakpad
+			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
+			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
+
+			export GYP_MSVS_VERSION=2013
+
+			gyp --no-circular-check ./src/client/windows/breakpad_client.gyp
+			
+			"/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/devenv.exe" ./src/client/windows/breakpad_client.sln //upgrade
+			
+			echo 'Breakpad patch'
+			# configurate compile options
+			patch -p1 --binary -N < ../crashreporter/patch/common.patch
+			patch -p1 --binary -N < ../crashreporter/patch/exception_handler.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_report_sender.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_client.patch
+			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_server.patch
+
+			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
+            mkdir -p ../lib/breakpad/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
+			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
+			cp ./src/client/windows/handler/Debug/lib/exception_handler.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
+			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_client.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
+			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_server.lib ./src/client/windows/Debug
+			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
+			cp ./src/client/windows/sender/Debug/lib/crash_report_sender.lib ./src/client/windows/Debug
+
+            cp ./src/client/windows/Debug/common.lib ./src/client/windows/Debug/exception_handler.lib ./src/client/windows/Debug/crash_generation_client.lib ./src/client/windows/Debug/crash_generation_server.lib ./src/client/windows/Debug/crash_report_sender.lib ../lib/breakpad/Debug/
+
+            mkdir -p ../lib/breakpad/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
+			cp ./src/client/windows/Release/lib/common.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
+			cp ./src/client/windows/handler/Release/lib/exception_handler.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
+			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_client.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
+			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_server.lib ./src/client/windows/Release
+			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
+			cp ./src/client/windows/sender/Release/lib/crash_report_sender.lib ./src/client/windows/Release
+
+            cp ./src/client/windows/Release/common.lib ./src/client/windows/Release/exception_handler.lib ./src/client/windows/Release/crash_generation_client.lib ./src/client/windows/Release/crash_generation_server.lib ./src/client/windows/Release/crash_report_sender.lib ../lib/breakpad/Release/
+
+			cd ..
+		fi
     fi
 }
 
@@ -222,6 +286,8 @@ build() {
 
 
     if [ $OS == 'Mac' ]; then
+
+
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
         else
@@ -229,12 +295,22 @@ build() {
         fi
 
         ninja
+        
+		# crashreporter
+        cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
+        cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else
+
+
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
         fi
+
+		# crashreporter
+        cp crashreporter/crashreporter.exe .
+        cp crashreporter/crashreporter_*.qm .
     fi
 
     cd ..
@@ -273,6 +349,8 @@ make_installer() {
         # Can't use mv because mv fails when Release/packages already exists
         cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
         rm -rf silkedit.exe onig.dll packages plugin_runner
+		#crashreporter
+        cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
 
         windeployqt --release --no-compiler-runtime silkedit.exe
@@ -367,6 +445,8 @@ set_build() {
 
 localize() {
     lupdate src core -ts translations/silkedit_ja.ts
+	#CrashReporter
+	lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
 
 # -e: stops if any command returns non zero value

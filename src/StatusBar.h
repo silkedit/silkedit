@@ -9,11 +9,13 @@ class TextEditView;
 class LanguageComboBox;
 class EncodingComboBox;
 class LineSeparatorComboBox;
+class BOMComboBox;
 class QMainWindow;
 namespace core {
 struct Language;
 class Encoding;
 class Theme;
+class BOM;
 }
 
 class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
@@ -29,9 +31,11 @@ class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   void setLanguage(const QString& scope);
   void setEncoding(const core::Encoding& encoding);
   void setLineSeparator(const QString& separator);
+  void setBOM(const core::BOM& bom);
   void setActiveTextEditViewLanguage();
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
+  void setActiveTextEditViewBOM();
 
  signals:
   void languageChanged(const QString& scopeName);
@@ -49,6 +53,7 @@ class StatusBar : public QStatusBar, public core::UniqueObject<StatusBar> {
   LanguageComboBox* m_langComboBox;
   LineSeparatorComboBox* m_separatorComboBox;
   EncodingComboBox* m_encComboBox;
+  BOMComboBox* m_bomComboBox;
 
   void setTheme(const core::Theme* theme);
   void setCurrentLanguage(core::Language* lang);

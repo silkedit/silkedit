@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+﻿cmake_minimum_required(VERSION 3.0.2)
 
 project(SilkEdit)
 
@@ -47,13 +47,34 @@ if (APPLE)
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual")
-  include_directories(SYSTEM /usr/local/include msgpack-c/include src)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
+  include_directories(SYSTEM /usr/local/include msgpack-c/include src breakpad/src)
+
+  # breakpad framework
+  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
+  link_directories(${BREAKPAD_LIBS})
+
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 else (APPLE)
+#
+#if(MSVC)
+  string(REGEX REPLACE "/Z[iI7]" ""
+         CMAKE_CXX_FLAGS_RELEASE
+         "${CMAKE_CXX_FLAGS_RELEASE}")
+  set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+  string(REGEX REPLACE "/INCREMENTAL:NO" ""
+         CMAKE_EXE_LINKER_FLAGS_RELEASE
+         "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
+  set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /debug /OPT:REF")
+#endif()
+
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS")
+
+  #breakpad libs under 'lib' folder
+  set( BREAKPAD_LIBS "breakpad/${CMAKE_BUILD_TYPE}")
+
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include include src ${Boost_INCLUDE_DIRS})
+  include_directories(SYSTEM msgpack-c/include include src ${Boost_INCLUDE_DIRS} breakpad/src)
   link_directories(lib)
 
   if (BUILD_EDGE)
@@ -69,9 +90,18 @@ INCLUDE(Dart)
 # enable_testing should be in the root
 enable_testing()
 add_subdirectory(core)
+add_subdirectory(crashreporter)
 add_subdirectory(test)
 
 target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml ${YAML_CPP_LIBRARY})
+# brakpad lib/framework
+if(APPLE)
+  target_link_libraries(${PROJECT_NAME}
+    "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
+    "-framework Breakpad")
+else (APPLE)
+  target_link_libraries(${PROJECT_NAME} ${BREAKPAD_LIBS}/common ${BREAKPAD_LIBS}/exception_handler ${BREAKPAD_LIBS}/crash_generation_client)
+ENDIF(APPLE)
 
 if(APPLE)
   # bundle packages
@@ -80,7 +110,8 @@ if(APPLE)
   # bundle plugin runner (node.js)
   file(COPY ${PROJECT_SOURCE_DIR}/plugin_runner DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
-  set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist )
+  set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
+  set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
 
   # Use special icon for edge build
   if (BUILD_EDGE)
@@ -97,6 +128,10 @@ if(APPLE)
             ${CMAKE_PREFIX_PATH}/translations/qtquick1_ja.qm
             ${CMAKE_PREFIX_PATH}/translations/qtscript_ja.qm
             ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
+
+  # breakpad framework
+  file(COPY ${BREAKPAD_LIBS}/breakpad.framework DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
+
 else (APPLE)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)

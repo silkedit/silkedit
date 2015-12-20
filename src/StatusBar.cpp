@@ -4,6 +4,7 @@
 #include "LanguageComboBox.h"
 #include "EncodingComboBox.h"
 #include "LineSeparatorComboBox.h"
+#include "BOMComboBox.h"
 #include "Window.h"
 #include "TabView.h"
 #include "TextEditView.h"
@@ -12,6 +13,7 @@
 #include "core/Theme.h"
 #include "core/LanguageParser.h"
 #include "core/LineSeparator.h"
+#include "core/BOM.h"
 
 using core::Encoding;
 using core::Config;
@@ -21,13 +23,14 @@ using core::LanguageParser;
 using core::LanguageProvider;
 using core::LineSeparator;
 using core::ColorSettings;
-
+using core::BOM;
 
 StatusBar::StatusBar(QMainWindow* window)
     : QStatusBar(window),
       m_langComboBox(new LanguageComboBox),
       m_separatorComboBox(new LineSeparatorComboBox),
-      m_encComboBox(new EncodingComboBox) {
+      m_encComboBox(new EncodingComboBox),
+      m_bomComboBox(new BOMComboBox) {
 #ifdef Q_OS_WIN
   // Can't set padding and margin of StatusBar and ComboBox in a stylesheet.
   // As a workaround, setSizeGripEnabled(true) (defualt value) to set a right margin of StatusBar on
@@ -38,8 +41,10 @@ StatusBar::StatusBar(QMainWindow* window)
   m_langComboBox->setFocusPolicy(Qt::NoFocus);
   m_separatorComboBox->setFocusPolicy(Qt::NoFocus);
   m_encComboBox->setFocusPolicy(Qt::NoFocus);
+  m_bomComboBox->setFocusPolicy(Qt::NoFocus);
 
   // StatusBar becomes the owner of these widgets
+  addPermanentWidget(m_bomComboBox);
   addPermanentWidget(m_separatorComboBox);
   addPermanentWidget(m_encComboBox);
   addPermanentWidget(m_langComboBox);
@@ -52,12 +57,16 @@ StatusBar::StatusBar(QMainWindow* window)
   connect(m_separatorComboBox,
           static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
           &StatusBar::setActiveTextEditViewLineSeparator);
+  connect(m_bomComboBox,
+          static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &StatusBar::setActiveTextEditViewBOM);
 
   // Set default values
   setTheme(Config::singleton().theme());
   setCurrentLanguage(LanguageProvider::defaultLanguage());
   setEncoding(Encoding::defaultEncoding());
   setLineSeparator(LineSeparator::defaultLineSeparator().separatorStr());
+  setBOM(BOM::defaultBOM());
 }
 
 void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
@@ -69,6 +78,9 @@ void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEdit
     }
     if (auto separator = newEditView->lineSeparator()) {
       setLineSeparator(*separator);
+    }
+    if (auto bom = newEditView->BOM()) {
+      setBOM(*bom);
     }
   } else {
     qDebug("newEditView is null");
@@ -160,6 +172,7 @@ void StatusBar::setActiveTextEditViewLineSeparator() {
   }
 }
 
+
 void StatusBar::setTheme(const Theme* theme) {
   qDebug("StatusBar theme is changed");
   if (!theme) {
@@ -174,6 +187,23 @@ void StatusBar::setTheme(const Theme* theme) {
     style = QString("background-color: %1;").arg(statusBarSettings->value("background").name());
     style += QString("color: %1;").arg(statusBarSettings->value("foreground").name());
     this->setStyleSheet(QString("StatusBar, StatusBar QComboBox{%1}").arg(style));
+  }
+}  
+
+void StatusBar::setActiveTextEditViewBOM() {
+  qDebug("currentIndexChanged in bomComboBox. %d", m_bomComboBox->currentIndex());
+  TabView* tabView = static_cast<Window*>(window())->activeTabView();
+  if (tabView) {
+    if (TextEditView* editView = tabView->activeEditView()) {
+      if (auto bom = editView->BOM()) {
+        qDebug("active editView's BOM: %s", qPrintable(bom->name()));
+        editView->setBOM(m_bomComboBox->currentBOM());
+      }
+    } else {
+      qDebug("active TextEditView is null");
+    }
+  } else {
+    qDebug("active tab widget is null");
   }
 }
 
@@ -217,4 +247,8 @@ void StatusBar::setEncoding(const Encoding& encoding) {
 
 void StatusBar::setLineSeparator(const QString& separator) {
   m_separatorComboBox->setCurrentLineSeparator(separator);
+}
+
+void StatusBar::setBOM(const BOM& bom) {
+  m_bomComboBox->setCurrentBOM(bom);
 }

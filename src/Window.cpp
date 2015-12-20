@@ -135,6 +135,7 @@ void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditVi
     disconnect(oldEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
     disconnect(oldEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
                &StatusBar::setLineSeparator);
+    disconnect(oldEditView, &TextEditView::bomChanged, ui->statusBar, &StatusBar::setBOM);
   }
 
   if (newEditView && ui->statusBar) {
@@ -142,6 +143,7 @@ void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditVi
     connect(newEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
     connect(newEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
             &StatusBar::setLineSeparator);
+    connect(newEditView, &TextEditView::bomChanged, ui->statusBar, &StatusBar::setBOM);
   }
 }
 

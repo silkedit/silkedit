@@ -17,7 +17,7 @@
 <context>
     <name>ClearRecentItemListAction</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="105"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="134"/>
         <source>Clear List</source>
         <translation>履歴をクリア</translation>
     </message>
@@ -272,27 +272,27 @@
 <context>
     <name>KeymapTableModel</name>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="111"/>
+        <location filename="../src/KeymapTableView.cpp" line="121"/>
         <source>Command</source>
         <translation>コマンド</translation>
     </message>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="113"/>
+        <location filename="../src/KeymapTableView.cpp" line="123"/>
         <source>Description</source>
         <translation>説明</translation>
     </message>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="115"/>
+        <location filename="../src/KeymapTableView.cpp" line="125"/>
         <source>Key</source>
         <translation>キー</translation>
     </message>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="117"/>
+        <location filename="../src/KeymapTableView.cpp" line="127"/>
         <source>If</source>
         <translation>条件</translation>
     </message>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="119"/>
+        <location filename="../src/KeymapTableView.cpp" line="129"/>
         <source>Source</source>
         <translation>ソース</translation>
     </message>
@@ -300,7 +300,7 @@
 <context>
     <name>KeymapTableView</name>
     <message>
-        <location filename="../src/KeymapTableView.cpp" line="17"/>
+        <location filename="../src/KeymapTableView.cpp" line="18"/>
         <source>Copy</source>
         <translation>コピー</translation>
     </message>
@@ -421,12 +421,12 @@
 <context>
     <name>OpenRecentItemManager</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="44"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="52"/>
         <source>Open Recent</source>
         <translation>最近開いたファイル</translation>
     </message>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="46"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="54"/>
         <source>&amp;Reopen Last Closed File</source>
         <translation>最後に閉じたファイルを開く(&amp;R)</translation>
     </message>
@@ -459,22 +459,22 @@
 <context>
     <name>ProjectTreeView</name>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="82"/>
+        <location filename="../src/ProjectTreeView.cpp" line="85"/>
         <source>Rename</source>
         <translation>名前変更</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="83"/>
+        <location filename="../src/ProjectTreeView.cpp" line="86"/>
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="84"/>
+        <location filename="../src/ProjectTreeView.cpp" line="87"/>
         <source>New File</source>
         <translation>新しいファイル</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="85"/>
+        <location filename="../src/ProjectTreeView.cpp" line="88"/>
         <source>New Folder</source>
         <translation>新しいフォルダ</translation>
     </message>
@@ -482,7 +482,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="57"/>
+        <location filename="../src/DocumentManager.cpp" line="58"/>
         <source>Save As</source>
         <translation>名前を付けて保存</translation>
     </message>
@@ -696,6 +696,16 @@
         <source>Show in Explorer</source>
         <translation>エクスプローラーで開く</translation>
     </message>
+    <message>
+        <location filename="../core/BOM.cpp" line="9"/>
+        <source>BOM</source>
+        <translation>BOM有</translation>
+    </message>
+    <message>
+        <location filename="../core/BOM.cpp" line="10"/>
+        <source>No BOM</source>
+        <translation>BOM無</translation>
+    </message>
 </context>
 <context>
     <name>ReloadEncodingDialog</name>
@@ -743,7 +753,7 @@ Convert: convert current text in %1</source>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../src/StatusBar.cpp" line="97"/>
+        <location filename="../src/StatusBar.cpp" line="113"/>
         <source>Current document is changed. This change will be lost after reloading. Do you want to continue?</source>
         <translation>ファイルが変更されています。再読み込みするとこの変更が破棄されますが、実行しますか？</translation>
     </message>
