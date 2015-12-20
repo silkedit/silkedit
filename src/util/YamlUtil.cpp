@@ -343,15 +343,15 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
       if (commandNode.IsDefined() && iconNode.IsDefined()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         if (iconNode.Type() == YAML::NodeType::Scalar) {
-            QString iconPath = getAbsolutePath(ymlPath, iconNode.as<std::string>());
-            action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
-
+          QString iconPath = getAbsolutePath(ymlPath, iconNode.as<std::string>());
+          action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
         } else if (iconNode.Type() == YAML::NodeType::Map) {
           QMap<QString, QString> icons;
           for (auto it = iconNode.begin(); it != iconNode.end(); ++it) {
             YAML::Node key = it->first;
             YAML::Node value = it->second;
-            icons.insert(QString::fromUtf8(key.as<std::string>().c_str()), getAbsolutePath(ymlPath, value.as<std::string>()));
+            icons.insert(QString::fromUtf8(key.as<std::string>().c_str()),
+                         getAbsolutePath(ymlPath, value.as<std::string>()));
           }
           action = new CommandAction(id, command, icons, nullptr, pkgName);
         }
