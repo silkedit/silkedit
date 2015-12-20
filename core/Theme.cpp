@@ -79,9 +79,12 @@ QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
   return newColor;
 }
 
-QColor getAppropriateGrey(QColor const color) {
+QColor getAppropriateGrey(QColor const color, bool reverse = false) {
   QColor newColor;
   int brightness = color.value();
+  if(reverse) {
+    brightness = 255 - brightness;
+  }
   // use material color
   //  - http://www.materialui.co/colors
   if (brightness < brightnessThresholdBlack) {
@@ -207,6 +210,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->packageToolBarSettings.reset(new ColorSettings());
   parseSettings(theme->packageToolBarSettings.get(), createPackageToolBarSettingsColors(theme));
 
+  // Find Replace View settings(FindReplaceView)
+  theme->findReplaceViewSettings.reset(new ColorSettings());
+  parseSettings(theme->findReplaceViewSettings.get(), createFindReplaceViewSettingsColors(theme));
+
   return theme;
 }
 
@@ -329,6 +336,14 @@ ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
 
 ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
   return createStatusBarSettingsColors(theme);
+}
+
+ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
+   ColorSettings defaultColors  = createStatusBarSettingsColors(theme);
+   defaultColors["buttonUncheckedBackgroundColor"] = getAppropriateGrey(defaultColors.value("background").name(), true);
+   defaultColors["buttonCheckedBackgroundColor"] = getAppropriateGrey(defaultColors.value("background").name());
+
+   return defaultColors;
 }
 
 // Return the rank of scopeSelector for scope

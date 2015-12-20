@@ -32,6 +32,9 @@
     </item>
     <item row="1" column="0">
      <widget class="LineEdit" name="lineEditForReplace">
+      <property name="focusPolicy">
+       <enum>Qt::StrongFocus</enum>
+      </property>
       <property name="placeholderText">
        <string>Replace</string>
       </property>
@@ -46,10 +49,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../resources/images_common.qrc">
-          <normaloff>:/images/find-and-replace-left-arrow.png</normaloff>:/images/find-and-replace-left-arrow.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -66,10 +65,6 @@
         </property>
         <property name="text">
          <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../resources/images_common.qrc">
-          <normaloff>:/images/find-and-replace-right-arrow.png</normaloff>:/images/find-and-replace-right-arrow.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -170,8 +165,6 @@
   <tabstop>replaceButton</tabstop>
   <tabstop>replaceAllButton</tabstop>
  </tabstops>
- <resources>
-  <include location="../resources/images_common.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

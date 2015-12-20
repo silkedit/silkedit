@@ -13,9 +13,14 @@
 #include "App.h"
 #include "TextEditView.h"
 #include "LineEdit.h"
+#include "core/Config.h"
+#include "core/Theme.h"
 
 using core::Document;
 using core::Region;
+using core::Config;
+using core::ColorSettings;
+using core::Theme;
 
 namespace {
 const char* PREVIOUS_MATCH_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Previous match");
@@ -36,10 +41,12 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   font.setPointSize(font.pointSize() - 2);
   ui->replaceButton->setFont(font);
   ui->replaceAllButton->setFont(font);
+  ui->lineEditForFind->setAttribute(Qt::WA_MacShowFocusRect, 0);
+  ui->lineEditForReplace->setAttribute(Qt::WA_MacShowFocusRect, 0);
 
   // The contents margin is the width of the reserved space along each of the QGridLayout's four
   // sides.
-  ui->layout->setContentsMargins(3, 0, 0, 3);
+  ui->layout->setContentsMargins(3, 1, 0, 3);
   // The spacing() is the width of the automatically allocated spacing between neighboring boxes.
   ui->layout->setSpacing(0);
 
@@ -70,6 +77,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   });
 
   connect(ui->preserveCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(&Config::singleton(), &Config::themeChanged, this, &FindReplaceView::setTheme);
 
   // todo: configure mnemonic in keymap.yml using condition
   ui->prevButton->setToolTip(tr(PREVIOUS_MATCH_TEXT));
@@ -81,6 +89,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   ui->preserveCaseChk->setToolTip(tr(PRESERVE_CASE_TEXT));
 
   setLayout(ui->layout);
+  setTheme(Config::singleton().theme());
 }
 
 FindReplaceView::~FindReplaceView() {}
@@ -365,4 +374,98 @@ void FindReplaceView::hide() {
     m_activeView->setFocus();
   }
   QWidget::hide();
+}
+
+void FindReplaceView::setTheme(core::Theme* theme) {
+  ui->prevButton->setIcon(QIcon(":/images/prevButton-black.svg"));
+  ui->nextButton->setIcon(QIcon(":/images/nextButton-black.svg"));
+
+  qDebug("FindReplaceView theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->findReplaceViewSettings != nullptr) {
+    ColorSettings* findReplaceViewSettings = theme->findReplaceViewSettings.get();
+
+    QString defaultIconColor = "black";
+    QString checkedIconColor = "white";
+
+    if (theme->isDarkTheme()) {
+      defaultIconColor = "white";
+      checkedIconColor = "black";
+      ui->prevButton->setIcon(QIcon(":/images/prevButton-white.svg"));
+      ui->nextButton->setIcon(QIcon(":/images/nextButton-white.svg"));
+    }
+
+    QList<QCheckBox*> allCkButtons = this->findChildren<QCheckBox*>();
+    for (int i = 0; i < allCkButtons.size(); i++) {
+      QString style;
+      style = QString(
+                  "#%1::indicator {"
+                  "image: url(:/images/%1-%2);"
+                  "}"
+                  "#%1::indicator:checked {"
+                  "image: url(:/images/%1-%3);"
+                  "}")
+                  .arg(allCkButtons.at(i)->objectName())
+                  .arg(defaultIconColor)
+                  .arg(checkedIconColor);
+      allCkButtons.at(i)->setStyleSheet(style);
+    };
+
+    QString style;
+    style = QString(
+                "#%1 {"
+                "background-color: %2;"
+                "}")
+                .arg(this->objectName())
+                .arg(findReplaceViewSettings->value("background").name());
+
+    style += QString(
+                 "#%1 QPushButton {"
+                 "color: %2;"
+                 "background-color: %3;"
+                 "}"
+                 "#%1 QCheckBox {"
+                 "background-color: %3;"
+                 "}"
+                 "#%1 QCheckBox:checked {"
+                 "background-color: %4;"
+                 "}")
+                 .arg(this->objectName())
+                 .arg(findReplaceViewSettings->value("foreground").name())
+                 .arg(findReplaceViewSettings->value("buttonUncheckedBackgroundColor").name())
+                 .arg(findReplaceViewSettings->value("buttonCheckedBackgroundColor").name());
+
+    style += QString(
+                 "#%1 QPushButton:hover {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #919191, stop:1 "
+                 "#7E7E7E);"
+                 "}"
+                 "#%1 QPushButton:pressed {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #6A6A6A, stop:1 "
+                 "#595959);"
+                 "}"
+                 "#%1 QCheckBox:unchecked:hover {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
+                 "#7E7E7E);"
+                 "}"
+                 "#%1 QCheckBox:unchecked:pressed {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #575757, stop:1 "
+                 "#444444);"
+                 "}"
+                 "#%1 QCheckBox:checked:hover {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
+                 "#7E7E7E);"
+                 "}"
+                 "#%1 QCheckBox:checked:pressed {"
+                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #6A6A6A, stop:1 "
+                 "#595959);"
+                 "}")
+                 .arg(this->objectName());
+
+    this->setStyleSheet(style);
+  }
 }
