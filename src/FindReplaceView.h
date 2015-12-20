@@ -16,6 +16,9 @@ class TextEditView;
 namespace Ui {
 class FindReplaceView;
 }
+namespace core {
+class Theme;
+}
 
 class FindReplaceView : public QWidget {
   Q_OBJECT
@@ -65,4 +68,6 @@ class FindReplaceView : public QWidget {
   void selectFirstMatch();
   void replace();
   void replaceAll();
+
+  void setTheme(core::Theme* theme);
 };
