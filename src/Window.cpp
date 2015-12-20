@@ -89,11 +89,11 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           &FindReplaceView::setActiveView);
   connect(this, &Window::activeViewChanged, ui->statusBar, &StatusBar::onActiveViewChanged);
 
-   updateConnection(nullptr, m_tabViewGroup->activeTab());
-   connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
+  updateConnection(nullptr, m_tabViewGroup->activeTab());
+  connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
 }
 
-void Window::setTheme(const core::Theme *theme){
+void Window::setTheme(const core::Theme* theme) {
   qDebug("Window theme is changed");
   if (!theme) {
     qWarning("theme is null");
@@ -105,14 +105,14 @@ void Window::setTheme(const core::Theme *theme){
     ColorSettings* windowSettings = theme->windowSettings.get();
 
     style = QString(
-          "Window {"
-          "background-color: %1;"
-          "color: %2;"
-          "}")
-        .arg(windowSettings->value("background").name(),
-             windowSettings->value("foregound").name());
+                "Window {"
+                "background-color: %1;"
+                "color: %2;"
+                "}")
+                .arg(windowSettings->value("background").name(),
+                     windowSettings->value("foregound").name());
 
-       this->setStyleSheet(style);
+    this->setStyleSheet(style);
   }
 }
 
