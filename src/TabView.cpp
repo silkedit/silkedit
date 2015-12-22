@@ -15,13 +15,18 @@
 #include "PluginManager.h"
 #include "core/Config.h"
 #include "core/Theme.h"
+#include "core/Constants.h"
 
 using core::Document;
 using core::Config;
 using core::Theme;
 using core::ColorSettings;
+using core::Constants;
 
 namespace {
+constexpr const char* PREFIX    = "tabInformation";
+constexpr const char* PATH_KEY  = "tab";
+
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
   return info.fileName();
@@ -144,6 +149,7 @@ bool TabView::closeAllTabs() {
     std::list<QWidget*> widgets;
     for (int i = 0; i < count(); i++) {
       widgets.push_back(widget(i));
+      insertTabInformation(i);
     }
 
     for (auto w : widgets) {
@@ -388,4 +394,52 @@ void TabView::notify(TabView* view, const QString& method, const msgpack::object
       qWarning("invalid numArgs: %d", numArgs);
     }
   }
+}
+int TabView::insertTabInformation( const int index ){
+  TextEditView* v = qobject_cast<TextEditView*>(widget(index));
+  QString path    = v->path();
+
+  // Declaration variables to insert tab information.
+  QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
+                                QSettings::IniFormat);
+
+  // set tab information to array.
+  tabViewHistoryTable.beginWriteArray(PREFIX);
+  tabViewHistoryTable.setArrayIndex(index);
+  tabViewHistoryTable.setValue(PATH_KEY, path.toStdString().c_str());
+  tabViewHistoryTable.endArray();
+
+  return index;
+
+}
+bool TabView::restoreTabInformation( void ){
+  // declaration variables to insert tab information.
+  QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
+                                QSettings::IniFormat);
+
+  // get array size.
+  int size = tabViewHistoryTable.beginReadArray(PREFIX);
+
+  // if array size is 0, return false
+  if( !size ){
+    return false;
+  }
+
+  // restore tab information.
+  for (int i = 0; i < size; i++) {
+    tabViewHistoryTable.setArrayIndex(i);
+    const QVariant& value = tabViewHistoryTable.value(PATH_KEY);
+    // if value is empty,creat new window.
+    if (value.toString().isEmpty()){
+       addNew();
+    }
+    // if value convert to QString, open file.
+    if (value.canConvert<QString>()) {
+       open(value.toString());
+    }
+  }
+
+  tabViewHistoryTable.endArray();
+  
+  return true;
 }

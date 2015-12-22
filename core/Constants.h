@@ -34,7 +34,7 @@ class Constants {
   static QString pluginServerDir();
   static QString silkHomePath();
   static QString recentOpenHistoryPath();
- 
+  static QString tabViewInformationPath();
  private:
   Constants() = delete;
   ~Constants() = delete;
