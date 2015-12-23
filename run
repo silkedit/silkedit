@@ -224,20 +224,9 @@ resolve() {
 			cd breakpad
 			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
 			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
+			patch -p1 --binary -N < ../crashreporter/patch/common.gypi.patch
 
-			export GYP_MSVS_VERSION=2013
-
-			gyp --no-circular-check ./src/client/windows/breakpad_client.gyp
-			
-			"/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/devenv.exe" ./src/client/windows/breakpad_client.sln //upgrade
-			
-			echo 'Breakpad patch'
-			# configurate compile options
-			patch -p1 --binary -N < ../crashreporter/patch/common.patch
-			patch -p1 --binary -N < ../crashreporter/patch/exception_handler.patch
-			patch -p1 --binary -N < ../crashreporter/patch/crash_report_sender.patch
-			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_client.patch
-			patch -p1 --binary -N < ../crashreporter/patch/crash_generation_server.patch
+			/c/tools/python2/Scripts/gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
 
 			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
             mkdir -p ../lib/breakpad/Debug

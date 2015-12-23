@@ -5,16 +5,9 @@ namespace CrashReport {
 
 class HttpSendDump {
  public:
-  HttpSendDump() {}
-  HttpSendDump(QString f, QString c, QString v) {
-    setFile(f);
-    setComment(c);
-    setVersion(v);
+  HttpSendDump(const QString& f, const QString& c, const QString& v)
+    : fileName(f), comment(c), version(v){
   }
-
-  void setFile(QString f) { fileName = f; }
-  void setComment(QString c) { comment = c; }
-  void setVersion(QString v) { version = v; }
 
   // Send dump info.
   // Return value:
