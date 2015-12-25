@@ -29,12 +29,12 @@
         <translation>終了</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="43"/>
+        <location filename="../src/mainwindow.cpp" line="39"/>
         <source>Sent a bug report successfully.</source>
         <translation>バグレポートを送信しました。</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.cpp" line="45"/>
+        <location filename="../src/mainwindow.cpp" line="41"/>
         <source>Failed to send a bug report.</source>
         <translation>バグレポートの送信に失敗しました。</translation>
     </message>

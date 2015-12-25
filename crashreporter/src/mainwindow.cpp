@@ -1,10 +1,6 @@
 ﻿#include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-#ifdef Q_OS_WIN
-#pragma warning(disable : 4091)
-#endif
-
 #include "HttpSendDump.h"
 #include <qdebug.h>
 #include <qstring.h>
