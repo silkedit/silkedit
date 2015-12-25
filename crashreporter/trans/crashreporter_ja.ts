@@ -4,14 +4,14 @@
 <context>
     <name>MainWindow</name>
     <message>
-        <location filename="../src/mainwindow.ui" line="57"/>
-        <source>Silkedit crashed.</source>
-        <translation>Silkeditがクラッシュしました。</translation>
-    </message>
-    <message>
         <location filename="../src/mainwindow.ui" line="31"/>
         <source>CrashReporter</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.ui" line="57"/>
+        <source>SilkEdit crashed.</source>
+        <translation>SilkEditがクラッシュしました。</translation>
     </message>
     <message>
         <location filename="../src/mainwindow.ui" line="75"/>
@@ -27,6 +27,16 @@
         <location filename="../src/mainwindow.ui" line="143"/>
         <source>Exit</source>
         <translation>終了</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="43"/>
+        <source>Sent a bug report successfully.</source>
+        <translation>バグレポートを送信しました。</translation>
+    </message>
+    <message>
+        <location filename="../src/mainwindow.cpp" line="45"/>
+        <source>Failed to send a bug report.</source>
+        <translation>バグレポートの送信に失敗しました。</translation>
     </message>
 </context>
 </TS>

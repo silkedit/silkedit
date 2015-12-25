@@ -1,4 +1,9 @@
 ﻿#include "crash_handler.h"
+
+#if defined(Q_OS_WIN32)
+#pragma warning(disable : 4091)
+#endif
+
 #include <QtCore/QDir>
 #include <QtCore/QProcess>
 #include <QtCore/QCoreApplication>
@@ -79,7 +84,7 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
   arg << QString::fromStdString(dump_file.str());
 #endif
   qDebug() << "Execute CrashReporter :" << command << arg;
-  QProcess::startDetached(command, arg);
+  QProcess::execute(command, arg);
 
   return CrashHandlerPrivate::bReportCrashesToSystem ? success : true;
 }

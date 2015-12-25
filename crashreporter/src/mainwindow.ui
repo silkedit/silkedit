@@ -54,7 +54,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Silkedit crashed.</string>
+         <string>SilkEdit crashed.</string>
         </property>
        </widget>
       </item>
