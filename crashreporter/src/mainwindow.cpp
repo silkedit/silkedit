@@ -39,7 +39,7 @@ void MainWindow::on_pushButton_send_clicked() {
 
   int i = ret.indexOf("\"success\"");
   QString msg;
-  if(i>=0) {
+  if (i>=0) {
     msg = tr("Sent a bug report successfully.");
   } else {
     msg = tr("Failed to send a bug report.");

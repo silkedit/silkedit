@@ -75,6 +75,8 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
   dump_file << _dump_dir << L"/" << _minidump_id << L".dmp";
   arg << string_util::stdWToQString(dump_file.str());
 
+  qDebug() << "Execute CrashReporter :" << command << arg;
+  QProcess::execute(command, arg);//it is necessary in order to move to the top
 #elif defined(Q_OS_MAC)
   // open path.app
   command = qApp->applicationDirPath() + "/CrashReporter";
@@ -82,9 +84,10 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
   std::stringstream dump_file;
   dump_file << _dump_dir << "/" << _minidump_id << ".dmp";
   arg << QString::fromStdString(dump_file.str());
-#endif
+
   qDebug() << "Execute CrashReporter :" << command << arg;
-  QProcess::execute(command, arg);
+  QProcess::startDetached(command, arg);
+#endif
 
   return CrashHandlerPrivate::bReportCrashesToSystem ? success : true;
 }
