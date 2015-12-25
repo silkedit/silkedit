@@ -1,0 +1,15 @@
+--- ./src/build/common.gypi.org	2015-12-23 14:44:08.378761500 +0900
++++ ./src/build/common.gypi	2015-12-23 14:53:34.041115500 +0900
+@@ -325,10 +325,10 @@
+           # This is required for ATL to use XP-safe versions of its functions.
+           '_USING_V110_SDK71_',
+         ],
+-        'msvs_disabled_warnings': [4800],
++        'msvs_disabled_warnings': [4800,4091],
+         'msvs_settings': {
+           'VCCLCompilerTool': {
+-            'WarnAsError': 'true',
++            'WarnAsError': 'false',
+             'Detect64BitPortabilityProblems': 'false',
+           },
+         },
