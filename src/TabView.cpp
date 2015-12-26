@@ -397,6 +397,9 @@ void TabView::notify(TabView* view, const QString& method, const msgpack::object
 }
 int TabView::insertTabInformation( const int index ){
   TextEditView* v = qobject_cast<TextEditView*>(widget(index));
+  if (!v) {
+    return false;
+  }
   QString path    = v->path();
 
   // Declaration variables to insert tab information.
@@ -412,7 +415,7 @@ int TabView::insertTabInformation( const int index ){
   return index;
 
 }
-bool TabView::restoreTabInformation( void ){
+bool TabView::createWithSavedTabs( void ){
   // declaration variables to insert tab information.
   QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
                                 QSettings::IniFormat);

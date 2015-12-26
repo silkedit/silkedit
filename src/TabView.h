@@ -35,7 +35,7 @@ class TabView : public QTabWidget, public core::UniqueObject<TabView> {
   bool closeAllTabs();
   void closeOtherTabs();
   int indexOfPath(const QString& path);
-  bool restoreTabInformation( void );
+  bool createWithSavedTabs( void );
   int insertTabInformation( const int index );
 
 signals:
