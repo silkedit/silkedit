@@ -340,7 +340,6 @@ ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
 
 ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
    ColorSettings defaultColors  = createStatusBarSettingsColors(theme);
-   defaultColors["buttonUncheckedBackgroundColor"] = getAppropriateGrey(defaultColors.value("background").name(), true);
    defaultColors["buttonCheckedBackgroundColor"] = getAppropriateGrey(defaultColors.value("background").name());
 
    return defaultColors;
