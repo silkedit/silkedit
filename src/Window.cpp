@@ -130,7 +130,14 @@ Window* Window::create(QWidget* parent, Qt::WindowFlags flags) {
 
 Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   Window* w = create(parent, flags);
-  w->activeTabView()->addNew();
+  bool result = false;
+
+  result = w->activeTabView()->createWithSavedTabs();
+
+  if( !result ){
+      w->activeTabView()->addNew();
+  }
+
   return w;
 }
 

@@ -3,6 +3,7 @@
 #include <memory>
 #include <unordered_set>
 #include <QTabWidget>
+#include <QSettings>
 
 #include "core/macros.h"
 #include "core/set_unique_ptr.h"
@@ -34,6 +35,8 @@ class TabView : public QTabWidget, public core::UniqueObject<TabView> {
   bool closeAllTabs();
   void closeOtherTabs();
   int indexOfPath(const QString& path);
+  bool createWithSavedTabs( void );
+  int insertTabInformation( const int index );
 
 signals:
   void allTabRemoved();

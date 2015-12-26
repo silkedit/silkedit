@@ -113,4 +113,9 @@ QString Constants::recentOpenHistoryPath() {
   return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/recentOpenHistory.ini";
 }
 	
+QString Constants::tabViewInformationPath() {
+  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/tabViewInformation.ini";
+}
+
+
 }  // namespace core
