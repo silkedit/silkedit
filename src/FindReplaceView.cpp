@@ -313,17 +313,12 @@ void FindReplaceView::setTheme(core::Theme* theme) {
     style += QString(
                  "#%1 QPushButton {"
                  "color: %2;"
-                 "background-color: %3;"
-                 "}"
-                 "#%1 QCheckBox {"
-                 "background-color: %3;"
                  "}"
                  "#%1 QCheckBox:checked {"
-                 "background-color: %4;"
+                 "background-color: %3;"
                  "}")
                  .arg(this->objectName())
                  .arg(findReplaceViewSettings->value("foreground").name())
-                 .arg(findReplaceViewSettings->value("buttonUncheckedBackgroundColor").name())
                  .arg(findReplaceViewSettings->value("buttonCheckedBackgroundColor").name());
 
     style += QString(
