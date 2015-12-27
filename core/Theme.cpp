@@ -166,7 +166,7 @@ Theme* Theme::loadTheme(const QString& filename) {
     theme->name = rootMap.value(nameStr).toString();
   }
 
-  // main editor settings (TextEditView)
+  // create base theme
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
     foreach (const QVariant& var, settingList) {
@@ -174,6 +174,10 @@ Theme* Theme::loadTheme(const QString& filename) {
       theme->scopeSettings.append(toScopeSetting(var));
     }
   }
+
+  // text edit view settings (TextEditView)
+  theme->textEditViewSettings.reset(new ColorSettings());
+  parseSettings(theme->textEditViewSettings.get(), createTextEditViewSettingsColors(theme));
 
   // gutter settings (LineNumberArea)
   const QString gutterSettingsStr = "gutterSettings";
@@ -237,6 +241,50 @@ bool Theme::isDarkTheme() {
     ret = true;
   }
   return ret;
+}
+
+ColorSettings Theme::createTextEditViewSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::gray);
+  QColor foregroundColor = QColor(Qt::black);
+  QColor selectionBackgroundColor = QColor(Qt::gray);
+  QColor selectionForegroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("foreground")) {
+        foregroundColor = baseColorSettings->value("foreground").name();
+      }
+
+      if (baseColorSettings->contains("background")) {
+        backgroundColor = baseColorSettings->value("background").name();
+      }
+
+      if (baseColorSettings->contains("selection")) {
+        selectionBackgroundColor = baseColorSettings->value("selection").name();
+      } else if (baseColorSettings->contains("selectionBackground")) {
+        selectionBackgroundColor = baseColorSettings->value("selectionBackground").name();
+      }
+
+      // for selection foreground color, we use foreground color if selectionForeground is not
+      // found.
+      // The reason is that Qt ignores syntax highlighted color for a selected text and sets
+      // selection
+      // foreground color something.
+      // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
+      // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
+      if (baseColorSettings->contains("selectionForeground")) {
+        selectionForegroundColor = baseColorSettings->value("selectionForeground").name();
+      } else {
+        selectionForegroundColor = foregroundColor;
+      }
+    }
+  }
+  return defaultColors = {{"background", backgroundColor},
+                          {"foreground", foregroundColor},
+                          {"selectionBackground", selectionBackgroundColor},
+                          {"selectionForeground", selectionForegroundColor}};
 }
 
 ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {

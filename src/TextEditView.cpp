@@ -138,52 +138,23 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
     return;
   }
 
-  QString style;
-  if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
-    if (settings->contains("foreground")) {
-      style = style % QString("color: %1;").arg(settings->value("foreground").name());
-      qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
-    }
+  if (theme->textEditViewSettings != nullptr) {
+    QString style;
+    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
 
-    if (settings->contains("background")) {
-      style = style % QString("background-color: %1;").arg(settings->value("background").name());
-      qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
-    }
+    style = QString(
+                "QPlainTextEdit {"
+                "color: %1;"
+                "background-color: %2;"
+                "selection-color:%4;"
+                "selection-background-color: %3;"
+                "}")
+                .arg(textEditViewSettings->value("foreground").name())
+                .arg(textEditViewSettings->value("background").name())
+                .arg(textEditViewSettings->value("selectionForeground").name())
+                .arg(textEditViewSettings->value("selectionBackground").name());
 
-    QString selectionBackgroundColor = "";
-    if (settings->contains("selection")) {
-      selectionBackgroundColor = settings->value("selection").name();
-    } else if (settings->contains("selectionBackground")) {
-      selectionBackgroundColor = settings->value("selectionBackground").name();
-    }
-    if (!selectionBackgroundColor.isEmpty()) {
-      style = style % QString("selection-background-color: %1;").arg(selectionBackgroundColor);
-      qDebug() << QString("selection-background-color: %1;")
-                      .arg(settings->value("selection").name());
-    }
-
-    // for selection foreground color, we use foreground color if selectionForeground is not
-    // found.
-    // The reason is that Qt ignores syntax highlighted color for a selected text and sets
-    // selection
-    // foreground color something.
-    // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
-    // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
-    QString selectionColor = "";
-    if (settings->contains("selectionForeground")) {
-      selectionColor = settings->value("selectionForeground").name();
-    } else if (settings->contains("foreground")) {
-      selectionColor = settings->value("foreground").name();
-    }
-
-    if (!selectionColor.isEmpty()) {
-      style = style % QString("selection-color: %1;").arg(selectionColor);
-      qDebug() << QString("selection-color: %1;")
-                      .arg(settings->value("selectionForeground").name());
-    }
-
-    q_ptr->setStyleSheet(QString("QPlainTextEdit{%1}").arg(style));
+    q_ptr->setStyleSheet(style);
   }
 
   highlightCurrentLine();
