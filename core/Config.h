@@ -61,11 +61,6 @@ class Config : public QObject, public Singleton<Config> {
   void init();
   bool contains(const QString& key);
 
-  // specialization of QString for convenience
-  QString value(const QString& key, const QString& defaultValue = "") {
-    return value<QString>(key, defaultValue);
-  }
-
   template <typename T>
   T value(const QString& key, const T& defaultValue) {
     if (m_scalarConfigs.count(key) != 0 && m_scalarConfigs[key].canConvert<T>()) {
@@ -83,6 +78,13 @@ class Config : public QObject, public Singleton<Config> {
       return true;
     }
     return false;
+  }
+
+public slots:
+
+  // specialization of QString for convenience
+  QString value(const QString& key, const QString& defaultValue = "") {
+    return value<QString>(key, defaultValue);
   }
 
  signals:

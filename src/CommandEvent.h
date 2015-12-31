@@ -9,7 +9,7 @@
 #include "core/stlSpecialization.h"
 #include "core/macros.h"
 #include "core/AndConditionExpression.h"
-#include "CommandArgument.h"
+#include "core/CommandArgument.h"
 
 class CommandEvent {
  public:

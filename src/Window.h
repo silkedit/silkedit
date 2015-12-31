@@ -7,7 +7,6 @@
 #include <QMainWindow>
 
 #include "core/macros.h"
-#include "core/UniqueObject.h"
 
 class TabView;
 class StatusBar;
@@ -20,7 +19,7 @@ namespace Ui {
 class Window;
 }
 
-class Window : public QMainWindow, public core::UniqueObject {
+class Window : public QMainWindow{
   Q_OBJECT
   DISABLE_COPY(Window)
 
@@ -53,15 +52,18 @@ class Window : public QMainWindow, public core::UniqueObject {
   // accessor
   TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
   TabView* activeTabView();
-  Q_INVOKABLE StatusBar* statusBar();
   bool isProjectOpend() { return m_projectView != nullptr; }
 
   void show();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
-  Q_INVOKABLE void openFindAndReplacePanel();
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
+
+public slots:
+  StatusBar* statusBar();
+  void openFindAndReplacePanel();
+
 
  signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);

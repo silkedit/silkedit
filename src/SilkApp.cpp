@@ -1,5 +1,7 @@
 ﻿#include <QWidget>
 #include <QTranslator>
+#include <QChildEvent>
+#include <QProcess>
 
 #include "SilkApp.h"
 #include "TabViewGroup.h"
@@ -10,6 +12,8 @@
 #include "Helper.h"
 #include "version.h"
 #include "SilkStyle.h"
+#include "API.h"
+#include "ObjectStore.h"
 #include "core/Constants.h"
 
 using core::Constants;
@@ -91,6 +95,8 @@ SilkApp::SilkApp(int& argc, char** argv)
       qDebug("focused widget is not TextEditView");
     }
   });
+
+  installEventFilter(this);
 }
 
 bool SilkApp::event(QEvent* event) {
@@ -104,6 +110,34 @@ bool SilkApp::event(QEvent* event) {
   }
 }
 
+bool SilkApp::eventFilter(QObject*, QEvent* event) {
+  switch (event->type()) {
+    case QEvent::ChildAdded: {
+      QObject* child = static_cast<QChildEvent*>(event)->child();
+      if (child && child->property(OBJECT_STATE).isValid()) {
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
+                 << "to" << ObjectStore::ObjectState::NewFromJSButHasParent;
+        child->setProperty(OBJECT_STATE,
+                           ObjectStore::ObjectState::NewFromJSButHasParent);
+      }
+      break;
+    }
+    // Qt doc says 'child might have already been destructed'. Is the code below safe?
+    case QEvent::ChildRemoved: {
+      QObject* child = static_cast<QChildEvent*>(event)->child();
+      if (child && child->property(OBJECT_STATE).isValid()) {
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
+                 << "to" << ObjectStore::ObjectState::NewFromJS;
+        child->setProperty(OBJECT_STATE, ObjectStore::ObjectState::NewFromJS);
+      }
+      break;
+    }
+    default:
+      return false;
+  }
+  return false;
+}
+
 void SilkApp::setupTranslator(const QString& locale) {
   if (m_translator) {
     m_translator->deleteLater();
@@ -112,7 +146,8 @@ void SilkApp::setupTranslator(const QString& locale) {
 
   m_translator = new QTranslator(this);
   // Load silkedit_<locale>.qm to translate SilkEdit menu
-  bool result = m_translator->load("silkedit_" + locale, Constants::singleton().translationDirPath());
+  bool result =
+      m_translator->load("silkedit_" + locale, Constants::singleton().translationDirPath());
   if (!result) {
     qWarning() << "Failed to load" << qPrintable("silkedit_");
   }

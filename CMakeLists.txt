@@ -33,6 +33,7 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 if (APPLE)
   find_package(Qt5WebEngineWidgets REQUIRED)
+  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /${PROJECT_SOURCE_DIR}/libnode/lib/libnode.dylib)
 endif (APPLE)
 find_package(Boost REQUIRED)
 
@@ -50,8 +51,8 @@ if (APPLE)
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
-  include_directories(SYSTEM /usr/local/include msgpack-c/include src breakpad/src)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
+  include_directories(SYSTEM /usr/local/include src breakpad/src libnode/include/node)
 
   # breakpad framework
   set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
@@ -77,7 +78,7 @@ else (APPLE)
   set( BREAKPAD_LIBS "breakpad/${CMAKE_BUILD_TYPE}")
 
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM msgpack-c/include include src ${Boost_INCLUDE_DIRS} breakpad/src)
+  include_directories(SYSTEM include src ${Boost_INCLUDE_DIRS} breakpad/src)
   link_directories(lib)
 
   if (BUILD_EDGE)
@@ -94,10 +95,11 @@ INCLUDE(Dart)
 enable_testing()
 add_subdirectory(core)
 add_subdirectory(crashreporter)
+add_subdirectory(node)
 add_subdirectory(test)
 
 if(APPLE)
-  target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml Qt5::WebEngineWidgets ${YAML_CPP_LIBRARY})
+  target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_core Qt5::Widgets Qt5::Network Qt5::Xml Qt5::WebEngineWidgets ${YAML_CPP_LIBRARY} ${NODE_LIBRARY})
   # brakpad lib/framework
   target_link_libraries(${PROJECT_NAME}
     "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
@@ -115,11 +117,27 @@ if(APPLE)
   # bundle builtin packages
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
-  # bundle silkedit_helper (node.js)
-  file(COPY ${PROJECT_SOURCE_DIR}/helper DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  # bundle JS libraries
+  file(COPY ${PROJECT_SOURCE_DIR}/jslib DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+
+  # copy npm
+  file(COPY
+     ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
+     DESTINATION
+     ${PROJECT_NAME}.app/Contents/MacOS/npm/bin)
+
+  file(COPY
+     ${PROJECT_SOURCE_DIR}/npm/lib
+     ${PROJECT_SOURCE_DIR}/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/npm/package.json
+     DESTINATION
+     ${PROJECT_NAME}.app/Contents/MacOS/npm)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
+
+  # copy node executable
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_BINARY_DIR}/node/node ${PROJECT_NAME}.app/Contents/MacOS)
 
   # Use special icon for edge build
   if (BUILD_EDGE)
@@ -140,15 +158,15 @@ if(APPLE)
   # breakpad framework
   file(COPY ${BREAKPAD_LIBS}/breakpad.framework DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
 
+  # libnode.dylib
+  file(COPY ${NODE_LIBRARY} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
+
 else (APPLE)
   # Copy themes
   file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION .)
 
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
-
-  # Copy silkedit_helper (node.js)
-  file(COPY ${PROJECT_SOURCE_DIR}/helper DESTINATION .)
 
   # Copy onig.dll
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)

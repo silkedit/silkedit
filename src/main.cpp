@@ -13,8 +13,11 @@
 #include "PlatformUtil.h"
 #include "TestUtil.h"
 #include "Helper.h"
-#include "core/ConditionManager.h"
 #include "MenuBar.h"
+#include "MetaTypeInitializer.h"
+#include "QObjectHelper.h"
+#include "API.h"
+#include "core/ConditionManager.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
 #include "core/ThemeManager.h"
@@ -34,9 +37,17 @@ int main(int argv, char** args) {
 #endif
   SilkApp app(argv, args);
 
+  // call a bunch of qRegisterMetaType calls
+  MetaTypeInitializer::init();
+
+  // instantiate singleton objects to set their thrad affinity to current thread
+  QObjectHelper::singleton();
+  API::singleton();
+
   ConditionManager::init();
 
   PackageManager::loadGrammers();
+
   ThemeManager::load();
 
   Config::singleton().init();

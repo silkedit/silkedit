@@ -8,7 +8,8 @@ class LineEdit : public QLineEdit {
   Q_OBJECT
   DISABLE_COPY(LineEdit)
  public:
-  explicit LineEdit(QWidget* parent);
+  Q_INVOKABLE explicit LineEdit(QWidget* parent = nullptr);
+  Q_INVOKABLE explicit LineEdit(const QString& contents, QWidget* parent = nullptr);
   ~LineEdit() = default;
   DEFAULT_MOVE(LineEdit)
 
@@ -16,7 +17,7 @@ class LineEdit : public QLineEdit {
   void keyPressEvent(QKeyEvent* event) override;
   void focusInEvent(QFocusEvent* ev) override;
 
-signals:
+ signals:
   void shiftReturnPressed();
   void focusIn();
 };

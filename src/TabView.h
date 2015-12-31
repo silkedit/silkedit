@@ -7,7 +7,6 @@
 
 #include "core/macros.h"
 #include "core/set_unique_ptr.h"
-#include "core/UniqueObject.h"
 
 class TextEditView;
 class TabBar;
@@ -15,7 +14,7 @@ namespace core {
 class Theme;
 }
 
-class TabView : public QTabWidget, public core::UniqueObject {
+class TabView : public QTabWidget{
   Q_OBJECT
   DISABLE_COPY(TabView)
 
@@ -26,31 +25,27 @@ class TabView : public QTabWidget, public core::UniqueObject {
 
   int addTab(QWidget* page, const QString& label);
   int insertTab(int index, QWidget* w, const QString& label);
-  Q_INVOKABLE int open(const QString& path);
-  Q_INVOKABLE void addNew();
   TextEditView* activeEditView() { return m_activeEditView; }
   bool tabDragging() { return m_tabDragging; }
   void saveAllTabs();
-  Q_INVOKABLE void closeActiveTab();
-  Q_INVOKABLE bool closeAllTabs();
-  Q_INVOKABLE void closeOtherTabs();
   int indexOfPath(const QString& path);
-  bool createWithSavedTabs( void );
   int insertTabInformation( const int index );
   Q_INVOKABLE int count();
   Q_INVOKABLE int currentIndex();
   Q_INVOKABLE void setCurrentIndex(int index);
 
+ public slots:
+  void closeActiveTab();
+  bool closeAllTabs();
+  void closeOtherTabs();
+  int open(const QString& path);
+  void createWithSavedTabs();
+
  signals:
   void allTabRemoved();
   void activeTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
 
- public slots:
-  // Detach Tab
-  void detachTabStarted(int index, const QPoint&);
-  void detachTabEntered(const QPoint& enterPoint);
-  void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
-
+ protected:
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
   void mouseReleaseEvent(QMouseEvent* event) override;
@@ -61,16 +56,16 @@ class TabView : public QTabWidget, public core::UniqueObject {
   bool m_tabDragging;
 
   void setActiveEditView(TextEditView* editView);
-
   void removeTabAndWidget(int index);
   bool closeTab(QWidget* w);
   void focusTabContent(int index);
-
- private slots:
   void updateTabTextBasedOn(bool changed);
   void changeActiveEditView(int index);
   void changeTabText(const QString& path);
   void changeTabStyle(core::Theme* theme);
+  void detachTabStarted(int index, const QPoint&);
+  void detachTabEntered(const QPoint& enterPoint);
+  void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
 };
 
 Q_DECLARE_METATYPE(TabView*)

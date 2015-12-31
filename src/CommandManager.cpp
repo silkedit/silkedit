@@ -19,6 +19,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   for (const CmdEventHandler& handler : m_cmdEventFilters) {
     std::tuple<bool, std::string, CommandArgument> resultTuple = handler(cmdName, cmdArg);
     if (std::get<0>(resultTuple)) {
+      qDebug() << name << "is handled by an event filter";
       return;
     }
     cmdName = std::get<1>(resultTuple);
@@ -26,7 +27,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   }
 
   QString qCmdName = QString::fromUtf8(cmdName.c_str());
-  //  qDebug("qCmdName: %s", qPrintable(qCmdName));
+//  qDebug() << "qCmdName:" << qCmdName;
   if (m_commands.find(qCmdName) != m_commands.end()) {
     m_commands[qCmdName]->run(cmdArg, repeat);
     Helper::singleton().sendCommandEvent(qCmdName, cmdArg);

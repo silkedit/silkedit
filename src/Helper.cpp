@@ -1,4 +1,6 @@
-﻿#include <unordered_map>
+﻿#include <memory>
+#include <node.h>
+#include <unordered_map>
 #include <string>
 #include <vector>
 #include <tuple>
@@ -11,53 +13,58 @@
 #include <QApplication>
 #include <QMetaObject>
 #include <QMetaMethod>
+#include <QObject>
+#include <QEventLoop>
+#include <QMutexLocker>
+#include <QVariantMap>
 
 #include "Helper_p.h"
 #include "API.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
+#include "Window.h"
 #include "core/Constants.h"
 #include "core/modifiers.h"
 #include "core/Config.h"
 #include "core/Icondition.h"
 #include "core/Util.h"
-#include "core/ObjectStore.h"
-#include "core/ArgumentArray.h"
+#include "core/QVariantArgument.h"
 
 using core::Constants;
 using core::Config;
 using core::Util;
-using core::ArgumentArray;
-using core::ObjectStore;
+using core::QVariantArgument;
+
+using v8::String;
+using v8::Isolate;
+using v8::Local;
+using v8::MaybeLocal;
+using v8::Exception;
+using v8::FunctionCallbackInfo;
+using v8::Value;
+using v8::Object;
+using v8::Function;
+using v8::Null;
+using v8::Persistent;
+using v8::HandleScope;
+using v8::TryCatch;
+using v8::Boolean;
+using v8::EscapableHandleScope;
+using v8::Array;
 
 namespace {
 
-const QUuid API_UUID = QUuid(QByteArray::fromHex("7b32626237643730372d343265332d346265322d613766632d3363363566393937646534307d"));
-const QUuid Constants_UUID = QUuid(QByteArray::fromHex("7b36336433393166332d653764382d343261342d393339622d3435373934663265333532367d"));
-
-struct QVariantArgument {
-  operator QGenericArgument() const {
-    if (value.isValid()) {
-      return QGenericArgument(value.typeName(), value.constData());
-    } else {
-      return QGenericArgument();
-    }
-  }
-
-  QVariant value;
-};
-
 QStringList helperArgs() {
   QStringList args;
+  args << QCoreApplication::applicationFilePath();
   // stop Node in debug mode
   //  args << "--debug-brk";
-  // add --harmony option first
+  // expose global.gc()
+  //  args << "--expose-gc";
   args << "--harmony";
   args << "--harmony_proxies";
   // first argument is main script
-  args << Constants::singleton().helperDir() + "/main.js";
-  // second argument is a socket path
-  args << Constants::singleton().helperSocketPath();
+  args << Constants::singleton().jsLibDir() + "/main.js";
   // third argument is locale
   args << Config::singleton().locale();
   // remaining arguments are paths to be loaded in silkedit_helper
@@ -65,243 +72,59 @@ QStringList helperArgs() {
   args << QDir::toNativeSeparators(Constants::singleton().silkHomePath() + "/packages");
   return args;
 }
-}
 
-std::unordered_map<QString, std::function<void(const QString&, const msgpack::object&)>>
-    HelperPrivate::s_notifyFunctions;
-std::unordered_map<
-    QString,
-    std::function<void(msgpack::rpc::msgid_t, const QString&, const msgpack::object&)>>
-    HelperPrivate::s_requestFunctions;
-msgpack::rpc::msgid_t Helper::s_msgId = 0;
-std::unordered_map<msgpack::rpc::msgid_t, ResponseResult*> Helper::s_eventLoopMap;
+CommandArgument toCommandArgument(QVariantMap map) {
+  CommandArgument arg;
+  auto it = map.constBegin();
+  while (it != map.constEnd()) {
+    arg.insert(
+        std::make_pair(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData()));
+  }
+  return arg;
+}
+}
 
 HelperPrivate::~HelperPrivate() {
   qDebug("~HelperPrivate");
-  if (m_helperProcess) {
-    disconnect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-               this, &HelperPrivate::onFinished);
-    m_helperProcess->terminate();
-  }
 }
 
-void HelperPrivate::startPluginRunnerProcess() {
-  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-  env.insert("NODE_PATH", QApplication::applicationDirPath() + "/helper/node_modules");
-  m_helperProcess->setProcessEnvironment(env);
-  m_helperProcess->start(Constants::singleton().helperPath(), helperArgs());
+void HelperPrivate::startHelperThread() {
+  m_helperThread->start();
 }
 
 void HelperPrivate::init() {
-  connect(&ObjectStore::singleton(), &ObjectStore::objectRemoved, q, &Helper::notifyObjectRemoved);
-
-  ObjectStore::singleton().insert(API_UUID, &API::singleton());
-  ObjectStore::singleton().insert(Constants_UUID, &Constants::singleton());
-
-  Q_ASSERT(!m_helperProcess);
+  Q_ASSERT(!m_helperThread);
 
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
   CommandManager::singleton().addEventFilter(std::bind(
       &HelperPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
-  m_server = new QLocalServer(this);
-  QFile socketFile(Constants::singleton().helperSocketPath());
-  if (socketFile.exists()) {
-    socketFile.remove();
-  }
+  m_helperThread = new HelperThread(this);
+  connect(m_helperThread, &QThread::finished, this, &HelperPrivate::onFinished);
 
-  if (!m_server->listen(Constants::singleton().helperSocketPath())) {
-    qCritical("Unable to start the server: %s", qPrintable(m_server->errorString()));
-    return;
-  }
-
-  connect(m_server, &QLocalServer::newConnection, this, &HelperPrivate::helperConnected);
-
-  m_helperProcess.reset(new QProcess(this));
-  connect(m_helperProcess.get(), &QProcess::readyReadStandardOutput, this,
-          &HelperPrivate::readStdout);
-  connect(m_helperProcess.get(), &QProcess::readyReadStandardError, this,
-          &HelperPrivate::readStderr);
-  connect(m_helperProcess.get(), static_cast<void (QProcess::*)(int)>(&QProcess::finished), this,
-          &HelperPrivate::onFinished);
-  qDebug("helper: %s", qPrintable(Constants::singleton().helperPath()));
-  qDebug() << "args:" << helperArgs();
-  // Disable stdout to speed up calling external command
-  //  m_helperProcess->setStandardOutputFile(QProcess::nullDevice());
-
-  startPluginRunnerProcess();
-}
-
-void HelperPrivate::sendError(const std::string& err, msgpack::rpc::msgid_t id) {
-  if (q->m_isStopped)
-    return;
-
-  msgpack::sbuffer sbuf;
-  msgpack::rpc::msg_response<msgpack::type::nil, std::string> response;
-  response.msgid = id;
-  response.error = err;
-  response.result = msgpack::type::nil();
-
-  msgpack::pack(sbuf, response);
-
-  q->m_socket->write(sbuf.data(), sbuf.size());
+  startHelperThread();
 }
 
 HelperPrivate::HelperPrivate(Helper* q_ptr)
-    : q(q_ptr),
-      m_helperProcess(nullptr),
-      m_server(nullptr),
-      m_classMethodHash(QHash<QString, QHash<QString, int>>()) {}
+    : q(q_ptr), m_helperThread(nullptr) {}
 
-void HelperPrivate::readStdout() {
-  QProcess* p = (QProcess*)sender();
-  QByteArray buf = p->readAllStandardOutput();
-  qDebug() << buf;
+void HelperPrivate::onFinished() {
+  qCritical("Helper thread has stopped working.");
 }
 
-void HelperPrivate::readStderr() {
-  QProcess* p = (QProcess*)sender();
-  QByteArray buf = p->readAllStandardError();
-  qWarning() << buf;
-}
-
-void HelperPrivate::helperConnected() {
-  qDebug() << "new helper process connected";
-
-  q->m_socket = m_server->nextPendingConnection();
-  Q_ASSERT(q->m_socket);
-  connect(q->m_socket, &QLocalSocket::disconnected, q->m_socket, &QLocalSocket::deleteLater);
-
-  // QueuedConnection is necessary to emit readyRead() recursively.
-  // > readyRead() is not emitted recursively; if you reenter the event loop or call
-  // waitForReadyRead() inside a slot connected to the readyRead() signal, the signal will not be
-  // reemitted (although waitForReadyRead() may still return true).
-  connect(q->m_socket, &QLocalSocket::readyRead, this, &HelperPrivate::readRequest,
-          Qt::QueuedConnection);
-  connect(q->m_socket,
-          static_cast<void (QLocalSocket::*)(QLocalSocket::LocalSocketError)>(&QLocalSocket::error),
-          this, &HelperPrivate::displayError);
-}
-
-void HelperPrivate::onFinished(int exitCode) {
-  qWarning("silkedit_helper has stopped working. exit code: %d", exitCode);
-  q->m_isStopped = true;
-  auto reply = QMessageBox::question(
-      nullptr, "Error",
-      tr("silkedit_helper process has crashed. SilkEdit can continue to run but "
-         "you can't use any packages. Do you want to restart the silkedit_helper process?"));
-  if (reply == QMessageBox::Yes) {
-    startPluginRunnerProcess();
-    q->m_isStopped = false;
-  }
-}
-
-void HelperPrivate::readRequest() {
-  //  qDebug("readRequest");
-
-  msgpack::unpacker unpacker;
-  std::size_t readSize = q->m_socket->bytesAvailable();
-
-  // Message receive loop
-  while (true) {
-    unpacker.reserve_buffer(readSize);
-    // unp has at least readSize buffer on this point.
-
-    // read message to msgpack::unpacker's internal buffer directly.
-    qint64 actual_read_size = q->m_socket->read(unpacker.buffer(), readSize);
-    //    qDebug() << actual_read_size;
-    QByteArray array(unpacker.buffer(), actual_read_size);
-    //    qDebug() << QString(array.toHex());
-    if (actual_read_size == 0) {
-      break;
-    } else if (actual_read_size == -1) {
-      qCritical("unable to read a socket. %s", qPrintable(q->m_socket->errorString()));
-      break;
-    }
-
-    // tell msgpack::unpacker actual consumed size.
-    unpacker.buffer_consumed(actual_read_size);
-
-    msgpack::unpacked result;
-    // Message pack data loop
-    while (unpacker.next(result)) {
-      msgpack::object obj(result.get());
-      msgpack::rpc::msg_rpc rpc;
-      try {
-        obj.convert(&rpc);
-
-        switch (rpc.type) {
-          case msgpack::rpc::REQUEST: {
-            msgpack::rpc::msg_request<msgpack::object, msgpack::object> req;
-            obj.convert(&req);
-            QString methodName = QString::fromUtf8(req.method.as<std::string>().c_str());
-            callRequestFunc(methodName, req.msgid, req.param);
-          } break;
-
-          case msgpack::rpc::RESPONSE: {
-            msgpack::rpc::msg_response<msgpack::object, msgpack::object> res;
-            obj.convert(&res);
-            auto found = Helper::s_eventLoopMap.find(res.msgid);
-            if (found != Helper::s_eventLoopMap.end()) {
-              //              qDebug("result of %d arrived", res.msgid);
-              if (res.error.type == msgpack::type::NIL) {
-                found->second->setResult(std::move(std::unique_ptr<object_with_zone>(
-                    new object_with_zone(res.result, std::move(result.zone())))));
-              } else {
-                found->second->setError(std::move(std::unique_ptr<object_with_zone>(
-                    new object_with_zone(res.error, std::move(result.zone())))));
-              }
-            } else {
-              qWarning("no matched response result for %d", res.msgid);
-            }
-          } break;
-
-          case msgpack::rpc::NOTIFY: {
-            msgpack::rpc::msg_notify<msgpack::object, msgpack::object> notify;
-            obj.convert(&notify);
-            QString methodName = QString::fromUtf8(notify.method.as<std::string>().c_str());
-            callNotifyFunc(methodName, notify.param);
-          } break;
-          default:
-            qCritical("invalid rpc type");
-        }
-      } catch (msgpack::v1::type_error e) {
-        qCritical() << "type error. bad cast. cause: " << e.what();
-        continue;
-      }
+CommandEventFilterResult HelperPrivate::cmdEventFilter(const std::string& name,
+                                                       const CommandArgument& arg) {
+  const QVariantList& args = QVariantList{QVariant::fromValue(name), QVariant::fromValue(arg)};
+  const QVariant& result = q->callRequestJSFunc("cmdEventFilter", args);
+  if (result.canConvert<QVariantList>()) {
+    QVariantList varResults = result.value<QVariantList>();
+    if (varResults.size() == 3 && varResults[0].canConvert<bool>() &&
+        varResults[1].canConvert<QString>() && varResults[2].canConvert<QVariantMap>()) {
+      return std::make_tuple(varResults[0].toBool(), varResults[1].toString().toUtf8().constData(),
+                             toCommandArgument(varResults[2].value<QVariantMap>()));
     }
   }
-}
-
-void HelperPrivate::displayError(QLocalSocket::LocalSocketError socketError) {
-  switch (socketError) {
-    case QLocalSocket::ServerNotFoundError:
-      qWarning("The host was not found.");
-      break;
-    case QLocalSocket::ConnectionRefusedError:
-      qWarning("The connection was refused by the peer.");
-      break;
-    case QLocalSocket::PeerClosedError:
-      break;
-    default:
-      qWarning("The following error occurred: %s.", qPrintable(q->m_socket->errorString()));
-      break;
-  }
-}
-
-std::tuple<bool, std::string, CommandArgument> HelperPrivate::cmdEventFilter(
-    const std::string& name,
-    const CommandArgument& arg) {
-  qDebug("cmdEventFilter");
-  std::tuple<std::string, CommandArgument> event = std::make_tuple(name, arg);
-  try {
-    return std::move(q->sendRequest<std::tuple<std::string, CommandArgument>,
-                                    std::tuple<bool, std::string, CommandArgument>>(
-        "cmdEventFilter", event, msgpack::type::ARRAY));
-  } catch (const std::exception& e) {
-    qCritical() << e.what();
-    return std::make_tuple(false, "", CommandArgument());
-  }
+  return std::make_tuple(false, "", CommandArgument());
 }
 
 bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
@@ -341,35 +164,25 @@ bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
   bool metaKey = event->modifiers() & Silk::MetaModifier;
   bool shiftKey = event->modifiers() & Silk::ShiftModifier;
 
-  std::tuple<std::string, std::string, bool, bool, bool, bool, bool> params =
-      std::make_tuple(type, key, event->isAutoRepeat(), altKey, ctrlKey, metaKey, shiftKey);
-  try {
-    return q->sendRequest<std::tuple<std::string, std::string, bool, bool, bool, bool, bool>, bool>(
-        "keyEventFilter", params, msgpack::type::BOOLEAN);
-  } catch (const std::exception& e) {
-    qCritical() << e.what();
-    return false;
-  }
-}
-
-void ResponseResult::setResult(std::unique_ptr<object_with_zone> obj) {
-  //  qDebug("setResult");
-  m_isReady = true;
-  m_isSuccess = true;
-  m_result = std::move(obj);
-  emit ready();
-}
-
-void ResponseResult::setError(std::unique_ptr<object_with_zone> obj) {
-  qDebug("setError");
-  m_isReady = true;
-  m_isSuccess = false;
-  m_result = std::move(obj);
-  emit ready();
+  std::unique_ptr<BoolResponse> response = std::make_unique<BoolResponse>();
+  const QVariantList& args = QVariantList{QVariant::fromValue(type),
+                                          QVariant::fromValue(key),
+                                          QVariant::fromValue(event->isAutoRepeat()),
+                                          QVariant::fromValue(altKey),
+                                          QVariant::fromValue(ctrlKey),
+                                          QVariant::fromValue(metaKey),
+                                          QVariant::fromValue(shiftKey),
+                                          QVariant::fromValue(response.get())};
+  QEventLoop loop;
+  connect(response.get(), &BoolResponse::finished, &loop, &QEventLoop::quit);
+  q->callNotifyJSFunc("keyEventFilter", args);
+  loop.exec(QEventLoop::ExcludeUserInputEvents);
+  return response->result();
 }
 
 Helper::~Helper() {
   qDebug("~Helper");
+  uv_close((uv_handle_t*)&async, NULL);
 }
 
 void Helper::init() {
@@ -377,162 +190,170 @@ void Helper::init() {
 }
 
 void Helper::sendFocusChangedEvent(const QString& viewType) {
-  std::string type = viewType.toUtf8().constData();
-  std::tuple<std::string> params = std::make_tuple(type);
-  sendNotification("focusChanged", params);
+  const QVariantList& args = QVariantList{QVariant::fromValue(viewType)};
+  callNotifyJSFunc("focusChanged", args);
 }
 
-void Helper::sendCommandEvent(const QString& command, const CommandArgument& args) {
-  std::string methodName = command.toUtf8().constData();
-  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  sendNotification("commandEvent", params);
+void Helper::sendCommandEvent(const QString& command, const CommandArgument& cmdArgs) {
+  const QVariantList& args =
+      QVariantList{QVariant::fromValue(command), QVariant::fromValue(cmdArgs)};
+  callNotifyJSFunc("commandEvent", args);
 }
 
-void Helper::callExternalCommand(const QString& cmd, const CommandArgument& args) {
-  std::string methodName = cmd.toUtf8().constData();
-  std::tuple<std::string, CommandArgument> params = std::make_tuple(methodName, args);
-  try {
-    sendRequest<std::tuple<std::string, CommandArgument>, bool>("runCommand", params,
-                                                                msgpack::type::BOOLEAN, -1);
-  } catch (const std::exception& e) {
-    qWarning("cmd: %s:, cause: %s", qPrintable(cmd), e.what());
-  }
+void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
+  const QVariantList& args = QVariantList{QVariant::fromValue(cmd), QVariant::fromValue(cmdArgs)};
+  callRequestJSFunc("runCommand", args);
 }
 
-bool Helper::askExternalCondition(const QString& name, core::Operator op, const QString& value) {
-  qDebug("askExternalCondition");
-  std::tuple<std::string, std::string, std::string> params = std::make_tuple(
-      name.toUtf8().constData(), core::ICondition::operatorString(op).toUtf8().constData(),
-      value.toUtf8().constData());
-
-  try {
-    return sendRequest<std::tuple<std::string, std::string, std::string>, bool>(
-        "askCondition", params, msgpack::type::BOOLEAN);
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return false;
-  }
+bool Helper::askCondition(const QString& name, core::Operator op, const QString& value) {
+  const QVariantList& args = QVariantList{QVariant::fromValue(name),
+                                          QVariant::fromValue(core::ICondition::operatorString(op)),
+                                          QVariant::fromValue(value)};
+  const QVariant& result = callRequestJSFunc("askCondition", args);
+  return result.canConvert<bool>() ? result.toBool() : false;
 }
 
 QString Helper::translate(const QString& key, const QString& defaultValue) {
-  try {
-    const std::string& result = sendRequest<std::tuple<std::string, std::string>, std::string>(
-        "translate", std::make_tuple(key.toUtf8().constData(), defaultValue.toUtf8().constData()),
-        msgpack::type::STR);
-    return QString::fromUtf8(result.c_str());
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return defaultValue;
+  const QVariantList& args =
+      QVariantList{QVariant::fromValue(key), QVariant::fromValue(defaultValue)};
+  const QVariant& result = callRequestJSFunc("translate", args);
+  return result.canConvert<QString>() ? result.toString() : defaultValue;
+}
+
+void Helper::emitSignalInternal(const QVariantList& args) {
+  if (!isAsyncReady()) {
+    qWarning() << "uv_async is not active";
+    return;
   }
+
+  QObject* obj = QObject::sender();
+  if (!obj) {
+    qWarning() << "sender is null";
+    return;
+  }
+
+  if (obj->thread() != QThread::currentThread()) {
+    qWarning() << "invalid thread affinity";
+    return;
+  }
+
+  const QMetaMethod& method = obj->metaObject()->method(QObject::senderSignalIndex());
+  if (!method.isValid()) {
+    qWarning() << "signal method is invalid";
+    return;
+  }
+
+  //  qDebug() << "emitSignalInternal." << method.name();
+  auto emitSignal = std::make_shared<NodeEmitSignal>(obj, method.name(), args);
+  nodeRemoteCalls.enqueue(QVariant::fromValue(emitSignal));
+  asyncLock.lock();
+  async.data = (void*)&nodeRemoteCalls;
+  asyncLock.unlock();
+
+  QEventLoop eventLoop;
+  connect(emitSignal.get(), &NodeEmitSignal::finished, &eventLoop, &QEventLoop::quit);
+  uv_async_send(&async);
+  // don't block current thread because Node.js needs to call silkedit API in this call
+  eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
+}
+
+bool Helper::isAsyncReady() {
+  QMutexLocker locker(&asyncLock);
+  return async.type == UV_ASYNC;
+}
+
+void Helper::emitSignal() {
+  emitSignalInternal(QVariantList());
+}
+
+void Helper::callNotifyJSFunc(const QString& funcName, const QVariantList& args) {
+  if (!isAsyncReady()) {
+    qWarning() << "uv_async is not active";
+    return;
+  }
+
+  QVariant methodCall = QVariant::fromValue(std::make_shared<NodeMethodCall>(funcName, args));
+  // We need queuing NodeMethodCall request because uv_async_send may coalesce multiple
+  // uv_async_send calls into single one.
+  // http://docs.libuv.org/en/v1.x/async.html
+  nodeRemoteCalls.enqueue(methodCall);
+  asyncLock.lock();
+  async.data = (void*)&nodeRemoteCalls;
+  asyncLock.unlock();
+
+  uv_async_send(&async);
+}
+
+QVariant Helper::callRequestJSFunc(const QString& funcName, const QVariantList& args) {
+  if (!isAsyncReady()) {
+    qWarning() << "uv_async is not active";
+    return QVariant();
+  }
+
+  QVariant methodCall = QVariant::fromValue(std::make_shared<NodeMethodCall>(funcName, args));
+  // We need queuing NodeMethodCall request because uv_async_send may coalesce multiple
+  // uv_async_send calls into single one.
+  // http://docs.libuv.org/en/v1.x/async.html
+  nodeRemoteCalls.enqueue(methodCall);
+  asyncLock.lock();
+  async.data = (void*)&nodeRemoteCalls;
+  asyncLock.unlock();
+
+  QEventLoop eventLoop;
+  connect(methodCall.value<std::shared_ptr<NodeMethodCall>>().get(), &NodeMethodCall::finished,
+          &eventLoop, &QEventLoop::quit);
+  uv_async_send(&async);
+  // don't block current thread because Node.js needs to call silkedit API in this call
+  eventLoop.exec(QEventLoop::ExcludeUserInputEvents);
+  return methodCall.value<std::shared_ptr<NodeMethodCall>>()->returnValue();
 }
 
 void Helper::loadPackage(const QString& pkgName) {
   const QString& pkgDirPath =
       Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
-  const std::tuple<std::string>& params =
-      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
-  sendNotification("loadPackage", params);
+  const QVariantList& args = QVariantList{QVariant::fromValue(pkgDirPath)};
+  callNotifyJSFunc("loadPackage", args);
 }
 
 bool Helper::removePackage(const QString& pkgName) {
   const QString& pkgDirPath =
       Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
-  const std::tuple<std::string>& params =
-      std::make_tuple<std::string>(pkgDirPath.toUtf8().constData());
-
-  try {
-    return sendRequest<std::tuple<std::string>, bool>("removePackage", params,
-                                                      msgpack::type::BOOLEAN, 0);
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return false;
-  }
+  std::unique_ptr<BoolResponse> response = std::make_unique<BoolResponse>();
+  const QVariantList& args =
+      QVariantList{QVariant::fromValue(pkgDirPath), QVariant::fromValue(response.get())};
+  QEventLoop loop;
+  connect(response.get(), &BoolResponse::finished, &loop, &QEventLoop::quit);
+  callNotifyJSFunc("removePackage", args);
+  loop.exec(QEventLoop::ExcludeUserInputEvents);
+  return response->result();
 }
 
 GetRequestResponse* Helper::sendGetRequest(const QString& url, int timeoutInMs) {
-  const std::tuple<std::string>& params = std::make_tuple<std::string>(url.toUtf8().constData());
-
-  try {
-    GetRequestResponse* response = new GetRequestResponse();
-    sendRequestAsync<std::tuple<std::string>, std::string>(
-        "sendGetRequest", params, msgpack::type::STR,
-        [=](const std::string& body) {
-          emit response->onSucceeded(QString::fromUtf8(body.c_str()));
-        },
-        [=](const QString& error) { emit response->onFailed(error); }, timeoutInMs);
-    return response;
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-  }
-  return nullptr;
+  GetRequestResponse* response = new GetRequestResponse();
+  const QVariantList& args = QVariantList{
+      QVariant::fromValue(url), QVariant::fromValue(timeoutInMs), QVariant::fromValue(response)};
+  callNotifyJSFunc("sendGetRequest", args);
+  return response;
 }
 
 void Helper::reloadKeymaps() {
-  sendNotification("reloadKeymaps");
+  callNotifyJSFunc("reloadKeymaps");
 }
 
-void Helper::notifyObjectRemoved(const QUuid &id)
-{
-  std::tuple<QUuid> params = std::make_tuple(id);
-  sendNotification("objectRemoved", params);
-}
+void Helper::invokeMethodFromJS(std::shared_ptr<InvokeMethodInfo> info,
+                                std::shared_ptr<UvEventLoop> loop) {
+  qDebug() << "invokeMethod in main thread." << info->method().name();
+  QObject* object = info->object();
+  const QMetaMethod& method = info->method();
+  QVariantList args = info->args();
 
-Helper::Helper() : d(new HelperPrivate(this)), m_isStopped(false), m_socket(nullptr) {}
+  assert(args.size() <= Q_METAMETHOD_INVOKE_MAX_ARGS);
+  assert(args.size() <= method.parameterCount());
+  assert(object);
+  assert(method.isValid());
+  assert(method.access() == QMetaMethod::Public);
 
-void HelperPrivate::cacheMethods(const QString& className, const QMetaObject* metaObj) {
-  QHash<QString, int> methodNameIndexHash;
-  for (int i = 0; i < metaObj->methodCount(); i++) {
-    const QString& name = QString::fromLatin1(metaObj->method(i).name());
-    methodNameIndexHash.insert(name, i);
-  }
-  m_classMethodHash.insert(className, methodNameIndexHash);
-}
-
-QVariant HelperPrivate::invokeMethod(QObject* object,
-                                     const QString& methodName,
-                                     QVariantList args) {
-  if (args.size() > 10) {
-    qWarning() << "Can't invoke method with more than 10 arguments. args:" << args.size();
-    return QVariant();
-  }
-
-  if (!object) {
-    QString errMsg = QString("can't convert to QObject");
-    qWarning() << qPrintable(errMsg);
-    return QVariant();
-  }
-
-  int methodIndex = -1;
-  const QString& className = object->metaObject()->className();
-  if (!m_classMethodHash.contains(className)) {
-    cacheMethods(className, object->metaObject());
-  }
-
-  if (m_classMethodHash.value(className).contains(methodName)) {
-    methodIndex = m_classMethodHash.value(className).value(methodName);
-  }
-
-  if (methodIndex == -1) {
-    QString errMsg = QString("method: %1 not found").arg(methodName);
-    qWarning() << qPrintable(errMsg);
-    return QVariant();
-  }
-
-  QMetaMethod method = object->metaObject()->method(methodIndex);
-
-  if (!method.isValid()) {
-    qWarning() << "Invalid method. name:" << method.name() << "index:" << methodIndex;
-    return QVariant();
-  } else if (method.access() != QMetaMethod::Public) {
-    qWarning() << "Can't invoke non-public method. name:" << method.name()
-               << "index:" << methodIndex;
-    return QVariant();
-  } else if (args.size() > method.parameterCount()) {
-    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
-               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
-  }
-
-  QVariantArgument varArgs[10];
+  QVariantArgument varArgs[Q_METAMETHOD_INVOKE_MAX_ARGS];
   for (int i = 0; i < args.size(); i++) {
     varArgs[i].value = args[i];
   }
@@ -547,59 +368,79 @@ QVariant HelperPrivate::invokeMethod(QObject* object,
     returnValue = QVariant(method.returnType(), nullptr);
   }
 
-  bool result = method.invoke(object, QGenericReturnArgument(method.typeName(), returnValue.data()),
-                              varArgs[0], varArgs[1], varArgs[2], varArgs[3], varArgs[4],
-                              varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
-  if (!result) {
-    qWarning("invoke %s failed", qPrintable(methodName));
+  QGenericReturnArgument returnArg;
+  if (returnValue.isValid()) {
+    returnArg = QGenericReturnArgument(method.typeName(), returnValue.data());
   }
-  return returnValue;
-}
 
-void HelperPrivate::callNotifyFunc(const QString& method, const msgpack::v1::object& obj) {
-  ArgumentArray params;
-  obj.convert(&params);
-  QUuid id = params.id();
-
-  QObject* view = ObjectStore::singleton().find(id);
-
-  if (view) {
-    invokeMethod(view, method, params.args());
+  if (object->thread() != QCoreApplication::instance()->thread()) {
+    qWarning() << "object thread affinity must be main thread";
   } else {
-    qWarning() << "id:" << id << "not found";
+    bool result = method.invoke(object, Qt::DirectConnection, returnArg, varArgs[0], varArgs[1],
+                                varArgs[2], varArgs[3], varArgs[4], varArgs[5], varArgs[6],
+                                varArgs[7], varArgs[8], varArgs[9]);
+    if (!result) {
+      qWarning() << "invoking" << method.name() << "failed";
+    }
   }
+
+  info->setReturnValue(returnValue);
+  nodeRemoteCalls.enqueue(QVariant::fromValue(loop));
+  asyncLock.lock();
+  async.data = (void*)&nodeRemoteCalls;
+  asyncLock.unlock();
+  uv_async_send(&async);
 }
 
-void HelperPrivate::callRequestFunc(const QString& method,
-                                    msgpack::rpc::msgid_t msgId,
-                                    const msgpack::v1::object& obj) {
-  ArgumentArray params;
-  obj.convert(&params);
-  QUuid id = params.id();
-
-  QObject* view = ObjectStore::singleton().find(id);
-
-  if (view) {
-    const QVariant& returnValue = invokeMethod(view, method, params.args());
-    Helper::singleton().sendResponse(returnValue, msgpack::type::nil(), msgId);
-  } else {
-    QString errMsg = QString("id: %1 not found").arg(id.toString());
-    qWarning() << qPrintable(errMsg);
-    Helper::singleton().sendResponse(msgpack::type::nil(),
-                                     ((std::string)errMsg.toUtf8().constData()), msgId);
-  }
+Helper::Helper() : d(new HelperPrivate(this)), m_isStopped(false) {
+  qRegisterMetaType<GetRequestResponse*>();
+  qRegisterMetaType<std::shared_ptr<UvEventLoop>>();
+  qRegisterMetaType<std::shared_ptr<InvokeMethodInfo>>();
 }
 
-std::tuple<bool, std::string, CommandArgument> Helper::cmdEventFilter(const std::string& name,
-                                                                      const CommandArgument& arg) {
-  qDebug("cmdEventFilter");
-  std::tuple<std::string, CommandArgument> event = std::make_tuple(name, arg);
-  try {
-    return std::move(sendRequest<std::tuple<std::string, CommandArgument>,
-                                 std::tuple<bool, std::string, CommandArgument>>(
-        "cmdEventFilter", event, msgpack::type::ARRAY));
-  } catch (const std::exception& e) {
-    qWarning() << e.what();
-    return std::make_tuple(false, "", CommandArgument());
+HelperThread::HelperThread(QObject* parent) : QThread(parent) {}
+
+void HelperThread::run() {
+  // convert QStringList to char*[]
+  const QStringList& argsStrings = helperArgs();
+  int size = 0;
+  for (const auto& arg : argsStrings) {
+    size += arg.size() + 1;
+  }
+
+  char** argv = (char**)malloc(sizeof(char*) * (argsStrings.size() + 1));  // +1 for last nullptr
+  // argv needs to be contiguous
+  char* s = (char*)malloc(sizeof(char) * size);
+  if (argv == nullptr) {
+    qWarning() << "failed to allocate memory for argument";
+    exit(1);
+  }
+
+  int i = 0;
+  for (i = 0; i < argsStrings.size(); i++) {
+    size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
+    memcpy(s, argsStrings[i].toLocal8Bit().data(), size);
+    argv[i] = s;
+    s += size;
+  }
+  argv[i] = nullptr;
+  int argc = argsStrings.size();
+  node::Start(argc, argv);
+
+  free(argv[0]);
+  free(argv);
+}
+
+void Helper::emitSignal(const QString& str) {
+  qDebug() << "emitSignal(QString)";
+  QVariantList args{QVariant::fromValue(str)};
+  emitSignalInternal(args);
+}
+
+void UvEventLoop::exec() {
+  // FIXME: known issue with net.createConnection on Windows
+  // https://github.com/abbr/deasync/issues/40
+  while (!m_isFinished) {
+    uv_run(uv_default_loop(), UV_RUN_ONCE);
   }
 }

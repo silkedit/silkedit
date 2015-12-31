@@ -3,15 +3,14 @@ CMakeLists.txt.user
 *.autosave
 .idea/
 *.otf
+*.node
 
 /lib/
+/libnode/
 /build/
 /include/
-/helper/bin
-/helper/lib
-/helper/node_modules
-/helper/node_modules/silkedit/node_modules/
-/helper/nodejs
+/jslib/node_modules/silkedit/node_modules/
+/jslib/node_modules/silkedit/build/
 /yaml-cpp-*
 /packages/node_modules/vim
 /packages/node_modules/default/node_modules

@@ -24,8 +24,11 @@ class SilkApp : public QApplication {
   SilkApp(int& argc, char** argv);
   ~SilkApp() = default;
 
-  bool event(QEvent*) override;
   void setupTranslator(const QString& locale);
+  bool eventFilter(QObject *, QEvent *event) override;
+
+protected:
+  bool event(QEvent*) override;
 
  private:
   static SilkApp* s_app;

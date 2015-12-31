@@ -5,7 +5,6 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QFontDialog>
-#include <QInputDialog>
 
 #include "API.h"
 #include "Window.h"
@@ -20,7 +19,6 @@
 #include "ProjectManager.h"
 #include "KeymapManager.h"
 #include "PackageCondition.h"
-#include "InputDialog.h"
 #include "ConfigDialog.h"
 #include "util/DialogUtils.h"
 #include "core/ConditionManager.h"
@@ -35,11 +33,6 @@ void API::hideActiveFindReplacePanel() {
   if (Window* window = SilkApp::activeWindow()) {
     window->hideFindReplacePanel();
   }
-}
-
-API::API() {
-  // Necessary to call a method with boost::optional<QString> return value
-  qRegisterMetaType<boost::optional<QString>>();
 }
 
 void API::alert(const QString& msg) {
@@ -66,9 +59,9 @@ void API::loadConfig(const QString& pkgName, const QString& ymlPath) {
 
 void API::registerCommands(QVariantList commands) {
   for (const QVariant& cmdVar : commands) {
-    //    qDebug("command: %s", cmd.c_str());
     if (cmdVar.canConvert<QStringList>() && cmdVar.value<QStringList>().size() == 2) {
       const QStringList cmd = cmdVar.value<QStringList>();
+//      qDebug() << "registering command: " << cmd.at(0);
       CommandManager::singleton().add(
           std::unique_ptr<ICommand>(new PackageCommand(cmd.at(0), cmd.at(1))));
     }
@@ -153,10 +146,6 @@ QString API::version() {
   return SilkApp::applicationVersion();
 }
 
-InputDialog* API::newInputDialog() {
-  return new InputDialog();
-}
-
 void API::open(const QString& pathStr) {
   QString path = QDir::fromNativeSeparators(pathStr);
   QFileInfo info(path);
@@ -167,41 +156,6 @@ void API::open(const QString& pathStr) {
   } else {
     qWarning("%s is neither file nor directory.", qPrintable(path));
   }
-}
-
-void API::dispatchCommand(const QString& typeStr,
-                          const QString& key,
-                          bool autorep,
-                          bool altKey,
-                          bool ctrlKey,
-                          bool metaKey,
-                          bool shiftKey) {
-  QEvent::Type type;
-  if (typeStr == "keypress") {
-    type = QEvent::KeyPress;
-  } else if (typeStr == "keyup") {
-    type = QEvent::KeyRelease;
-  } else {
-    qWarning("invalid key event type: %s", qPrintable(typeStr));
-    return;
-  }
-
-  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
-  if (altKey) {
-    modifiers |= Silk::AltModifier;
-  }
-  if (ctrlKey) {
-    modifiers |= Silk::ControlModifier;
-  }
-  if (metaKey) {
-    modifiers |= Silk::MetaModifier;
-  }
-  if (shiftKey) {
-    modifiers |= Silk::ShiftModifier;
-  }
-
-  KeymapManager::singleton().dispatch(
-      new QKeyEvent(type, QKeySequence(key)[0], modifiers, key, autorep));
 }
 
 void API::setFont(const QString& family, int size) {

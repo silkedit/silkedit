@@ -121,25 +121,36 @@ resolve() {
       fi
 
       # node
-      if [ ! -d helper/bin ]; then
-        node=node-v5.1.0-darwin-x64
-        echo "Downloading $node"
-        curl -O http://nodejs.org/dist/v5.1.0/$node.tar.gz
-        tar zxf $node.tar.gz
-        # -R keeps symlink intact
-        cp -R $node/bin $node/lib helper
-        rm -rf $node $node.tar.gz
+      if [ ! -f libnode/lib/libnode.dylib ]; then
+        # download libnode.dylib
+        node_version=v5.1.1
+        mkdir -p libnode/lib
+        cd libnode/lib
+        echo "Downloading Node.js library"
+        curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/libnode.dylib.zip
+        unzip libnode.dylib.zip
+        rm libnode.dylib.zip
+        cd ..
+        
+        # download node.js headers
+        curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/node-$node_version-headers.tar.gz
+        tar zxvf node-$node_version-headers.tar.gz
+        mv node-$node_version/include .
+        rm -r node-$node_version*
+        cd ..
       fi
 
-      # npm install for plugin runner
-      cd helper/node_modules/silkedit
-      PATH=$(pwd)/../../bin:$PATH
-      ../../bin/npm install
+      # npm install for silkedit
+      cd jslib/node_modules/silkedit
+      cmake-js build
+      cp build/Release/silkeditbridge.node .
+      rm -rf build
+      npm install --production
       cd ../../..
 
       # npm install for default package
       cd packages/node_modules/default
-      ../../../helper/bin/npm install
+      npm install --production
       cd ../../..
     else
         # yaml-cpp
@@ -283,7 +294,8 @@ build() {
 
         ninja
 
-		# crashreporter
+        # crashreporter
+        # todo: do these in cmake
         cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
         cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else

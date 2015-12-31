@@ -17,6 +17,7 @@
 #include "core/AndConditionExpression.h"
 #include "core/PackageManager.h"
 #include "core/Package.h"
+#include "core/modifiers.h"
 #include "util/YamlUtils.h"
 
 using core::Constants;
@@ -54,12 +55,12 @@ QKeySequence toSequence(const QKeyEvent& ev) {
 CommandArgument parseArgs(const YAML::Node& argsNode) {
   CommandArgument args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
-    std::string arg = argsIter->first.as<std::string>();
-    std::string value = argsIter->second.as<std::string>();
-    args.insert(std::make_pair(std::move(arg), std::move(value)));
+    const std::string& arg = argsIter->first.as<std::string>();
+    const std::string& value = argsIter->second.as<std::string>();
+    args.insert(std::make_pair(arg, value));
   }
 
-  return std::move(args);
+  return args;
 }
 }
 
@@ -92,7 +93,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
         const std::string& commandStr = commandNode.as<std::string>();
         command = QString::fromUtf8(commandStr.c_str());
       }
-      //      qDebug() << "key: " << key << ", command: " << command;
+//      qDebug() << "key: " << key << ", command: " << command;
 
       YAML::Node ifNode = keymapDefNode["if"];
       boost::optional<AndConditionExpression> condition;
@@ -165,18 +166,47 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
+void KeymapManager::dispatchFromJS(const QString &typeStr, const QString &key, bool autorep, bool altKey, bool ctrlKey, bool metaKey, bool shiftKey) {
+  QEvent::Type type;
+  if (typeStr == "keypress") {
+    type = QEvent::KeyPress;
+  } else if (typeStr == "keyup") {
+    type = QEvent::KeyRelease;
+  } else {
+    qWarning("invalid key event type: %s", qPrintable(typeStr));
+    return;
+  }
+
+  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
+  if (altKey) {
+    modifiers |= Silk::AltModifier;
+  }
+  if (ctrlKey) {
+    modifiers |= Silk::ControlModifier;
+  }
+  if (metaKey) {
+    modifiers |= Silk::MetaModifier;
+  }
+  if (shiftKey) {
+    modifiers |= Silk::ShiftModifier;
+  }
+
+  dispatch(
+        new QKeyEvent(type, QKeySequence(key)[0], modifiers, key, autorep));
+}
+
 KeymapManager::KeymapManager() {
   connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
           [=](const Package& pkg) {
-            for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
-              if (it->second.source() == pkg.name) {
-                it = m_keymaps.erase(it);
-              } else {
-                ++it;
-              }
-            }
-            emit keymapUpdated();
-          });
+    for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+      if (it->second.source() == pkg.name) {
+        it = m_keymaps.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    emit keymapUpdated();
+  });
 
   connect(&CommandManager::singleton(), &CommandManager::commandRemoved, this,
           [=](const QString& name) { m_cmdKeymapHash.erase(name); });

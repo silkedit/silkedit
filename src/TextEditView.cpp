@@ -456,7 +456,7 @@ TextEditView::TextEditView(QWidget* parent)
 }
 
 TextEditView::~TextEditView() {
-  emit destroying(d_ptr->m_document->path());
+  emit destroying(d_ptr->m_document->path(), QPrivateSignal());
   qDebug("~TextEditView");
 }
 
@@ -913,7 +913,7 @@ void TextEditView::replaceAllSelection(const QString& findText,
   }
 }
 
-void TextEditView::insertNewLineWithIndent() {
+void TextEditView::insertNewLine() {
   // textCursor()->insertBlock() doesn't work because QPlainTextEdit does more things
   // than just inserting a new block such as ensuring a cursor visible.
   // Instead, we send return key press event directly to QPlainTextEdit.

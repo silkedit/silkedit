@@ -13,7 +13,6 @@
 #include "core/macros.h"
 #include "core/ICloneable.h"
 #include "core/Document.h"
-#include "core/UniqueObject.h"
 #include "core/BOM.h"
 
 class QPaintEvent;
@@ -31,7 +30,6 @@ class BOM;
 }
 
 class TextEditView : public QPlainTextEdit,
-                     public core::UniqueObject,
                      public core::ICloneable<TextEditView> {
   Q_OBJECT
   Q_DECLARE_PRIVATE(TextEditView)
@@ -52,13 +50,7 @@ class TextEditView : public QPlainTextEdit,
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
-  Q_INVOKABLE void moveCursor(const QString& op, int);
-  Q_INVOKABLE void doDelete(int n);
-  Q_INVOKABLE bool isThinCursor();
-  Q_INVOKABLE void setThinCursor(bool on);
   TextEditView* clone() override;
-  Q_INVOKABLE void save();
-  Q_INVOKABLE void saveAs();
   void setPath(const QString& path);
   void find(const QString& text, int begin = 0, int end = -1, core::Document::FindFlags flags = 0);
   void find(const QString& text,
@@ -83,30 +75,39 @@ class TextEditView : public QPlainTextEdit,
                            int end,
                            core::Document::FindFlags flags = 0,
                            bool preserveCase = false);
-  Q_INVOKABLE void performCompletion();
-  Q_INVOKABLE void insertNewLineWithIndent();
   void clearSelection();
-  Q_INVOKABLE QString scopeName();
-  Q_INVOKABLE QString scopeTree();
-  Q_INVOKABLE void undo();
-  Q_INVOKABLE void redo();
-  Q_INVOKABLE void cut();
-  Q_INVOKABLE void copy();
-  Q_INVOKABLE void paste();
-  Q_INVOKABLE void selectAll();
-  Q_INVOKABLE void indent();
-  Q_INVOKABLE QString text();
+
+ public slots:
+  QString scopeName();
+  QString scopeTree();
+  void undo();
+  void redo();
+  void cut();
+  void copy();
+  void paste();
+  void selectAll();
+  void indent();
+  QString text();
+  void performCompletion();
+  void insertNewLine();
+  void save();
+  void saveAs();
+  void moveCursor(const QString& op, int);
+  void doDelete(int n);
+  bool isThinCursor();
+  void setThinCursor(bool on);
 
  signals:
-  void destroying(const QString& path);
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
-
   // emitted when underlying document's encoding is changed.
   void encodingChanged(const core::Encoding& encoding);
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
+
+  // private signals
+  void destroying(const QString& path, QPrivateSignal);
 
  protected:
   void resizeEvent(QResizeEvent* event) override;

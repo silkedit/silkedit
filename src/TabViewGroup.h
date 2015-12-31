@@ -5,13 +5,12 @@
 #include <QWidget>
 
 #include "core/macros.h"
-#include "core/UniqueObject.h"
 
 class TabView;
 class TabBar;
 class Splitter;
 
-class TabViewGroup : public QWidget, public core::UniqueObject {
+class TabViewGroup : public QWidget{
   Q_OBJECT
   DISABLE_COPY(TabViewGroup)
 
@@ -24,11 +23,13 @@ class TabViewGroup : public QWidget, public core::UniqueObject {
   TabView* activeTab();
   void setActiveTab(TabView* tab);
 
-  Q_INVOKABLE void saveAll();
   bool closeAllTabs();
-  Q_INVOKABLE void splitTabHorizontally();
-  Q_INVOKABLE void splitTabVertically();
   TabBar* tabBarAt(int screenX, int screenY);
+
+public slots:
+  void saveAll();
+  void splitHorizontally();
+  void splitVertically();
 
  signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);

@@ -12,6 +12,9 @@ class Constants : public QObject, public core::Singleton<Constants> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 
+  Q_PROPERTY(QString userPackagesJsonPath READ userPackagesJsonPath CONSTANT)
+  Q_PROPERTY(QString userPackagesNodeModulesPath READ userPackagesNodeModulesPath CONSTANT)
+
  public:
   ~Constants() = default;
 
@@ -29,19 +32,18 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QStringList userKeymapPaths();
   QString userConfigPath();
   QString userKeymapPath();
-  QString userPackagesRootDirPath();
-  Q_INVOKABLE QString userPackagesNodeModulesPath();
-  Q_INVOKABLE QString userPackagesJsonPath();
-  QString helperPath();
-  QString npmPath();
-  QString helperSocketPath();
+  QString userPackagesRootDirPath() const;
+  QString nodePath();
+  QString npmCliPath();
   QString translationDirPath();
-  QString helperDir();
-  QString silkHomePath();
+  QString jsLibDir();
+  QString silkHomePath() const;
   QString recentOpenHistoryPath();
   QString tabViewInformationPath();
   QStringList themePaths();
   QStringList packagesPaths();
+  QString userPackagesJsonPath() const;
+  QString userPackagesNodeModulesPath() const;
 
  private:
   friend class core::Singleton<Constants>;

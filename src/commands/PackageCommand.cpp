@@ -5,5 +5,5 @@ PackageCommand::PackageCommand(const QString& name, const QString& description)
     : ICommand(name, description) {}
 
 void PackageCommand::doRun(const CommandArgument& args, int) {
-  Helper::singleton().callExternalCommand(name(), std::move(args));
+  Helper::singleton().runCommand(name(), std::move(args));
 }

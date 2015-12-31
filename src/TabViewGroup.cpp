@@ -68,12 +68,12 @@ bool TabViewGroup::closeAllTabs() {
   return true;
 }
 
-void TabViewGroup::splitTabHorizontally() {
+void TabViewGroup::splitHorizontally() {
   splitTab(std::bind(&TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1,
                      std::placeholders::_2));
 }
 
-void TabViewGroup::splitTabVertically() {
+void TabViewGroup::splitVertically() {
   splitTab(std::bind(&TabViewGroup::addTabViewVertically, this, std::placeholders::_1,
                      std::placeholders::_2));
 }

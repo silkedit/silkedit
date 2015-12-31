@@ -55,7 +55,9 @@ bool DocumentManager::save(Document* doc) {
 }
 
 QString DocumentManager::saveAs(Document* doc) {
-  QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path());
+  // fixme: If we use native dialog, it closes immediately on Mac.
+//  QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path(), QString());
+  QString filePath = QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path(), QString(), nullptr, QFileDialog::DontUseNativeDialog);
   if (!filePath.isEmpty()) {
     doc->setPath(filePath);
     save(doc);

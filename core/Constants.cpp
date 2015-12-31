@@ -53,32 +53,33 @@ QString Constants::userKeymapPath() {
   return silkHomePath() + "/keymap.yml";
 }
 
-QString Constants::userPackagesRootDirPath() {
+QString Constants::userPackagesRootDirPath() const {
   return silkHomePath() + "/packages";
 }
 
-QString Constants::userPackagesNodeModulesPath() {
+QString Constants::userPackagesNodeModulesPath() const {
   return userPackagesRootDirPath() + "/node_modules";
 }
 
-QString Constants::userPackagesJsonPath() {
+QString Constants::userPackagesJsonPath() const {
   return userPackagesRootDirPath() + "/packages.json";
 }
 
-QString Constants::helperPath() {
-  return helperDir() + "/bin/node";
-}
-
-QString Constants::npmPath() {
+// To run npm, pass bin/npm-cli.js as first argument of node.
+QString Constants::nodePath() {
 #ifdef Q_OS_WIN
-  return helperDir() + "/bin/npm.cmd";
+  return QApplication::applicationDirPath() + "/node";
 #else
-  return helperDir() + "/bin/npm";
+  return QApplication::applicationDirPath() + "/node";
 #endif
 }
 
-QString Constants::helperSocketPath() {
-  return socketPath;
+QString Constants::npmCliPath() {
+#ifdef Q_OS_WIN
+  return QApplication::applicationDirPath() + "/npm/bin/npm-cli.js";
+#else
+  return QApplication::applicationDirPath() + "/npm/bin/npm-cli.js";
+#endif
 }
 
 QString Constants::translationDirPath() {
@@ -97,11 +98,11 @@ QStringList Constants::dataDirectoryPaths() {
   return paths;
 }
 
-QString Constants::helperDir() {
-  return QApplication::applicationDirPath() + "/helper";
+QString Constants::jsLibDir() {
+  return QApplication::applicationDirPath() + "/jslib";
 }
 
-QString Constants::silkHomePath() {
+QString Constants::silkHomePath() const {
   return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }
 

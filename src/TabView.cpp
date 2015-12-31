@@ -188,18 +188,6 @@ int TabView::indexOfPath(const QString& path) {
   return -1;
 }
 
-int TabView::count() {
-  return QTabWidget::count();
-}
-
-int TabView::currentIndex() {
-  return QTabWidget::currentIndex();
-}
-
-void TabView::setCurrentIndex(int index) {
-  QTabWidget::setCurrentIndex(index);
-}
-
 void TabView::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;
@@ -393,7 +381,7 @@ int TabView::insertTabInformation( const int index ){
   return index;
 
 }
-bool TabView::createWithSavedTabs( void ){
+bool TabView::createWithSavedTabs(){
   // declaration variables to insert tab information.
   QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
                                 QSettings::IniFormat);

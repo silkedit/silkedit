@@ -3,7 +3,6 @@
 #include <QStatusBar>
 
 #include "core/macros.h"
-#include "core/UniqueObject.h"
 
 class TextEditView;
 class LanguageComboBox;
@@ -17,7 +16,7 @@ class Encoding;
 class BOM;
 }
 
-class StatusBar : public QStatusBar, public core::UniqueObject {
+class StatusBar : public QStatusBar{
   Q_OBJECT
   DISABLE_COPY(StatusBar)
 
@@ -35,7 +34,9 @@ class StatusBar : public QStatusBar, public core::UniqueObject {
   void setActiveTextEditViewEncoding();
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
-  Q_INVOKABLE void showMessageWithTimeout(const QString& text, int timeout);
+
+public slots:
+  void showMessageWithTimeout(const QString& text, int timeout);
 
  signals:
   void languageChanged(const QString& scopeName);

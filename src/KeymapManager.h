@@ -32,6 +32,15 @@ class KeymapManager : public QObject,
   bool dispatch(QKeyEvent* ev, int repeat = 1);
   const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
 
+ public slots:
+  void dispatchFromJS(const QString& typeStr,
+                       const QString& key,
+                       bool autorep,
+                       bool altKey,
+                       bool ctrlKey,
+                       bool metaKey,
+                       bool shiftKey);
+
  signals:
   void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
   void keymapUpdated();
