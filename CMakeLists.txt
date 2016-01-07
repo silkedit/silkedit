@@ -33,7 +33,7 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 if (APPLE)
   find_package(Qt5WebEngineWidgets REQUIRED)
-  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /usr/local/lib/libnode.dylib)
+  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /usr/local/lib)
 elseif (MSVC)
   add_library(NODE_LIBRARY SHARED IMPORTED)
   set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/node.dll)
@@ -122,7 +122,7 @@ if(APPLE)
   target_link_libraries(${PROJECT_NAME}
     "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
     "-framework Breakpad")
-elseif(MSVC)
+elseif (MSVC)
   # Don't include WebEngineWidgets on Windows because it needs MSVC 2013
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_core
