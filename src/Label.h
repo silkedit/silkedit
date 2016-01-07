@@ -1,10 +1,11 @@
 #pragma once
 
+#include <node.h>
 #include <QLabel>
 
 #include "core/macros.h"
 
-class Label : public QLabel {
+class NODE_EXTERN Label : public QLabel {
   Q_OBJECT
   DISABLE_COPY(Label)
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <uv.h>
+#include <node.h>
 #include <memory>
 #include <QObject>
 #include <QMetaMethod>
@@ -9,7 +9,7 @@
 #include "core/macros.h"
 
 // lives in main thread
-class QObjectHelper : public QObject, public core::Singleton<QObjectHelper> {
+class NODE_EXTERN QObjectHelper : public QObject, public core::Singleton<QObjectHelper> {
   Q_OBJECT
   DISABLE_COPY(QObjectHelper)
 

@@ -58,14 +58,14 @@ QStringList helperArgs() {
   QStringList args;
   args << QCoreApplication::applicationFilePath();
   // stop Node in debug mode
-  //  args << "--debug-brk";
+  // args << "--debug-brk";
   // expose global.gc()
   //  args << "--expose-gc";
   args << "--harmony";
   args << "--harmony_proxies";
   // first argument is main script
   args << Constants::singleton().jsLibDir() + "/main.js";
-  // third argument is locale
+  // second argument is locale
   args << Config::singleton().locale();
   // remaining arguments are paths to be loaded in silkedit_helper
   args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");

@@ -11,7 +11,7 @@
 
 namespace core {
 
-class PrototypeStore : public Singleton<PrototypeStore> {
+class NODE_EXTERN PrototypeStore : public Singleton<PrototypeStore> {
   DISABLE_COPY(PrototypeStore)
 
  public:

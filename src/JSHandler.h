@@ -1,11 +1,12 @@
 #pragma once
 
+#include <node.h>
 #include <v8.h>
 #include <QObject>
 
 constexpr int MAX_ARGS_COUNT = 10;
 
-class JSHandler {
+class NODE_EXTERN JSHandler {
  public:
   static void init(v8::Local<v8::Object> jsHandler);
   static QVariant callFunc(const QString& funcName, QVariantList args);

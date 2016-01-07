@@ -5,14 +5,6 @@
 
 #include "Constants.h"
 
-namespace {
-#ifdef Q_OS_WIN
-const QString socketPath = R"(\\.\pipe\silkedit_)" + QUuid::createUuid().toString();
-#else
-const QString socketPath = QDir::tempPath() + "/silkedit.sock";
-#endif
-}
-
 namespace core {
 
 #ifdef Q_OS_MAC

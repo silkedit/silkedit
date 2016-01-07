@@ -1,5 +1,6 @@
 #pragma once
 
+#include <node.h>
 #include <v8.h>
 #include <boost/optional.hpp>
 #include <unordered_map>
@@ -12,7 +13,7 @@
 #define OBJECT_STATE "_s_object_state"
 
 // todo: make thread safe
-class ObjectStore : public QObject, public core::Singleton<ObjectStore> {
+class NODE_EXTERN ObjectStore : public QObject, public core::Singleton<ObjectStore> {
   Q_OBJECT
 
  public:

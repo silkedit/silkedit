@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <yaml-cpp/yaml.h>
+#include <node.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <QObject>
@@ -16,7 +16,7 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public QObject,
+class NODE_EXTERN KeymapManager : public QObject,
                       public core::Singleton<KeymapManager>,
                       public core::IKeyEventFilter {
   Q_OBJECT

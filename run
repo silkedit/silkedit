@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Constants
+
+NODE_VERSION=v5.1.1
+
 if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
@@ -84,9 +88,7 @@ resolve() {
     fi
 
     # vim package
-    if [ ! -d packages/node_modules/vim ]; then
-      npm i --prefix packages https://github.com/silkedit/vim/tarball/0.1.3
-    fi
+    npm i --prefix packages https://github.com/silkedit/vim/tarball/0.1.4
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
@@ -130,7 +132,7 @@ resolve() {
         mv libnode.dylib /usr/local/lib
         rm libnode.dylib.zip
       fi
-        
+
       if [ ! -d libnode/include ]; then
         # download node.js headers
         mkdir -p libnode
@@ -150,10 +152,6 @@ resolve() {
       npm install --production
       cd ../../..
 
-      # npm install for default package
-      cd packages/node_modules/default
-      npm install --production
-      cd ../../..
     else
         # yaml-cpp
         if [ ! -f lib/libyaml-cppmd.lib ]; then
@@ -184,22 +182,34 @@ resolve() {
             rm yaml-cpp-*.tar.gz
         fi
 
-        # node
-        if [ ! -d helper/bin ]; then
-            cp -r "C:\Program Files\nodejs" helper
-            cd helper
-            mv nodejs bin
-            cd ..
+        # download Node.js shared library
+        libnode=node.dll
+        if [ ! -f lib/${libnode} ]; then
+          mkdir -p lib
+          cd lib
+          echo "Downloading Node.js shared library"
+          wget http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/win-${ARCH}/${libnode}.zip
+          wget http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/win-${ARCH}/node.lib
+          unzip ${libnode}.zip
+          rm ${libnode}.zip
+          cd ..
         fi
 
-        # npm install for plugin runner
-        cd helper/node_modules/silkedit
-        node ../../bin/node_modules/npm/bin/npm-cli.js install
-        cd ../../..
+        # download node.js headers
+        if [ ! -d include/node ]; then
+          mkdir -p include
+          curl -O http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/node-${NODE_VERSION}-headers.tar.gz
+          tar zxvf node-${NODE_VERSION}-headers.tar.gz
+          mv node-${NODE_VERSION}/include/node include
+          rm -r node-${NODE_VERSION}*
+        fi
 
-        # npm install for default package
-        cd packages/node_modules/default
-        node ../../../helper/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
+        # npm install for silkedit
+        cd jslib/node_modules/silkedit
+        cmd /C "set HOME=%USERPROFILE%\.silkedit-gyp && node-gyp rebuild --target=5.1.1 --arch=x64 --dist-url=http://silksmiths.sakura.ne.jp/download/nodejs"
+        cp build/Release/silkeditbridge.node .
+        rm -rf build
+        npm install --production
         cd ../../..
 
         # uchardet
@@ -271,12 +281,15 @@ resolve() {
 			cd ..
 		fi
     fi
+
+      # npm install for default package
+      cd packages/node_modules/default
+      npm install --production
+      cd ../../..
 }
 
 # release build
 build() {
-    resolve
-
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
         ensure_dir build

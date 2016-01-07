@@ -2,6 +2,7 @@
 
 #include <boost/optional.hpp>
 #include <v8.h>
+#include <node.h>
 #include <unordered_map>
 #include <QMetaObject>
 #include <QHash>
@@ -9,7 +10,7 @@
 #include "core/macros.h"
 #include "core/Singleton.h"
 
-class ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
+class NODE_EXTERN ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
   DISABLE_COPY(ObjectTemplateStore)
 
  public:

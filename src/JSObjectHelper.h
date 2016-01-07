@@ -1,12 +1,13 @@
 #pragma once
 
+#include <node.h>
 #include <v8.h>
 #include <QVariant>
 #include <QThreadStorage>
 
 #include "core/Singleton.h"
 
-class JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
+class NODE_EXTERN JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
   Q_OBJECT
 
  public:

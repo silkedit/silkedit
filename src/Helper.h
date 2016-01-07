@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <node.h>
 #include <v8.h>
 #include <uv.h>
 #include <boost/optional.hpp>
@@ -95,7 +96,7 @@ class InvokeMethodInfo : public QObject {
 Q_DECLARE_METATYPE(std::shared_ptr<InvokeMethodInfo>)
 
 // This class is thread safe
-class NodeEmitSignal : public QObject {
+class NODE_EXTERN NodeEmitSignal : public QObject {
   Q_OBJECT
 
  public:
@@ -134,7 +135,7 @@ private:
 Q_DECLARE_METATYPE(std::shared_ptr<NodeEmitSignal>)
 
 // This class is thread safe
-class NodeMethodCall : public QObject {
+class NODE_EXTERN NodeMethodCall : public QObject {
   Q_OBJECT
  public:
   NodeMethodCall() = default;
@@ -253,7 +254,7 @@ class ConcurrentQueue {
  * @brief Proxy object to interact with Node.js side
  * thread affinity: main thread
  */
-class Helper : public QObject, public core::Singleton<Helper> {
+class NODE_EXTERN Helper : public QObject, public core::Singleton<Helper> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Helper)
 

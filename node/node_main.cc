@@ -1,5 +1,6 @@
 // copied from node_main.cc
 #include <node.h>
+#include <uv.h>
 
 #ifdef _WIN32
 int wmain(int argc, wchar_t *wargv[]) {

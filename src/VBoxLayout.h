@@ -1,10 +1,11 @@
 #pragma once
 
+#include <node.h>
 #include <QVBoxLayout>
 
 #include "core/macros.h"
 
-class VBoxLayout : public QVBoxLayout {
+class NODE_EXTERN VBoxLayout : public QVBoxLayout {
   Q_OBJECT
   DISABLE_COPY(VBoxLayout)
 

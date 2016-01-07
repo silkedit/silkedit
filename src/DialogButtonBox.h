@@ -1,10 +1,11 @@
 #pragma once
 
+#include <node.h>
 #include <QDialogButtonBox>
 
 #include "core/macros.h"
 
-class DialogButtonBox : public QDialogButtonBox {
+class NODE_EXTERN DialogButtonBox : public QDialogButtonBox {
   Q_OBJECT
   DISABLE_COPY(DialogButtonBox)
 
