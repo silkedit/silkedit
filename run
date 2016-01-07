@@ -121,18 +121,20 @@ resolve() {
       fi
 
       # node
-      if [ ! -f libnode/lib/libnode.dylib ]; then
+      node_version=v5.1.1
+      if [ ! -f /usr/local/lib/libnode.dylib ]; then
         # download libnode.dylib
-        node_version=v5.1.1
-        mkdir -p libnode/lib
-        cd libnode/lib
         echo "Downloading Node.js library"
         curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/libnode.dylib.zip
         unzip libnode.dylib.zip
+        mv libnode.dylib /usr/local/lib
         rm libnode.dylib.zip
-        cd ..
+      fi
         
+      if [ ! -d libnode/include ]; then
         # download node.js headers
+        mkdir -p libnode
+        cd libnode
         curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/node-$node_version-headers.tar.gz
         tar zxvf node-$node_version-headers.tar.gz
         mv node-$node_version/include .
@@ -142,7 +144,7 @@ resolve() {
 
       # npm install for silkedit
       cd jslib/node_modules/silkedit
-      cmake-js build
+      cmake-js rebuild
       cp build/Release/silkeditbridge.node .
       rm -rf build
       npm install --production

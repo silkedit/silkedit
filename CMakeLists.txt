@@ -33,7 +33,7 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 if (APPLE)
   find_package(Qt5WebEngineWidgets REQUIRED)
-  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /${PROJECT_SOURCE_DIR}/libnode/lib/libnode.dylib)
+  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /usr/local/lib/libnode.dylib)
 endif (APPLE)
 find_package(Boost REQUIRED)
 
