@@ -328,4 +328,19 @@ QVariant core::Util::toVariant(const QString &str)
   }
 }
 
+QString Util::qcolorForStyleSheet(const QColor& color) {
+  QString rgbaString;
+  int alpha = static_cast<int>(color.alphaF() / 1.0 * 100);
+  if (alpha == 0) {
+    rgbaString = QString("rgb(%1, %2, %3)").arg(color.red()).arg(color.green()).arg(color.blue());
+  } else {
+    rgbaString = QString("rgba(%1, %2, %3, %4%)")
+                     .arg(color.red())
+                     .arg(color.green())
+                     .arg(color.blue())
+                     .arg(alpha);
+  }
+  return rgbaString;
+}
+
 }  // namespace core
