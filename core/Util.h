@@ -5,6 +5,7 @@
 #include <string>
 #include <QStringList>
 #include <QTime>
+#include <QColor>
 #include <QKeySequence>
 #include <QVariantList>
 
@@ -36,6 +37,7 @@ class Util {
 
   static QKeySequence toSequence(const QString& str);
   static QString toString(const QKeySequence& keySeq);
+  static QString qcolorForStyleSheet(const QColor& color);
 
   static void processWithPublicMethods(const QMetaObject* metaObj,
                                        std::function<void(const QMetaMethod&)> fn);
