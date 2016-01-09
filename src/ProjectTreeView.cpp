@@ -10,7 +10,9 @@
 #include "PlatformUtil.h"
 #include "core/Config.h"
 #include "core/Theme.h"
+#include "core/Util.h"
 
+using core::Util;
 using core::Config;
 using core::Theme;
 using core::ColorSettings;
@@ -108,13 +110,21 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
     QString style;
     ColorSettings* projectTreeViewSettings = theme->projectTreeViewSettings.get();
 
-    style = QString(
-                "ProjectTreeView {"
-                "background-color: %1;"
-                "color: %2;"
-                "}")
-                .arg(projectTreeViewSettings->value("background").name(),
-                     projectTreeViewSettings->value("foreground").name());
+    style =
+        QString(
+            "ProjectTreeView {"
+            "background-color: %1;"
+            "color: %2;"
+            "selection-background-color: %3"
+            "}"
+            "ProjectTreeView::item:selected {"
+            "background-color: %3;"
+            "color:%4;"
+            "}")
+            .arg(Util::qcolorForStyleSheet(projectTreeViewSettings->value("background")),
+                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("foreground")),
+                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("selectionBackground")),
+                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("selectionForeground")));
 
     this->setStyleSheet(style);
   }
