@@ -369,31 +369,21 @@ void TextEditViewPrivate::highlightCurrentLine() {
   if (q_ptr->textCursor().hasSelection()) {
     return;
   }
-
   Theme* theme = Config::singleton().theme();
-  if (theme && !theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
-    if (settings->contains("lineHighlight")) {
-      QList<QTextEdit::ExtraSelection> extraSelections;
+  if (theme->textEditViewSettings != nullptr) {
+    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
 
-      if (!q_ptr->isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
-
-        QColor lineColor = QColor(settings->value("lineHighlight"));
-
-        selection.format.setBackground(lineColor);
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = q_ptr->textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-      }
-
-      q_ptr->setExtraSelections(extraSelections);
-    } else {
-      qDebug("lineHighlight not found");
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    if (!q_ptr->isReadOnly()) {
+      QTextEdit::ExtraSelection selection;
+      QColor lineColor = QColor(textEditViewSettings->value("lineHighlight"));
+      selection.format.setBackground(lineColor);
+      selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+      selection.cursor = q_ptr->textCursor();
+      selection.cursor.clearSelection();
+      extraSelections.append(selection);
     }
-  } else {
-    qDebug("theme is null or theme->scopeSettings is empty");
+    q_ptr->setExtraSelections(extraSelections);
   }
 }
 
