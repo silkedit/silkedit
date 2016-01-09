@@ -14,6 +14,7 @@
 #include "core/LanguageParser.h"
 #include "core/LineSeparator.h"
 #include "core/BOM.h"
+#include "core/Util.h"
 
 using core::Encoding;
 using core::Config;
@@ -24,6 +25,7 @@ using core::LanguageProvider;
 using core::LineSeparator;
 using core::BOM;
 using core::ColorSettings;
+using core::Util;
 
 
 StatusBar::StatusBar(QMainWindow* window)
@@ -202,8 +204,10 @@ void StatusBar::setTheme(const Theme* theme) {
     QString style;
     ColorSettings* statusBarSettings = theme->statusBarSettings.get();
 
-    style = QString("background-color: %1;").arg(statusBarSettings->value("background").name());
-    style += QString("color: %1;").arg(statusBarSettings->value("foreground").name());
+    style = QString("background-color: %1;")
+        .arg(Util::qcolorForStyleSheet(statusBarSettings->value("background")));
+    style += QString("color: %1;")
+        .arg(Util::qcolorForStyleSheet(statusBarSettings->value("foreground")));
     this->setStyleSheet(QString("StatusBar, StatusBar QComboBox{%1}").arg(style));
   }
 }

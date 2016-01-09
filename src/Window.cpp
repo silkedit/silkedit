@@ -23,9 +23,11 @@
 #include "core/Document.h"
 #include "core/Config.h"
 #include "core/Theme.h"
+#include "core/Util.h"
 
 using core::Config;
 using core::Theme;
+using core::Util;
 using core::ColorSettings;
 
 QMap<QString, QString> Window::s_toolbarsDefinitions;
@@ -109,8 +111,8 @@ void Window::setTheme(const core::Theme* theme) {
                 "background-color: %1;"
                 "color: %2;"
                 "}")
-                .arg(windowSettings->value("background").name(),
-                     windowSettings->value("foregound").name());
+        .arg(Util::qcolorForStyleSheet(windowSettings->value("background")))
+        .arg(Util::qcolorForStyleSheet(windowSettings->value("foregound")));
 
     this->setStyleSheet(style);
   }

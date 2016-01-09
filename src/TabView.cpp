@@ -16,10 +16,12 @@
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Constants.h"
+#include "core/Util.h"
 
 using core::Document;
 using core::Config;
 using core::Theme;
+using core::Util;
 using core::ColorSettings;
 using core::Constants;
 
@@ -276,7 +278,8 @@ void TabView::setTheme(const Theme* theme) {
     QString style;
     ColorSettings* tabViewSettings = theme->tabViewSettings.get();
 
-    style = QString("background-color: %1;").arg(tabViewSettings->value("background").name());
+    style = QString("background-color: %1;")
+                .arg(Util::qcolorForStyleSheet(tabViewSettings->value("background")));
     this->setStyleSheet(style);
   }
 }

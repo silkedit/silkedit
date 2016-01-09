@@ -10,9 +10,11 @@
 #include "SilkApp.h"
 #include "core/Config.h"
 #include "core/Theme.h"
+#include "core/Util.h"
 
 using core::Config;
 using core::Theme;
+using core::Util;
 using core::ColorSettings;
 
 TabBar::TabBar(QWidget* parent)
@@ -44,8 +46,8 @@ void TabBar::setTheme(const Theme* theme) {
                 "background-color: %1;"
                 "color: %2;"
                 "}")
-                .arg(tabBarSettings->value("background").name(),
-                     tabBarSettings->value("foreground").name());
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("background")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")));
 
     style += QString(
                  "TabBar::tab:selected {"
@@ -54,9 +56,9 @@ void TabBar::setTheme(const Theme* theme) {
                  "border-left: 2px solid;"
                  "border-color: %3;"
                  "}")
-                 .arg(tabBarSettings->value("selected").name(),
-                      tabBarSettings->value("foreground").name(),
-                      tabBarSettings->value("selectedBorder").name());
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selected")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selectedBorder")));
 
     this->setStyleSheet(style);
   }
