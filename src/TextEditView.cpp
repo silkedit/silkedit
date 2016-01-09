@@ -22,6 +22,7 @@
 #include "core/Constants.h"
 #include "core/BOM.h"
 #include "core/Region.h"
+#include "core/Util.h"
 
 using core::Document;
 using core::Encoding;
@@ -36,6 +37,8 @@ using core::Regexp;
 using core::Constants;
 using core::BOM;
 using core::Region;
+using core::Util;
+
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -146,13 +149,13 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
                 "QPlainTextEdit {"
                 "color: %1;"
                 "background-color: %2;"
-                "selection-color:%4;"
-                "selection-background-color: %3;"
+                "selection-color:%3;"
+                "selection-background-color: %4;"
                 "}")
-                .arg(textEditViewSettings->value("foreground").name())
-                .arg(textEditViewSettings->value("background").name())
-                .arg(textEditViewSettings->value("selectionForeground").name())
-                .arg(textEditViewSettings->value("selectionBackground").name());
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("foreground")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("background")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionForeground")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionBackground")));
 
     q_ptr->setStyleSheet(style);
   }

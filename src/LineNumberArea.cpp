@@ -26,11 +26,11 @@ void LineNumberArea::setTheme(Theme* theme) {
   if (theme->gutterSettings != nullptr) {
     ColorSettings* gutterSettings = theme->gutterSettings.get();
     if (gutterSettings->contains("background")) {
-      setBackgroundColor(gutterSettings->value("background").name());
+      setBackgroundColor(gutterSettings->value("background"));
     }
 
     if (gutterSettings->contains("foreground")) {
-      setLineNumberColor(gutterSettings->value("foreground").name());
+      setLineNumberColor(gutterSettings->value("foreground"));
     }
   }
 }

@@ -15,12 +15,14 @@
 #include "LineEdit.h"
 #include "core/Config.h"
 #include "core/Theme.h"
+#include "core/Util.h"
 
 using core::Document;
 using core::Region;
 using core::Config;
 using core::ColorSettings;
 using core::Theme;
+using core::Util;
 
 namespace {
 const char* PREVIOUS_MATCH_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Previous match");
@@ -421,7 +423,7 @@ void FindReplaceView::setTheme(core::Theme* theme) {
                 "background-color: %2;"
                 "}")
                 .arg(this->objectName())
-                .arg(findReplaceViewSettings->value("background").name());
+        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("background")));
 
     style += QString(
                  "#%1 QPushButton {"
@@ -431,8 +433,8 @@ void FindReplaceView::setTheme(core::Theme* theme) {
                  "background-color: %3;"
                  "}")
                  .arg(this->objectName())
-                 .arg(findReplaceViewSettings->value("foreground").name())
-                 .arg(findReplaceViewSettings->value("buttonCheckedBackgroundColor").name());
+        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("foreground")))
+        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("buttonCheckedBackgroundColor")));
 
     style += QString(
                  "#%1 QPushButton:hover {"
