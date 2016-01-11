@@ -14,5 +14,5 @@
 	url = git@github.com:npm/npm.git
 [submodule "vendor/node"]
 	path = vendor/node
-	url = git@github.com:silkedit/node-1.git
+	url = git@github.com:silkedit/node.git
 	branch = silkedit
