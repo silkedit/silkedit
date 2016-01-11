@@ -22,8 +22,10 @@ using v8::Boolean;
 using v8::Array;
 using v8::External;
 using v8::Symbol;
+using v8::Locker;
 
 v8::Persistent<v8::Object> JSHandler::s_jsHandler;
+bool JSHandler::s_isInitialized = false;
 
 namespace {
 constexpr int MAX_ARGS_COUNT_FOR_SIGNAL = MAX_ARGS_COUNT + 1;
@@ -31,11 +33,14 @@ constexpr int MAX_ARGS_COUNT_FOR_SIGNAL = MAX_ARGS_COUNT + 1;
 
 void JSHandler::init(v8::Local<v8::Object> jsHandler) {
   s_jsHandler.Reset(Isolate::GetCurrent(), jsHandler);
+  s_isInitialized = true;
 }
 
-QVariant JSHandler::callFunc(const QString& funcName, QVariantList args) {
-  Isolate* isolate = Isolate::GetCurrent();
-  HandleScope scope(isolate);
+QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariantList args) {
+  if (!s_isInitialized) {
+    qWarning() << "JSHandler is not yet initialized";
+    return QVariant();
+  }
 
   if (args.size() >= MAX_ARGS_COUNT) {
     qWarning() << "max # of args is " << MAX_ARGS_COUNT << ". Exceeded arguments will be dropped";
@@ -84,8 +89,10 @@ QVariant JSHandler::callFunc(const QString& funcName, QVariantList args) {
   return JSObjectHelper::toVariant(maybeResult.ToLocalChecked());
 }
 
-void JSHandler::inheritsQtEventEmitter(Local<v8::Value> proto) {
-  Isolate* isolate = Isolate::GetCurrent();
+void JSHandler::inheritsQtEventEmitter(Isolate* isolate, Local<v8::Value> proto) {
+  Q_ASSERT(s_isInitialized);
+
+  Locker locker(isolate);
   HandleScope scope(isolate);
 
   Local<Value> argv[1];
@@ -129,10 +136,13 @@ void JSHandler::inheritsQtEventEmitter(Local<v8::Value> proto) {
   }
 }
 
-void JSHandler::emitSignal(QObject* obj, const QString& signal, QVariantList args) {
+void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal, QVariantList args) {
   qDebug() << "emitSignal. " << signal << "args:" << args;
-  Isolate* isolate = Isolate::GetCurrent();
-  HandleScope scope(isolate);
+
+  if (!s_isInitialized) {
+    qWarning() << "JSHandler is not yet initialized";
+    return;
+  }
 
   if (args.size() >= MAX_ARGS_COUNT) {
     qWarning() << "max # of args is " << MAX_ARGS_COUNT << ". Exceeded arguments will be dropped";

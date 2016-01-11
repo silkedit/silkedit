@@ -15,6 +15,8 @@
 #include "core/QVariantArgument.h"
 #include "core/macros.h"
 
+namespace bridge {
+
 template <class QObjectSubClass>
 class JSStaticObject {
  public:
@@ -28,11 +30,14 @@ class JSStaticObject {
     ObjectTemplateStore::initInstanceTemplate(tpl->InstanceTemplate(), &metaObj, isolate);
 
     // register method and slots to prototype object
+    QSet<QByteArray> registeredMethods;
     for (int i = 0; i < metaObj.methodCount(); i++) {
       const QMetaMethod& method = metaObj.method(i);
-      if (method.methodType() == QMetaMethod::MethodType::Method ||
-          method.methodType() == QMetaMethod::MethodType::Slot) {
+      if ((method.methodType() == QMetaMethod::MethodType::Method ||
+           method.methodType() == QMetaMethod::MethodType::Slot) &&
+          !registeredMethods.contains(method.name())) {
         NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), JSObjectHelper::invokeMethod);
+        registeredMethods.insert(method.name());
       }
     }
 
@@ -45,7 +50,7 @@ class JSStaticObject {
     v8::Local<v8::Function> ctor = maybeFunc.ToLocalChecked();
 
     addEnumsToFunction(metaObj, ctor, isolate);
-    JSHandler::inheritsQtEventEmitter(ctor);
+    JSHandler::inheritsQtEventEmitter(isolate, ctor);
     constructor.Reset(isolate, ctor);
     exports->Set(v8::String::NewFromUtf8(isolate, metaObj.className()), ctor);
   }
@@ -79,12 +84,8 @@ class JSStaticObject {
             variants[j] = QVariant(QMetaType::type(parameterTypes[j]), variants[j].data());
           }
 
-          QObject* newObj = nullptr;
-          bool result = QMetaObject::invokeMethod(
-              &QObjectHelper::singleton(), "newInstanceFromJS", Qt::BlockingQueuedConnection,
-              Q_RETURN_ARG(QObject*, newObj), Q_ARG(QMetaObject, metaObj),
-              Q_ARG(QVariantList, variants));
-          if (!result || !newObj) {
+          QObject* newObj = QObjectHelper::singleton().newInstanceFromJS(metaObj, variants);
+          if (!newObj) {
             std::stringstream ss;
             ss << "invoking" << ctor.methodSignature().constData() << "failed";
             isolate->ThrowException(v8::Exception::TypeError(
@@ -141,3 +142,5 @@ class JSStaticObject {
 
 template <typename QObjectSubClass>
 v8::Persistent<v8::Function> JSStaticObject<QObjectSubClass>::constructor;
+
+}  // namespace bridge

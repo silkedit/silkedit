@@ -1,6 +1,5 @@
 #pragma once
 
-#include <node.h>
 #include <v8.h>
 #include <boost/optional.hpp>
 #include <unordered_map>
@@ -12,8 +11,7 @@
 // Note: Dynamic properties starting with "_q_" are reserved for internal purposes.
 #define OBJECT_STATE "_s_object_state"
 
-// todo: make thread safe
-class NODE_EXTERN ObjectStore : public QObject, public core::Singleton<ObjectStore> {
+class ObjectStore : public QObject, public core::Singleton<ObjectStore> {
   Q_OBJECT
 
  public:

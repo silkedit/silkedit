@@ -1,13 +1,12 @@
 #pragma once
 
-#include <node.h>
 #include <v8.h>
 #include <QVariant>
 #include <QThreadStorage>
 
 #include "core/Singleton.h"
 
-class NODE_EXTERN JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
+class JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
   Q_OBJECT
 
  public:
@@ -28,7 +27,7 @@ private:
   static v8::Local<v8::Value> toV8ValueInternal(const QVariant& var,
                                         v8::Isolate* isolate = v8::Isolate::GetCurrent());
   static v8::Local<v8::Value> toV8ObjectFrom(QObject *sourceObj, v8::Isolate *isolate);
-  static QVariant invokeMethodInternal(QObject *object, const QString &methodName, QVariantList args);
+  static QVariant invokeMethodInternal(v8::Isolate *isolate, QObject *object, const QString &methodName, QVariantList args);
   static void cacheMethods(const QString &className, const QMetaObject *metaObj);
 
   friend class core::Singleton<JSObjectHelper>;

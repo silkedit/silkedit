@@ -1,11 +1,10 @@
 #pragma once
 
-#include <node.h>
 #include <QDialog>
 
 #include "core/macros.h"
 
-class NODE_EXTERN Dialog : public QDialog {
+class Dialog : public QDialog {
   Q_OBJECT
   DISABLE_COPY(Dialog)
 

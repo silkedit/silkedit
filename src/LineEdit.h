@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include <node.h>
 #include <QLineEdit>
 
 #include "core/macros.h"
 
-class NODE_EXTERN LineEdit : public QLineEdit {
+class LineEdit : public QLineEdit {
   Q_OBJECT
   DISABLE_COPY(LineEdit)
  public:

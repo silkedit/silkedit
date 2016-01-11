@@ -1,3 +1,4 @@
+#include <node.h>
 #include <QMetaMethod>
 
 #include "PrototypeStore.h"
@@ -37,7 +38,7 @@ v8::Local<v8::Object> core::PrototypeStore::getOrCreatePrototype(const QMetaObje
     for (int i = 0; i < metaObj->methodCount(); i++) {
       NODE_SET_METHOD(proto, metaObj->method(i).name().constData(), invoke);
     }
-    JSHandler::inheritsQtEventEmitter(proto);
+    JSHandler::inheritsQtEventEmitter(isolate, proto);
     PrototypeStore::singleton().insert(metaObj, proto);
     return handle_scope.Escape(proto);
   }

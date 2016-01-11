@@ -15,7 +15,7 @@ class Handler {
   ~Handler() = delete;
   DEFAULT_MOVE(Handler)
 
-  static void init(v8::Local<v8::Object> exports);
+  static void init(v8::Local<v8::Object> exports, v8::Local<v8::Value> unused, v8::Local<v8::Context> context, void *priv);
   static void lateInit(const v8::FunctionCallbackInfo<v8::Value>& args);
 
  private:

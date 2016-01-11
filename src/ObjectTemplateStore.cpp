@@ -1,4 +1,3 @@
-#include <node.h>
 #include <QMetaProperty>
 #include <QDebug>
 #include <sstream>
@@ -90,16 +89,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
     return;
   }
 
-  QVariant value;
-  bool result = QMetaObject::invokeMethod(
-      &QObjectHelper::singleton(), "read", Qt::BlockingQueuedConnection,
-      Q_RETURN_ARG(QVariant, value), Q_ARG(QObject*, obj), Q_ARG(QMetaProperty, prop));
-  if (!result || !value.isValid()) {
-    std::stringstream ss;
-    ss << "failed to read property:" << *propertyName;
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().c_str())));
-    return;
-  }
+  QVariant value = prop.read(obj);
   info.GetReturnValue().Set(JSObjectHelper::toV8Value(value, isolate));
 }
 
@@ -130,13 +120,5 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
     return;
   }
 
-  bool result = QMetaObject::invokeMethod(
-      &QObjectHelper::singleton(), "write", Qt::QueuedConnection, Q_ARG(QObject*, obj),
-      Q_ARG(QMetaProperty, prop), Q_ARG(QVariant, JSObjectHelper::toVariant(value)));
-  if (!result) {
-    std::stringstream ss;
-    ss << "failed to write property:" << *propertyName;
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().data())));
-    return;
-  }
+  prop.write(obj, JSObjectHelper::toVariant(value));
 }

@@ -431,7 +431,7 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const QSt
           qWarning("invalid tyep: %s", qPrintable(type));
           continue;
         }
-        assert(defaultValue.isValid());
+        Q_ASSERT(defaultValue.isValid());
         defs.append(ConfigDefinition{pkgName + "." + configName, title, description, defaultValue});
       }
     }

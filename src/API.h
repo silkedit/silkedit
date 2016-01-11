@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <node.h>
 #include <boost/optional.hpp>
 #include <functional>
 #include <unordered_map>
@@ -17,7 +16,7 @@ class TabView;
 class TabViewGroup;
 class Window;
 
-class NODE_EXTERN API : public QObject, public core::Singleton<API> {
+class API : public QObject, public core::Singleton<API> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(API)
 

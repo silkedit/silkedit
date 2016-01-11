@@ -22,8 +22,8 @@ using v8::String;
 std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> ObjectStore::s_objects;
 
 QObject* ObjectStore::unwrap(v8::Local<v8::Object> handle) {
-  assert(!handle.IsEmpty());
-  assert(handle->InternalFieldCount() > 0);
+  Q_ASSERT(!handle.IsEmpty());
+  Q_ASSERT(handle->InternalFieldCount() > 0);
   // Cast to ObjectWrap before casting to T.  A direct cast from void
   // to T won't work right when T has more than one base class.
   void* ptr = handle->GetAlignedPointerFromInternalField(0);
@@ -31,7 +31,7 @@ QObject* ObjectStore::unwrap(v8::Local<v8::Object> handle) {
 }
 
 void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate) {
-  assert(QThread::currentThread() != QCoreApplication::instance()->thread());
+  Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
   // When registered QObject is destoryed, delete its associated JS object
   connect(obj, &QObject::destroyed, [=](QObject* destroyedObj) {
     if (s_objects.count(destroyedObj) != 0) {
@@ -49,7 +49,7 @@ void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::I
 }
 
 boost::optional<v8::Local<v8::Object>> ObjectStore::find(QObject* obj, v8::Isolate* isolate) {
-  assert(QThread::currentThread() != QCoreApplication::instance()->thread());
+  Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
   if (s_objects.count(obj) != 0) {
     return s_objects.at(obj).Get(isolate);
   } else {
@@ -58,7 +58,7 @@ boost::optional<v8::Local<v8::Object>> ObjectStore::find(QObject* obj, v8::Isola
 }
 
 void ObjectStore::WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& data) {
-  assert(QThread::currentThread() != QCoreApplication::instance()->thread());
+  Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
   qDebug() << "WeakCallback";
   v8::Isolate* isolate = data.GetIsolate();
   v8::HandleScope scope(isolate);
@@ -67,7 +67,7 @@ void ObjectStore::WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& 
     s_objects.erase(wrap);
     const QVariant& state = wrap->property(OBJECT_STATE);
     if (state.isValid() && state.value<ObjectState>() == ObjectState::NewFromJS) {
-      QMetaObject::invokeMethod(wrap, "deleteLater", Qt::QueuedConnection);
+      wrap->deleteLater();
     }
   }
 }

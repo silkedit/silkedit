@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <node.h>
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
 #include <fstream>
@@ -25,7 +24,7 @@ class Theme;
  * @brief Model class for config.yml
  * We don't use QSettings to support if condition
  */
-class NODE_EXTERN Config : public QObject, public Singleton<Config> {
+class Config : public QObject, public Singleton<Config> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Config)
 

@@ -1,28 +1,17 @@
 ﻿#pragma once
 
-#include <QThread>
-
 #include "Helper.h"
 #include "core/IKeyEventFilter.h"
 
-class HelperThread : public QThread {
-  Q_OBJECT
-  DISABLE_COPY_AND_MOVE(HelperThread)
-
- public:
-  explicit HelperThread(QObject* parent);
-  ~HelperThread() = default;
-
- protected:
-  void run() override;
-};
+namespace node {
+class ArrayBufferAllocator;
+}
 
 class HelperPrivate : public QObject, public core::IKeyEventFilter {
   Q_OBJECT
 
  public:
   Helper* q;
-  QThread* m_helperThread;
 
   explicit HelperPrivate(Helper* q_ptr);
   ~HelperPrivate();
@@ -31,8 +20,10 @@ class HelperPrivate : public QObject, public core::IKeyEventFilter {
 
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
-  void onFinished();
   CommandEventFilterResult cmdEventFilter(const std::string& name, const CommandArgument& arg);
-  void startHelperThread();
+  void startNodeEventLoop();
+  void startNodeInstance(void* arg);
+  void quitApplication();
   void cacheMethods(const QString& className, const QMetaObject* object);
+  void cleanup();
 };

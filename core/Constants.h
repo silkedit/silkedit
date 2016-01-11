@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <node.h>
 #include <QStringList>
 #include <QObject>
 
@@ -9,7 +8,7 @@
 
 namespace core {
 
-class NODE_EXTERN Constants : public QObject, public core::Singleton<Constants> {
+class Constants : public QObject, public core::Singleton<Constants> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 

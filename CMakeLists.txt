@@ -3,6 +3,7 @@
 project(SilkEdit)
 
 option (BUILD_EDGE "Build edge version" OFF)
+option (USE_DEBUG_NODE "Use debug build of libnode (it's slow but useful for debugging because it has many debug only assertions)" OFF)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
@@ -11,6 +12,12 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
+if (APPLE)
+  ADD_DEFINITIONS(-D__POSIX__)
+  list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_win.cpp)
+elseif (MSVC)
+  list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_mac.cpp)
+endif ()
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 file(GLOB_RECURSE SILK_UIS src/*.ui)
 set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc)
@@ -33,7 +40,11 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 if (APPLE)
   find_package(Qt5WebEngineWidgets REQUIRED)
-  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS /usr/local/lib)
+  if (USE_DEBUG_NODE)
+    find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
+  else ()
+    find_library(NODE_LIBRARY NAMES libnode.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Release NO_DEFAULT_PATH)
+  endif ()
 elseif (MSVC)
   add_library(NODE_LIBRARY SHARED IMPORTED)
   set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/node.dll)
@@ -56,7 +67,7 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
-  include_directories(SYSTEM /usr/local/include src breakpad/src include/node)
+  include_directories(SYSTEM /usr/local/include src breakpad/src vendor/node/src vendor/node/deps/v8 vendor/node/deps/v8/include vendor/node/deps/uv/include vendor/node/deps/cares/include vendor/node/deps/openssl/openssl/include)
 
   # breakpad framework
   set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
@@ -97,6 +108,9 @@ elseif (MSVC)
   # define _WINSOCKAPI_ before including winsock.h
   # http://stackoverflow.com/questions/1372480/c-redefinition-header-files-winsock2-h
   ADD_DEFINITIONS(-D_WINSOCKAPI_)
+
+  # Node.js defines HAVE_OPENSSL by default
+  ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif ()
@@ -160,6 +174,9 @@ if(APPLE)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
+
+  # run install_name_tool to update the path to libnode.dylib
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
 
   # copy node executable
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_BINARY_DIR}/node/node ${PROJECT_NAME}.app/Contents/MacOS)

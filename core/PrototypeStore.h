@@ -2,7 +2,6 @@
 
 #include <boost/optional.hpp>
 #include <v8.h>
-#include <node.h>
 #include <unordered_map>
 #include <QMetaObject>
 
@@ -11,7 +10,7 @@
 
 namespace core {
 
-class NODE_EXTERN PrototypeStore : public Singleton<PrototypeStore> {
+class PrototypeStore : public Singleton<PrototypeStore> {
   DISABLE_COPY(PrototypeStore)
 
  public:

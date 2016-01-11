@@ -10,7 +10,7 @@
 #include "core/macros.h"
 #include "core/Singleton.h"
 
-class NODE_EXTERN ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
+class ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
   DISABLE_COPY(ObjectTemplateStore)
 
  public:

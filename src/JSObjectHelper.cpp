@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QMetaProperty>
 #include <QObject>
+#include <QCoreApplication>
 
 #include "JSObjectHelper.h"
 #include "ObjectTemplateStore.h"
@@ -40,7 +41,7 @@ using v8::FunctionTemplate;
 QThreadStorage<QHash<QString, QHash<QString, int>>> JSObjectHelper::m_classMethodHash;
 
 namespace {
-Local<Object> toV8Object(const CommandArgument args, Isolate* isolate = Isolate::GetCurrent()) {
+Local<Object> toV8Object(const CommandArgument args, Isolate* isolate) {
   Local<Object> argsObj = Object::New(isolate);
   for (const auto& pair : args) {
     argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
@@ -86,12 +87,7 @@ void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
     return;
   }
 
-  // check obj thread affnity
-  if (obj->thread() == QThread::currentThread()) {
-    isolate->ThrowException(
-        Exception::Error(String::NewFromUtf8(isolate, "invalid thread affinity")));
-    return;
-  }
+  Q_ASSERT(obj->thread() == QThread::currentThread());
 
   // convert args to QVariantList
   QVariantList varArgs;
@@ -100,14 +96,15 @@ void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
   }
 
   QVariant result =
-      invokeMethodInternal(obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
+      invokeMethodInternal(isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
 
   if (result.isValid()) {
     args.GetReturnValue().Set(toV8Value(result, isolate));
   }
 }
 
-QVariant JSObjectHelper::invokeMethodInternal(QObject* object,
+QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
+                                              QObject* object,
                                               const QString& methodName,
                                               QVariantList args) {
   if (args.size() > Q_METAMETHOD_INVOKE_MAX_ARGS) {
@@ -152,31 +149,37 @@ QVariant JSObjectHelper::invokeMethodInternal(QObject* object,
                << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
   }
 
-  // void method
-  if (method.returnType() == qMetaTypeId<void>()) {
-    QVariantArgument varArgs[Q_METAMETHOD_INVOKE_MAX_ARGS];
-    for (int i = 0; i < args.size(); i++) {
-      varArgs[i].value = args[i];
-    }
+  v8::HandleScope scope(isolate);
 
-    bool result =
-        method.invoke(object, Qt::QueuedConnection, varArgs[0], varArgs[1], varArgs[2], varArgs[3],
-                      varArgs[4], varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
-    if (!result) {
-      qWarning() << "invoking" << methodName << "failed";
-    }
-    return QVariant();
-  } else {
-    v8::HandleScope scope(v8::Isolate::GetCurrent());
-    auto info = std::make_shared<InvokeMethodInfo>(object, method, args);
-    std::shared_ptr<UvEventLoop> loop = std::make_shared<UvEventLoop>();
-    assert(Helper::singleton().thread() != QThread::currentThread());
-    QMetaObject::invokeMethod(&Helper::singleton(), "invokeMethodFromJS", Qt::QueuedConnection,
-                              Q_ARG(std::shared_ptr<InvokeMethodInfo>, info),
-                              Q_ARG(std::shared_ptr<UvEventLoop>, loop));
-    loop->exec();
-    return info->returnValue();
+  QVariantArgument varArgs[Q_METAMETHOD_INVOKE_MAX_ARGS];
+  for (int i = 0; i < args.size(); i++) {
+    varArgs[i].value = args[i];
   }
+
+  // Init return value
+  QVariant returnValue;
+  // If we pass nullptr as QVariant data, the function with QList<Window*> return type crashes.
+  if (method.returnType() == qMetaTypeId<QList<Window*>>()) {
+    returnValue = QVariant::fromValue(QList<Window*>());
+  } else if (method.returnType() != qMetaTypeId<QVariant>() &&
+             method.returnType() != qMetaTypeId<void>()) {
+    returnValue = QVariant(method.returnType(), nullptr);
+  }
+
+  QGenericReturnArgument returnArg;
+  if (returnValue.isValid()) {
+    returnArg = QGenericReturnArgument(method.typeName(), returnValue.data());
+  }
+
+  Q_ASSERT(object->thread() == QCoreApplication::instance()->thread());
+  bool result = method.invoke(object, Qt::DirectConnection, returnArg, varArgs[0], varArgs[1],
+                              varArgs[2], varArgs[3], varArgs[4], varArgs[5], varArgs[6],
+                              varArgs[7], varArgs[8], varArgs[9]);
+  if (!result) {
+    qWarning() << "invoking" << method.name() << "failed";
+  }
+
+  return returnValue;
 }
 
 Local<Value> JSObjectHelper::toV8ObjectFrom(QObject* sourceObj, Isolate* isolate) {
@@ -199,9 +202,9 @@ Local<Value> JSObjectHelper::toV8ObjectFrom(QObject* sourceObj, Isolate* isolate
       return v8::Null(isolate);
     }
     Local<Object> obj = maybeObj.ToLocalChecked();
-    Maybe<bool> result =
-        obj->SetPrototype(isolate->GetCurrentContext(),
-                          PrototypeStore::singleton().getOrCreatePrototype(metaObj, invokeMethod, isolate));
+    Maybe<bool> result = obj->SetPrototype(
+        isolate->GetCurrentContext(),
+        PrototypeStore::singleton().getOrCreatePrototype(metaObj, invokeMethod, isolate));
     ObjectStore::singleton().wrapAndInsert(sourceObj, obj);
 
     if (result.IsNothing()) {
@@ -390,7 +393,7 @@ void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
   //  qDebug() << method.methodSignature();
   QByteArray emitSignalSignature =
       parameterTypeSignature(method.methodSignature()).prepend("emitSignal");
-//  qDebug() << emitSignalSignature;
+  //  qDebug() << emitSignalSignature;
   const QMetaMethod& emitSignal =
       Helper::staticMetaObject.method(Helper::staticMetaObject.indexOfMethod(emitSignalSignature));
   if (emitSignal.isValid()) {

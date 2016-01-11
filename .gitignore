@@ -10,8 +10,7 @@ CMakeLists.txt.user
 /build/
 /include/
 /jslib/node_modules/silkedit/node_modules/
-/jslib/node_modules/silkedit/build/
-/jslib/node_modules/silkedit/lib/SilkEdit.lib
 /yaml-cpp-*
-/packages/node_modules/vim
-/packages/node_modules/default/node_modules
+/packages/node_modules/
+!/packages/node_modules/vim
+!/packages/node_modules/default

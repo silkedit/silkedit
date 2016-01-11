@@ -13,8 +13,6 @@
 #include "core/PrototypeStore.h"
 #include "ObjectTemplateStore.h"
 #include "API.h"
-#include "Helper.h"
-#include "JSStaticObject.h"
 #include "JSObjectHelper.h"
 #include "Dialog.h"
 #include "VBoxLayout.h"
@@ -27,6 +25,7 @@
 #include "core/Config.h"
 #include "core/Constants.h"
 #include "core/QVariantArgument.h"
+#include "bridge/JSStaticObject.h"
 
 using core::Config;
 using core::Constants;
@@ -52,51 +51,23 @@ using v8::FunctionTemplate;
 using v8::FunctionCallback;
 using v8::Function;
 
-namespace {
-
-void handleRequest(uv_async_t* handle) {
-  // todo: make pointer of singleton thread safe
-  Helper::singleton().asyncLock.lock();
-  auto remoteCalls = static_cast<ConcurrentQueue<QVariant>*>(handle->data);
-  Helper::singleton().asyncLock.unlock();
-
-  while (!remoteCalls->isEmpty()) {
-    QVariant remoteCall = remoteCalls->dequeue();
-    if (remoteCall.canConvert<std::shared_ptr<NodeEmitSignal>>()) {
-      NodeEmitSignal* emitSignal = remoteCall.value<std::shared_ptr<NodeEmitSignal>>().get();
-      JSHandler::emitSignal(emitSignal->object(), emitSignal->signal(), emitSignal->args());
-      emit emitSignal->finished();
-    } else if (remoteCall.canConvert<std::shared_ptr<NodeMethodCall>>()) {
-      NodeMethodCall* methodCall = remoteCall.value<std::shared_ptr<NodeMethodCall>>().get();
-      methodCall->setReturnValue(JSHandler::callFunc(methodCall->method(), methodCall->args()));
-    } else if (remoteCall.canConvert<std::shared_ptr<UvEventLoop>>()) {
-      UvEventLoop* loop = remoteCall.value<std::shared_ptr<UvEventLoop>>().get();
-      if (loop) {
-        loop->quit();
-      } else {
-        qWarning() << "UvEventLoop is null";
-      }
-    } else {
-      qWarning() << "QVariant is invalid type." << remoteCall.typeName();
-    }
-  }
-}
-}
-
-void bridge::Handler::init(Local<Object> exports) {
-  Isolate* isolate = exports->GetIsolate();
+void bridge::Handler::init(Local<Object> exports,
+                           v8::Local<v8::Value>,
+                           v8::Local<v8::Context> context,
+                           void*) {
+  Isolate* isolate = context->GetIsolate();
   HandleScope handle_scope(isolate);
 
   // init JSHandler singleton object
   Local<ObjectTemplate> jsHandler = ObjectTemplate::New(isolate);
-  MaybeLocal<Object> maybeJsHandlerObj = jsHandler->NewInstance(isolate->GetCurrentContext());
+  MaybeLocal<Object> maybeJsHandlerObj = jsHandler->NewInstance(context);
   if (maybeJsHandlerObj.IsEmpty()) {
     qWarning() << "Failed to create JSHandler object";
     return;
   }
   Local<Object> jsHandlerObj = maybeJsHandlerObj.ToLocalChecked();
-  Maybe<bool> result = exports->Set(isolate->GetCurrentContext(),
-                                    String::NewFromUtf8(isolate, "JSHandler"), jsHandlerObj);
+  Maybe<bool> result =
+      exports->Set(context, String::NewFromUtf8(isolate, "JSHandler"), jsHandlerObj);
   if (result.IsNothing()) {
     qWarning() << "exposing JSHandler failed";
   }
@@ -108,7 +79,7 @@ void bridge::Handler::init(Local<Object> exports) {
   // register enums in Qt namespace
   qRegisterMetaType<Qt::Orientation>();
   int id = QMetaType::type("Qt::Orientation");
-  assert(id != QMetaType::UnknownType);
+  Q_ASSERT(id != QMetaType::UnknownType);
   const QMetaObject* metaObj = QMetaType::metaObjectForType(id);
   for (int i = 0; i < metaObj->enumeratorCount(); i++) {
     const QMetaEnum& metaEnum = metaObj->enumerator(i);
@@ -117,14 +88,18 @@ void bridge::Handler::init(Local<Object> exports) {
       enumObj->Set(v8::String::NewFromUtf8(isolate, metaEnum.key(j)),
                    v8::Integer::New(isolate, metaEnum.value(j)));
     }
-    exports->Set(isolate->GetCurrentContext(), v8::String::NewFromUtf8(isolate, metaEnum.name()), enumObj);
+    Maybe<bool> result =
+        exports->Set(context, v8::String::NewFromUtf8(isolate, metaEnum.name()), enumObj);
+    if (result.IsNothing()) {
+      qCritical() << "failed to set enum" << metaEnum.name();
+    }
   }
 }
 
 void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
-  assert(args.Length() == 1);
-  assert(args[0]->IsObject());
+  Q_ASSERT(args.Length() == 1);
+  Q_ASSERT(args[0]->IsObject());
 
   Local<Object> exports = args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked();
   // init singleton objects
@@ -139,12 +114,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   JSStaticObject<DialogButtonBox>::Init(exports);
   JSStaticObject<LineEdit>::Init(exports);
   JSStaticObject<Label>::Init(exports);
-
-  // setup uv_async to call Node.js method from Qt side
-  // http://nikhilm.github.io/uvbook/threads.html
-  Helper::singleton().asyncLock.lock();
-  uv_async_init(uv_default_loop(), &Helper::singleton().async, handleRequest);
-  Helper::singleton().asyncLock.unlock();
 }
 
 void bridge::Handler::setSingletonObj(Local<Object>& exports,
@@ -164,8 +133,8 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   obj->SetAlignedPointerInInternalField(0, sourceObj);
 
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(
-      PrototypeStore::singleton().getOrCreatePrototype(metaObj, JSObjectHelper::invokeMethod, isolate));
+  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
+      metaObj, JSObjectHelper::invokeMethod, isolate));
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);
@@ -173,3 +142,6 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
     qWarning() << "setting exports failed";
   }
 }
+
+// register builtin silkeditbridge module
+NODE_MODULE_CONTEXT_AWARE_BUILTIN(silkeditbridge, bridge::Handler::init)

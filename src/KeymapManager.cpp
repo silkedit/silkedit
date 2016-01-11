@@ -111,7 +111,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
 
       YAML::Node argsNode = keymapDefNode["args"];
       if (argsNode.IsMap()) {
-        assert(argsNode.IsMap());
+        Q_ASSERT(argsNode.IsMap());
         CommandArgument args = parseArgs(argsNode);
         add(key,
             CommandEvent(command, args, condition, source, CommandEvent::USER_KEYMAP_PRIORITY));

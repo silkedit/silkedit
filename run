@@ -81,14 +81,11 @@ clean() {
 # resolve dependency
 resolve() {
     # Update submodules
-    # Currently git submodule is disabled by default because it takes long time
-    if [ "$1" = '-submodule' ]; then
-      git submodule sync
-      git submodule update --init
-    fi
+    git submodule sync
+    git submodule update --init
 
     # vim package
-    npm i --prefix packages https://github.com/silkedit/vim/tarball/0.1.4
+    npm install --prefix packages https://github.com/silkedit/vim/tarball/0.1.4
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
@@ -124,31 +121,17 @@ resolve() {
 
       # node
       node_version=v5.1.1
-      if [ ! -f /usr/local/lib/libnode.dylib ]; then
-        # download libnode.dylib
-        echo "Downloading Node.js library"
-        curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/libnode.dylib.zip
-        unzip libnode.dylib.zip
-        mv libnode.dylib /usr/local/lib
-        rm libnode.dylib.zip
-      fi
 
-      if [ ! -d libnode/include ]; then
-        mkdir -p libnode
-        cd libnode
-        curl -O http://silksmiths.sakura.ne.jp/download/nodejs/$node_version/node-$node_version-headers.tar.gz
-        tar zxvf node-$node_version-headers.tar.gz
-        mv node-$node_version/include .
-        rm -r node-$node_version*
-        cd ..
-      fi
-
-      # npm install for silkedit
-      cd jslib/node_modules/silkedit
-      rm -rf build
-      npm install --production
-      cp build/Release/silkeditbridge.node .
-      cd ../../..
+			# build libnode.dylib
+			cd vendor/node
+			# Build Release version
+			./configure --enable-shared
+			make -j8
+      # Build Debug version
+			./configure --debug --enable-shared
+			make -j8
+			mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
+			cd ../..
 
     else
         # yaml-cpp
@@ -192,23 +175,6 @@ resolve() {
           rm ${libnode}.zip
           cd ..
         fi
-
-        # download node.js headers
-        if [ ! -d include/node ]; then
-          mkdir -p include
-          curl -O http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/node-${NODE_VERSION}-headers.tar.gz
-          tar zxvf node-${NODE_VERSION}-headers.tar.gz
-          mv node-${NODE_VERSION}/include/node include
-          rm -r node-${NODE_VERSION}*
-        fi
-
-        # npm install for silkedit
-        cd jslib/node_modules/silkedit
-        cmd /C "set HOME=%USERPROFILE%\.silkedit-gyp && node-gyp rebuild --target=5.1.1 --arch=x64 --dist-url=http://silksmiths.sakura.ne.jp/download/nodejs"
-        cp build/Release/silkeditbridge.node .
-        rm -rf build
-        npm install --production
-        cd ../../..
 
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
@@ -280,10 +246,15 @@ resolve() {
 		fi
     fi
 
-      # npm install for default package
-      cd packages/node_modules/default
-      npm install --production
-      cd ../../..
+    # npm install for silkedit package
+    cd jslib/node_modules/silkedit
+    npm install --production
+    cd ../../..
+
+    # npm install for default packages
+    cd packages/node_modules
+    npm install --production
+    cd ../..
 }
 
 # release build
@@ -297,8 +268,6 @@ build() {
 
 
     if [ $OS == 'Mac' ]; then
-
-
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
         else
@@ -312,15 +281,13 @@ build() {
         cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
         cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else
-
-
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
         fi
 
-		# crashreporter
+        # crashreporter
         cp crashreporter/crashreporter.exe .
         cp crashreporter/crashreporter_*.qm .
     fi
@@ -457,8 +424,8 @@ set_build() {
 
 localize() {
     lupdate src core -ts translations/silkedit_ja.ts
-	#CrashReporter
-	lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
+    #CrashReporter
+    lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
 
 send_symbol() {
@@ -539,7 +506,7 @@ format         format sources
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer
 rebuild        build from scratch (-edge: Edge build)
-resolve        resolve dependency (-submodule: update submodules)
+resolve        resolve dependency
 test           run tests
 set_version    set version number
 set_build      set build number
