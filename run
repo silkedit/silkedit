@@ -119,9 +119,6 @@ resolve() {
         cd ..
       fi
 
-      # node
-      node_version=v5.1.1
-
 			# build libnode.dylib
 			cd vendor/node
 			# Build Release version
@@ -163,18 +160,13 @@ resolve() {
             rm yaml-cpp-*.tar.gz
         fi
 
-        # download Node.js shared library
-        libnode=node.dll
-        if [ ! -f lib/${libnode} ]; then
-          mkdir -p lib
-          cd lib
-          echo "Downloading Node.js shared library"
-          wget http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/win-${ARCH}/${libnode}.zip
-          wget http://silksmiths.sakura.ne.jp/download/nodejs/${NODE_VERSION}/win-${ARCH}/node.lib
-          unzip ${libnode}.zip
-          rm ${libnode}.zip
-          cd ..
-        fi
+  			# build node.dll
+        cd vendor/node
+        # Build Release version
+        ./vcbuild.bat nosign shared ${ARCH}
+        # Build Debug version
+        ./vcbuild.bat nosign shared debug ${ARCH}
+        cd ../..
 
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then

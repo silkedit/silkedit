@@ -26,4 +26,9 @@ class HelperPrivate : public QObject, public core::IKeyEventFilter {
   void quitApplication();
   void cacheMethods(const QString& className, const QMetaObject* object);
   void cleanup();
+  void emitSignal(QObject *obj, const QString& signal, QVariantList args);
+  QVariant callFunc(const QString& funcName, QVariantList args = QVariantList());
+
+  template <typename T>
+  T callFunc(const QString& funcName, QVariantList args, T defaultValue);
 };

@@ -5,7 +5,9 @@
 #ifndef ATOM_COMMON_NODE_INCLUDES_H_
 #define ATOM_COMMON_NODE_INCLUDES_H_
 
+#ifdef __clang__
 #pragma clang system_header
+#endif
 
 // Include common headers for using node APIs.
 

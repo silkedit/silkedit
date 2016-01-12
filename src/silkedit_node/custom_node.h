@@ -1,6 +1,12 @@
-#include <node.h>
+#pragma once
 
-#include "atom/node_bindings.h"
+namespace atom {
+class NodeBindings;
+}
+
+namespace node {
+class Environment;
+}
 
 namespace silkedit_node {
 

@@ -11,6 +11,8 @@
 #include "CommandManager.h"
 #include "KeymapManager.h"
 #include "SilkApp.h"
+#include "JSHandler.h"
+#include "atom/node_includes.h"
 #include "atom/node_bindings.h"
 #include "silkedit_node/custom_node.h"
 #include "core/Constants.h"
@@ -60,7 +62,6 @@ CommandArgument toCommandArgument(QVariantMap map) {
 
 HelperPrivate::~HelperPrivate() {
   qDebug("~HelperPrivate");
-  silkedit_node::Cleanup(q->m_nodeBindings->uv_env());
 }
 
 void HelperPrivate::startNodeEventLoop() {
@@ -94,6 +95,36 @@ void HelperPrivate::startNodeEventLoop() {
   free(argv);
 }
 
+void HelperPrivate::emitSignal(QObject *obj, const QString &signal, QVariantList args)
+{
+  node::Environment* env = q->m_nodeBindings->uv_env();
+  if (!env) {
+    qDebug() << "NodeBinding is not yet initialized";
+    return;
+  }
+
+  v8::Locker locker(env->isolate());
+  v8::HandleScope handle_scope(env->isolate());
+  v8::Context::Scope context_scope(env->context());
+
+  return JSHandler::emitSignal(env->isolate(), obj, signal, args);
+}
+
+QVariant HelperPrivate::callFunc(const QString &funcName, QVariantList args)
+{
+   node::Environment* env = q->m_nodeBindings->uv_env();
+  if (!env) {
+    qDebug() << "NodeBinding is not yet initialized";
+    return QVariant();
+  }
+
+  v8::Locker locker(env->isolate());
+  v8::HandleScope handle_scope(env->isolate());
+  v8::Context::Scope context_scope(env->context());
+
+  return JSHandler::callFunc(env->isolate(), funcName, args);
+}
+
 void HelperPrivate::init() {
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
   CommandManager::singleton().addEventFilter(std::bind(
@@ -102,14 +133,15 @@ void HelperPrivate::init() {
   startNodeEventLoop();
 }
 
-HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}
+HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {
+}
 
 CommandEventFilterResult HelperPrivate::cmdEventFilter(const std::string& name,
                                                        const CommandArgument& arg) {
   const QVariantList& args = QVariantList{QVariant::fromValue(name), QVariant::fromValue(arg)};
 
   QVariantList varResults =
-      q->m_nodeBindings->callFunc<QVariantList>("cmdEventFilter", args, QVariantList());
+      callFunc<QVariantList>("cmdEventFilter", args, QVariantList());
   if (varResults.size() == 3 && varResults[0].canConvert<bool>() &&
       varResults[1].canConvert<QString>() && varResults[2].canConvert<QVariantMap>()) {
     return std::make_tuple(varResults[0].toBool(), varResults[1].toString().toUtf8().constData(),
@@ -162,7 +194,7 @@ bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
                                           QVariant::fromValue(ctrlKey),
                                           QVariant::fromValue(metaKey),
                                           QVariant::fromValue(shiftKey)};
-  return q->m_nodeBindings->callFunc<bool>("keyEventFilter", args, false);
+  return callFunc<bool>("keyEventFilter", args, false);
 }
 
 Helper::~Helper() {
@@ -173,33 +205,38 @@ void Helper::init() {
   d->init();
 }
 
+void Helper::cleanup() {
+  qDebug("cleanup");
+  silkedit_node::Cleanup(m_nodeBindings->uv_env());
+}
+
 void Helper::sendFocusChangedEvent(const QString& viewType) {
   const QVariantList& args = QVariantList{QVariant::fromValue(viewType)};
-  m_nodeBindings->callFunc("focusChanged", args);
+  d->callFunc("focusChanged", args);
 }
 
 void Helper::sendCommandEvent(const QString& command, const CommandArgument& cmdArgs) {
   const QVariantList& args =
       QVariantList{QVariant::fromValue(command), QVariant::fromValue(cmdArgs)};
-  m_nodeBindings->callFunc("commandEvent", args);
+  d->callFunc("commandEvent", args);
 }
 
 void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
   const QVariantList& args = QVariantList{QVariant::fromValue(cmd), QVariant::fromValue(cmdArgs)};
-  m_nodeBindings->callFunc("runCommand", args);
+  d->callFunc("runCommand", args);
 }
 
 bool Helper::askCondition(const QString& name, core::Operator op, const QString& value) {
   const QVariantList& args = QVariantList{QVariant::fromValue(name),
                                           QVariant::fromValue(core::ICondition::operatorString(op)),
                                           QVariant::fromValue(value)};
-  return m_nodeBindings->callFunc<bool>("askCondition", args, false);
+  return d->callFunc<bool>("askCondition", args, false);
 }
 
 QString Helper::translate(const QString& key, const QString& defaultValue) {
   const QVariantList& args =
       QVariantList{QVariant::fromValue(key), QVariant::fromValue(defaultValue)};
-  return m_nodeBindings->callFunc<QString>("translate", args, defaultValue);
+  return d->callFunc<QString>("translate", args, defaultValue);
 }
 
 void Helper::emitSignalInternal(const QVariantList& args) {
@@ -217,7 +254,7 @@ void Helper::emitSignalInternal(const QVariantList& args) {
     return;
   }
 
-  m_nodeBindings->emitSignal(obj, method.name(), args);
+  d->emitSignal(obj, method.name(), args);
 }
 
 void Helper::emitSignal() {
@@ -228,7 +265,7 @@ void Helper::loadPackage(const QString& pkgName) {
   const QString& pkgDirPath =
       Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
   const QVariantList& args = QVariantList{QVariant::fromValue(pkgDirPath)};
-  m_nodeBindings->callFunc("loadPackage", args);
+  d->callFunc("loadPackage", args);
 }
 
 bool Helper::removePackage(const QString& pkgName) {
@@ -239,7 +276,7 @@ bool Helper::removePackage(const QString& pkgName) {
       QVariantList{QVariant::fromValue(pkgDirPath), QVariant::fromValue(response.get())};
   QEventLoop loop;
   connect(response.get(), &BoolResponse::finished, &loop, &QEventLoop::quit);
-  m_nodeBindings->callFunc("removePackage", args);
+  d->callFunc("removePackage", args);
   loop.exec(QEventLoop::ExcludeUserInputEvents);
   return response->result();
 }
@@ -248,12 +285,12 @@ GetRequestResponse* Helper::sendGetRequest(const QString& url, int timeoutInMs) 
   GetRequestResponse* response = new GetRequestResponse();
   const QVariantList& args = QVariantList{
       QVariant::fromValue(url), QVariant::fromValue(timeoutInMs), QVariant::fromValue(response)};
-  m_nodeBindings->callFunc("sendGetRequest", args);
+  d->callFunc("sendGetRequest", args);
   return response;
 }
 
 void Helper::reloadKeymaps() {
-  m_nodeBindings->callFunc("reloadKeymaps");
+  d->callFunc("reloadKeymaps");
 }
 
 void Helper::quitApplication() {
@@ -273,4 +310,19 @@ void Helper::emitSignal(const QString& str) {
   qDebug() << "emitSignal(QString)";
   QVariantList args{QVariant::fromValue(str)};
   emitSignalInternal(args);
+}
+
+template <typename T>
+T HelperPrivate::callFunc(const QString &funcName, QVariantList args, T defaultValue)
+{
+    node::Environment* env = q->m_nodeBindings->uv_env();
+    if (!env) {
+      qDebug() << "NodeBinding is not yet initialized";
+      return defaultValue;
+    }
+    v8::Locker locker(env->isolate());
+    v8::HandleScope handle_scope(env->isolate());
+    v8::Context::Scope context_scope(env->context());
+
+    return JSHandler::callFunc(env->isolate(), funcName, args, defaultValue);
 }

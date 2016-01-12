@@ -4,7 +4,6 @@
 
 // Modified based on node_bindings.cc in electron
 
-#include <node.h>
 #include <libplatform/libplatform.h>
 #include <string>
 #include <vector>
@@ -12,6 +11,7 @@
 #include <QCoreApplication>
 #include <QThread>
 
+#include "node_includes.h"
 #include "node_bindings.h"
 #include "Helper.h"
 
@@ -79,20 +79,6 @@ void NodeBindings::RunMessageLoop() {
   UvRunOnce();
 }
 
-QVariant NodeBindings::callFunc(const QString& funcName, QVariantList args) {
-  node::Environment* env = uv_env();
-  if (!env) {
-    qDebug() << "NodeBinding is not yet initialized";
-    return QVariant();
-  }
-
-  v8::Locker locker(env->isolate());
-  v8::HandleScope handle_scope(env->isolate());
-  v8::Context::Scope context_scope(env->context());
-
-  return JSHandler::callFunc(env->isolate(), funcName, args);
-}
-
 void NodeBindings::UvRunOnce() {
   Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
 
@@ -106,7 +92,7 @@ void NodeBindings::UvRunOnce() {
   v8::Context::Scope context_scope(env->context());
 
   // run javascript code
-  v8::platform::PumpMessageLoop(platform_, env->isolate());
+  node::PumpMessageLoop(platform_, env->isolate());
 
   // Deal with uv events.
   int r = uv_run(uv_loop_, UV_RUN_NOWAIT);
@@ -149,20 +135,6 @@ void NodeBindings::EmbedThreadRunner(void* arg) {
     // Deal with event in main thread.
     self->WakeupMainThread();
   }
-}
-
-void atom::NodeBindings::emitSignal(QObject* obj, const QString& signal, QVariantList args) {
-  node::Environment* env = uv_env();
-  if (!env) {
-    qDebug() << "NodeBinding is not yet initialized";
-    return;
-  }
-
-  v8::Locker locker(env->isolate());
-  v8::HandleScope handle_scope(env->isolate());
-  v8::Context::Scope context_scope(env->context());
-
-  return JSHandler::emitSignal(env->isolate(), obj, signal, args);
 }
 
 }  // namespace atom

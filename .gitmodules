@@ -9,6 +9,7 @@
 [submodule "breakpad"]
 	path = breakpad
 	url = https://chromium.googlesource.com/breakpad/breakpad
+	ignore = dirty
 [submodule "npm"]
 	path = npm
 	url = git@github.com:npm/npm.git

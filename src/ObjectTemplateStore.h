@@ -2,7 +2,6 @@
 
 #include <boost/optional.hpp>
 #include <v8.h>
-#include <node.h>
 #include <unordered_map>
 #include <QMetaObject>
 #include <QHash>

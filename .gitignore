@@ -12,5 +12,4 @@ CMakeLists.txt.user
 /jslib/node_modules/silkedit/node_modules/
 /yaml-cpp-*
 /packages/node_modules/
-!/packages/node_modules/vim
 !/packages/node_modules/default

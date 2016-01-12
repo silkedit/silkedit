@@ -11,6 +11,13 @@ set(CMAKE_AUTOUIC ON)
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# Node.js defines HAVE_OPENSSL by default
+ADD_DEFINITIONS(-DHAVE_OPENSSL)
+
+# These are necessary to import v8 and libuv symbols in node.dll
+ADD_DEFINITIONS(-DUSING_V8_SHARED)
+ADD_DEFINITIONS(-DUSING_UV_SHARED)
+
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 if (APPLE)
   ADD_DEFINITIONS(-D__POSIX__)
@@ -47,8 +54,13 @@ if (APPLE)
   endif ()
 elseif (MSVC)
   add_library(NODE_LIBRARY SHARED IMPORTED)
-  set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/node.dll)
-  set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/lib/node.lib)
+  if (USE_DEBUG_NODE)
+    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll)
+    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.lib)
+  else ()
+    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll)
+    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.lib)
+  endif ()
 endif ()
 find_package(Boost REQUIRED)
 
@@ -67,7 +79,16 @@ if (APPLE)
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
-  include_directories(SYSTEM /usr/local/include src breakpad/src vendor/node/src vendor/node/deps/v8 vendor/node/deps/v8/include vendor/node/deps/uv/include vendor/node/deps/cares/include vendor/node/deps/openssl/openssl/include)
+  include_directories(SYSTEM
+    /usr/local/include
+    src
+    breakpad/src
+    vendor/node/src
+    vendor/node/deps/v8
+    vendor/node/deps/v8/include
+    vendor/node/deps/uv/include
+    vendor/node/deps/cares/include
+    vendor/node/deps/openssl/openssl/include)
 
   # breakpad framework
   set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
@@ -90,11 +111,18 @@ elseif (MSVC)
   set( BREAKPAD_LIBS "breakpad/${CMAKE_BUILD_TYPE}")
 
   # SYSTEM tells the compiler to skip warning for these header files.
-  include_directories(SYSTEM ${PROJECT_SOURCE_DIR}/include
-                             ${PROJECT_SOURCE_DIR}/src
-                             ${Boost_INCLUDE_DIRS}
-                             ${PROJECT_SOURCE_DIR}/breakpad/src
-                             ${PROJECT_SOURCE_DIR}/include/node)
+  include_directories(SYSTEM
+    include
+    src
+    ${Boost_INCLUDE_DIRS}
+    breakpad/src
+    vendor/node/src
+    vendor/node/deps/v8
+    vendor/node/deps/v8/include
+    vendor/node/deps/uv/include
+    vendor/node/deps/cares/include
+    vendor/node/deps/openssl/openssl/include
+  )
   link_directories(${PROJECT_SOURCE_DIR}/lib)
 
   if (BUILD_EDGE)
@@ -102,15 +130,6 @@ elseif (MSVC)
   else ()
     set( SILK_ICON resources/silkedit.rc)
   endif ()
-
-  # Qt includes winsock.h but uv.h includes winsock2.h
-  # To prevent Qt from including winsock.h (typically from windows.h),
-  # define _WINSOCKAPI_ before including winsock.h
-  # http://stackoverflow.com/questions/1372480/c-redefinition-header-files-winsock2-h
-  ADD_DEFINITIONS(-D_WINSOCKAPI_)
-
-  # Node.js defines HAVE_OPENSSL by default
-  ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
   add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif ()
@@ -217,7 +236,11 @@ elseif (MSVC)
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
 
   # Copy node.dll
-  file(COPY ${PROJECT_SOURCE_DIR}/lib/node.dll DESTINATION .)
+  if (USE_DEBUG_NODE)
+    file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll DESTINATION .)
+  else ()
+    file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll DESTINATION .)
+  endif ()
 
   # copy silkedit.lib
   # NOTE: The command becomes part of the target and will only execute when the
