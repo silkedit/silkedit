@@ -369,7 +369,7 @@ int TabView::insertTabInformation( const int index ){
   QString path    = v->path();
 
   // Declaration variables to insert tab information.
-  QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
+  QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
                                 QSettings::IniFormat);
 
   // set tab information to array.
@@ -383,7 +383,7 @@ int TabView::insertTabInformation( const int index ){
 }
 bool TabView::createWithSavedTabs(){
   // declaration variables to insert tab information.
-  QSettings tabViewHistoryTable(Constants::tabViewInformationPath(),
+  QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
                                 QSettings::IniFormat);
 
   // get array size.
@@ -412,35 +412,3 @@ bool TabView::createWithSavedTabs(){
   
   return true;
 }
-// QVariant TabView::request(TabView* view, const QString& method, const msgpack::object&) {
-//  if (method == "count") {
-//    return view->count();
-//  } else if (method == "currentIndex") {
-//    return view->currentIndex();
-//  } else {
-//    qDebug("method: %s not found", qPrintable(method));
-//    return QVariant();
-//  }
-//}
-
-// void TabView::notify(TabView* view, const QString& method, const msgpack::object& obj) {
-//  int numArgs = obj.via.array.size;
-//  if (method == "closeAllTabs") {
-//    view->closeAllTabs();
-//  } else if (method == "closeActiveTab") {
-//    view->closeActiveTab();
-//  } else if (method == "closeOtherTabs") {
-//    view->closeOtherTabs();
-//  } else if (method == "addNew") {
-//    view->addNew();
-//  } else if (method == "setCurrentIndex") {
-//    if (numArgs == 2) {
-//      std::tuple<int, int> params;
-//      obj.convert(&params);
-//      int index = std::get<1>(params);
-//      view->setCurrentIndex(index);
-//    } else {
-//      qWarning("invalid numArgs: %d", numArgs);
-//    }
-//  }
-//}

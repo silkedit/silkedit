@@ -30,16 +30,14 @@ class TabView : public QTabWidget{
   void saveAllTabs();
   int indexOfPath(const QString& path);
   int insertTabInformation( const int index );
-  Q_INVOKABLE int count();
-  Q_INVOKABLE int currentIndex();
-  Q_INVOKABLE void setCurrentIndex(int index);
+  bool createWithSavedTabs();
 
  public slots:
   void closeActiveTab();
   bool closeAllTabs();
   void closeOtherTabs();
   int open(const QString& path);
-  void createWithSavedTabs();
+  void addNew();
 
  signals:
   void allTabRemoved();
