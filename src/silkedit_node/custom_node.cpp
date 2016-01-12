@@ -26,6 +26,8 @@ using atomic = std::atomic<T>;
 
 namespace silkedit_node {
 
+using node::Environment;
+
 using v8::Array;
 using v8::ArrayBuffer;
 using v8::Boolean;
@@ -63,9 +65,6 @@ static const char** exec_argv;
 
 static bool trace_sync_io = false;
 static bool track_heap_objects = false;
-static bool use_debug_agent = false;
-static bool debug_wait_connect = false;
-static int debug_port = 5858;
 
 // process-relative uptime base, initialized at start-up
 static bool debugger_running;
@@ -105,12 +104,13 @@ static void DispatchMessagesDebugAgentCallback(node::Environment*) {
 }
 
 static void StartDebug(node::Environment* env, bool wait) {
+  Q_ASSERT(env->debugger_agent());
   Q_ASSERT(!debugger_running);
 
   env->debugger_agent()->set_dispatch_handler(DispatchMessagesDebugAgentCallback);
-  debugger_running = env->debugger_agent()->Start(debug_port, wait);
+  debugger_running = env->debugger_agent()->Start(node::debug_port, wait);
   if (debugger_running == false) {
-    fprintf(stderr, "Starting debugger on port %d failed\n", debug_port);
+    fprintf(stderr, "Starting debugger on port %d failed\n", node::debug_port);
     fflush(stderr);
     return;
   }
@@ -118,7 +118,8 @@ static void StartDebug(node::Environment* env, bool wait) {
 
 // Called from the main thread.
 static void EnableDebug(node::Environment* env) {
-  CHECK(debugger_running);
+  Q_ASSERT(env->debugger_agent());
+  Q_ASSERT(debugger_running);
 
   // Send message to enable debug in workers
   HandleScope handle_scope(env->isolate());
@@ -131,6 +132,30 @@ static void EnableDebug(node::Environment* env) {
 
   // Enabled debugger, possibly making it wait on a semaphore
   env->debugger_agent()->Enable();
+}
+
+// Called from the main thread.
+static void DispatchDebugMessagesAsyncCallback(uv_async_t* ) {
+  // Synchronize with signal handler, see TryStartDebugger.
+  Isolate* isolate;
+  do {
+    isolate = node_isolate.exchange(nullptr);
+  } while (isolate == nullptr);
+
+  if (debugger_running == false) {
+    fprintf(stderr, "Starting debugger agent.\n");
+
+    HandleScope scope(isolate);
+    Environment* env = Environment::GetCurrent(isolate);
+    Context::Scope context_scope(env->context());
+
+    StartDebug(env, false);
+    EnableDebug(env);
+  }
+
+  Isolate::Scope isolate_scope(isolate);
+  v8::Debug::ProcessDebugMessages();
+  CHECK_EQ(nullptr, node_isolate.exchange(isolate));
 }
 
 #ifdef __POSIX__
@@ -258,7 +283,7 @@ static void StartNodeInstance(void* arg, atom::NodeBindings* nodeBindings) {
 
     // Start debug agent when argv has --debug
     if (instance_data->use_debug_agent())
-      StartDebug(env, debug_wait_connect);
+      StartDebug(env, node::debug_wait_connect);
 
     // Make uv loop being wrapped by window context.
     if (nodeBindings->uv_env() == nullptr)
@@ -291,6 +316,14 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
   int exec_argc;
   node::g_upstream_node_mode = true;
   node::Init(&argc, const_cast<const char**>(argv), &exec_argc, &exec_argv);
+
+  // init async debug messages dispatching
+  // Main thread uses uv_default_loop
+  uv_async_init(uv_default_loop(),
+                &dispatch_debug_messages_async,
+                DispatchDebugMessagesAsyncCallback);
+  uv_unref(reinterpret_cast<uv_handle_t*>(&dispatch_debug_messages_async));
+
   nodeBindings->PrepareMessageLoop();
 
   #if HAVE_OPENSSL
@@ -307,7 +340,7 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
 
   node::NodeInstanceData instance_data(node::NodeInstanceType::MAIN, uv_default_loop(), argc,
                                        const_cast<const char**>(argv), exec_argc, exec_argv,
-                                       use_debug_agent);
+                                       node::use_debug_agent);
   StartNodeInstance(&instance_data, nodeBindings);
 }
 
