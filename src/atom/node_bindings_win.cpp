@@ -2,11 +2,9 @@
 // Use of this source code is governed by the MIT license that can be
 // found in the LICENSE file.
 
-#include "atom/common/node_bindings_win.h"
+#include "node_bindings_win.h"
 
 #include <windows.h>
-
-#include "base/logging.h"
 
 extern "C" {
 #include "vendor/node/deps/uv/src/win/internal.h"
@@ -14,8 +12,8 @@ extern "C" {
 
 namespace atom {
 
-NodeBindingsWin::NodeBindingsWin(bool is_browser)
-    : NodeBindings(is_browser) {
+NodeBindingsWin::NodeBindingsWin()
+    : NodeBindings() {
 }
 
 NodeBindingsWin::~NodeBindingsWin() {
@@ -45,8 +43,8 @@ void NodeBindingsWin::PollEvents() {
 }
 
 // static
-NodeBindings* NodeBindings::Create(bool is_browser) {
-  return new NodeBindingsWin(is_browser);
+NodeBindings* NodeBindings::Create() {
+  return new NodeBindingsWin();
 }
 
 }  // namespace atom

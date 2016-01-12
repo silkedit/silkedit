@@ -68,6 +68,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   ~Helper();
 
   void init();
+  void cleanup();
   void sendFocusChangedEvent(const QString& viewType);
   void sendCommandEvent(const QString& command, const CommandArgument& cmdArgs);
   void runCommand(const QString& cmd, const CommandArgument& cmdArgs);

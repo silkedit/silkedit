@@ -2,13 +2,13 @@
 
 #include "custom_node.h"
 #include "atom/node_includes.h"
+#include "atom/node_bindings.h"
 
 #include <node_crypto.h>
 #include <QtGlobal>
 #include <v8.h>
 #include <libplatform/libplatform.h>
 #include <v8-profiler.h>
-#include <uv.h>
 
 #ifdef __APPLE__
 #include "atomic-polyfill.h"  // NOLINT(build/include_order)
@@ -133,6 +133,7 @@ static void EnableDebug(node::Environment* env) {
   env->debugger_agent()->Enable();
 }
 
+#ifdef __POSIX__
 static void RegisterSignalHandler(int signal,
                                   void (*handler)(int signal),
                                   bool reset_handler = false) {
@@ -148,6 +149,7 @@ static void RegisterSignalHandler(int signal,
   sigfillset(&sa.sa_mask);
   CHECK_EQ(sigaction(signal, &sa, nullptr), 0);
 }
+#endif  // __POSIX__
 
 static void SignalExit(int signo) {
   uv_tty_reset_mode();
@@ -294,11 +296,11 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
   #if HAVE_OPENSSL
   // V8 on Windows doesn't have a good source of entropy. Seed it from
   // OpenSSL's pool.
-  v8::SetEntropySource(node::crypto::EntropySource);
+  V8::SetEntropySource(node::crypto::EntropySource);
   #endif
 
   const int thread_pool_size = 4;
-  default_platform = v8::platform::CreateDefaultPlatform(thread_pool_size);
+  default_platform = node::CreateDefaultPlatform(thread_pool_size);
   nodeBindings->set_platform(default_platform);
   V8::InitializePlatform(default_platform);
   V8::Initialize();
@@ -322,14 +324,15 @@ void Cleanup(node::Environment* env) {
     node::RunAtExit(env);
 
     array_buffer_allocator->set_env(nullptr);
-    env->Dispose();
+    // This causes assertion error on Windows
+//    env->Dispose();
   }
 
   // Synchronize with signal handler, see TryStartDebugger.
   while (isolate != node_isolate.exchange(nullptr))
     ;  // NOLINT
 
-  // Note don't delete isolate because s_objects of ObjectStore has unordered_map<QObject*,
+  // don't delete isolate because s_objects of ObjectStore has unordered_map<QObject*,
   // v8::UniquePersistent<v8::Object>>
   // If we delete isolate here, crash happens at the destructor of s_objects
   //  CHECK_NE(isolate, nullptr);
@@ -343,8 +346,9 @@ void Cleanup(node::Environment* env) {
   delete default_platform;
   default_platform = nullptr;
 
-  delete[] exec_argv;
-  exec_argv = nullptr;
+    // This causes assertion error on Windows
+//  delete[] exec_argv;
+//  exec_argv = nullptr;
 }
 
 }  // namespace silkedit_node

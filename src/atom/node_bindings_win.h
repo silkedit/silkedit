@@ -5,20 +5,19 @@
 #ifndef ATOM_COMMON_NODE_BINDINGS_WIN_H_
 #define ATOM_COMMON_NODE_BINDINGS_WIN_H_
 
-#include "atom/common/node_bindings.h"
-#include "base/compiler_specific.h"
+#include "node_bindings.h"
+#include "core/macros.h"
 
 namespace atom {
 
 class NodeBindingsWin : public NodeBindings {
+  DISABLE_COPY(NodeBindingsWin)
  public:
-  explicit NodeBindingsWin(bool is_browser);
+  NodeBindingsWin();
   virtual ~NodeBindingsWin();
 
  private:
   void PollEvents() override;
-
-  DISALLOW_COPY_AND_ASSIGN(NodeBindingsWin);
 };
 
 }  // namespace atom

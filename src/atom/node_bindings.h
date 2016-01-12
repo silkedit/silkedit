@@ -11,7 +11,6 @@
 #include <uv.h>
 #include <QDebug>
 
-#include "node_includes.h"
 #include "core/macros.h"
 #include "JSHandler.h"
 
@@ -42,24 +41,6 @@ class NodeBindings {
 
   // Run the libuv loop for once.
   void UvRunOnce();
-
-  QVariant callFunc(const QString& funcName, QVariantList args = QVariantList());
-
-  void emitSignal(QObject *obj, const QString& signal, QVariantList args);
-
-  template <typename T>
-  T callFunc(const QString& funcName, QVariantList args, T defaultValue) {
-    node::Environment* env = uv_env();
-    if (!env) {
-      qDebug() << "NodeBinding is not yet initialized";
-      return defaultValue;
-    }
-    v8::Locker locker(env->isolate());
-    v8::HandleScope handle_scope(env->isolate());
-    v8::Context::Scope context_scope(env->context());
-
-    return JSHandler::callFunc(env->isolate(), funcName, args, defaultValue);
-  }
 
  protected:
   NodeBindings();
