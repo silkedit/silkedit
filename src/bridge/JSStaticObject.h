@@ -14,6 +14,9 @@
 #include "ObjectTemplateStore.h"
 #include "core/QVariantArgument.h"
 #include "core/macros.h"
+#include "core/Util.h"
+
+using core::Util;
 
 namespace bridge {
 
@@ -30,16 +33,9 @@ class JSStaticObject {
     ObjectTemplateStore::initInstanceTemplate(tpl->InstanceTemplate(), &metaObj, isolate);
 
     // register method and slots to prototype object
-    QSet<QByteArray> registeredMethods;
-    for (int i = 0; i < metaObj.methodCount(); i++) {
-      const QMetaMethod& method = metaObj.method(i);
-      if ((method.methodType() == QMetaMethod::MethodType::Method ||
-           method.methodType() == QMetaMethod::MethodType::Slot) &&
-          !registeredMethods.contains(method.name())) {
-        NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), JSObjectHelper::invokeMethod);
-        registeredMethods.insert(method.name());
-      }
-    }
+    Util::processWithPublicMethods(&metaObj, [&](const QMetaMethod& method) {
+      NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), JSObjectHelper::invokeMethod);
+    });
 
     v8::MaybeLocal<v8::Function> maybeFunc = tpl->GetFunction(isolate->GetCurrentContext());
     if (maybeFunc.IsEmpty()) {

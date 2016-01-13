@@ -3,6 +3,7 @@
 
 #include "PrototypeStore.h"
 #include "JSHandler.h"
+#include "Util.h"
 
 using v8::UniquePersistent;
 using v8::Object;
@@ -35,9 +36,9 @@ v8::Local<v8::Object> core::PrototypeStore::getOrCreatePrototype(const QMetaObje
   } else {
     // cache prototype object
     Local<Object> proto = Object::New(isolate);
-    for (int i = 0; i < metaObj->methodCount(); i++) {
-      NODE_SET_METHOD(proto, metaObj->method(i).name().constData(), invoke);
-    }
+    Util::processWithPublicMethods(metaObj, [&](const QMetaMethod& method) {
+      NODE_SET_METHOD(proto, method.name().constData(), invoke);
+    });
     JSHandler::inheritsQtEventEmitter(isolate, proto);
     PrototypeStore::singleton().insert(metaObj, proto);
     return handle_scope.Escape(proto);
