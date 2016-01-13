@@ -95,8 +95,7 @@ void HelperPrivate::startNodeEventLoop() {
   free(argv);
 }
 
-void HelperPrivate::emitSignal(QObject *obj, const QString &signal, QVariantList args)
-{
+void HelperPrivate::emitSignal(QObject* obj, const QString& signal, QVariantList args) {
   node::Environment* env = q->m_nodeBindings->uv_env();
   if (!env) {
     qDebug() << "NodeBinding is not yet initialized";
@@ -110,9 +109,8 @@ void HelperPrivate::emitSignal(QObject *obj, const QString &signal, QVariantList
   return JSHandler::emitSignal(env->isolate(), obj, signal, args);
 }
 
-QVariant HelperPrivate::callFunc(const QString &funcName, QVariantList args)
-{
-   node::Environment* env = q->m_nodeBindings->uv_env();
+QVariant HelperPrivate::callFunc(const QString& funcName, QVariantList args) {
+  node::Environment* env = q->m_nodeBindings->uv_env();
   if (!env) {
     qDebug() << "NodeBinding is not yet initialized";
     return QVariant();
@@ -131,17 +129,17 @@ void HelperPrivate::init() {
       &HelperPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   startNodeEventLoop();
+  connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, &Helper::singleton(),
+                   &Helper::cleanup);
 }
 
-HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {
-}
+HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}
 
 CommandEventFilterResult HelperPrivate::cmdEventFilter(const std::string& name,
                                                        const CommandArgument& arg) {
   const QVariantList& args = QVariantList{QVariant::fromValue(name), QVariant::fromValue(arg)};
 
-  QVariantList varResults =
-      callFunc<QVariantList>("cmdEventFilter", args, QVariantList());
+  QVariantList varResults = callFunc<QVariantList>("cmdEventFilter", args, QVariantList());
   if (varResults.size() == 3 && varResults[0].canConvert<bool>() &&
       varResults[1].canConvert<QString>() && varResults[2].canConvert<QVariantMap>()) {
     return std::make_tuple(varResults[0].toBool(), varResults[1].toString().toUtf8().constData(),
@@ -313,16 +311,15 @@ void Helper::emitSignal(const QString& str) {
 }
 
 template <typename T>
-T HelperPrivate::callFunc(const QString &funcName, QVariantList args, T defaultValue)
-{
-    node::Environment* env = q->m_nodeBindings->uv_env();
-    if (!env) {
-      qDebug() << "NodeBinding is not yet initialized";
-      return defaultValue;
-    }
-    v8::Locker locker(env->isolate());
-    v8::HandleScope handle_scope(env->isolate());
-    v8::Context::Scope context_scope(env->context());
+T HelperPrivate::callFunc(const QString& funcName, QVariantList args, T defaultValue) {
+  node::Environment* env = q->m_nodeBindings->uv_env();
+  if (!env) {
+    qDebug() << "NodeBinding is not yet initialized";
+    return defaultValue;
+  }
+  v8::Locker locker(env->isolate());
+  v8::HandleScope handle_scope(env->isolate());
+  v8::Context::Scope context_scope(env->context());
 
-    return JSHandler::callFunc(env->isolate(), funcName, args, defaultValue);
+  return JSHandler::callFunc(env->isolate(), funcName, args, defaultValue);
 }
