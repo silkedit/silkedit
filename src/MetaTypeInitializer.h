@@ -5,6 +5,7 @@
 #include <QString>
 #include <QMetaProperty>
 #include <QPushButton>
+#include <QLayout>
 
 class MetaTypeInitializer {
  public:
@@ -17,3 +18,4 @@ class MetaTypeInitializer {
 Q_DECLARE_METATYPE(boost::optional<QString>)
 Q_DECLARE_METATYPE(QMetaProperty)
 Q_DECLARE_METATYPE(QPushButton*)
+Q_DECLARE_METATYPE(QLayout*)
