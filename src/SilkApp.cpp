@@ -60,8 +60,6 @@ SilkApp::SilkApp(int& argc, char** argv)
   setAttribute(Qt::AA_UseHighDpiPixmaps);
   s_app = this;
 
-  connect(this, &QApplication::aboutToQuit, &Helper::singleton(), &Helper::cleanup);
-
 #ifdef Q_OS_WIN
 // application font doesn't work with DirectWrite font engine
 // https://bugreports.qt.io/browse/QTBUG-18711
