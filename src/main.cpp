@@ -2,6 +2,7 @@
 #include <QTime>
 #include <QTranslator>
 #include <QLibraryInfo>
+#include <QTimer>
 
 #include "SilkApp.h"
 #include "TabView.h"
@@ -69,7 +70,9 @@ int main(int argv, char** args) {
     v->setFocus();
   }
 
-  Helper::singleton().init();
+  // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the
+  // window system's event queue have been processe
+  QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {
