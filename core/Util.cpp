@@ -1,7 +1,9 @@
-﻿#include <QDebug>
+﻿#include <functional>
+#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
 #include <QRegularExpression>
+#include <QMetaMethod>
 
 #include "Util.h"
 
@@ -87,6 +89,20 @@ QString Util::toString(const QKeySequence& keySeq) {
 
   replace(str, "return", "enter");
   return str;
+}
+
+void Util::processWithPublicMethods(const QMetaObject* metaObj, std::function<void(const QMetaMethod&)> fn) {
+  QSet<QByteArray> registeredMethods;
+  for (int i = 0; i < metaObj->methodCount(); i++) {
+    const QMetaMethod& method = metaObj->method(i);
+    if (method.access() == QMetaMethod::Access::Public &&
+        (method.methodType() == QMetaMethod::MethodType::Method ||
+         method.methodType() == QMetaMethod::MethodType::Slot) &&
+        !registeredMethods.contains(method.name())) {
+      registeredMethods.insert(method.name());
+      fn(method);
+    }
+  }
 }
 
 }  // namespace core

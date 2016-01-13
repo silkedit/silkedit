@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <functional>
 #include <list>
 #include <string>
 #include <functional>
@@ -33,6 +34,9 @@ class Util {
 
   static QKeySequence toSequence(const QString& str);
   static QString toString(const QKeySequence& keySeq);
+
+  static void processWithPublicMethods(const QMetaObject* metaObj,
+                                       std::function<void(const QMetaMethod&)> fn);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
