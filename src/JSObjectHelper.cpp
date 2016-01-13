@@ -4,6 +4,8 @@
 #include <QMetaProperty>
 #include <QObject>
 #include <QCoreApplication>
+#include <QCache>
+#include <QMultiHash>
 
 #include "JSObjectHelper.h"
 #include "ObjectTemplateStore.h"
@@ -38,7 +40,7 @@ using v8::Function;
 using v8::Null;
 using v8::FunctionTemplate;
 
-QThreadStorage<QHash<QString, QHash<QString, int>>> JSObjectHelper::m_classMethodHash;
+QCache <const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>> JSObjectHelper::s_classMethodCache;
 
 namespace {
 Local<Object> toV8Object(const CommandArgument args, Isolate* isolate) {
@@ -119,14 +121,23 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
   }
 
   int methodIndex = -1;
-  // todo: store QMetaObject* instead of QString
-  const QString& className = object->metaObject()->className();
-  if (!m_classMethodHash.localData().contains(className)) {
-    cacheMethods(className, object->metaObject());
+  const QMetaObject* metaObj = object->metaObject();
+  if (!s_classMethodCache.contains(metaObj)) {
+    cacheMethods(metaObj);
   }
 
-  if (m_classMethodHash.localData().value(className).contains(methodName)) {
-    methodIndex = m_classMethodHash.localData().value(className).value(methodName);
+  for (MethodInfo methodInfo : s_classMethodCache[metaObj]->values(methodName)) {
+    ParameterTypes parameterTypes = methodInfo.second;
+    if (matchTypes(parameterTypes, args)) {
+      // overwrite QVariant type with parameter type to match the method signature.
+      // e.g. convert QLabel* to QWidget*
+      for (int j = 0; j < parameterTypes.size(); j++) {
+        args[j] = QVariant(QMetaType::type(parameterTypes[j]), args[j].data());
+      }
+
+      methodIndex = methodInfo.first;
+      break;
+    }
   }
 
   if (methodIndex == -1) {
@@ -406,12 +417,12 @@ void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
   }
 }
 
-// todo: handle overloaded methods
-void JSObjectHelper::cacheMethods(const QString& className, const QMetaObject* metaObj) {
-  QHash<QString, int> methodNameIndexHash;
+void JSObjectHelper::cacheMethods(const QMetaObject* metaObj) {
+  QMultiHash<QString, MethodInfo>* methodNameParameterTypesHash = new QMultiHash<QString, MethodInfo>();
   for (int i = 0; i < metaObj->methodCount(); i++) {
-    const QString& name = QString::fromLatin1(metaObj->method(i).name());
-    methodNameIndexHash.insert(name, i);
+    const auto& method = metaObj->method(i);
+    const QString& name = QString::fromLatin1(method.name());
+    methodNameParameterTypesHash->insert(name, std::make_pair(i, method.parameterTypes()));
   }
-  m_classMethodHash.localData().insert(className, methodNameIndexHash);
+  s_classMethodCache.insert(metaObj, methodNameParameterTypesHash);
 }

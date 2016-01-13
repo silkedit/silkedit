@@ -35,9 +35,6 @@ class StatusBar : public QStatusBar{
   void setActiveTextEditViewLineSeparator();
   void setActiveTextEditViewBOM();
 
-public slots:
-  void showMessageWithTimeout(const QString& text, int timeout);
-
  signals:
   void languageChanged(const QString& scopeName);
 

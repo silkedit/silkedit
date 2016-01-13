@@ -6,6 +6,9 @@
 
 #include "core/Singleton.h"
 
+typedef QList<QByteArray> ParameterTypes;
+typedef std::pair<int, ParameterTypes> MethodInfo;
+
 class JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
   Q_OBJECT
 
@@ -21,14 +24,13 @@ class JSObjectHelper : public QObject, public core::Singleton<JSObjectHelper> {
   ~JSObjectHelper() = default;
 
 private:
-  // todo: use QCache
-  static QThreadStorage<QHash<QString, QHash<QString, int>>> m_classMethodHash;
+  static QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> s_classMethodCache;
 
   static v8::Local<v8::Value> toV8ValueInternal(const QVariant& var,
                                         v8::Isolate* isolate = v8::Isolate::GetCurrent());
   static v8::Local<v8::Value> toV8ObjectFrom(QObject *sourceObj, v8::Isolate *isolate);
   static QVariant invokeMethodInternal(v8::Isolate *isolate, QObject *object, const QString &methodName, QVariantList args);
-  static void cacheMethods(const QString &className, const QMetaObject *metaObj);
+  static void cacheMethods( const QMetaObject *metaObj);
 
   friend class core::Singleton<JSObjectHelper>;
   JSObjectHelper() = default;
