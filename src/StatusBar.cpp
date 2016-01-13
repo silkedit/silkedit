@@ -181,10 +181,6 @@ void StatusBar::setActiveTextEditViewBOM() {
   }
 }
 
-void StatusBar::showMessageWithTimeout(const QString& text, int timeout) {
-  QStatusBar::showMessage(text, timeout);
-}
-
 void StatusBar::setLanguage(const QString& scope) {
   qDebug("setLanguage inStatusBar. scope: %s", qPrintable(scope));
   Language* lang = LanguageProvider::languageFromScope(scope);
