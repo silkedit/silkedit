@@ -158,7 +158,22 @@ static void DispatchDebugMessagesAsyncCallback(uv_async_t* ) {
   CHECK_EQ(nullptr, node_isolate.exchange(isolate));
 }
 
+// Called from an arbitrary thread.
+static void TryStartDebugger() {
+  // Call only async signal-safe functions here!  Don't retry the exchange,
+  // it will deadlock when the thread is interrupted inside a critical section.
+  if (auto isolate = node_isolate.exchange(nullptr)) {
+    v8::Debug::DebugBreak(isolate);
+    uv_async_send(&dispatch_debug_messages_async);
+    CHECK_EQ(nullptr, node_isolate.exchange(isolate));
+  }
+}
+
 #ifdef __POSIX__
+static void EnableDebugSignalHandler(int ) {
+  TryStartDebugger();
+}
+
 static void RegisterSignalHandler(int signal,
                                   void (*handler)(int signal),
                                   bool reset_handler = false) {
@@ -174,7 +189,74 @@ static void RegisterSignalHandler(int signal,
   sigfillset(&sa.sa_mask);
   CHECK_EQ(sigaction(signal, &sa, nullptr), 0);
 }
+
+static int RegisterDebugSignalHandler() {
+  // FIXME(bnoordhuis) Should be per-isolate or per-context, not global.
+  RegisterSignalHandler(SIGUSR1, EnableDebugSignalHandler);
+  // Unblock SIGUSR1.  A pending SIGUSR1 signal will now be delivered.
+  sigset_t sigmask;
+  sigemptyset(&sigmask);
+  sigaddset(&sigmask, SIGUSR1);
+  CHECK_EQ(0, pthread_sigmask(SIG_UNBLOCK, &sigmask, nullptr));
+  return 0;
+}
 #endif  // __POSIX__
+
+#ifdef _WIN32
+DWORD WINAPI EnableDebugThreadProc(void* arg) {
+  TryStartDebugger();
+  return 0;
+}
+
+
+static int GetDebugSignalHandlerMappingName(DWORD pid, wchar_t* buf,
+    size_t buf_len) {
+  return _snwprintf(buf, buf_len, L"node-debug-handler-%u", pid);
+}
+
+
+static int RegisterDebugSignalHandler() {
+  wchar_t mapping_name[32];
+  HANDLE mapping_handle;
+  DWORD pid;
+  LPTHREAD_START_ROUTINE* handler;
+
+  pid = GetCurrentProcessId();
+
+  if (GetDebugSignalHandlerMappingName(pid,
+                                       mapping_name,
+                                       ARRAY_SIZE(mapping_name)) < 0) {
+    return -1;
+  }
+
+  mapping_handle = CreateFileMappingW(INVALID_HANDLE_VALUE,
+                                      nullptr,
+                                      PAGE_READWRITE,
+                                      0,
+                                      sizeof *handler,
+                                      mapping_name);
+  if (mapping_handle == nullptr) {
+    return -1;
+  }
+
+  handler = reinterpret_cast<LPTHREAD_START_ROUTINE*>(
+      MapViewOfFile(mapping_handle,
+                    FILE_MAP_ALL_ACCESS,
+                    0,
+                    0,
+                    sizeof *handler));
+  if (handler == nullptr) {
+    CloseHandle(mapping_handle);
+    return -1;
+  }
+
+  *handler = EnableDebugThreadProc;
+
+  UnmapViewOfFile(static_cast<void*>(handler));
+
+  return 0;
+}
+#endif  // _WIN32
 
 static void SignalExit(int signo) {
   uv_tty_reset_mode();
@@ -302,7 +384,7 @@ static void StartNodeInstance(void* arg, atom::NodeBindings* nodeBindings) {
   }
 }
 
-// copied from Start function in node.cc
+// mostly copied from Start function in node.cc
 void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
   PlatformInit();
 
@@ -316,6 +398,9 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
   int exec_argc;
   node::g_upstream_node_mode = true;
   node::Init(&argc, const_cast<const char**>(argv), &exec_argc, &exec_argv);
+  if (!node::use_debug_agent) {
+    RegisterDebugSignalHandler();
+  }
 
   // init async debug messages dispatching
   // Main thread uses uv_default_loop
