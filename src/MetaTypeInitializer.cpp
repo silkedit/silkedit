@@ -19,5 +19,6 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<std::string>();
   qRegisterMetaType<QMetaProperty>();
   qRegisterMetaType<QPushButton*>();
+  qRegisterMetaType<QLayout*>();
 }
 
