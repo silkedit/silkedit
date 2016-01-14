@@ -9,7 +9,6 @@
 #include "core/macros.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
-#include "util/DialogUtils.h"
 
 class TextEditView;
 class TabView;
@@ -26,9 +25,6 @@ class API : public QObject, public core::Singleton<API> {
 public slots:
   void setFont(const QString& family, int size);
   void hideActiveFindReplacePanel();
-  QStringList showFileAndFolderDialog(const QString& caption);
-  QStringList showFilesDialog(const QString& caption);
-  boost::optional<QString> showFolderDialog(const QString& caption);
   QList<Window*> windows();
   boost::optional<QString> getConfig(const QString& name);
   QString version();
@@ -36,6 +32,4 @@ public slots:
  private:
   friend class core::Singleton<API>;
   API() = default;
-
-  QStringList showDialogImpl(const QString& caption, DialogUtils::MODE mode);
 };

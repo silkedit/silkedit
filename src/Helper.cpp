@@ -38,6 +38,7 @@ QStringList helperArgs() {
   // expose global.gc()
   //  args << "--expose-gc";
   args << "--harmony";
+  args << "--harmony_default_parameters";
   args << "--harmony_proxies";
   // first argument is main script
   args << Constants::singleton().jsLibDir() + "/main.js";
