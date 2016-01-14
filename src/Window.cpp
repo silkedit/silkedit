@@ -7,7 +7,6 @@
 
 #include "Window.h"
 #include "ui_Window.h"
-#include "API.h"
 #include "TabViewGroup.h"
 #include "TextEditView.h"
 #include "StatusBar.h"

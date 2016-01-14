@@ -12,7 +12,6 @@
 #include "Helper.h"
 #include "version.h"
 #include "SilkStyle.h"
-#include "API.h"
 #include "ObjectStore.h"
 #include "core/Constants.h"
 

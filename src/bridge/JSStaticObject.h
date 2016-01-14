@@ -64,7 +64,7 @@ class JSStaticObject {
       // convert args to QVariantList
       QVariantList variants;
       for (int i = 0; i < args.Length(); i++) {
-        variants.append(JSObjectHelper::toVariant(args[i]));
+        variants.append(JSObjectHelper::toVariant(isolate, args[i]));
       }
 
       for (int i = 0; i < metaObj.constructorCount(); i++) {

@@ -13,8 +13,9 @@
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
 #include "core/Config.h"
-#include "API.h"
 #include "Helper.h"
+#include "App.h"
+#include "Window.h"
 #include "core/Metadata.h"
 #include "core/LanguageParser.h"
 #include "core/Theme.h"
@@ -324,8 +325,7 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
                         &TextEditView::encodingChanged);
     QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
                         &TextEditView::lineSeparatorChanged);
-    QObject::disconnect(m_document.get(), &Document::bomChanged, q,
-                        &TextEditView::bomChanged);
+    QObject::disconnect(m_document.get(), &Document::bomChanged, q, &TextEditView::bomChanged);
     QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
                         SLOT(outdentCurrentLineIfNecessary()));
   }
@@ -336,8 +336,7 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
   QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
   QObject::connect(m_document.get(), &Document::lineSeparatorChanged, q,
                    &TextEditView::lineSeparatorChanged);
-  QObject::connect(m_document.get(), &Document::bomChanged, q,
-                   &TextEditView::bomChanged);
+  QObject::connect(m_document.get(), &Document::bomChanged, q, &TextEditView::bomChanged);
   QObject::connect(m_document.get(), SIGNAL(contentsChanged()), q,
                    SLOT(outdentCurrentLineIfNecessary()));
 }
@@ -1105,9 +1104,12 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
   }
 
   // todo: define this behavior in keymap.yml
+  // https://trello.com/c/S46aBYnu
   switch (event->key()) {
     case Qt::Key_Escape:
-      API::singleton().hideActiveFindReplacePanel();
+      if (Window* window = App::instance()->activeWindow()) {
+        window->hideFindReplacePanel();
+      }
       clearSelection();
       break;
   }

@@ -17,7 +17,6 @@
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
 #include "QObjectHelper.h"
-#include "API.h"
 #include "core/ConditionManager.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
@@ -43,7 +42,6 @@ int main(int argv, char** args) {
 
   // instantiate singleton objects to set their thrad affinity to current thread
   QObjectHelper::singleton();
-  API::singleton();
 
   ConditionManager::singleton().init();
 

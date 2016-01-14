@@ -90,7 +90,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   }
 
   QVariant value = prop.read(obj);
-  info.GetReturnValue().Set(JSObjectHelper::toV8Value(value, isolate));
+  info.GetReturnValue().Set(JSObjectHelper::toV8Value(isolate, value));
 }
 
 void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
@@ -120,5 +120,5 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
     return;
   }
 
-  prop.write(obj, JSObjectHelper::toVariant(value));
+  prop.write(obj, JSObjectHelper::toVariant(isolate, value));
 }
