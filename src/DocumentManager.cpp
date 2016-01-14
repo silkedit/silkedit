@@ -7,7 +7,7 @@
 #include <QDebug>
 
 #include "DocumentManager.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "TabView.h"
 #include "core/Document.h"
 
@@ -16,7 +16,7 @@ using core::Document;
 const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
 bool DocumentManager::open(const QString& filename) {
-  if (TabView* tabView = SilkApp::activeTabView()) {
+  if (TabView* tabView = App::instance()->activeTabView()) {
     return tabView->open(filename) >= 0;
   } else {
     qWarning("active tab view is null");

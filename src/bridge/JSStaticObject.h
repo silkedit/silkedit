@@ -23,7 +23,7 @@ namespace bridge {
 template <class QObjectSubClass>
 class JSStaticObject {
  public:
-  static void Init(v8::Local<v8::Object> exports) {
+  static v8::Local<v8::Function> Init(v8::Local<v8::Object> exports) {
     v8::Isolate* isolate = exports->GetIsolate();
     const QMetaObject& metaObj = QObjectSubClass::staticMetaObject;
 
@@ -48,7 +48,8 @@ class JSStaticObject {
     addEnumsToFunction(metaObj, ctor, isolate);
     JSHandler::inheritsQtEventEmitter(isolate, ctor);
     constructor.Reset(isolate, ctor);
-    exports->Set(v8::String::NewFromUtf8(isolate, metaObj.className()), ctor);
+    exports->Set(v8::String::NewFromUtf8(isolate, Util::stipNamespace(metaObj.className())), ctor);
+    return ctor;
   }
 
  private:

@@ -28,8 +28,9 @@ boost::optional<v8::Local<v8::Object>> core::PrototypeStore::find(const QMetaObj
 }
 
 v8::Local<v8::Object> core::PrototypeStore::getOrCreatePrototype(const QMetaObject* metaObj,
-                                                         v8::FunctionCallback invoke,
-                                                         v8::Isolate* isolate) {
+                                                                 v8::FunctionCallback invoke,
+                                                                 v8::Isolate* isolate,
+                                                                 bool noInsert) {
   EscapableHandleScope handle_scope(isolate);
   if (const auto& maybeProto = PrototypeStore::singleton().find(metaObj, isolate)) {
     return handle_scope.Escape(*maybeProto);
@@ -40,7 +41,9 @@ v8::Local<v8::Object> core::PrototypeStore::getOrCreatePrototype(const QMetaObje
       NODE_SET_METHOD(proto, method.name().constData(), invoke);
     });
     JSHandler::inheritsQtEventEmitter(isolate, proto);
-    PrototypeStore::singleton().insert(metaObj, proto);
+    if (!noInsert) {
+      PrototypeStore::singleton().insert(metaObj, proto);
+    }
     return handle_scope.Escape(proto);
   }
 }

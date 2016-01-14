@@ -19,18 +19,27 @@
 #include "DialogButtonBox.h"
 #include "LineEdit.h"
 #include "Label.h"
+#include "MessageBox.h"
 #include "KeymapManager.h"
+#include "CommandManager.h"
+#include "App.h"
+#include "Window.h"
+#include "ConfigDialog.h"
 #include "core/v8adapter.h"
 #include "core/macros.h"
 #include "core/Config.h"
 #include "core/Constants.h"
 #include "core/QVariantArgument.h"
+#include "core/Condition.h"
+#include "core/ConditionManager.h"
 #include "bridge/JSStaticObject.h"
 
 using core::Config;
 using core::Constants;
 using core::PrototypeStore;
 using core::QVariantArgument;
+using core::Condition;
+using core::ConditionManager;
 
 using v8::Array;
 using v8::Boolean;
@@ -49,7 +58,79 @@ using v8::EscapableHandleScope;
 using v8::Maybe;
 using v8::FunctionTemplate;
 using v8::FunctionCallback;
+using v8::FunctionCallbackInfo;
 using v8::Function;
+
+namespace {
+
+bool checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
+                    int numArgs,
+                    std::function<bool()> validateFn) {
+  Isolate* isolate = args.GetIsolate();
+  if (args.Length() != numArgs) {
+    std::stringstream ss;
+    ss << "arguments size mismatched. expected:" << numArgs << " actual:" << args.Length();
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().data())));
+    return false;
+  }
+
+  if (!validateFn()) {
+    isolate->ThrowException(
+        Exception::TypeError(String::NewFromUtf8(isolate, "invalid arguments")));
+    return false;
+  }
+
+  return true;
+}
+
+/*
+  Window static methods
+*/
+
+void loadMenu(const FunctionCallbackInfo<Value>& args) {
+  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+    return;
+  }
+
+  Window::loadMenu(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+}
+
+void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+    return;
+  }
+
+  Window::loadToolbar(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+}
+
+/*
+  ConfigDialog static methods
+*/
+
+void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+    return;
+  }
+
+  ConfigDialog::loadDefinition(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+}
+
+/*
+  Condition static methods
+*/
+void check(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  if (!checkArguments(args, 3, [&] {
+        return args[0]->IsString() && args[1]->IsInt32() && args[2]->IsString();
+      })) {
+    return;
+  }
+
+  bool result = Condition::check(toQString(args[0]->ToString()),
+                                 static_cast<Condition::Operator>(args[1]->ToInt32()->Value()),
+                                 toQString(args[2]->ToString()));
+  args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
+}
+}
 
 void bridge::Handler::init(Local<Object> exports,
                            v8::Local<v8::Value>,
@@ -103,17 +184,50 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
   Local<Object> exports = args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked();
   // init singleton objects
+  // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
+  Util::stipNamespace(KeymapManager::staticMetaObject.className());
   setSingletonObj(exports, &API::singleton(), "API");
-  setSingletonObj(exports, &Config::singleton(), "Config");
-  setSingletonObj(exports, &Constants::singleton(), "Constants");
-  setSingletonObj(exports, &KeymapManager::singleton(), "KeymapManager");
+  setSingletonObj(exports, App::instance(), Util::stipNamespace(App::staticMetaObject.className()));
+  setSingletonObj(exports, &Config::singleton(),
+                  Util::stipNamespace(Config::staticMetaObject.className()));
+  setSingletonObj(exports, &Constants::singleton(),
+                  Util::stipNamespace(Constants::staticMetaObject.className()));
+  setSingletonObj(exports, &KeymapManager::singleton(),
+                  Util::stipNamespace(KeymapManager::staticMetaObject.className()));
+  setSingletonObj(exports, &CommandManager::singleton(),
+                  Util::stipNamespace(CommandManager::staticMetaObject.className()));
+  // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
+  // converts JS object to QObject* or QVariantMap internally)
+  ConditionManager::Init(exports);
 
   // init classes
-  JSStaticObject<Dialog>::Init(exports);
-  JSStaticObject<VBoxLayout>::Init(exports);
-  JSStaticObject<DialogButtonBox>::Init(exports);
-  JSStaticObject<LineEdit>::Init(exports);
-  JSStaticObject<Label>::Init(exports);
+  registerClass<Dialog>(exports);
+  registerClass<VBoxLayout>(exports);
+  registerClass<DialogButtonBox>(exports);
+  registerClass<LineEdit>(exports);
+  registerClass<Label>(exports);
+  registerClass<MessageBox>(exports);
+  registerClass<Window>(exports);
+  registerClass<ConfigDialog>(exports);
+  registerClass<Condition>(exports);
+}
+
+template <typename T>
+void bridge::Handler::registerClass(v8::Local<v8::Object> exports) {
+  auto ctor = JSStaticObject<T>::Init(exports);
+  registerStaticMethods(T::staticMetaObject, ctor);
+}
+
+void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
+                                            v8::Local<v8::Function> ctor) {
+  if (metaObj.className() == Window::staticMetaObject.className()) {
+    NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
+    NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
+  } else if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
+    NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
+  } else if (metaObj.className() == Condition::staticMetaObject.className()) {
+    NODE_SET_METHOD(ctor, "check", check);
+  }
 }
 
 void bridge::Handler::setSingletonObj(Local<Object>& exports,
@@ -134,7 +248,7 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
 
   // sets __proto__ (this doesn't create prototype property)
   obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
-      metaObj, JSObjectHelper::invokeMethod, isolate));
+      metaObj, JSObjectHelper::invokeMethod, isolate, true));
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);

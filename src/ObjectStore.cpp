@@ -6,7 +6,6 @@
 
 #include "ObjectStore.h"
 #include "JSObjectHelper.h"
-#include "Helper.h"
 #include "core/v8adapter.h"
 
 using v8::UniquePersistent;

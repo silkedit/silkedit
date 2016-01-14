@@ -25,14 +25,16 @@ class KeymapManager : public QObject,
   ~KeymapManager() = default;
 
   void loadUserKeymap();
-  void load(const QString& filename, const QString& source);
   QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
   bool dispatch(QKeyEvent* ev, int repeat = 1);
   const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
 
  public slots:
-  void dispatchFromJS(const QString& typeStr,
+  void load(const QString& filename, const QString& source);
+
+  // This is internal
+  void _dispatchFromJS(const QString& typeStr,
                        const QString& key,
                        bool autorep,
                        bool altKey,

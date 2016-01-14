@@ -4,7 +4,7 @@
 #include <QLibraryInfo>
 #include <QTimer>
 
-#include "SilkApp.h"
+#include "App.h"
 #include "TabView.h"
 #include "Window.h"
 #include "KeymapManager.h"
@@ -32,7 +32,7 @@ using core::ThemeManager;
 int main(int argv, char** args) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
-  SilkApp app(argv, args);
+  App app(argv, args);
 #ifdef QT_NO_DEBUG
   // crash dumps output location setting.
   Breakpad::CrashHandler::instance()->Init(QDir::tempPath());
@@ -45,7 +45,7 @@ int main(int argv, char** args) {
   QObjectHelper::singleton();
   API::singleton();
 
-  ConditionManager::init();
+  ConditionManager::singleton().init();
 
   PackageManager::loadGrammers();
 

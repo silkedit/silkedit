@@ -10,7 +10,7 @@
 #include "Helper_p.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "JSHandler.h"
 #include "atom/node_includes.h"
 #include "atom/node_bindings.h"
@@ -18,7 +18,7 @@
 #include "core/Constants.h"
 #include "core/modifiers.h"
 #include "core/Config.h"
-#include "core/Icondition.h"
+#include "core/condition.h"
 #include "core/Util.h"
 #include "core/QVariantArgument.h"
 
@@ -205,6 +205,7 @@ void Helper::init() {
 
 void Helper::cleanup() {
   qDebug("cleanup");
+  delete m_nodeBindings;
   silkedit_node::Cleanup(m_nodeBindings->uv_env());
 }
 
@@ -222,13 +223,6 @@ void Helper::sendCommandEvent(const QString& command, const CommandArgument& cmd
 void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
   const QVariantList& args = QVariantList{QVariant::fromValue(cmd), QVariant::fromValue(cmdArgs)};
   d->callFunc("runCommand", args);
-}
-
-bool Helper::askCondition(const QString& name, core::Operator op, const QString& value) {
-  const QVariantList& args = QVariantList{QVariant::fromValue(name),
-                                          QVariant::fromValue(core::ICondition::operatorString(op)),
-                                          QVariant::fromValue(value)};
-  return d->callFunc<bool>("askCondition", args, false);
 }
 
 QString Helper::translate(const QString& key, const QString& defaultValue) {
@@ -293,7 +287,7 @@ void Helper::reloadKeymaps() {
 
 void Helper::quitApplication() {
   qDebug() << "quitApplication";
-  SilkApp::instance()->quit();
+  App::instance()->quit();
 }
 
 void Helper::uvRunOnce() {

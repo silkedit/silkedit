@@ -92,7 +92,7 @@ class TextEditView : public QPlainTextEdit,
   void insertNewLine();
   void save();
   void saveAs();
-  void moveCursor(const QString& op, int);
+  void moveCursor(const QString& op, int = 1);
   void doDelete(int n);
   bool isThinCursor();
   void setThinCursor(bool on);

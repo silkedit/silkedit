@@ -17,9 +17,11 @@
 #include "core/CommandArgument.h"
 #include "core/qdeclare_metatype.h"
 #include "core/QVariantArgument.h"
+#include "core/Util.h"
 
 using core::QVariantArgument;
 using core::PrototypeStore;
+using core::Util;
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -40,7 +42,8 @@ using v8::Function;
 using v8::Null;
 using v8::FunctionTemplate;
 
-QCache <const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>> JSObjectHelper::s_classMethodCache;
+QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
+    JSObjectHelper::s_classMethodCache;
 
 namespace {
 Local<Object> toV8Object(const CommandArgument args, Isolate* isolate) {
@@ -69,8 +72,8 @@ bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
   int typeId = QMetaType::type(typeName);
   if (typeId != QMetaType::UnknownType) {
     const QMetaObject* metaObj = QMetaType(typeId).metaObject();
-    const QByteArray& enumName = typeName.mid(typeName.lastIndexOf(":") + 1);
-    return metaObj->indexOfEnumerator(enumName) > 0;
+    const QByteArray& enumName = Util::stipNamespace(typeName);
+    return metaObj->indexOfEnumerator(enumName) >= 0;
   }
 
   return false;
@@ -79,8 +82,8 @@ bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
 
 void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
-  const QString& funcName = toQString(args.Callee()->GetName()->ToString());
-  qDebug() << "invoking" << funcName;
+//  const QString& funcName = toQString(args.Callee()->GetName()->ToString());
+//  qDebug() << "invoking" << funcName;
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
@@ -97,11 +100,16 @@ void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
     varArgs.append(JSObjectHelper::toVariant(args[i]));
   }
 
-  QVariant result =
-      invokeMethodInternal(isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
-
-  if (result.isValid()) {
-    args.GetReturnValue().Set(toV8Value(result, isolate));
+  try {
+    QVariant result = invokeMethodInternal(
+        isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
+    if (result.isValid()) {
+      args.GetReturnValue().Set(toV8Value(result, isolate));
+    }
+  } catch (const std::exception& e) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, e.what())));
+  } catch (...) {
+    qCritical() << "unexpected exception occured";
   }
 }
 
@@ -110,14 +118,14 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
                                               const QString& methodName,
                                               QVariantList args) {
   if (args.size() > Q_METAMETHOD_INVOKE_MAX_ARGS) {
-    qWarning() << "Can't invoke" << methodName << "with more than" << Q_METAMETHOD_INVOKE_MAX_ARGS
-               << "arguments. args:" << args.size();
-    return QVariant();
+    std::stringstream ss;
+    ss << "Can't invoke" << methodName.toUtf8().constData() << "with more than"
+       << Q_METAMETHOD_INVOKE_MAX_ARGS << "arguments. args:" << args.size();
+    throw std::runtime_error(ss.str());
   }
 
   if (!object) {
-    qWarning() << "object is null";
-    return QVariant();
+    throw std::runtime_error("object is null");
   }
 
   int methodIndex = -1;
@@ -126,6 +134,7 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
     cacheMethods(metaObj);
   }
 
+  // Find an appropriate method with the provided arguments
   for (MethodInfo methodInfo : s_classMethodCache[metaObj]->values(methodName)) {
     ParameterTypes parameterTypes = methodInfo.second;
     if (matchTypes(parameterTypes, args)) {
@@ -141,20 +150,20 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
   }
 
   if (methodIndex == -1) {
-    QString errMsg = QString("method: %1 not found").arg(methodName);
-    qWarning() << errMsg;
-    return QVariant();
+    throw std::runtime_error("invalid arguments");
   }
 
   QMetaMethod method = object->metaObject()->method(methodIndex);
 
   if (!method.isValid()) {
-    qWarning() << "Invalid method. name:" << method.name() << "index:" << methodIndex;
-    return QVariant();
+    std::stringstream ss;
+    ss << "Invalid method. name:" << method.name().constData() << "index:" << methodIndex;
+    throw std::runtime_error(ss.str());
   } else if (method.access() != QMetaMethod::Public) {
-    qWarning() << "Can't invoke non-public method. name:" << method.name()
-               << "index:" << methodIndex;
-    return QVariant();
+    std::stringstream ss;
+    ss << "Can't invoke non-public method. name:" << method.name().constData()
+       << "index:" << methodIndex;
+    throw std::runtime_error(ss.str());
   } else if (args.size() > method.parameterCount()) {
     qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
                << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
@@ -187,7 +196,9 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
                               varArgs[2], varArgs[3], varArgs[4], varArgs[5], varArgs[6],
                               varArgs[7], varArgs[8], varArgs[9]);
   if (!result) {
-    qWarning() << "invoking" << method.name() << "failed";
+    std::stringstream ss;
+    ss << "invoking" << method.name().constData() << "failed";
+    throw std::runtime_error(ss.str());
   }
 
   return returnValue;
@@ -231,7 +242,7 @@ Local<Value> JSObjectHelper::toV8Value(const QVariant& var, Isolate* isolate) {
   } else if (var.canConvert<CommandArgument>()) {
     return toV8Object(var.value<CommandArgument>(), isolate);
   } else if (var.canConvert<std::string>()) {
-    return toV8String(var.value<std::string>());
+    return toV8String(isolate, var.value<std::string>());
   } else if (var.canConvert<QList<Window*>>()) {
     auto windows = var.value<QList<Window*>>();
     Local<Array> array = Array::New(isolate, windows.size());
@@ -261,12 +272,12 @@ Local<Value> JSObjectHelper::toV8Value(const QVariant& var, Isolate* isolate) {
       }
     }
     case QVariant::String:
-      return toV8String(var.toString());
+      return toV8String(isolate, var.toString());
     case QVariant::StringList: {
       const QStringList& strList = var.toStringList();
       Local<Array> array = Array::New(isolate, strList.size());
       for (int i = 0; i < strList.size(); i++) {
-        array->Set(i, toV8String(strList[i]));
+        array->Set(i, toV8String(isolate, strList[i]));
       }
       return array;
     }
@@ -348,7 +359,7 @@ bool JSObjectHelper::matchTypes(QList<QByteArray> types, QVariantList args) {
   }
 
   for (int i = 0; i < types.size(); i++) {
-    if (types[i] != args[i].typeName() && !qObjectPointerTypeCheck(args[i], types[i]) &&
+    if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) && !qObjectPointerTypeCheck(args[i], types[i]) &&
         !enumTypeCheck(args[i], types[i])) {
       return false;
     }
@@ -418,7 +429,8 @@ void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
 }
 
 void JSObjectHelper::cacheMethods(const QMetaObject* metaObj) {
-  QMultiHash<QString, MethodInfo>* methodNameParameterTypesHash = new QMultiHash<QString, MethodInfo>();
+  QMultiHash<QString, MethodInfo>* methodNameParameterTypesHash =
+      new QMultiHash<QString, MethodInfo>();
   for (int i = 0; i < metaObj->methodCount(); i++) {
     const auto& method = metaObj->method(i);
     const QString& name = QString::fromLatin1(method.name());

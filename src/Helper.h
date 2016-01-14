@@ -8,7 +8,7 @@
 #include "core/macros.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
-#include "core/Icondition.h"
+#include "core/condition.h"
 #include "core/QVariantArgument.h"
 #include "core/qdeclare_metatype.h"
 
@@ -72,7 +72,6 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void sendFocusChangedEvent(const QString& viewType);
   void sendCommandEvent(const QString& command, const CommandArgument& cmdArgs);
   void runCommand(const QString& cmd, const CommandArgument& cmdArgs);
-  bool askCondition(const QString& name, core::Operator op, const QString& value);
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);

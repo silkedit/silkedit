@@ -6,6 +6,7 @@
 #include "StatusBar.h"
 #include "TextEditView.h"
 #include "core/qdeclare_metatype.h"
+#include "core/Condition.h"
 
 void MetaTypeInitializer::init()
 {
@@ -20,5 +21,6 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QMetaProperty>();
   qRegisterMetaType<QPushButton*>();
   qRegisterMetaType<QLayout*>();
+  qRegisterMetaType<core::Condition::Operator>();
 }
 

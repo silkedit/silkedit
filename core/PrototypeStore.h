@@ -19,7 +19,7 @@ class PrototypeStore : public Singleton<PrototypeStore> {
 
   v8::Local<v8::Object> getOrCreatePrototype(const QMetaObject* metaObj,
                                      v8::FunctionCallback invoke,
-                                     v8::Isolate* isolate);
+                                     v8::Isolate* isolate, bool noInsert = false);
 
  private:
   std::unordered_map<const QMetaObject*, v8::UniquePersistent<v8::Object>> m_prototypeHash;
