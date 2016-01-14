@@ -24,7 +24,6 @@ class API : public QObject, public core::Singleton<API> {
   ~API() = default;
 
 public slots:
-  void open(const QString& pathStr);
   void setFont(const QString& family, int size);
   void hideActiveFindReplacePanel();
   QStringList showFileAndFolderDialog(const QString& caption);

@@ -25,6 +25,8 @@
 #include "App.h"
 #include "Window.h"
 #include "ConfigDialog.h"
+#include "DocumentManager.h"
+#include "ProjectManager.h"
 #include "core/v8adapter.h"
 #include "core/macros.h"
 #include "core/Config.h"
@@ -196,6 +198,10 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stipNamespace(KeymapManager::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
                   Util::stipNamespace(CommandManager::staticMetaObject.className()));
+  setSingletonObj(exports, &DocumentManager::singleton(),
+                  Util::stipNamespace(DocumentManager::staticMetaObject.className()));
+  setSingletonObj(exports, &ProjectManager::singleton(),
+                  Util::stipNamespace(ProjectManager::staticMetaObject.className()));
   // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   ConditionManager::Init(exports);

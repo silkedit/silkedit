@@ -79,18 +79,6 @@ QString API::version() {
   return App::applicationVersion();
 }
 
-void API::open(const QString& pathStr) {
-  QString path = QDir::fromNativeSeparators(pathStr);
-  QFileInfo info(path);
-  if (info.isFile()) {
-    DocumentManager::open(path);
-  } else if (info.isDir()) {
-    ProjectManager::open(path);
-  } else {
-    qWarning("%s is neither file nor directory.", qPrintable(path));
-  }
-}
-
 void API::setFont(const QString& family, int size) {
   QFont font(family, size);
   Config::singleton().setFont(font);

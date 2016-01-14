@@ -32,7 +32,7 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
       }
     }
     Window::showFirst();
-    DocumentManager::open(Constants::singleton().userKeymapPath());
+    DocumentManager::singleton().open(Constants::singleton().userKeymapPath());
   });
 
   setLayout(ui->rootLayout);

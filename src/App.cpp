@@ -103,7 +103,7 @@ bool App::event(QEvent* event) {
   switch (event->type()) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
-      DocumentManager::open(static_cast<QFileOpenEvent*>(event)->file());
+      DocumentManager::singleton().open(static_cast<QFileOpenEvent*>(event)->file());
       return true;
     default:
       return QApplication::event(event);
