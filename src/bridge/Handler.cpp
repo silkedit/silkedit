@@ -27,6 +27,7 @@
 #include "ConfigDialog.h"
 #include "DocumentManager.h"
 #include "ProjectManager.h"
+#include "FileDialog.h"
 #include "core/v8adapter.h"
 #include "core/macros.h"
 #include "core/Config.h"
@@ -207,15 +208,16 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   ConditionManager::Init(exports);
 
   // init classes
+  registerClass<Condition>(exports);
+  registerClass<ConfigDialog>(exports);
   registerClass<Dialog>(exports);
-  registerClass<VBoxLayout>(exports);
   registerClass<DialogButtonBox>(exports);
-  registerClass<LineEdit>(exports);
+  registerClass<FileDialog>(exports);
   registerClass<Label>(exports);
+  registerClass<LineEdit>(exports);
   registerClass<MessageBox>(exports);
   registerClass<Window>(exports);
-  registerClass<ConfigDialog>(exports);
-  registerClass<Condition>(exports);
+  registerClass<VBoxLayout>(exports);
 }
 
 template <typename T>

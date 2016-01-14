@@ -203,6 +203,11 @@ Window* App::activeWindow() {
   return qobject_cast<Window*>(QApplication::activeWindow());
 }
 
+void App::setActiveWindow(QWidget *act)
+{
+  QApplication::setActiveWindow(act);
+}
+
 void App::restart() {
   if (s_app) {
     QProcess::startDetached(QApplication::applicationFilePath());

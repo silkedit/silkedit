@@ -60,6 +60,9 @@ QByteArray parameterTypeSignature(const QByteArray& methodSignature) {
 }
 
 bool qObjectPointerTypeCheck(QVariant var, const QByteArray& typeName) {
+  if (var.isNull())
+    return true;
+
   return var.canConvert<QObject*>() &&
          var.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
 }
@@ -82,8 +85,8 @@ bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
 
 void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
   Isolate* isolate = args.GetIsolate();
-//  const QString& funcName = toQString(args.Callee()->GetName()->ToString());
-//  qDebug() << "invoking" << funcName;
+  //  const QString& funcName = toQString(args.Callee()->GetName()->ToString());
+  //  qDebug() << "invoking" << funcName;
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
@@ -298,7 +301,7 @@ QVariant JSObjectHelper::toVariant(v8::Local<v8::Value> value, Isolate* isolate)
     return QVariant::fromValue(value->ToNumber()->Value());
   } else if (value->IsString()) {
     return QVariant::fromValue(toQString(value->ToString()));
-  } else if (value->IsUndefined()) {
+  } else if (value->IsNull() || value->IsUndefined()) {
     return QVariant();
   } else if (value->IsArray()) {
     QVariantList list;
@@ -359,8 +362,8 @@ bool JSObjectHelper::matchTypes(QList<QByteArray> types, QVariantList args) {
   }
 
   for (int i = 0; i < types.size(); i++) {
-    if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) && !qObjectPointerTypeCheck(args[i], types[i]) &&
-        !enumTypeCheck(args[i], types[i])) {
+    if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) &&
+        !qObjectPointerTypeCheck(args[i], types[i]) && !enumTypeCheck(args[i], types[i])) {
       return false;
     }
   }
