@@ -67,6 +67,7 @@ void ObjectStore::WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& 
     const QVariant& state = wrap->property(OBJECT_STATE);
     if (state.isValid() && state.value<ObjectState>() == ObjectState::NewFromJS) {
       wrap->deleteLater();
+      qDebug() << wrap->metaObject()->className() << "is deleted";
     }
   }
 }
