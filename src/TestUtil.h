@@ -2,7 +2,6 @@
 #include <QTimer>
 
 #include "DocumentManager.h"
-#include "API.h"
 #include "Window.h"
 
 class TestUtil : public QObject {

@@ -49,7 +49,7 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
   Local<Value> argv[MAX_ARGS_COUNT];
   int argc = qMin(args.size(), MAX_ARGS_COUNT);
   for (int i = 0; i < argc; i++) {
-    argv[i] = JSObjectHelper::toV8Value(args[i], isolate);
+    argv[i] = JSObjectHelper::toV8Value(isolate, args[i]);
   }
 
   MaybeLocal<Value> maybeFnValue =
@@ -86,7 +86,7 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
     return QVariant();
   }
 
-  return JSObjectHelper::toVariant(maybeResult.ToLocalChecked());
+  return JSObjectHelper::toVariant(isolate, maybeResult.ToLocalChecked());
 }
 
 void JSHandler::inheritsQtEventEmitter(Isolate* isolate, Local<v8::Value> proto) {
@@ -169,7 +169,7 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
     argv[0] = String::NewFromUtf8(isolate, signal.toUtf8().constData(), v8::NewStringType::kNormal)
                   .ToLocalChecked();
     for (int i = 0; i < qMin(args.size(), MAX_ARGS_COUNT_FOR_SIGNAL - 1); i++) {
-      argv[i + 1] = JSObjectHelper::toV8Value(args[i], isolate);
+      argv[i + 1] = JSObjectHelper::toV8Value(isolate, args[i]);
     }
 
     TryCatch trycatch(isolate);

@@ -12,7 +12,6 @@
 #include "JSHandler.h"
 #include "core/PrototypeStore.h"
 #include "ObjectTemplateStore.h"
-#include "API.h"
 #include "JSObjectHelper.h"
 #include "Dialog.h"
 #include "VBoxLayout.h"
@@ -133,6 +132,21 @@ void check(const v8::FunctionCallbackInfo<v8::Value>& args) {
                                  toQString(args[2]->ToString()));
   args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
 }
+
+/*
+  Window static methods
+*/
+void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  auto windows = Window::windows();
+
+  Isolate* isolate = args.GetIsolate();
+  HandleScope handleScope(isolate);
+  Local<Array> array = Array::New(isolate, windows.size());
+  for (int i = 0; i < windows.size(); i++) {
+    array->Set(i, JSObjectHelper::toV8ObjectFrom(isolate, windows[i]));
+  }
+  args.GetReturnValue().Set(array);
+}
 }
 
 void bridge::Handler::init(Local<Object> exports,
@@ -189,7 +203,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // init singleton objects
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
   Util::stipNamespace(KeymapManager::staticMetaObject.className());
-  setSingletonObj(exports, &API::singleton(), "API");
   setSingletonObj(exports, App::instance(), Util::stipNamespace(App::staticMetaObject.className()));
   setSingletonObj(exports, &Config::singleton(),
                   Util::stipNamespace(Config::staticMetaObject.className()));
@@ -216,8 +229,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
   registerClass<MessageBox>(exports);
-  registerClass<Window>(exports);
   registerClass<VBoxLayout>(exports);
+  registerClass<Window>(exports);
 }
 
 template <typename T>
@@ -228,13 +241,14 @@ void bridge::Handler::registerClass(v8::Local<v8::Object> exports) {
 
 void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
                                             v8::Local<v8::Function> ctor) {
-  if (metaObj.className() == Window::staticMetaObject.className()) {
-    NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
-    NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
-  } else if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
+  if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
   } else if (metaObj.className() == Condition::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "check", check);
+  } else if (metaObj.className() == Window::staticMetaObject.className()) {
+    NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
+    NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
+    NODE_SET_METHOD(ctor, "windows", windows);
   }
 }
 

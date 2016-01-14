@@ -46,7 +46,7 @@ QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
     JSObjectHelper::s_classMethodCache;
 
 namespace {
-Local<Object> toV8Object(const CommandArgument args, Isolate* isolate) {
+Local<Object> toV8Object( Isolate* isolate, const CommandArgument args) {
   Local<Object> argsObj = Object::New(isolate);
   for (const auto& pair : args) {
     argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
@@ -100,14 +100,14 @@ void JSObjectHelper::invokeMethod(const FunctionCallbackInfo<Value>& args) {
   // convert args to QVariantList
   QVariantList varArgs;
   for (int i = 0; i < args.Length(); i++) {
-    varArgs.append(JSObjectHelper::toVariant(args[i]));
+    varArgs.append(JSObjectHelper::toVariant(isolate, args[i]));
   }
 
   try {
     QVariant result = invokeMethodInternal(
         isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
     if (result.isValid()) {
-      args.GetReturnValue().Set(toV8Value(result, isolate));
+      args.GetReturnValue().Set(toV8Value(isolate, result));
     }
   } catch (const std::exception& e) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, e.what())));
@@ -207,7 +207,7 @@ QVariant JSObjectHelper::invokeMethodInternal(Isolate* isolate,
   return returnValue;
 }
 
-Local<Value> JSObjectHelper::toV8ObjectFrom(QObject* sourceObj, Isolate* isolate) {
+Local<Value> JSObjectHelper::toV8ObjectFrom(Isolate* isolate, QObject* sourceObj) {
   if (!sourceObj) {
     return v8::Null(isolate);
   }
@@ -239,20 +239,13 @@ Local<Value> JSObjectHelper::toV8ObjectFrom(QObject* sourceObj, Isolate* isolate
   }
 }
 
-Local<Value> JSObjectHelper::toV8Value(const QVariant& var, Isolate* isolate) {
+Local<Value> JSObjectHelper::toV8Value(Isolate* isolate, const QVariant& var) {
   if (var.canConvert<QObject*>()) {
-    return toV8ObjectFrom(var.value<QObject*>(), isolate);
+    return toV8ObjectFrom(isolate, var.value<QObject*>());
   } else if (var.canConvert<CommandArgument>()) {
-    return toV8Object(var.value<CommandArgument>(), isolate);
+    return toV8Object(isolate, var.value<CommandArgument>());
   } else if (var.canConvert<std::string>()) {
     return toV8String(isolate, var.value<std::string>());
-  } else if (var.canConvert<QList<Window*>>()) {
-    auto windows = var.value<QList<Window*>>();
-    Local<Array> array = Array::New(isolate, windows.size());
-    for (int i = 0; i < windows.size(); i++) {
-      array->Set(i, toV8ObjectFrom(windows[i], isolate));
-    }
-    return array;
   }
 
   switch (var.type()) {
@@ -290,7 +283,7 @@ Local<Value> JSObjectHelper::toV8Value(const QVariant& var, Isolate* isolate) {
   }
 }
 
-QVariant JSObjectHelper::toVariant(v8::Local<v8::Value> value, Isolate* isolate) {
+QVariant JSObjectHelper::toVariant(Isolate* isolate, v8::Local<v8::Value> value) {
   if (value->IsBoolean()) {
     return QVariant::fromValue(value->ToBoolean()->Value());
   } else if (value->IsInt32()) {
@@ -307,7 +300,7 @@ QVariant JSObjectHelper::toVariant(v8::Local<v8::Value> value, Isolate* isolate)
     QVariantList list;
     Local<Array> arr = Local<Array>::Cast(value);
     for (uint32_t i = 0; i < arr->Length(); i++) {
-      list.append(toVariant(arr->Get(i)));
+      list.append(toVariant(isolate, arr->Get(i)));
     }
     return QVariant::fromValue(list);
   } else if (value->IsObject()) {
@@ -346,7 +339,7 @@ QVariant JSObjectHelper::toVariant(v8::Local<v8::Value> value, Isolate* isolate)
           qWarning() << "value is not string";
           continue;
         }
-        map.insert(toQString(key->ToString()), toVariant(value));
+        map.insert(toQString(key->ToString()), toVariant(isolate, value));
       }
       return QVariant::fromValue(map);
     }
