@@ -38,6 +38,8 @@ class Util {
   static void processWithPublicMethods(const QMetaObject* metaObj,
                                        std::function<void(const QMetaMethod&)> fn);
 
+  static QByteArray stipNamespace(const QByteArray &name);
+
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
     QTime startTime = QTime::currentTime();

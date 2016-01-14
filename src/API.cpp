@@ -12,94 +12,27 @@
 #include "commands/PackageCommand.h"
 #include "Helper.h"
 #include "TextEditView.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "TabView.h"
 #include "TabViewGroup.h"
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "KeymapManager.h"
-#include "PackageCondition.h"
+#include "core/PackageCondition.h"
 #include "ConfigDialog.h"
 #include "util/DialogUtils.h"
 #include "core/ConditionManager.h"
 #include "core/Config.h"
 #include "core/modifiers.h"
-#include "core/ICondition.h"
+#include "core/Condition.h"
 
 using core::Config;
 using core::ConditionManager;
 
 void API::hideActiveFindReplacePanel() {
-  if (Window* window = SilkApp::activeWindow()) {
+  if (Window* window = App::instance()->activeWindow()) {
     window->hideFindReplacePanel();
   }
-}
-
-void API::alert(const QString& msg) {
-  QMessageBox msgBox;
-  msgBox.setText(msg);
-  msgBox.exec();
-}
-
-void API::loadKeymap(const QString& pkgName, const QString& ymlPath) {
-  KeymapManager::singleton().load(ymlPath, pkgName);
-}
-
-void API::loadMenu(const QString& pkgName, const QString& ymlPath) {
-  Window::loadMenu(pkgName, ymlPath);
-}
-
-void API::loadToolbar(const QString& pkgName, const QString& ymlPath) {
-  Window::loadToolbar(pkgName, ymlPath);
-}
-
-void API::loadConfig(const QString& pkgName, const QString& ymlPath) {
-  ConfigDialog::loadConfig(pkgName, ymlPath);
-}
-
-void API::registerCommands(QVariantList commands) {
-  for (const QVariant& cmdVar : commands) {
-    if (cmdVar.canConvert<QStringList>() && cmdVar.value<QStringList>().size() == 2) {
-      const QStringList cmd = cmdVar.value<QStringList>();
-//      qDebug() << "registering command: " << cmd.at(0);
-      CommandManager::singleton().add(
-          std::unique_ptr<ICommand>(new PackageCommand(cmd.at(0), cmd.at(1))));
-    }
-  }
-}
-
-void API::unregisterCommands(QVariantList commands) {
-  for (const QVariant& cmd : commands) {
-    if (cmd.canConvert<QString>()) {
-      qDebug() << "unregisterCommand: %s" << cmd.toString();
-      CommandManager::singleton().remove(cmd.toString());
-    }
-  }
-}
-
-void API::registerCondition(const QString& condition) {
-  ConditionManager::add(
-      condition, std::move(std::unique_ptr<core::ICondition>(new PackageCondition(condition))));
-}
-
-void API::unregisterCondition(const QString& condition) {
-  ConditionManager::remove(condition);
-}
-
-TextEditView* API::activeTextEditView() {
-  return SilkApp::activeTextEditView();
-}
-
-TabView* API::activeTabView() {
-  return SilkApp::activeTabView();
-}
-
-TabViewGroup* API::activeTabViewGroup() {
-  return SilkApp::activeTabViewGroup();
-}
-
-Window* API::activeWindow() {
-  return SilkApp::activeWindow();
 }
 
 QStringList API::showFileAndFolderDialog(const QString& caption) {
@@ -143,7 +76,7 @@ boost::optional<QString> API::getConfig(const QString& name) {
 }
 
 QString API::version() {
-  return SilkApp::applicationVersion();
+  return App::applicationVersion();
 }
 
 void API::open(const QString& pathStr) {

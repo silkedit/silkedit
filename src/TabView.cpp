@@ -10,7 +10,7 @@
 #include "TabBar.h"
 #include "Window.h"
 #include "DraggingTabInfo.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "DocumentManager.h"
 #include "Helper.h"
 #include "core/Config.h"

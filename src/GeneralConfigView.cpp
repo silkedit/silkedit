@@ -1,6 +1,6 @@
 #include "GeneralConfigView.h"
 #include "ui_GeneralConfigView.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "core/ThemeManager.h"
 #include "core/Config.h"
 
@@ -79,7 +79,7 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
           [=](const QString& text) { Config::singleton().setEndOfLineStr(text); });
 
   // Restart button to apply change
-  connect(ui->restartButton, &QPushButton::clicked, this, [=] { SilkApp::restart(); });
+  connect(ui->restartButton, &QPushButton::clicked, this, [=] { App::restart(); });
 
   setLayout(ui->rootLayout);
 }

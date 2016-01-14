@@ -30,9 +30,12 @@ class CommandManager : public QObject, public core::Singleton<CommandManager> {
                   const CommandArgument& args = CommandArgument(),
                   int repeat = 1);
   void add(std::unique_ptr<ICommand> cmd);
-  void remove(const QString& name);
   void addEventFilter(CmdEventHandler handler);
   const std::unordered_map<QString, std::unique_ptr<ICommand>>& commands() { return m_commands; }
+
+public slots:
+  void add(const QString& name, const QString& description);
+  void remove(const QString& name);
 
  signals:
   void commandRemoved(const QString& name);

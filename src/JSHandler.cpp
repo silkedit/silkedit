@@ -53,7 +53,7 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
   }
 
   MaybeLocal<Value> maybeFnValue =
-      s_jsHandler.Get(isolate)->Get(isolate->GetCurrentContext(), toV8String(funcName));
+      s_jsHandler.Get(isolate)->Get(isolate->GetCurrentContext(), toV8String(isolate, funcName));
   if (maybeFnValue.IsEmpty()) {
     qWarning() << funcName << "not found";
     return QVariant();

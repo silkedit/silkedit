@@ -2,6 +2,7 @@
 
 #include "CommandManager.h"
 #include "Helper.h"
+#include "commands/PackageCommand.h"
 
 QString CommandManager::cmdDescription(const QString& name) {
   if (m_commands.count(name) != 0) {
@@ -27,7 +28,7 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   }
 
   QString qCmdName = QString::fromUtf8(cmdName.c_str());
-//  qDebug() << "qCmdName:" << qCmdName;
+  //  qDebug() << "qCmdName:" << qCmdName;
   if (m_commands.find(qCmdName) != m_commands.end()) {
     m_commands[qCmdName]->run(cmdArg, repeat);
     Helper::singleton().sendCommandEvent(qCmdName, cmdArg);
@@ -47,4 +48,8 @@ void CommandManager::remove(const QString& name) {
 
 void CommandManager::addEventFilter(CommandManager::CmdEventHandler handler) {
   m_cmdEventFilters.push_back(handler);
+}
+
+void CommandManager::add(const QString& name, const QString& description) {
+  CommandManager::singleton().add(std::unique_ptr<ICommand>(new PackageCommand(name, description)));
 }

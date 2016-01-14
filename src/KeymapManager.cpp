@@ -167,7 +167,7 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
-void KeymapManager::dispatchFromJS(const QString &typeStr, const QString &key, bool autorep, bool altKey, bool ctrlKey, bool metaKey, bool shiftKey) {
+void KeymapManager::_dispatchFromJS(const QString &typeStr, const QString &key, bool autorep, bool altKey, bool ctrlKey, bool metaKey, bool shiftKey) {
   QEvent::Type type;
   if (typeStr == "keypress") {
     type = QEvent::KeyPress;

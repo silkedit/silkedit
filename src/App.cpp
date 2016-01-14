@@ -3,7 +3,7 @@
 #include <QChildEvent>
 #include <QProcess>
 
-#include "SilkApp.h"
+#include "App.h"
 #include "TabViewGroup.h"
 #include "DocumentManager.h"
 #include "TextEditView.h"
@@ -18,7 +18,7 @@
 
 using core::Constants;
 
-SilkApp* SilkApp::s_app = nullptr;
+App* App::s_app = nullptr;
 
 namespace {
 template <typename T>
@@ -43,7 +43,7 @@ int installFont(const QString& path) {
 #endif
 }
 
-TabBar* SilkApp::tabBarAt(int x, int y) {
+TabBar* App::tabBarAt(int x, int y) {
   foreach (Window* window, Window::windows()) {
     if (TabBar* tabBar = window->tabViewGroup()->tabBarAt(x, y)) {
       return tabBar;
@@ -53,7 +53,7 @@ TabBar* SilkApp::tabBarAt(int x, int y) {
   return nullptr;
 }
 
-SilkApp::SilkApp(int& argc, char** argv)
+App::App(int& argc, char** argv)
     : QApplication(argc, argv), m_translator(nullptr), m_qtTranslator(nullptr) {
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
@@ -99,7 +99,7 @@ SilkApp::SilkApp(int& argc, char** argv)
   installEventFilter(this);
 }
 
-bool SilkApp::event(QEvent* event) {
+bool App::event(QEvent* event) {
   switch (event->type()) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
@@ -110,7 +110,7 @@ bool SilkApp::event(QEvent* event) {
   }
 }
 
-bool SilkApp::eventFilter(QObject*, QEvent* event) {
+bool App::eventFilter(QObject*, QEvent* event) {
   switch (event->type()) {
     case QEvent::ChildAdded: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
@@ -138,7 +138,7 @@ bool SilkApp::eventFilter(QObject*, QEvent* event) {
   return false;
 }
 
-void SilkApp::setupTranslator(const QString& locale) {
+void App::setupTranslator(const QString& locale) {
   if (m_translator) {
     m_translator->deleteLater();
     removeTranslator(m_translator);
@@ -169,7 +169,7 @@ void SilkApp::setupTranslator(const QString& locale) {
 #endif
 }
 
-TextEditView* SilkApp::activeTextEditView() {
+TextEditView* App::activeTextEditView() {
   TabView* tabView = activeTabView();
   if (tabView) {
     return tabView->activeEditView();
@@ -179,7 +179,7 @@ TextEditView* SilkApp::activeTextEditView() {
   }
 }
 
-TabView* SilkApp::activeTabView() {
+TabView* App::activeTabView() {
   TabViewGroup* tabViewGroup = activeTabViewGroup();
   if (tabViewGroup) {
     return tabViewGroup->activeTab();
@@ -189,7 +189,7 @@ TabView* SilkApp::activeTabView() {
   }
 }
 
-TabViewGroup* SilkApp::activeTabViewGroup() {
+TabViewGroup* App::activeTabViewGroup() {
   Window* window = activeWindow();
   if (window) {
     return window->tabViewGroup();
@@ -199,11 +199,11 @@ TabViewGroup* SilkApp::activeTabViewGroup() {
   }
 }
 
-Window* SilkApp::activeWindow() {
+Window* App::activeWindow() {
   return qobject_cast<Window*>(QApplication::activeWindow());
 }
 
-void SilkApp::restart() {
+void App::restart() {
   if (s_app) {
     QProcess::startDetached(QApplication::applicationFilePath());
     s_app->exit();

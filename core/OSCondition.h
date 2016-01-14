@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "ICondition.h"
+#include "Condition.h"
 #include "macros.h"
 
 namespace core {
 
-class OSCondition : public ICondition {
+class OSCondition : public Condition {
   DISABLE_COPY(OSCondition)
 
  public:
@@ -21,7 +21,7 @@ class OSCondition : public ICondition {
   QString key() override;
 };
 
-class OnMacCondition : public ICondition {
+class OnMacCondition : public Condition {
   DISABLE_COPY(OnMacCondition)
 
  public:
@@ -37,7 +37,7 @@ class OnMacCondition : public ICondition {
   QString key() override;
 };
 
-class OnWindowsCondition : public ICondition {
+class OnWindowsCondition : public Condition {
   DISABLE_COPY(OnWindowsCondition)
 
  public:

@@ -15,5 +15,5 @@ class DialogButtonBox : public QDialogButtonBox {
   DEFAULT_MOVE(DialogButtonBox)
 
  public slots:
-  QPushButton* button(QDialogButtonBox::StandardButton which) const;
+  QPushButton* button(int which) const;
 };

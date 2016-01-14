@@ -1,5 +1,4 @@
-﻿#include <functional>
-#include <QDebug>
+﻿#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
 #include <QRegularExpression>
@@ -91,7 +90,8 @@ QString Util::toString(const QKeySequence& keySeq) {
   return str;
 }
 
-void Util::processWithPublicMethods(const QMetaObject* metaObj, std::function<void(const QMetaMethod&)> fn) {
+void Util::processWithPublicMethods(const QMetaObject* metaObj,
+                                    std::function<void(const QMetaMethod&)> fn) {
   QSet<QByteArray> registeredMethods;
   for (int i = 0; i < metaObj->methodCount(); i++) {
     const QMetaMethod& method = metaObj->method(i);
@@ -103,6 +103,10 @@ void Util::processWithPublicMethods(const QMetaObject* metaObj, std::function<vo
       fn(method);
     }
   }
+}
+
+QByteArray Util::stipNamespace(const QByteArray& name) {
+  return name.mid(name.lastIndexOf(":") + 1);
 }
 
 }  // namespace core

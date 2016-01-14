@@ -29,6 +29,8 @@ private:
   static v8::Local<v8::Value> toV8ValueInternal(const QVariant& var,
                                         v8::Isolate* isolate = v8::Isolate::GetCurrent());
   static v8::Local<v8::Value> toV8ObjectFrom(QObject *sourceObj, v8::Isolate *isolate);
+
+  //  Throws exception
   static QVariant invokeMethodInternal(v8::Isolate *isolate, QObject *object, const QString &methodName, QVariantList args);
   static void cacheMethods( const QMetaObject *metaObj);
 

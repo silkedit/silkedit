@@ -6,7 +6,7 @@ DialogButtonBox::~DialogButtonBox() {
   qDebug() << "~DialogButtonBox";
 }
 
-QPushButton *DialogButtonBox::button(QDialogButtonBox::StandardButton which) const
+QPushButton *DialogButtonBox::button(int which) const
 {
-  return QDialogButtonBox::button(which);
+  return QDialogButtonBox::button(static_cast<StandardButton>(which));
 }

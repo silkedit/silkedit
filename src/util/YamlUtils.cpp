@@ -15,7 +15,7 @@
 #include "core/PackageMenu.h"
 #include "core/PackageAction.h"
 
-using core::Operator;
+using core::Condition;
 using core::PackageMenu;
 using core::PackageAction;
 using core::PackageToolBar;
@@ -60,11 +60,11 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
 
   QString key;
-  Operator op;
+  Condition::Operator op;
   QString value;
   if (list.size() == 1) {
     key = list[0];
-    op = Operator::EQUALS;
+    op = Condition::Operator::EQUALS;
     value = "true";
   } else if (list.size() == 3) {
     key = list[0];
@@ -72,9 +72,9 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
     // Parse operator expression
     QString opStr = list[1];
     if (opStr == "==") {
-      op = Operator::EQUALS;
+      op = Condition::Operator::EQUALS;
     } else if (opStr == "!=") {
-      op = Operator::NOT_EQUALS;
+      op = Condition::Operator::NOT_EQUALS;
     } else {
       qWarning("%s is not supported", qPrintable(opStr));
       return boost::none;

@@ -7,7 +7,7 @@
 #include "FakeWindow.h"
 #include "API.h"
 #include "Window.h"
-#include "SilkApp.h"
+#include "App.h"
 
 TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
@@ -76,7 +76,7 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
     }
 
     // dragging tab is over an another tab bar.
-    TabBar* anotherTabBar = SilkApp::tabBarAt(event->screenPos().x(), event->screenPos().y());
+    TabBar* anotherTabBar = App::tabBarAt(event->screenPos().x(), event->screenPos().y());
 
     if (m_dragInitiated && anotherTabBar && anotherTabBar != this) {
       qDebug("dragging tab is over an another tab bar.");

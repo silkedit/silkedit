@@ -10,28 +10,32 @@ class Window;
 class TabView;
 class TabViewGroup;
 
-class SilkApp : public QApplication {
-  DISABLE_COPY_AND_MOVE(SilkApp)
+class App : public QApplication {
+  Q_OBJECT
+  DISABLE_COPY_AND_MOVE(App)
 
  public:
+  static App* instance() { return s_app; }
   static TabBar* tabBarAt(int x, int y);
-  static TextEditView* activeTextEditView();
-  static TabView* activeTabView();
-  static TabViewGroup* activeTabViewGroup();
-  static Window* activeWindow();
   static void restart();
 
-  SilkApp(int& argc, char** argv);
-  ~SilkApp() = default;
+  App(int& argc, char** argv);
+  ~App() = default;
 
   void setupTranslator(const QString& locale);
   bool eventFilter(QObject *, QEvent *event) override;
+
+public slots:
+  TextEditView* activeTextEditView();
+  TabView* activeTabView();
+  TabViewGroup* activeTabViewGroup();
+  Window* activeWindow();
 
 protected:
   bool event(QEvent*) override;
 
  private:
-  static SilkApp* s_app;
+  static App* s_app;
 
   QTranslator* m_translator;
   QTranslator* m_qtTranslator;

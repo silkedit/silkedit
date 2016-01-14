@@ -8,7 +8,7 @@
 #include "OpenRecentItemManager.h"
 #include "core/ThemeManager.h"
 #include "core/Config.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "commands/PackageCommand.h"
 #include "CommandManager.h"
 #include "version.h"
@@ -104,8 +104,8 @@ void MenuBar::themeActionTriggered(QAction* action) {
 }
 
 void MenuBar::showAboutDialog() {
-  QMessageBox::about(this, SilkApp::applicationName(), tr("version") + " " +
-                                                           SilkApp::applicationVersion() + " (" +
+  QMessageBox::about(this, App::applicationName(), tr("version") + " " +
+                                                           App::applicationVersion() + " (" +
                                                            tr("build") + ": " + BUILD + ")");
 }
 

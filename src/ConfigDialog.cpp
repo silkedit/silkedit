@@ -11,7 +11,7 @@ using core::ConfigDefinition;
 QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 ConfigDialog* ConfigDialog::s_dialog = nullptr;
 
-void ConfigDialog::loadConfig(const QString& pkgName, const QString& configPath) {
+void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configPath) {
   auto configList = YamlUtils::parseConfig(pkgName, configPath);
   if (!configList.isEmpty()) {
     s_packageConfigs[pkgName] = configList;

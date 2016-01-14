@@ -24,22 +24,9 @@ class API : public QObject, public core::Singleton<API> {
   ~API() = default;
 
 public slots:
-  void alert(const QString& msg);
-  void loadKeymap(const QString& pkgName, const QString& ymlPath);
-  void loadMenu(const QString& pkgName, const QString& ymlPath);
-  void loadToolbar(const QString& pkgName, const QString& ymlPath);
-  void loadConfig(const QString& pkgName, const QString& ymlPath);
-  void registerCommands(QVariantList commands);
-  void unregisterCommands(QVariantList commands);
-  void registerCondition(const QString& condition);
-  void unregisterCondition(const QString& condition);
   void open(const QString& pathStr);
   void setFont(const QString& family, int size);
   void hideActiveFindReplacePanel();
-  TextEditView* activeTextEditView();
-  TabView* activeTabView();
-  TabViewGroup* activeTabViewGroup();
-  Window* activeWindow();
   QStringList showFileAndFolderDialog(const QString& caption);
   QStringList showFilesDialog(const QString& caption);
   boost::optional<QString> showFolderDialog(const QString& caption);
