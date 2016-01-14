@@ -12,8 +12,8 @@ class TestUtil : public QObject {
 
  public slots:
   void openFile() {
-    DocumentManager::open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
-    DocumentManager::open("/Users/shinichi/Code/silkedit/test/testdata/test.txt");
+    DocumentManager::singleton().open("/Users/shinichi/Code/silkedit/test/testdata/test.cpp");
+    DocumentManager::singleton().open("/Users/shinichi/Code/silkedit/test/testdata/test.txt");
     //    API::activeWindow()->openFindAndReplacePanel();
   }
 };

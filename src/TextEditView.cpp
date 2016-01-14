@@ -1027,13 +1027,13 @@ TextEditView* TextEditView::clone() {
 }
 
 void TextEditView::save() {
-  if (DocumentManager::save(d_ptr->m_document.get())) {
+  if (DocumentManager::singleton().save(d_ptr->m_document.get())) {
     emit saved();
   }
 }
 
 void TextEditView::saveAs() {
-  QString newFilePath = DocumentManager::saveAs(d_ptr->m_document.get());
+  QString newFilePath = DocumentManager::singleton().saveAs(d_ptr->m_document.get());
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
     emit saved();

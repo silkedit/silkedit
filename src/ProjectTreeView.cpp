@@ -108,7 +108,7 @@ void ProjectTreeView::open(QModelIndex index) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   if (filter && m_model) {
     QString filePath = m_model->filePath(filter->mapToSource(index));
-    DocumentManager::open(filePath);
+    DocumentManager::singleton().open(filePath);
   }
 }
 

@@ -76,7 +76,7 @@ int main(int argv, char** args) {
 
   QStringList arguments = app.arguments();
   if (arguments.size() > 1) {
-    DocumentManager::open(arguments.at(1));
+    DocumentManager::singleton().open(arguments.at(1));
   }
 
   //  new TestUtil();
