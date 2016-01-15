@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVariant>
 
+namespace core {
+
 constexpr int MAX_ARGS_COUNT = 10;
 
 class JSHandler {
@@ -26,4 +28,6 @@ private:
   JSHandler() = delete;
   ~JSHandler() = delete;
 };
+
+}  // namespace core
 

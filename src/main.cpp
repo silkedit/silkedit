@@ -16,7 +16,6 @@
 #include "Helper.h"
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
-#include "QObjectHelper.h"
 #include "core/ConditionManager.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
@@ -39,9 +38,6 @@ int main(int argv, char** args) {
 
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
-
-  // instantiate singleton objects to set their thrad affinity to current thread
-  QObjectHelper::singleton();
 
   ConditionManager::singleton().init();
 

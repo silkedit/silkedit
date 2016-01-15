@@ -100,7 +100,9 @@ class Config : public QObject, public Singleton<Config> {
   void endOfLineStrChanged(const QString& str);
 
  private:
+  // public API accessible from JS
   static void get(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void setFont(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   Theme* m_theme;
   QFont m_font;

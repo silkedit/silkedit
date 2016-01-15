@@ -9,9 +9,6 @@
 #include <QCoreApplication>
 
 #include "Handler.h"
-#include "JSHandler.h"
-#include "core/PrototypeStore.h"
-#include "ObjectTemplateStore.h"
 #include "JSObjectHelper.h"
 #include "Dialog.h"
 #include "VBoxLayout.h"
@@ -27,7 +24,11 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "FileDialog.h"
-#include "core/v8adapter.h"
+#include "core/Font.h"
+#include "core/JSHandler.h"
+#include "core/V8Util.h"
+#include "core/PrototypeStore.h"
+#include "core/ObjectTemplateStore.h"
 #include "core/macros.h"
 #include "core/Config.h"
 #include "core/Constants.h"
@@ -42,6 +43,9 @@ using core::PrototypeStore;
 using core::QVariantArgument;
 using core::Condition;
 using core::ConditionManager;
+using core::Font;
+using core::ObjectTemplateStore;
+using core::JSHandler;
 
 using v8::Array;
 using v8::Boolean;
@@ -94,7 +98,7 @@ void loadMenu(const FunctionCallbackInfo<Value>& args) {
     return;
   }
 
-  Window::loadMenu(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+  Window::loadMenu(V8Util::toQString(args[0]->ToString()), V8Util::toQString(args[1]->ToString()));
 }
 
 void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -102,7 +106,7 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  Window::loadToolbar(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+  Window::loadToolbar(V8Util::toQString(args[0]->ToString()), V8Util::toQString(args[1]->ToString()));
 }
 
 /*
@@ -114,7 +118,7 @@ void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  ConfigDialog::loadDefinition(toQString(args[0]->ToString()), toQString(args[1]->ToString()));
+  ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()), V8Util::toQString(args[1]->ToString()));
 }
 
 /*
@@ -127,9 +131,9 @@ void check(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  bool result = Condition::check(toQString(args[0]->ToString()),
+  bool result = Condition::check(V8Util::toQString(args[0]->ToString()),
                                  static_cast<Condition::Operator>(args[1]->ToInt32()->Value()),
-                                 toQString(args[2]->ToString()));
+                                 V8Util::toQString(args[2]->ToString()));
   args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
 }
 
@@ -143,7 +147,7 @@ void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
   HandleScope handleScope(isolate);
   Local<Array> array = Array::New(isolate, windows.size());
   for (int i = 0; i < windows.size(); i++) {
-    array->Set(i, JSObjectHelper::toV8ObjectFrom(isolate, windows[i]));
+    array->Set(i, V8Util::toV8ObjectFrom(isolate, windows[i]));
   }
   args.GetReturnValue().Set(array);
 }
@@ -202,18 +206,18 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   Local<Object> exports = args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked();
   // init singleton objects
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
-  Util::stipNamespace(KeymapManager::staticMetaObject.className());
-  setSingletonObj(exports, App::instance(), Util::stipNamespace(App::staticMetaObject.className()));
+  Util::stripNamespace(KeymapManager::staticMetaObject.className());
+  setSingletonObj(exports, App::instance(), Util::stripNamespace(App::staticMetaObject.className()));
   setSingletonObj(exports, &Constants::singleton(),
-                  Util::stipNamespace(Constants::staticMetaObject.className()));
+                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &KeymapManager::singleton(),
-                  Util::stipNamespace(KeymapManager::staticMetaObject.className()));
+                  Util::stripNamespace(KeymapManager::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
-                  Util::stipNamespace(CommandManager::staticMetaObject.className()));
+                  Util::stripNamespace(CommandManager::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
-                  Util::stipNamespace(DocumentManager::staticMetaObject.className()));
+                  Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
-                  Util::stipNamespace(ProjectManager::staticMetaObject.className()));
+                  Util::stripNamespace(ProjectManager::staticMetaObject.className()));
   // Config::get returns config whose type is decided based on ConfigDefinition, so we need to handle it specially
   Config::Init(exports);
   // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
@@ -231,6 +235,9 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<MessageBox>(exports);
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);
+
+  // Font is Q_GADGET
+  Font::Init(exports);
 }
 
 template <typename T>
@@ -270,7 +277,7 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
 
   // sets __proto__ (this doesn't create prototype property)
   obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
-      metaObj, JSObjectHelper::invokeMethod, isolate, true));
+      metaObj, V8Util::invokeMethod, isolate, true));
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);

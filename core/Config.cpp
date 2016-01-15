@@ -5,8 +5,9 @@
 
 #include "Config.h"
 #include "ThemeManager.h"
-#include "Util.h"
-#include "v8adapter.h"
+#include "V8Util.h"
+#include "ObjectStore.h"
+#include "Font.h"
 
 using v8::Function;
 using v8::FunctionCallbackInfo;
@@ -65,6 +66,7 @@ void Config::Init(v8::Local<v8::Object> exports) {
   obj->SetAlignedPointerInInternalField(0, &Config::singleton());
 
   NODE_SET_METHOD(obj, "get", get);
+  NODE_SET_METHOD(obj, "setFont", setFont);
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "Config"), obj);
@@ -199,7 +201,8 @@ void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  const auto& key = toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const auto& key =
+      V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
   QVariant result = Config::singleton().get(key);
 
   switch (result.type()) {
@@ -213,10 +216,33 @@ void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
       args.GetReturnValue().Set(v8::Number::New(isolate, result.toDouble()));
       return;
     case QVariant::String:
-      args.GetReturnValue().Set(toV8String(isolate, result.toString()));
+      args.GetReturnValue().Set(V8Util::toV8String(isolate, result.toString()));
       return;
     default:
       args.GetReturnValue().Set(v8::Null(isolate));
+  }
+}
+
+void Config::setFont(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsObject()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return;
+  }
+
+  Local<Object> obj = args[0]->ToObject();
+  if (obj->InternalFieldCount() > 0) {
+    Font* font = Font::Unwrap<Font>(obj);
+    if (!font) {
+      V8Util::throwError(isolate, "object is not Font");
+      return;
+    }
+
+    Config::singleton().setFont(*font);
+  } else {
+    V8Util::throwError(isolate, "can't find the internal field");
+    return;
   }
 }
 

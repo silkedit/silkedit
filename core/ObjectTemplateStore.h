@@ -6,10 +6,12 @@
 #include <QMetaObject>
 #include <QHash>
 
-#include "core/macros.h"
-#include "core/Singleton.h"
+#include "macros.h"
+#include "Singleton.h"
 
-class ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
+namespace core {
+
+class ObjectTemplateStore : public Singleton<ObjectTemplateStore> {
   DISABLE_COPY(ObjectTemplateStore)
 
  public:
@@ -36,6 +38,9 @@ class ObjectTemplateStore : public core::Singleton<ObjectTemplateStore> {
   std::unordered_map<const QMetaObject*, v8::UniquePersistent<v8::ObjectTemplate>>
       m_classObjectTemplateHash;
 
-  friend class core::Singleton<ObjectTemplateStore>;
+  friend class Singleton<ObjectTemplateStore>;
   ObjectTemplateStore() = default;
 };
+
+}  // namespace core
+

@@ -11,10 +11,10 @@
 #include "CommandManager.h"
 #include "KeymapManager.h"
 #include "App.h"
-#include "JSHandler.h"
 #include "atom/node_includes.h"
 #include "atom/node_bindings.h"
 #include "silkedit_node/custom_node.h"
+#include "core/JSHandler.h"
 #include "core/Constants.h"
 #include "core/modifiers.h"
 #include "core/Config.h"
@@ -26,6 +26,8 @@ using core::Constants;
 using core::Config;
 using core::Util;
 using core::QVariantArgument;
+using core::JSHandler;
+
 using atom::NodeBindings;
 
 namespace {

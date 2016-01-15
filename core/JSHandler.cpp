@@ -3,9 +3,8 @@
 
 #include "JSHandler.h"
 #include "ObjectStore.h"
-#include "core/CommandArgument.h"
-#include "core/v8adapter.h"
-#include "JSObjectHelper.h"
+#include "CommandArgument.h"
+#include "V8Util.h"
 
 using v8::String;
 using v8::Isolate;
@@ -23,6 +22,8 @@ using v8::Array;
 using v8::External;
 using v8::Symbol;
 using v8::Locker;
+
+namespace core {
 
 v8::Persistent<v8::Object> JSHandler::s_jsHandler;
 bool JSHandler::s_isInitialized = false;
@@ -49,11 +50,11 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
   Local<Value> argv[MAX_ARGS_COUNT];
   int argc = qMin(args.size(), MAX_ARGS_COUNT);
   for (int i = 0; i < argc; i++) {
-    argv[i] = JSObjectHelper::toV8Value(isolate, args[i]);
+    argv[i] = V8Util::toV8Value(isolate, args[i]);
   }
 
   MaybeLocal<Value> maybeFnValue =
-      s_jsHandler.Get(isolate)->Get(isolate->GetCurrentContext(), toV8String(isolate, funcName));
+      s_jsHandler.Get(isolate)->Get(isolate->GetCurrentContext(), V8Util::toV8String(isolate, funcName));
   if (maybeFnValue.IsEmpty()) {
     qWarning() << funcName << "not found";
     return QVariant();
@@ -86,7 +87,7 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
     return QVariant();
   }
 
-  return JSObjectHelper::toVariant(isolate, maybeResult.ToLocalChecked());
+  return V8Util::toVariant(isolate, maybeResult.ToLocalChecked());
 }
 
 void JSHandler::inheritsQtEventEmitter(Isolate* isolate, Local<v8::Value> proto) {
@@ -169,7 +170,7 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
     argv[0] = String::NewFromUtf8(isolate, signal.toUtf8().constData(), v8::NewStringType::kNormal)
                   .ToLocalChecked();
     for (int i = 0; i < qMin(args.size(), MAX_ARGS_COUNT_FOR_SIGNAL - 1); i++) {
-      argv[i + 1] = JSObjectHelper::toV8Value(isolate, args[i]);
+      argv[i + 1] = V8Util::toV8Value(isolate, args[i]);
     }
 
     TryCatch trycatch(isolate);
@@ -197,3 +198,6 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
     qWarning() << "associated JS object not found";
   }
 }
+
+}  // namespace core
+
