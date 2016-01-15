@@ -204,8 +204,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
   Util::stipNamespace(KeymapManager::staticMetaObject.className());
   setSingletonObj(exports, App::instance(), Util::stipNamespace(App::staticMetaObject.className()));
-  setSingletonObj(exports, &Config::singleton(),
-                  Util::stipNamespace(Config::staticMetaObject.className()));
   setSingletonObj(exports, &Constants::singleton(),
                   Util::stipNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &KeymapManager::singleton(),
@@ -216,6 +214,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stipNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stipNamespace(ProjectManager::staticMetaObject.className()));
+  // Config::get returns config whose type is decided based on ConfigDefinition, so we need to handle it specially
+  Config::Init(exports);
   // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   ConditionManager::Init(exports);
