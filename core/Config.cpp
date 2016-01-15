@@ -1,10 +1,28 @@
-﻿#include <string>
+﻿#include <node.h>
+#include <string>
 #include <QDebug>
 #include <QVariant>
 
 #include "Config.h"
 #include "ThemeManager.h"
 #include "Util.h"
+#include "v8adapter.h"
+
+using v8::Function;
+using v8::FunctionCallbackInfo;
+using v8::FunctionTemplate;
+using v8::Isolate;
+using v8::Local;
+using v8::Number;
+using v8::Object;
+using v8::Persistent;
+using v8::String;
+using v8::Value;
+using v8::Exception;
+using v8::MaybeLocal;
+using v8::TryCatch;
+using v8::ObjectTemplate;
+using v8::Maybe;
 
 namespace {
 const QString END_OF_LINE_STR_KEY = "end_of_line_str";
@@ -17,22 +35,43 @@ const QString TAB_WIDTH_KEY = "tab_width";
 const QString LOCALE_KEY = "locale";
 const QString SHOW_INVISIBLES_KEY = "show_invisibles";
 
-QHash<QString, QVariant::Type> keyTypeHash;
+QHash<QString, QVariant::Type> keyTypeHashForBuiltinConfigs;
 
 void initKeyTypeHash() {
-  keyTypeHash[END_OF_LINE_STR_KEY] = QVariant::String;
-  keyTypeHash[END_OF_FILE_STR_KEY] = QVariant::String;
-  keyTypeHash[THEME_KEY] = QVariant::String;
-  keyTypeHash[FONT_FAMILY_KEY] = QVariant::String;
-  keyTypeHash[FONT_SIZE_KEY] = QVariant::Int;
-  keyTypeHash[INDENT_USING_SPACES_KEY] = QVariant::Bool;
-  keyTypeHash[TAB_WIDTH_KEY] = QVariant::Int;
-  keyTypeHash[LOCALE_KEY] = QVariant::String;
-  keyTypeHash[SHOW_INVISIBLES_KEY] = QVariant::Bool;
+  keyTypeHashForBuiltinConfigs[END_OF_LINE_STR_KEY] = QVariant::String;
+  keyTypeHashForBuiltinConfigs[END_OF_FILE_STR_KEY] = QVariant::String;
+  keyTypeHashForBuiltinConfigs[THEME_KEY] = QVariant::String;
+  keyTypeHashForBuiltinConfigs[FONT_FAMILY_KEY] = QVariant::String;
+  keyTypeHashForBuiltinConfigs[FONT_SIZE_KEY] = QVariant::Int;
+  keyTypeHashForBuiltinConfigs[INDENT_USING_SPACES_KEY] = QVariant::Bool;
+  keyTypeHashForBuiltinConfigs[TAB_WIDTH_KEY] = QVariant::Int;
+  keyTypeHashForBuiltinConfigs[LOCALE_KEY] = QVariant::String;
+  keyTypeHashForBuiltinConfigs[SHOW_INVISIBLES_KEY] = QVariant::Bool;
 }
 }
 
 namespace core {
+
+void Config::Init(v8::Local<v8::Object> exports) {
+  Isolate* isolate = exports->GetIsolate();
+  Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
+  objTempl->SetInternalFieldCount(1);
+  MaybeLocal<Object> maybeObj = objTempl->NewInstance(isolate->GetCurrentContext());
+  if (maybeObj.IsEmpty()) {
+    throw std::runtime_error("Failed to create ConditionManager");
+  }
+
+  Local<Object> obj = maybeObj.ToLocalChecked();
+  obj->SetAlignedPointerInInternalField(0, &Config::singleton());
+
+  NODE_SET_METHOD(obj, "get", get);
+
+  Maybe<bool> result =
+      exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, "Config"), obj);
+  if (result.IsNothing()) {
+    throw std::runtime_error("setting exports failed");
+  }
+}
 
 void Config::setTheme(Theme* theme) {
   if (m_theme != theme) {
@@ -59,7 +98,7 @@ void Config::setFont(const QFont& font) {
 }
 
 int Config::tabWidth() {
-  return value(TAB_WIDTH_KEY, 4);
+  return get(TAB_WIDTH_KEY, 4);
 }
 
 void Config::setTabWidth(int tabWidth) {
@@ -69,7 +108,7 @@ void Config::setTabWidth(int tabWidth) {
 }
 
 bool Config::indentUsingSpaces() {
-  return value(INDENT_USING_SPACES_KEY, false);
+  return get(INDENT_USING_SPACES_KEY, false);
 }
 
 void Config::setIndentUsingSpaces(bool value) {
@@ -103,8 +142,86 @@ bool Config::contains(const QString& key) {
   return m_scalarConfigs.count(key) != 0;
 }
 
+void Config::addPackageConfigDefinition(const ConfigDefinition& def) {
+  m_packageConfigDefinitions[def.key] = def;
+}
+
+QVariant convert(QVariant var, QVariant::Type type) {
+  Q_ASSERT(var.type() == QVariant::Type::ByteArray);
+
+  switch (type) {
+    case QVariant::Type::String:
+      return QString::fromUtf8(var.toByteArray());
+    case QVariant::Type::Bool:
+      if (var.toByteArray() == "true") {
+        return QVariant::fromValue(true);
+      } else if (var.toByteArray() == "false") {
+        return QVariant::fromValue(false);
+      } else {
+        return QVariant();
+      }
+    case QVariant::Type::Int: {
+      bool ok;
+      int value = var.toByteArray().toInt(&ok);
+      return ok ? QVariant::fromValue(value) : QVariant();
+    }
+    case QVariant::Type::Double: {
+      bool ok;
+      double value = var.toByteArray().toDouble(&ok);
+      return ok ? QVariant::fromValue(value) : QVariant();
+    }
+    default:
+      qWarning() << "invalid type:" << type;
+      return QVariant();
+  }
+}
+
+QVariant Config::get(const QString& key) {
+  if (m_scalarConfigs.count(key) != 0) {
+    QVariant var = m_scalarConfigs.at(key);
+    // Configs defined in packages are stored as byte array (because we don't know their type when
+    // parsing config.yml), so convert it to appropriate type defined in config_definitinos.yml
+    if (var.type() == QVariant::Type::ByteArray && m_packageConfigDefinitions.contains(key)) {
+      QVariant newValue = convert(var, m_packageConfigDefinitions.value(key).type());
+      m_scalarConfigs[key] = newValue;
+    }
+    return m_scalarConfigs[key];
+  }
+
+  return QVariant();
+}
+
+void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsString()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "invalid argument")));
+    return;
+  }
+
+  const auto& key = toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  QVariant result = Config::singleton().get(key);
+
+  switch (result.type()) {
+    case QVariant::Bool:
+      args.GetReturnValue().Set(v8::Boolean::New(isolate, result.toBool()));
+      return;
+    case QVariant::Int:
+      args.GetReturnValue().Set(v8::Int32::New(isolate, result.toInt()));
+      return;
+    case QVariant::Double:
+      args.GetReturnValue().Set(v8::Number::New(isolate, result.toDouble()));
+      return;
+    case QVariant::String:
+      args.GetReturnValue().Set(toV8String(isolate, result.toString()));
+      return;
+    default:
+      args.GetReturnValue().Set(v8::Null(isolate));
+  }
+}
+
 QString Config::endOfLineStr() {
-  return value(END_OF_LINE_STR_KEY, u8"\u00AC");  // U+00AC is '¬'
+  return get(END_OF_LINE_STR_KEY, u8"\u00AC");  // U+00AC is '¬'
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {
@@ -114,16 +231,16 @@ void Config::setEndOfLineStr(const QString& newValue) {
 }
 
 QString Config::endOfFileStr() {
-  return value(END_OF_FILE_STR_KEY, "");
+  return get(END_OF_FILE_STR_KEY, "");
 }
 
 bool Config::enableMnemonic() {
-  return value("enable_mnemonic", false);
+  return get("enable_mnemonic", false);
 }
 
 QString Config::locale() {
   const QString& systemLocale = QLocale::system().name();
-  const QString& locale = value(LOCALE_KEY, systemLocale);
+  const QString& locale = get(LOCALE_KEY, systemLocale);
   if (locale == "system") {
     return systemLocale;
   }
@@ -135,7 +252,7 @@ void Config::setLocale(const QString& newValue) {
 }
 
 bool Config::showInvisibles() {
-  return value(SHOW_INVISIBLES_KEY, false);
+  return get(SHOW_INVISIBLES_KEY, false);
 }
 
 void Config::setShowInvisibles(bool newValue) {
@@ -175,8 +292,8 @@ void Config::load(const QString& filename) {
       QString key = QString::fromUtf8(it->first.as<std::string>().c_str()).trimmed();
       if (it->second.IsScalar()) {
         // If key is predefined, save it as an appropriate type.
-        if (keyTypeHash.contains(key)) {
-          switch (keyTypeHash[key]) {
+        if (keyTypeHashForBuiltinConfigs.contains(key)) {
+          switch (keyTypeHashForBuiltinConfigs[key]) {
             case QVariant::Bool:
               m_scalarConfigs[key] = QVariant(it->second.as<bool>());
               break;
@@ -189,12 +306,13 @@ void Config::load(const QString& filename) {
               break;
             }
             default:
-              qWarning("Invalid type %d. key: %s", keyTypeHash[key], qPrintable(key));
+              qWarning("Invalid type %d. key: %s", keyTypeHashForBuiltinConfigs[key],
+                       qPrintable(key));
               break;
           }
-          // If key is defined in a package, save it as string.
+          // If key is defined in a package, save it as byte array
         } else {
-          QString value = QString::fromUtf8(it->second.as<std::string>().c_str()).trimmed();
+          QByteArray value = it->second.as<std::string>().c_str();
           m_scalarConfigs[key] = value;
         }
       } else if (it->second.IsMap()) {
@@ -218,15 +336,15 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return value(THEME_KEY, "Solarized (dark)");
+  return get(THEME_KEY, "Solarized (dark)");
 }
 
 QString Config::fontFamily() {
-  return value(FONT_FAMILY_KEY, Constants::singleton().defaultFontFamily);
+  return get(FONT_FAMILY_KEY, Constants::singleton().defaultFontFamily);
 }
 
 int Config::fontSize() {
-  return value(FONT_SIZE_KEY, Constants::singleton().defaultFontSize);
+  return get(FONT_SIZE_KEY, Constants::singleton().defaultFontSize);
 }
 
 }  // namespace core
