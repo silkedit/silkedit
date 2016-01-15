@@ -12,7 +12,7 @@ const QString settingsStr = "settings";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
 const int brightnessThresholdWhite = 180;
-const int brightnessThresholdGrey = 125;
+const int brightnessThresholdGray = 125;
 const int brightnessThresholdBlack = 60;
 
 void parseSettings(ColorSettings* settings,
@@ -61,7 +61,7 @@ void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
 
 QColor changeColorBrightness(QColor const color,
                              int value = 10,
-                             int threshold = brightnessThresholdGrey) {
+                             int threshold = brightnessThresholdGray) {
   QColor newColor;
 
   // 0 is black; 255 is as far from black as possible.
@@ -79,7 +79,7 @@ QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
   return newColor;
 }
 
-QColor getAppropriateGrey(QColor const color, bool reverse = false) {
+QColor getAppropriateGray(QColor const color, bool reverse = false) {
   QColor newColor;
   int brightness = color.value();
   if(reverse) {
@@ -89,7 +89,7 @@ QColor getAppropriateGrey(QColor const color, bool reverse = false) {
   //  - http://www.materialui.co/colors
   if (brightness < brightnessThresholdBlack) {
     newColor.setRgb(224, 224, 224);  // 300
-  } else if (brightness < brightnessThresholdGrey) {
+  } else if (brightness < brightnessThresholdGray) {
     newColor.setRgb(158, 158, 158);  // 500
   } else if (brightness < brightnessThresholdWhite) {
     newColor.setRgb(97, 97, 97);  // 700
@@ -104,7 +104,7 @@ QColor getSelectedTabBorderColor(QColor const color) {
   int brightness = color.value();
   // use material color
   //  - http://www.materialui.co/colors
-  if (brightness < brightnessThresholdGrey) {
+  if (brightness < brightnessThresholdGray) {
     newColor.setRgb(130, 177, 255);  // Blue A100
   } else {
     newColor.setRgb(41, 98, 255);  // Blue A700
@@ -233,7 +233,7 @@ bool Theme::isDarkTheme() {
   }
 
   QColor backgroundColor = baseColorSettings->value("background").name();
-  if (backgroundColor.value() < brightnessThresholdGrey) {
+  if (backgroundColor.value() < brightnessThresholdGray) {
     ret = true;
   }
   return ret;
@@ -320,15 +320,15 @@ ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
 
 ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
   ColorSettings defaultColors;
-  QColor backgroundColor = QColor(33, 33, 33);     // Grey 900
-  QColor foregroundColor = QColor(117, 117, 117);  // Grey 600
+  QColor backgroundColor = QColor(33, 33, 33);     // Gray 900
+  QColor foregroundColor = QColor(117, 117, 117);  // Gray 600
 
   if (!theme->scopeSettings.isEmpty()) {
     ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
 
     if (baseColorSettings->contains("background")) {
       backgroundColor = baseColorSettings->value("background").name();
-      foregroundColor = getAppropriateGrey(baseColorSettings->value("background").name());
+      foregroundColor = getAppropriateGray(baseColorSettings->value("background").name());
     }
   }
   return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
@@ -340,7 +340,7 @@ ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
 
 ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
    ColorSettings defaultColors  = createStatusBarSettingsColors(theme);
-   defaultColors["buttonCheckedBackgroundColor"] = getAppropriateGrey(defaultColors.value("background").name());
+   defaultColors["buttonCheckedBackgroundColor"] = getAppropriateGray(defaultColors.value("background").name());
 
    return defaultColors;
 }
