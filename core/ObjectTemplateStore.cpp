@@ -4,7 +4,7 @@
 
 #include "ObjectTemplateStore.h"
 #include "V8Util.h"
-#include "QObjectHelper.h"
+#include "QObjectUtil.h"
 #include "ObjectStore.h"
 
 using v8::UniquePersistent;

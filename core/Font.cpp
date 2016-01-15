@@ -3,7 +3,7 @@
 #include <QDebug>
 
 #include "Font.h"
-#include "QObjectHelper.h"
+#include "QObjectUtil.h"
 #include "Util.h"
 #include "V8Util.h"
 
@@ -61,7 +61,7 @@ void Font::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
         }
 
         Font* newObj = static_cast<Font*>(
-            QObjectHelper::singleton().newInstanceOfGadgetFromJS(metaObj, variants));
+            QObjectUtil::newInstanceOfGadgetFromJS(metaObj, variants));
         if (!newObj) {
           std::stringstream ss;
           ss << "invoking" << ctor.methodSignature().constData() << "failed";
