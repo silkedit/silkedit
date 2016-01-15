@@ -1,7 +1,6 @@
 ﻿#include <QDebug>
 
 #include "CommandManager.h"
-#include "Helper.h"
 #include "commands/PackageCommand.h"
 
 QString CommandManager::cmdDescription(const QString& name) {
@@ -31,7 +30,6 @@ void CommandManager::runCommand(const QString& name, const CommandArgument& args
   //  qDebug() << "qCmdName:" << qCmdName;
   if (m_commands.find(qCmdName) != m_commands.end()) {
     m_commands[qCmdName]->run(cmdArg, repeat);
-    Helper::singleton().sendCommandEvent(qCmdName, cmdArg);
   } else {
     qDebug() << "Can't find a command: " << qCmdName;
   }
