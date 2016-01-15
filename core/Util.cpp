@@ -16,6 +16,29 @@ void replace(QString& str, const QString& regex, const QString& after) {
     str = str.replace(match.capturedStart(), match.capturedLength(), after);
   }
 }
+
+bool qObjectPointerTypeCheck(QVariant var, const QByteArray& typeName) {
+  if (var.isNull())
+    return true;
+
+  return var.canConvert<QObject*>() &&
+         var.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
+}
+
+bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
+  if (!var.canConvert<int>()) {
+    return false;
+  }
+
+  int typeId = QMetaType::type(typeName);
+  if (typeId != QMetaType::UnknownType) {
+    const QMetaObject* metaObj = QMetaType(typeId).metaObject();
+    const QByteArray& enumName = core::Util::stripNamespace(typeName);
+    return metaObj->indexOfEnumerator(enumName) >= 0;
+  }
+
+  return false;
+}
 }
 
 namespace core {
@@ -105,8 +128,24 @@ void Util::processWithPublicMethods(const QMetaObject* metaObj,
   }
 }
 
-QByteArray Util::stipNamespace(const QByteArray& name) {
+QByteArray Util::stripNamespace(const QByteArray& name) {
   return name.mid(name.lastIndexOf(":") + 1);
+}
+
+bool Util::matchTypes(QList<QByteArray> types, QVariantList args)
+{
+  if (types.size() != args.size()) {
+    return false;
+  }
+
+  for (int i = 0; i < types.size(); i++) {
+    if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) &&
+        !qObjectPointerTypeCheck(args[i], types[i]) && !enumTypeCheck(args[i], types[i])) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 }  // namespace core

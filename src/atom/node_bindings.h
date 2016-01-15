@@ -12,7 +12,6 @@
 #include <QDebug>
 
 #include "core/macros.h"
-#include "JSHandler.h"
 
 namespace node {
 class Environment;

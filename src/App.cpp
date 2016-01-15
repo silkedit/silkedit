@@ -12,10 +12,11 @@
 #include "Helper.h"
 #include "version.h"
 #include "SilkStyle.h"
-#include "ObjectStore.h"
+#include "core/ObjectStore.h"
 #include "core/Constants.h"
 
 using core::Constants;
+using core::ObjectStore;
 
 App* App::s_app = nullptr;
 

@@ -3,10 +3,9 @@
 #include <sstream>
 
 #include "ObjectTemplateStore.h"
-#include "JSObjectHelper.h"
+#include "V8Util.h"
 #include "QObjectHelper.h"
 #include "ObjectStore.h"
-#include "core/v8adapter.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -17,6 +16,8 @@ using v8::PropertyCallbackInfo;
 using v8::Value;
 using v8::Isolate;
 using v8::Exception;
+
+namespace core {
 
 QHash<const QMetaObject*, QHash<QString, int>> ObjectTemplateStore::s_classPropertiesHash;
 
@@ -90,7 +91,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   }
 
   QVariant value = prop.read(obj);
-  info.GetReturnValue().Set(JSObjectHelper::toV8Value(isolate, value));
+  info.GetReturnValue().Set(V8Util::toV8Value(isolate, value));
 }
 
 void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
@@ -120,5 +121,8 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
     return;
   }
 
-  prop.write(obj, JSObjectHelper::toVariant(isolate, value));
+  prop.write(obj, V8Util::toVariant(isolate, value));
 }
+
+}  // namespace core
+

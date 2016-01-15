@@ -7,6 +7,7 @@
 #include <QStringList>
 #include <QTime>
 #include <QKeySequence>
+#include <QVariantList>
 
 #include "macros.h"
 
@@ -38,7 +39,9 @@ class Util {
   static void processWithPublicMethods(const QMetaObject* metaObj,
                                        std::function<void(const QMetaMethod&)> fn);
 
-  static QByteArray stipNamespace(const QByteArray &name);
+  static QByteArray stripNamespace(const QByteArray &name);
+
+  static bool matchTypes(QList<QByteArray> types, QVariantList args);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {

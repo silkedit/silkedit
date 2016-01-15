@@ -5,8 +5,7 @@
 #include <QCoreApplication>
 
 #include "ObjectStore.h"
-#include "JSObjectHelper.h"
-#include "core/v8adapter.h"
+#include "V8Util.h"
 
 using v8::UniquePersistent;
 using v8::Object;
@@ -17,6 +16,8 @@ using v8::Value;
 using v8::Isolate;
 using v8::Null;
 using v8::String;
+
+namespace core {
 
 std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> ObjectStore::s_objects;
 
@@ -71,3 +72,6 @@ void ObjectStore::WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& 
     }
   }
 }
+
+}  // namespace core
+

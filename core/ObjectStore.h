@@ -5,13 +5,15 @@
 #include <unordered_map>
 #include <QObject>
 
-#include "core/Singleton.h"
+#include "Singleton.h"
 
 // From Qt doc
 // Note: Dynamic properties starting with "_q_" are reserved for internal purposes.
 #define OBJECT_STATE "_s_object_state"
 
-class ObjectStore : public QObject, public core::Singleton<ObjectStore> {
+namespace core {
+
+class ObjectStore : public QObject, public Singleton<ObjectStore> {
   Q_OBJECT
 
  public:
@@ -37,3 +39,6 @@ class ObjectStore : public QObject, public core::Singleton<ObjectStore> {
   ObjectStore() = default;
 
 };
+
+}  // namespace core
+

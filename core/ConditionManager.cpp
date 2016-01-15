@@ -3,7 +3,7 @@
 #include "ConditionManager.h"
 #include "OSCondition.h"
 #include "PackageCondition.h"
-#include "v8adapter.h"
+#include "V8Util.h"
 
 using core::Condition;
 using v8::Function;
@@ -81,7 +81,7 @@ void core::ConditionManager::addPackageCondition(const v8::FunctionCallbackInfo<
     return;
   }
 
-  const auto& key = toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const auto& key = V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
   singleton().add(key, std::move(std::unique_ptr<core::Condition>(new PackageCondition(
                                                                     isolate, args[1]->ToObject(isolate->GetCurrentContext()).ToLocalChecked()))));
 }
@@ -95,7 +95,7 @@ void ConditionManager::removePackageCondition(const v8::FunctionCallbackInfo<v8:
     return;
   }
 
-  const auto& key = toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const auto& key = V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
   singleton().remove(key);
 }
 

@@ -2,7 +2,7 @@
 #include <QDebug>
 
 #include "PackageCondition.h"
-#include "v8adapter.h"
+#include "V8Util.h"
 
 using v8::Function;
 using v8::FunctionCallbackInfo;
@@ -47,7 +47,7 @@ bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
   const int argc = 2;
   Local<Value> argv[argc];
   argv[0] = v8::Int32::New(m_isolate, static_cast<int>(op));
-  argv[1] = toV8String(m_isolate, operand);
+  argv[1] = V8Util::toV8String(m_isolate, operand);
 
   TryCatch trycatch(m_isolate);
   MaybeLocal<Value> maybeResult =
@@ -118,7 +118,7 @@ QString PackageCondition::key() {
     throw std::runtime_error("result is not string");
   }
 
-  return toQString(result->ToString());
+  return V8Util::toQString(result->ToString());
 }
 
 }  // namespace core

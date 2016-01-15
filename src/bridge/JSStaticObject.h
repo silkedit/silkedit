@@ -8,15 +8,20 @@
 #include <QDialogButtonBox>
 
 #include "JSObjectHelper.h"
-#include "ObjectStore.h"
-#include "QObjectHelper.h"
-#include "JSHandler.h"
-#include "ObjectTemplateStore.h"
+#include "core/JSHandler.h"
+#include "core/QObjectHelper.h"
+#include "core/ObjectTemplateStore.h"
+#include "core/ObjectStore.h"
 #include "core/QVariantArgument.h"
 #include "core/macros.h"
 #include "core/Util.h"
+#include "core/V8Util.h"
 
 using core::Util;
+using core::QObjectHelper;
+using core::ObjectTemplateStore;
+using core::JSHandler;
+using core::V8Util;
 
 namespace bridge {
 
@@ -34,7 +39,7 @@ class JSStaticObject {
 
     // register method and slots to prototype object
     Util::processWithPublicMethods(&metaObj, [&](const QMetaMethod& method) {
-      NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), JSObjectHelper::invokeMethod);
+      NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), V8Util::invokeMethod);
     });
 
     v8::MaybeLocal<v8::Function> maybeFunc = tpl->GetFunction(isolate->GetCurrentContext());
@@ -48,7 +53,7 @@ class JSStaticObject {
     addEnumsToFunction(metaObj, ctor, isolate);
     JSHandler::inheritsQtEventEmitter(isolate, ctor);
     constructor.Reset(isolate, ctor);
-    exports->Set(v8::String::NewFromUtf8(isolate, Util::stipNamespace(metaObj.className())), ctor);
+    exports->Set(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj.className())), ctor);
     return ctor;
   }
 
@@ -64,7 +69,7 @@ class JSStaticObject {
       // convert args to QVariantList
       QVariantList variants;
       for (int i = 0; i < args.Length(); i++) {
-        variants.append(JSObjectHelper::toVariant(isolate, args[i]));
+        variants.append(V8Util::toVariant(isolate, args[i]));
       }
 
       for (int i = 0; i < metaObj.constructorCount(); i++) {
@@ -74,7 +79,7 @@ class JSStaticObject {
         }
 
         const auto& parameterTypes = ctor.parameterTypes();
-        if (JSObjectHelper::matchTypes(parameterTypes, variants)) {
+        if (Util::matchTypes(parameterTypes, variants)) {
           // overwrite QVariant type with parameter type to match the method signature.
           // e.g. convert QLabel* to QWidget*
           for (int j = 0; j < ctor.parameterCount(); j++) {
@@ -85,13 +90,11 @@ class JSStaticObject {
           if (!newObj) {
             std::stringstream ss;
             ss << "invoking" << ctor.methodSignature().constData() << "failed";
-            isolate->ThrowException(v8::Exception::TypeError(
-                v8::String::NewFromUtf8(isolate, ss.str().c_str(), v8::NewStringType::kNormal)
-                    .ToLocalChecked()));
+            V8Util::throwError(isolate, ss.str());
             return;
           }
 
-          ObjectStore::singleton().wrapAndInsert(newObj, args.This(), isolate);
+          core::ObjectStore::singleton().wrapAndInsert(newObj, args.This(), isolate);
           args.GetReturnValue().Set(args.This());
           return;
         }
@@ -100,22 +103,20 @@ class JSStaticObject {
       std::stringstream ss;
       ss << "no constructor matched. args.Length:" << args.Length();
       // no constructor matched
-      isolate->ThrowException(v8::Exception::TypeError(
-          v8::String::NewFromUtf8(isolate, ss.str().c_str(), v8::NewStringType::kNormal)
-              .ToLocalChecked()));
+      V8Util::throwError(isolate, ss.str());
     } else {
       // Invoked as plain function `MyObject(...)`, turn into construct call.
-      if (args.Length() >= MAX_ARGS_COUNT) {
-        qWarning() << "max # of args is " << MAX_ARGS_COUNT
+      if (args.Length() >= Q_METAMETHOD_INVOKE_MAX_ARGS) {
+        qWarning() << "max # of args is " << Q_METAMETHOD_INVOKE_MAX_ARGS
                    << ". Exceeded arguments will be dropped";
       }
 
-      v8::Local<v8::Value> argv[MAX_ARGS_COUNT];
-      for (int i = 0; i < qMin(args.Length(), MAX_ARGS_COUNT); i++) {
+      v8::Local<v8::Value> argv[Q_METAMETHOD_INVOKE_MAX_ARGS];
+      for (int i = 0; i < qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS); i++) {
         argv[i] = args[i];
       }
       v8::Local<v8::Function> cons = v8::Local<v8::Function>::New(isolate, constructor);
-      args.GetReturnValue().Set(cons->NewInstance(qMin(args.Length(), MAX_ARGS_COUNT), argv));
+      args.GetReturnValue().Set(cons->NewInstance(qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS), argv));
     }
   }
 
