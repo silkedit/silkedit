@@ -54,11 +54,12 @@ QStringList helperArgs() {
 
 CommandArgument toCommandArgument(QVariantMap map) {
   CommandArgument arg;
-  auto it = map.constBegin();
-  while (it != map.constEnd()) {
+
+  for (const auto& key : map.keys()) {
     arg.insert(
-        std::make_pair(it.key().toUtf8().constData(), it.value().toString().toUtf8().constData()));
+        std::make_pair(key.toUtf8().constData(), map.value(key).toString().toUtf8().constData()));
   }
+
   return arg;
 }
 }
