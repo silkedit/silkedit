@@ -134,7 +134,7 @@ void HelperPrivate::init() {
 
   startNodeEventLoop();
   connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, &Helper::singleton(),
-                   &Helper::cleanup);
+          &Helper::cleanup);
 }
 
 HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}
@@ -216,12 +216,6 @@ void Helper::cleanup() {
 void Helper::sendFocusChangedEvent(const QString& viewType) {
   const QVariantList& args = QVariantList{QVariant::fromValue(viewType)};
   d->callFunc("focusChanged", args);
-}
-
-void Helper::sendCommandEvent(const QString& command, const CommandArgument& cmdArgs) {
-  const QVariantList& args =
-      QVariantList{QVariant::fromValue(command), QVariant::fromValue(cmdArgs)};
-  d->callFunc("commandEvent", args);
 }
 
 void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
