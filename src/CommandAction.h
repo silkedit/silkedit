@@ -5,6 +5,10 @@
 #include "core/macros.h"
 #include "core/PackageAction.h"
 
+namespace core {
+    class Theme;
+}
+
 class CommandAction : public core::PackageAction {
   Q_OBJECT
  public:
@@ -32,6 +36,6 @@ class CommandAction : public core::PackageAction {
  private:
   QMap<QString, QString> m_icons;
   QString m_cmdName;
-  void setTheme();
+  void setTheme(const core::Theme* theme);
   void init(const QString& id, const QString& cmdName);
 };

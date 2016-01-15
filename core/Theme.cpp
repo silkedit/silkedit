@@ -217,7 +217,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   return theme;
 }
 
-bool Theme::isDarkTheme() {
+bool Theme::isDarkTheme() const {
   bool ret = false;
   if (scopeSettings.isEmpty()) {
     return ret;

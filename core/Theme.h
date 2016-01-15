@@ -63,7 +63,7 @@ class Theme {
   bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> scopeSettings;
-  bool isDarkTheme();
+  bool isDarkTheme() const;
 
  private:
   static ScopeSetting* matchedSetting(const QString& scope);

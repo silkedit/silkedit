@@ -56,12 +56,12 @@ CommandAction::CommandAction(const QString& id,
                              const QString& pkgName)
     : PackageAction(id, pkgName, parent), m_icons(icons), m_cmdName(cmdName) {
   init(id, cmdName);
-  setTheme();
+  setTheme(Config::singleton().theme());
   connect(&Config::singleton(), &Config::themeChanged, this, &CommandAction::setTheme);
 }
 
-void CommandAction::setTheme() {
-  if(Config::singleton().theme()->isDarkTheme()){
+void CommandAction::setTheme(const Theme* theme)  {
+  if(theme->isDarkTheme()){
     setIcon(QIcon(m_icons.value("light", NULL)));
   } else {
     setIcon(QIcon(m_icons.value("dark", NULL)));
