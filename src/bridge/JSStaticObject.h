@@ -9,7 +9,7 @@
 
 #include "JSObjectHelper.h"
 #include "core/JSHandler.h"
-#include "core/QObjectHelper.h"
+#include "core/QObjectUtil.h"
 #include "core/ObjectTemplateStore.h"
 #include "core/ObjectStore.h"
 #include "core/QVariantArgument.h"
@@ -18,7 +18,7 @@
 #include "core/V8Util.h"
 
 using core::Util;
-using core::QObjectHelper;
+using core::QObjectUtil;
 using core::ObjectTemplateStore;
 using core::JSHandler;
 using core::V8Util;
@@ -86,7 +86,7 @@ class JSStaticObject {
             variants[j] = QVariant(QMetaType::type(parameterTypes[j]), variants[j].data());
           }
 
-          QObject* newObj = QObjectHelper::singleton().newInstanceFromJS(metaObj, variants);
+          QObject* newObj = QObjectUtil::newInstanceFromJS(metaObj, variants);
           if (!newObj) {
             std::stringstream ss;
             ss << "invoking" << ctor.methodSignature().constData() << "failed";

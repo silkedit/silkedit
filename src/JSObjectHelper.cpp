@@ -1,4 +1,5 @@
 #include <sstream>
+#include <QMetaMethod>
 
 #include "JSObjectHelper.h"
 #include "Helper.h"
