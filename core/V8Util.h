@@ -20,6 +20,8 @@ class V8Util {
   ~V8Util() = delete;
 
  public:
+  static v8::Persistent<v8::String> hiddenQObjectKey;
+
   static QString toQString(v8::Local<v8::String> str) {
     return QString::fromUtf16(*v8::String::Value(str));
   }

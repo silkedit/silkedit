@@ -74,7 +74,7 @@ void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
     QObject::connect(obj, method, &Helper::singleton(), emitSignal, Qt::UniqueConnection);
   } else {
     std::stringstream ss;
-    ss << "parameter signature" << emitSignalSignature.constData() << "not supported";
+    ss << "parameter signature " << emitSignalSignature.constData() << " not supported";
     V8Util::throwError(isolate, ss.str());
     return;
   }

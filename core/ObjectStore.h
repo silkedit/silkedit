@@ -26,7 +26,7 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
 
   void wrapAndInsert(QObject* obj,
                      v8::Local<v8::Object> jsObj,
-                     v8::Isolate* isolate = v8::Isolate::GetCurrent());
+                     v8::Isolate* isolate);
   boost::optional<v8::Local<v8::Object>> find(QObject* obj,
                                               v8::Isolate* isolate = v8::Isolate::GetCurrent());
 

@@ -3,6 +3,7 @@
 #include <string>
 #include <tuple>
 #include <QObject>
+#include <QWidget>
 
 #include "core/CommandArgument.h"
 #include "core/macros.h"
@@ -69,7 +70,6 @@ class Helper : public QObject, public core::Singleton<Helper> {
 
   void init();
   void cleanup();
-  void sendFocusChangedEvent(const QString& viewType);
   void runCommand(const QString& cmd, const CommandArgument& cmdArgs);
   QString translate(const QString& key, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
@@ -94,4 +94,5 @@ public slots:
  private slots:
   void emitSignal();
   void emitSignal(const QString& arg);
+  void emitSignal(QWidget* old, QWidget* now);
 };

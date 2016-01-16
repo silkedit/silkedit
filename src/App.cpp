@@ -2,6 +2,7 @@
 #include <QTranslator>
 #include <QChildEvent>
 #include <QProcess>
+#include <QDebug>
 
 #include "App.h"
 #include "TabViewGroup.h"
@@ -9,7 +10,6 @@
 #include "TextEditView.h"
 #include "TabView.h"
 #include "Window.h"
-#include "Helper.h"
 #include "version.h"
 #include "SilkStyle.h"
 #include "core/ObjectStore.h"
@@ -82,9 +82,6 @@ App::App(int& argc, char** argv)
       if (TabView* tabView = findParent<TabView*>(editView)) {
         if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
           tabViewGroup->setActiveTab(tabView);
-
-          // send focusChangedEvent to silkedit_helper
-          Helper::singleton().sendFocusChangedEvent("TextEditView");
         } else {
           qDebug("unable to find the parent TabViewGroup");
         }

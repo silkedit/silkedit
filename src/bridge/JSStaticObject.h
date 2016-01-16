@@ -16,12 +16,16 @@
 #include "core/macros.h"
 #include "core/Util.h"
 #include "core/V8Util.h"
+#include "core/ConstructorStore.h"
+#include "core/ObjectStore.h"
 
 using core::Util;
 using core::QObjectUtil;
 using core::ObjectTemplateStore;
 using core::JSHandler;
 using core::V8Util;
+using core::ConstructorStore;
+using core::ObjectStore;
 
 namespace bridge {
 
@@ -31,27 +35,7 @@ class JSStaticObject {
   static v8::Local<v8::Function> Init(v8::Local<v8::Object> exports) {
     v8::Isolate* isolate = exports->GetIsolate();
     const QMetaObject& metaObj = QObjectSubClass::staticMetaObject;
-
-    // Prepare constructor template
-    v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, New);
-    tpl->SetClassName(v8::String::NewFromUtf8(isolate, metaObj.className()));
-    ObjectTemplateStore::initInstanceTemplate(tpl->InstanceTemplate(), &metaObj, isolate);
-
-    // register method and slots to prototype object
-    Util::processWithPublicMethods(&metaObj, [&](const QMetaMethod& method) {
-      NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), V8Util::invokeMethod);
-    });
-
-    v8::MaybeLocal<v8::Function> maybeFunc = tpl->GetFunction(isolate->GetCurrentContext());
-    if (maybeFunc.IsEmpty()) {
-      // This happens when /usr/local/lib/libnode.dylib is debug version
-      qCritical() << "Failed to GetFunction of FunctionTemplate";
-      return;
-    }
-    v8::Local<v8::Function> ctor = maybeFunc.ToLocalChecked();
-
-    addEnumsToFunction(metaObj, ctor, isolate);
-    JSHandler::inheritsQtEventEmitter(isolate, ctor);
+    auto ctor = ConstructorStore::singleton().getConstructor(&metaObj, isolate, New);
     constructor.Reset(isolate, ctor);
     exports->Set(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj.className())), ctor);
     return ctor;
@@ -65,6 +49,17 @@ class JSStaticObject {
 
     if (args.IsConstructCall()) {
       const QMetaObject& metaObj = QObjectSubClass::staticMetaObject;
+
+      // If this constructor is called from C++, existing C++ instance is passed as hidden value
+      v8::Local<v8::Value> wrappedObj =
+          args.Callee()->GetHiddenValue(V8Util::hiddenQObjectKey.Get(isolate));
+      if (!wrappedObj.IsEmpty() && wrappedObj->IsObject()) {
+        QObject* sourceObj = ObjectStore::unwrap(
+            wrappedObj->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
+        ObjectStore::singleton().wrapAndInsert(sourceObj, args.This(), isolate);
+        args.GetReturnValue().Set(args.This());
+        return;
+      }
 
       // convert args to QVariantList
       QVariantList variants;
@@ -94,7 +89,7 @@ class JSStaticObject {
             return;
           }
 
-          core::ObjectStore::singleton().wrapAndInsert(newObj, args.This(), isolate);
+          ObjectStore::singleton().wrapAndInsert(newObj, args.This(), isolate);
           args.GetReturnValue().Set(args.This());
           return;
         }
@@ -116,7 +111,10 @@ class JSStaticObject {
         argv[i] = args[i];
       }
       v8::Local<v8::Function> cons = v8::Local<v8::Function>::New(isolate, constructor);
-      args.GetReturnValue().Set(cons->NewInstance(qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS), argv));
+      args.GetReturnValue().Set(cons->NewInstance(isolate->GetCurrentContext(),
+                                                  qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS),
+                                                  argv)
+                                    .ToLocalChecked());
     }
   }
 
