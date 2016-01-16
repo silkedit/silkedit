@@ -461,8 +461,9 @@ void Cleanup(node::Environment* env) {
 
   V8::Dispose();
 
-  delete default_platform;
-  default_platform = nullptr;
+  // An error sometimes occurs here...
+//  delete default_platform;
+//  default_platform = nullptr;
 
     // This causes assertion error on Windows
 //  delete[] exec_argv;
