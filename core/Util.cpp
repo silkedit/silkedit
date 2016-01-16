@@ -119,8 +119,7 @@ void Util::processWithPublicMethods(const QMetaObject* metaObj,
   for (int i = 0; i < metaObj->methodCount(); i++) {
     const QMetaMethod& method = metaObj->method(i);
     if (method.access() == QMetaMethod::Access::Public &&
-        (method.methodType() == QMetaMethod::MethodType::Method ||
-         method.methodType() == QMetaMethod::MethodType::Slot) &&
+        method.methodType() != QMetaMethod::MethodType::Constructor &&
         !registeredMethods.contains(method.name())) {
       registeredMethods.insert(method.name());
       fn(method);
@@ -132,8 +131,7 @@ QByteArray Util::stripNamespace(const QByteArray& name) {
   return name.mid(name.lastIndexOf(":") + 1);
 }
 
-bool Util::matchTypes(QList<QByteArray> types, QVariantList args)
-{
+bool Util::matchTypes(QList<QByteArray> types, QVariantList args) {
   if (types.size() != args.size()) {
     return false;
   }
