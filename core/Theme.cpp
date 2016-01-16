@@ -170,7 +170,7 @@ Theme* Theme::loadTheme(const QString& filename) {
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
     foreach (const QVariant& var, settingList) {
-      // This is the base color In the following process,
+      // This is the base color in the following process,
       theme->scopeSettings.append(toScopeSetting(var));
     }
   }
