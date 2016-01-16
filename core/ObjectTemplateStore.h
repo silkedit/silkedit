@@ -26,7 +26,7 @@ class ObjectTemplateStore : public Singleton<ObjectTemplateStore> {
 
   v8::Local<v8::ObjectTemplate> getObjectTemplate(const QMetaObject* metaObj, v8::Isolate* isolate);
 
- private:
+private:
   static QHash<const QMetaObject*, QHash<QString, int>> s_classPropertiesHash;
   static void cacheProperties(const QMetaObject* metaObj);
   static void getterCallback(v8::Local<v8::String> property,
@@ -40,6 +40,8 @@ class ObjectTemplateStore : public Singleton<ObjectTemplateStore> {
 
   friend class Singleton<ObjectTemplateStore>;
   ObjectTemplateStore() = default;
+
+  void addObjectTemplate(v8::Local<v8::ObjectTemplate> objTempl, const QMetaObject* metaObj, v8::Isolate* isolate);
 };
 
 }  // namespace core

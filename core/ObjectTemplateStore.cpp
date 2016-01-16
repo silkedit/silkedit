@@ -6,6 +6,9 @@
 #include "V8Util.h"
 #include "QObjectUtil.h"
 #include "ObjectStore.h"
+#include "Util.h"
+
+using core::Util;
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -32,7 +35,9 @@ void ObjectTemplateStore::cacheProperties(const QMetaObject* metaObj) {
 
 v8::Local<v8::ObjectTemplate> ObjectTemplateStore::createObjectTemplate(const QMetaObject* metaObj,
                                                                         v8::Isolate* isolate) {
-  Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
+  v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate);
+  tpl->SetClassName(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj->className())));
+  Local<ObjectTemplate> objTempl = tpl->InstanceTemplate();
   initInstanceTemplate(objTempl, metaObj, isolate);
   return objTempl;
 }
@@ -48,6 +53,13 @@ void ObjectTemplateStore::initInstanceTemplate(Local<ObjectTemplate> objTempl,
   }
 }
 
+void ObjectTemplateStore::addObjectTemplate(Local<ObjectTemplate> objTempl, const QMetaObject* metaObj, v8::Isolate* isolate)
+{
+  UniquePersistent<ObjectTemplate> persistentTempl(isolate, objTempl);
+  auto pair = std::make_pair(metaObj, std::move(persistentTempl));
+  m_classObjectTemplateHash.insert(std::move(pair));
+}
+
 v8::Local<v8::ObjectTemplate> ObjectTemplateStore::getObjectTemplate(const QMetaObject* metaObj,
                                                                      v8::Isolate* isolate) {
   EscapableHandleScope handle_scope(isolate);
@@ -57,9 +69,7 @@ v8::Local<v8::ObjectTemplate> ObjectTemplateStore::getObjectTemplate(const QMeta
     Local<ObjectTemplate> objTempl = createObjectTemplate(metaObj, isolate);
 
     // cache object template
-    UniquePersistent<ObjectTemplate> persistentTempl(isolate, objTempl);
-    auto pair = std::make_pair(metaObj, std::move(persistentTempl));
-    m_classObjectTemplateHash.insert(std::move(pair));
+    addObjectTemplate(objTempl, metaObj, isolate);
     return handle_scope.Escape(objTempl);
   }
 }

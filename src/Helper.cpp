@@ -213,11 +213,6 @@ void Helper::cleanup() {
   silkedit_node::Cleanup(m_nodeBindings->uv_env());
 }
 
-void Helper::sendFocusChangedEvent(const QString& viewType) {
-  const QVariantList& args = QVariantList{QVariant::fromValue(viewType)};
-  d->callFunc("focusChanged", args);
-}
-
 void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
   const QVariantList& args = QVariantList{QVariant::fromValue(cmd), QVariant::fromValue(cmdArgs)};
   d->callFunc("runCommand", args);
@@ -299,6 +294,12 @@ Helper::Helper() : d(new HelperPrivate(this)), m_nodeBindings(NodeBindings::Crea
 void Helper::emitSignal(const QString& str) {
   qDebug() << "emitSignal(QString)";
   QVariantList args{QVariant::fromValue(str)};
+  emitSignalInternal(args);
+}
+
+void Helper::emitSignal(QWidget* old, QWidget* now) {
+  qDebug() << "emitSignal(QWidget *old, QWidget *now)";
+  QVariantList args{QVariant::fromValue(old), QVariant::fromValue(now)};
   emitSignalInternal(args);
 }
 

@@ -24,6 +24,7 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "FileDialog.h"
+#include "TextEditView.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -35,7 +36,8 @@
 #include "core/QVariantArgument.h"
 #include "core/Condition.h"
 #include "core/ConditionManager.h"
-#include "bridge/JSStaticObject.h"
+#include "core/ObjectStore.h"
+#include "JSStaticObject.h"
 
 using core::Config;
 using core::Constants;
@@ -46,6 +48,7 @@ using core::ConditionManager;
 using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
+using core::ObjectStore;
 
 using v8::Array;
 using v8::Boolean;
@@ -106,7 +109,8 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  Window::loadToolbar(V8Util::toQString(args[0]->ToString()), V8Util::toQString(args[1]->ToString()));
+  Window::loadToolbar(V8Util::toQString(args[0]->ToString()),
+                      V8Util::toQString(args[1]->ToString()));
 }
 
 /*
@@ -118,7 +122,8 @@ void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()), V8Util::toQString(args[1]->ToString()));
+  ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()),
+                               V8Util::toQString(args[1]->ToString()));
 }
 
 /*
@@ -207,7 +212,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // init singleton objects
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
   Util::stripNamespace(KeymapManager::staticMetaObject.className());
-  setSingletonObj(exports, App::instance(), Util::stripNamespace(App::staticMetaObject.className()));
+  setSingletonObj(exports, App::instance(),
+                  Util::stripNamespace(App::staticMetaObject.className()));
   setSingletonObj(exports, &Constants::singleton(),
                   Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &KeymapManager::singleton(),
@@ -218,7 +224,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
-  // Config::get returns config whose type is decided based on ConfigDefinition, so we need to handle it specially
+  // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
+  // handle it specially
   Config::Init(exports);
   // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
@@ -233,6 +240,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
   registerClass<MessageBox>(exports);
+  registerClass<TextEditView>(exports);
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);
 
@@ -242,7 +250,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
 template <typename T>
 void bridge::Handler::registerClass(v8::Local<v8::Object> exports) {
-  auto ctor = JSStaticObject<T>::Init(exports);
+  auto ctor = bridge::JSStaticObject<T>::Init(exports);
   registerStaticMethods(T::staticMetaObject, ctor);
 }
 
@@ -273,11 +281,13 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   }
 
   Local<Object> obj = maybeObj.ToLocalChecked();
-  obj->SetAlignedPointerInInternalField(0, sourceObj);
+  // associate QObject with JS object (This association is used when emitting a signal from
+  // singleton)
+  ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
 
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
-      metaObj, V8Util::invokeMethod, isolate, true));
+  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(metaObj, V8Util::invokeMethod,
+                                                                     isolate, true));
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);
