@@ -35,7 +35,7 @@ using v8::FunctionTemplate;
 
 namespace core {
 
-v8::Persistent<v8::String> V8Util::hiddenQObjectKey;
+v8::Persistent<v8::String> V8Util::s_hiddenQObjectKey;
 
 QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
     V8Util::s_classMethodCache;
@@ -49,6 +49,15 @@ Local<Object> toV8Object(Isolate* isolate, const CommandArgument args) {
   }
   return argsObj;
 }
+}
+
+v8::Local<v8::String> V8Util::hiddenQObjectKey(Isolate* isolate) {
+  if (s_hiddenQObjectKey.IsEmpty()) {
+    s_hiddenQObjectKey.Reset(
+        isolate,
+        String::NewFromUtf8(isolate, "sourceObj", v8::NewStringType::kNormal).ToLocalChecked());
+  }
+  return s_hiddenQObjectKey.Get(isolate);
 }
 
 QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
@@ -175,12 +184,7 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
     objTempl->SetInternalFieldCount(1);
     Local<Object> wrappedObj = objTempl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
     wrappedObj->SetAlignedPointerInInternalField(0, sourceObj);
-    if (hiddenQObjectKey.IsEmpty()) {
-      hiddenQObjectKey.Reset(
-          isolate,
-          String::NewFromUtf8(isolate, "sourceObj", v8::NewStringType::kNormal).ToLocalChecked());
-    }
-    Local<String> hiddenKey = hiddenQObjectKey.Get(isolate);
+    Local<String> hiddenKey = hiddenQObjectKey(isolate);
 
     // set sourceObj as hidden value to tell constructor set it as internal object
     ctor->SetHiddenValue(hiddenKey, wrappedObj);

@@ -20,7 +20,7 @@ class V8Util {
   ~V8Util() = delete;
 
  public:
-  static v8::Persistent<v8::String> hiddenQObjectKey;
+  static v8::Local<v8::String> hiddenQObjectKey(v8::Isolate *isolate);
 
   static QString toQString(v8::Local<v8::String> str) {
     return QString::fromUtf16(*v8::String::Value(str));
@@ -51,6 +51,7 @@ class V8Util {
   static void invokeMethod(const v8::FunctionCallbackInfo<v8::Value>& args);
 
  private:
+  static v8::Persistent<v8::String> s_hiddenQObjectKey;
   static QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> s_classMethodCache;
 
   static QVariant invokeMethodInternal(v8::Isolate* isolate,
