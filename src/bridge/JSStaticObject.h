@@ -52,7 +52,7 @@ class JSStaticObject {
 
       // If this constructor is called from C++, existing C++ instance is passed as hidden value
       v8::Local<v8::Value> wrappedObj =
-          args.Callee()->GetHiddenValue(V8Util::hiddenQObjectKey.Get(isolate));
+          args.Callee()->GetHiddenValue(V8Util::hiddenQObjectKey(isolate));
       if (!wrappedObj.IsEmpty() && wrappedObj->IsObject()) {
         QObject* sourceObj = ObjectStore::unwrap(
             wrappedObj->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
