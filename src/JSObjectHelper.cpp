@@ -19,10 +19,18 @@ namespace {
 QByteArray parameterTypeSignature(const QByteArray& methodSignature) {
   return methodSignature.mid(std::max(0, methodSignature.indexOf('(')));
 }
-
 }
 
 void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
+  connectOrDisconnect(args, true);
+}
+
+void JSObjectHelper::disconnect(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  connectOrDisconnect(args, false);
+}
+
+void JSObjectHelper::connectOrDisconnect(const v8::FunctionCallbackInfo<v8::Value>& args,
+                                         bool connect) {
   Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);
 
@@ -71,7 +79,11 @@ void JSObjectHelper::connect(const FunctionCallbackInfo<Value>& args) {
   const QMetaMethod& emitSignal =
       Helper::staticMetaObject.method(Helper::staticMetaObject.indexOfMethod(emitSignalSignature));
   if (emitSignal.isValid()) {
-    QObject::connect(obj, method, &Helper::singleton(), emitSignal, Qt::UniqueConnection);
+    if (connect) {
+      QObject::connect(obj, method, &Helper::singleton(), emitSignal, Qt::UniqueConnection);
+    } else {
+      QObject::disconnect(obj, method, &Helper::singleton(), emitSignal);
+    }
   } else {
     std::stringstream ss;
     ss << "parameter signature " << emitSignalSignature.constData() << " not supported";

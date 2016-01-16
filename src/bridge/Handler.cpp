@@ -181,6 +181,7 @@ void bridge::Handler::init(Local<Object> exports,
   JSHandler::init(jsHandlerObj);
 
   NODE_SET_METHOD(exports, "connect", JSObjectHelper::connect);
+  NODE_SET_METHOD(exports, "disconnect", JSObjectHelper::disconnect);
   NODE_SET_METHOD(exports, "lateInit", lateInit);
 
   // register enums in Qt namespace
