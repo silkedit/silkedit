@@ -51,7 +51,7 @@ bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
 
   TryCatch trycatch(m_isolate);
   MaybeLocal<Value> maybeResult =
-      isSatisfiedFn->Call(m_isolate->GetCurrentContext(), v8::Null(m_isolate), argc, argv);
+      isSatisfiedFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), argc, argv);
 
   if (trycatch.HasCaught()) {
     MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(m_isolate->GetCurrentContext());
@@ -96,7 +96,7 @@ QString PackageCondition::key() {
 
   TryCatch trycatch(m_isolate);
   MaybeLocal<Value> maybeResult =
-      keyFn->Call(m_isolate->GetCurrentContext(), v8::Null(m_isolate), 0, nullptr);
+      keyFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), 0, nullptr);
 
   if (trycatch.HasCaught()) {
     MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(m_isolate->GetCurrentContext());
