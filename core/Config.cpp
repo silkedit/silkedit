@@ -190,6 +190,11 @@ QVariant Config::get(const QString& key) {
     return m_scalarConfigs[key];
   }
 
+  // check default value for package config
+  if (m_packageConfigDefinitions.contains(key)) {
+    return m_packageConfigDefinitions.value(key).defaultValue;
+  }
+
   return QVariant();
 }
 
