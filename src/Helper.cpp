@@ -52,16 +52,6 @@ QStringList helperArgs() {
   return args;
 }
 
-CommandArgument toCommandArgument(QVariantMap map) {
-  CommandArgument arg;
-
-  for (const auto& key : map.keys()) {
-    arg.insert(
-        std::make_pair(key.toUtf8().constData(), map.value(key).toString().toUtf8().constData()));
-  }
-
-  return arg;
-}
 }
 
 HelperPrivate::~HelperPrivate() {
@@ -129,8 +119,6 @@ QVariant HelperPrivate::callFunc(const QString& funcName, QVariantList args) {
 
 void HelperPrivate::init() {
   TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
-  CommandManager::singleton().addEventFilter(std::bind(
-      &HelperPrivate::cmdEventFilter, this, std::placeholders::_1, std::placeholders::_2));
 
   startNodeEventLoop();
   connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, &Helper::singleton(),
@@ -138,19 +126,6 @@ void HelperPrivate::init() {
 }
 
 HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}
-
-CommandEventFilterResult HelperPrivate::cmdEventFilter(const std::string& name,
-                                                       const CommandArgument& arg) {
-  const QVariantList& args = QVariantList{QVariant::fromValue(name), QVariant::fromValue(arg)};
-
-  QVariantList varResults = callFunc<QVariantList>("cmdEventFilter", args, QVariantList());
-  if (varResults.size() == 3 && varResults[0].canConvert<bool>() &&
-      varResults[1].canConvert<QString>() && varResults[2].canConvert<QVariantMap>()) {
-    return std::make_tuple(varResults[0].toBool(), varResults[1].toString().toUtf8().constData(),
-                           toCommandArgument(varResults[2].value<QVariantMap>()));
-  }
-  return std::make_tuple(false, "", CommandArgument());
-}
 
 bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
   //  qDebug("keyEventFilter");
@@ -283,6 +258,11 @@ void Helper::quitApplication() {
   App::instance()->quit();
 }
 
+node::Environment *Helper::uvEnv()
+{
+  return m_nodeBindings->uv_env();
+}
+
 void Helper::uvRunOnce() {
   m_nodeBindings->UvRunOnce();
 }
@@ -311,8 +291,8 @@ T HelperPrivate::callFunc(const QString& funcName, QVariantList args, T defaultV
     return defaultValue;
   }
   v8::Locker locker(env->isolate());
-  v8::HandleScope handle_scope(env->isolate());
   v8::Context::Scope context_scope(env->context());
+  v8::HandleScope handle_scope(env->isolate());
 
   return JSHandler::callFunc(env->isolate(), funcName, args, defaultValue);
 }

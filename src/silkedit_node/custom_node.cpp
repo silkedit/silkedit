@@ -461,13 +461,12 @@ void Cleanup(node::Environment* env) {
 
   V8::Dispose();
 
-  // An error sometimes occurs here...
-//  delete default_platform;
-//  default_platform = nullptr;
+  delete default_platform;
+  default_platform = nullptr;
 
     // This causes assertion error on Windows
 //  delete[] exec_argv;
-//  exec_argv = nullptr;
+  //  exec_argv = nullptr;
 }
 
 }  // namespace silkedit_node

@@ -20,7 +20,6 @@ class HelperPrivate : public QObject, public core::IKeyEventFilter {
 
   // IKeyEventFilter interface
   bool keyEventFilter(QKeyEvent* event) override;
-  CommandEventFilterResult cmdEventFilter(const std::string& name, const CommandArgument& arg);
   void startNodeEventLoop();
   void startNodeInstance(void* arg);
   void quitApplication();
