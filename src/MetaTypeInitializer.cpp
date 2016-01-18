@@ -7,6 +7,7 @@
 #include "TextEditView.h"
 #include "core/qdeclare_metatype.h"
 #include "core/Condition.h"
+#include "core/FunctionInfo.h"
 
 void MetaTypeInitializer::init()
 {
@@ -22,5 +23,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QPushButton*>();
   qRegisterMetaType<QLayout*>();
   qRegisterMetaType<core::Condition::Operator>();
+  qRegisterMetaType<core::FunctionInfo>("FunctionInfo");
+  qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
 }
 

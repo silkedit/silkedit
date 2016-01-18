@@ -3,9 +3,9 @@
 #include <QMetaMethod>
 #include <QCoreApplication>
 #include <QThread>
+#include <QDebug>
 
 #include "V8Util.h"
-#include "CommandArgument.h"
 #include "ObjectStore.h"
 #include "ObjectTemplateStore.h"
 #include "PrototypeStore.h"
@@ -13,6 +13,7 @@
 #include "QVariantArgument.h"
 #include "qdeclare_metatype.h"
 #include "ConstructorStore.h"
+#include "FunctionInfo.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -39,17 +40,6 @@ v8::Persistent<v8::String> V8Util::s_hiddenQObjectKey;
 
 QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
     V8Util::s_classMethodCache;
-
-namespace {
-Local<Object> toV8Object(Isolate* isolate, const CommandArgument args) {
-  Local<Object> argsObj = Object::New(isolate);
-  for (const auto& pair : args) {
-    argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
-                 String::NewFromUtf8(isolate, pair.second.c_str()));
-  }
-  return argsObj;
-}
-}
 
 v8::Local<v8::String> V8Util::hiddenQObjectKey(Isolate* isolate) {
   if (s_hiddenQObjectKey.IsEmpty()) {
@@ -80,8 +70,9 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
       list.append(toVariant(isolate, arr->Get(i)));
     }
     return QVariant::fromValue(list);
+  } else if (value->IsFunction()) {
+    return QVariant::fromValue(FunctionInfo{isolate, Local<Function>::Cast(value)});
   } else if (value->IsObject()) {
-    QVariantMap map;
     Local<Object> obj = value->ToObject();
 
     if (obj->InternalFieldCount() > 0) {
@@ -93,32 +84,7 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
         return QVariant();
       }
     } else {
-      Local<Array> keys = obj->GetOwnPropertyNames();
-      for (uint32_t i = 0; i < keys->Length(); i++) {
-        MaybeLocal<Value> maybeKey = keys->Get(isolate->GetCurrentContext(), i);
-        if (maybeKey.IsEmpty()) {
-          qWarning() << "key is empty";
-          continue;
-        }
-        Local<Value> key = maybeKey.ToLocalChecked();
-        if (!key->IsString()) {
-          qWarning() << "key is not string";
-          continue;
-        }
-        MaybeLocal<Value> maybeValue = obj->Get(isolate->GetCurrentContext(), key->ToString());
-        if (maybeValue.IsEmpty()) {
-          qWarning() << "value is empty";
-          continue;
-        }
-
-        Local<Value> value = maybeValue.ToLocalChecked();
-        if (!key->IsString()) {
-          qWarning() << "value is not string";
-          continue;
-        }
-        map.insert(toQString(key->ToString()), toVariant(isolate, value));
-      }
-      return QVariant::fromValue(map);
+      return toVariantMap(isolate, obj);
     }
   } else {
     qWarning() << "can't convert to QVariant";
@@ -170,12 +136,21 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
   }
 }
 
+v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgument args) {
+  Local<Object> argsObj = Object::New(isolate);
+  for (const auto& pair : args) {
+    argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
+                 String::NewFromUtf8(isolate, pair.second.c_str()));
+  }
+  return argsObj;
+}
+
 v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourceObj) {
   if (!sourceObj) {
     return v8::Null(isolate);
   }
 
-  if (const auto& maybeExistingObj = ObjectStore::singleton().find(sourceObj)) {
+  if (const auto& maybeExistingObj = ObjectStore::singleton().find(sourceObj, isolate)) {
     return *maybeExistingObj;
   } else {
     const QMetaObject* metaObj = sourceObj->metaObject();
@@ -208,6 +183,36 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
     ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
     return obj;
   }
+}
+
+QVariantMap V8Util::toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj) {
+  QVariantMap map;
+  Local<Array> keys = obj->GetOwnPropertyNames();
+  for (uint32_t i = 0; i < keys->Length(); i++) {
+    MaybeLocal<Value> maybeKey = keys->Get(isolate->GetCurrentContext(), i);
+    if (maybeKey.IsEmpty()) {
+      qWarning() << "key is empty";
+      continue;
+    }
+    Local<Value> key = maybeKey.ToLocalChecked();
+    if (!key->IsString()) {
+      qWarning() << "key is not string";
+      continue;
+    }
+    MaybeLocal<Value> maybeValue = obj->Get(isolate->GetCurrentContext(), key->ToString());
+    if (maybeValue.IsEmpty()) {
+      qWarning() << "value is empty";
+      continue;
+    }
+
+    Local<Value> value = maybeValue.ToLocalChecked();
+    if (!key->IsString()) {
+      qWarning() << "value is not string";
+      continue;
+    }
+    map.insert(toQString(key->ToString()), toVariant(isolate, value));
+  }
+  return map;
 }
 
 // todo: replace all isolate->ThrowException code with this

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <v8.h>
 #include <vector>
 #include <string>
 #include <tuple>
@@ -13,6 +14,7 @@
 #include "core/macros.h"
 #include "core/stlSpecialization.h"
 #include "core/Singleton.h"
+#include "core/FunctionInfo.h"
 
 class CommandManager : public QObject, public core::Singleton<CommandManager> {
   Q_OBJECT
@@ -26,16 +28,18 @@ class CommandManager : public QObject, public core::Singleton<CommandManager> {
   ~CommandManager() = default;
 
   QString cmdDescription(const QString& name);
-  void runCommand(const QString& name,
-                  const CommandArgument& args = CommandArgument(),
+  void runCommand(QString cmdName,
+                  CommandArgument cmdArgs = CommandArgument(),
                   int repeat = 1);
   void add(std::unique_ptr<ICommand> cmd);
-  void addEventFilter(CmdEventHandler handler);
   const std::unordered_map<QString, std::unique_ptr<ICommand>>& commands() { return m_commands; }
 
 public slots:
   void add(const QString& name, const QString& description);
   void remove(const QString& name);
+
+  // private (only used in initialization in JS side)
+  void _assignJSCommandEventFilter(core::FunctionInfo info);
 
  signals:
   void commandRemoved(const QString& name);
@@ -48,5 +52,7 @@ public slots:
   // so use an unordered_map here instead
   std::unordered_map<QString, std::unique_ptr<ICommand>> m_commands;
 
-  std::vector<CmdEventHandler> m_cmdEventFilters;
+  v8::UniquePersistent<v8::Function> m_jsCmdEventFilter;
+
+  bool runCommandEventFilter(QString &cmdName, CommandArgument &cmdArg);
 };

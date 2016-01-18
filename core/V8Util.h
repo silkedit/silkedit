@@ -7,6 +7,7 @@
 #include <QCache>
 #include <QMultiHash>
 
+#include "CommandArgument.h"
 #include "macros.h"
 
 namespace core {
@@ -20,7 +21,7 @@ class V8Util {
   ~V8Util() = delete;
 
  public:
-  static v8::Local<v8::String> hiddenQObjectKey(v8::Isolate *isolate);
+  static v8::Local<v8::String> hiddenQObjectKey(v8::Isolate* isolate);
 
   static QString toQString(v8::Local<v8::String> str) {
     return QString::fromUtf16(*v8::String::Value(str));
@@ -43,7 +44,11 @@ class V8Util {
 
   static v8::Local<v8::Value> toV8Value(v8::Isolate* isolate, const QVariant& var);
 
+  static v8::Local<v8::Object> toV8Object(v8::Isolate* isolate, const CommandArgument args);
+
   static v8::Local<v8::Value> toV8ObjectFrom(v8::Isolate* isolate, QObject* sourceObj);
+
+  static QVariantMap toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 
   static void throwError(v8::Isolate* isolate, const std::string& msg);
   static void throwError(v8::Isolate* isolate, const char* msg);

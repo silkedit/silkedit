@@ -17,6 +17,10 @@ namespace atom {
 class NodeBindings;
 }
 
+namespace node {
+class Environment;
+}
+
 typedef std::tuple<bool, std::string, CommandArgument> CommandEventFilterResult;
 
 Q_DECLARE_METATYPE(CommandEventFilterResult)
@@ -77,6 +81,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
   void reloadKeymaps();
   void quitApplication();
+  node::Environment* uvEnv();
 
 public slots:
   void uvRunOnce();
