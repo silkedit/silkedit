@@ -194,9 +194,6 @@ if(APPLE)
   # run install_name_tool to update the path to libnode.dylib
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
 
-  # copy node executable
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_BINARY_DIR}/node/node ${PROJECT_NAME}.app/Contents/MacOS)
-
   # Use special icon for edge build
   if (BUILD_EDGE)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_SOURCE_DIR}/resources/silkedit_edge.icns ${PROJECT_NAME}.app/Contents/Resources/silkedit.icns)
@@ -228,6 +225,17 @@ elseif (MSVC)
 
   # bundle JS libraries
   file(COPY ${PROJECT_SOURCE_DIR}/jslib DESTINATION .)
+
+  # copy npm
+  file(COPY
+     ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
+     DESTINATION npm/bin)
+
+  file(COPY
+     ${PROJECT_SOURCE_DIR}/npm/lib
+     ${PROJECT_SOURCE_DIR}/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/npm/package.json
+     DESTINATION npm)
 
   # Copy onig.dll
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
