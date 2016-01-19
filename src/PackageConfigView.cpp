@@ -65,7 +65,7 @@ PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) 
 
 ConfigCheckBox::ConfigCheckBox(const core::ConfigDefinition& def, QWidget* parent)
     : QCheckBox(def.title, parent) {
-  setChecked(Config::singleton().value(def.key, def.defaultValue.toBool()));
+  setChecked(Config::singleton().get(def.key, def.defaultValue.toBool()));
   setToolTip(def.description);
   connect(this, &QCheckBox::toggled, this,
           [=](bool checked) { Config::singleton().setValue(def.key, checked); });
@@ -73,7 +73,7 @@ ConfigCheckBox::ConfigCheckBox(const core::ConfigDefinition& def, QWidget* paren
 
 ConfigLineEdit::ConfigLineEdit(const core::ConfigDefinition& def, QWidget* parent)
     : QLineEdit(parent) {
-  setText(Config::singleton().value(def.key, def.defaultValue.toString()));
+  setText(Config::singleton().get(def.key, def.defaultValue.toString()));
   setToolTip(def.description);
   connect(this, &ConfigLineEdit::textEdited, this,
           [=](const QString& text) { Config::singleton().setValue(def.key, text); });
@@ -81,7 +81,7 @@ ConfigLineEdit::ConfigLineEdit(const core::ConfigDefinition& def, QWidget* paren
 
 ConfigSpinBox::ConfigSpinBox(const core::ConfigDefinition& def, QWidget* parent)
     : QSpinBox(parent) {
-  setValue(Config::singleton().value(def.key, def.defaultValue.toInt()));
+  setValue(Config::singleton().get(def.key, def.defaultValue.toInt()));
   setToolTip(def.description);
   connect(this, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
           [=](int value) { Config::singleton().setValue(def.key, value); });
@@ -89,7 +89,7 @@ ConfigSpinBox::ConfigSpinBox(const core::ConfigDefinition& def, QWidget* parent)
 
 ConfigDoubleSpinBox::ConfigDoubleSpinBox(const core::ConfigDefinition& def, QWidget* parent)
     : QDoubleSpinBox(parent) {
-  setValue(Config::singleton().value(def.key, def.defaultValue.toDouble()));
+  setValue(Config::singleton().get(def.key, def.defaultValue.toDouble()));
   setToolTip(def.description);
   connect(this, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
           [=](double value) { Config::singleton().setValue(def.key, value); });

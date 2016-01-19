@@ -6,15 +6,15 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
-#include "core/ThemeProvider.h"
+#include "core/ThemeManager.h"
 #include "core/Config.h"
-#include "SilkApp.h"
-#include "commands/PluginCommand.h"
+#include "App.h"
+#include "commands/PackageCommand.h"
 #include "CommandManager.h"
 #include "version.h"
 #include "ConfigDialog.h"
 
-using core::ThemeProvider;
+using core::ThemeManager;
 using core::Theme;
 using core::Config;
 
@@ -49,7 +49,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   themeMenu->setObjectName("theme");
   viewMenu->addMenu(themeMenu);
   QActionGroup* themeActionGroup = new QActionGroup(themeMenu);
-  for (const QString& name : ThemeProvider::sortedThemeNames()) {
+  for (const QString& name : ThemeManager::sortedThemeNames()) {
     ThemeAction* themeAction = new ThemeAction(name, themeMenu);
     themeMenu->addAction(themeAction);
     themeActionGroup->addAction(themeAction);
@@ -99,13 +99,13 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
 
 void MenuBar::themeActionTriggered(QAction* action) {
   qDebug("themeSelected: %s", qPrintable(action->text()));
-  Theme* theme = ThemeProvider::theme(action->text());
+  Theme* theme = ThemeManager::theme(action->text());
   Config::singleton().setTheme(theme);
 }
 
 void MenuBar::showAboutDialog() {
-  QMessageBox::about(this, SilkApp::applicationName(), tr("version") + " " +
-                                                           SilkApp::applicationVersion() + " (" +
+  QMessageBox::about(this, App::applicationName(), tr("version") + " " +
+                                                           App::applicationVersion() + " (" +
                                                            tr("build") + ": " + BUILD + ")");
 }
 

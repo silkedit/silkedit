@@ -1,5 +1,9 @@
 set(MODULE_NAME ${PROJECT_NAME}_core)
 
+include_directories(SYSTEM
+  ${PROJECT_SOURCE_DIR}
+)
+
 file(GLOB SILK_CORE_SOURCES *.cpp)
 file(GLOB SILK_CORE_HEADERS *.h)
 add_library(${MODULE_NAME} STATIC ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
@@ -8,8 +12,8 @@ if (APPLE)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
   find_library(UCHARDET_LIBRARY NAMES libuchardet.a PATHS /usr/local/lib)
   find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
-  target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ${ONIG_LIBRARY} ${UCHARDET_LIBRARY} ${YAML_CPP_LIBRARY})
-else (APPLE)
+  target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ${ONIG_LIBRARY} ${UCHARDET_LIBRARY} ${YAML_CPP_LIBRARY} ${NODE_LIBRARY})
+elseif (MSVC)
   add_library(YAML_CPP_LIBRARY STATIC IMPORTED)
   set_property(TARGET YAML_CPP_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/libyaml-cppmd.lib)
   set_property(TARGET YAML_CPP_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/libyaml-cppmdd.lib)
@@ -22,6 +26,6 @@ else (APPLE)
   set_target_properties(ONIG_LIBRARY PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/Onigmo)
   set_property(TARGET ONIG_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/onig.dll)
   set_property(TARGET ONIG_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/lib/onig.lib)
-  target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ONIG_LIBRARY UCHARDET_LIBRARY YAML_CPP_LIBRARY)
-endif (APPLE)
+  target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ONIG_LIBRARY UCHARDET_LIBRARY YAML_CPP_LIBRARY NODE_LIBRARY)
+endif ()
 

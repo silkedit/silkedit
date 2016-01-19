@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Constants
+
+NODE_VERSION=v5.1.1
+
 if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
@@ -64,7 +68,7 @@ ensure_dir() {
 
 clean() {
     # Somehow git clean fails to remove these directories, so remove them manually
-    rm -rf build plugin_runner/bin
+    rm -rf build helper/bin
 
     # clean submodules
     git submodule foreach git reset --hard HEAD
@@ -77,18 +81,11 @@ clean() {
 # resolve dependency
 resolve() {
     # Update submodules
-    # Currently git submodule is disabled by default because it takes long time
-    if [ "$1" = '-submodule' ]; then
-      git submodule sync
-      git submodule update --init
-    fi
+    git submodule sync
+    git submodule update --init
 
     # vim package
-    if [ ! -d packages/vim ]; then
-      npm i https://api.github.com/repos/silkedit/vim/tarball/0.1.2
-      mv node_modules/vim packages
-      rm -rf node_modules
-    fi
+    npm install --prefix packages https://github.com/silkedit/vim/tarball/0.1.5
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
@@ -115,34 +112,24 @@ resolve() {
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
         echo 'Building Breakpad client ...'
-        
+
         cd breakpad
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Debug
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
         cd ..
       fi
 
-      # node
-      if [ ! -d plugin_runner/bin ]; then
-        node=node-v0.12.0-darwin-x64
-        echo "Downloading $node"
-        curl -O http://nodejs.org/dist/v0.12.0/$node.tar.gz
-        tar zxf $node.tar.gz
-        # -R keeps symlink intact
-        cp -R $node/bin $node/lib plugin_runner
-        rm -rf $node $node.tar.gz
-      fi
+			# build libnode.dylib
+			cd vendor/node
+			# Build Release version
+			./configure --enable-shared
+			make -j8
+      # Build Debug version
+			./configure --debug --enable-shared
+			make -j8
+			mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
+			cd ../..
 
-      # npm install for plugin runner
-      cd plugin_runner
-      PATH=$(pwd)/bin:$PATH
-      bin/npm install
-      cd ..
-
-      # npm install for silkedit package
-      cd packages/silkedit
-      ../../plugin_runner/bin/npm install
-      cd ../..
     else
         # yaml-cpp
         if [ ! -f lib/libyaml-cppmd.lib ]; then
@@ -173,22 +160,12 @@ resolve() {
             rm yaml-cpp-*.tar.gz
         fi
 
-        # node
-        if [ ! -d plugin_runner/bin ]; then
-            cp -r "C:\Program Files\nodejs" plugin_runner
-            cd plugin_runner
-            mv nodejs bin
-            cd ..
-        fi
-
-        # npm install for plugin runner
-        cd plugin_runner
-        node bin/node_modules/npm/bin/npm-cli.js install
-        cd ..
-
-        # npm install for silkedit package
-        cd packages/silkedit
-        node ../../plugin_runner/bin/node_modules/npm/bin/npm-cli.js install --msvs_version=2013
+  			# build node.dll
+        cd vendor/node
+        # Build Release version
+        ./vcbuild.bat nosign shared ${ARCH}
+        # Build Debug version
+        ./vcbuild.bat nosign shared debug ${ARCH}
         cd ../..
 
         # uchardet
@@ -228,7 +205,7 @@ resolve() {
 
 			/c/tools/python2/Scripts/gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
 
-			# //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
+      # //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
             mkdir -p ../lib/breakpad/Debug
 			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
 			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
@@ -260,12 +237,20 @@ resolve() {
 			cd ..
 		fi
     fi
+
+    # npm install for silkedit package
+    cd jslib/node_modules/silkedit
+    npm install --production
+    cd ../../..
+
+    # npm install for default packages
+    cd packages/node_modules
+    npm install --production
+    cd ../..
 }
 
 # release build
 build() {
-    resolve
-
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
         ensure_dir build
@@ -275,8 +260,6 @@ build() {
 
 
     if [ $OS == 'Mac' ]; then
-
-
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
         else
@@ -284,20 +267,19 @@ build() {
         fi
 
         ninja
-        
-		# crashreporter
+
+        # crashreporter
+        # todo: do these in cmake
         cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
         cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else
-
-
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
         fi
 
-		# crashreporter
+        # crashreporter
         cp crashreporter/crashreporter.exe .
         cp crashreporter/crashreporter_*.qm .
     fi
@@ -336,9 +318,9 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll packages plugin_runner silkedit_ja.qm Release
-        rm -rf silkedit.exe onig.dll packages plugin_runner
-		#crashreporter
+        cp -r silkedit.exe onig.dll node_modules helper silkedit_ja.qm Release
+        rm -rf silkedit.exe onig.dll node_modules helper
+        #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
 
@@ -392,8 +374,6 @@ analyze() {
 }
 
 run_tests() {
-    resolve
-
     ensure_dir build
     cd build
     if [ $OS == 'Mac' ]; then
@@ -434,8 +414,8 @@ set_build() {
 
 localize() {
     lupdate src core -ts translations/silkedit_ja.ts
-	#CrashReporter
-	lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
+    #CrashReporter
+    lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
 
 send_symbol() {
@@ -516,7 +496,7 @@ format         format sources
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer
 rebuild        build from scratch (-edge: Edge build)
-resolve        resolve dependency (-submodule: update submodules)
+resolve        resolve dependency
 test           run tests
 set_version    set version number
 set_build      set build number

@@ -11,6 +11,7 @@ class Singleton {
   DISABLE_COPY_AND_MOVE(Singleton)
  public:
   virtual ~Singleton() = default;
+  // todo: rename instance
   static T& singleton() {
     static typename T::singleton_pointer_type s_singleton(T::createInstance());
     return getReference(s_singleton);

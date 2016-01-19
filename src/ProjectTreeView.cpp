@@ -108,7 +108,7 @@ void ProjectTreeView::open(QModelIndex index) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   if (filter && m_model) {
     QString filePath = m_model->filePath(filter->mapToSource(index));
-    DocumentManager::open(filePath);
+    DocumentManager::singleton().open(filePath);
   }
 }
 
@@ -230,6 +230,7 @@ ProjectTreeView::~ProjectTreeView() {
 // Show only specific directory content
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
   QModelIndex pathIndex = sourceModel()->index(sourceRow, 0, sourceParent);
-  QString path = sourceModel()->data(pathIndex, QFileSystemModel::FilePathRole).toString();
+  // Without trailing /, can't distinguish hoge from hoge2
+  QString path = sourceModel()->data(pathIndex, QFileSystemModel::FilePathRole).toString() + "/";
   return dir.startsWith(path, Qt::CaseInsensitive) || path.startsWith(dir, Qt::CaseInsensitive);
 }

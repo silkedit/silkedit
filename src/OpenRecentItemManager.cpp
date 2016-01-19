@@ -2,7 +2,7 @@
 
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
-#include "SilkApp.h"
+#include "App.h"
 #include "TabView.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
@@ -23,7 +23,7 @@ void OpenRecentItemManager::clear() {
 
 void OpenRecentItemManager::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
-    auto tabView = SilkApp::activeTabView();
+    auto tabView = App::instance()->activeTabView();
     if (tabView->indexOfPath(path) < 0) {
       tabView->open(path);
       return;
@@ -69,7 +69,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
-  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
 
   int size = recentOpenHistory.beginReadArray(PREFIX);
   for (int i = 0; i < size; i++) {
@@ -96,7 +96,7 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
-  QSettings recentOpenHistory(Constants::recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
   
   recentOpenHistory.clear();
 
@@ -123,7 +123,7 @@ void OpenRecentItemManager::updateOpenRecentItems() {
 OpenRecentAction::OpenRecentAction(QObject* parent) : QAction(parent) {
   QObject::connect(this, &QAction::triggered, [this]() {
     if (data().isValid()) {
-      DocumentManager::open(data().toString());
+      DocumentManager::singleton().open(data().toString());
     }
   });
 }

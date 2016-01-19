@@ -4,7 +4,7 @@
 #include "KeymapConfigView.h"
 #include "ui_KeymapConfigView.h"
 #include "KeymapManager.h"
-#include "PluginManager.h"
+#include "Helper.h"
 #include "DocumentManager.h"
 #include "Window.h"
 #include "core/Constants.h"
@@ -17,7 +17,7 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
 
   connect(ui->filterLine, &QLineEdit::textEdited, ui->keymapTable, &KeymapTableView::setFilterText);
   connect(ui->openKeymapFileButton, &QPushButton::clicked, this, [=] {
-    QFile keymapFile(Constants::userKeymapPath());
+    QFile keymapFile(Constants::singleton().userKeymapPath());
     if (!keymapFile.exists()) {
       if (keymapFile.open(QFile::WriteOnly | QIODevice::Text)) {
         QString defaultContent(R"(
@@ -32,7 +32,7 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
       }
     }
     Window::showFirst();
-    DocumentManager::open(Constants::userKeymapPath());
+    DocumentManager::singleton().open(Constants::singleton().userKeymapPath());
   });
 
   setLayout(ui->rootLayout);

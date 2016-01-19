@@ -5,17 +5,17 @@
 #include <QString>
 #include <QHash>
 
-#include "ICondition.h"
+#include "Condition.h"
 #include "stlSpecialization.h"
 
 namespace core {
 
 struct ConditionExpression {
   QString m_key;
-  core::Operator m_op;
+  core::Condition::Operator m_op;
   QString m_value;
 
-  ConditionExpression(const QString& key, core::Operator op, const QString& value);
+  ConditionExpression(const QString& key, core::Condition::Operator op, const QString& value);
   bool isSatisfied() const;
   QString toString() const;
 

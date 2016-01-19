@@ -7,7 +7,6 @@
 
 #include "Window.h"
 #include "ui_Window.h"
-#include "API.h"
 #include "TabViewGroup.h"
 #include "TextEditView.h"
 #include "StatusBar.h"
@@ -18,10 +17,10 @@
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "util/YamlUtils.h"
-#include "PluginManager.h"
+#include "Helper.h"
 #include "PlatformUtil.h"
 
-QMap<QString, std::string> Window::s_toolbarsDefinitions;
+QMap<QString, QString> Window::s_toolbarsDefinitions;
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -72,8 +71,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
 
-void Window::loadToolbar(const QString& pkgName, const std::string& ymlPath) {
-  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), ymlPath.c_str());
+void Window::loadToolbar(const QString& pkgName, const QString& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), qPrintable(ymlPath));
   foreach (Window* win, s_windows) { loadToolbar(win, pkgName, ymlPath); }
 }
 
@@ -141,10 +140,10 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   return w;
 }
 
-void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
-  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), ymlPath.c_str());
+void Window::loadMenu(const QString& pkgName, const QString& ymlPath) {
+  qDebug("Start loading. pkg: %s, path: %s", qPrintable(pkgName), qPrintable(ymlPath));
   try {
-    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());
     if (!rootNode.IsMap()) {
       qWarning("root node must be a map");
       return;
@@ -161,14 +160,14 @@ void Window::loadMenu(const QString& pkgName, const std::string& ymlPath) {
     }
 #endif
   } catch (const YAML::ParserException& ex) {
-    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+    qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
   }
 }
 
 // todo: remove yaml-cpp dependency in Window class
-void Window::loadToolbar(Window* win, const QString& pkgName, const std::string& ymlPath) {
+void Window::loadToolbar(Window* win, const QString& pkgName, const QString& ymlPath) {
   try {
-    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());
     if (!rootNode.IsMap()) {
       qWarning("root node must be a map");
       return;
@@ -179,7 +178,7 @@ void Window::loadToolbar(Window* win, const QString& pkgName, const std::string&
     YAML::Node toolbarsNode = rootNode["toolbar"];
     YamlUtils::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);
   } catch (const YAML::ParserException& ex) {
-    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+    qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
   }
 }
 
@@ -257,24 +256,4 @@ void Window::hideFindReplacePanel() {
 
 QToolBar* Window::findToolbar(const QString& id) {
   return findChild<QToolBar*>(id);
-}
-
-void Window::request(Window* window,
-                     const QString& method,
-                     msgpack::rpc::msgid_t msgId,
-                     const msgpack::object&) {
-  if (method == "statusBar") {
-    PluginManager::singleton().sendResponse(window->statusBar()->id(), msgpack::type::nil(), msgId);
-  } else {
-    qWarning("%s is not supported", qPrintable(method));
-    PluginManager::singleton().sendResponse(msgpack::type::nil(), msgpack::type::nil(), msgId);
-  }
-}
-
-void Window::notify(Window* window, const QString& method, const msgpack::object&) {
-  if (method == "close") {
-    window->close();
-  } else if (method == "openFindPanel") {
-    window->openFindAndReplacePanel();
-  }
 }

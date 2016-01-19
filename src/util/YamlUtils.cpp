@@ -9,13 +9,13 @@
 #include "YamlUtils.h"
 #include "core/ConditionExpression.h"
 #include "CommandAction.h"
-#include "PluginManager.h"
+#include "Helper.h"
 #include "Window.h"
 #include "core/PackageToolBar.h"
 #include "core/PackageMenu.h"
 #include "core/PackageAction.h"
 
-using core::Operator;
+using core::Condition;
 using core::PackageMenu;
 using core::PackageAction;
 using core::PackageToolBar;
@@ -60,11 +60,11 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
 
   QString key;
-  Operator op;
+  Condition::Operator op;
   QString value;
   if (list.size() == 1) {
     key = list[0];
-    op = Operator::EQUALS;
+    op = Condition::Operator::EQUALS;
     value = "true";
   } else if (list.size() == 3) {
     key = list[0];
@@ -72,9 +72,9 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
     // Parse operator expression
     QString opStr = list[1];
     if (opStr == "==") {
-      op = Operator::EQUALS;
+      op = Condition::Operator::EQUALS;
     } else if (opStr == "!=") {
-      op = Operator::NOT_EQUALS;
+      op = Condition::Operator::NOT_EQUALS;
     } else {
       qWarning("%s is not supported", qPrintable(opStr));
       return boost::none;
@@ -145,7 +145,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
                      : "";
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = PluginManager::singleton().translate(
+      label = Helper::singleton().translate(
           QString("%1:menu.%2.label")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -236,7 +236,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
 }
 
 void YamlUtils::parseToolbarNode(const QString& pkgName,
-                                 const std::string& ymlPath,
+                                 const QString& ymlPath,
                                  QWidget* parent,
                                  const YAML::Node& toolbarNode) {
   if (!toolbarNode.IsSequence()) {
@@ -279,7 +279,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
                      : "";
     QString label = defaultLabel;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = PluginManager::singleton().translate(
+      label = Helper::singleton().translate(
           QString("%1:toolbar.%2.label")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -319,12 +319,12 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         QString iconPath = QString::fromUtf8(iconNode.as<std::string>().c_str());
         if (!iconPath.startsWith('/')) {
-          iconPath = QFileInfo(QString::fromUtf8(ymlPath.c_str())).dir().absoluteFilePath(iconPath);
+          iconPath = QFileInfo(ymlPath).dir().absoluteFilePath(iconPath);
         }
         action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
-          tooltip = PluginManager::singleton().translate(
+          tooltip = Helper::singleton().translate(
               QString("%1:toolbar.%2.tooltip")
                   .arg(pkgName)
                   .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
@@ -364,10 +364,10 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
   }
 }
 
-QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std::string& ymlPath) {
+QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const QString& ymlPath) {
   QList<ConfigDefinition> defs;
   try {
-    YAML::Node rootNode = YAML::LoadFile(ymlPath);
+    YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());
     if (!rootNode.IsMap()) {
       qWarning("root node must be a map");
       return QList<ConfigDefinition>();
@@ -389,13 +389,13 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std
         }
 
         QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
-        title = PluginManager::singleton().translate(
+        title = Helper::singleton().translate(
             QString("%1:config.%2.title").arg(pkgName).arg(configName), title);
         QString description;
         // description is optional
         if (defNode["description"].IsScalar()) {
           description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
-          description = PluginManager::singleton().translate(
+          description = Helper::singleton().translate(
               QString("%1:config.%2.description").arg(pkgName).arg(configName), description);
         }
         QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());
@@ -431,12 +431,12 @@ QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const std
           qWarning("invalid tyep: %s", qPrintable(type));
           continue;
         }
-        assert(defaultValue.isValid());
+        Q_ASSERT(defaultValue.isValid());
         defs.append(ConfigDefinition{pkgName + "." + configName, title, description, defaultValue});
       }
     }
   } catch (const std::runtime_error& ex) {
-    qWarning("Unable to load %s. Cause: %s", ymlPath.c_str(), ex.what());
+    qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
   }
 
   return defs;

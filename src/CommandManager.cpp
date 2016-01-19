@@ -1,7 +1,46 @@
 ﻿#include <QDebug>
 
 #include "CommandManager.h"
-#include "PluginManager.h"
+#include "Helper.h"
+#include "commands/PackageCommand.h"
+#include "core/V8Util.h"
+#include "atom/node_includes.h"
+
+using core::V8Util;
+using core::FunctionInfo;
+
+using v8::UniquePersistent;
+using v8::ObjectTemplate;
+using v8::EscapableHandleScope;
+using v8::Local;
+using v8::String;
+using v8::PropertyCallbackInfo;
+using v8::Value;
+using v8::Isolate;
+using v8::Array;
+using v8::Object;
+using v8::MaybeLocal;
+using v8::Maybe;
+using v8::Exception;
+using v8::FunctionCallbackInfo;
+using v8::Boolean;
+using v8::Function;
+using v8::Null;
+using v8::FunctionTemplate;
+
+namespace {
+
+CommandArgument toCommandArgument(QVariantMap map) {
+  CommandArgument arg;
+
+  for (const auto& key : map.keys()) {
+    arg.insert(
+        std::make_pair(key.toUtf8().constData(), map.value(key).toString().toUtf8().constData()));
+  }
+
+  return arg;
+}
+}
 
 QString CommandManager::cmdDescription(const QString& name) {
   if (m_commands.count(name) != 0) {
@@ -11,27 +50,118 @@ QString CommandManager::cmdDescription(const QString& name) {
   return "";
 }
 
-void CommandManager::runCommand(const QString& name, const CommandArgument& args, int repeat) {
-  // Copy command name and argument.
-  std::string cmdName = name.toUtf8().constData();
-  CommandArgument cmdArg = args;
-
-  for (const CmdEventHandler& handler : m_cmdEventFilters) {
-    std::tuple<bool, std::string, CommandArgument> resultTuple = handler(cmdName, cmdArg);
-    if (std::get<0>(resultTuple)) {
-      return;
-    }
-    cmdName = std::get<1>(resultTuple);
-    cmdArg = std::get<2>(resultTuple);
+bool CommandManager::runCommandEventFilter(QString& cmdName, CommandArgument& cmdArgs) {
+  node::Environment* env = Helper::singleton().uvEnv();
+  // run command filters
+  if (!env) {
+    qDebug() << "env is null";
+    return false;
   }
 
-  QString qCmdName = QString::fromUtf8(cmdName.c_str());
-  //  qDebug("qCmdName: %s", qPrintable(qCmdName));
-  if (m_commands.find(qCmdName) != m_commands.end()) {
-    m_commands[qCmdName]->run(cmdArg, repeat);
-    PluginManager::singleton().sendCommandEvent(qCmdName, cmdArg);
+  Isolate* isolate = env->isolate();
+  v8::Locker locker(env->isolate());
+  v8::Context::Scope context_scope(env->context());
+  v8::HandleScope handle_scope(env->isolate());
+
+  Local<Value> argv[1];
+  int argc = 1;
+  Local<Object> evObj = Object::New(isolate);
+  Maybe<bool> result =
+      evObj->Set(isolate->GetCurrentContext(),
+                 String::NewFromUtf8(isolate, "name", v8::NewStringType::kNormal).ToLocalChecked(),
+                 V8Util::toV8String(isolate, cmdName));
+  if (!result.FromMaybe(false)) {
+    qWarning() << "failed to set name property";
+    return false;
+  }
+
+  result =
+      evObj->Set(isolate->GetCurrentContext(),
+                 String::NewFromUtf8(isolate, "args", v8::NewStringType::kNormal).ToLocalChecked(),
+                 V8Util::toV8Object(isolate, cmdArgs));
+  if (!result.FromMaybe(false)) {
+    qWarning() << "failed to set args property";
+    return false;
+  }
+
+  argv[0] = evObj;
+
+  Local<Function> fn = m_jsCmdEventFilter.Get(isolate);
+
+  v8::TryCatch trycatch(isolate);
+  MaybeLocal<Value> maybeHandled =
+      fn->Call(isolate->GetCurrentContext(), v8::Undefined(isolate), argc, argv);
+  if (trycatch.HasCaught()) {
+    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
+    Local<Value> exception = trycatch.Exception();
+    String::Utf8Value exceptionStr(exception);
+    std::stringstream ss;
+    ss << "error: " << *exceptionStr;
+    if (!maybeStackTrace.IsEmpty()) {
+      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
+      ss << " stack trace: " << *stackTraceStr;
+    }
+    qWarning() << ss.str().c_str();
+    return false;
+  } else if (maybeHandled.IsEmpty()) {
+    qWarning() << "maybeResult is empty (but exception is not thrown...)";
+    return false;
+  }
+
+  Local<Value> handled = maybeHandled.ToLocalChecked();
+  if (!handled->IsBoolean()) {
+    qWarning() << "handled is not boolean";
+    return false;
+  }
+
+  MaybeLocal<Value> maybeName =
+      evObj->Get(isolate->GetCurrentContext(),
+                 String::NewFromUtf8(isolate, "name", v8::NewStringType::kNormal).ToLocalChecked());
+  if (maybeName.IsEmpty()) {
+    qWarning() << "name property is not found";
+    return false;
+  }
+
+  auto nameValue = maybeName.ToLocalChecked();
+  if (!nameValue->IsString()) {
+    qWarning() << "name property is not string";
+    return false;
+  }
+
+  cmdName = V8Util::toQString(nameValue->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+
+  MaybeLocal<Value> maybeArgs =
+      evObj->Get(isolate->GetCurrentContext(),
+                 String::NewFromUtf8(isolate, "args", v8::NewStringType::kNormal).ToLocalChecked());
+  if (maybeArgs.IsEmpty()) {
+    qWarning() << "args property is not found";
+    return false;
+  }
+
+  auto argsValue = maybeArgs.ToLocalChecked();
+  if (!argsValue->IsObject()) {
+    qWarning() << "args property is not object";
+    return false;
+  }
+
+  auto varMap = V8Util::toVariantMap(
+      isolate, argsValue->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
+  cmdArgs = toCommandArgument(varMap);
+
+  return handled->ToBoolean(isolate)->Value();
+}
+
+void CommandManager::runCommand(QString name, CommandArgument args, int repeat) {
+  bool result = runCommandEventFilter(name, args);
+  if (result) {
+    qDebug() << name << "is handled by an event filter";
+    return;
+  }
+
+  if (m_commands.find(name) != m_commands.end()) {
+    m_commands[name]->run(args, repeat);
   } else {
-    qDebug() << "Can't find a command: " << qCmdName;
+    qDebug() << "Can't find a command: " << name;
   }
 }
 
@@ -44,6 +174,12 @@ void CommandManager::remove(const QString& name) {
   emit commandRemoved(name);
 }
 
-void CommandManager::addEventFilter(CommandManager::CmdEventHandler handler) {
-  m_cmdEventFilters.push_back(handler);
+void CommandManager::_assignJSCommandEventFilter(FunctionInfo info) {
+  Isolate* isolate = info.isolate;
+  UniquePersistent<Function> perFn(isolate, info.fn);
+  m_jsCmdEventFilter.Reset(info.isolate, info.fn);
+}
+
+void CommandManager::add(const QString& name, const QString& description) {
+  CommandManager::singleton().add(std::unique_ptr<ICommand>(new PackageCommand(name, description)));
 }

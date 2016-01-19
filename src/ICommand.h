@@ -7,12 +7,12 @@
 #include <QDebug>
 
 #include "core/macros.h"
-#include "CommandArgument.h"
+#include "core/CommandArgument.h"
 
 namespace {
 std::string toString(const CommandArgument& arg) {
   std::stringstream ss;
-  for (std::pair<std::string, std::string> pair : arg) {
+  for (const auto& pair : arg) {
     ss << pair.first.c_str() << ": " << pair.second.c_str() << std::endl;
   }
 

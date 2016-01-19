@@ -16,7 +16,9 @@ class ConfigDialog : public QDialog {
   Q_OBJECT
 
  public:
-  static void loadConfig(const QString& pkgName, const std::string& configPath);
+  // Note: Ideally, this method should belong to core::Config. But this relies on YAMLUtils
+  // which is not in core, so core::Config can't use it.
+  static void loadDefinition(const QString& pkgName, const QString& configPath);
   static void showModeless();
 
  private:

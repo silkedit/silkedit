@@ -187,23 +187,6 @@ void StatusBar::setLanguage(const QString& scope) {
   setCurrentLanguage(lang);
 }
 
-void StatusBar::request(StatusBar*, const QString&, msgpack::rpc::msgid_t, const msgpack::object&) {
-}
-
-void StatusBar::notify(StatusBar* view, const QString& method, const msgpack::object& obj) {
-  int numArgs = obj.via.array.size;
-  if (method == "showMessage") {
-    if (numArgs == 2) {
-      std::tuple<int, std::string> params;
-      obj.convert(&params);
-      std::string message = std::get<1>(params);
-      view->showMessage(QString::fromUtf8(message.c_str()));
-    }
-  } else if (method == "clearMessage") {
-    view->clearMessage();
-  }
-}
-
 void StatusBar::setCurrentLanguage(Language* lang) {
   if (lang) {
     int idx = m_langComboBox->findText(lang->name());

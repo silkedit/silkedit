@@ -5,7 +5,7 @@
 
 core::AndConditionExpression::AndConditionExpression(QSet<core::ConditionExpression> condSet)
     : m_condSet(condSet) {
-  assert(!m_condSet.isEmpty());
+  Q_ASSERT(!m_condSet.isEmpty());
 }
 
 bool core::AndConditionExpression::isSatisfied() {
