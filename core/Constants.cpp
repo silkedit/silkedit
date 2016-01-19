@@ -7,6 +7,8 @@
 
 namespace core {
 
+const char* Constants::RUN_AS_NODE = "--run-as-node";
+
 #ifdef Q_OS_MAC
 const QString Constants::defaultFontFamily = "Source Han Code JP";
 #endif
@@ -57,21 +59,14 @@ QString Constants::userPackagesJsonPath() const {
   return userPackagesRootDirPath() + "/packages.json";
 }
 
+// To run SilkEdit as Node.js, pass --run-as-node
 // To run npm, pass bin/npm-cli.js as first argument of node.
 QString Constants::nodePath() {
-#ifdef Q_OS_WIN
-  return QApplication::applicationDirPath() + "/node";
-#else
-  return QApplication::applicationDirPath() + "/node";
-#endif
+  return QApplication::applicationFilePath();
 }
 
 QString Constants::npmCliPath() {
-#ifdef Q_OS_WIN
   return QApplication::applicationDirPath() + "/npm/bin/npm-cli.js";
-#else
-  return QApplication::applicationDirPath() + "/npm/bin/npm-cli.js";
-#endif
 }
 
 QString Constants::translationDirPath() {

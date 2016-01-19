@@ -439,7 +439,7 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
             emit processSucceeded(index);
             Helper::singleton().loadPackage(pkg.name);
           });
-  const QStringList args{Constants::singleton().npmCliPath(), "i", "--production", "--prefix", Constants::singleton().userPackagesRootDirPath(),
+  const QStringList args{Constants::RUN_AS_NODE, Constants::singleton().npmCliPath(), "i", "--production", "--prefix", Constants::singleton().userPackagesRootDirPath(),
                          tarballUrl};
   npmProcess->start(Constants::singleton().nodePath(), args);
 }
@@ -541,6 +541,6 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
         emit processSucceeded(index);
         emit PackageManager::singleton().packageRemoved(pkg);
       });
-  const QStringList args{Constants::singleton().npmCliPath(), "r", "--prefix", Constants::singleton().userPackagesRootDirPath(), pkg.name};
+  const QStringList args{Constants::RUN_AS_NODE, Constants::singleton().npmCliPath(), "r", "--prefix", Constants::singleton().userPackagesRootDirPath(), pkg.name};
   npmProcess->start(Constants::singleton().nodePath(), args);
 }

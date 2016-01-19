@@ -1,9 +1,10 @@
 // copied from node_main.cc
-#include <node.h>
 #include <uv.h>
 
+#include "atom/node_includes.h"
+
 #ifdef _WIN32
-int wmain(int argc, wchar_t *wargv[]) {
+int nodeMain(int argc, wchar_t *wargv[]) {
   // Convert argv to to UTF8
   char** argv = new char*[argc];
   for (int i = 0; i < argc; i++) {
@@ -42,7 +43,7 @@ int wmain(int argc, wchar_t *wargv[]) {
 }
 #else
 // UNIX
-int main(int argc, char *argv[]) {
+int nodeMain(int argc, char *argv[]) {
   setvbuf(stderr, NULL, _IOLBF, 1024);
   return node::Start(argc, argv);
 }

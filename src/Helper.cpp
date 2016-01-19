@@ -50,7 +50,6 @@ QStringList helperArgs() {
   args << QDir::toNativeSeparators(Constants::singleton().silkHomePath() + "/packages");
   return args;
 }
-
 }
 
 HelperPrivate::~HelperPrivate() {
@@ -59,27 +58,7 @@ HelperPrivate::~HelperPrivate() {
 
 void HelperPrivate::startNodeEventLoop() {
   const QStringList& argsStrings = helperArgs();
-  int size = 0;
-  for (const auto& arg : argsStrings) {
-    size += arg.size() + 1;
-  }
-
-  char** argv = (char**)malloc(sizeof(char*) * (argsStrings.size() + 1));  // +1 for last nullptr
-  // argv needs to be contiguous
-  char* s = (char*)malloc(sizeof(char) * size);
-  if (argv == nullptr) {
-    qWarning() << "failed to allocate memory for argument";
-    exit(1);
-  }
-
-  int i = 0;
-  for (i = 0; i < argsStrings.size(); i++) {
-    size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
-    memcpy(s, argsStrings[i].toLocal8Bit().data(), size);
-    argv[i] = s;
-    s += size;
-  }
-  argv[i] = nullptr;
+  char** argv = Util::toCStringList(argsStrings);
   int argc = argsStrings.size();
 
   silkedit_node::Start(argc, argv, q->m_nodeBindings.get());
@@ -207,8 +186,7 @@ void Helper::quitApplication() {
   App::instance()->quit();
 }
 
-node::Environment *Helper::uvEnv()
-{
+node::Environment* Helper::uvEnv() {
   return m_nodeBindings->uv_env();
 }
 

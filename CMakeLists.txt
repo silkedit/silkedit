@@ -137,7 +137,6 @@ INCLUDE(Dart)
 enable_testing()
 add_subdirectory(core)
 add_subdirectory(crashreporter)
-add_subdirectory(node)
 add_subdirectory(test)
 
 if(APPLE)
