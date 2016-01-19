@@ -5,7 +5,9 @@
 class HelperPrivate : public QObject{
   Q_OBJECT
 
- public:
+  char ** toCStringList(const QStringList& argsStrings);
+
+public:
   Helper* q;
 
   explicit HelperPrivate(Helper* q_ptr);

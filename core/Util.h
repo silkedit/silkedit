@@ -38,9 +38,14 @@ class Util {
   static void processWithPublicMethods(const QMetaObject* metaObj,
                                        std::function<void(const QMetaMethod&)> fn);
 
-  static QByteArray stripNamespace(const QByteArray &name);
+  static QByteArray stripNamespace(const QByteArray& name);
 
   static bool matchTypes(QList<QByteArray> types, QVariantList args);
+
+  // Caller needs to call free argv after using it as follows
+  //  free(argv[0]);
+  //  free(argv);
+  static char** toCStringList(const QStringList& argsStrings);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {

@@ -21,21 +21,34 @@
 #include "core/PackageManager.h"
 #include "core/Config.h"
 #include "core/ThemeManager.h"
+#include "core/Util.h"
+#include "core/Constants.h"
 #include "breakpad/crash_handler.h"
+#include "node_main.h"
 
 using core::PackageManager;
 using core::Config;
 using core::ConditionManager;
 using core::ThemeManager;
+using core::Util;
+using core::Constants;
 
-int main(int argv, char** args) {
+int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
-  App app(argv, args);
+  App app(argc, argv);
 #ifdef QT_NO_DEBUG
   // crash dumps output location setting.
   Breakpad::CrashHandler::instance()->Init(QDir::tempPath());
 #endif
+
+  QStringList arguments = app.arguments();
+
+  // Run SilkEdit as normal Node.js
+  if (arguments.contains(Constants::RUN_AS_NODE)) {
+    arguments.removeOne(Constants::RUN_AS_NODE);
+    return nodeMain(arguments.size(), Util::toCStringList(arguments));
+  }
 
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
@@ -69,7 +82,6 @@ int main(int argv, char** args) {
   // window system's event queue have been processe
   QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
 
-  QStringList arguments = app.arguments();
   if (arguments.size() > 1) {
     DocumentManager::singleton().open(arguments.at(1));
   }

@@ -27,6 +27,7 @@ class Constants : public QObject, public core::Singleton<Constants> {
 #endif
 
   static const int defaultFontSize;
+  static const char* RUN_AS_NODE;
 
   QStringList configPaths();
   QStringList userKeymapPaths();

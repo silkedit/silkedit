@@ -146,4 +146,30 @@ bool Util::matchTypes(QList<QByteArray> types, QVariantList args) {
   return true;
 }
 
+char **core::Util::toCStringList(const QStringList &argsStrings) {
+  int size = 0;
+  for (const auto& arg : argsStrings) {
+    size += arg.size() + 1;
+  }
+
+  char** argv = (char**)malloc(sizeof(char*) * (argsStrings.size() + 1));  // +1 for last nullptr
+  // argv needs to be contiguous
+  char* s = (char*)malloc(sizeof(char) * size);
+  if (argv == nullptr) {
+    qWarning() << "failed to allocate memory for argument";
+    exit(1);
+  }
+
+  int i = 0;
+  for (i = 0; i < argsStrings.size(); i++) {
+    size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
+    memcpy(s, argsStrings[i].toLocal8Bit().data(), size);
+    argv[i] = s;
+    s += size;
+  }
+  argv[i] = nullptr;
+
+  return argv;
+}
+
 }  // namespace core
