@@ -85,7 +85,7 @@ resolve() {
     git submodule update --init
 
     # vim package
-    npm install --prefix packages https://github.com/silkedit/vim/tarball/0.1.4
+    npm install --prefix packages https://github.com/silkedit/vim/tarball/0.1.5
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then

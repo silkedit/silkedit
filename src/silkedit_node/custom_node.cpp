@@ -430,6 +430,7 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
 }
 
 void Cleanup(node::Environment* env) {
+  Q_ASSERT(env);
   env->set_trace_sync_io(false);
   Isolate* isolate = env->isolate();
 

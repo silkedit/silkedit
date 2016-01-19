@@ -8,9 +8,11 @@ include_directories(SYSTEM
 
 if (APPLE)
   target_link_libraries(${PROJECT_NAME} ${NODE_LIBRARY} )
+
+  # run install_name_tool to update the path to libnode.dylib
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME})
+
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME} NODE_LIBRARY )
 endif ()
 
-# run install_name_tool to update the path to libnode.dylib
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME})
