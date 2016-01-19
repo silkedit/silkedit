@@ -1,13 +1,8 @@
 ﻿#pragma once
 
 #include "Helper.h"
-#include "core/IKeyEventFilter.h"
 
-namespace node {
-class ArrayBufferAllocator;
-}
-
-class HelperPrivate : public QObject, public core::IKeyEventFilter {
+class HelperPrivate : public QObject{
   Q_OBJECT
 
  public:
@@ -18,8 +13,6 @@ class HelperPrivate : public QObject, public core::IKeyEventFilter {
 
   void init();
 
-  // IKeyEventFilter interface
-  bool keyEventFilter(QKeyEvent* event) override;
   void startNodeEventLoop();
   void startNodeInstance(void* arg);
   void quitApplication();

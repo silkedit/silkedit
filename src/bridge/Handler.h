@@ -27,6 +27,9 @@ class Handler {
 
   template <typename T>
   static void registerClass(v8::Local<v8::Object> exports);
+
+  template <typename T>
+  static void registerQtEnum(v8::Local<v8::Context> context, v8::Local<v8::Object> exports, v8::Isolate* isolate, const char* name);
 };
 
 }  // namespace bridge

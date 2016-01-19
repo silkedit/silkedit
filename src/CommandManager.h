@@ -38,7 +38,7 @@ public slots:
   void add(const QString& name, const QString& description);
   void remove(const QString& name);
 
-  // private (only used in initialization in JS side)
+  // internal (only used in initialization in JS side)
   void _assignJSCommandEventFilter(core::FunctionInfo info);
 
  signals:

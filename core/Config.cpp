@@ -59,7 +59,7 @@ void Config::Init(v8::Local<v8::Object> exports) {
   objTempl->SetInternalFieldCount(1);
   MaybeLocal<Object> maybeObj = objTempl->NewInstance(isolate->GetCurrentContext());
   if (maybeObj.IsEmpty()) {
-    throw std::runtime_error("Failed to create ConditionManager");
+    throw std::runtime_error("Failed to create Config");
   }
 
   Local<Object> obj = maybeObj.ToLocalChecked();

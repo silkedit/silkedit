@@ -43,16 +43,6 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
     return QVariant();
   }
 
-  if (args.size() >= MAX_ARGS_COUNT) {
-    qWarning() << "max # of args is " << MAX_ARGS_COUNT << ". Exceeded arguments will be dropped";
-  }
-
-  Local<Value> argv[MAX_ARGS_COUNT];
-  int argc = qMin(args.size(), MAX_ARGS_COUNT);
-  for (int i = 0; i < argc; i++) {
-    argv[i] = V8Util::toV8Value(isolate, args[i]);
-  }
-
   MaybeLocal<Value> maybeFnValue =
       s_jsHandler.Get(isolate)->Get(isolate->GetCurrentContext(), V8Util::toV8String(isolate, funcName));
   if (maybeFnValue.IsEmpty()) {
@@ -67,27 +57,17 @@ QVariant JSHandler::callFunc(Isolate* isolate, const QString& funcName, QVariant
   }
   Local<Function> fn = Local<Function>::Cast(fnValue);
 
-  TryCatch trycatch(isolate);
-  MaybeLocal<Value> maybeResult =
-      fn->Call(isolate->GetCurrentContext(), s_jsHandler.Get(isolate), argc, argv);
-  if (trycatch.HasCaught()) {
-    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
-    Local<Value> exception = trycatch.Exception();
-    String::Utf8Value exceptionStr(exception);
-    std::stringstream ss;
-    ss << "error: " << *exceptionStr;
-    if (!maybeStackTrace.IsEmpty()) {
-      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
-      ss << " stack trace: " << *stackTraceStr;
-    }
-    qWarning() << ss.str().c_str();
-    return QVariant();
-  } else if (maybeResult.IsEmpty()) {
-    qWarning() << "maybeResult is empty (but exception is not thrown...)";
-    return QVariant();
+  if (args.size() >= MAX_ARGS_COUNT) {
+    qWarning() << "max # of args is " << MAX_ARGS_COUNT << ". Exceeded arguments will be dropped";
   }
 
-  return V8Util::toVariant(isolate, maybeResult.ToLocalChecked());
+  Local<Value> argv[MAX_ARGS_COUNT];
+  int argc = qMin(args.size(), MAX_ARGS_COUNT);
+  for (int i = 0; i < argc; i++) {
+    argv[i] = V8Util::toV8Value(isolate, args[i]);
+  }
+
+  return V8Util::callJSFunc(isolate, fn, s_jsHandler.Get(isolate), argc, argv);
 }
 
 void JSHandler::inheritsQtEventEmitter(Isolate* isolate, Local<v8::Value> proto) {

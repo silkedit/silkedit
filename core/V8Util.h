@@ -6,11 +6,14 @@
 #include <QVariant>
 #include <QCache>
 #include <QMultiHash>
+#include <QKeyEvent>
 
 #include "CommandArgument.h"
 #include "macros.h"
 
 namespace core {
+
+constexpr int MAX_ARGS_COUNT = 10;
 
 typedef QList<QByteArray> ParameterTypes;
 typedef std::pair<int, ParameterTypes> MethodInfo;
@@ -22,6 +25,7 @@ class V8Util {
 
  public:
   static v8::Local<v8::String> hiddenQObjectKey(v8::Isolate* isolate);
+  static v8::Local<v8::String> constructorKey(v8::Isolate* isolate);
 
   static QString toQString(v8::Local<v8::String> str) {
     return QString::fromUtf16(*v8::String::Value(str));
@@ -47,23 +51,28 @@ class V8Util {
   static v8::Local<v8::Object> toV8Object(v8::Isolate* isolate, const CommandArgument args);
 
   static v8::Local<v8::Value> toV8ObjectFrom(v8::Isolate* isolate, QObject* sourceObj);
+  static v8::Local<v8::Value> toV8ObjectFrom(v8::Isolate* isolate, QKeyEvent* keyEvent);
 
   static QVariantMap toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 
   static void throwError(v8::Isolate* isolate, const std::string& msg);
   static void throwError(v8::Isolate* isolate, const char* msg);
 
-  static void invokeMethod(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args);
+
+  static QVariant callJSFunc(v8::Isolate* isolate, v8::Local<v8::Function> fn, v8::Local<v8::Value> recv, int argc, v8::Local<v8::Value> argv[]);
 
  private:
   static v8::Persistent<v8::String> s_hiddenQObjectKey;
+  static v8::Persistent<v8::String> s_constructorKey;
   static QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> s_classMethodCache;
 
-  static QVariant invokeMethodInternal(v8::Isolate* isolate,
+  static QVariant invokeQObjectMethodInternal(v8::Isolate* isolate,
                                        QObject* object,
                                        const QString& methodName,
                                        QVariantList args);
   static void cacheMethods(const QMetaObject* metaObj);
+  static v8::MaybeLocal<v8::Object> newInstance(v8::Isolate *isolate, v8::Local<v8::Function> constructor, void *sourceObj);
 };
 
 }  // namespace core
