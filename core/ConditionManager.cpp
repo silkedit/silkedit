@@ -77,7 +77,7 @@ void core::ConditionManager::addPackageCondition(const v8::FunctionCallbackInfo<
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "invalid argument")));
+    V8Util::throwError(isolate, "invalid argument");
     return;
   }
 
@@ -91,7 +91,7 @@ void ConditionManager::removePackageCondition(const v8::FunctionCallbackInfo<v8:
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 1 || !args[0]->IsString()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "invalid argument")));
+    V8Util::throwError(isolate, "invalid argument");
     return;
   }
 

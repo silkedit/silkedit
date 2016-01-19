@@ -202,7 +202,7 @@ void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 1 || !args[0]->IsString()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "invalid argument")));
+    V8Util::throwError(isolate, "invalid argument");
     return;
   }
 

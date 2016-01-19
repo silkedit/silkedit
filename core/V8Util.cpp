@@ -257,7 +257,6 @@ QVariantMap V8Util::toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj
   return map;
 }
 
-// todo: replace all isolate->ThrowException code with this
 void V8Util::throwError(v8::Isolate* isolate, const std::string& msg) {
   throwError(isolate, msg.c_str());
 }
@@ -274,8 +273,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
-    isolate->ThrowException(
-        Exception::TypeError(String::NewFromUtf8(isolate, "can't convert to QObject")));
+    throwError(isolate, "can't convert to QObject");
     return;
   }
 
@@ -292,7 +290,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
       args.GetReturnValue().Set(toV8Value(isolate, result));
     }
   } catch (const std::exception& e) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, e.what())));
+    V8Util::throwError(isolate, e.what());
   } catch (...) {
     qCritical() << "unexpected exception occured";
   }
