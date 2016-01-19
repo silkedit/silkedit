@@ -239,14 +239,4 @@ elseif (MSVC)
   else ()
     file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll DESTINATION .)
   endif ()
-
-  # copy silkedit.lib
-  # NOTE: The command becomes part of the target and will only execute when the
-  # target itself is built. If the target is already built, the command will
-  # not execute.
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E make_directory ${PROJECT_SOURCE_DIR}/jslib/node_modules/silkedit/lib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-    ${CMAKE_COMMAND} -E copy_if_different ${PROJECT_BINARY_DIR}/SilkEdit.lib
-                             ${PROJECT_SOURCE_DIR}/jslib/node_modules/silkedit/lib)
 endif()
