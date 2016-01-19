@@ -88,7 +88,7 @@ public slots:
 
  private:
   std::unique_ptr<HelperPrivate> d;
-  atom::NodeBindings* m_nodeBindings;
+  std::unique_ptr<atom::NodeBindings> m_nodeBindings;
 
   friend class HelperPrivate;
   friend class core::Singleton<Helper>;
