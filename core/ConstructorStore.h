@@ -16,13 +16,22 @@ class ConstructorStore : public Singleton<ConstructorStore> {
   ~ConstructorStore() = default;
   DEFAULT_MOVE(ConstructorStore)
 
-  v8::Local<v8::Function> getConstructor(const QMetaObject* metaObj,
+  v8::Local<v8::Function> findOrCreateConstructor(const QMetaObject* metaObj,
                                          v8::Isolate* isolate,
+                                         bool isQObject,
                                          v8::FunctionCallback newFunc = nullptr);
 
- private:
-  static v8::Local<v8::Function> createConstructor(const QMetaObject* metaObj,
+  v8::Local<v8::Function> createConstructor(const QMetaObject* metaObj,
                                                    v8::Isolate* isolate,
+                                                   bool isQObject,
+                                                   v8::FunctionCallback newFunc = nullptr);
+  v8::Local<v8::Function> findConstructor(const QMetaObject* metaObj,
+                                         v8::Isolate* isolate);
+
+ private:
+  static v8::Local<v8::Function> createConstructorInternal(const QMetaObject* metaObj,
+                                                   v8::Isolate* isolate,
+                                                   bool isQObject,
                                                    v8::FunctionCallback newFunc = nullptr);
   std::unordered_map<const QMetaObject*, v8::UniquePersistent<v8::Function>> m_classConstructorHash;
 

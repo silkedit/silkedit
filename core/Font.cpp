@@ -60,8 +60,8 @@ void Font::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
           variants[j] = QVariant(QMetaType::type(parameterTypes[j]), variants[j].data());
         }
 
-        Font* newObj = static_cast<Font*>(
-            QObjectUtil::newInstanceOfGadgetFromJS(metaObj, variants));
+        Font* newObj =
+            static_cast<Font*>(QObjectUtil::newInstanceOfGadgetFromJS(metaObj, variants));
         if (!newObj) {
           std::stringstream ss;
           ss << "invoking" << ctor.methodSignature().constData() << "failed";
@@ -91,10 +91,11 @@ void Font::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
       argv[i] = args[i];
     }
     v8::Local<v8::Function> cons = v8::Local<v8::Function>::New(isolate, constructor);
-    args.GetReturnValue().Set(
-        cons->NewInstance(qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS), argv));
+    args.GetReturnValue().Set(cons->NewInstance(isolate->GetCurrentContext(),
+                                                qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS),
+                                                argv)
+                                  .ToLocalChecked());
   }
 }
 
 }  // namespace core
-

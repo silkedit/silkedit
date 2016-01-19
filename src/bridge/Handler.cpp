@@ -37,6 +37,8 @@
 #include "core/Condition.h"
 #include "core/ConditionManager.h"
 #include "core/ObjectStore.h"
+#include "core/QKeyEventWrap.h"
+#include "core/Event.h"
 #include "JSStaticObject.h"
 
 using core::Config;
@@ -49,6 +51,8 @@ using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
 using core::ObjectStore;
+using core::QKeyEventWrap;
+using core::Event;
 
 using v8::Array;
 using v8::Boolean;
@@ -158,6 +162,28 @@ void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
 }
 }
 
+template <typename T>
+void bridge::Handler::registerQtEnum(v8::Local<v8::Context> context, Local<Object> exports, Isolate* isolate, const char* name)
+{
+  qRegisterMetaType<T>();
+  int id = QMetaType::type(name);
+  Q_ASSERT(id != QMetaType::UnknownType);
+  const QMetaObject* metaObj = QMetaType::metaObjectForType(id);
+  for (int i = 0; i < metaObj->enumeratorCount(); i++) {
+    const QMetaEnum& metaEnum = metaObj->enumerator(i);
+    v8::Local<v8::Object> enumObj = v8::Object::New(isolate);
+    for (int j = 0; j < metaEnum.keyCount(); j++) {
+      enumObj->Set(v8::String::NewFromUtf8(isolate, metaEnum.key(j)),
+                   v8::Integer::New(isolate, metaEnum.value(j)));
+    }
+    Maybe<bool> result =
+        exports->Set(context, v8::String::NewFromUtf8(isolate, metaEnum.name()), enumObj);
+    if (result.IsNothing()) {
+      qCritical() << "failed to set enum" << metaEnum.name();
+    }
+  }
+}
+
 void bridge::Handler::init(Local<Object> exports,
                            v8::Local<v8::Value>,
                            v8::Local<v8::Context> context,
@@ -185,23 +211,8 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "lateInit", lateInit);
 
   // register enums in Qt namespace
-  qRegisterMetaType<Qt::Orientation>();
-  int id = QMetaType::type("Qt::Orientation");
-  Q_ASSERT(id != QMetaType::UnknownType);
-  const QMetaObject* metaObj = QMetaType::metaObjectForType(id);
-  for (int i = 0; i < metaObj->enumeratorCount(); i++) {
-    const QMetaEnum& metaEnum = metaObj->enumerator(i);
-    v8::Local<v8::Object> enumObj = v8::Object::New(isolate);
-    for (int j = 0; j < metaEnum.keyCount(); j++) {
-      enumObj->Set(v8::String::NewFromUtf8(isolate, metaEnum.key(j)),
-                   v8::Integer::New(isolate, metaEnum.value(j)));
-    }
-    Maybe<bool> result =
-        exports->Set(context, v8::String::NewFromUtf8(isolate, metaEnum.name()), enumObj);
-    if (result.IsNothing()) {
-      qCritical() << "failed to set enum" << metaEnum.name();
-    }
-  }
+  registerQtEnum<Qt::Orientation>(context, exports, isolate, "Qt::Orientation");
+  registerQtEnum<Qt::Key>(context, exports, isolate, "Qt::Key");
 }
 
 void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
@@ -212,31 +223,32 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   Local<Object> exports = args[0]->ToObject(isolate->GetCurrentContext()).ToLocalChecked();
   // init singleton objects
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
-  Util::stripNamespace(KeymapManager::staticMetaObject.className());
   setSingletonObj(exports, App::instance(),
                   Util::stripNamespace(App::staticMetaObject.className()));
   setSingletonObj(exports, &Constants::singleton(),
                   Util::stripNamespace(Constants::staticMetaObject.className()));
-  setSingletonObj(exports, &KeymapManager::singleton(),
-                  Util::stripNamespace(KeymapManager::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
                   Util::stripNamespace(CommandManager::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
-  // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
-  // handle it specially
-  Config::Init(exports);
+
   // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   ConditionManager::Init(exports);
+  // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
+  // handle it specially
+  Config::Init(exports);
+  // KeymapManager::dispatch accepts QKeyEvent*
+  KeymapManager::Init(exports);
 
-  // init classes
+  // init classes for QObject subclasses
   registerClass<Condition>(exports);
   registerClass<ConfigDialog>(exports);
   registerClass<Dialog>(exports);
   registerClass<DialogButtonBox>(exports);
+  registerClass<Event>(exports);
   registerClass<FileDialog>(exports);
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
@@ -245,8 +257,9 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);
 
-  // Font is Q_GADGET
+  // init classes for Q_GADGET classes
   Font::Init(exports);
+  QKeyEventWrap::Init(exports);
 }
 
 template <typename T>
@@ -287,7 +300,7 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
 
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(metaObj, V8Util::invokeMethod,
+  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(metaObj, V8Util::invokeQObjectMethod,
                                                                      isolate, true));
 
   Maybe<bool> result =

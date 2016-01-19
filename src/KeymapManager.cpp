@@ -1,4 +1,5 @@
-﻿#include <boost/optional.hpp>
+﻿#include <node.h>
+#include <boost/optional.hpp>
 #include <yaml-cpp/yaml.h>
 #include <string>
 #include <QDebug>
@@ -19,7 +20,11 @@
 #include "core/PackageManager.h"
 #include "core/Package.h"
 #include "core/modifiers.h"
+#include "core/V8Util.h"
+#include "core/QKeyEventWrap.h"
 #include "util/YamlUtils.h"
+#include "core/FunctionInfo.h"
+#include "atom/node_includes.h"
 
 using core::Constants;
 using core::IKeyEventFilter;
@@ -27,6 +32,28 @@ using core::Util;
 using core::AndConditionExpression;
 using core::PackageManager;
 using core::Package;
+using core::V8Util;
+using core::QKeyEventWrap;
+using core::FunctionInfo;
+
+using v8::UniquePersistent;
+using v8::ObjectTemplate;
+using v8::EscapableHandleScope;
+using v8::Local;
+using v8::String;
+using v8::PropertyCallbackInfo;
+using v8::Value;
+using v8::Isolate;
+using v8::Array;
+using v8::Object;
+using v8::MaybeLocal;
+using v8::Maybe;
+using v8::Exception;
+using v8::FunctionCallbackInfo;
+using v8::Boolean;
+using v8::Function;
+using v8::Null;
+using v8::FunctionTemplate;
 
 namespace {
 
@@ -94,7 +121,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
         const std::string& commandStr = commandNode.as<std::string>();
         command = QString::fromUtf8(commandStr.c_str());
       }
-//      qDebug() << "key: " << key << ", command: " << command;
+      //      qDebug() << "key: " << key << ", command: " << command;
 
       YAML::Node ifNode = keymapDefNode["if"];
       boost::optional<AndConditionExpression> condition;
@@ -167,47 +194,74 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   return false;
 }
 
-void KeymapManager::_dispatchFromJS(const QString &typeStr, const QString &key, bool autorep, bool altKey, bool ctrlKey, bool metaKey, bool shiftKey) {
-  QEvent::Type type;
-  if (typeStr == "keypress") {
-    type = QEvent::KeyPress;
-  } else if (typeStr == "keyup") {
-    type = QEvent::KeyRelease;
-  } else {
-    qWarning("invalid key event type: %s", qPrintable(typeStr));
+void KeymapManager::_assignJSKeyEventFilter(core::FunctionInfo info) {
+  Isolate* isolate = info.isolate;
+  UniquePersistent<Function> perFn(isolate, info.fn);
+  m_jsKeyEventFilter.Reset(info.isolate, info.fn);
+}
+
+void KeymapManager::dispatch(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsObject()) {
+    V8Util::throwError(isolate, "invalid argument");
     return;
   }
 
-  Qt::KeyboardModifiers modifiers = Qt::NoModifier;
-  if (altKey) {
-    modifiers |= Silk::AltModifier;
+  Local<Object> obj = args[0]->ToObject();
+  if (obj->InternalFieldCount() > 0) {
+    QKeyEventWrap* keyEventWrap = QKeyEventWrap::Unwrap<QKeyEventWrap>(obj);
+    if (!keyEventWrap) {
+      V8Util::throwError(isolate, "object is not QKeyEventWrap");
+      return;
+    }
+
+    KeymapManager::singleton().dispatch(keyEventWrap->keyEvent());
+  } else {
+    V8Util::throwError(isolate, "can't find the internal field");
+    return;
   }
-  if (ctrlKey) {
-    modifiers |= Silk::ControlModifier;
-  }
-  if (metaKey) {
-    modifiers |= Silk::MetaModifier;
-  }
-  if (shiftKey) {
-    modifiers |= Silk::ShiftModifier;
+}
+
+void KeymapManager::load(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsString()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return;
   }
 
-  dispatch(
-        new QKeyEvent(type, QKeySequence(key)[0], modifiers, key, autorep));
+  QString filename =
+      V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  QString source =
+      V8Util::toQString(args[1]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  KeymapManager::singleton().load(filename, source);
+}
+
+void KeymapManager::_assignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 1 || !args[0]->IsFunction()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return;
+  }
+
+  KeymapManager::singleton()._assignJSKeyEventFilter(
+      FunctionInfo{isolate, Local<Function>::Cast(args[0])});
 }
 
 KeymapManager::KeymapManager() {
   connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
           [=](const Package& pkg) {
-    for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
-      if (it->second.source() == pkg.name) {
-        it = m_keymaps.erase(it);
-      } else {
-        ++it;
-      }
-    }
-    emit keymapUpdated();
-  });
+            for (auto it = m_keymaps.begin(); it != m_keymaps.end();) {
+              if (it->second.source() == pkg.name) {
+                it = m_keymaps.erase(it);
+              } else {
+                ++it;
+              }
+            }
+            emit keymapUpdated();
+          });
 
   connect(&CommandManager::singleton(), &CommandManager::commandRemoved, this,
           [=](const QString& name) { m_cmdKeymapHash.erase(name); });
@@ -222,6 +276,29 @@ void KeymapManager::removeKeymap() {
   m_emptyCmdKeymap.clear();
   m_cmdKeymapHash.clear();
   m_keymaps.clear();
+}
+
+void KeymapManager::Init(v8::Local<v8::Object> exports) {
+  Isolate* isolate = exports->GetIsolate();
+  Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
+  objTempl->SetInternalFieldCount(1);
+  MaybeLocal<Object> maybeObj = objTempl->NewInstance(isolate->GetCurrentContext());
+  if (maybeObj.IsEmpty()) {
+    throw std::runtime_error("Failed to create KeymapManager");
+  }
+
+  Local<Object> obj = maybeObj.ToLocalChecked();
+  obj->SetAlignedPointerInInternalField(0, &KeymapManager::singleton());
+
+  NODE_SET_METHOD(obj, "dispatch", KeymapManager::dispatch);
+  NODE_SET_METHOD(obj, "load", KeymapManager::load);
+  NODE_SET_METHOD(obj, "_assignJSKeyEventFilter", KeymapManager::_assignJSKeyEventFilter);
+
+  Maybe<bool> result = exports->Set(isolate->GetCurrentContext(),
+                                    String::NewFromUtf8(isolate, "KeymapManager"), obj);
+  if (result.IsNothing()) {
+    throw std::runtime_error("setting exports failed");
+  }
 }
 
 void KeymapManager::loadUserKeymap() {
@@ -267,7 +344,41 @@ QKeySequence KeymapManager::findShortcut(QString cmdName) {
 }
 
 bool KeymapManager::keyEventFilter(QKeyEvent* event) {
+  bool result = runJSKeyEventFilter(event);
+  if (result) {
+    qDebug() << "key event is handled by an event filter";
+    return true;
+  }
+
   return dispatch(event);
+}
+
+bool KeymapManager::runJSKeyEventFilter(QKeyEvent* event) {
+  node::Environment* env = Helper::singleton().uvEnv();
+  // run command filters
+  if (!env) {
+    qDebug() << "env is null";
+    return false;
+  }
+
+  Isolate* isolate = env->isolate();
+  v8::Locker locker(env->isolate());
+  v8::Context::Scope context_scope(env->context());
+  v8::HandleScope handle_scope(env->isolate());
+
+  const int argc = 1;
+  v8::Local<Value> argv[argc];
+  argv[0] = V8Util::toV8ObjectFrom(isolate, event);
+
+  QVariant handled = V8Util::callJSFunc(isolate, m_jsKeyEventFilter.Get(isolate),
+                                        v8::Undefined(isolate), argc, argv);
+
+  if (!handled.canConvert<bool>()) {
+    qWarning() << "handled is not boolean";
+    return false;
+  }
+
+  return handled.toBool();
 }
 
 void KeymapManager::addShortcut(const QKeySequence& key, CommandEvent cmdEvent) {

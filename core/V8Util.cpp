@@ -14,6 +14,7 @@
 #include "qdeclare_metatype.h"
 #include "ConstructorStore.h"
 #include "FunctionInfo.h"
+#include "QKeyEventWrap.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -33,10 +34,12 @@ using v8::Boolean;
 using v8::Function;
 using v8::Null;
 using v8::FunctionTemplate;
+using v8::TryCatch;
 
 namespace core {
 
 v8::Persistent<v8::String> V8Util::s_hiddenQObjectKey;
+v8::Persistent<v8::String> V8Util::s_constructorKey;
 
 QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
     V8Util::s_classMethodCache;
@@ -48,6 +51,15 @@ v8::Local<v8::String> V8Util::hiddenQObjectKey(Isolate* isolate) {
         String::NewFromUtf8(isolate, "sourceObj", v8::NewStringType::kNormal).ToLocalChecked());
   }
   return s_hiddenQObjectKey.Get(isolate);
+}
+
+v8::Local<v8::String> V8Util::constructorKey(Isolate* isolate) {
+  if (s_constructorKey.IsEmpty()) {
+    s_constructorKey.Reset(
+        isolate,
+        String::NewFromUtf8(isolate, "constructor", v8::NewStringType::kNormal).ToLocalChecked());
+  }
+  return s_constructorKey.Get(isolate);
 }
 
 QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
@@ -145,6 +157,53 @@ v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgu
   return argsObj;
 }
 
+v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QKeyEvent* keyEvent) {
+  if (!keyEvent) {
+    return v8::Null(isolate);
+  }
+
+  Local<Function> ctor = v8::Local<v8::Function>::New(isolate, QKeyEventWrap::constructor);
+  MaybeLocal<Object> maybeObj = newInstance(isolate, ctor, keyEvent);
+  if (maybeObj.IsEmpty()) {
+    return v8::Null(isolate);
+  }
+
+  auto obj = maybeObj.ToLocalChecked();
+  return obj;
+}
+
+v8::MaybeLocal<v8::Object> V8Util::newInstance(v8::Isolate* isolate,
+                                               v8::Local<v8::Function> constructor,
+                                               void* sourceObj) {
+  EscapableHandleScope scope(isolate);
+  Q_ASSERT(!constructor.IsEmpty());
+  Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
+  objTempl->SetInternalFieldCount(1);
+  Local<Object> wrappedObj = objTempl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
+  wrappedObj->SetAlignedPointerInInternalField(0, sourceObj);
+  Local<String> hiddenKey = hiddenQObjectKey(isolate);
+
+  // set sourceObj as hidden value to tell constructor set it as internal object
+  constructor->SetHiddenValue(hiddenKey, wrappedObj);
+  MaybeLocal<Object> maybeObj = constructor->NewInstance(isolate->GetCurrentContext(), 0, nullptr);
+  constructor->DeleteHiddenValue(hiddenKey);
+  if (maybeObj.IsEmpty()) {
+    qWarning() << "Failed to create an object";
+    return v8::MaybeLocal<Object>();
+  }
+  Local<Object> obj = maybeObj.ToLocalChecked();
+
+  // set constructor
+  Maybe<bool> result =
+      obj->Set(isolate->GetCurrentContext(), constructorKey(isolate), constructor);
+  if (result.IsNothing() || !result.FromJust()) {
+    qWarning() << "failed to set constructor property";
+    return v8::MaybeLocal<Object>();
+  }
+
+  return scope.Escape(obj);
+}
+
 v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourceObj) {
   if (!sourceObj) {
     return v8::Null(isolate);
@@ -154,32 +213,15 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
     return *maybeExistingObj;
   } else {
     const QMetaObject* metaObj = sourceObj->metaObject();
-    Local<Function> ctor = ConstructorStore::singleton().getConstructor(metaObj, isolate);
-    Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
-    objTempl->SetInternalFieldCount(1);
-    Local<Object> wrappedObj = objTempl->NewInstance(isolate->GetCurrentContext()).ToLocalChecked();
-    wrappedObj->SetAlignedPointerInInternalField(0, sourceObj);
-    Local<String> hiddenKey = hiddenQObjectKey(isolate);
+    Local<Function> ctor =
+        ConstructorStore::singleton().findOrCreateConstructor(metaObj, isolate, true);
 
-    // set sourceObj as hidden value to tell constructor set it as internal object
-    ctor->SetHiddenValue(hiddenKey, wrappedObj);
-    MaybeLocal<Object> maybeObj = ctor->NewInstance(isolate->GetCurrentContext(), 0, nullptr);
-    ctor->DeleteHiddenValue(hiddenKey);
+    MaybeLocal<Object> maybeObj = newInstance(isolate, ctor, sourceObj);
     if (maybeObj.IsEmpty()) {
-      qWarning() << "Failed to create an object";
       return v8::Null(isolate);
     }
-    Local<Object> obj = maybeObj.ToLocalChecked();
 
-    // set constructor
-    Maybe<bool> result = obj->Set(
-        isolate->GetCurrentContext(),
-        String::NewFromUtf8(isolate, "constructor", v8::NewStringType::kNormal).ToLocalChecked(),
-        ctor);
-    if (result.IsNothing() || !result.FromJust()) {
-      qWarning() << "failed to set constructor property";
-      return v8::Null(isolate);
-    }
+    auto obj = maybeObj.ToLocalChecked();
     ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
     return obj;
   }
@@ -225,7 +267,7 @@ void V8Util::throwError(v8::Isolate* isolate, const char* msg) {
       v8::String::NewFromUtf8(isolate, msg, v8::NewStringType::kNormal).ToLocalChecked()));
 }
 
-void V8Util::invokeMethod(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
   //  const QString& funcName = toQString(args.Callee()->GetName()->ToString());
   //  qDebug() << "invoking" << funcName;
@@ -244,7 +286,7 @@ void V8Util::invokeMethod(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 
   try {
-    QVariant result = invokeMethodInternal(
+    QVariant result = invokeQObjectMethodInternal(
         isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
     if (result.isValid()) {
       args.GetReturnValue().Set(toV8Value(isolate, result));
@@ -256,10 +298,37 @@ void V8Util::invokeMethod(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-QVariant V8Util::invokeMethodInternal(v8::Isolate* isolate,
-                                      QObject* object,
-                                      const QString& methodName,
-                                      QVariantList args) {
+QVariant V8Util::callJSFunc(v8::Isolate* isolate,
+                            v8::Local<v8::Function> fn,
+                            Local<Value> recv,
+                            int argc,
+                            Local<Value> argv[]) {
+  TryCatch trycatch(isolate);
+  MaybeLocal<Value> maybeResult = fn->Call(isolate->GetCurrentContext(), recv, argc, argv);
+  if (trycatch.HasCaught()) {
+    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
+    Local<Value> exception = trycatch.Exception();
+    String::Utf8Value exceptionStr(exception);
+    std::stringstream ss;
+    ss << "error: " << *exceptionStr;
+    if (!maybeStackTrace.IsEmpty()) {
+      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
+      ss << " stack trace: " << *stackTraceStr;
+    }
+    qWarning() << ss.str().c_str();
+    return QVariant();
+  } else if (maybeResult.IsEmpty()) {
+    qWarning() << "maybeResult is empty (but exception is not thrown...)";
+    return QVariant();
+  }
+
+  return V8Util::toVariant(isolate, maybeResult.ToLocalChecked());
+}
+
+QVariant V8Util::invokeQObjectMethodInternal(v8::Isolate* isolate,
+                                             QObject* object,
+                                             const QString& methodName,
+                                             QVariantList args) {
   if (args.size() > Q_METAMETHOD_INVOKE_MAX_ARGS) {
     std::stringstream ss;
     ss << "Can't invoke" << methodName.toUtf8().constData() << "with more than"

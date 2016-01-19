@@ -29,26 +29,23 @@ using core::ObjectStore;
 
 namespace bridge {
 
-template <class QObjectSubClass>
+template <class TypeWithMetaObject>
 class JSStaticObject {
  public:
   static v8::Local<v8::Function> Init(v8::Local<v8::Object> exports) {
     v8::Isolate* isolate = exports->GetIsolate();
-    const QMetaObject& metaObj = QObjectSubClass::staticMetaObject;
-    auto ctor = ConstructorStore::singleton().getConstructor(&metaObj, isolate, New);
-    constructor.Reset(isolate, ctor);
+    const QMetaObject& metaObj = TypeWithMetaObject::staticMetaObject;
+    auto ctor = ConstructorStore::singleton().createConstructor(&metaObj, isolate, true, New);
     exports->Set(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj.className())), ctor);
     return ctor;
   }
 
  private:
-  static v8::Persistent<v8::Function> constructor;
-
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args) {
     v8::Isolate* isolate = args.GetIsolate();
+    const QMetaObject& metaObj = TypeWithMetaObject::staticMetaObject;
 
     if (args.IsConstructCall()) {
-      const QMetaObject& metaObj = QObjectSubClass::staticMetaObject;
 
       // If this constructor is called from C++, existing C++ instance is passed as hidden value
       v8::Local<v8::Value> wrappedObj =
@@ -110,8 +107,10 @@ class JSStaticObject {
       for (int i = 0; i < qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS); i++) {
         argv[i] = args[i];
       }
-      v8::Local<v8::Function> cons = v8::Local<v8::Function>::New(isolate, constructor);
-      args.GetReturnValue().Set(cons->NewInstance(isolate->GetCurrentContext(),
+
+      auto ctor = ConstructorStore::singleton().findConstructor(&metaObj, isolate);
+      Q_ASSERT(!ctor.IsEmpty());
+      args.GetReturnValue().Set(ctor->NewInstance(isolate->GetCurrentContext(),
                                                   qMin(args.Length(), Q_METAMETHOD_INVOKE_MAX_ARGS),
                                                   argv)
                                     .ToLocalChecked());
@@ -135,8 +134,5 @@ class JSStaticObject {
   JSStaticObject() = delete;
   ~JSStaticObject() = delete;
 };
-
-template <typename QObjectSubClass>
-v8::Persistent<v8::Function> JSStaticObject<QObjectSubClass>::constructor;
 
 }  // namespace bridge

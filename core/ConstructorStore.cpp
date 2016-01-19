@@ -38,9 +38,10 @@ void addEnumsToFunction(const QMetaObject& metaObj,
 }
 }
 
-v8::Local<v8::Function> ConstructorStore::createConstructor(const QMetaObject* metaObj,
-                                                            v8::Isolate* isolate,
-                                                            v8::FunctionCallback newFunc) {
+v8::Local<v8::Function> ConstructorStore::createConstructorInternal(const QMetaObject* metaObj,
+                                                                    v8::Isolate* isolate,
+                                                                    bool isQObject,
+                                                                    v8::FunctionCallback newFunc) {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, newFunc);
   tpl->SetClassName(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj->className())));
   Local<ObjectTemplate> objTempl = tpl->InstanceTemplate();
@@ -48,7 +49,7 @@ v8::Local<v8::Function> ConstructorStore::createConstructor(const QMetaObject* m
 
   // register method and slots to prototype object
   Util::processWithPublicMethods(metaObj, [&](const QMetaMethod& method) {
-    NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), V8Util::invokeMethod);
+    NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), V8Util::invokeQObjectMethod);
   });
 
   v8::MaybeLocal<v8::Function> maybeFunc = tpl->GetFunction(isolate->GetCurrentContext());
@@ -60,26 +61,48 @@ v8::Local<v8::Function> ConstructorStore::createConstructor(const QMetaObject* m
   v8::Local<v8::Function> ctor = maybeFunc.ToLocalChecked();
 
   addEnumsToFunction(*metaObj, ctor, isolate);
-  JSHandler::inheritsQtEventEmitter(isolate, ctor);
+  if (isQObject) {
+    JSHandler::inheritsQtEventEmitter(isolate, ctor);
+  }
   return ctor;
 }
 
-v8::Local<v8::Function> ConstructorStore::getConstructor(const QMetaObject* metaObj,
-                                                         v8::Isolate* isolate,
-                                                         v8::FunctionCallback newFunc) {
-  EscapableHandleScope handle_scope(isolate);
+v8::Local<v8::Function> ConstructorStore::findConstructor(const QMetaObject* metaObj,
+                                                          v8::Isolate* isolate) {
   if (m_classConstructorHash.count(metaObj) != 0) {
+    EscapableHandleScope handle_scope(isolate);
     return handle_scope.Escape(
         v8::Local<v8::Function>::New(isolate, m_classConstructorHash.at(metaObj)));
   } else {
-    Local<Function> ctor = createConstructor(metaObj, isolate, newFunc);
-
-    // cache object template
-    UniquePersistent<Function> persistentConstructor(isolate, ctor);
-    auto pair = std::make_pair(metaObj, std::move(persistentConstructor));
-    m_classConstructorHash.insert(std::move(pair));
-    return handle_scope.Escape(ctor);
+    return v8::Local<v8::Function>();
   }
+}
+
+v8::Local<v8::Function> ConstructorStore::findOrCreateConstructor(const QMetaObject* metaObj,
+                                                                  v8::Isolate* isolate,
+                                                                  bool isQObject,
+                                                                  v8::FunctionCallback newFunc) {
+  if (m_classConstructorHash.count(metaObj) != 0) {
+    EscapableHandleScope handle_scope(isolate);
+    return handle_scope.Escape(
+        v8::Local<v8::Function>::New(isolate, m_classConstructorHash.at(metaObj)));
+  } else {
+    return createConstructor(metaObj, isolate, isQObject, newFunc);
+  }
+}
+
+v8::Local<v8::Function> ConstructorStore::createConstructor(const QMetaObject* metaObj,
+                                                            v8::Isolate* isolate,
+                                                            bool isQObject,
+                                                            v8::FunctionCallback newFunc) {
+  EscapableHandleScope handle_scope(isolate);
+  Local<Function> ctor = createConstructorInternal(metaObj, isolate, isQObject, newFunc);
+
+  // cache object template
+  UniquePersistent<Function> persistentConstructor(isolate, ctor);
+  auto pair = std::make_pair(metaObj, std::move(persistentConstructor));
+  m_classConstructorHash.insert(std::move(pair));
+  return handle_scope.Escape(ctor);
 }
 
 }  // namespace core

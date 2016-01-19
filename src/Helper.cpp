@@ -1,5 +1,4 @@
 ﻿#include <memory>
-#include <QKeyEvent>
 #include <QApplication>
 #include <QMetaMethod>
 #include <QEventLoop>
@@ -118,61 +117,12 @@ QVariant HelperPrivate::callFunc(const QString& funcName, QVariantList args) {
 }
 
 void HelperPrivate::init() {
-  TextEditViewKeyHandler::singleton().registerKeyEventFilter(this);
-
   startNodeEventLoop();
   connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, &Helper::singleton(),
           &Helper::cleanup);
 }
 
 HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}
-
-bool HelperPrivate::keyEventFilter(QKeyEvent* event) {
-  //  qDebug("keyEventFilter");
-  std::string type = event->type() & QEvent::KeyPress ? "keypress" : "keyup";
-  bool isModifierKey = false;
-  std::string key;
-  switch (event->key()) {
-    case Silk::Key_Alt:
-      isModifierKey = true;
-      key = "Alt";
-      break;
-    case Silk::Key_Control:
-      isModifierKey = true;
-      key = "Control";
-      break;
-    case Silk::Key_Meta:
-      isModifierKey = true;
-      key = "Meta";
-      break;
-    case Silk::Key_Shift:
-      isModifierKey = true;
-      key = "Shift";
-      break;
-    default:
-      key = QKeySequence(event->key()).toString().toLower().toUtf8().constData();
-      break;
-  }
-
-  // don't send keypress/up event if only a modifier key is pressed
-  if (isModifierKey) {
-    return false;
-  }
-
-  bool altKey = event->modifiers() & Silk::AltModifier;
-  bool ctrlKey = event->modifiers() & Silk::ControlModifier;
-  bool metaKey = event->modifiers() & Silk::MetaModifier;
-  bool shiftKey = event->modifiers() & Silk::ShiftModifier;
-
-  const QVariantList& args = QVariantList{QVariant::fromValue(type),
-                                          QVariant::fromValue(key),
-                                          QVariant::fromValue(event->isAutoRepeat()),
-                                          QVariant::fromValue(altKey),
-                                          QVariant::fromValue(ctrlKey),
-                                          QVariant::fromValue(metaKey),
-                                          QVariant::fromValue(shiftKey)};
-  return callFunc<bool>("keyEventFilter", args, false);
-}
 
 Helper::~Helper() {
   qDebug("~Helper");

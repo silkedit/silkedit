@@ -6,8 +6,6 @@
 
 namespace core {
 
-constexpr int MAX_ARGS_COUNT = 10;
-
 class JSHandler {
  public:
   static void init(v8::Local<v8::Object> jsHandler);
