@@ -54,6 +54,12 @@ using core::ObjectStore;
 using core::QKeyEventWrap;
 using core::Event;
 
+#ifdef Q_OS_WIN
+// MessageBox is defined in winuser.h
+#undef MessageBox
+#endif
+using view::MessageBox;
+
 using v8::Array;
 using v8::Boolean;
 using v8::HandleScope;
@@ -253,7 +259,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<FileDialog>(exports);
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
-  registerClass<MessageBox>(exports);
+  registerClass<view::MessageBox>(exports);
   registerClass<TextEditView>(exports);
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);

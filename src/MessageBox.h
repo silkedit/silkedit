@@ -4,6 +4,8 @@
 
 #include "core/macros.h"
 
+namespace view {
+
 class MessageBox : public QMessageBox {
   Q_OBJECT
   DISABLE_COPY(MessageBox)
@@ -13,3 +15,5 @@ class MessageBox : public QMessageBox {
   ~MessageBox() = default;
   DEFAULT_MOVE(MessageBox)
 };
+
+}  // namespace view
