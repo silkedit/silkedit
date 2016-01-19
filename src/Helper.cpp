@@ -82,7 +82,7 @@ void HelperPrivate::startNodeEventLoop() {
   argv[i] = nullptr;
   int argc = argsStrings.size();
 
-  silkedit_node::Start(argc, argv, q->m_nodeBindings);
+  silkedit_node::Start(argc, argv, q->m_nodeBindings.get());
 
   free(argv[0]);
   free(argv);
@@ -134,7 +134,6 @@ void Helper::init() {
 
 void Helper::cleanup() {
   qDebug("cleanup");
-  delete m_nodeBindings;
   silkedit_node::Cleanup(m_nodeBindings->uv_env());
 }
 
