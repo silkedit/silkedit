@@ -9,6 +9,7 @@
 #include <v8.h>
 #include <libplatform/libplatform.h>
 #include <v8-profiler.h>
+#include <unistd.h>
 
 #ifdef __APPLE__
 #include "vendor/node/src/atomic-polyfill.h"  // NOLINT(build/include_order)
