@@ -1,9 +1,8 @@
-#include <node.h>
-
 #include "ConditionManager.h"
 #include "OSCondition.h"
 #include "PackageCondition.h"
 #include "V8Util.h"
+#include "atom/node_includes.h"
 
 using core::Condition;
 using v8::Function;

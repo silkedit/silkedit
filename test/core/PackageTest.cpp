@@ -50,7 +50,7 @@ class PackageTest : public QObject {
     QVERIFY(!doc.isNull());
     Package pkg(QJsonValue(doc.object()));
     QCOMPARE(pkg.tarballUrl(),
-             QString("https://api.github.com/repos/silkedit/hello/tarball/0.1.0"));
+             QString("https://github.com/silkedit/hello/tarball/0.1.0"));
 
     QString longUrlJson =
         u8R"({
@@ -69,7 +69,7 @@ class PackageTest : public QObject {
     QVERIFY(!doc.isNull());
     pkg = Package(QJsonValue(doc.object()));
     QCOMPARE(pkg.tarballUrl(),
-             QString("https://api.github.com/repos/silkedit/hello/tarball/0.1.0"));
+             QString("https://github.com/silkedit/hello/tarball/0.1.0"));
   }
 };
 

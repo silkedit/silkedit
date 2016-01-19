@@ -8,7 +8,7 @@
 #include <sys/sysctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <node.h>
+#include "atom/node_includes.h"
 
 namespace atom {
 

@@ -1,10 +1,10 @@
-#include <node.h>
 #include <sstream>
 
 #include "JSHandler.h"
 #include "ObjectStore.h"
 #include "CommandArgument.h"
 #include "V8Util.h"
+#include "atom/node_includes.h"
 
 using v8::String;
 using v8::Isolate;

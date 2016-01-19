@@ -1,4 +1,3 @@
-#include <node.h>
 #include <algorithm>
 #include <memory>
 #include <QDebug>
@@ -25,6 +24,7 @@
 #include "ProjectManager.h"
 #include "FileDialog.h"
 #include "TextEditView.h"
+#include "JSStaticObject.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -39,7 +39,7 @@
 #include "core/ObjectStore.h"
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
-#include "JSStaticObject.h"
+#include "atom/node_includes.h"
 
 using core::Config;
 using core::Constants;

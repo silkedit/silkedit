@@ -374,8 +374,6 @@ analyze() {
 }
 
 run_tests() {
-    resolve
-
     ensure_dir build
     cd build
     if [ $OS == 'Mac' ]; then

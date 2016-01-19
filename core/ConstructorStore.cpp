@@ -1,4 +1,3 @@
-#include <node.h>
 #include <QDebug>
 #include <QMetaEnum>
 
@@ -7,6 +6,7 @@
 #include "ObjectTemplateStore.h"
 #include "Util.h"
 #include "V8Util.h"
+#include "atom/node_includes.h"
 
 using v8::UniquePersistent;
 using v8::Function;

@@ -3,7 +3,6 @@
 #include <functional>
 #include <list>
 #include <string>
-#include <functional>
 #include <QStringList>
 #include <QTime>
 #include <QKeySequence>

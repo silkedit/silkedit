@@ -1,9 +1,9 @@
-#include <node.h>
 #include <QMetaMethod>
 
 #include "PrototypeStore.h"
 #include "JSHandler.h"
 #include "Util.h"
+#include "atom/node_includes.h"
 
 using v8::UniquePersistent;
 using v8::Object;

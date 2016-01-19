@@ -1,5 +1,4 @@
-﻿#include <node.h>
-#include <string>
+﻿#include <string>
 #include <QDebug>
 #include <QVariant>
 
@@ -8,6 +7,7 @@
 #include "V8Util.h"
 #include "ObjectStore.h"
 #include "Font.h"
+#include "atom/node_includes.h"
 
 using v8::Function;
 using v8::FunctionCallbackInfo;
