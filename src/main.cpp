@@ -3,6 +3,7 @@
 #include <QTranslator>
 #include <QLibraryInfo>
 #include <QTimer>
+#include <QDir>
 
 #include "App.h"
 #include "TabView.h"

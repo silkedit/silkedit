@@ -83,7 +83,6 @@ if (APPLE)
     /usr/local/include
     src
     breakpad/src
-    vendor/node/src
     vendor/node/deps/v8
     vendor/node/deps/v8/include
     vendor/node/deps/uv/include
@@ -116,7 +115,6 @@ elseif (MSVC)
     src
     ${Boost_INCLUDE_DIRS}
     breakpad/src
-    vendor/node/src
     vendor/node/deps/v8
     vendor/node/deps/v8/include
     vendor/node/deps/uv/include

@@ -4,14 +4,14 @@
 #include "atom/node_includes.h"
 #include "atom/node_bindings.h"
 
-#include <node_crypto.h>
+#include <vendor/node/src/node_crypto.h>
 #include <QtGlobal>
 #include <v8.h>
 #include <libplatform/libplatform.h>
 #include <v8-profiler.h>
 
 #ifdef __APPLE__
-#include "atomic-polyfill.h"  // NOLINT(build/include_order)
+#include "vendor/node/src/atomic-polyfill.h"  // NOLINT(build/include_order)
 namespace node {
 template <typename T>
 using atomic = nonstd::atomic<T>;

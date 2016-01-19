@@ -1,6 +1,5 @@
 #pragma once
 
-#include <node.h>
 #include <v8.h>
 #include <sstream>
 #include <QDebug>
@@ -18,6 +17,7 @@
 #include "core/V8Util.h"
 #include "core/ConstructorStore.h"
 #include "core/ObjectStore.h"
+#include "atom/node_includes.h"
 
 using core::Util;
 using core::QObjectUtil;

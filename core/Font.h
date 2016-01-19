@@ -1,6 +1,6 @@
 #pragma once
 
-#include <node_object_wrap.h>
+#include <vendor/node/src/node_object_wrap.h>
 #include <QFont>
 
 #include "macros.h"

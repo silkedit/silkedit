@@ -1,4 +1,4 @@
-#include <node_buffer.h>
+#include <vendor/node/src/node_buffer.h>
 #include <sstream>
 #include <QMetaMethod>
 #include <QCoreApplication>

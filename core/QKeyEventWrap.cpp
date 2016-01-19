@@ -1,8 +1,8 @@
-#include <node.h>
 #include <QMetaMethod>
 
 #include "QKeyEventWrap.h"
 #include "V8Util.h"
+#include "atom/node_includes.h"
 
 v8::Persistent<v8::Function> core::QKeyEventWrap::constructor;
 
