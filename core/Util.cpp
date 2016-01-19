@@ -163,7 +163,8 @@ char **core::Util::toCStringList(const QStringList &argsStrings) {
   int i = 0;
   for (i = 0; i < argsStrings.size(); i++) {
     size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
-    memcpy(s, argsStrings[i].toLocal8Bit().data(), size);
+    // convert to UTF-8
+    memcpy(s, argsStrings[i].toUtf8().data(), size);
     argv[i] = s;
     s += size;
   }
