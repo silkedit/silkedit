@@ -1,15 +1,23 @@
 ﻿#pragma once
 
 #include <QStringList>
+#include <QObject>
 
 #include "macros.h"
+#include "Singleton.h"
 
 namespace core {
 
-class Constants {
+class Constants : public QObject, public core::Singleton<Constants> {
+  Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 
+  Q_PROPERTY(QString userPackagesJsonPath READ userPackagesJsonPath CONSTANT)
+  Q_PROPERTY(QString userPackagesNodeModulesPath READ userPackagesNodeModulesPath CONSTANT)
+
  public:
+  ~Constants() = default;
+
 #ifdef Q_OS_MAC
   static const QString defaultFontFamily;
 #endif
@@ -19,27 +27,30 @@ class Constants {
 #endif
 
   static const int defaultFontSize;
+  static const char* RUN_AS_NODE;
 
-  static QStringList configPaths();
-  static QStringList userKeymapPaths();
-  static QStringList packagePaths();
-  static QString userConfigPath();
-  static QString userKeymapPath();
-  static QString userPackagesDirPath();
-  static QString packagesDirName();
-  static QString pluginRunnerPath();
-  static QString npmPath();
-  static QString pluginServerSocketPath();
-  static QString translationDirPath();
-  static QString pluginServerDir();
-  static QString silkHomePath();
-  static QString recentOpenHistoryPath();
-  static QString tabViewInformationPath();
+  QStringList configPaths();
+  QStringList userKeymapPaths();
+  QString userConfigPath();
+  QString userKeymapPath();
+  QString userPackagesRootDirPath() const;
+  QString nodePath();
+  QString npmCliPath();
+  QString translationDirPath();
+  QString jsLibDir();
+  QString silkHomePath() const;
+  QString recentOpenHistoryPath();
+  QString tabViewInformationPath();
+  QStringList themePaths();
+  QStringList packagesPaths();
+  QString userPackagesJsonPath() const;
+  QString userPackagesNodeModulesPath() const;
+
  private:
-  Constants() = delete;
-  ~Constants() = delete;
+  friend class core::Singleton<Constants>;
+  Constants() = default;
 
-  static QStringList dataDirectoryPaths();
+  QStringList dataDirectoryPaths();
 };
 
 }  // namespace core

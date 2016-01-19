@@ -24,7 +24,7 @@ KeymapTableView::KeymapTableView(QWidget* parent)
   connect(m_copy, &QAction::triggered, this, [=] {
     if (const auto& keymap = m_model->keymapAt(m_proxyModel->mapToSource(currentIndex()).row())) {
       QClipboard* clipboard = QApplication::clipboard();
-      assert(clipboard);
+      Q_ASSERT(clipboard);
       if (keymap->cmd.condition()) {
         clipboard->setText(QString("- { key: %1, command: %2, if: %3 }")
                                .arg(Util::toString(keymap->key))

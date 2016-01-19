@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <v8.h>
 #include <yaml-cpp/yaml.h>
 #include <unordered_map>
 #include <fstream>
@@ -15,6 +16,7 @@
 #include "Singleton.h"
 #include "stlSpecialization.h"
 #include "Constants.h"
+#include "ConfigDefinition.h"
 
 namespace core {
 
@@ -29,6 +31,8 @@ class Config : public QObject, public Singleton<Config> {
   DISABLE_COPY_AND_MOVE(Config)
 
  public:
+  static void Init(v8::Local<v8::Object> exports);
+
   ~Config() = default;
 
   Theme* theme() { return m_theme; }
@@ -43,7 +47,7 @@ class Config : public QObject, public Singleton<Config> {
   void setTabWidth(int tabWidth);
 
   bool indentUsingSpaces();
-  void setIndentUsingSpaces(bool value);
+  void setIndentUsingSpaces(bool get);
 
   QString endOfLineStr();
   void setEndOfLineStr(const QString& newValue);
@@ -60,19 +64,20 @@ class Config : public QObject, public Singleton<Config> {
 
   void init();
   bool contains(const QString& key);
-
-  // specialization of QString for convenience
-  QString value(const QString& key, const QString& defaultValue = "") {
-    return value<QString>(key, defaultValue);
-  }
+  void addPackageConfigDefinition(const core::ConfigDefinition& def);
 
   template <typename T>
-  T value(const QString& key, const T& defaultValue) {
+  T get(const QString& key, const T& defaultValue) {
     if (m_scalarConfigs.count(key) != 0 && m_scalarConfigs[key].canConvert<T>()) {
       return m_scalarConfigs[key].value<T>();
     }
 
     return defaultValue;
+  }
+
+  // specialization of QString for convenience
+  QString get(const QString& key, const QString& defaultValue) {
+    return get<QString>(key, defaultValue);
   }
 
   template <typename T>
@@ -85,6 +90,7 @@ class Config : public QObject, public Singleton<Config> {
     return false;
   }
 
+
  signals:
   void themeChanged(Theme* newTheme);
   void fontChanged(QFont font);
@@ -94,10 +100,15 @@ class Config : public QObject, public Singleton<Config> {
   void endOfLineStrChanged(const QString& str);
 
  private:
+  // public API accessible from JS
+  static void get(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void setFont(const v8::FunctionCallbackInfo<v8::Value>& args);
+
   Theme* m_theme;
   QFont m_font;
   std::unordered_map<QString, QVariant> m_scalarConfigs;
   std::unordered_map<QString, std::unordered_map<std::string, std::string>> m_mapConfigs;
+  QMap<QString, core::ConfigDefinition> m_packageConfigDefinitions;
 
   friend class Singleton<Config>;
   Config();
@@ -108,6 +119,7 @@ class Config : public QObject, public Singleton<Config> {
   QString themeName();
   QString fontFamily();
   int fontSize();
+  QVariant get(const QString& key);
 
   void save(const QString& key, const QString& newValue) {
     save(key, newValue.toUtf8().constData());
@@ -120,7 +132,7 @@ class Config : public QObject, public Singleton<Config> {
    */
   template <typename T>
   void save(const QString& key, const T& newValue) {
-    QString configFilePath = Constants::userConfigPath();
+    QString configFilePath = Constants::singleton().userConfigPath();
 
     try {
       YAML::Node rootNode;

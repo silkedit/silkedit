@@ -7,7 +7,6 @@
 #include <QMainWindow>
 
 #include "core/macros.h"
-#include "core/UniqueObject.h"
 
 class TabView;
 class StatusBar;
@@ -20,7 +19,7 @@ namespace Ui {
 class Window;
 }
 
-class Window : public QMainWindow, public core::UniqueObject<Window> {
+class Window : public QMainWindow{
   Q_OBJECT
   DISABLE_COPY(Window)
 
@@ -28,14 +27,14 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   static Window* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<Window*> windows() { return s_windows; }
-  static void loadMenu(const QString& pkgName, const std::string& ymlPath);
+  static void loadMenu(const QString& pkgName, const QString& ymlPath);
 
   /**
    * @brief parse toolbars definition and create toolbars for all windows.
    * @param pkgName
    * @param ymlPath
    */
-  static void loadToolbar(const QString& pkgName, const std::string& ymlPath);
+  static void loadToolbar(const QString& pkgName, const QString& ymlPath);
 
   /**
    * @brief parse toolbars definition and create toolbars for a window.
@@ -43,7 +42,7 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
    * @param pkgName
    * @param ymlPath
    */
-  static void loadToolbar(Window* window, const QString& pkgName, const std::string& ymlPath);
+  static void loadToolbar(Window* window, const QString& pkgName, const QString& ymlPath);
 
   static void showFirst();
 
@@ -53,27 +52,21 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   // accessor
   TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
   TabView* activeTabView();
-  StatusBar* statusBar();
   bool isProjectOpend() { return m_projectView != nullptr; }
 
   void show();
   void closeEvent(QCloseEvent* event) override;
   bool openDir(const QString& dirPath);
-  void openFindAndReplacePanel();
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
 
+public slots:
+  StatusBar* statusBar();
+  void openFindAndReplacePanel();
+
+
  signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
-
- protected:
-  friend struct core::UniqueObject<Window>;
-
-  static void request(Window* window,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(Window* window, const QString& method, const msgpack::object& obj);
 
  private:
   static QList<Window*> s_windows;
@@ -82,7 +75,7 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
    * @brief toolbars definitions
    * A new window can load toolbars using this toolbars definition map
    */
-  static QMap<QString, std::string> s_toolbarsDefinitions;
+  static QMap<QString, QString> s_toolbarsDefinitions;
 
   explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
@@ -96,3 +89,5 @@ class Window : public QMainWindow, public core::UniqueObject<Window> {
   void updateConnection(TextEditView* oldEditView, TextEditView* newEditView);
   void emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView);
 };
+
+Q_DECLARE_METATYPE(Window*)

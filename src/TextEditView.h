@@ -13,7 +13,6 @@
 #include "core/macros.h"
 #include "core/ICloneable.h"
 #include "core/Document.h"
-#include "core/UniqueObject.h"
 #include "core/BOM.h"
 
 class QPaintEvent;
@@ -31,7 +30,6 @@ class BOM;
 }
 
 class TextEditView : public QPlainTextEdit,
-                     public core::UniqueObject<TextEditView>,
                      public core::ICloneable<TextEditView> {
   Q_OBJECT
   Q_DECLARE_PRIVATE(TextEditView)
@@ -52,15 +50,7 @@ class TextEditView : public QPlainTextEdit,
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
-  void moveCursor(int mv, int = 1);
-  void doDelete(int n);
-  void doUndo(int n);
-  void doRedo(int n);
-  bool isThinCursor();
-  void setThinCursor(bool on);
   TextEditView* clone() override;
-  void save();
-  void saveAs();
   void setPath(const QString& path);
   void find(const QString& text, int begin = 0, int end = -1, core::Document::FindFlags flags = 0);
   void find(const QString& text,
@@ -85,12 +75,29 @@ class TextEditView : public QPlainTextEdit,
                            int end,
                            core::Document::FindFlags flags = 0,
                            bool preserveCase = false);
-  void performCompletion();
-  void insertNewLineWithIndent();
   void clearSelection();
 
+ public slots:
+  QString scopeName();
+  QString scopeTree();
+  void undo();
+  void redo();
+  void cut();
+  void copy();
+  void paste();
+  void selectAll();
+  void indent();
+  QString text();
+  void performCompletion();
+  void insertNewLine();
+  void save();
+  void saveAs();
+  void moveCursor(const QString& op, int = 1);
+  void doDelete(int n);
+  bool isThinCursor();
+  void setThinCursor(bool on);
+
  signals:
-  void destroying(const QString& path);
   void pathUpdated(const QString& path);
   void saved();
   void languageChanged(const QString& scope);
@@ -99,15 +106,10 @@ class TextEditView : public QPlainTextEdit,
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
 
+  // private signals
+  void destroying(const QString& path, QPrivateSignal);
+
  protected:
-  friend struct core::UniqueObject<TextEditView>;
-
-  static void request(TextEditView* view,
-                      const QString& method,
-                      msgpack::rpc::msgid_t msgId,
-                      const msgpack::object& obj);
-  static void notify(TextEditView* view, const QString& method, const msgpack::object& obj);
-
   void resizeEvent(QResizeEvent* event) override;
   void paintEvent(QPaintEvent* e) override;
   void wheelEvent(QWheelEvent* event) override;
@@ -136,3 +138,5 @@ class TextEditView : public QPlainTextEdit,
  private slots:
   void setTheme(core::Theme* theme);
 };
+
+Q_DECLARE_METATYPE(TextEditView*)

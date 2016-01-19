@@ -6,6 +6,10 @@ LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent) {
   setClearButtonEnabled(true);
 }
 
+LineEdit::LineEdit(const QString& contents, QWidget* parent) : QLineEdit(contents, parent) {
+  setClearButtonEnabled(true);
+}
+
 void LineEdit::keyPressEvent(QKeyEvent* event) {
   switch (event->key()) {
     case Qt::Key_Return:

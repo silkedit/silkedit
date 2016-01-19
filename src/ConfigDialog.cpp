@@ -5,16 +5,22 @@
 #include "PackagesView.h"
 #include "PackageConfigView.h"
 #include "util/YamlUtils.h"
+#include "core/Config.h"
 
 using core::ConfigDefinition;
+using core::Config;
 
 QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 ConfigDialog* ConfigDialog::s_dialog = nullptr;
 
-void ConfigDialog::loadConfig(const QString& pkgName, const std::string& configPath) {
+void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configPath) {
   auto configList = YamlUtils::parseConfig(pkgName, configPath);
   if (!configList.isEmpty()) {
     s_packageConfigs[pkgName] = configList;
+  }
+
+  for (const auto& def : configList) {
+    Config::singleton().addPackageConfigDefinition(def);
   }
 }
 

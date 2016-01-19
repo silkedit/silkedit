@@ -49,5 +49,14 @@ QString core::Package::tarballUrl() const {
   }
   owner = match.captured("owner");
   repo = match.captured("repo");
-  return QString("https://api.github.com/repos/%1/%2/tarball/%3").arg(owner, repo, version);
+  return QString("https://github.com/%1/%2/tarball/%3").arg(owner, repo, version);
+}
+
+QJsonObject core::Package::toJson() const {
+  QJsonObject obj;
+  obj["name"] = name;
+  obj["version"] = version;
+  obj["description"] = description;
+  obj["repository"] = repositoryUrl;
+  return obj;
 }

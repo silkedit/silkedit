@@ -24,11 +24,10 @@ class YamlUtils {
   static boost::optional<core::ConditionExpression> parseValueCondition(const QString& str);
   static void parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode);
   static void parseToolbarNode(const QString& pkgName,
-                               const std::string& ymlPath,
+                               const QString& ymlPath,
                                QWidget* window,
                                const YAML::Node& toolbarNode);
-  static QList<core::ConfigDefinition> parseConfig(const QString& pkgName,
-                                                   const std::string& ymlPath);
+  static QList<core::ConfigDefinition> parseConfig(const QString& pkgName, const QString& ymlPath);
 
  private:
   YamlUtils() = delete;

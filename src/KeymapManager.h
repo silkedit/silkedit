@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <yaml-cpp/yaml.h>
+#include <v8.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <QObject>
@@ -11,6 +11,7 @@
 #include "core/macros.h"
 #include "core/Singleton.h"
 #include "core/stlSpecialization.h"
+#include "core/FunctionInfo.h"
 
 class QKeySequence;
 class QKeyEvent;
@@ -23,13 +24,13 @@ class KeymapManager : public QObject,
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
+  static void Init(v8::Local<v8::Object> exports);
+
   ~KeymapManager() = default;
 
   void loadUserKeymap();
-  void load(const QString& filename, const QString& source);
   QKeySequence findShortcut(QString cmdName);
   bool keyEventFilter(QKeyEvent* event);
-  bool dispatch(QKeyEvent* ev, int repeat = 1);
   const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
 
  signals:
@@ -37,10 +38,20 @@ class KeymapManager : public QObject,
   void keymapUpdated();
 
  private:
+  static void dispatch(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void load(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void _assignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args);
+
   friend class core::Singleton<KeymapManager>;
   KeymapManager();
 
   void add(const QKeySequence& key, CommandEvent cmdEvent);
+  bool runJSKeyEventFilter(QKeyEvent* event);
+  bool dispatch(QKeyEvent* ev, int repeat = 1);
+  void load(const QString& filename, const QString& source);
+
+  // internal (only used in initialization in JS side)
+  void _assignJSKeyEventFilter(core::FunctionInfo info);
 
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition
@@ -48,6 +59,7 @@ class KeymapManager : public QObject,
   std::unordered_map<QString, Keymap> m_cmdKeymapHash;
   QString m_partiallyMatchedKeyString;
   std::unordered_map<QKeySequence, CommandEvent> m_emptyCmdKeymap;
+  v8::UniquePersistent<v8::Function> m_jsKeyEventFilter;
 
   void removeKeymap();
   void removeShortcut(const QString& cmdName);

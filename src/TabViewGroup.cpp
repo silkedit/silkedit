@@ -51,7 +51,7 @@ void TabViewGroup::setActiveTab(TabView* tabView) {
   }
 }
 
-void TabViewGroup::saveAllTabs() {
+void TabViewGroup::saveAll() {
   for (auto tabView : m_tabViews) {
     tabView->saveAllTabs();
   }
@@ -68,14 +68,14 @@ bool TabViewGroup::closeAllTabs() {
   return true;
 }
 
-void TabViewGroup::splitTabHorizontally() {
-  splitTab(std::bind(
-      &TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1, std::placeholders::_2));
+void TabViewGroup::splitHorizontally() {
+  splitTab(std::bind(&TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1,
+                     std::placeholders::_2));
 }
 
-void TabViewGroup::splitTabVertically() {
-  splitTab(std::bind(
-      &TabViewGroup::addTabViewVertically, this, std::placeholders::_1, std::placeholders::_2));
+void TabViewGroup::splitVertically() {
+  splitTab(std::bind(&TabViewGroup::addTabViewVertically, this, std::placeholders::_1,
+                     std::placeholders::_2));
 }
 
 TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
@@ -87,24 +87,6 @@ TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
   }
 
   return nullptr;
-}
-
-void TabViewGroup::request(TabViewGroup*,
-                           const QString&,
-                           msgpack::rpc::msgid_t,
-                           const msgpack::object&) {
-}
-
-void TabViewGroup::notify(TabViewGroup* view, const QString& method, const msgpack::object&) {
-  if (method == "saveAllTabs") {
-    view->saveAllTabs();
-  } else if (method == "splitHorizontally") {
-    view->splitTabHorizontally();
-  } else if (method == "splitVertically") {
-    view->splitTabVertically();
-  } else {
-    qWarning("%s not supportd", qPrintable(method));
-  }
 }
 
 TabView* TabViewGroup::createTabView() {

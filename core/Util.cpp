@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QRegularExpression>
+#include <QMetaMethod>
 
 #include "Util.h"
 
@@ -14,6 +15,29 @@ void replace(QString& str, const QString& regex, const QString& after) {
     QRegularExpressionMatch match = iter.next();
     str = str.replace(match.capturedStart(), match.capturedLength(), after);
   }
+}
+
+bool qObjectPointerTypeCheck(QVariant var, const QByteArray& typeName) {
+  if (var.isNull())
+    return true;
+
+  return var.canConvert<QObject*>() &&
+         var.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
+}
+
+bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
+  if (!var.canConvert<int>()) {
+    return false;
+  }
+
+  int typeId = QMetaType::type(typeName);
+  if (typeId != QMetaType::UnknownType) {
+    const QMetaObject* metaObj = QMetaType(typeId).metaObject();
+    const QByteArray& enumName = core::Util::stripNamespace(typeName);
+    return metaObj->indexOfEnumerator(enumName) >= 0;
+  }
+
+  return false;
 }
 }
 
@@ -87,6 +111,66 @@ QString Util::toString(const QKeySequence& keySeq) {
 
   replace(str, "return", "enter");
   return str;
+}
+
+void Util::processWithPublicMethods(const QMetaObject* metaObj,
+                                    std::function<void(const QMetaMethod&)> fn) {
+  QSet<QByteArray> registeredMethods;
+  for (int i = 0; i < metaObj->methodCount(); i++) {
+    const QMetaMethod& method = metaObj->method(i);
+    if (method.access() == QMetaMethod::Access::Public &&
+        method.methodType() != QMetaMethod::MethodType::Constructor &&
+        !registeredMethods.contains(method.name())) {
+      registeredMethods.insert(method.name());
+      fn(method);
+    }
+  }
+}
+
+QByteArray Util::stripNamespace(const QByteArray& name) {
+  return name.mid(name.lastIndexOf(":") + 1);
+}
+
+bool Util::matchTypes(QList<QByteArray> types, QVariantList args) {
+  if (types.size() != args.size()) {
+    return false;
+  }
+
+  for (int i = 0; i < types.size(); i++) {
+    if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) &&
+        !qObjectPointerTypeCheck(args[i], types[i]) && !enumTypeCheck(args[i], types[i])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+char **core::Util::toCStringList(const QStringList &argsStrings) {
+  int size = 0;
+  for (const auto& arg : argsStrings) {
+    size += arg.size() + 1;
+  }
+
+  char** argv = (char**)malloc(sizeof(char*) * (argsStrings.size() + 1));  // +1 for last nullptr
+  // argv needs to be contiguous
+  char* s = (char*)malloc(sizeof(char) * size);
+  if (argv == nullptr) {
+    qWarning() << "failed to allocate memory for argument";
+    exit(1);
+  }
+
+  int i = 0;
+  for (i = 0; i < argsStrings.size(); i++) {
+    size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
+    // convert to UTF-8
+    memcpy(s, argsStrings[i].toUtf8().data(), size);
+    argv[i] = s;
+    s += size;
+  }
+  argv[i] = nullptr;
+
+  return argv;
 }
 
 }  // namespace core
