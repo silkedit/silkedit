@@ -83,13 +83,12 @@ bool checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
   if (args.Length() != numArgs) {
     std::stringstream ss;
     ss << "arguments size mismatched. expected:" << numArgs << " actual:" << args.Length();
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().data())));
+    V8Util::throwError(isolate, ss.str());
     return false;
   }
 
   if (!validateFn()) {
-    isolate->ThrowException(
-        Exception::TypeError(String::NewFromUtf8(isolate, "invalid arguments")));
+    V8Util::throwError(isolate, "invalid argument");
     return false;
   }
 
@@ -163,8 +162,10 @@ void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 template <typename T>
-void bridge::Handler::registerQtEnum(v8::Local<v8::Context> context, Local<Object> exports, Isolate* isolate, const char* name)
-{
+void bridge::Handler::registerQtEnum(v8::Local<v8::Context> context,
+                                     Local<Object> exports,
+                                     Isolate* isolate,
+                                     const char* name) {
   qRegisterMetaType<T>();
   int id = QMetaType::type(name);
   Q_ASSERT(id != QMetaType::UnknownType);
@@ -300,8 +301,8 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
 
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(metaObj, V8Util::invokeQObjectMethod,
-                                                                     isolate, true));
+  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
+      metaObj, V8Util::invokeQObjectMethod, isolate, true));
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);

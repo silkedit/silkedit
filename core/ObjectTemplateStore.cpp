@@ -79,7 +79,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   Isolate* isolate = info.GetIsolate();
   QObject* obj = ObjectStore::unwrap(info.Holder());
   if (!obj) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "QObject is null")));
+    V8Util::throwError(isolate, "QObject is null");
     return;
   }
 
@@ -88,7 +88,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   if (propertyIndex == -1) {
     std::stringstream ss;
     ss << "property:" << *propertyName << "not found";
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().data())));
+    V8Util::throwError(isolate, ss.str());
     return;
   }
 
@@ -96,7 +96,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   if (!prop.isReadable()) {
     std::stringstream ss;
     ss << "property:" << *propertyName << "is not readable";
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().c_str())));
+    V8Util::throwError(isolate, ss.str());
     return;
   }
 
@@ -110,7 +110,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   Isolate* isolate = info.GetIsolate();
   QObject* obj = ObjectStore::unwrap(info.Holder());
   if (!obj) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, "QObject is null")));
+    V8Util::throwError(isolate, "QObject is null");
     return;
   }
 
@@ -119,7 +119,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   if (propertyIndex == -1) {
     std::stringstream ss;
     ss << "property:" << *propertyName << "not found";
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().c_str())));
+    V8Util::throwError(isolate, ss.str());
     return;
   }
 
@@ -127,7 +127,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   if (!prop.isWritable()) {
     std::stringstream ss;
     ss << "property:" << *propertyName << "is not writable";
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate, ss.str().c_str())));
+    V8Util::throwError(isolate, ss.str());
     return;
   }
 
