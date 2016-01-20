@@ -27,7 +27,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       ui(new Ui::Window),
       m_tabViewGroup(new TabViewGroup(this)),
       m_projectView(nullptr),
-      m_findReplaceView(new FindReplaceView(this)) {
+      m_findReplaceView(new FindReplaceView(this)),
+      m_firstPaintEventFired(false) {
   qDebug("creating Window");
   ui->setupUi(this);
 
@@ -133,8 +134,8 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
 
   result = w->activeTabView()->createWithSavedTabs();
 
-  if( !result ){
-      w->activeTabView()->addNew();
+  if (!result) {
+    w->activeTabView()->addNew();
   }
 
   return w;
@@ -246,6 +247,14 @@ bool Window::openDir(const QString& dirPath) {
 
 void Window::openFindAndReplacePanel() {
   m_findReplaceView->show();
+}
+
+void Window::paintEvent(QPaintEvent* event) {
+  QMainWindow::paintEvent(event);
+  if (!m_firstPaintEventFired) {
+    m_firstPaintEventFired = true;
+    emit firstPaintEventFired();
+  }
 }
 
 void Window::hideFindReplacePanel() {
