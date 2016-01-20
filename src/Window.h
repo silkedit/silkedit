@@ -67,6 +67,10 @@ public slots:
 
  signals:
   void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+  void firstPaintEventFired();
+
+protected:
+  void paintEvent(QPaintEvent * event) override;
 
  private:
   static QList<Window*> s_windows;
@@ -83,6 +87,7 @@ public slots:
   TabViewGroup* m_tabViewGroup;
   ProjectTreeView* m_projectView;
   FindReplaceView* m_findReplaceView;
+  bool m_firstPaintEventFired;
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);

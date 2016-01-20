@@ -70,17 +70,20 @@ int main(int argc, char** argv) {
   // Create default menu bar before creating any new window
   MenuBar::init();
 
-  Window* w = Window::createWithNewFile();
-  w->show();
+  Window* window = Window::createWithNewFile();
+  QMetaObject::Connection connection;
+  connection = QObject::connect(window, &Window::firstPaintEventFired, [&] {
+    QObject::disconnect(connection);
+    // Start Node.js event loop after showing the first window
+    // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed
+    QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
+  });
+  window->show();
 
   //   Set focus to active edit view
-  if (auto v = w->activeTabView()->activeEditView()) {
+  if (auto v = window->activeTabView()->activeEditView()) {
     v->setFocus();
   }
-
-  // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the
-  // window system's event queue have been processe
-  QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
 
   if (arguments.size() > 1) {
     DocumentManager::singleton().open(arguments.at(1));
