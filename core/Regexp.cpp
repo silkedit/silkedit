@@ -1,4 +1,5 @@
 ﻿#include <oniguruma.h>
+#include <memory>
 #include <QString>
 #include <QStringBuilder>
 #include <QDebug>
