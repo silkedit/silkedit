@@ -358,7 +358,7 @@ rebuild() {
 # static analysis
 analyze() {
     if [ $OS == 'Win32' ]; then
-        echo "gcc is used on Windows so clang-check doesn't work"
+        echo "Not implemented yet on Windows"
         exit 1
     fi
 

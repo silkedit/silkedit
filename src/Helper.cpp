@@ -58,7 +58,7 @@ HelperPrivate::~HelperPrivate() {
 
 void HelperPrivate::startNodeEventLoop() {
   const QStringList& argsStrings = helperArgs();
-  char** argv = Util::toCStringList(argsStrings);
+  char** argv = Util::toArgv(argsStrings);
   int argc = argsStrings.size();
 
   silkedit_node::Start(argc, argv, q->m_nodeBindings.get());
