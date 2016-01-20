@@ -78,12 +78,13 @@ Regexp* Regexp::compile(const QString& expr) {
 }
 
 // todo: Use QString instead of QStringRef
+// todo: return std::unique_ptr<QVecor<int>>
 QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s,
                                               bool backward,
                                               bool findNotEmpty) const {
   Q_ASSERT(m_reg);
 
-  unsigned char* start, *range, *end;
+  unsigned char *start, *range, *end;
   OnigRegion* region = onig_region_new();
 
   QByteArray ba = s.toUtf8();
@@ -130,10 +131,11 @@ QVector<int>* Regexp::findStringSubmatchIndex(const QStringRef& s,
 }
 
 bool Regexp::matches(const QString& text, bool findNotEmpty) {
-  return findStringSubmatchIndex(QStringRef(&text), false, findNotEmpty) != nullptr;
+  std::unique_ptr<QVector<int>> result(
+      findStringSubmatchIndex(QStringRef(&text), false, findNotEmpty));
+  return result.get() != nullptr;
 }
 
-Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {
-}
+Regexp::Regexp(regex_t* reg, const QString& pattern) : m_reg(reg), m_pattern(pattern) {}
 
 }  // namespace core

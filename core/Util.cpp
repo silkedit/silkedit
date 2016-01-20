@@ -146,28 +146,40 @@ bool Util::matchTypes(QList<QByteArray> types, QVariantList args) {
   return true;
 }
 
-char **core::Util::toCStringList(const QStringList &argsStrings) {
-  int size = 0;
+// argv is contiguous and has nullptr as last element
+char** core::Util::toArgv(const QStringList& argsStrings) {
+  int totalSize = 0;
   for (const auto& arg : argsStrings) {
-    size += arg.size() + 1;
+    totalSize += arg.toUtf8().size() + 1;
   }
 
   char** argv = (char**)malloc(sizeof(char*) * (argsStrings.size() + 1));  // +1 for last nullptr
-  // argv needs to be contiguous
-  char* s = (char*)malloc(sizeof(char) * size);
   if (argv == nullptr) {
     qWarning() << "failed to allocate memory for argument";
     exit(1);
   }
 
   int i = 0;
-  for (i = 0; i < argsStrings.size(); i++) {
-    size = argsStrings[i].size() + 1;  // +1 for 0 terminated string
-    // convert to UTF-8
-    memcpy(s, argsStrings[i].toUtf8().data(), size);
-    argv[i] = s;
-    s += size;
+
+  // Don't call malloc(0)
+  // https://www.securecoding.cert.org/confluence/display/c/MEM04-C.+Beware+of+zero-length+allocations
+  if (totalSize > 0) {
+// clang-check thinks that s is never freed, but argv points to the memory to which s also points.
+// Ignore the following warning because this is false positive.
+// clang-check says "Potential leak of memory pointed to by 's'"
+#ifndef __clang_analyzer__
+    char* s = (char*)malloc(sizeof(char) * totalSize);
+    for (i = 0; i < argsStrings.size(); i++) {
+      int strSize = argsStrings[i].size() + 1;  // +1 for 0 terminated string
+      // convert to UTF-8
+      memcpy(s, argsStrings[i].toUtf8().data(), strSize);
+      argv[i] = s;
+      s += strSize;
+    }
+#endif
   }
+
+  // the last element of argv is nullptr
   argv[i] = nullptr;
 
   return argv;

@@ -92,7 +92,7 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 }
 
 void KeymapManager::load(const QString& filename, const QString& source) {
-  const std::string& name = filename.toUtf8().constData();
+  std::string name = filename.toUtf8().constData();
   try {
     YAML::Node keymapNode = YAML::LoadFile(name);
     if (!keymapNode.IsSequence()) {

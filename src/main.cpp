@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   // Run SilkEdit as normal Node.js
   if (arguments.contains(Constants::RUN_AS_NODE)) {
     arguments.removeOne(Constants::RUN_AS_NODE);
-    return nodeMain(arguments.size(), Util::toCStringList(arguments));
+    return nodeMain(arguments.size(), Util::toArgv(arguments));
   }
 
   // call a bunch of qRegisterMetaType calls

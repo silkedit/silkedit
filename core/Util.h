@@ -45,7 +45,7 @@ class Util {
   // Caller needs to call free argv after using it as follows
   //  free(argv[0]);
   //  free(argv);
-  static char** toCStringList(const QStringList& argsStrings);
+  static char** toArgv(const QStringList& argsStrings);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
