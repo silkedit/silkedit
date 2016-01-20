@@ -318,8 +318,7 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll node_modules helper silkedit_ja.qm Release
-        rm -rf silkedit.exe onig.dll node_modules helper
+        cp -r silkedit.exe onig.dll node.dll jslib packages themes silkedit_ja.qm Release
         #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
