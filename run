@@ -116,6 +116,14 @@ resolve() {
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
         cd ..
       fi
+      
+      # Download BugSplat breakpad to send a symbol using dump_sdk_symbols (symupload can't be built on Mac)
+      mkdir -p bugsplat
+      cd bugsplat
+      wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
+      unzip Breakpad.framework.zip
+      rm Breakpad.framework.zip
+      cd ..
 
 			# build libnode.dylib
 			cd vendor/node
@@ -416,16 +424,19 @@ localize() {
 }
 
 send_symbol() {
-    if [ ! -d build ]; then
-      build
-    fi
+    build
 
-    version=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+    APP_NAME="SilkEdit"
+    VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+    echo "sending symbol with app name:${APP_NAME}, version: ${VERSION}"
 
     if [ $OS == 'Mac' ]; then
-      echo 'Not support OSX'
+      DSYM_DIR="/tmp/SilkEdit.dSYM"
+      rm -rf ${DSYM_DIR}
+      dsymutil build/SilkEdit.app/Contents/MacOS/SilkEdit -o ${DSYM_DIR}
+      bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a ${APP_NAME} -v ${VERSION} -s ${DSYM_DIR}
     else
-      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe 'http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=Silkedit&appVer='$version
+      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${APP_NAME}&appVer=${VERSION}"
     fi
 }
 
