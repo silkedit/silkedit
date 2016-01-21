@@ -5,6 +5,7 @@ CMakeLists.txt.user
 *.otf
 *.node
 
+/bugsplat/
 /lib/
 /libnode/
 /build/

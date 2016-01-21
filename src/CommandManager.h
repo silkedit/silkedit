@@ -32,6 +32,7 @@ class CommandManager : public QObject, public core::Singleton<CommandManager> {
                   CommandArgument cmdArgs = CommandArgument(),
                   int repeat = 1);
   void add(std::unique_ptr<ICommand> cmd);
+  void addHidden(std::unique_ptr<ICommand> cmd);
   const std::unordered_map<QString, std::unique_ptr<ICommand>>& commands() { return m_commands; }
 
 public slots:
@@ -46,11 +47,14 @@ public slots:
 
  private:
   friend class core::Singleton<CommandManager>;
-  CommandManager() = default;
+  CommandManager();
 
   // QHash doesn't like unique_ptr (probably lack of move semantics),
   // so use an unordered_map here instead
   std::unordered_map<QString, std::unique_ptr<ICommand>> m_commands;
+
+  // hidden commands
+  std::unordered_map<QString, std::unique_ptr<ICommand>> m_hiddenCommands;
 
   v8::UniquePersistent<v8::Function> m_jsCmdEventFilter;
 
