@@ -116,12 +116,12 @@ resolve() {
         xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
         cd ..
       fi
-      
+
       # Download BugSplat breakpad to send a symbol using dump_sdk_symbols (symupload can't be built on Mac)
       mkdir -p bugsplat
       cd bugsplat
       wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
-      unzip Breakpad.framework.zip
+      unzip -o Breakpad.framework.zip
       rm Breakpad.framework.zip
       cd ..
 
