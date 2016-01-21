@@ -2,8 +2,6 @@
 
 # Constants
 
-NODE_VERSION=v5.1.1
-
 if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
