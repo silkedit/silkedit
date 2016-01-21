@@ -3,6 +3,7 @@
 #include "CommandManager.h"
 #include "Helper.h"
 #include "commands/PackageCommand.h"
+#include "commands/CrashCommand.h"
 #include "core/V8Util.h"
 #include "atom/node_includes.h"
 
@@ -152,6 +153,12 @@ bool CommandManager::runCommandEventFilter(QString& cmdName, CommandArgument& cm
 }
 
 void CommandManager::runCommand(QString name, CommandArgument args, int repeat) {
+  // check hidden commands first
+  if (m_hiddenCommands.find(name) != m_hiddenCommands.end()) {
+    m_hiddenCommands[name]->run(args, repeat);
+    return;
+  }
+
   bool result = runCommandEventFilter(name, args);
   if (result) {
     qDebug() << name << "is handled by an event filter";
@@ -169,6 +176,10 @@ void CommandManager::add(std::unique_ptr<ICommand> cmd) {
   m_commands[cmd->name()] = std::move(cmd);
 }
 
+void CommandManager::addHidden(std::unique_ptr<ICommand> cmd) {
+  m_hiddenCommands[cmd->name()] = std::move(cmd);
+}
+
 void CommandManager::remove(const QString& name) {
   m_commands.erase(name);
   emit commandRemoved(name);
@@ -178,6 +189,10 @@ void CommandManager::_assignJSCommandEventFilter(FunctionInfo info) {
   Isolate* isolate = info.isolate;
   UniquePersistent<Function> perFn(isolate, info.fn);
   m_jsCmdEventFilter.Reset(info.isolate, info.fn);
+}
+
+CommandManager::CommandManager() {
+  addHidden(std::move(std::unique_ptr<ICommand>(new CrashCommand())));
 }
 
 void CommandManager::add(const QString& name, const QString& description) {
