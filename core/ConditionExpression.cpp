@@ -1,7 +1,6 @@
 ﻿#include "ConditionExpression.h"
 #include "OSCondition.h"
 #include "Condition.h"
-#include "ConditionManager.h"
 
 using core::Condition;
 
@@ -11,7 +10,7 @@ core::ConditionExpression::ConditionExpression(const QString& key,
     : m_key(key), m_op(op), m_value(value) {}
 
 bool core::ConditionExpression::isSatisfied() const {
-  return ConditionManager::singleton().isSatisfied(m_key, m_op, m_value);
+  return Condition::isSatisfied(m_key, m_op, m_value);
 }
 
 QString core::ConditionExpression::toString() const {
@@ -23,7 +22,7 @@ QString core::ConditionExpression::toString() const {
 }
 
 bool core::ConditionExpression::isStatic() const {
-  return ConditionManager::singleton().isStatic(m_key);
+  return Condition::isStatic(m_key);
 }
 
 bool core::ConditionExpression::operator==(const core::ConditionExpression& other) const {
