@@ -6,11 +6,12 @@ CMakeLists.txt.user
 *.node
 
 /bugsplat/
-/lib/
-/libnode/
 /build/
 /include/
+/jsdoc/
 /jslib/node_modules/silkedit/node_modules/
+/lib/
+/libnode/
 /yaml-cpp-*
 /packages/node_modules/*
 !/packages/node_modules/default
