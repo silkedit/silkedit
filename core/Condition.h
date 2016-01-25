@@ -24,8 +24,6 @@ class Condition : public QObject {
 
   virtual ~Condition() = default;
 
-
-public slots:
   virtual bool isSatisfied(Operator op, const QString& operand);
 
   /**
@@ -42,5 +40,3 @@ public slots:
 };
 
 }  // namespace core
-
-//Q_DECLARE_METATYPE(core::Condition::Operator)
