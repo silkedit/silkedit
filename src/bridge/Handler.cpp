@@ -35,7 +35,6 @@
 #include "core/Constants.h"
 #include "core/QVariantArgument.h"
 #include "core/Condition.h"
-#include "core/ConditionManager.h"
 #include "core/ObjectStore.h"
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
@@ -46,7 +45,6 @@ using core::Constants;
 using core::PrototypeStore;
 using core::QVariantArgument;
 using core::Condition;
-using core::ConditionManager;
 using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
@@ -82,31 +80,12 @@ using v8::Function;
 
 namespace {
 
-bool checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
-                    int numArgs,
-                    std::function<bool()> validateFn) {
-  Isolate* isolate = args.GetIsolate();
-  if (args.Length() != numArgs) {
-    std::stringstream ss;
-    ss << "arguments size mismatched. expected:" << numArgs << " actual:" << args.Length();
-    V8Util::throwError(isolate, ss.str());
-    return false;
-  }
-
-  if (!validateFn()) {
-    V8Util::throwError(isolate, "invalid argument");
-    return false;
-  }
-
-  return true;
-}
-
 /*
   Window static methods
 */
 
 void loadMenu(const FunctionCallbackInfo<Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -114,7 +93,7 @@ void loadMenu(const FunctionCallbackInfo<Value>& args) {
 }
 
 void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -127,28 +106,12 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
 */
 
 void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
   ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()),
                                V8Util::toQString(args[1]->ToString()));
-}
-
-/*
-  Condition static methods
-*/
-void check(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 3, [&] {
-        return args[0]->IsString() && args[1]->IsInt32() && args[2]->IsString();
-      })) {
-    return;
-  }
-
-  bool result = Condition::check(V8Util::toQString(args[0]->ToString()),
-                                 static_cast<Condition::Operator>(args[1]->ToInt32()->Value()),
-                                 V8Util::toQString(args[2]->ToString()));
-  args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
 }
 
 /*
@@ -241,9 +204,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
 
-  // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
-  // converts JS object to QObject* or QVariantMap internally)
-  ConditionManager::Init(exports);
   // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
   // handle it specially
   Config::Init(exports);
@@ -251,7 +211,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   KeymapManager::Init(exports);
 
   // init classes for QObject subclasses
-  registerClass<Condition>(exports);
   registerClass<ConfigDialog>(exports);
   registerClass<Dialog>(exports);
   registerClass<DialogButtonBox>(exports);
@@ -264,6 +223,9 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);
 
+  // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
+  // converts JS object to QObject* or QVariantMap internally)
+  Condition::Init(exports);
   // init classes for Q_GADGET classes
   Font::Init(exports);
   QKeyEventWrap::Init(exports);
@@ -279,8 +241,6 @@ void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
                                             v8::Local<v8::Function> ctor) {
   if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
-  } else if (metaObj.className() == Condition::staticMetaObject.className()) {
-    NODE_SET_METHOD(ctor, "check", check);
   } else if (metaObj.className() == Window::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
     NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);

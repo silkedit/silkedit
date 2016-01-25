@@ -323,6 +323,23 @@ QVariant V8Util::callJSFunc(v8::Isolate* isolate,
   return V8Util::toVariant(isolate, maybeResult.ToLocalChecked());
 }
 
+bool V8Util::checkArguments(const v8::FunctionCallbackInfo<v8::Value> args, int numArgs, std::function<bool ()> validateFn) {
+  Isolate* isolate = args.GetIsolate();
+  if (args.Length() != numArgs) {
+    std::stringstream ss;
+    ss << "arguments size mismatched. expected:" << numArgs << " actual:" << args.Length();
+    V8Util::throwError(isolate, ss.str());
+    return false;
+  }
+
+  if (!validateFn()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return false;
+  }
+
+  return true;
+}
+
 QVariant V8Util::invokeQObjectMethodInternal(v8::Isolate* isolate,
                                              QObject* object,
                                              const QString& methodName,

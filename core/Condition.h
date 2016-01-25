@@ -1,7 +1,11 @@
 ﻿#pragma once
 
+#include <v8.h>
+#include <unordered_map>
+#include <memory>
 #include <QObject>
 
+#include "stlSpecialization.h"
 #include "macros.h"
 
 class QString;
@@ -18,9 +22,13 @@ class Condition : public QObject {
   };
   Q_ENUM(Operator)
 
-  static bool check(const QString &key, Operator op, const QString& operand);
 
   static QString operatorString(Operator op);
+
+  static void Init(v8::Local<v8::Object> exports);
+  static void init();
+  static bool isStatic(const QString& key);
+  static bool isSatisfied(const QString& key, core::Condition::Operator op, const QString& value);
 
   virtual ~Condition() = default;
 
@@ -36,6 +44,15 @@ class Condition : public QObject {
   Condition() = default;
 
  private:
+  static std::unordered_map<QString, std::unique_ptr<Condition>> s_conditions;
+
+  static void add(const QString& key, std::unique_ptr<Condition> condition);
+  static void remove(const QString& key);
+  static bool check(const QString &key, Operator op, const QString& operand);
+  static void Add(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Remove(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Check(const v8::FunctionCallbackInfo<v8::Value>& args);
+
   virtual QString key() = 0;
 };
 
