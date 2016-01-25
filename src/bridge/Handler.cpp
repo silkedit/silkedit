@@ -232,10 +232,10 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
   setSingletonObj(exports, App::instance(),
                   Util::stripNamespace(App::staticMetaObject.className()));
-  setSingletonObj(exports, &Constants::singleton(),
-                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
                   Util::stripNamespace(CommandManager::staticMetaObject.className()));
+  setSingletonObj(exports, &Constants::singleton(),
+                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
