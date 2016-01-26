@@ -23,7 +23,7 @@ class PackageCondition : public Condition {
   v8::UniquePersistent<v8::Object> m_object;
   v8::Isolate* m_isolate;
 
-  QString key() override;
+  QString keyValue() override;
 };
 
 }  // namespace core

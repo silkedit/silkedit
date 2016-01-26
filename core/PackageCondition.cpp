@@ -79,24 +79,24 @@ bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
   return result->ToBoolean()->Value();
 }
 
-QString PackageCondition::key() {
+QString PackageCondition::keyValue() {
   auto object = Local<Object>::New(m_isolate, m_object);
-  MaybeLocal<Value> maybeKeyFn =
-      object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "key"));
-  if (maybeKeyFn.IsEmpty()) {
-    throw std::runtime_error("key is empty");
+  MaybeLocal<Value> maybeKeyValueFn =
+      object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "keyValue"));
+  if (maybeKeyValueFn.IsEmpty()) {
+    throw std::runtime_error("keyValue is empty");
   }
 
-  Local<Value> keyValue = maybeKeyFn.ToLocalChecked();
-  if (!keyValue->IsFunction()) {
-    throw std::runtime_error("key is not function");
+  Local<Value> keyValueV8Value = maybeKeyValueFn.ToLocalChecked();
+  if (!keyValueV8Value->IsFunction()) {
+    throw std::runtime_error("keyValue is not function");
   }
 
-  Local<Function> keyFn = Local<Function>::Cast(keyValue);
+  Local<Function> keyValueFn = Local<Function>::Cast(keyValueV8Value);
 
   TryCatch trycatch(m_isolate);
   MaybeLocal<Value> maybeResult =
-      keyFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), 0, nullptr);
+      keyValueFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), 0, nullptr);
 
   if (trycatch.HasCaught()) {
     MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(m_isolate->GetCurrentContext());
