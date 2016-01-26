@@ -8,7 +8,7 @@ CMakeLists.txt.user
 /bugsplat/
 /build/
 /include/
-/jsdoc/
+/jsdoc_out/
 /jslib/node_modules/silkedit/node_modules/
 /lib/
 /libnode/
