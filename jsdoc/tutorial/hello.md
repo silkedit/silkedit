@@ -32,7 +32,7 @@ commandsプロパティにはパッケージが提供するコマンドを登録
 
 [silkedit.alert]{@link module:silkedit.alert}はアラートを表示する関数です。
 
-[silkedit.tr]{@link module:silkedit.tr}はローカライズされた文字列を取得する関数です。locales/ja/translation.ymlに日本語ロケールの時に使用されるローカライズされた文字列が定義されています。
+[silkedit.tr]{@link module:silkedit.tr}はローカライズされた文字列を取得する関数です。locales/ja/translation.ymlに日本語ロケールの時に使用されるローカライズされた文字列がYAMLで定義されています。
 
 ```
 menu:
