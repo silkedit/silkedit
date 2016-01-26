@@ -23,8 +23,8 @@ class QKeyEventWrap : public node::ObjectWrap {
  private:
 
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void type(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void key(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Type(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Key(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   QKeyEvent* m_keyEvent;
 };
