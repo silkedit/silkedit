@@ -27,8 +27,8 @@ class Condition : public QObject {
 
   static void Init(v8::Local<v8::Object> exports);
   static void init();
-  static bool isStatic(const QString& key);
-  static bool isSatisfied(const QString& key, core::Condition::Operator op, const QString& value);
+  static bool isStatic(const QString& keyValue);
+  static bool isSatisfied(const QString& keyValue, core::Condition::Operator op, const QString& value);
 
   virtual ~Condition() = default;
 
@@ -46,14 +46,14 @@ class Condition : public QObject {
  private:
   static std::unordered_map<QString, std::unique_ptr<Condition>> s_conditions;
 
-  static void add(const QString& key, std::unique_ptr<Condition> condition);
-  static void remove(const QString& key);
-  static bool check(const QString &key, Operator op, const QString& operand);
+  static void add(const QString& keyValue, std::unique_ptr<Condition> condition);
+  static void remove(const QString& keyValue);
+  static bool check(const QString &keyValue, Operator op, const QString& operand);
   static void Add(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Remove(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Check(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  virtual QString key() = 0;
+  virtual QString keyValue() = 0;
 };
 
 }  // namespace core

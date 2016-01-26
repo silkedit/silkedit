@@ -99,7 +99,7 @@ void core::Condition::init() {
 
 bool Condition::isSatisfied(Operator op, const QString& operand) {
   try {
-    return check(key(), op, operand);
+    return check(keyValue(), op, operand);
   } catch (const std::exception& e) {
     qWarning() << e.what();
   } catch (...) {

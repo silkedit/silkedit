@@ -5,7 +5,7 @@ namespace core {
 
 const QString OSCondition::name = "os";
 
-QString OSCondition::key() {
+QString OSCondition::keyValue() {
 #if defined Q_OS_WIN
   return "windows";
 #elif defined Q_OS_LINUX
@@ -17,7 +17,7 @@ QString OSCondition::key() {
 
 const QString OnMacCondition::name = "onMac";
 
-QString OnMacCondition::key() {
+QString OnMacCondition::keyValue() {
 #if defined Q_OS_MAC
   return "true";
 #else
@@ -27,7 +27,7 @@ QString OnMacCondition::key() {
 
 const QString OnWindowsCondition::name = "onWindows";
 
-QString OnWindowsCondition::key() {
+QString OnWindowsCondition::keyValue() {
 #if defined Q_OS_WIN
   return "true";
 #else
