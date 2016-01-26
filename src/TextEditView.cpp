@@ -971,23 +971,23 @@ void TextEditView::saveAs() {
   }
 }
 
-void TextEditView::deleteChar(int n) {
+void TextEditView::deleteChar(int repeat) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {
     const int pos = cur.position();
     int dst;
-    if (n > 0) {
+    if (repeat > 0) {
       cur.movePosition(QTextCursor::EndOfBlock);
       const int endpos = cur.position();
       if (pos == endpos)
         return;
-      dst = qMin(pos + n, endpos);
+      dst = qMin(pos + repeat, endpos);
       cur.setPosition(pos);
     } else {
       const int blockPos = cur.block().position();
       if (pos == blockPos)
         return;
-      dst = qMax(pos + n, blockPos);
+      dst = qMax(pos + repeat, blockPos);
     }
 
     cur.setPosition(dst, QTextCursor::KeepAnchor);
