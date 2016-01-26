@@ -2,6 +2,9 @@
 
 # Constants
 
+API_DOC_DIR=jsdoc_out
+VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+
 if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
@@ -431,7 +434,6 @@ send_symbol() {
     build
 
     APP_NAME="SilkEdit"
-    VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
     echo "sending symbol with app name:${APP_NAME}, version: ${VERSION}"
 
     if [ $OS == 'Mac' ]; then
@@ -445,9 +447,14 @@ send_symbol() {
 }
 
 generate_doc() {
-  DIR=jsdoc_out
-  rm -rf ${DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${DIR}
-  echo "API document is generated in ${DIR}"
+  rm -rf ${API_DOC_DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${API_DOC_DIR}
+  echo "API document is generated in ${API_DOC_DIR}"
+}
+
+upload_doc() {
+  generate_doc
+  
+  scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
 }
 
 # -e: stops if any command returns non zero value
@@ -508,6 +515,10 @@ case "$1" in
         send_symbol
         echo
         ;;
+    upload_doc)
+        upload_doc
+        echo
+        ;;
     *)
 
         cat << EOF
@@ -515,7 +526,7 @@ analyze        static analysis
 build          build an app and an installer (-edge: Edge build)
 clean          clean build dir
 format         format sources
-generate_doc   generate SilkEdit package API documentation
+generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer
 rebuild        build from scratch (-edge: Edge build)
@@ -524,6 +535,7 @@ test           run tests
 set_version    set version number
 set_build      set build number
 send_symbol    send application symbol to server
+upload_doc     upload package API document
 EOF
 
         exit 1
