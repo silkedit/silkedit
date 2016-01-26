@@ -649,7 +649,7 @@ int TextEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void TextEditView::moveCursor(const QString& op, int n) {
+void TextEditView::moveCursor(const QString& op, int repeat) {
   // tood: use QTextCursor::MoveOperation
   int mv = toMoveOperation(op);
   QTextCursor cur = textCursor();
@@ -660,7 +660,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
   bool moved = false;
   switch (mv) {
     case QTextCursor::Left: {
-      n = qMin(n, pos - blockPos);
+      repeat = qMin(repeat, pos - blockPos);
       break;
     }
     case QTextCursor::Right: {
@@ -674,7 +674,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
       }
       if (pos >= endpos)
         return;
-      n = qMin(n, endpos - pos);
+      repeat = qMin(repeat, endpos - pos);
       break;
     }
     case ViMoveOperation::FirstNonBlankChar:
@@ -690,12 +690,12 @@ void TextEditView::moveCursor(const QString& op, int n) {
       break;
     }
     case ViMoveOperation::NextLine:
-      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, n);
+      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, repeat);
       moveToFirstNonBlankChar(cur);
       moved = true;
       break;
     case ViMoveOperation::PrevLine:
-      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, n);
+      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, repeat);
       moveToFirstNonBlankChar(cur);
       moved = true;
       break;
@@ -704,7 +704,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
   }
 
   if (!moved) {
-    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, n);
+    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, repeat);
   }
 
   setTextCursor(cur);

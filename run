@@ -405,7 +405,8 @@ set_version() {
         sed -i -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc
         sed -i -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc
         sed -i -E "s/VERSION \"[0-9]+\.[0-9]+\.[0-9]+\"/VERSION \"$1\"/" src/version.h
-        git add src/SilkEdit-info.plist resources/silkedit.rc src/version.h
+        sed -i -E "s/version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/version\": \"0.9.0\"/" jsdoc/package.json
+        git add src/SilkEdit-info.plist resources/silkedit.rc src/version.h jsdoc/package.json
         git commit -m "Bump version to $1"
         git tag v$1
     fi
@@ -444,8 +445,8 @@ send_symbol() {
 }
 
 generate_doc() {
-  DIR=jsdoc
-  rm -rf ${DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc_conf.json -d ${DIR}
+  DIR=jsdoc_out
+  rm -rf ${DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${DIR}
   echo "API document is generated in ${DIR}"
 }
 
