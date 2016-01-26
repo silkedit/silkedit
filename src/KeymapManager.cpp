@@ -199,7 +199,7 @@ void KeymapManager::_assignJSKeyEventFilter(core::FunctionInfo info) {
   m_jsKeyEventFilter.Reset(info.isolate, info.fn);
 }
 
-void KeymapManager::dispatch(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void KeymapManager::Dispatch(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 1 || !args[0]->IsObject()) {
@@ -222,7 +222,7 @@ void KeymapManager::dispatch(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void KeymapManager::load(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void KeymapManager::Load(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsString()) {
@@ -237,7 +237,7 @@ void KeymapManager::load(const v8::FunctionCallbackInfo<v8::Value>& args) {
   KeymapManager::singleton().load(filename, source);
 }
 
-void KeymapManager::_assignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void KeymapManager::_AssignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() != 1 || !args[0]->IsFunction()) {
@@ -289,9 +289,9 @@ void KeymapManager::Init(v8::Local<v8::Object> exports) {
   Local<Object> obj = maybeObj.ToLocalChecked();
   obj->SetAlignedPointerInInternalField(0, &KeymapManager::singleton());
 
-  NODE_SET_METHOD(obj, "dispatch", KeymapManager::dispatch);
-  NODE_SET_METHOD(obj, "load", KeymapManager::load);
-  NODE_SET_METHOD(obj, "_assignJSKeyEventFilter", KeymapManager::_assignJSKeyEventFilter);
+  NODE_SET_METHOD(obj, "dispatch", KeymapManager::Dispatch);
+  NODE_SET_METHOD(obj, "load", KeymapManager::Load);
+  NODE_SET_METHOD(obj, "_assignJSKeyEventFilter", KeymapManager::_AssignJSKeyEventFilter);
 
   Maybe<bool> result = exports->Set(isolate->GetCurrentContext(),
                                     String::NewFromUtf8(isolate, "KeymapManager"), obj);
