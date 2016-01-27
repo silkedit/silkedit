@@ -86,7 +86,7 @@ resolve() {
     git submodule update --init
     
     # jsdoc
-    npm install -g jsdoc
+    npm install -g jsdoc@latest
 
     # vim package
     npm install --prefix packages https://github.com/silkedit/vim/tarball/0.1.5
