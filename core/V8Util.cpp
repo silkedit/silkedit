@@ -295,7 +295,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
 }
 
 void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  qDebug() << "emitQObjectSignal";
+//  qDebug() << "emitQObjectSignal";
 
   Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);
