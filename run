@@ -455,6 +455,10 @@ upload_doc() {
   generate_doc
   
   scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
+  
+  # make current version as the latest API document
+  cp -r ${API_DOC_DIR}/SilkEdit/${VERSION} ${API_DOC_DIR}/SilkEdit/latest
+  scp -r ${API_DOC_DIR}/SilkEdit/latest silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
 }
 
 # -e: stops if any command returns non zero value
