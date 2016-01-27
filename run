@@ -448,15 +448,20 @@ send_symbol() {
 
 generate_doc() {
   rm -rf ${API_DOC_DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${API_DOC_DIR}
+  
+  # change JSDoc hard coded title
+  TITLE="SilkEdit APIリファレンス"
+  sed -i -E "s/JSDoc: Home/${TITLE}/" ${API_DOC_DIR}/SilkEdit/${VERSION}/index.html
+  
+  # set favicon
+  FAVICON="http://silksmiths.sakura.ne.jp/files/SilkEdit/favicon.ico"
+  sed -i -E "s#</head>#<link rel=\"icon\" href=\"${FAVICON}\"></head>#" ${API_DOC_DIR}/SilkEdit/${VERSION}/index.html
+
   echo "API document is generated in ${API_DOC_DIR}"
 }
 
 upload_doc() {
   generate_doc
-
-  # change JSDoc hard coded title
-  TITLE="SilkEdit APIリファレンス"
-  sed -i -E "s/JSDoc: Home/${TITLE}/" jsdoc_out/SilkEdit/${VERSION}/index.html
   
   # upload to FTP
   scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
