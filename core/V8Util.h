@@ -1,6 +1,7 @@
 #pragma once
 
 #include <v8.h>
+#include <functional>
 #include <string>
 #include <QString>
 #include <QVariant>
