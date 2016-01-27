@@ -99,5 +99,6 @@ public slots:
  private slots:
   void emitSignal();
   void emitSignal(const QString& arg);
+  void emitSignal(int n);
   void emitSignal(QWidget* old, QWidget* now);
 };
