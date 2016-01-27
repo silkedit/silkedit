@@ -153,11 +153,11 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
     }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["menu"];
-    if (submenuNode.IsDefined() && !label.isEmpty() && !id.isEmpty()) {
+    if (submenuNode.IsDefined() && !id.isEmpty()) {
       QMenu* currentMenu = nullptr;
       if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
-      } else {
+      } else if (!label.isEmpty()) {
         currentMenu = new PackageMenu(label, pkgName, parent);
         if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
           QAction* beforeAction =
@@ -176,7 +176,12 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
             parentMenu->addMenu(currentMenu);
           }
         }
+      } else {
+        qWarning() << "id is invalid and label is empty";
+        continue;
       }
+
+      Q_ASSERT(currentMenu);
       parseMenuNode(pkgName, currentMenu, submenuNode);
       prevId = id;
     } else {

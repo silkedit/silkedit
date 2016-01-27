@@ -1,0 +1,12 @@
+{
+    "templates": {
+        "default": {
+            "outputSourceFiles": false
+        }
+    },
+    "source": {
+        "exclude": [ "jslib/node_modules/silkedit/node_modules" ],
+        "includePattern": ".+\\.js(doc)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    }
+}

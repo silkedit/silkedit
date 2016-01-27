@@ -649,7 +649,8 @@ int TextEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void TextEditView::moveCursor(const QString& op, int n) {
+void TextEditView::moveCursor(const QString& op, int repeat) {
+  // tood: use QTextCursor::MoveOperation
   int mv = toMoveOperation(op);
   QTextCursor cur = textCursor();
   const int pos = cur.position();
@@ -659,7 +660,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
   bool moved = false;
   switch (mv) {
     case QTextCursor::Left: {
-      n = qMin(n, pos - blockPos);
+      repeat = qMin(repeat, pos - blockPos);
       break;
     }
     case QTextCursor::Right: {
@@ -673,7 +674,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
       }
       if (pos >= endpos)
         return;
-      n = qMin(n, endpos - pos);
+      repeat = qMin(repeat, endpos - pos);
       break;
     }
     case ViMoveOperation::FirstNonBlankChar:
@@ -689,12 +690,12 @@ void TextEditView::moveCursor(const QString& op, int n) {
       break;
     }
     case ViMoveOperation::NextLine:
-      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, n);
+      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, repeat);
       moveToFirstNonBlankChar(cur);
       moved = true;
       break;
     case ViMoveOperation::PrevLine:
-      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, n);
+      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, repeat);
       moveToFirstNonBlankChar(cur);
       moved = true;
       break;
@@ -703,7 +704,7 @@ void TextEditView::moveCursor(const QString& op, int n) {
   }
 
   if (!moved) {
-    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, n);
+    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, repeat);
   }
 
   setTextCursor(cur);
@@ -950,75 +951,6 @@ void TextEditView::insertNewLine() {
                                        prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
 }
 
-// QVariant TextEditView::request(TextEditView* view, const QString& method, const QVariantList&) {
-//  if (method == "text") {
-//    return view->toPlainText().toUtf8();
-//  } else if (method == "scopeName") {
-//    return view->d_ptr->m_document->scopeName(view->textCursor().position());
-//  } else if (method == "scopeTree") {
-//    return view->d_ptr->m_document->scopeTree();
-//  } else {
-//    qWarning("%s is not supported", qPrintable(method));
-//    return QVariant();
-//  }
-//}
-
-// void TextEditView::notify(TextEditView* view, const QString& method, const QVariantList& obj) {
-//  //  int numArgs = obj.via.array.size;
-//  int numArgs = obj.size();
-//  if (method == "save") {
-//    view->save();
-//  } else if (method == "saveAs") {
-//    view->saveAs();
-//  } else if (method == "undo") {
-//    view->undo();
-//  } else if (method == "redo") {
-//    view->redo();
-//  } else if (method == "cut") {
-//    view->cut();
-//  } else if (method == "copy") {
-//    view->copy();
-//  } else if (method == "paste") {
-//    view->paste();
-//  } else if (method == "selectAll") {
-//    view->selectAll();
-//  } else if (method == "complete") {
-//    view->performCompletion();
-//  } else if (method == "delete" && obj.size() == 1 && obj.at(0).canConvert(QMetaType::Int)) {
-//    int repeat = obj.at(0).toInt();
-//    qDebug("repeat: %d", repeat);
-//    view->doDelete(repeat);
-//  } else if (method == "moveCursor") {
-//    if (numArgs == 3) {
-//      //      std::tuple<int, std::string, int> params;
-//      //      obj.convert(&params);
-//      //      std::string operation = std::get<1>(params);
-//      //      int repeat = std::get<2>(params);
-//      //      qDebug("operation: %s", operation.c_str());
-//      //      qDebug("repeat: %d", repeat);
-//      //      view->moveCursor(toMoveOperation(std::move(operation)), repeat);
-//    } else {
-//      qWarning("invalid numArgs: %d", numArgs);
-//    }
-//  } else if (method == "setThinCursor") {
-//    //    if (numArgs == 2) {
-//    //      std::tuple<int, bool> params;
-//    //      obj.convert(&params);
-//    //      bool isThin = std::get<1>(params);
-//    //      view->setThinCursor(isThin);
-//    //    } else {
-//    //      qWarning("invalid numArgs: %d", numArgs);
-//    //    }
-//  } else if (method == "insertNewLine") {
-//    view->insertNewLineWithIndent();
-//  } else if (method == "indent") {
-//    auto cursor = view->textCursor();
-//    view->d_ptr->indentOneLevel(cursor);
-//  } else {
-//    qWarning("%s is not support", qPrintable(method));
-//  }
-//}
-
 TextEditView* TextEditView::clone() {
   TextEditView* editView = new TextEditView(this);
   editView->setDocument(d_ptr->m_document);
@@ -1039,23 +971,23 @@ void TextEditView::saveAs() {
   }
 }
 
-void TextEditView::doDelete(int n) {
+void TextEditView::deleteChar(int repeat) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {
     const int pos = cur.position();
     int dst;
-    if (n > 0) {
+    if (repeat > 0) {
       cur.movePosition(QTextCursor::EndOfBlock);
       const int endpos = cur.position();
       if (pos == endpos)
         return;
-      dst = qMin(pos + n, endpos);
+      dst = qMin(pos + repeat, endpos);
       cur.setPosition(pos);
     } else {
       const int blockPos = cur.block().position();
       if (pos == blockPos)
         return;
-      dst = qMax(pos + n, blockPos);
+      dst = qMax(pos + repeat, blockPos);
     }
 
     cur.setPosition(dst, QTextCursor::KeepAnchor);

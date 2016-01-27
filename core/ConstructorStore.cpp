@@ -47,7 +47,7 @@ v8::Local<v8::Function> ConstructorStore::createConstructorInternal(const QMetaO
   Local<ObjectTemplate> objTempl = tpl->InstanceTemplate();
   ObjectTemplateStore::initInstanceTemplate(objTempl, metaObj, isolate);
 
-  // register method and slots to prototype object
+  // register invokable methods and slots to prototype object
   Util::processWithPublicMethods(metaObj, [&](const QMetaMethod& method) {
     NODE_SET_PROTOTYPE_METHOD(tpl, method.name().constData(), V8Util::invokeQObjectMethod);
   });
