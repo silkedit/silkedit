@@ -59,6 +59,7 @@ class V8Util {
   static void throwError(v8::Isolate* isolate, const char* msg);
 
   static void invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   static QVariant callJSFunc(v8::Isolate* isolate,
                              v8::Local<v8::Function> fn,

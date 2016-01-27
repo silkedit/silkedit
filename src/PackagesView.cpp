@@ -351,13 +351,13 @@ void AvailablePackagesViewModel::loadPackages() {
   GetRequestResponse* response = Helper::singleton().sendGetRequest(
       "https://raw.githubusercontent.com/silkedit/packages/master/packages.json", TIMEOUT_IN_MS);
   if (response) {
-    connect(response, &GetRequestResponse::onFailed, this, [=](const QString& error) {
+    connect(response, &GetRequestResponse::failed, this, [=](const QString& error) {
       response->deleteLater();
       qDebug("getRequestFailed. cause: %s", qPrintable(error));
       emit packagesLoaded(QList<core::Package>());
     });
 
-    connect(response, &GetRequestResponse::onSucceeded, this, [=](const QString& result) {
+    connect(response, &GetRequestResponse::succeeded, this, [=](const QString& result) {
       response->deleteLater();
       if (auto packages = PackageManager::loadPackagesJson(result.toUtf8())) {
         for (auto it = packages->begin(); it != packages->end();) {

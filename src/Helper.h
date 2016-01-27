@@ -37,8 +37,8 @@ class GetRequestResponse : public QObject {
   DEFAULT_MOVE(GetRequestResponse)
 
  signals:
-  void onSucceeded(const QString& body);
-  void onFailed(const QString& error);
+  void succeeded(const QString& body);
+  void failed(const QString& error);
 };
 Q_DECLARE_METATYPE(GetRequestResponse*)
 
