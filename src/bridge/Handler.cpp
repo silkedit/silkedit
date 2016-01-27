@@ -28,7 +28,6 @@
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
-#include "core/PrototypeStore.h"
 #include "core/ObjectTemplateStore.h"
 #include "core/macros.h"
 #include "core/Config.h"
@@ -42,7 +41,6 @@
 
 using core::Config;
 using core::Constants;
-using core::PrototypeStore;
 using core::QVariantArgument;
 using core::Condition;
 using core::Font;
@@ -85,7 +83,8 @@ namespace {
 */
 
 void loadMenu(const FunctionCallbackInfo<Value>& args) {
-  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -93,7 +92,8 @@ void loadMenu(const FunctionCallbackInfo<Value>& args) {
 }
 
 void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -106,7 +106,8 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
 */
 
 void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!V8Util::checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -267,9 +268,15 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   // singleton)
   ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
 
+  // create prototype object
+  Local<Object> proto = Object::New(isolate);
+  Util::processWithPublicMethods(metaObj, [&](const QMetaMethod& method) {
+    NODE_SET_METHOD(proto, method.name().constData(), V8Util::invokeQObjectMethod);
+  });
+  JSHandler::inheritsQtEventEmitter(isolate, proto);
+
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
-      metaObj, V8Util::invokeQObjectMethod, isolate, true));
+  obj->SetPrototype(proto);
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);
