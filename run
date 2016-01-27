@@ -456,7 +456,7 @@ upload_doc() {
 
   # change JSDoc hard coded title
   TITLE="SilkEdit APIリファレンス"
-  sed -i -E "s/JSDoc: Home/${TITLE}/" jsdoc_out/SilkEdit/0.8.0/index.html
+  sed -i -E "s/JSDoc: Home/${TITLE}/" jsdoc_out/SilkEdit/${VERSION}/index.html
   
   # upload to FTP
   scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
