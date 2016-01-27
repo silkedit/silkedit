@@ -95,8 +95,8 @@ void KeymapManager::load(const QString& filename, const QString& source) {
   std::string name = filename.toUtf8().constData();
   try {
     YAML::Node keymapNode = YAML::LoadFile(name);
+
     if (!keymapNode.IsSequence()) {
-      qWarning("keymap value must be sequence");
       return;
     }
 
