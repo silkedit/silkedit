@@ -132,7 +132,7 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
   if (const auto& jsObj = ObjectStore::singleton().find(obj, isolate)) {
     MaybeLocal<Value> maybeEmitValue = (*jsObj)->Get(
         isolate->GetCurrentContext(),
-        String::NewFromUtf8(isolate, "emit", v8::NewStringType::kNormal).ToLocalChecked());
+        String::NewFromUtf8(isolate, "_emit", v8::NewStringType::kNormal).ToLocalChecked());
     if (maybeEmitValue.IsEmpty()) {
       qWarning() << "emit method not found";
       return;

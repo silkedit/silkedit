@@ -8,7 +8,6 @@
 #include "V8Util.h"
 #include "ObjectStore.h"
 #include "ObjectTemplateStore.h"
-#include "PrototypeStore.h"
 #include "Util.h"
 #include "QVariantArgument.h"
 #include "qdeclare_metatype.h"
@@ -194,8 +193,7 @@ v8::MaybeLocal<v8::Object> V8Util::newInstance(v8::Isolate* isolate,
   Local<Object> obj = maybeObj.ToLocalChecked();
 
   // set constructor
-  Maybe<bool> result =
-      obj->Set(isolate->GetCurrentContext(), constructorKey(isolate), constructor);
+  Maybe<bool> result = obj->Set(isolate->GetCurrentContext(), constructorKey(isolate), constructor);
   if (result.IsNothing() || !result.FromJust()) {
     qWarning() << "failed to set constructor property";
     return v8::MaybeLocal<Object>();
@@ -296,6 +294,46 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
   }
 }
 
+void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  qDebug() << "emitQObjectSignal";
+
+  Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+
+  if (args.Length() <= 0 || !args[0]->IsString()) {
+    throwError(isolate, "invalid argument");
+    return;
+  }
+
+  QObject* obj = ObjectStore::unwrap(args.Holder());
+  if (!obj) {
+    throwError(isolate, "can't convert to QObject");
+    return;
+  }
+
+  v8::String::Utf8Value eventNameValue(
+      args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const char* eventName = *eventNameValue;
+
+  // convert args to QVariantList
+  QVariantList varArgs;
+  // skip args[0] because it is the event name
+  for (int i = 1; i < args.Length(); i++) {
+    varArgs.append(toVariant(isolate, args[i]));
+  }
+
+  try {
+    QVariant result = invokeQObjectMethodInternal(isolate, obj, eventName, varArgs);
+    if (result.isValid()) {
+      args.GetReturnValue().Set(toV8Value(isolate, result));
+    }
+  } catch (const std::exception& e) {
+    V8Util::throwError(isolate, e.what());
+  } catch (...) {
+    qCritical() << "unexpected exception occured";
+  }
+}
+
 QVariant V8Util::callJSFunc(v8::Isolate* isolate,
                             v8::Local<v8::Function> fn,
                             Local<Value> recv,
@@ -323,7 +361,9 @@ QVariant V8Util::callJSFunc(v8::Isolate* isolate,
   return V8Util::toVariant(isolate, maybeResult.ToLocalChecked());
 }
 
-bool V8Util::checkArguments(const v8::FunctionCallbackInfo<v8::Value> args, int numArgs, std::function<bool ()> validateFn) {
+bool V8Util::checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
+                            int numArgs,
+                            std::function<bool()> validateFn) {
   Isolate* isolate = args.GetIsolate();
   if (args.Length() != numArgs) {
     std::stringstream ss;
