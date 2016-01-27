@@ -14,8 +14,8 @@ void core::QKeyEventWrap::Init(v8::Local<v8::Object> exports) {
   tpl->SetClassName(v8::String::NewFromUtf8(isolate, "KeyEvent"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "type", QKeyEventWrap::type);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "key", QKeyEventWrap::key);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "type", QKeyEventWrap::Type);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "key", QKeyEventWrap::Key);
 
   constructor.Reset(isolate, tpl->GetFunction());
   exports->Set(v8::String::NewFromUtf8(isolate, "KeyEvent"), tpl->GetFunction());
@@ -62,14 +62,14 @@ void core::QKeyEventWrap::New(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-void core::QKeyEventWrap::type(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void core::QKeyEventWrap::Type(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
   QKeyEventWrap* keyEvent = ObjectWrap::Unwrap<QKeyEventWrap>(args.Holder());
   args.GetReturnValue().Set(
       v8::Int32::New(isolate, static_cast<int>(keyEvent->m_keyEvent->type())));
 }
 
-void core::QKeyEventWrap::key(const v8::FunctionCallbackInfo<v8::Value>& args) {
+void core::QKeyEventWrap::Key(const v8::FunctionCallbackInfo<v8::Value>& args) {
   v8::Isolate* isolate = args.GetIsolate();
   QKeyEventWrap* keyEvent = ObjectWrap::Unwrap<QKeyEventWrap>(args.Holder());
   args.GetReturnValue().Set(v8::Int32::New(isolate, keyEvent->m_keyEvent->key()));

@@ -18,7 +18,7 @@ class OSCondition : public Condition {
   bool isStatic() override { return true; }
 
  private:
-  QString key() override;
+  QString keyValue() override;
 };
 
 class OnMacCondition : public Condition {
@@ -34,7 +34,7 @@ class OnMacCondition : public Condition {
   bool isStatic() override { return true; }
 
  private:
-  QString key() override;
+  QString keyValue() override;
 };
 
 class OnWindowsCondition : public Condition {
@@ -50,7 +50,7 @@ class OnWindowsCondition : public Condition {
   bool isStatic() override { return true; }
 
  private:
-  QString key() override;
+  QString keyValue() override;
 };
 
 }  // namespace core

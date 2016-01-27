@@ -17,4 +17,4 @@ if (process.argv.length < 2) {
 }
 
 // cache silkedit module to share it globaly
-require('silkedit')
+require('silkedit');

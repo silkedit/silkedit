@@ -17,7 +17,7 @@
 #include "Helper.h"
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
-#include "core/ConditionManager.h"
+#include "core/Condition.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
 #include "core/ThemeManager.h"
@@ -28,7 +28,7 @@
 
 using core::PackageManager;
 using core::Config;
-using core::ConditionManager;
+using core::Condition;
 using core::ThemeManager;
 using core::Util;
 using core::Constants;
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
 
-  ConditionManager::singleton().init();
+  Condition::init();
 
   PackageManager::loadGrammers();
 

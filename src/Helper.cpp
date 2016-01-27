@@ -204,6 +204,13 @@ void Helper::emitSignal(const QString& str) {
   emitSignalInternal(args);
 }
 
+void Helper::emitSignal(int n)
+{
+  qDebug() << "emitSignal(int)";
+  QVariantList args{QVariant::fromValue(n)};
+  emitSignalInternal(args);
+}
+
 void Helper::emitSignal(QWidget* old, QWidget* now) {
   qDebug() << "emitSignal(QWidget *old, QWidget *now)";
   QVariantList args{QVariant::fromValue(old), QVariant::fromValue(now)};

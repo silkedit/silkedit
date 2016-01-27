@@ -59,8 +59,17 @@ class V8Util {
   static void throwError(v8::Isolate* isolate, const char* msg);
 
   static void invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  static QVariant callJSFunc(v8::Isolate* isolate, v8::Local<v8::Function> fn, v8::Local<v8::Value> recv, int argc, v8::Local<v8::Value> argv[]);
+  static QVariant callJSFunc(v8::Isolate* isolate,
+                             v8::Local<v8::Function> fn,
+                             v8::Local<v8::Value> recv,
+                             int argc,
+                             v8::Local<v8::Value> argv[]);
+
+  static bool checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
+                             int numArgs,
+                             std::function<bool()> validateFn);
 
  private:
   static v8::Persistent<v8::String> s_hiddenQObjectKey;
@@ -68,11 +77,13 @@ class V8Util {
   static QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> s_classMethodCache;
 
   static QVariant invokeQObjectMethodInternal(v8::Isolate* isolate,
-                                       QObject* object,
-                                       const QString& methodName,
-                                       QVariantList args);
+                                              QObject* object,
+                                              const QString& methodName,
+                                              QVariantList args);
   static void cacheMethods(const QMetaObject* metaObj);
-  static v8::MaybeLocal<v8::Object> newInstance(v8::Isolate *isolate, v8::Local<v8::Function> constructor, void *sourceObj);
+  static v8::MaybeLocal<v8::Object> newInstance(v8::Isolate* isolate,
+                                                v8::Local<v8::Function> constructor,
+                                                void* sourceObj);
 };
 
 }  // namespace core

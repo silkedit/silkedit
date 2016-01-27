@@ -118,8 +118,10 @@ void Util::processWithPublicMethods(const QMetaObject* metaObj,
   QSet<QByteArray> registeredMethods;
   for (int i = 0; i < metaObj->methodCount(); i++) {
     const QMetaMethod& method = metaObj->method(i);
+    // MethodType::Method means Q_INVOKABLE method
     if (method.access() == QMetaMethod::Access::Public &&
-        method.methodType() != QMetaMethod::MethodType::Constructor &&
+        (method.methodType() == QMetaMethod::MethodType::Method ||
+         method.methodType() == QMetaMethod::MethodType::Slot) &&
         !registeredMethods.contains(method.name())) {
       registeredMethods.insert(method.name());
       fn(method);

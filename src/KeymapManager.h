@@ -38,9 +38,9 @@ class KeymapManager : public QObject,
   void keymapUpdated();
 
  private:
-  static void dispatch(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void load(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void _assignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Dispatch(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Load(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void _AssignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   friend class core::Singleton<KeymapManager>;
   KeymapManager();

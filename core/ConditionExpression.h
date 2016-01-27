@@ -12,10 +12,10 @@ namespace core {
 
 struct ConditionExpression {
   QString m_key;
-  core::Condition::Operator m_op;
+  Condition::Operator m_op;
   QString m_value;
 
-  ConditionExpression(const QString& key, core::Condition::Operator op, const QString& value);
+  ConditionExpression(const QString& key, Condition::Operator op, const QString& value);
   bool isSatisfied() const;
   QString toString() const;
 

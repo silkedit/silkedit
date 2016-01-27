@@ -28,14 +28,12 @@
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
-#include "core/PrototypeStore.h"
 #include "core/ObjectTemplateStore.h"
 #include "core/macros.h"
 #include "core/Config.h"
 #include "core/Constants.h"
 #include "core/QVariantArgument.h"
 #include "core/Condition.h"
-#include "core/ConditionManager.h"
 #include "core/ObjectStore.h"
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
@@ -43,10 +41,8 @@
 
 using core::Config;
 using core::Constants;
-using core::PrototypeStore;
 using core::QVariantArgument;
 using core::Condition;
-using core::ConditionManager;
 using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
@@ -82,31 +78,13 @@ using v8::Function;
 
 namespace {
 
-bool checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
-                    int numArgs,
-                    std::function<bool()> validateFn) {
-  Isolate* isolate = args.GetIsolate();
-  if (args.Length() != numArgs) {
-    std::stringstream ss;
-    ss << "arguments size mismatched. expected:" << numArgs << " actual:" << args.Length();
-    V8Util::throwError(isolate, ss.str());
-    return false;
-  }
-
-  if (!validateFn()) {
-    V8Util::throwError(isolate, "invalid argument");
-    return false;
-  }
-
-  return true;
-}
-
 /*
   Window static methods
 */
 
 void loadMenu(const FunctionCallbackInfo<Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -114,7 +92,8 @@ void loadMenu(const FunctionCallbackInfo<Value>& args) {
 }
 
 void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
@@ -127,28 +106,13 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
 */
 
 void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 2, [&] { return args[0]->IsString() && args[1]->IsString(); })) {
+  if (!V8Util::checkArguments(args, 2,
+                              [&] { return args[0]->IsString() && args[1]->IsString(); })) {
     return;
   }
 
   ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()),
                                V8Util::toQString(args[1]->ToString()));
-}
-
-/*
-  Condition static methods
-*/
-void check(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  if (!checkArguments(args, 3, [&] {
-        return args[0]->IsString() && args[1]->IsInt32() && args[2]->IsString();
-      })) {
-    return;
-  }
-
-  bool result = Condition::check(V8Util::toQString(args[0]->ToString()),
-                                 static_cast<Condition::Operator>(args[1]->ToInt32()->Value()),
-                                 V8Util::toQString(args[2]->ToString()));
-  args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
 }
 
 /*
@@ -215,6 +179,7 @@ void bridge::Handler::init(Local<Object> exports,
 
   NODE_SET_METHOD(exports, "connect", JSObjectHelper::connect);
   NODE_SET_METHOD(exports, "disconnect", JSObjectHelper::disconnect);
+  NODE_SET_METHOD(exports, "emit", V8Util::emitQObjectSignal);
   NODE_SET_METHOD(exports, "lateInit", lateInit);
 
   // register enums in Qt namespace
@@ -232,18 +197,15 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // NOTE: staticMetaObject.className() inclues namespace, so don't use it as class name
   setSingletonObj(exports, App::instance(),
                   Util::stripNamespace(App::staticMetaObject.className()));
-  setSingletonObj(exports, &Constants::singleton(),
-                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
                   Util::stripNamespace(CommandManager::staticMetaObject.className()));
+  setSingletonObj(exports, &Constants::singleton(),
+                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
 
-  // ConditionManager::add accepts JS object as argument, so we can't use setSingletonObj (this
-  // converts JS object to QObject* or QVariantMap internally)
-  ConditionManager::Init(exports);
   // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
   // handle it specially
   Config::Init(exports);
@@ -251,7 +213,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   KeymapManager::Init(exports);
 
   // init classes for QObject subclasses
-  registerClass<Condition>(exports);
   registerClass<ConfigDialog>(exports);
   registerClass<Dialog>(exports);
   registerClass<DialogButtonBox>(exports);
@@ -264,6 +225,9 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<VBoxLayout>(exports);
   registerClass<Window>(exports);
 
+  // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
+  // converts JS object to QObject* or QVariantMap internally)
+  Condition::Init(exports);
   // init classes for Q_GADGET classes
   Font::Init(exports);
   QKeyEventWrap::Init(exports);
@@ -279,8 +243,6 @@ void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
                                             v8::Local<v8::Function> ctor) {
   if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
-  } else if (metaObj.className() == Condition::staticMetaObject.className()) {
-    NODE_SET_METHOD(ctor, "check", check);
   } else if (metaObj.className() == Window::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
     NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
@@ -306,9 +268,15 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   // singleton)
   ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
 
+  // create prototype object
+  Local<Object> proto = Object::New(isolate);
+  Util::processWithPublicMethods(metaObj, [&](const QMetaMethod& method) {
+    NODE_SET_METHOD(proto, method.name().constData(), V8Util::invokeQObjectMethod);
+  });
+  JSHandler::inheritsQtEventEmitter(isolate, proto);
+
   // sets __proto__ (this doesn't create prototype property)
-  obj->SetPrototype(PrototypeStore::singleton().getOrCreatePrototype(
-      metaObj, V8Util::invokeQObjectMethod, isolate, true));
+  obj->SetPrototype(proto);
 
   Maybe<bool> result =
       exports->Set(isolate->GetCurrentContext(), String::NewFromUtf8(isolate, name), obj);
