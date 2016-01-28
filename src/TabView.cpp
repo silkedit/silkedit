@@ -24,8 +24,8 @@ using core::ColorSettings;
 using core::Constants;
 
 namespace {
-constexpr const char* PREFIX    = "tabInformation";
-constexpr const char* PATH_KEY  = "tab";
+constexpr const char* PREFIX = "tabInformation";
+constexpr const char* PATH_KEY = "tab";
 
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
@@ -39,10 +39,7 @@ bool isLightColor(const QColor& color) {
 }
 
 TabView::TabView(QWidget* parent)
-    : QTabWidget(parent),
-      m_activeEditView(nullptr),
-      m_tabBar(new TabBar(this)),
-      m_tabDragging(false) {
+    : QTabWidget(parent), m_activeView(nullptr), m_tabBar(new TabBar(this)), m_tabDragging(false) {
   setTabBar(m_tabBar);
   setMovable(true);
   setDocumentMode(true);
@@ -55,7 +52,7 @@ TabView::TabView(QWidget* parent)
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
   connect(m_tabBar, &TabBar::onDetachTabFinished, this, &TabView::detachTabFinished);
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
-  connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveEditView);
+  connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
   connect(&Config::singleton(), &Config::themeChanged, this, &TabView::changeTabStyle);
 }
@@ -68,27 +65,23 @@ int TabView::addTab(QWidget* page, const QString& label) {
   return insertTab(-1, page, label);
 }
 
-int TabView::insertTab(int index, QWidget* w, const QString& label) {
-  if (!w) {
+int TabView::insertTab(int index, QWidget* widget, const QString& label) {
+  if (!widget) {
     return -1;
   }
 
-  w->setParent(this);
-  TextEditView* editView = qobject_cast<TextEditView*>(w);
-  if (editView) {
-    connect(editView, &TextEditView::pathUpdated, this, &TabView::changeTabText);
-    connect(editView, &TextEditView::modificationChanged, this, &TabView::updateTabTextBasedOn);
-  } else {
-    qDebug("inserted widget is not TextEditView");
+  widget->setParent(this);
+  TextEditView* textEdit = qobject_cast<TextEditView*>(widget);
+  if (textEdit) {
+    connect(textEdit, &TextEditView::pathUpdated, this,
+            [=](const QString& path) { setTabText(indexOf(textEdit), getFileNameFrom(path)); });
+    connect(textEdit, &TextEditView::modificationChanged, this, &TabView::updateTabTextBasedOn);
   }
-
-  int result = QTabWidget::insertTab(index, w, label);
+  int result = QTabWidget::insertTab(index, widget, label);
 
   if (count() == 1 && result >= 0) {
-    m_activeEditView = editView;
-    if (editView) {
-      editView->setFocus();
-    }
+    m_activeView = widget;
+    m_activeView->setFocus();
   }
   return result;
 }
@@ -179,8 +172,12 @@ int TabView::indexOfPath(const QString& path) {
   //  qDebug("TabView::indexOfPath(%s)", qPrintable(path));
   for (int i = 0; i < count(); i++) {
     TextEditView* v = qobject_cast<TextEditView*>(widget(i));
+    if (!v) {
+      continue;
+    }
+
     QString path2 = v->path();
-    if (v && !path2.isEmpty() && path == path2) {
+    if (!path2.isEmpty() && path == path2) {
       return i;
     }
   }
@@ -229,32 +226,25 @@ void TabView::mouseReleaseEvent(QMouseEvent* event) {
   QTabWidget::mouseReleaseEvent(event);
 }
 
-void TabView::changeActiveEditView(int index) {
+void TabView::changeActiveView(int index) {
   // This lambda is called after m_tabbar is deleted when shutdown.
   if (index < 0)
     return;
 
   qDebug("currentChanged. index: %i, tab count: %i", index, count());
   if (auto w = widget(index)) {
-    TextEditView* editView = qobject_cast<TextEditView*>(w);
-    setActiveEditView(editView);
+    setActiveView(w);
   } else {
-    qDebug("active edit view is null");
-    setActiveEditView(nullptr);
+    qDebug("active view is null");
+    setActiveView(nullptr);
   }
 }
 
-void TabView::setActiveEditView(TextEditView* editView) {
-  if (m_activeEditView != editView) {
-    TextEditView* oldEditView = m_activeEditView;
-    m_activeEditView = editView;
-    emit activeTextEditViewChanged(oldEditView, editView);
-  }
-}
-
-void TabView::changeTabText(const QString& path) {
-  if (TextEditView* editView = qobject_cast<TextEditView*>(QObject::sender())) {
-    setTabText(indexOf(editView), getFileNameFrom(path));
+void TabView::setActiveView(QWidget* activeView) {
+  if (m_activeView != activeView) {
+    QWidget* oldEditView = m_activeView;
+    m_activeView = activeView;
+    emit activeViewChanged(oldEditView, activeView);
   }
 }
 
@@ -274,8 +264,8 @@ void TabView::changeTabStyle(Theme* theme) {
 
 void TabView::removeTabAndWidget(int index) {
   if (auto w = widget(index)) {
-    if (w == m_activeEditView) {
-      m_activeEditView = nullptr;
+    if (w == m_activeView) {
+      m_activeView = nullptr;
     }
     w->deleteLater();
   }
@@ -305,10 +295,7 @@ bool TabView::closeTab(QWidget* w) {
         qWarning("ret is invalid");
         return false;
     }
-  } else {
-    qDebug("widget is neither TextEditView nor modified");
   }
-
   removeTabAndWidget(indexOf(w));
 
   // Focus to the current widget after closing a tab
@@ -361,12 +348,12 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1);
 }
 
-int TabView::insertTabInformation( const int index ){
+bool TabView::insertTabInformation(const int index) {
   TextEditView* v = qobject_cast<TextEditView*>(widget(index));
   if (!v) {
     return false;
   }
-  QString path    = v->path();
+  QString path = v->path();
 
   // Declaration variables to insert tab information.
   QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
@@ -378,10 +365,10 @@ int TabView::insertTabInformation( const int index ){
   tabViewHistoryTable.setValue(PATH_KEY, path.toStdString().c_str());
   tabViewHistoryTable.endArray();
 
-  return index;
-
+  return true;
 }
-bool TabView::createWithSavedTabs(){
+
+bool TabView::createWithSavedTabs() {
   // declaration variables to insert tab information.
   QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
                                 QSettings::IniFormat);
@@ -390,7 +377,7 @@ bool TabView::createWithSavedTabs(){
   int size = tabViewHistoryTable.beginReadArray(PREFIX);
 
   // if array size is 0, return false
-  if( !size ){
+  if (!size) {
     return false;
   }
 
@@ -399,16 +386,16 @@ bool TabView::createWithSavedTabs(){
     tabViewHistoryTable.setArrayIndex(i);
     const QVariant& value = tabViewHistoryTable.value(PATH_KEY);
     // if value is empty,creat new window.
-    if (value.toString().isEmpty()){
-       addNew();
+    if (value.toString().isEmpty()) {
+      addNew();
     }
     // if value convert to QString, open file.
     if (value.canConvert<QString>()) {
-       open(value.toString());
+      open(value.toString());
     }
   }
 
   tabViewHistoryTable.endArray();
-  
+
   return true;
 }

@@ -61,21 +61,22 @@ StatusBar::StatusBar(QMainWindow* window)
   setBOM(BOM::defaultBOM());
 }
 
-void StatusBar::onActiveTextEditViewChanged(TextEditView*, TextEditView* newEditView) {
-  qDebug("onActiveTextEditViewChanged");
-  if (newEditView) {
-    setCurrentLanguage(newEditView->language());
-    if (auto enc = newEditView->encoding()) {
+void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
+//  qDebug("onActiveViewChanged");
+  TextEditView* textEdit = qobject_cast<TextEditView*>(newView);
+  if (textEdit) {
+    setCurrentLanguage(textEdit->language());
+    if (auto enc = textEdit->encoding()) {
       setEncoding(*enc);
     }
-    if (auto separator = newEditView->lineSeparator()) {
+    if (auto separator = textEdit->lineSeparator()) {
       setLineSeparator(*separator);
     }
-    if (auto bom = newEditView->BOM()) {
+    if (auto bom = textEdit->BOM()) {
       setBOM(*bom);
     }
   } else {
-    qDebug("newEditView is null");
+    qDebug() << "active view is not TextEdit";
   }
 }
 
@@ -83,7 +84,7 @@ void StatusBar::setActiveTextEditViewLanguage() {
   qDebug("currentIndexChanged in langComboBox. %d", m_langComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = tabView->activeEditView()) {
+    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
       qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));
       editView->setLanguage(m_langComboBox->currentData().toString());
     } else {
@@ -98,7 +99,7 @@ void StatusBar::setActiveTextEditViewEncoding() {
   qDebug("currentIndexChanged in encComboBox. %d", m_encComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = tabView->activeEditView()) {
+    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
       if (boost::optional<Encoding> oldEncoding = editView->encoding()) {
         QString fromEncodingName = oldEncoding->name();
         qDebug("active editView's encoding: %s", qPrintable(fromEncodingName));
@@ -151,7 +152,7 @@ void StatusBar::setActiveTextEditViewLineSeparator() {
   qDebug("currentIndexChanged in separatorComboBox. %d", m_separatorComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = tabView->activeEditView()) {
+    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
       if (auto separator = editView->lineSeparator()) {
         qDebug("active editView's line separator: %s", qPrintable(*separator));
         editView->setLineSeparator(m_separatorComboBox->currentLineSeparator());
@@ -168,7 +169,7 @@ void StatusBar::setActiveTextEditViewBOM() {
   qDebug("currentIndexChanged in bomComboBox. %d", m_bomComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = tabView->activeEditView()) {
+    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
       if (auto bom = editView->BOM()) {
         qDebug("active editView's BOM: %s", qPrintable(bom->name()));
         editView->setBOM(m_bomComboBox->currentBOM());

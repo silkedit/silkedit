@@ -169,7 +169,7 @@ void App::setupTranslator(const QString& locale) {
 TextEditView* App::activeTextEditView() {
   TabView* tabView = activeTabView();
   if (tabView) {
-    return tabView->activeEditView();
+    return qobject_cast<TextEditView*>(tabView->activeView());
   } else {
     qDebug("active tab view is null");
     return nullptr;

@@ -155,10 +155,10 @@ void TabViewGroup::addTabView(QWidget* widget,
 
 void TabViewGroup::splitTab(std::function<void(QWidget*, const QString&)> func) {
   if (m_activeTabView) {
-    TextEditView* activeEditView = m_activeTabView->activeEditView();
-    QString label = m_activeTabView->tabText(m_activeTabView->currentIndex());
+    TextEditView* activeEditView = qobject_cast<TextEditView*>(m_activeTabView->activeView());
     if (activeEditView) {
       TextEditView* anotherEditView = activeEditView->clone();
+      QString label = m_activeTabView->tabText(m_activeTabView->currentIndex());
       func(anotherEditView, label);
     }
   }
