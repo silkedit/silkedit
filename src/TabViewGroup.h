@@ -13,6 +13,7 @@ class Splitter;
 
 class TabViewGroup : public QWidget {
   Q_OBJECT
+  Q_PROPERTY(QLinkedList<TabView*> tabViews READ tabViews)
   DISABLE_COPY(TabViewGroup)
 
  public:
@@ -32,7 +33,6 @@ class TabViewGroup : public QWidget {
   void splitVertically();
   void splitHorizontally(QWidget* initialWidget, const QString& label);
   void splitVertically(QWidget* initialWidget, const QString& label);
-  QLinkedList<TabView*> tabViews() { return m_tabViews; }
 
  signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
@@ -53,6 +53,7 @@ class TabViewGroup : public QWidget {
                   Qt::Orientation activeLayoutDirection,
                   Qt::Orientation newDirection);
   void splitTextEditView(std::function<void(QWidget*, const QString&)> func);
+  QLinkedList<TabView*> tabViews() { return m_tabViews; }
 };
 
 Q_DECLARE_METATYPE(TabViewGroup*)

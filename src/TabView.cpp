@@ -122,13 +122,12 @@ void TabView::addNew() {
   addTab(view, DocumentManager::DEFAULT_FILE_NAME);
 }
 
-QWidget *TabView::widget(int index) const
-{
+QWidget* TabView::widget(int index) const {
   return QTabWidget::widget(index);
 }
 
-void TabView::closeActiveTab() {
-  closeTab(currentWidget());
+bool TabView::closeActiveTab() {
+  return closeTab(currentWidget());
 }
 
 bool TabView::closeAllTabs() {
@@ -151,7 +150,7 @@ bool TabView::closeAllTabs() {
   return true;
 }
 
-void TabView::closeOtherTabs() {
+bool TabView::closeOtherTabs() {
   std::list<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
     if (i != currentIndex()) {
@@ -160,8 +159,12 @@ void TabView::closeOtherTabs() {
   }
 
   for (auto w : widgets) {
-    closeTab(w);
+    bool isSuccess = closeTab(w);
+    if (!isSuccess)
+      return false;
   }
+
+  return true;
 }
 
 int TabView::indexOfPath(const QString& path) {
