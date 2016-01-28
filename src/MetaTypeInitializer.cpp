@@ -13,6 +13,7 @@ void MetaTypeInitializer::init()
 {
   qRegisterMetaType<boost::optional<QString>>();
   qRegisterMetaType<TabView*>();
+  qRegisterMetaType<QLinkedList<TabView*>>();
   qRegisterMetaType<TextEditView*>();
   qRegisterMetaType<TabViewGroup*>();
   qRegisterMetaType<Window*>();
