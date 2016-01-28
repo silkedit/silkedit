@@ -2,7 +2,7 @@ SilkEditのパッケージメニューの中のパッケージ開発、新しい
 
 ```hello``` という名前を入力してOKをクリックします。
 
-helloパッケージのディレクトリが開かれるので、index.jsを開きます。
+helloパッケージのディレクトリが開かれるので、index.jsを開きます。(helloパッケージはMacなら```/Users/<ユーザ名>/.silk/packages/node_modules/hello```, Windowsは```C:\Users\<ユーザ名>\.silk\packages\node_modules\hello```に作成されます)
 
 index.jsの中身は以下のようになっています。
 
