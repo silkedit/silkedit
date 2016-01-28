@@ -110,6 +110,14 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
     return toV8Object(isolate, var.value<CommandArgument>());
   } else if (var.canConvert<std::string>()) {
     return toV8String(isolate, var.value<std::string>());
+  } else if (var.canConvert<QVariantList>()) {
+    QSequentialIterable iterable = var.value<QSequentialIterable>();
+    Local<Array> array = Array::New(isolate, iterable.size());
+    int i = 0;
+    for (const QVariant& v : iterable) {
+      array->Set(i++, toV8Value(isolate, v));
+    }
+    return array;
   }
 
   switch (var.type()) {
@@ -295,7 +303,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
 }
 
 void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) {
-//  qDebug() << "emitQObjectSignal";
+  //  qDebug() << "emitQObjectSignal";
 
   Isolate* isolate = args.GetIsolate();
   v8::HandleScope scope(isolate);

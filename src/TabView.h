@@ -27,7 +27,6 @@ class TabView : public QTabWidget{
   int insertTab(int index, QWidget* widget, const QString& label);
   QWidget* activeView() { return m_activeView; }
   bool tabDragging() { return m_tabDragging; }
-  void saveAllTabs();
   int indexOfPath(const QString& path);
   bool insertTabInformation( const int index );
   bool createWithSavedTabs();
@@ -38,6 +37,7 @@ class TabView : public QTabWidget{
   void closeOtherTabs();
   int open(const QString& path);
   void addNew();
+  QWidget *widget(int index) const;
 
  signals:
   void allTabRemoved();

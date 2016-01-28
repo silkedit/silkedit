@@ -122,13 +122,9 @@ void TabView::addNew() {
   addTab(view, DocumentManager::DEFAULT_FILE_NAME);
 }
 
-void TabView::saveAllTabs() {
-  for (int i = 0; i < count(); i++) {
-    auto editView = qobject_cast<TextEditView*>(widget(i));
-    if (editView) {
-      editView->save();
-    }
-  }
+QWidget *TabView::widget(int index) const
+{
+  return QTabWidget::widget(index);
 }
 
 void TabView::closeActiveTab() {
