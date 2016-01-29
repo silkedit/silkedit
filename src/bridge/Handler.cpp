@@ -25,7 +25,7 @@
 #include "FileDialog.h"
 #include "TextEditView.h"
 #include "JSStaticObject.h"
-#include "WebEngineView.h"
+#include "WebView.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -226,7 +226,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<view::MessageBox>(exports);
   registerClass<TextEditView>(exports);
   registerClass<VBoxLayout>(exports);
-  registerClass<WebEngineView>(exports);
+  registerClass<WebView>(exports);
   registerClass<Window>(exports);
 
   // Wrappers
