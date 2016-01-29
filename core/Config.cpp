@@ -238,13 +238,19 @@ void Config::setFont(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   Local<Object> obj = args[0]->ToObject();
   if (obj->InternalFieldCount() > 0) {
-    Font* font = Font::Unwrap<Font>(obj);
-    if (!font) {
-      V8Util::throwError(isolate, "object is not Font");
+    QObject* fontObj = ObjectStore::unwrap(obj);
+    if (!fontObj) {
+      V8Util::throwError(isolate, "QObject is null");
       return;
     }
 
-    Config::singleton().setFont(*font);
+    Font* font = qobject_cast<Font*>(fontObj);
+    if (!font) {
+      V8Util::throwError(isolate, "QObject is not Font");
+      return;
+    }
+
+    Config::singleton().setFont(font->getWrapped().value<QFont>());
   } else {
     V8Util::throwError(isolate, "can't find the internal field");
     return;

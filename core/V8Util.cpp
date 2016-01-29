@@ -1,19 +1,13 @@
 #include <vendor/node/src/node_buffer.h>
 #include <sstream>
-#include <QMetaMethod>
-#include <QCoreApplication>
-#include <QThread>
 #include <QDebug>
 
 #include "V8Util.h"
 #include "ObjectStore.h"
-#include "ObjectTemplateStore.h"
-#include "Util.h"
-#include "QVariantArgument.h"
 #include "qdeclare_metatype.h"
 #include "ConstructorStore.h"
 #include "FunctionInfo.h"
-#include "QKeyEventWrap.h"
+#include "QObjectUtil.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -39,9 +33,6 @@ namespace core {
 
 v8::Persistent<v8::String> V8Util::s_hiddenQObjectKey;
 v8::Persistent<v8::String> V8Util::s_constructorKey;
-
-QCache<const QMetaObject*, QMultiHash<QString, std::pair<int, ParameterTypes>>>
-    V8Util::s_classMethodCache;
 
 v8::Local<v8::String> V8Util::hiddenQObjectKey(Isolate* isolate) {
   if (s_hiddenQObjectKey.IsEmpty()) {
@@ -164,21 +155,6 @@ v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgu
   return argsObj;
 }
 
-v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QKeyEvent* keyEvent) {
-  if (!keyEvent) {
-    return v8::Null(isolate);
-  }
-
-  Local<Function> ctor = v8::Local<v8::Function>::New(isolate, QKeyEventWrap::constructor);
-  MaybeLocal<Object> maybeObj = newInstance(isolate, ctor, keyEvent);
-  if (maybeObj.IsEmpty()) {
-    return v8::Null(isolate);
-  }
-
-  auto obj = maybeObj.ToLocalChecked();
-  return obj;
-}
-
 v8::MaybeLocal<v8::Object> V8Util::newInstance(v8::Isolate* isolate,
                                                v8::Local<v8::Function> constructor,
                                                void* sourceObj) {
@@ -220,7 +196,7 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
   } else {
     const QMetaObject* metaObj = sourceObj->metaObject();
     Local<Function> ctor =
-        ConstructorStore::singleton().findOrCreateConstructor(metaObj, isolate, true);
+        ConstructorStore::singleton().findOrCreateConstructor(metaObj, isolate);
 
     MaybeLocal<Object> maybeObj = newInstance(isolate, ctor, sourceObj);
     if (maybeObj.IsEmpty()) {
@@ -290,8 +266,8 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
   }
 
   try {
-    QVariant result = invokeQObjectMethodInternal(
-        isolate, obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
+    QVariant result = QObjectUtil::invokeQObjectMethodInternal(
+        obj, toQString(args.Callee()->GetName()->ToString()), varArgs);
     if (result.isValid()) {
       args.GetReturnValue().Set(toV8Value(isolate, result));
     }
@@ -331,7 +307,7 @@ void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) 
   }
 
   try {
-    QVariant result = invokeQObjectMethodInternal(isolate, obj, eventName, varArgs);
+    QVariant result = QObjectUtil::invokeQObjectMethodInternal(obj, eventName, varArgs);
     if (result.isValid()) {
       args.GetReturnValue().Set(toV8Value(isolate, result));
     }
@@ -386,105 +362,6 @@ bool V8Util::checkArguments(const v8::FunctionCallbackInfo<v8::Value> args,
   }
 
   return true;
-}
-
-QVariant V8Util::invokeQObjectMethodInternal(v8::Isolate* isolate,
-                                             QObject* object,
-                                             const QString& methodName,
-                                             QVariantList args) {
-  if (args.size() > Q_METAMETHOD_INVOKE_MAX_ARGS) {
-    std::stringstream ss;
-    ss << "Can't invoke" << methodName.toUtf8().constData() << "with more than"
-       << Q_METAMETHOD_INVOKE_MAX_ARGS << "arguments. args:" << args.size();
-    throw std::runtime_error(ss.str());
-  }
-
-  if (!object) {
-    throw std::runtime_error("object is null");
-  }
-
-  int methodIndex = -1;
-  const QMetaObject* metaObj = object->metaObject();
-  if (!s_classMethodCache.contains(metaObj)) {
-    cacheMethods(metaObj);
-  }
-
-  // Find an appropriate method with the provided arguments
-  for (MethodInfo methodInfo : s_classMethodCache[metaObj]->values(methodName)) {
-    ParameterTypes parameterTypes = methodInfo.second;
-    if (Util::matchTypes(parameterTypes, args)) {
-      // overwrite QVariant type with parameter type to match the method signature.
-      // e.g. convert QLabel* to QWidget*
-      for (int j = 0; j < parameterTypes.size(); j++) {
-        args[j] = QVariant(QMetaType::type(parameterTypes[j]), args[j].data());
-      }
-
-      methodIndex = methodInfo.first;
-      break;
-    }
-  }
-
-  if (methodIndex == -1) {
-    throw std::runtime_error("invalid arguments");
-  }
-
-  QMetaMethod method = object->metaObject()->method(methodIndex);
-
-  if (!method.isValid()) {
-    std::stringstream ss;
-    ss << "Invalid method. name:" << method.name().constData() << "index:" << methodIndex;
-    throw std::runtime_error(ss.str());
-  } else if (method.access() != QMetaMethod::Public) {
-    std::stringstream ss;
-    ss << "Can't invoke non-public method. name:" << method.name().constData()
-       << "index:" << methodIndex;
-    throw std::runtime_error(ss.str());
-  } else if (args.size() > method.parameterCount()) {
-    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
-               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
-  }
-
-  v8::HandleScope scope(isolate);
-
-  QVariantArgument varArgs[Q_METAMETHOD_INVOKE_MAX_ARGS];
-  for (int i = 0; i < args.size(); i++) {
-    varArgs[i].value = args[i];
-  }
-
-  // Init return value
-  QVariant returnValue;
-  if (method.returnType() != qMetaTypeId<QVariant>() &&
-      method.returnType() != qMetaTypeId<void>()) {
-    returnValue = QVariant(method.returnType(), nullptr);
-  }
-
-  QGenericReturnArgument returnArg;
-  if (returnValue.isValid()) {
-    returnArg = QGenericReturnArgument(method.typeName(), returnValue.data());
-  }
-
-  Q_ASSERT(object->thread() == QCoreApplication::instance()->thread());
-  bool result = method.invoke(object, Qt::DirectConnection, returnArg, varArgs[0], varArgs[1],
-                              varArgs[2], varArgs[3], varArgs[4], varArgs[5], varArgs[6],
-                              varArgs[7], varArgs[8], varArgs[9]);
-  if (!result) {
-    std::stringstream ss;
-    ss << "invoking" << method.name().constData() << "failed";
-    throw std::runtime_error(ss.str());
-  }
-
-  return returnValue;
-}
-
-void V8Util::cacheMethods(const QMetaObject* metaObj) {
-  QMultiHash<QString, MethodInfo>* methodNameParameterTypesHash =
-      new QMultiHash<QString, MethodInfo>();
-  for (int i = 0; i < metaObj->methodCount(); i++) {
-    const auto& method = metaObj->method(i);
-    const QString& name = QString::fromLatin1(method.name());
-    methodNameParameterTypesHash->insert(name, std::make_pair(i, method.parameterTypes()));
-  }
-  s_classMethodCache.insert(metaObj, methodNameParameterTypesHash);
 }
 
 }  // namespace core

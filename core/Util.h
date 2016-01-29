@@ -12,6 +12,8 @@
 
 namespace core {
 
+typedef QList<QByteArray> ParameterTypes;
+
 class Util {
   DISABLE_COPY_AND_MOVE(Util)
 
@@ -42,6 +44,8 @@ class Util {
 
   static bool matchTypes(QList<QByteArray> types, QVariantList args);
 
+  static bool convertArgs(ParameterTypes parameterTypes, QVariantList &args);
+
   // Caller needs to call free argv after using it as follows
   //  free(argv[0]);
   //  free(argv);
@@ -56,8 +60,12 @@ class Util {
   }
 
  private:
+  friend class UtilTest;
+
   Util() = delete;
   ~Util() = delete;
+
+  static bool wrappedTypeCheck(QVariant var, const QByteArray& typeName);
 };
 
 }  // namespace core

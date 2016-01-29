@@ -1,4 +1,5 @@
 ﻿include_directories(SYSTEM
+  ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/core
 )
 
@@ -41,3 +42,5 @@ add_unittest(TextEditViewLogicTest)
 add_unittest(LineSeparatorTest)
 add_unittest(PackageTest)
 add_unittest(BOMTest)
+add_unittest(V8UtilTest)
+add_unittest(QObjectUtilTest)
