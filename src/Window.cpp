@@ -32,7 +32,9 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   qDebug("creating Window");
   ui->setupUi(this);
 
-  setUnifiedTitleAndToolBarOnMac(true);
+  // QWebEngineView doesn't work well with unified toolbar on Mac
+  // https://bugreports.qt.io/browse/QTBUG-41179
+  // setUnifiedTitleAndToolBarOnMac(true);
   setAttribute(Qt::WA_DeleteOnClose);
 
 // Note: Windows of Mac app share global menu bar
@@ -66,8 +68,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           &Window::emitActiveViewChanged);
-  connect(this, &Window::activeViewChanged, ui->statusBar,
-          &StatusBar::onActiveViewChanged);
+  connect(this, &Window::activeViewChanged, ui->statusBar, &StatusBar::onActiveViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
@@ -83,9 +84,8 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
   if (oldTabView && ui->statusBar) {
     disconnect(oldTabView, &TabView::activeViewChanged, ui->statusBar,
                &StatusBar::onActiveViewChanged);
-    disconnect(
-        oldTabView, &TabView::activeViewChanged, this,
-        static_cast<void (Window::*)(QWidget*, QWidget*)>(&Window::updateConnection));
+    disconnect(oldTabView, &TabView::activeViewChanged, this,
+               static_cast<void (Window::*)(QWidget*, QWidget*)>(&Window::updateConnection));
   }
 
   if (newTabView && ui->statusBar) {
