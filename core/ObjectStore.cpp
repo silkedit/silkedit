@@ -31,6 +31,7 @@ QObject* ObjectStore::unwrap(v8::Local<v8::Object> handle) {
 }
 
 void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate) {
+  Q_ASSERT(obj);
   Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
   // When registered QObject is destoryed, delete its associated JS object
   connect(obj, &QObject::destroyed, [=](QObject* destroyedObj) {

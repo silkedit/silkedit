@@ -10,14 +10,12 @@
 #include <QKeyEvent>
 
 #include "CommandArgument.h"
+#include "Util.h"
 #include "macros.h"
 
 namespace core {
 
 constexpr int MAX_ARGS_COUNT = 10;
-
-typedef QList<QByteArray> ParameterTypes;
-typedef std::pair<int, ParameterTypes> MethodInfo;
 
 // static class
 class V8Util {
@@ -52,7 +50,6 @@ class V8Util {
   static v8::Local<v8::Object> toV8Object(v8::Isolate* isolate, const CommandArgument args);
 
   static v8::Local<v8::Value> toV8ObjectFrom(v8::Isolate* isolate, QObject* sourceObj);
-  static v8::Local<v8::Value> toV8ObjectFrom(v8::Isolate* isolate, QKeyEvent* keyEvent);
 
   static QVariantMap toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj);
 
@@ -72,15 +69,12 @@ class V8Util {
                              int numArgs,
                              std::function<bool()> validateFn);
 
- private:
+private:
+  friend class V8UtilTest;
+
   static v8::Persistent<v8::String> s_hiddenQObjectKey;
   static v8::Persistent<v8::String> s_constructorKey;
-  static QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> s_classMethodCache;
 
-  static QVariant invokeQObjectMethodInternal(v8::Isolate* isolate,
-                                              QObject* object,
-                                              const QString& methodName,
-                                              QVariantList args);
   static void cacheMethods(const QMetaObject* metaObj);
   static v8::MaybeLocal<v8::Object> newInstance(v8::Isolate* isolate,
                                                 v8::Local<v8::Function> constructor,

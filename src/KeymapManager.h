@@ -24,8 +24,6 @@ class KeymapManager : public QObject,
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
  public:
-  static void Init(v8::Local<v8::Object> exports);
-
   ~KeymapManager() = default;
 
   void loadUserKeymap();
@@ -33,25 +31,23 @@ class KeymapManager : public QObject,
   bool keyEventFilter(QKeyEvent* event);
   const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
 
- signals:
-  void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
-  void keymapUpdated();
-
- private:
-  static void Dispatch(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Load(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void _AssignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args);
-
-  friend class core::Singleton<KeymapManager>;
-  KeymapManager();
-
-  void add(const QKeySequence& key, CommandEvent cmdEvent);
-  bool runJSKeyEventFilter(QKeyEvent* event);
+public slots:
   bool dispatch(QKeyEvent* ev, int repeat = 1);
   void load(const QString& filename, const QString& source);
 
   // internal (only used in initialization in JS side)
   void _assignJSKeyEventFilter(core::FunctionInfo info);
+
+ signals:
+  void shortcutUpdated(const QString& cmdName, const QKeySequence& key);
+  void keymapUpdated();
+
+ private:
+  friend class core::Singleton<KeymapManager>;
+  KeymapManager();
+
+  void add(const QKeySequence& key, CommandEvent cmdEvent);
+  bool runJSKeyEventFilter(QKeyEvent* event);
 
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition

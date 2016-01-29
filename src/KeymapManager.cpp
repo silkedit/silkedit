@@ -199,56 +199,6 @@ void KeymapManager::_assignJSKeyEventFilter(core::FunctionInfo info) {
   m_jsKeyEventFilter.Reset(info.isolate, info.fn);
 }
 
-void KeymapManager::Dispatch(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-
-  if (args.Length() != 1 || !args[0]->IsObject()) {
-    V8Util::throwError(isolate, "invalid argument");
-    return;
-  }
-
-  Local<Object> obj = args[0]->ToObject();
-  if (obj->InternalFieldCount() > 0) {
-    QKeyEventWrap* keyEventWrap = QKeyEventWrap::Unwrap<QKeyEventWrap>(obj);
-    if (!keyEventWrap) {
-      V8Util::throwError(isolate, "object is not QKeyEventWrap");
-      return;
-    }
-
-    KeymapManager::singleton().dispatch(keyEventWrap->keyEvent());
-  } else {
-    V8Util::throwError(isolate, "can't find the internal field");
-    return;
-  }
-}
-
-void KeymapManager::Load(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-
-  if (args.Length() != 2 || !args[0]->IsString() || !args[1]->IsString()) {
-    V8Util::throwError(isolate, "invalid argument");
-    return;
-  }
-
-  QString filename =
-      V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
-  QString source =
-      V8Util::toQString(args[1]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
-  KeymapManager::singleton().load(filename, source);
-}
-
-void KeymapManager::_AssignJSKeyEventFilter(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-
-  if (args.Length() != 1 || !args[0]->IsFunction()) {
-    V8Util::throwError(isolate, "invalid argument");
-    return;
-  }
-
-  KeymapManager::singleton()._assignJSKeyEventFilter(
-      FunctionInfo{isolate, Local<Function>::Cast(args[0])});
-}
-
 KeymapManager::KeymapManager() {
   connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
           [=](const Package& pkg) {
@@ -275,29 +225,6 @@ void KeymapManager::removeKeymap() {
   m_emptyCmdKeymap.clear();
   m_cmdKeymapHash.clear();
   m_keymaps.clear();
-}
-
-void KeymapManager::Init(v8::Local<v8::Object> exports) {
-  Isolate* isolate = exports->GetIsolate();
-  Local<ObjectTemplate> objTempl = ObjectTemplate::New(isolate);
-  objTempl->SetInternalFieldCount(1);
-  MaybeLocal<Object> maybeObj = objTempl->NewInstance(isolate->GetCurrentContext());
-  if (maybeObj.IsEmpty()) {
-    throw std::runtime_error("Failed to create KeymapManager");
-  }
-
-  Local<Object> obj = maybeObj.ToLocalChecked();
-  obj->SetAlignedPointerInInternalField(0, &KeymapManager::singleton());
-
-  NODE_SET_METHOD(obj, "dispatch", KeymapManager::Dispatch);
-  NODE_SET_METHOD(obj, "load", KeymapManager::Load);
-  NODE_SET_METHOD(obj, "_assignJSKeyEventFilter", KeymapManager::_AssignJSKeyEventFilter);
-
-  Maybe<bool> result = exports->Set(isolate->GetCurrentContext(),
-                                    String::NewFromUtf8(isolate, "KeymapManager"), obj);
-  if (result.IsNothing()) {
-    throw std::runtime_error("setting exports failed");
-  }
 }
 
 void KeymapManager::loadUserKeymap() {
@@ -367,7 +294,7 @@ bool KeymapManager::runJSKeyEventFilter(QKeyEvent* event) {
 
   const int argc = 1;
   v8::Local<Value> argv[argc];
-  argv[0] = V8Util::toV8ObjectFrom(isolate, event);
+  argv[0] = V8Util::toV8ObjectFrom(isolate, new QKeyEventWrap(event));
 
   QVariant handled = V8Util::callJSFunc(isolate, m_jsKeyEventFilter.Get(isolate),
                                         v8::Undefined(isolate), argc, argv);

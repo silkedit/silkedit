@@ -1,5 +1,7 @@
+#include <sstream>
 #include <QMetaMethod>
 #include <QDebug>
+#include <QCoreApplication>
 
 #include "QObjectUtil.h"
 #include "ObjectStore.h"
@@ -9,6 +11,8 @@ using core::QVariantArgument;
 using core::ObjectStore;
 
 namespace core {
+
+QCache<const QMetaObject*, QMultiHash<QString, MethodInfo>> QObjectUtil::s_classMethodCache;
 
 namespace {
 void* newInstanceOfGadget(const QMetaObject& metaObj,
@@ -66,7 +70,6 @@ void* newInstanceOfGadget(const QMetaObject& metaObj,
     return 0;
   return returnValue;
 }
-
 }
 
 QObject* QObjectUtil::newInstanceFromJS(const QMetaObject& metaObj, QVariantList args) {
@@ -101,6 +104,102 @@ void* QObjectUtil::newInstanceOfGadgetFromJS(const QMetaObject& metaObj, QVarian
   }
   return newInstanceOfGadget(metaObj, varArgs[0], varArgs[1], varArgs[2], varArgs[3], varArgs[4],
                              varArgs[5], varArgs[6], varArgs[7], varArgs[8], varArgs[9]);
+}
+
+void QObjectUtil::cacheMethods(const QMetaObject* metaObj) {
+  QMultiHash<QString, MethodInfo>* methodNameParameterTypesHash =
+      new QMultiHash<QString, MethodInfo>();
+  for (int i = 0; i < metaObj->methodCount(); i++) {
+    const auto& method = metaObj->method(i);
+    const QString& name = QString::fromLatin1(method.name());
+    methodNameParameterTypesHash->insert(name, std::make_pair(i, method.parameterTypes()));
+  }
+  s_classMethodCache.insert(metaObj, methodNameParameterTypesHash);
+}
+
+QVariant core::QObjectUtil::invokeQObjectMethodInternal(QObject* object,
+                                                            const QString& methodName,
+                                                            QVariantList args) {
+  if (args.size() > Q_METAMETHOD_INVOKE_MAX_ARGS) {
+    std::stringstream ss;
+    ss << "Can't invoke" << methodName.toUtf8().constData() << "with more than"
+       << Q_METAMETHOD_INVOKE_MAX_ARGS << "arguments. args:" << args.size();
+    throw std::runtime_error(ss.str());
+  }
+
+  if (!object) {
+    throw std::runtime_error("object is null");
+  }
+
+  int methodIndex = -1;
+  const QMetaObject* metaObj = object->metaObject();
+  if (!s_classMethodCache.contains(metaObj)) {
+    cacheMethods(metaObj);
+  }
+
+  // Find an appropriate method with the provided arguments
+  for (MethodInfo methodInfo : s_classMethodCache[metaObj]->values(methodName)) {
+    ParameterTypes parameterTypes = methodInfo.second;
+    if (Util::matchTypes(parameterTypes, args)) {
+      // overwrite QVariant type with parameter type to match the method signature.
+      bool result = Util::convertArgs(parameterTypes, args);
+      if (!result) {
+        throw std::runtime_error("invalid arguments (failed to convert)");
+      }
+
+      methodIndex = methodInfo.first;
+      break;
+    }
+  }
+
+  if (methodIndex == -1) {
+    throw std::runtime_error("invalid arguments (appropriate method not found)");
+  }
+
+  QMetaMethod method = object->metaObject()->method(methodIndex);
+
+  if (!method.isValid()) {
+    std::stringstream ss;
+    ss << "Invalid method. name:" << method.name().constData() << "index:" << methodIndex;
+    throw std::runtime_error(ss.str());
+  } else if (method.access() != QMetaMethod::Public) {
+    std::stringstream ss;
+    ss << "Can't invoke non-public method. name:" << method.name().constData()
+       << "index:" << methodIndex;
+    throw std::runtime_error(ss.str());
+  } else if (args.size() > method.parameterCount()) {
+    qWarning() << "# of arguments is more than # of parameters. name:" << method.name()
+               << "args size:" << args.size() << ",parameters size:" << method.parameterCount();
+  }
+
+  QVariantArgument varArgs[Q_METAMETHOD_INVOKE_MAX_ARGS];
+  for (int i = 0; i < args.size(); i++) {
+    varArgs[i].value = args[i];
+  }
+
+  // Init return value
+  QVariant returnValue;
+  if (method.returnType() != qMetaTypeId<QVariant>() &&
+      method.returnType() != qMetaTypeId<void>()) {
+    returnValue = QVariant(method.returnType(), nullptr);
+  }
+
+  QGenericReturnArgument returnArg;
+  if (returnValue.isValid()) {
+    returnArg = QGenericReturnArgument(method.typeName(), returnValue.data());
+  }
+
+  Q_ASSERT(object->thread() == QCoreApplication::instance()->thread());
+  bool result = method.invoke(object, Qt::DirectConnection, returnArg, varArgs[0], varArgs[1],
+                              varArgs[2], varArgs[3], varArgs[4], varArgs[5], varArgs[6],
+                              varArgs[7], varArgs[8], varArgs[9]);
+  if (!result) {
+    std::stringstream ss;
+    ss << "invoking " << method.name().constData() << " failed";
+    throw std::runtime_error(ss.str());
+  }
+
+  return returnValue;
 }
 
 }  // namespace core
