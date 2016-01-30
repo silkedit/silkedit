@@ -16,5 +16,9 @@ class WebView : public QWebEngineView {
  public slots:
   void load(const QUrl& url) { QWebEngineView::load(url); }
 
+  void setHtml(const QString& html, const QUrl& baseUrl = QUrl()) {
+    QWebEngineView::setHtml(html, baseUrl);
+  }
+
  private:
 };
