@@ -21,12 +21,16 @@ namespace core {
 
 std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> ObjectStore::s_objects;
 
-QObject* ObjectStore::unwrap(v8::Local<v8::Object> handle) {
-  Q_ASSERT(!handle.IsEmpty());
-  Q_ASSERT(handle->InternalFieldCount() > 0);
+QObject* ObjectStore::unwrap(v8::Local<v8::Object> obj) {
+  Q_ASSERT(!obj.IsEmpty());
+  // This is the case when QObject method is called without QObject.
+  // e.g.  new silkedit.App.activeTextEditView()
+  if (obj->InternalFieldCount() == 0) {
+    return nullptr;
+  }
   // Cast to ObjectWrap before casting to T.  A direct cast from void
   // to T won't work right when T has more than one base class.
-  void* ptr = handle->GetAlignedPointerFromInternalField(0);
+  void* ptr = obj->GetAlignedPointerFromInternalField(0);
   return static_cast<QObject*>(ptr);
 }
 

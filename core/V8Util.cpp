@@ -255,7 +255,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
-    throwError(isolate, "can't convert to QObject");
+    throwError(isolate, "failed to get QObject. maybe caller is not QObject.");
     return;
   }
 
