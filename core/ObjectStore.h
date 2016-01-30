@@ -20,7 +20,7 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
   enum ObjectState { NewFromJS, NewFromJSButHasParent };
   Q_ENUM(ObjectState)
 
-  static QObject* unwrap(v8::Local<v8::Object> handle);
+  static QObject* unwrap(v8::Local<v8::Object> obj);
 
   ~ObjectStore() = default;
 
