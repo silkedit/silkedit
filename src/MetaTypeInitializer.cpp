@@ -25,6 +25,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Url*>("Url*");
   qRegisterMetaType<core::Url*>("core::Url*");
+  qRegisterMetaType<core::Url::ParsingMode>("ParsingMode");
   qRegisterMetaType<core::Font*>("Font*");
   qRegisterMetaType<core::Font*>("core::Font*");
   qRegisterMetaType<core::QKeyEventWrap*>("QKeyEventWrap*");
