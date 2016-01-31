@@ -112,10 +112,13 @@ bool App::eventFilter(QObject*, QEvent* event) {
     case QEvent::ChildAdded: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
       if (child && child->property(OBJECT_STATE).isValid()) {
-        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
-                 << "to" << ObjectStore::ObjectState::NewFromJSButHasParent;
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className() << "to"
+                 << ObjectStore::ObjectState::NewFromJSButHasParent;
         child->setProperty(OBJECT_STATE,
-                           ObjectStore::ObjectState::NewFromJSButHasParent);
+                           QVariant::fromValue(ObjectStore::ObjectState::NewFromJSButHasParent));
+        Q_ASSERT(child->property(OBJECT_STATE).isValid());
+        Q_ASSERT(child->property(OBJECT_STATE).value<ObjectStore::ObjectState>() ==
+                 ObjectStore::ObjectState::NewFromJSButHasParent);
       }
       break;
     }
@@ -123,9 +126,12 @@ bool App::eventFilter(QObject*, QEvent* event) {
     case QEvent::ChildRemoved: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
       if (child && child->property(OBJECT_STATE).isValid()) {
-        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
-                 << "to" << ObjectStore::ObjectState::NewFromJS;
-        child->setProperty(OBJECT_STATE, ObjectStore::ObjectState::NewFromJS);
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className() << "to"
+                 << ObjectStore::ObjectState::NewFromJS;
+        child->setProperty(OBJECT_STATE, QVariant::fromValue(ObjectStore::ObjectState::NewFromJS));
+        Q_ASSERT(child->property(OBJECT_STATE).isValid());
+        Q_ASSERT(child->property(OBJECT_STATE).value<ObjectStore::ObjectState>() ==
+                 ObjectStore::ObjectState::NewFromJS);
       }
       break;
     }
@@ -200,8 +206,7 @@ Window* App::activeWindow() {
   return qobject_cast<Window*>(QApplication::activeWindow());
 }
 
-void App::setActiveWindow(QWidget *act)
-{
+void App::setActiveWindow(QWidget* act) {
   QApplication::setActiveWindow(act);
 }
 
