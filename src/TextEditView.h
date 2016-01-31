@@ -37,7 +37,6 @@ class TextEditView : public QPlainTextEdit,
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
 
-  QString path();
   core::Document* document();
   void setDocument(std::shared_ptr<core::Document> document);
   core::Language* language();
@@ -96,6 +95,7 @@ class TextEditView : public QPlainTextEdit,
   void deleteChar(int repeat = 1);
   bool isThinCursor();
   void setThinCursor(bool on);
+  QString path();
 
  signals:
   void pathUpdated(const QString& path);
