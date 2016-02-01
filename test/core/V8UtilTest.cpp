@@ -1,5 +1,5 @@
 ﻿#include <libplatform/libplatform.h>
-#include <v8.h>
+#include <vendor/node/src/node.h>
 #include <QtTest/QtTest>
 
 #include "V8Util.h"
@@ -28,8 +28,8 @@ class V8UtilTest : public QObject {
 
     // Initialize V8.
     V8::InitializeICU();
-    //    V8::InitializeExternalStartupData(argv[0]);
-    Platform* platform = platform::CreateDefaultPlatform();
+    // v8::CreateDefaultPlatform is not exposed in dll
+    Platform* platform = node::CreateDefaultPlatform();
     V8::InitializePlatform(platform);
     V8::Initialize();
 
