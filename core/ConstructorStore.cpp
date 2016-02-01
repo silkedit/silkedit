@@ -40,7 +40,6 @@ void addEnumsToFunction(const QMetaObject& metaObj,
 
 v8::Local<v8::Function> ConstructorStore::createConstructorInternal(const QMetaObject* metaObj,
                                                                     v8::Isolate* isolate,
-                                                                    bool isQObject,
                                                                     v8::FunctionCallback newFunc) {
   v8::Local<v8::FunctionTemplate> tpl = v8::FunctionTemplate::New(isolate, newFunc);
   tpl->SetClassName(v8::String::NewFromUtf8(isolate, Util::stripNamespace(metaObj->className())));
@@ -61,9 +60,7 @@ v8::Local<v8::Function> ConstructorStore::createConstructorInternal(const QMetaO
   v8::Local<v8::Function> ctor = maybeFunc.ToLocalChecked();
 
   addEnumsToFunction(*metaObj, ctor, isolate);
-  if (isQObject) {
-    JSHandler::inheritsQtEventEmitter(isolate, ctor);
-  }
+  JSHandler::inheritsQtEventEmitter(isolate, ctor);
   return ctor;
 }
 
@@ -80,23 +77,21 @@ v8::Local<v8::Function> ConstructorStore::findConstructor(const QMetaObject* met
 
 v8::Local<v8::Function> ConstructorStore::findOrCreateConstructor(const QMetaObject* metaObj,
                                                                   v8::Isolate* isolate,
-                                                                  bool isQObject,
                                                                   v8::FunctionCallback newFunc) {
   if (m_classConstructorHash.count(metaObj) != 0) {
     EscapableHandleScope handle_scope(isolate);
     return handle_scope.Escape(
         v8::Local<v8::Function>::New(isolate, m_classConstructorHash.at(metaObj)));
   } else {
-    return createConstructor(metaObj, isolate, isQObject, newFunc);
+    return createConstructor(metaObj, isolate, newFunc);
   }
 }
 
 v8::Local<v8::Function> ConstructorStore::createConstructor(const QMetaObject* metaObj,
                                                             v8::Isolate* isolate,
-                                                            bool isQObject,
                                                             v8::FunctionCallback newFunc) {
   EscapableHandleScope handle_scope(isolate);
-  Local<Function> ctor = createConstructorInternal(metaObj, isolate, isQObject, newFunc);
+  Local<Function> ctor = createConstructorInternal(metaObj, isolate, newFunc);
 
   // cache object template
   UniquePersistent<Function> persistentConstructor(isolate, ctor);

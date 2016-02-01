@@ -80,8 +80,8 @@ int main(int argc, char** argv) {
   });
   window->show();
 
-  //   Set focus to active edit view
-  if (auto v = window->activeTabView()->activeEditView()) {
+  //   Set focus to active view
+  if (auto v = window->activeTabView()->activeView()) {
     v->setFocus();
   }
 

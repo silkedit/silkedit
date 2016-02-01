@@ -32,7 +32,9 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   qDebug("creating Window");
   ui->setupUi(this);
 
-  setUnifiedTitleAndToolBarOnMac(true);
+  // QWebEngineView doesn't work well with unified toolbar on Mac
+  // https://bugreports.qt.io/browse/QTBUG-41179
+  // setUnifiedTitleAndToolBarOnMac(true);
   setAttribute(Qt::WA_DeleteOnClose);
 
 // Note: Windows of Mac app share global menu bar
@@ -65,9 +67,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
-          &Window::emitActiveEditViewChanged);
-  connect(this, &Window::activeEditViewChanged, ui->statusBar,
-          &StatusBar::onActiveTextEditViewChanged);
+          &Window::emitActiveViewChanged);
+  connect(this, &Window::activeViewChanged, ui->statusBar, &StatusBar::onActiveViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
 }
@@ -81,24 +82,24 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
   //  qDebug("updateConnection for new active TabView");
 
   if (oldTabView && ui->statusBar) {
-    disconnect(oldTabView, &TabView::activeTextEditViewChanged, ui->statusBar,
-               &StatusBar::onActiveTextEditViewChanged);
-    disconnect(
-        oldTabView, &TabView::activeTextEditViewChanged, this,
-        static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
+    disconnect(oldTabView, &TabView::activeViewChanged, ui->statusBar,
+               &StatusBar::onActiveViewChanged);
+    disconnect(oldTabView, &TabView::activeViewChanged, this,
+               static_cast<void (Window::*)(QWidget*, QWidget*)>(&Window::updateConnection));
   }
 
   if (newTabView && ui->statusBar) {
-    connect(newTabView, &TabView::activeTextEditViewChanged, ui->statusBar,
-            &StatusBar::onActiveTextEditViewChanged);
-    connect(newTabView, &TabView::activeTextEditViewChanged, this,
-            static_cast<void (Window::*)(TextEditView*, TextEditView*)>(&Window::updateConnection));
+    connect(newTabView, &TabView::activeViewChanged, ui->statusBar,
+            &StatusBar::onActiveViewChanged);
+    connect(newTabView, &TabView::activeViewChanged, this,
+            static_cast<void (Window::*)(QWidget*, QWidget*)>(&Window::updateConnection));
   }
 }
 
-void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditView) {
+void Window::updateConnection(QWidget* oldView, QWidget* newView) {
   //  qDebug("updateConnection for new active TextEditView");
 
+  TextEditView* oldEditView = qobject_cast<TextEditView*>(oldView);
   if (oldEditView && ui->statusBar) {
     disconnect(oldEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
     disconnect(oldEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
@@ -107,6 +108,7 @@ void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditVi
     disconnect(oldEditView, &TextEditView::bomChanged, ui->statusBar, &StatusBar::setBOM);
   }
 
+  TextEditView* newEditView = qobject_cast<TextEditView*>(newView);
   if (newEditView && ui->statusBar) {
     connect(newEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
     connect(newEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
@@ -116,10 +118,10 @@ void Window::updateConnection(TextEditView* oldEditView, TextEditView* newEditVi
   }
 }
 
-void Window::emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView) {
-  TextEditView* oldEditView = oldTabView ? oldTabView->activeEditView() : nullptr;
-  TextEditView* newEditView = newTabView ? newTabView->activeEditView() : nullptr;
-  emit activeEditViewChanged(oldEditView, newEditView);
+void Window::emitActiveViewChanged(TabView* oldTabView, TabView* newTabView) {
+  QWidget* oldView = oldTabView ? oldTabView->activeView() : nullptr;
+  QWidget* newView = newTabView ? newTabView->activeView() : nullptr;
+  emit activeViewChanged(oldView, newView);
 }
 
 Window* Window::create(QWidget* parent, Qt::WindowFlags flags) {

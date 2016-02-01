@@ -25,6 +25,7 @@
 #include "FileDialog.h"
 #include "TextEditView.h"
 #include "JSStaticObject.h"
+#include "WebView.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -37,6 +38,7 @@
 #include "core/ObjectStore.h"
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
+#include "core/Url.h"
 #include "atom/node_includes.h"
 
 using core::Config;
@@ -49,6 +51,7 @@ using core::JSHandler;
 using core::ObjectStore;
 using core::QKeyEventWrap;
 using core::Event;
+using core::Url;
 
 #ifdef Q_OS_WIN
 // MessageBox is defined in winuser.h
@@ -203,14 +206,14 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
+  setSingletonObj(exports, &KeymapManager::singleton(),
+                  Util::stripNamespace(KeymapManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
 
   // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
   // handle it specially
   Config::Init(exports);
-  // KeymapManager::dispatch accepts QKeyEvent*
-  KeymapManager::Init(exports);
 
   // init classes for QObject subclasses
   registerClass<ConfigDialog>(exports);
@@ -223,14 +226,17 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<view::MessageBox>(exports);
   registerClass<TextEditView>(exports);
   registerClass<VBoxLayout>(exports);
+  registerClass<WebView>(exports);
   registerClass<Window>(exports);
+
+  // Wrappers
+  registerClass<Url>(exports);
+  registerClass<Font>(exports);
+  registerClass<QKeyEventWrap>(exports);
 
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   Condition::Init(exports);
-  // init classes for Q_GADGET classes
-  Font::Init(exports);
-  QKeyEventWrap::Init(exports);
 }
 
 template <typename T>

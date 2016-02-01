@@ -5,6 +5,7 @@
 #include <QMetaMethod>
 
 #include "Util.h"
+#include "Wrapper.h"
 
 namespace {
 
@@ -140,8 +141,53 @@ bool Util::matchTypes(QList<QByteArray> types, QVariantList args) {
 
   for (int i = 0; i < types.size(); i++) {
     if (QMetaType::type(types[i]) != QMetaType::type(args[i].typeName()) &&
-        !qObjectPointerTypeCheck(args[i], types[i]) && !enumTypeCheck(args[i], types[i])) {
+        !qObjectPointerTypeCheck(args[i], types[i]) && !wrappedTypeCheck(args[i], types[i]) &&
+        !enumTypeCheck(args[i], types[i])) {
       return false;
+    }
+  }
+
+  return true;
+}
+
+bool Util::convertArgs(ParameterTypes parameterTypes, QVariantList& args) {
+  for (int j = 0; j < args.size(); j++) {
+    int getWrappedIndex = -1;
+    int typeId = QMetaType::type(args[j].typeName());
+    if (args[j].canConvert<QObject*>()) {
+      QByteArray pointerType = args[j].value<QObject*>()->metaObject()->className();
+      pointerType.append('*');
+      typeId = QMetaType::type(pointerType);
+      if (typeId != QMetaType::UnknownType) {
+        const QMetaObject* metaObj = QMetaType::metaObjectForType(typeId);
+        if (metaObj) {
+          getWrappedIndex = metaObj->indexOfMethod(WRAPPED_METHOD_SIGNATURE);
+        }
+      }
+    }
+
+    if (getWrappedIndex != -1) {
+      // get wrapped type from wrapper class
+      // e.g. get QUrl from Url
+      const QMetaObject* metaObj = QMetaType::metaObjectForType(typeId);
+      if (!metaObj) {
+        qWarning() << "failed to get metaObject for" << typeId;
+        return false;
+      }
+      const QMetaMethod& method = metaObj->method(getWrappedIndex);
+      QVariant returnValue = QVariant(method.returnType(), nullptr);
+      QGenericReturnArgument returnArg =
+          QGenericReturnArgument(method.typeName(), returnValue.data());
+      bool result = method.invoke(args[j].value<QObject*>(), returnArg);
+      if (!result) {
+        qWarning() << "faled to invoke" << method.name();
+        return false;
+      }
+      QVariant wrappedVar = returnValue.value<QVariant>();
+      args[j] = QVariant(QMetaType::type(wrappedVar.typeName()), wrappedVar.data());
+    } else {
+      // e.g. convert QLabel* to QWidget*
+      args[j] = QVariant(QMetaType::type(parameterTypes[j]), args[j].data());
     }
   }
 
@@ -185,6 +231,30 @@ char** core::Util::toArgv(const QStringList& argsStrings) {
   argv[i] = nullptr;
 
   return argv;
+}
+
+bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
+  // canConvert doesn't work for QObject constructed by QMetaObject::newInstance
+  //  if (var.canConvert<QObject*>()) {
+  if (static_cast<QMetaType::Type>(var.type()) != QMetaType::QObjectStar) {
+    return false;
+  }
+
+  QByteArray pointerType = var.value<QObject*>()->metaObject()->className();
+  pointerType.append('*');
+  int typeId = QMetaType::type(pointerType);
+
+  const QMetaObject* metaObj = QMetaType::metaObjectForType(typeId);
+  if (!metaObj) {
+    return false;
+  }
+
+  int infoIndex = metaObj->indexOfClassInfo(WRAPPED);
+  if (infoIndex == -1) {
+    return false;
+  }
+
+  return metaObj->classInfo(infoIndex).value() == typeName;
 }
 
 }  // namespace core

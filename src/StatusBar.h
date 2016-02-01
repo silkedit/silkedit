@@ -25,7 +25,7 @@ class StatusBar : public QStatusBar{
   ~StatusBar() = default;
   DEFAULT_MOVE(StatusBar)
 
-  void onActiveTextEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+  void onActiveViewChanged(QWidget *oldEditView, QWidget *newEditView);
   void setLanguage(const QString& scope);
   void setEncoding(const core::Encoding& encoding);
   void setLineSeparator(const QString& separator);

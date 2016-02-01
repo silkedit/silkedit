@@ -1,33 +1,29 @@
 #pragma once
 
-#include <vendor/node/src/node_object_wrap.h>
 #include <QKeyEvent>
 
 #include "macros.h"
+#include "Wrapper.h"
 
 namespace core {
 
-class QKeyEventWrap : public node::ObjectWrap {
-  Q_GADGET
+class QKeyEventWrap : public Wrapper {
+  Q_OBJECT
+  Q_CLASSINFO(WRAPPED, "QKeyEvent*")
 
  public:
-  static v8::Persistent<v8::Function> constructor;
+  QKeyEventWrap(QKeyEvent* event) { m_wrapped = QVariant::fromValue(event); }
 
-  static void Init(v8::Local<v8::Object> exports);
-
-  QKeyEvent* keyEvent() { return m_keyEvent; }
-
-  QKeyEventWrap(QKeyEvent* event);
   ~QKeyEventWrap() = default;
 
+ public slots:
+  int type() const { return static_cast<int>(m_wrapped.value<QKeyEvent*>()->type()); }
+  int key() const { return m_wrapped.value<QKeyEvent*>()->key(); }
+
  private:
-
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Type(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Key(const v8::FunctionCallbackInfo<v8::Value>& args);
-
-  QKeyEvent* m_keyEvent;
 };
 
 }  // namespace core
 
+Q_DECLARE_METATYPE(core::QKeyEventWrap*)
+Q_DECLARE_METATYPE(QKeyEvent*)
