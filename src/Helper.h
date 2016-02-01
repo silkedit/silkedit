@@ -11,7 +11,6 @@
 #include "core/Singleton.h"
 #include "core/condition.h"
 #include "core/QVariantArgument.h"
-#include "core/qdeclare_metatype.h"
 
 namespace atom {
 class NodeBindings;
@@ -20,10 +19,6 @@ class NodeBindings;
 namespace node {
 class Environment;
 }
-
-typedef std::tuple<bool, std::string, CommandArgument> CommandEventFilterResult;
-
-Q_DECLARE_METATYPE(CommandEventFilterResult)
 
 class HelperPrivate;
 

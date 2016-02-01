@@ -4,7 +4,6 @@
 
 #include "ObjectTemplateStore.h"
 #include "V8Util.h"
-#include "QObjectUtil.h"
 #include "ObjectStore.h"
 #include "Util.h"
 

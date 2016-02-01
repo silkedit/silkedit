@@ -51,12 +51,6 @@ void TabViewGroup::setActiveTab(TabView* tabView) {
   }
 }
 
-void TabViewGroup::saveAll() {
-  for (auto tabView : m_tabViews) {
-    tabView->saveAllTabs();
-  }
-}
-
 bool TabViewGroup::closeAllTabs() {
   while (!m_tabViews.empty()) {
     bool isSuccess = m_tabViews.front()->closeAllTabs();
@@ -69,13 +63,17 @@ bool TabViewGroup::closeAllTabs() {
 }
 
 void TabViewGroup::splitHorizontally() {
-  splitTab(std::bind(&TabViewGroup::addTabViewHorizontally, this, std::placeholders::_1,
-                     std::placeholders::_2));
+  splitTextEditView(
+      std::bind(static_cast<void (TabViewGroup::*)(QWidget* initialWidget, const QString& label)>(
+                    &TabViewGroup::splitHorizontally),
+                this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void TabViewGroup::splitVertically() {
-  splitTab(std::bind(&TabViewGroup::addTabViewVertically, this, std::placeholders::_1,
-                     std::placeholders::_2));
+  splitTextEditView(
+      std::bind(static_cast<void (TabViewGroup::*)(QWidget* initialWidget, const QString& label)>(
+                    &TabViewGroup::splitVertically),
+                this, std::placeholders::_1, std::placeholders::_2));
 }
 
 TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
@@ -120,17 +118,21 @@ void TabViewGroup::removeTabView(TabView* widget) {
     m_activeTabView = nullptr;
   }
 
-  m_tabViews.remove(widget);
-  widget->hide();
-  widget->deleteLater();
+  bool result = m_tabViews.removeOne(widget);
+  if (result) {
+    widget->hide();
+    widget->deleteLater();
+  } else {
+    qWarning() << "widget is not a child";
+  }
 }
 
-void TabViewGroup::addTabViewHorizontally(QWidget* widget, const QString& label) {
-  addTabView(widget, label, Qt::Orientation::Horizontal, Qt::Orientation::Vertical);
+void TabViewGroup::splitHorizontally(QWidget* initialWidget, const QString& label) {
+  addTabView(initialWidget, label, Qt::Orientation::Horizontal, Qt::Orientation::Vertical);
 }
 
-void TabViewGroup::addTabViewVertically(QWidget* widget, const QString& label) {
-  addTabView(widget, label, Qt::Orientation::Vertical, Qt::Orientation::Horizontal);
+void TabViewGroup::splitVertically(QWidget* initialWidget, const QString& label) {
+  addTabView(initialWidget, label, Qt::Orientation::Vertical, Qt::Orientation::Horizontal);
 }
 
 void TabViewGroup::addTabView(QWidget* widget,
@@ -153,12 +155,12 @@ void TabViewGroup::addTabView(QWidget* widget,
   }
 }
 
-void TabViewGroup::splitTab(std::function<void(QWidget*, const QString&)> func) {
+void TabViewGroup::splitTextEditView(std::function<void(QWidget*, const QString&)> func) {
   if (m_activeTabView) {
-    TextEditView* activeEditView = m_activeTabView->activeEditView();
-    QString label = m_activeTabView->tabText(m_activeTabView->currentIndex());
+    TextEditView* activeEditView = qobject_cast<TextEditView*>(m_activeTabView->activeView());
     if (activeEditView) {
       TextEditView* anotherEditView = activeEditView->clone();
+      QString label = m_activeTabView->tabText(m_activeTabView->currentIndex());
       func(anotherEditView, label);
     }
   }

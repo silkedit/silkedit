@@ -3,6 +3,7 @@
 #include <list>
 #include <functional>
 #include <QWidget>
+#include <QLinkedList>
 
 #include "core/macros.h"
 
@@ -10,8 +11,9 @@ class TabView;
 class TabBar;
 class Splitter;
 
-class TabViewGroup : public QWidget{
+class TabViewGroup : public QWidget {
   Q_OBJECT
+  Q_PROPERTY(QLinkedList<TabView*> tabViews READ tabViews)
   DISABLE_COPY(TabViewGroup)
 
  public:
@@ -26,32 +28,32 @@ class TabViewGroup : public QWidget{
   bool closeAllTabs();
   TabBar* tabBarAt(int screenX, int screenY);
 
-public slots:
-  void saveAll();
+ public slots:
   void splitHorizontally();
   void splitVertically();
+  void splitHorizontally(QWidget* initialWidget, const QString& label);
+  void splitVertically(QWidget* initialWidget, const QString& label);
 
  signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
 
  private:
+  TabView* m_activeTabView;
   /**
    * @brief TabView children. This always has at least one TabView
    */
-  TabView* m_activeTabView;
-  std::list<TabView*> m_tabViews;
+  QLinkedList<TabView*> m_tabViews;
   Splitter* m_rootSplitter;
 
   TabView* createTabView();
   TabView* createInitialTabView();
   void removeTabView(TabView* tab);
-  void addTabViewHorizontally(QWidget* widget, const QString& label);
-  void addTabViewVertically(QWidget* widget, const QString& label);
   void addTabView(QWidget* widget,
                   const QString& label,
                   Qt::Orientation activeLayoutDirection,
                   Qt::Orientation newDirection);
-  void splitTab(std::function<void(QWidget*, const QString&)> func);
+  void splitTextEditView(std::function<void(QWidget*, const QString&)> func);
+  QLinkedList<TabView*> tabViews() { return m_tabViews; }
 };
 
 Q_DECLARE_METATYPE(TabViewGroup*)

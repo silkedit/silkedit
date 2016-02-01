@@ -66,7 +66,7 @@ public slots:
 
 
  signals:
-  void activeEditViewChanged(TextEditView* oldEditView, TextEditView* newEditView);
+  void activeViewChanged(QWidget* oldView, QWidget* newView);
   void firstPaintEventFired();
 
 protected:
@@ -91,8 +91,8 @@ protected:
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
-  void updateConnection(TextEditView* oldEditView, TextEditView* newEditView);
-  void emitActiveEditViewChanged(TabView* oldTabView, TabView* newTabView);
+  void updateConnection(QWidget *oldView, QWidget *newView);
+  void emitActiveViewChanged(TabView* oldTabView, TabView* newTabView);
 };
 
 Q_DECLARE_METATYPE(Window*)

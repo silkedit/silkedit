@@ -78,18 +78,10 @@ App::App(int& argc, char** argv)
   // Track active TabView
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
     //    qDebug("focusChanged");
-    if (TextEditView* editView = qobject_cast<TextEditView*>(focusedWidget)) {
-      if (TabView* tabView = findParent<TabView*>(editView)) {
-        if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
-          tabViewGroup->setActiveTab(tabView);
-        } else {
-          qDebug("unable to find the parent TabViewGroup");
-        }
-      } else {
-        qDebug("can't find TabView in ancestor");
+    if (TabView* tabView = findParent<TabView*>(focusedWidget)) {
+      if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
+        tabViewGroup->setActiveTab(tabView);
       }
-    } else {
-      qDebug("focused widget is not TextEditView");
     }
   });
 
@@ -112,10 +104,13 @@ bool App::eventFilter(QObject*, QEvent* event) {
     case QEvent::ChildAdded: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
       if (child && child->property(OBJECT_STATE).isValid()) {
-        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
-                 << "to" << ObjectStore::ObjectState::NewFromJSButHasParent;
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className() << "to"
+                 << ObjectStore::ObjectState::NewFromJSButHasParent;
         child->setProperty(OBJECT_STATE,
-                           ObjectStore::ObjectState::NewFromJSButHasParent);
+                           QVariant::fromValue(ObjectStore::ObjectState::NewFromJSButHasParent));
+        Q_ASSERT(child->property(OBJECT_STATE).isValid());
+        Q_ASSERT(child->property(OBJECT_STATE).value<ObjectStore::ObjectState>() ==
+                 ObjectStore::ObjectState::NewFromJSButHasParent);
       }
       break;
     }
@@ -123,9 +118,12 @@ bool App::eventFilter(QObject*, QEvent* event) {
     case QEvent::ChildRemoved: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
       if (child && child->property(OBJECT_STATE).isValid()) {
-        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className()
-                 << "to" << ObjectStore::ObjectState::NewFromJS;
-        child->setProperty(OBJECT_STATE, ObjectStore::ObjectState::NewFromJS);
+        qDebug() << "set" << OBJECT_STATE << "of" << child->metaObject()->className() << "to"
+                 << ObjectStore::ObjectState::NewFromJS;
+        child->setProperty(OBJECT_STATE, QVariant::fromValue(ObjectStore::ObjectState::NewFromJS));
+        Q_ASSERT(child->property(OBJECT_STATE).isValid());
+        Q_ASSERT(child->property(OBJECT_STATE).value<ObjectStore::ObjectState>() ==
+                 ObjectStore::ObjectState::NewFromJS);
       }
       break;
     }
@@ -169,7 +167,7 @@ void App::setupTranslator(const QString& locale) {
 TextEditView* App::activeTextEditView() {
   TabView* tabView = activeTabView();
   if (tabView) {
-    return tabView->activeEditView();
+    return qobject_cast<TextEditView*>(tabView->activeView());
   } else {
     qDebug("active tab view is null");
     return nullptr;
@@ -200,8 +198,7 @@ Window* App::activeWindow() {
   return qobject_cast<Window*>(QApplication::activeWindow());
 }
 
-void App::setActiveWindow(QWidget *act)
-{
+void App::setActiveWindow(QWidget* act) {
   QApplication::setActiveWindow(act);
 }
 

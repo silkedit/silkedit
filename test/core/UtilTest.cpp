@@ -1,11 +1,21 @@
 ﻿#include <QtTest/QtTest>
 #include <QStringList>
 #include "Util.h"
+#include "Url.h"
+#include "QObjectUtil.h"
 
 namespace core {
 
 class UtilTest : public QObject {
   Q_OBJECT
+
+ public:
+  UtilTest() {
+    qRegisterMetaType<QUrl>();
+    qRegisterMetaType<core::Url*>("Url*");
+    qRegisterMetaType<core::Url*>("core::Url*");
+  }
+
  private slots:
   void binarySearch() {
     QVector<int> vec(0);
@@ -41,6 +51,36 @@ class UtilTest : public QObject {
     QCOMPARE(argv[1], "foo");
     QCOMPARE(argv[2], "fuga");
     QCOMPARE(argv[3], (char*)(nullptr));
+  }
+
+  void wrappedTypeCheckForWrapper() {
+    // Given QObject constructed by QMetaObject::newInstance
+    auto url = QStringLiteral("url");
+    QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
+                                                         QVariantList{QVariant::fromValue(url)});
+    // When
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(newUrl), "QUrl");
+
+    // Then true
+    QVERIFY(result);
+  }
+
+  void wrappedTypeCheckForInt() {
+    // Given int
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(3), "QUrl");
+
+    // Then returns false
+    QVERIFY(!result);
+  }
+
+  void convertArgs() {
+    auto url = QStringLiteral("url");
+    QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
+                                                         QVariantList{QVariant::fromValue(url)});
+    QVariantList args = QVariantList{QVariant::fromValue(newUrl)};
+    bool result = Util::convertArgs(ParameterTypes(), args);
+    QVERIFY(result);
+    QCOMPARE(args[0].typeName(), "QUrl");
   }
 };
 
