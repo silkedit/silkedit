@@ -78,18 +78,14 @@ App::App(int& argc, char** argv)
   // Track active TabView
   QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
     //    qDebug("focusChanged");
-    if (TextEditView* editView = qobject_cast<TextEditView*>(focusedWidget)) {
-      if (TabView* tabView = findParent<TabView*>(editView)) {
-        if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
-          tabViewGroup->setActiveTab(tabView);
-        } else {
-          qDebug("unable to find the parent TabViewGroup");
-        }
+    if (TabView* tabView = findParent<TabView*>(focusedWidget)) {
+      if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
+        tabViewGroup->setActiveTab(tabView);
       } else {
-        qDebug("can't find TabView in ancestor");
+        //        qDebug("unable to find the parent TabViewGroup");
       }
     } else {
-      qDebug("focused widget is not TextEditView");
+      //      qDebug("can't find TabView in ancestor");
     }
   });
 
