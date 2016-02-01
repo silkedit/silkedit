@@ -81,11 +81,7 @@ App::App(int& argc, char** argv)
     if (TabView* tabView = findParent<TabView*>(focusedWidget)) {
       if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
         tabViewGroup->setActiveTab(tabView);
-      } else {
-        //        qDebug("unable to find the parent TabViewGroup");
       }
-    } else {
-      //      qDebug("can't find TabView in ancestor");
     }
   });
 
