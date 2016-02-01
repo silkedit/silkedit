@@ -22,16 +22,16 @@ class UtilTest : public QObject {
     for (int i = 0; i < 100; i++) {
       vec.append(i);
     }
-    int idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i > 70; });
-    QCOMPARE(idx, 70);
+    size_t idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i > 70; });
+    QCOMPARE(static_cast<int>(idx), 70);
 
     // binarySearch returns vec.length if there's no element which returns f(i) == true
     idx = Util::binarySearch(vec.length(), [vec](size_t) { return false; });
-    QCOMPARE(idx, vec.length());
+    QCOMPARE(static_cast<int>(idx), vec.length());
 
     // binarySearch returns 0 if all the items satisfies the predicate.
     idx = Util::binarySearch(vec.length(), [vec](size_t i) { return i <= 100; });
-    QCOMPARE(idx, 0);
+    QCOMPARE(static_cast<int>(idx), 0);
   }
 
   void toStdStringList() {
