@@ -313,7 +313,9 @@ make_installer() {
         echo "Creating dmg..."
         macdeployqt SilkEdit.app
         ensure_dir dmg
-        cp -r SilkEdit.app dmg
+        # If we copy SilkEdit.app, QWebEngineView doesn't work properly.
+        # This may be related. https://bugreports.qt.io/browse/QTBUG-50155
+        mv SilkEdit.app dmg
         ln -s /Applications dmg/Applications
 				n=0
 				MAX=3
