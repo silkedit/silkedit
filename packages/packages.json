@@ -9,7 +9,7 @@
 }
 ,{
   "name": "vim",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Vim emulation package",
   "main": "index.js",
   "repository": "silkedit/vim",
