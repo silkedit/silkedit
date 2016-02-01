@@ -1,5 +1,5 @@
 ﻿#pragma once
 
-#define VERSION "0.9.0"
+#define VERSION "0.9.1"
 
 #define BUILD "0"
