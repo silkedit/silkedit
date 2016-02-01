@@ -90,7 +90,9 @@ resolve() {
 
     # install built-in packages
     npm install --prefix packages --production https://github.com/silkedit/vim/tarball/0.1.5
-    npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.0
+    if [ ${OS} == 'Mac' ]; then
+      npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.0
+    fi
 
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
