@@ -466,8 +466,9 @@ void Cleanup(node::Environment* env) {
 
   V8::Dispose();
 
-  delete default_platform;
-  default_platform = nullptr;
+  // This sometimes causes SIGSEGV on Mac
+//  delete default_platform;
+//  default_platform = nullptr;
 
     // This causes assertion error on Windows
 //  delete[] exec_argv;
