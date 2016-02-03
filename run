@@ -406,7 +406,7 @@ set_version() {
     if [ $# -ne 1 ]; then
         echo 'Specify a version number (e.g., 1.0.0)'
     else
-        sed -i -E "s/CFBundleShortVersionString = \"[0-9]+\.[0-9]+\.[0-9]+\";/CFBundleShortVersionString = \"$1\";/" src/SilkEdit-info.plist
+        sed -i -E "s/<string>[0-9]+\.[0-9]+\.[0-9]+<\/string>/<string>$1<\/string>/" src/SilkEdit-info.plist
         commaVersion=$(echo $1 | sed -E 's/\./,/g')
         sed -i -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc
         sed -i -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc
