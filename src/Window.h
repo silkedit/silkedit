@@ -7,7 +7,6 @@
 #include <QMainWindow>
 
 #include "core/macros.h"
-#include "core/Document.h"
 
 class TabView;
 class StatusBar;
@@ -16,6 +15,11 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 class Toolbar;
+
+namespace core {
+class Document;
+}
+
 
 namespace Ui {
 class Window;
