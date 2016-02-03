@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="ja">
+<TS version="2.1" language="ja">
 <context>
     <name>AvailablePackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="379"/>
+        <location filename="../src/PackagesView.cpp" line="377"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="383"/>
+        <location filename="../src/PackagesView.cpp" line="381"/>
         <source>Installed</source>
         <translation>インストール済み</translation>
     </message>
@@ -17,7 +17,7 @@
 <context>
     <name>ClearRecentItemListAction</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="134"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="145"/>
         <source>Clear List</source>
         <translation>履歴をクリア</translation>
     </message>
@@ -51,6 +51,27 @@
     </message>
 </context>
 <context>
+    <name>DocumentManager</name>
+    <message>
+        <location filename="../src/DocumentManager.cpp" line="38"/>
+        <source>%1 
+
+has changed on disk. Do you want to reload?</source>
+        <translation>%1
+
+はディスク上で変更されました。再度読み込みますか？</translation>
+    </message>
+    <message>
+        <location filename="../src/DocumentManager.cpp" line="49"/>
+        <source>%1 
+
+has been removed on disk. Do you want to close its tab?</source>
+        <translation>%1
+
+はディスク上で削除または名前が変更されました。タブを閉じますか？</translation>
+    </message>
+</context>
+<context>
     <name>EncodingComboBox</name>
     <message>
         <location filename="../src/EncodingComboBox.cpp" line="12"/>
@@ -66,19 +87,19 @@
     </message>
     <message>
         <source>Re&amp;gex</source>
-        <translation>正規表現(&amp;G)</translation>
+        <translation type="vanished">正規表現(&amp;G)</translation>
     </message>
     <message>
         <source>&amp;Whole Word</source>
-        <translation>単語の検索(&amp;W)</translation>
+        <translation type="vanished">単語の検索(&amp;W)</translation>
     </message>
     <message>
         <source>&amp;Preserve Case</source>
-        <translation>大文字小文字の違いを保存(&amp;P)</translation>
+        <translation type="vanished">大文字小文字の違いを保存(&amp;P)</translation>
     </message>
     <message>
         <source>In &amp;Selection</source>
-        <translation>選択した範囲内のみ(&amp;S)</translation>
+        <translation type="vanished">選択した範囲内のみ(&amp;S)</translation>
     </message>
     <message>
         <location filename="../src/FindReplaceView.ui" line="26"/>
@@ -204,62 +225,61 @@
     <name>GeneralSettingsView</name>
     <message>
         <source>Theme:</source>
-        <translation>テーマ:</translation>
+        <translation type="vanished">テーマ:</translation>
     </message>
     <message>
         <source>Font:</source>
-        <translation>フォント:</translation>
+        <translation type="vanished">フォント:</translation>
     </message>
     <message>
         <source>Size:</source>
-        <translation>サイズ:</translation>
+        <translation type="vanished">サイズ:</translation>
     </message>
     <message>
         <source>Indent using spaces</source>
-        <translation>スペースでインデント</translation>
+        <translation type="vanished">スペースでインデント</translation>
     </message>
     <message>
         <source>Tab Width:</source>
-        <translation>タブ幅:</translation>
+        <translation type="vanished">タブ幅:</translation>
     </message>
     <message>
         <source>Language:</source>
-        <translation>言語:</translation>
+        <translation type="vanished">言語:</translation>
     </message>
     <message>
         <source>Restart to Apply Change</source>
-        <translation>再起動して適用</translation>
+        <translation type="vanished">再起動して適用</translation>
     </message>
     <message>
         <source>System Language</source>
-        <translation>&lt;システム言語&gt;</translation>
+        <translation type="vanished">&lt;システム言語&gt;</translation>
     </message>
     <message>
         <source>English</source>
-        <translation>英語</translation>
+        <translation type="vanished">英語</translation>
     </message>
     <message>
         <source>Japanese</source>
-        <translation>日本語</translation>
+        <translation type="vanished">日本語</translation>
     </message>
 </context>
 <context>
     <name>HelperProxyPrivate</name>
     <message>
-        <location filename="../src/HelperProxy.cpp" line="174"/>
         <source>silkedit_helper process has crashed. SilkEdit can continue to run but you can&apos;t use any packages. Do you want to restart the silkedit_helper process?</source>
-        <translation>silkedit_helperプロセスがクラッシュしました。SilkEditはこのままでも動作しますが、パッケージを利用することができません。silkedit_helperプロセスを再起動しますか？</translation>
+        <translation type="vanished">silkedit_helperプロセスがクラッシュしました。SilkEditはこのままでも動作しますが、パッケージを利用することができません。silkedit_helperプロセスを再起動しますか？</translation>
     </message>
 </context>
 <context>
     <name>InstalledPackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="479"/>
+        <location filename="../src/PackagesView.cpp" line="473"/>
         <source>Remove</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="483"/>
+        <location filename="../src/PackagesView.cpp" line="477"/>
         <source>Removed</source>
         <translation>削除済み</translation>
     </message>
@@ -429,12 +449,12 @@
 <context>
     <name>OpenRecentItemManager</name>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="52"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="63"/>
         <source>Open Recent</source>
         <translation>最近開いたファイル</translation>
     </message>
     <message>
-        <location filename="../src/OpenRecentItemManager.cpp" line="54"/>
+        <location filename="../src/OpenRecentItemManager.cpp" line="65"/>
         <source>&amp;Reopen Last Closed File</source>
         <translation>最後に閉じたファイルを開く(&amp;R)</translation>
     </message>
@@ -443,10 +463,10 @@
     <name>PackageDelegate</name>
     <message>
         <source>Installed</source>
-        <translation>インストール済み</translation>
+        <translation type="vanished">インストール済み</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="270"/>
+        <location filename="../src/PackagesView.cpp" line="271"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
@@ -490,7 +510,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="58"/>
+        <location filename="../src/DocumentManager.cpp" line="98"/>
         <source>Save As</source>
         <translation>名前を付けて保存</translation>
     </message>
@@ -761,7 +781,7 @@ Convert: convert current text in %1</source>
 <context>
     <name>StatusBar</name>
     <message>
-        <location filename="../src/StatusBar.cpp" line="113"/>
+        <location filename="../src/StatusBar.cpp" line="114"/>
         <source>Current document is changed. This change will be lost after reloading. Do you want to continue?</source>
         <translation>ファイルが変更されています。再読み込みするとこの変更が破棄されますが、実行しますか？</translation>
     </message>
@@ -769,12 +789,12 @@ Convert: convert current text in %1</source>
 <context>
     <name>TabView</name>
     <message>
-        <location filename="../src/TabView.cpp" line="283"/>
+        <location filename="../src/TabView.cpp" line="299"/>
         <source>Do you want to save the changes made to the document %1?</source>
         <translation>%1は変更されています。保存しますか？</translation>
     </message>
     <message>
-        <location filename="../src/TabView.cpp" line="285"/>
+        <location filename="../src/TabView.cpp" line="301"/>
         <source>Your changes will be lost if you don’t save them.</source>
         <translation>保存しないと変更した内容は破棄されます。</translation>
     </message>
