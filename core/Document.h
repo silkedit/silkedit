@@ -30,6 +30,7 @@ class Document : public QTextDocument {
   ~Document();
   DEFAULT_MOVE(Document)
 
+  // Don't call this except DocumentManager
   static Document* create(const QString& path = "");
   static Document* createBlank();
 

@@ -1,10 +1,13 @@
 ﻿#pragma once
 
+#include <memory>
 #include <QString>
 #include <QObject>
+#include <QFileSystemWatcher>
 
 #include "core/macros.h"
 #include "core/Singleton.h"
+#include "core/Document.h"
 
 class TabView;
 namespace core {
@@ -22,11 +25,15 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
 
   bool save(core::Document* doc);
   QString saveAs(core::Document* doc);
+  std::shared_ptr<core::Document> create(const QString& path);
 
 public slots:
   bool open(const QString& filename);
 
  private:
   friend class core::Singleton<DocumentManager>;
-  DocumentManager() = default;
+  DocumentManager();
+
+  QFileSystemWatcher* m_watcher;
+  QHash<QString, std::weak_ptr<core::Document>> m_pathDocHash;
 };

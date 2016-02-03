@@ -75,7 +75,8 @@ int main(int argc, char** argv) {
   connection = QObject::connect(window, &Window::firstPaintEventFired, [&] {
     QObject::disconnect(connection);
     // Start Node.js event loop after showing the first window
-    // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in the window system's event queue have been processed
+    // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in
+    // the window system's event queue have been processed
     QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
   });
   window->show();
