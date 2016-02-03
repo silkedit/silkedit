@@ -23,9 +23,8 @@ class OpenRecentItemManager : public QObject, public core::Singleton<OpenRecentI
   QMenu* openRecentMenu() { return m_openRecentMenu.get(); }
   void clear();
   void reopenLastClosedFile();
-
- public slots:
   void addOpenRecentItem(const QString& path);
+  void removeOpenRecentItem(const QString& path);
 
  private:
   static const int MAX_RECENT_ITEMS = 5;

@@ -102,7 +102,7 @@ Document::~Document() {
 }
 
 Document* Document::create(const QString& path) {
-  qDebug("Docment::create(%s)", qPrintable(path));
+  //  qDebug() << "Docment::create" << "path" << path;
   if (const boost::optional<std::tuple<QString, Encoding, QString, BOM>> textAndEncAndSeparator =
           load(path)) {
     return new Document(path, std::get<0>(*textAndEncAndSeparator),
@@ -266,8 +266,8 @@ QString Document::scopeTree() const {
 }
 
 void Document::reload() {
-  if (const boost::optional<std::tuple<QString, Encoding, QString, BOM>> textAndEncAndSeparatorAndBOM =
-          load(m_path)) {
+  if (const boost::optional<std::tuple<QString, Encoding, QString, BOM>>
+          textAndEncAndSeparatorAndBOM = load(m_path)) {
     setPlainText(std::get<0>(*textAndEncAndSeparatorAndBOM));
     setEncoding(std::get<1>(*textAndEncAndSeparatorAndBOM));
     setLineSeparator(std::get<2>(*textAndEncAndSeparatorAndBOM));
