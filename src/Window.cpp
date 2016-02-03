@@ -19,6 +19,7 @@
 #include "util/YamlUtils.h"
 #include "Helper.h"
 #include "PlatformUtil.h"
+#include "core/Document.h"
 
 QMap<QString, QString> Window::s_toolbarsDefinitions;
 
