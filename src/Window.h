@@ -7,6 +7,7 @@
 #include <QMainWindow>
 
 #include "core/macros.h"
+#include "core/Document.h"
 
 class TabView;
 class StatusBar;
@@ -15,6 +16,7 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 class Toolbar;
+
 namespace Ui {
 class Window;
 }
@@ -45,6 +47,8 @@ class Window : public QMainWindow{
   static void loadToolbar(Window* window, const QString& pkgName, const QString& ymlPath);
 
   static void showFirst();
+
+  static void closeTabIncludingDoc(core::Document* doc);
 
   ~Window();
   DEFAULT_MOVE(Window)
@@ -89,7 +93,9 @@ protected:
   FindReplaceView* m_findReplaceView;
   bool m_firstPaintEventFired;
 
- private slots:
+  static bool closeTabIncludingDocInternal(core::Document* doc);
+
+private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
   void updateConnection(QWidget *oldView, QWidget *newView);
   void emitActiveViewChanged(TabView* oldTabView, TabView* newTabView);

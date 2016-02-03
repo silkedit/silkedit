@@ -194,6 +194,33 @@ void Window::showFirst() {
   }
 }
 
+bool Window::closeTabIncludingDocInternal(core::Document* doc) {
+  for (Window* win : Window::windows()) {
+    Q_ASSERT(win);
+    for (TabView* tab : win->tabViewGroup()->tabViews()) {
+      Q_ASSERT(tab);
+      TabView::CloseTabIncludingDocResult result = tab->closeTabIncludingDoc(doc);
+      switch (result) {
+        case TabView::CloseTabIncludingDocResult::AllTabsRemoved:
+          return true;
+        case TabView::CloseTabIncludingDocResult::UserCanceled:
+          return false;
+        default:
+          break;
+      }
+    }
+  }
+
+  return false;
+}
+
+void Window::closeTabIncludingDoc(core::Document* doc) {
+  bool needsRetry = false;
+  do {
+    needsRetry = closeTabIncludingDocInternal(doc);
+  } while (needsRetry);
+}
+
 Window::~Window() {
   qDebug("~Window");
   s_windows.removeOne(this);

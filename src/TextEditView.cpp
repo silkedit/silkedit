@@ -386,8 +386,12 @@ void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
  * @brief Outdent one level
  * @param currentVisibleCursor
  */
-TextEditViewPrivate::TextEditViewPrivate(TextEditView* q_ptr)
-    : q_ptr(q_ptr), m_document(nullptr), m_completedAndSelected(false) {}
+TextEditViewPrivate::TextEditViewPrivate(TextEditView* editView)
+    : q_ptr(editView),
+      m_document(nullptr),
+      m_model(new QStringListModel(editView)),
+      m_completer(new QCompleter(editView)),
+      m_completedAndSelected(false) {}
 
 void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   if (!m_document || !m_document->language()) {
@@ -441,16 +445,14 @@ TextEditView::TextEditView(QWidget* parent)
   d_ptr->setTheme(Config::singleton().theme());
 
   // setup for completion
-  d_ptr->m_model.reset(new QStringListModel(this));
-  d_ptr->m_completer.reset(new QCompleter(this));
   d_ptr->m_completer->setWidget(this);
   d_ptr->m_completer->setCompletionMode(QCompleter::PopupCompletion);
-  d_ptr->m_completer->setModel(d_ptr->m_model.get());
+  d_ptr->m_completer->setModel(d_ptr->m_model);
   d_ptr->m_completer->setModelSorting(QCompleter::CaseInsensitivelySortedModel);
   d_ptr->m_completer->setCaseSensitivity(Qt::CaseInsensitive);
   d_ptr->m_completer->setWrapAround(true);
 
-  connect(d_ptr->m_completer.get(), SIGNAL(activated(const QString&)), this,
+  connect(d_ptr->m_completer, SIGNAL(activated(const QString&)), this,
           SLOT(insertCompletion(const QString&)));
 }
 
