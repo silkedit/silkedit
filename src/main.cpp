@@ -71,9 +71,8 @@ int main(int argc, char** argv) {
   MenuBar::init();
 
   Window* window = Window::createWithNewFile();
-  QMetaObject::Connection connection;
-  connection = QObject::connect(window, &Window::firstPaintEventFired, [&] {
-    QObject::disconnect(connection);
+  QObject::connect(window, &Window::firstPaintEventFired, [&] {
+    qDebug() << "firstPaintEventFired";
     // Start Node.js event loop after showing the first window
     // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in
     // the window system's event queue have been processed
