@@ -12,23 +12,27 @@ class TextEditView;
 class TabBar;
 namespace core {
 class Theme;
+class Document;
 }
 
-class TabView : public QTabWidget{
+class TabView : public QTabWidget {
   Q_OBJECT
   DISABLE_COPY(TabView)
 
  public:
+  enum CloseTabIncludingDocResult { UserCanceled, AllTabsRemoved, Finished };
+
   explicit TabView(QWidget* parent = nullptr);
   ~TabView();
   DEFAULT_MOVE(TabView)
 
   int addTab(QWidget* page, const QString& label);
   int insertTab(int index, QWidget* widget, const QString& label);
+  CloseTabIncludingDocResult closeTabIncludingDoc(core::Document* doc);
   QWidget* activeView() { return m_activeView; }
   bool tabDragging() { return m_tabDragging; }
   int indexOfPath(const QString& path);
-  bool insertTabInformation( const int index );
+  bool insertTabInformation(const int index);
   bool createWithSavedTabs();
   int open(const QString& path);
 
@@ -37,7 +41,7 @@ class TabView : public QTabWidget{
   bool closeAllTabs();
   bool closeOtherTabs();
   void addNew();
-  QWidget *widget(int index) const;
+  QWidget* widget(int index) const;
 
  signals:
   void allTabRemoved();
@@ -53,7 +57,7 @@ class TabView : public QTabWidget{
   TabBar* m_tabBar;
   bool m_tabDragging;
 
-  void setActiveView(QWidget *activeView);
+  void setActiveView(QWidget* activeView);
   void removeTabAndWidget(int index);
   bool closeTab(QWidget* w);
   void focusTabContent(int index);
@@ -63,6 +67,7 @@ class TabView : public QTabWidget{
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
+  QList<QWidget*> widgets() const;
 };
 
 Q_DECLARE_METATYPE(TabView*)

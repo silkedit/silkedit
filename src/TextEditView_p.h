@@ -17,14 +17,14 @@ class LineNumberArea;
 class TextEditViewPrivate {
   Q_DECLARE_PUBLIC(TextEditView)
  public:
-  explicit TextEditViewPrivate(TextEditView* q_ptr);
+  explicit TextEditViewPrivate(TextEditView* editView);
 
   TextEditView* q_ptr;
   LineNumberArea* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;
-  std::unique_ptr<QStringListModel> m_model;
-  std::unique_ptr<QCompleter> m_completer;
+  QStringListModel* m_model;
+  QCompleter* m_completer;
   bool m_completedAndSelected;
 
   void clearHighlightingCurrentLine();

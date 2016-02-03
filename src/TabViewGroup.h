@@ -27,6 +27,7 @@ class TabViewGroup : public QWidget {
 
   bool closeAllTabs();
   TabBar* tabBarAt(int screenX, int screenY);
+  QLinkedList<TabView*> tabViews() { return m_tabViews; }
 
  public slots:
   void splitHorizontally();
@@ -53,7 +54,6 @@ class TabViewGroup : public QWidget {
                   Qt::Orientation activeLayoutDirection,
                   Qt::Orientation newDirection);
   void splitTextEditView(std::function<void(QWidget*, const QString&)> func);
-  QLinkedList<TabView*> tabViews() { return m_tabViews; }
 };
 
 Q_DECLARE_METATYPE(TabViewGroup*)

@@ -29,10 +29,8 @@ class Theme;
 class BOM;
 }
 
-class TextEditView : public QPlainTextEdit,
-                     public core::ICloneable<TextEditView> {
+class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView> {
   Q_OBJECT
-  Q_DECLARE_PRIVATE(TextEditView)
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
@@ -122,8 +120,13 @@ class TextEditView : public QPlainTextEdit,
   void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
-  TextEditViewPrivate* d_ptr;
+  friend class TextEditViewPrivate;
+
+  std::unique_ptr<TextEditViewPrivate> d_ptr;
   void setViewportMargins(int left, int top, int right, int bottom);
+
+  inline TextEditViewPrivate* d_func() { return d_ptr.get(); }
+  inline const TextEditViewPrivate* d_func() const { return d_ptr.get(); }
 
   Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
   Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion))

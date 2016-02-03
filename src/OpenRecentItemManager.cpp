@@ -1,4 +1,5 @@
-﻿#include <qDebug>
+﻿#include <QDebug>
+#include <QFileInfo>
 
 #include "OpenRecentItemManager.h"
 #include "DocumentManager.h"
@@ -12,8 +13,8 @@
 using core::Constants;
 
 namespace {
-  constexpr const char* PREFIX = "recentOpenFileHistory";
-  constexpr const char* PATH_KEY = "path";
+constexpr const char* PREFIX = "recentOpenFileHistory";
+constexpr const char* PATH_KEY = "path";
 }
 
 void OpenRecentItemManager::clear() {
@@ -37,6 +38,11 @@ void OpenRecentItemManager::addOpenRecentItem(const QString& path) {
     return;
   }
 
+  if (!QFileInfo(path).exists()) {
+    qDebug("path doesn't exist");
+    return;
+  }
+
   auto foundIter = std::find(m_recentItems.begin(), m_recentItems.end(), path);
   if (foundIter != m_recentItems.end()) {
     // Move found item to top
@@ -46,6 +52,11 @@ void OpenRecentItemManager::addOpenRecentItem(const QString& path) {
     m_recentItems.push_front(path);
   }
 
+  updateOpenRecentItems();
+}
+
+void OpenRecentItemManager::removeOpenRecentItem(const QString& path) {
+  m_recentItems.remove(path);
   updateOpenRecentItems();
 }
 
@@ -69,7 +80,7 @@ OpenRecentItemManager::OpenRecentItemManager() : m_openRecentMenu(new QMenu(tr("
   m_openRecentMenu->addAction(m_clearRecentItemListAction);
 
   // read recent open file path from recentOpenHistory.ini,and set keys to m_recentItems.
-  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(), QSettings::IniFormat);
 
   int size = recentOpenHistory.beginReadArray(PREFIX);
   for (int i = 0; i < size; i++) {
@@ -96,8 +107,8 @@ void OpenRecentItemManager::updateOpenRecentItems() {
   m_reopenLastClosedFileAction->setEnabled(m_recentItems.empty() ? false : true);
 
   // save m_recenItemActions(recent open file history) to recentOpenHistory.ini.
-  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(),QSettings::IniFormat);
-  
+  QSettings recentOpenHistory(Constants::singleton().recentOpenHistoryPath(), QSettings::IniFormat);
+
   recentOpenHistory.clear();
 
   int index = 0;
