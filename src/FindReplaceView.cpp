@@ -176,6 +176,11 @@ void FindReplaceView::highlightMatches() {
       end = m_selectionEndPos;
     }
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
+    connect(editView->document(), &core::Document::contentsChanged, editView,
+            [=] {
+              editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end,
+                                               getFindFlags());
+            });
     selectFirstMatch();
   }
 }
