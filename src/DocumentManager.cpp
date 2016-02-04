@@ -17,12 +17,12 @@ using core::Document;
 
 const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
-bool DocumentManager::open(const QString& filename) {
+int DocumentManager::open(const QString& filename) {
   if (TabView* tabView = App::instance()->activeTabView()) {
     return tabView->open(filename) >= 0;
   } else {
     qWarning("active tab view is null");
-    return false;
+    return -1;
   }
 }
 
