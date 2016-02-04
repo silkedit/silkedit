@@ -14,6 +14,7 @@ TabBar::TabBar(QWidget* parent)
   setElideMode(Qt::ElideRight);
   setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
   setMouseTracking(true);
+  setUsesScrollButtons(true);
   hideAllCloseButtons();
 }
 
