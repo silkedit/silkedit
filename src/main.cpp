@@ -13,7 +13,6 @@
 #include "DocumentManager.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
-#include "TestUtil.h"
 #include "Helper.h"
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
@@ -71,9 +70,8 @@ int main(int argc, char** argv) {
   MenuBar::init();
 
   Window* window = Window::createWithNewFile();
-  QMetaObject::Connection connection;
-  connection = QObject::connect(window, &Window::firstPaintEventFired, [&] {
-    QObject::disconnect(connection);
+  QObject::connect(window, &Window::firstPaintEventFired, [&] {
+    qDebug() << "firstPaintEventFired";
     // Start Node.js event loop after showing the first window
     // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in
     // the window system's event queue have been processed
@@ -89,8 +87,6 @@ int main(int argc, char** argv) {
   if (arguments.size() > 1) {
     DocumentManager::singleton().open(arguments.at(1));
   }
-
-  //  new TestUtil();
 
   int passed = startTime.msecsTo(QTime::currentTime());
   qDebug("startup time: %d [ms]", passed);

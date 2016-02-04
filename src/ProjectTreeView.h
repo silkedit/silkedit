@@ -26,6 +26,7 @@ class ProjectTreeView : public QTreeView {
 
  private:
   MyFileSystemModel* m_model;
+  QMetaObject::Connection m_connection;
 
   void createNewFile(const QDir& dir);
   void createNewDir(const QDir& dir);
