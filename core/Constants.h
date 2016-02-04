@@ -14,6 +14,7 @@ class Constants : public QObject, public core::Singleton<Constants> {
 
   Q_PROPERTY(QString userPackagesJsonPath READ userPackagesJsonPath CONSTANT)
   Q_PROPERTY(QString userPackagesNodeModulesPath READ userPackagesNodeModulesPath CONSTANT)
+  Q_PROPERTY(QString silkHomePath READ silkHomePath CONSTANT)
 
  public:
   ~Constants() = default;
