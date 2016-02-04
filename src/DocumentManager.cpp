@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QDebug>
 #include <QMessageBox>
+#include <QTimer>
 
 #include "DocumentManager.h"
 #include "App.h"
@@ -86,7 +87,11 @@ bool DocumentManager::save(Document* doc) {
       }
     }
 
-    m_watcher->addPath(doc->path());
+    // calling addPath immediately still fires fileChanged signal on Windows.
+    QTimer::singleShot(0, this, [=] {
+      m_watcher->addPath(doc->path());
+    });
+
     return true;
   }
 
