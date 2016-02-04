@@ -81,8 +81,10 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
 
   if (count() == 1 && result >= 0) {
     m_activeView = widget;
-    m_activeView->setFocus();
   }
+
+  widget->setFocus();
+
   return result;
 }
 
