@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 
   Condition::init();
 
-  PackageManager::loadGrammers();
+  PackageManager::loadFiles();
 
   ThemeManager::load();
 

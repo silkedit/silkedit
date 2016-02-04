@@ -36,5 +36,15 @@
     "build": "webpack"
   },
   "os" : [ "darwin" ]
+},
+{
+  "name": "language-javascript",
+  "version": "0.1.0",
+  "description": "JavaScript language support in SilkEdit",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:silkedit/language-javascript.git"
+  },
+  "license": "MIT"
 }
 ]
