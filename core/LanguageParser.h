@@ -105,8 +105,9 @@ struct Language {
   std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   QString scopeName;
   Language* baseLanguage;
+  bool hideFromUser;
 
-  Language() : rootPattern(nullptr), baseLanguage(this) {}
+  Language() : rootPattern(nullptr), baseLanguage(this), hideFromUser(false) {}
 
   void tweak();
   QString name();
