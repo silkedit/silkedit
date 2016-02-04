@@ -16,7 +16,7 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
   DISABLE_COPY_AND_MOVE(PackageManager)
 
  public:
-  static void loadGrammers();
+  static void loadFiles();
   static boost::optional<QList<Package>> loadPackagesJson(const QByteArray& json);
 
   ~PackageManager() = default;
@@ -27,8 +27,6 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
  private:
   friend class Singleton<PackageManager>;
   PackageManager();
-
-  static void loadGrammers(const QString& path);
 };
 
 }  // namespace core
