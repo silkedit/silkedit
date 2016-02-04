@@ -46,5 +46,15 @@
     "url": "git@github.com:silkedit/language-javascript.git"
   },
   "license": "MIT"
+},
+{
+  "name": "language-c",
+  "version": "0.1.0",
+  "description": "C/C++ language support in SilkEdit",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:silkedit/language-c.git"
+  },
+  "license": "MIT"
 }
 ]
