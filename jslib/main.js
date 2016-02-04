@@ -1,7 +1,6 @@
 'use strict'
 
 const path = require('path');
-const vm = require('vm');
 const fs = require('fs');
 const domain = require('domain');
 
