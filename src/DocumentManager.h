@@ -28,7 +28,7 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
   std::shared_ptr<core::Document> create(const QString& path);
 
 public slots:
-  bool open(const QString& filename);
+  int open(const QString& filename);
 
  private:
   friend class core::Singleton<DocumentManager>;

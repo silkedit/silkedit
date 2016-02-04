@@ -262,7 +262,7 @@ bool Window::openDir(const QString& dirPath) {
     m_projectView = new ProjectTreeView(this);
   }
 
-  if (m_projectView->open(dirPath)) {
+  if (m_projectView->openDirOrExpand(dirPath)) {
     // root splitter becomes the owner of a project view.
     ui->rootSplitter->insertWidget(0, m_projectView);
     // Set the initial sizes for QSplitter widgets
