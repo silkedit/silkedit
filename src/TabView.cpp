@@ -29,7 +29,7 @@ constexpr const char* PATH_KEY = "tab";
 
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
-  return info.fileName();
+  return info.fileName().isEmpty() ? DocumentManager::DEFAULT_FILE_NAME : info.fileName();
 }
 
 // http://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
