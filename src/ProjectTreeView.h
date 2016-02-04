@@ -17,12 +17,13 @@ class ProjectTreeView : public QTreeView {
   ~ProjectTreeView();
   DEFAULT_MOVE(ProjectTreeView)
 
-  bool open(const QString& dirName);
+  bool openDirOrExpand(const QString& dirName);
   void edit(const QModelIndex& index);
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
+  void keyPressEvent(QKeyEvent * event) override;
 
  private:
   MyFileSystemModel* m_model;
@@ -31,8 +32,8 @@ class ProjectTreeView : public QTreeView {
   void createNewFile(const QDir& dir);
   void createNewDir(const QDir& dir);
 
- private slots:
-  void open(QModelIndex index);
+ private:
+  void openOrExpand(QModelIndex index);
   void rename();
   void remove();
   void showInFinder();

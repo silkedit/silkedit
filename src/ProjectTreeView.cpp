@@ -37,10 +37,10 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(n
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
   setFocusPolicy(Qt::ClickFocus);
-  connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(open(QModelIndex)));
+  connect(this, &ProjectTreeView::activated, this, &ProjectTreeView::openOrExpand);
 }
 
-bool ProjectTreeView::open(const QString& dirPath) {
+bool ProjectTreeView::openDirOrExpand(const QString& dirPath) {
   QDir targetDir(dirPath);
   if (targetDir.exists()) {
     if (m_model) {
@@ -103,7 +103,15 @@ bool ProjectTreeView::edit(const QModelIndex& index,
   return QTreeView::edit(index, trigger, event);
 }
 
-void ProjectTreeView::open(QModelIndex index) {
+void ProjectTreeView::keyPressEvent(QKeyEvent* event) {
+  if (event->key() == Qt::Key_Return) {
+    emit activated(currentIndex());
+  } else {
+    QTreeView::keyPressEvent(event);
+  }
+}
+
+void ProjectTreeView::openOrExpand(QModelIndex index) {
   if (!index.isValid()) {
     qWarning("index is invalid");
     return;
@@ -111,8 +119,12 @@ void ProjectTreeView::open(QModelIndex index) {
 
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   if (filter && m_model) {
-    QString filePath = m_model->filePath(filter->mapToSource(index));
-    DocumentManager::singleton().open(filePath);
+    QString path = m_model->filePath(filter->mapToSource(index));
+    if (QFileInfo(path).isFile()) {
+      DocumentManager::singleton().open(path);
+    } else {
+      setExpanded(index, !isExpanded(index));
+    }
   }
 }
 
