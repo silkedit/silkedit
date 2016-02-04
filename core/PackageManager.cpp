@@ -14,8 +14,8 @@ using core::LanguageProvider;
 using core::Metadata;
 
 namespace {
-const QStringList tmLanguageFilter{QStringLiteral("*.tmLanguage")};
-const QStringList tmPreferencesFilter{QStringLiteral("*.tmPreferences")};
+const QStringList tmLanguageFilter{QStringLiteral("*.tmLanguage"), QStringLiteral("*.plist")};
+const QStringList tmPreferencesFilter{QStringLiteral("*.tmPreferences"), QStringLiteral("*.plist")};
 
 void loadGrammers(const QString& path) {
   QDir dir(path);
