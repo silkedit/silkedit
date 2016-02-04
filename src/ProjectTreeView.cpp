@@ -49,8 +49,12 @@ bool ProjectTreeView::open(const QString& dirPath) {
     }
 
     m_model = new MyFileSystemModel(this);
-    connect(m_model, &QFileSystemModel::directoryLoaded, this,
-            &ProjectTreeView::focusRootDirectory);
+    m_connection =
+        connect(m_model, &QFileSystemModel::directoryLoaded, this, [=](const QString& path) {
+          qDebug() << "directoryLoaded" << path;
+          QObject::disconnect(m_connection);
+          focusRootDirectory(path);
+        });
 
     FilterModel* const filter = new FilterModel(this, dirPath);
     filter->setSourceModel(m_model);
@@ -180,6 +184,9 @@ void ProjectTreeView::createNewDir() {
 void ProjectTreeView::focusRootDirectory(const QString& path) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
   // it causes crash somehow...
+  // This seems to be related to these issues which seem to be related with QAccessibleTableCell
+  // https://bugreports.qt.io/browse/QTBUG-43796
+  // https://bugreports.qt.io/browse/QTBUG-49907
   //  setFocus();
   selectionModel()->select(filter->mapFromSource(m_model->index(path)),
                            QItemSelectionModel::Select | QItemSelectionModel::Rows);
