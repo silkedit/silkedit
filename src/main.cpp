@@ -13,7 +13,6 @@
 #include "DocumentManager.h"
 #include "TextEditView.h"
 #include "PlatformUtil.h"
-#include "TestUtil.h"
 #include "Helper.h"
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
@@ -88,8 +87,6 @@ int main(int argc, char** argv) {
   if (arguments.size() > 1) {
     DocumentManager::singleton().open(arguments.at(1));
   }
-
-  //  new TestUtil();
 
   int passed = startTime.msecsTo(QTime::currentTime());
   qDebug("startup time: %d [ms]", passed);

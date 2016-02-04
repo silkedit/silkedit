@@ -1,6 +1,9 @@
 'use strict'
 
-const path = require('path')
+const path = require('path');
+const vm = require('vm');
+const fs = require('fs');
+const domain = require('domain');
 
 // add builtin node_modules path to NODE_PATH to load silkedit module globally
 if (process.env.NODE_PATH) {
@@ -17,4 +20,18 @@ if (process.argv.length < 2) {
 }
 
 // cache silkedit module to share it globaly
-require('silkedit');
+const silkedit = require('silkedit');
+
+// call init.js
+const initPath = path.join(silkedit.Constants.silkHomePath, 'init.js');
+fs.open(initPath, 'r', (err, fd) => {
+  fd && fs.close(fd, (err) => {
+    const d = domain.create();
+    d.on('error', function(er) {
+      console.error(er.stack);
+    });
+    d.run(function() {
+      require(initPath);
+    });
+  });
+});
