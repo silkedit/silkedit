@@ -14,12 +14,10 @@
 #include "ui_PackagesView.h"
 #include "Helper.h"
 #include "core/Constants.h"
-#include "core/scoped_guard.h"
 #include "core/PackageManager.h"
 
 using core::Package;
 using core::Constants;
-using core::scoped_guard;
 using core::PackageManager;
 
 namespace {

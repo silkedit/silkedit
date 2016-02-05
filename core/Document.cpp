@@ -223,22 +223,24 @@ QTextCursor Document::find(const Regexp* expr,
          (options.testFlag(FindFlag::FindBackward)), from, begin, end);
   QString str = toPlainText();
   QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
-  QVector<int>* indices = expr->findStringSubmatchIndex(text, isBackward);
-  if (indices && indices->size() > 1) {
-    int startPos, endPos;
-    if (isBackward) {
-      startPos = begin + indices->at(0);
-      endPos = begin + indices->at(1);
-    } else {
-      startPos = from + indices->at(0);
-      endPos = from + indices->at(1);
+  if (const auto maybeIndices = expr->findStringSubmatchIndex(text, isBackward)) {
+    auto indices = *maybeIndices;
+    if (indices.size() > 1) {
+      int startPos, endPos;
+      if (isBackward) {
+        startPos = begin + indices.at(0);
+        endPos = begin + indices.at(1);
+      } else {
+        startPos = from + indices.at(0);
+        endPos = from + indices.at(1);
+      }
+      QTextCursor resultCursor(docHandle(), startPos);
+      resultCursor.setPosition(endPos, QTextCursor::KeepAnchor);
+      return resultCursor;
     }
-    QTextCursor resultCursor(docHandle(), startPos);
-    resultCursor.setPosition(endPos, QTextCursor::KeepAnchor);
-    return resultCursor;
-  } else {
-    return QTextCursor();
   }
+
+  return QTextCursor();
 }
 
 QTextCursor Document::find(const Regexp* expr,

@@ -686,32 +686,34 @@ QVector<Region>* Regex::find(const QString& str, int beginPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   while (lastFound < str.length()) {
-    std::unique_ptr<QVector<int>> indices(
-        regex->findStringSubmatchIndex(str.midRef(lastFound), false));
-    if (!indices) {
+    if (const auto maybeIndices = regex->findStringSubmatchIndex(str.midRef(lastFound), false)) {
+      QVector<int> indices = *maybeIndices;
+      if ((indices.at(0) + lastFound) < beginPos) {
+        if (indices.at(0) == 0) {
+          lastFound++;
+        } else {
+          lastFound += indices.at(0);
+        }
+        continue;
+      }
+
+      Q_ASSERT(!indices.isEmpty());
+      Q_ASSERT(indices.size() % 2 == 0);
+      for (int i = 0; i < indices.size(); i++) {
+        if (indices.at(i) != -1) {
+          indices[i] += lastFound;
+        }
+      }
+
+      QVector<Region>* regions = new QVector<Region>(indices.size() / 2);
+      for (int i = 0; i < indices.size() / 2; i++) {
+        (*regions)[i] = Region(indices.at(i * 2), indices.at(i * 2 + 1));
+      }
+      return regions;
+
+    } else {
       break;
-    } else if (((*indices)[0] + lastFound) < beginPos) {
-      if ((*indices)[0] == 0) {
-        lastFound++;
-      } else {
-        lastFound += (*indices)[0];
-      }
-      continue;
     }
-
-    Q_ASSERT(indices);
-    Q_ASSERT(indices->length() % 2 == 0);
-    for (int i = 0; i < indices->length(); i++) {
-      if ((*indices)[i] != -1) {
-        (*indices)[i] += lastFound;
-      }
-    }
-
-    QVector<Region>* regions = new QVector<Region>(indices->length() / 2);
-    for (int i = 0; i < indices->length() / 2; i++) {
-      (*regions)[i] = Region((*indices)[i * 2], (*indices)[i * 2 + 1]);
-    }
-    return regions;
   }
 
   return nullptr;
