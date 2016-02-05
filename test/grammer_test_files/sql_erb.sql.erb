@@ -1,0 +1,4 @@
+# app/sql_queries/get_player_by_email.sql.erb
+SELECT *
+FROM players
+WHERE email = <%= quote @email %>
