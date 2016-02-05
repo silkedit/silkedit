@@ -104,7 +104,7 @@ bool ProjectTreeView::edit(const QModelIndex& index,
 }
 
 void ProjectTreeView::keyPressEvent(QKeyEvent* event) {
-  if (event->key() == Qt::Key_Return) {
+  if (event->key() == Qt::Key_Return && state() != State::EditingState) {
     emit activated(currentIndex());
   } else {
     QTreeView::keyPressEvent(event);
