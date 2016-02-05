@@ -256,25 +256,5 @@
     "url": "git@github.com:silkedit/language-scala.git"
   },
   "license": "MIT"
-},
-{
-  "name": "language-perl",
-  "version": "0.1.0",
-  "description": "Perl language support in SilkEdit",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:silkedit/language-perl.git"
-  },
-  "license": "MIT"
-},
-{
-  "name": "language-batch",
-  "version": "0.1.0",
-  "description": "MSDOS Batch File language support in SilkEdit",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:silkedit/language-batch.git"
-  },
-  "license": "MIT"
 }
 ]

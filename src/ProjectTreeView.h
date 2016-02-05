@@ -34,12 +34,14 @@ class ProjectTreeView : public QTreeView {
 
  private:
   void openOrExpand(QModelIndex index);
+  void focusRootDirectory(const QString& path);
+
+private slots:
   void rename();
   void remove();
   void showInFinder();
   void createNewFile();
   void createNewDir();
-  void focusRootDirectory(const QString& path);
 };
 
 /**

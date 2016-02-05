@@ -60,6 +60,7 @@ Document::Document(const QString& path,
   if (dotPos >= 0) {
     QString ext = path.mid(dotPos + 1);
     qDebug("ext: %s", qPrintable(ext));
+    // todo: support firstLineMatch
     setupSyntaxHighlighter(LanguageProvider::languageFromExtension(ext), toPlainText());
   } else {
     qDebug("extension not found. path: %s", qPrintable(path));

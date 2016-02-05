@@ -1,0 +1,53 @@
+# keymap for Mac
+
+- { key: ctrl+b, command: move_cursor_left, if: onMac }
+- { key: ctrl+f, command: move_cursor_right, if: onMac }
+- { key: ctrl+p, command: move_cursor_up, if: onMac }
+- { key: ctrl+n, command: move_cursor_down, if: onMac }
+- { key: cmd+n, command: new_file, if: onMac }
+- { key: cmd+o, command: open, if: onMac }
+- { key: cmd+s, command: save, if: onMac }
+- { key: shift+cmd+s, command: save_as, if: onMac }
+- { key: opt+cmd+s, command: save_all, if: onMac }
+- { key: cmd+w, command: close_tab, if: onMac }
+- { key: shift+cmd+t, command: reopen_last_closed_file, if: onMac }
+- { key: 'ctrl+w, s', command: split_horizontally, if: onMac }
+- { key: 'ctrl+w, v', command: split_vertically, if: onMac }
+- { key: cmd+z, command: undo, if: onMac }
+- { key: cmd+shift+z, command: redo, if: onMac }
+- { key: cmd+x, command: cut, if: onMac }
+- { key: cmd+c, command: copy, if: onMac }
+- { key: cmd+v, command: paste, if: onMac }
+- { key: cmd+a, command: select_all, if: onMac }
+- { key: cmd+f, command: find_and_replace, if: onMac }
+- { key: ctrl+shift+p, command: show_scope, if: onMac }
+- { key: ctrl+space, command: complete, if: onMac }
+- { key: return, command: newline, if: onMac }
+- { key: tab, command: indent, if: onMac }
+- { key: 'cmd+shift+]', command: select_next_tab, if: onMac }
+- { key: 'cmd+shift+[', command: select_previous_tab, if: onMac }
+
+# keymap for Windows
+
+- { key: ctrl+n, command: new_file, if: onWindows }
+- { key: ctrl+o, command: open, if: onWindows }
+- { key: ctrl+s, command: save, if: onWindows }
+- { key: shift+ctrl+s, command: save_as, if: onWindows }
+- { key: alt+ctrl+s, command: save_all, if: onWindows }
+- { key: ctrl+w, command: close_tab, if: onWindows }
+- { key: shift+ctrl+t, command: reopen_last_closed_file, if: onWindows }
+- { key: 'ctrl+w, s', command: split_horizontally, if: onWindows }
+- { key: 'ctrl+w, v', command: split_vertically, if: onWindows }
+- { key: ctrl+z, command: undo, if: onWindows }
+- { key: ctrl+shift+z, command: redo, if: onWindows }
+- { key: ctrl+x, command: cut, if: onWindows }
+- { key: ctrl+c, command: copy, if: onWindows }
+- { key: ctrl+v, command: paste, if: onWindows }
+- { key: ctrl+a, command: select_all, if: onWindows }
+- { key: ctrl+f, command: find_and_replace, if: onWindows }
+- { key: ctrl+shift+p, command: show_scope, if: onWindows }
+- { key: ctrl+space, command: complete, if: onWindows }
+- { key: enter, command: newline, if: onWindows }
+- { key: tab, command: indent, if: onWindows }
+- { key: ctrl+tab, command: select_next_tab, if: onWindows }
+- { key: ctrl+shift+tab, command: select_previous_tab, if: onWindows }

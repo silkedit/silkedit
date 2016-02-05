@@ -15,7 +15,12 @@ namespace core {
 namespace {
 
 const int MAX_ITER_COUNT = 10000;
-const QString DEFAULT_SCOPE = "text.plain";
+const QString DEFAULT_SCOPE = QStringLiteral("text.plain");
+const QString HIDE_FROM_USER_KEY = QStringLiteral("hideFromUser");
+const QString FILE_TYPES_KEY = QStringLiteral("fileTypes");
+const QString FIRST_LINE_MATCH_KEY = QStringLiteral("firstLineMatch");
+const QString SCOPE_NAME_KEY = QStringLiteral("scopeName");
+const QString REPOSITORY_KEY = QStringLiteral("repository");
 
 // Clamps v to be in the region of _min and _max
 int clamp(int min, int max, int v) {
@@ -212,8 +217,7 @@ void LanguageParser::clearCache() {
   }
 }
 
-LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {
-}
+LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {}
 
 Node::Node(LanguageParser* p_p, const QString& p_name) {
   parser = p_p;
@@ -277,16 +281,14 @@ QString Node::data() const {
   return parser->getData(region.begin(), region.end());
 }
 
-Pattern::Pattern() : Pattern("") {
-}
+Pattern::Pattern() : Pattern("") {}
 
 Pattern::Pattern(const QString& p_include)
     : include(p_include),
       lang(nullptr),
       cachedPattern(nullptr),
       cachedPatterns(nullptr),
-      cachedRegions(nullptr) {
-}
+      cachedRegions(nullptr) {}
 
 std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos) {
   //  qDebug("firstMatch. pos: %d", pos);
@@ -618,9 +620,8 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   QVariantMap rootMap = root.toMap();
 
   // fileTypes
-  const QString fileTypes = "fileTypes";
-  if (rootMap.contains(fileTypes)) {
-    QVariant fileTypesVar = rootMap.value(fileTypes);
+  if (rootMap.contains(FILE_TYPES_KEY)) {
+    QVariant fileTypesVar = rootMap.value(FILE_TYPES_KEY);
     if (fileTypesVar.canConvert<QVariantList>()) {
       QSequentialIterable iterable = fileTypesVar.value<QSequentialIterable>();
       foreach (const QVariant& v, iterable) {
@@ -632,26 +633,31 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
     }
   }
 
+  // hideFromUser
+  if (rootMap.contains(HIDE_FROM_USER_KEY)) {
+    QVariant var = rootMap.value(HIDE_FROM_USER_KEY);
+    if (var.canConvert<bool>()) {
+      lang->hideFromUser = var.toBool();
+    }
+  }
+
   // firstLineMatch
-  const QString firstLineMatch = "firstLineMatch";
-  if (rootMap.contains(firstLineMatch)) {
-    lang->firstLineMatch = rootMap.value(firstLineMatch).toString();
+  if (rootMap.contains(FIRST_LINE_MATCH_KEY)) {
+    lang->firstLineMatch = rootMap.value(FIRST_LINE_MATCH_KEY).toString();
   }
 
   // scopeName
-  const QString scopeName = "scopeName";
-  if (rootMap.contains(scopeName)) {
-    lang->scopeName = rootMap.value(scopeName).toString();
+  if (rootMap.contains(SCOPE_NAME_KEY)) {
+    lang->scopeName = rootMap.value(SCOPE_NAME_KEY).toString();
   }
 
   // patterns
   lang->rootPattern.reset(toRootPattern(rootMap));
 
   // repository
-  const QString repository = "repository";
-  if (rootMap.contains(repository)) {
-    QVariantMap repositoryMap = rootMap.value(repository).toMap();
-    if (!repository.isEmpty()) {
+  if (rootMap.contains(REPOSITORY_KEY)) {
+    QVariantMap repositoryMap = rootMap.value(REPOSITORY_KEY).toMap();
+    if (!REPOSITORY_KEY.isEmpty()) {
       QMapIterator<QString, QVariant> iter(repositoryMap);
       while (iter.hasNext()) {
         iter.next();
@@ -732,8 +738,7 @@ void Language::clearCache() {
   }
 }
 
-RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {
-}
+RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {}
 
 void RootNode::adjust(int pos, int delta) {
   region.setEnd(region.end() + delta);
