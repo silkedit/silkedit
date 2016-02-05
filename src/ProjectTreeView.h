@@ -24,6 +24,7 @@ class ProjectTreeView : public QTreeView {
   void contextMenuEvent(QContextMenuEvent* event) override;
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
   void keyPressEvent(QKeyEvent * event) override;
+  void mouseDoubleClickEvent(QMouseEvent *) override;
 
  private:
   MyFileSystemModel* m_model;

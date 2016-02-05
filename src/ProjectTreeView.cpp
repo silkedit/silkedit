@@ -111,6 +111,10 @@ void ProjectTreeView::keyPressEvent(QKeyEvent* event) {
   }
 }
 
+void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent* ) {
+  emit activated(currentIndex());
+}
+
 void ProjectTreeView::openOrExpand(QModelIndex index) {
   if (!index.isValid()) {
     qWarning("index is invalid");
