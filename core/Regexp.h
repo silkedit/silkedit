@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <boost/optional.hpp>
 #include <QVector>
 #include <QStringRef>
 
@@ -22,7 +23,7 @@ class Regexp {
   static QString escape(const QString& expr);
 
   QString pattern() const { return m_pattern; }
-  QVector<int>* findStringSubmatchIndex(const QStringRef& s,
+  boost::optional<QVector<int> > findStringSubmatchIndex(const QStringRef& s,
                                         bool backward = false,
                                         bool findNotEmpty = false) const;
   bool matches(const QString& text, bool findNotEmpty = false);
