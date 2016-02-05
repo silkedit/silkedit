@@ -174,7 +174,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
     // because pos doesn't increase.
     auto pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
-    QVector<Region>* regions = pair.second;
+    boost::optional<QVector<Region>> regions = pair.second;
     int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
     if (newlinePos != -1) {
       newlinePos += pos;
@@ -284,22 +284,19 @@ QString Node::data() const {
 Pattern::Pattern() : Pattern("") {}
 
 Pattern::Pattern(const QString& p_include)
-    : include(p_include),
-      lang(nullptr),
-      cachedPattern(nullptr),
-      cachedPatterns(nullptr),
-      cachedRegions(nullptr) {}
+    : include(p_include), lang(nullptr), cachedPattern(nullptr), cachedPatterns(nullptr) {}
 
-std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& str, int beginPos) {
+std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(const QString& str,
+                                                                                int beginPos) {
   //  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* resultPattern = nullptr;
-  QVector<Region>* resultRegions = nullptr;
+  boost::optional<QVector<Region>> resultRegions;
   int i = 0;
   while (i < cachedPatterns->length()) {
     auto pair = (*cachedPatterns)[i]->find(str, beginPos);
     Pattern* pattern = pair.first;
-    QVector<Region>* regions = pair.second;
+    boost::optional<QVector<Region>> regions = pair.second;
     if (regions) {
       if (startIdx < 0 || startIdx > (*regions)[0].begin()) {
         startIdx = (*regions)[0].begin();
@@ -329,12 +326,13 @@ std::pair<Pattern*, QVector<Region>*> Pattern::searchInPatterns(const QString& s
  * @param beginPos
  * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0]
  */
-std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int beginPos) {
+std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QString& str,
+                                                                    int beginPos) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedRegions) {
       //      qDebug("cachedMatch is null");
-      return std::make_pair(nullptr, nullptr);
+      return std::make_pair(nullptr, boost::none);
     }
 
     if ((*cachedRegions)[0].begin() >= beginPos && cachedPattern->cachedRegions) {
@@ -365,7 +363,7 @@ std::pair<Pattern*, QVector<Region>*> Pattern::find(const QString& str, int begi
   //  misses++;
 
   Pattern* pattern = nullptr;
-  QVector<Region>* regions = nullptr;
+  boost::optional<QVector<Region>> regions;
   if (match.regex) {
     pattern = this;
     regions = match.find(str, beginPos);
@@ -449,7 +447,7 @@ Node* Pattern::createNode(const QString& str,
 
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
-    QVector<Region>* endMatchedRegions = end.find(str, i);
+    boost::optional<QVector<Region>> endMatchedRegions = end.find(str, i);
     if (endMatchedRegions) {
       endPos = (*endMatchedRegions)[0].end();
     } else {
@@ -474,7 +472,7 @@ Node* Pattern::createNode(const QString& str,
     if (cachedPatterns->length() > 0) {
       auto pair = searchInPatterns(str, i);
       Pattern* patternBeforeEnd = pair.first;
-      QVector<Region>* regionsBeforeEnd = pair.second;
+      boost::optional<QVector<Region>> regionsBeforeEnd = pair.second;
       if (regionsBeforeEnd && endMatchedRegions &&
           ((*regionsBeforeEnd)[0].begin() < (*endMatchedRegions)[0].begin() ||
            ((*regionsBeforeEnd)[0].begin() == (*endMatchedRegions)[0].begin() &&
@@ -567,7 +565,7 @@ void Pattern::clearCache() {
   cachedPatterns.reset(nullptr);
   includedLanguage.reset(nullptr);
   if (cachedRegions) {
-    cachedRegions->clear();
+    cachedRegions = boost::none;
   }
   cachedStr.clear();
   if (patterns) {
@@ -682,7 +680,7 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   return lang;
 }
 
-QVector<Region>* Regex::find(const QString& str, int beginPos) {
+boost::optional<QVector<Region>> Regex::find(const QString& str, int beginPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   while (lastFound < str.length()) {
@@ -705,9 +703,9 @@ QVector<Region>* Regex::find(const QString& str, int beginPos) {
         }
       }
 
-      QVector<Region>* regions = new QVector<Region>(indices.size() / 2);
+      QVector<Region> regions(indices.size() / 2);
       for (int i = 0; i < indices.size() / 2; i++) {
-        (*regions)[i] = Region(indices.at(i * 2), indices.at(i * 2 + 1));
+        regions[i] = Region(indices.at(i * 2), indices.at(i * 2 + 1));
       }
       return regions;
 
@@ -716,7 +714,7 @@ QVector<Region>* Regex::find(const QString& str, int beginPos) {
     }
   }
 
-  return nullptr;
+  return boost::none;
 }
 
 void Language::tweak() {
