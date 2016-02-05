@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>SilkEdit APIリファレンス</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+<link rel="icon" href="http://silksmiths.sakura.ne.jp/files/SilkEdit/favicon.ico"></head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3>SilkEdit 0.9.1</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>SilkEditパッケージAPIリファレンス</h1><p>パッケージはNode.jsのAPIの他にrequire('silkedit')でSilkEdit独自のAPIを使用することができます。</p>
+<p>このドキュメントはSilkEdit独自のAPIのリファレンスです。</p>
+<p>SilkEditのAPIは<a href="http://doc.qt.io/qt-5/qtwidgets-index.html">Qt Widgets</a>をベースにしており、各ウィジェットに対応するAPIをJavaScriptから呼ぶことができます。</p>
+<p>現在ウィジェットの全てのAPIをサポートしているわけではなく、ウィジェットのプロパティ、シグナル、スロット、そしてSilkEditのAPIで定義されたメソッドにアクセスすることができます。</p>
+<p>例えば、<a href="module-silkedit.Dialog.html">Dialog</a>は<a href="http://doc.qt.io/qt-5/qdialog.html">QDialog</a>に対応したクラスです。<a href="http://doc.qt.io/qt-5/qdialog.html">QDialog</a>クラスは<a href="http://doc.qt.io/qt-5/qdialog.html#modal-prop">modal</a>というプロパティを持ちますが、これはJavaScriptのプロパティとして定義されており、以下のようにアクセスできます。</p>
+<pre class="prettyprint source"><code>const silkedit = require('silkedit');
+const dialog = new silkedit.Dialog();
+console.log(dialog.modal);</code></pre><p><a href="http://doc.qt.io/qt-5/qdialog.html">QDialog</a>は<a href="http://doc.qt.io/qt-5/qdialog.html#exec">exec</a>というスロットがあり、これはJavaScriptのメソッドとして呼び出すことができます。</p>
+<pre class="prettyprint source"><code>const silkedit = require('silkedit');
+const dialog = new silkedit.Dialog();
+// 空のダイアログが表示される。
+dialog.exec();</code></pre><p><a href="http://doc.qt.io/qt-5/qdialog.html">QDialog</a>は<a href="http://doc.qt.io/qt-5/qdialog.html#finished">finished</a>というシグナルがあり、これはNode.jsの<a href="https://nodejs.org/api/events.html#events_class_eventemitter">EventEmitter</a>として実装されています。</p>
+<pre class="prettyprint source"><code>const silkedit = require('silkedit');
+const dialog = new silkedit.Dialog();
+// ダイアログが終了した時にemitされる。
+dialog.on('finished', (result) => console.log('dialog finished. result=' + result));
+dialog.exec();</code></pre><h1>パッケージ開発ガイド</h1><h2>ディレクトリ構成</h2><p>パッケージは<a href="https://nodejs.org/api/modules.html">Nodeモジュール</a>となっていますが、いくつか独自のルールがあります。</p>
+<p>パッケージのディレクトリ構成は以下のようになっています。</p>
+<pre class="prettyprint source"><code>my_package
+├── config_definition.yml
+├── index.js
+├── keymap.yml
+├── locales
+│   ├── en
+│   │   └── translation.yml
+│   └── ja
+│       └── translation.yml
+├── package.json
+├── menu.yml
+└── toolbar.yml</code></pre><h2>index.js</h2><p>index.jsはパッケージのエントリポイントです。以下にindex.jsの例を示します。</p>
+<pre class="prettyprint source"><code>const silkedit = require('silkedit');
+
+module.exports = {
+  activate: function() {
+  },
+
+  deactivate: function() {
+  },
+
+  commands: {
+    &quot;hello&quot;: () => {
+      silkedit.alert(silkedit.tr(&quot;hello:hello&quot;, &quot;Hello!&quot;));
+    }
+  }
+}</code></pre><p>index.jsはNodeモジュールとなっており、activate, deactivate, commandsのプロパティを持つオブジェクトを公開しています。</p>
+<p>activateはパッケージがロードされた時に呼び出されます。deactivateはパッケージが削除される時に呼び出されます。</p>
+<p>commandsプロパティにはパッケージが提供するコマンドを登録します。上の例では&quot;hello&quot;がコマンド名となり、コマンドが実行された時には<code>silkedit.alert(silkedit.tr(&quot;hello:hello&quot;, &quot;Hello!&quot;));</code>が実行されます。</p>
+<p>コマンド名はパッケージ名が自動的に修飾され、keymap.ymlやmenu.ymlでコマンド名を指定する時は&lt;パッケージ名&gt;.&lt;コマンド名&gt;のように指定する必要があります。上記のhelloコマンドは&quot;hello.hello&quot;というコマンドになります。</p>
+<p><a href="module-silkedit.html#.alert">silkedit.alert</a>はアラートを表示する関数です。</p>
+<p><a href="module-silkedit.html#.tr">silkedit.tr</a>はローカライズされた文字列を取得する関数です。locales/ja/translation.ymlに日本語ロケールの時に使用されるローカライズされた文字列がYAMLで定義されています。</p>
+<h2>設定</h2><p>config_definition.ymlでパッケージ独自の設定をYAMLで定義することができます。ルートはconfigで、その中に設定を定義します。以下にvimパッケージの例を示します。</p>
+<pre class="prettyprint source"><code>config:
+  enable_on_startup:
+    title: Enable Vim emulation on startup
+    description: Enable Vim emulation on startup
+    type: boolean
+    default: false</code></pre><p>enable_on_startupが設定となります。その中に連想配列でtitle, description, type, defaultを定義します。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>title</td>
+<td>設定のタイトル</td>
+</tr>
+<tr>
+<td>description</td>
+<td>説明</td>
+</tr>
+<tr>
+<td>type</td>
+<td>設定の型</td>
+</tr>
+<tr>
+<td>default</td>
+<td>デフォルト値</td>
+</tr>
+</tbody>
+</table>
+<p>パッケージの設定は設定ダイアログに表示されます。</p>
+<p>titleは設定ダイアログで表示されます。</p>
+<p>descriptionは設定ダイアログのツールチップとして表示されます。</p>
+<p>typeは設定の型です。string, integer, number, booleanのいずれかを指定して下さい。</p>
+<h2>キーマップ</h2><p>keymap.ymlで定義します。</p>
+<p>以下のようにkey, commandのセットを列挙します。</p>
+<pre class="prettyprint source"><code>- { key: ctrl+b, command: move_cursor_left}
+- { key: ctrl+f, command: move_cursor_right}</code></pre><p>以下のようにargsでコマンドに引数を渡すことも可能です。</p>
+<p><code>{ key: ctrl+b, command: move_cursor, args: { operation: left }}</code></p>
+<p>キーマップには条件を付加することも可能です。例えばOS、選択しているプログラミング言語モードなどです。
+条件の書式は2種類あります。</p>
+<pre class="prettyprint source"><code>&lt;key> &lt;operator> &lt;operand>の形式（1つ以上のスペース区切り）。</code></pre><p>例えば<code>if: lang == cpp</code>を定義すると、言語モードがC++の時にのみ有効になるショートカットを設定できます。</p>
+<pre class="prettyprint source"><code>- { key: ctrl+b, command: move_cursor_left, if: lang == cpp}</code></pre><p>operatorは&quot;==&quot;, &quot;!=&quot;をサポートしています。</p>
+<p>もう1つの書式は&quot;<key>&quot;のみ定義する場合です。この場合operatorは&quot;==&quot;, operandは&quot;true&quot;に設定されます。</p>
+<pre class="prettyprint source"><code>- { key: ctrl+cmd+i, command: vim.toggle_vim_emulation, if: onMac }
+- { key: ctrl+alt+i, command: vim.toggle_vim_emulation, if: onWindows }</code></pre><p>上記のonMac, onWindowsはSilkEdit組み込みの条件で、例えばonMacはMac上で動かす時にoperandがtrueになります。</p>
+<p>パッケージ独自の条件を付加することも可能です。以下はvimパッケージの例です。</p>
+<pre class="prettyprint source"><code>  const modeCond = {
+    isSatisfied: (operator, operand) => {
+      return isEnabled && silkedit.Condition.check(toModeText(mode), operator, operand);
+    }
+  }
+
+  silkedit.Condition.add(&quot;vim.mode&quot;, modeCond);</code></pre><p><a href="module-silkedit.Condition.html#.add">module:silkedit.Condition.add</a>で条件を追加できます。</p>
+<p>vimパッケージをロードするとvim.modeという条件が使用できるようになります。</p>
+<p>上記で定義したmodeCondのisSatisfied関数がtrueを返す時のみ以下のキーマップは有効になります。</p>
+<pre class="prettyprint source"><code>- { key: i, command: vim.insert_mode, if: vim.mode == normal }</code></pre><h2>メニュー</h2><p>menu.ymlで定義します。以下に例を示します。</p>
+<pre class="prettyprint source"><code>menu:
+  - id: file
+    menu:
+    - label: 'Say Hello!'
+      id: hello
+      command: hello.hello
+      if: onMac
+      before: save</code></pre><table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>label</td>
+<td>メニューに表示される文字列</td>
+</tr>
+<tr>
+<td>id</td>
+<td>メニューのid。ローカライズやbeforeで指定されます</td>
+</tr>
+<tr>
+<td>command</td>
+<td>実行するコマンド</td>
+</tr>
+<tr>
+<td>if</td>
+<td>表示する条件</td>
+</tr>
+<tr>
+<td>before</td>
+<td>指定したidのメニューの上に表示するようにします</td>
+</tr>
+</tbody>
+</table>
+<p>上記のhelloメニューはMacでのみファイルメニューの中の保存メニューの上に表示されます。クリックすると&quot;hello.hello&quot;コマンドが実行されます。</p>
+<h2>ツールバー</h2><p>toolbars.ymlで定義します。以下に例を示します。</p>
+<pre class="prettyprint source"><code>toolbars:
+- label: File
+  id: file
+  items:
+  - icon: resources/images/new.png
+    command: new_file
+    tooltip: &quot;New File&quot;
+    id: new_file
+  - icon: resources/images/open.png
+    command: open
+    tooltip: Open
+    id: open
+    if: onMac</code></pre><p>ツールバーはメニューと違い2階層しかありません。ルート要素でツールバーの定義、ツールバーの子要素でツールバーに表示するアイテムを定義します。</p>
+<p>ツールバーは以下の項目で定義します。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>label</td>
+<td>右クリックメニューに表示される文字列</td>
+</tr>
+<tr>
+<td>id</td>
+<td>ツールバーのid。ローカライズやbeforeで指定されます</td>
+</tr>
+<tr>
+<td>items</td>
+<td>実行するコマンド</td>
+</tr>
+<tr>
+<td>if</td>
+<td>表示する条件</td>
+</tr>
+<tr>
+<td>before</td>
+<td>指定したidのツールバーの前に表示するようにします</td>
+</tr>
+</tbody>
+</table>
+<p>ツールバーアイテムは以下の項目で定義します。</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>icon</td>
+<td>表示するアイコン</td>
+</tr>
+<tr>
+<td>tooltip</td>
+<td>ツールチップに表示される文字列</td>
+</tr>
+<tr>
+<td>id</td>
+<td>ツールバーアイテムのid。ローカライズやbeforeで指定されます</td>
+</tr>
+<tr>
+<td>command</td>
+<td>実行するコマンド</td>
+</tr>
+<tr>
+<td>if</td>
+<td>表示する条件</td>
+</tr>
+<tr>
+<td>before</td>
+<td>指定したidのツールバーアイテムの前に表示するようにします</td>
+</tr>
+</tbody>
+</table>
+<p>iconは絶対パス、もしくはtoolbars.ymlからの相対パスを指定します。</p>
+<h2>ローカライズ</h2><p>localesディレクトリに以下のようにロケールごとのディレクトリを作って翻訳ファイル(translation.yml)を置きます。</p>
+<pre class="prettyprint source"><code>word_count
+  locales
+    ja
+      translation.yml
+    zh_CN
+      translation.yml
+    zh_TW
+      translation.yml</code></pre><p>ja/translation.ymlの例をいかに示します。</p>
+<pre class="prettyprint source"><code>menu:
+  word_count:
+    label: 単語数カウント
+
+word_count: 単語数</code></pre><h4>メニューの国際化</h4><p><code>menu.&lt;id&gt;.label</code> のように定義します。</p>
+<h4>ツールバーの国際化</h4><p><code>toolbar.&lt;id&gt;.tooltip</code> のように定義します。</p>
+<h4>JavaScriptの文字列の国際化</h4><p><a href="module-silkedit.html#.tr">module:silkedit.tr</a>を呼びます。</p>
+<p>keyの形式は<code>&lt;package&gt;:&lt;key&gt;</code>です。</p>
+<p>以下の呼び出しはword_countパッケージの対応するロケールのtranslation.ymlのword_countキーの文字列を使用します。見つからなければ&quot;word count&quot;の文字列が使用されます。</p>
+<pre class="prettyprint source"><code>silkedit.tr(&quot;word_count:word_count&quot;, &quot;word count&quot;)</code></pre><h2>パッケージの公開</h2><p>SilkEditのパッケージはパッケージマネージャから検索、インストール、削除が可能です。</p>
+<p>パッケージを公開するにはSilkEditパッケージの<a href="https://github.com/silkedit/packages">セントラルリポジトリ</a>にパッケージを登録する必要があります。</p>
+<p>パッケージ自身のリポジトリもGithubに置く必要があります。</p>
+<h4>package.json</h4><p>package.jsonはパッケージの名前やバージョンなどの情報を格納したファイルです。基本的な書き方は<a href="https://docs.npmjs.com/files/package.json">npmのサイト</a>を参考にして下さい。</p>
+<p>package.jsonのサンプル</p>
+<pre class="prettyprint source"><code>{
+  &quot;name&quot;: &quot;yaml-validator&quot;,
+  &quot;version&quot;: &quot;0.1.0&quot;,
+  &quot;description&quot;: &quot;YAML Validator&quot;,
+  &quot;main&quot;: &quot;index.js&quot;,
+  &quot;repository&quot;: {
+    &quot;type&quot;: &quot;git&quot;,
+    &quot;url&quot;: &quot;https://github.com/silkedit/yaml-validator.git&quot;
+  },
+  &quot;author&quot;: {
+    &quot;name&quot;: &quot;SilkEdit team&quot;
+  },
+  &quot;license&quot;: &quot;MIT&quot;,
+  &quot;dependencies&quot;: {
+    &quot;js-yaml&quot;: &quot;3.x&quot;
+  }
+}</code></pre><p>repositoryは現在Githubのみ対応しています。Githubのurlを記入して下さい。以下の様なGithubの短縮URLも使用可能です。</p>
+<p><code>&quot;repository&quot;: &quot;silkedit/hello&quot;</code></p>
+<h4>タグを付けてパッケージのリポジトリをGithubにプッシュする</h4><p>package.jsonのversionと同じタグをパッケージのGithubリポジトリに登録する必要があります。</p>
+<ol>
+<li><p><code>git tag 0.1.0</code> でタグを付けます。</p>
+</li>
+<li><p><code>git push origin master --tags</code>でパッケージをpushする際にタグも一緒にpushします。</p>
+</li>
+</ol>
+<h4>パッケージの新規登録</h4><ol>
+<li><p><a href="https://github.com/silkedit/packages">https://github.com/silkedit/packages</a> をGithub上でフォークします。</p>
+</li>
+<li><p>開発したパッケージのpackage.jsonの中身をpackages.jsonに追加して、上記リポジトリにプルリクエストを投げます。必ずversionに一致するタグがパッケージのリポジトリに存在するか確認して下さい。</p>
+</li>
+<li><p>プルリクエストがマージされるとパッケージマネージャから検索可能になります。</p>
+</li>
+</ol>
+<h4>更新</h4><p>packages.jsonを更新してセントラルリポジトリにプルリクエストを投げます。versionを必ず更新して下さい。また必ず新versionに一致するタグがパッケージのリポジトリに存在するか確認して下さい。</p>
+<h4>削除</h4><p>packages.jsonからパッケージに該当する箇所を削除してセントラルリポジトリにプルリクエストを投げます。</p>
+<h4>helloサンプルパッケージ</h4><p><a href="https://github.com/silkedit/hello">https://github.com/silkedit/hello</a></p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-silkedit.html">silkedit</a></li></ul><h3>Classes</h3><ul><li><a href="KeyEvent.html">KeyEvent</a></li><li><a href="module-silkedit.Dialog.html">Dialog</a></li><li><a href="module-silkedit.DialogButtonBox.html">DialogButtonBox</a></li><li><a href="module-silkedit.FileDialog.html">FileDialog</a></li><li><a href="module-silkedit.Font.html">Font</a></li><li><a href="module-silkedit.Label.html">Label</a></li><li><a href="module-silkedit.LineEdit.html">LineEdit</a></li><li><a href="module-silkedit.MessageBox.html">MessageBox</a></li><li><a href="module-silkedit.TabView.html">TabView</a></li><li><a href="module-silkedit.TabViewGroup.html">TabViewGroup</a></li><li><a href="module-silkedit.TextEditView.html">TextEditView</a></li><li><a href="module-silkedit.Url.html">Url</a></li><li><a href="module-silkedit.VBoxLayout.html">VBoxLayout</a></li><li><a href="module-silkedit.WebView.html">WebView</a></li><li><a href="module-silkedit.Window.html">Window</a></li></ul><h3>Namespaces</h3><ul><li><a href="module-silkedit.App.html">App</a></li><li><a href="module-silkedit.CommandManager.html">CommandManager</a></li><li><a href="module-silkedit.Condition.html">Condition</a></li><li><a href="module-silkedit.Config.html">Config</a></li><li><a href="module-silkedit.Constants.html">Constants</a></li><li><a href="module-silkedit.DocumentManager.html">DocumentManager</a></li><li><a href="module-silkedit.Event.html">Event</a></li><li><a href="module-silkedit.KeymapManager.html">KeymapManager</a></li><li><a href="module-silkedit.ProjectManager.html">ProjectManager</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-hello.html">hello</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Thu Feb 04 2016 11:29:24 GMT+0900 (JST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
