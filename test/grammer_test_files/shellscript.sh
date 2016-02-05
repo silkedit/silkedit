@@ -88,7 +88,8 @@ resolve() {
     # jsdoc
     npm install -g jsdoc@latest
 
-    # install os specific built-in packages
+    # install built-in packages
+    npm install --prefix packages --production https://github.com/silkedit/vim/tarball/0.1.6
     if [ ${OS} == 'Mac' ]; then
       npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.1
     fi

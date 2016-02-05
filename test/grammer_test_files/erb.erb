@@ -1,0 +1,28 @@
+<%= javascript_include_tag "posters_index" %>
+<%= stylesheet_link_tag "posters_index" %>
+<input type="hidden" id="server" value="<%= @server %>">
+
+<div class="container">
+  <%= paginate @posters %>
+  <div id="list">
+    <table border="1" class="table-striped">
+      <tr>
+        <th class="category">区分</th>
+        <th class="title">タイトル</th>
+        <th class="contributor">投稿者</th>
+        <th class="posted">投稿日</th>
+        <th class="replies">返信数</th>
+      </tr>
+
+      <% @posters.each do |poster| %>
+        <tr <%= "class=closed" if poster.closed %>>
+          <td class="category"><%= poster.category.label %></td>
+          <td class="title"><%= link_to "#{poster.title}", "/posters/#{poster.server.server}/#{poster.id}" %></td>
+          <td class="contributor"><%= poster.contributor %></td>
+          <td class="posted"><%= poster.posted.to_date.strftime("%Y/%m/%d") %></td>
+          <td class="replies"><%= poster.replies.size %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</div>

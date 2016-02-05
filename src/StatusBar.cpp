@@ -81,17 +81,17 @@ void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
 }
 
 void StatusBar::setActiveTextEditViewLanguage() {
-  qDebug("currentIndexChanged in langComboBox. %d", m_langComboBox->currentIndex());
+  qDebug() << "currentIndexChanged in langComboBox." << m_langComboBox->currentIndex();
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
     if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
-      qDebug("active editView's lang: %s", qPrintable(editView->language()->scopeName));
+      qDebug() << "active editView's lang:" << editView->language()->scopeName;
       editView->setLanguage(m_langComboBox->currentData().toString());
     } else {
-      qDebug("active TextEditView is null");
+      qDebug() << "active TextEditView is null";
     }
   } else {
-    qDebug("active tab widget is null");
+    qDebug() << "active tab widget is null";
   }
 }
 
