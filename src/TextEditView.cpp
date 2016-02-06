@@ -472,6 +472,10 @@ Document* TextEditView::document() {
 void TextEditView::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
 
+  // clear undo stack
+  document->setUndoRedoEnabled(false);
+  document->setUndoRedoEnabled(true);
+
   Q_D(TextEditView);
 
   // Compare previous and current languages
