@@ -25,6 +25,14 @@ QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
 
   return nullptr;
 }
+
+void setSizesOfSplitter(QSplitter* splitter) {
+  QList<int> sizes;
+  for (int i = 0; i < splitter->count(); i++) {
+    sizes.append(100);
+  }
+  splitter->setSizes(sizes);
+}
 }
 
 TabViewGroup::TabViewGroup(QWidget* parent)
@@ -149,9 +157,12 @@ void TabViewGroup::addTabView(QWidget* widget,
     Splitter* splitter = new Splitter(newDirection);
     splitter->addWidget(m_activeTabView);
     splitter->addWidget(tabView);
+    setSizesOfSplitter(splitter);
     splitterInActiveTabViewGroup->insertWidget(index, splitter);
+    setSizesOfSplitter(splitterInActiveTabViewGroup);
   } else {
     splitterInActiveTabViewGroup->addWidget(tabView);
+    setSizesOfSplitter(splitterInActiveTabViewGroup);
   }
 }
 
