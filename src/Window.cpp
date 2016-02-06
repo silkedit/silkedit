@@ -265,6 +265,7 @@ bool Window::openDir(const QString& dirPath) {
   if (m_projectView->openDirOrExpand(dirPath)) {
     // root splitter becomes the owner of a project view.
     ui->rootSplitter->insertWidget(0, m_projectView);
+    ui->rootSplitter->setCollapsible(0, false);
     // Set the initial sizes for QSplitter widgets
     QList<int> sizes;
     sizes << 50 << 300;
