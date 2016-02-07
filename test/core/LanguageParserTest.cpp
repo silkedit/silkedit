@@ -49,13 +49,13 @@ class LanguageParserTest : public QObject {
     QCOMPARE(includePattern->include, QString("#special_block"));
 
     Pattern* matchPattern = rootPattern->patterns->at(2);
-    QCOMPARE(matchPattern->match.regex->pattern(), QString("\\b(friend|explicit|virtual)\\b"));
+    QCOMPARE(matchPattern->match->pattern(), QString("\\b(friend|explicit|virtual)\\b"));
     QCOMPARE(matchPattern->name, QString("storage.modifier.c++"));
 
     Pattern* beginEndPattern = rootPattern->patterns->at(14);
-    QVERIFY(!beginEndPattern->begin.regex->pattern().isEmpty());
+    QVERIFY(!beginEndPattern->begin->pattern().isEmpty());
     QCOMPARE(beginEndPattern->beginCaptures.size(), 2);
-    QVERIFY(!beginEndPattern->end.regex->pattern().isEmpty());
+    QVERIFY(!beginEndPattern->end->pattern().isEmpty());
     QCOMPARE(beginEndPattern->endCaptures.size(), 1);
     QCOMPARE(beginEndPattern->name, QString("meta.function.destructor.c++"));
     QCOMPARE(beginEndPattern->patterns->size(), 1);
@@ -63,14 +63,14 @@ class LanguageParserTest : public QObject {
     // repository
     QVERIFY(!lang->repository.empty());
     Pattern* blockPat = lang->repository.at("block").get();
-    QCOMPARE(blockPat->begin.regex->pattern(), QString("\\{"));
-    QCOMPARE(blockPat->end.regex->pattern(), QString("\\}"));
+    QCOMPARE(blockPat->begin->pattern(), QString("\\{"));
+    QCOMPARE(blockPat->end->pattern(), QString("\\}"));
     QCOMPARE(blockPat->name, QString("meta.block.c++"));
     QVector<Pattern*>* patterns = blockPat->patterns.get();
     QCOMPARE(patterns->size(), 2);
     Pattern* firstPat = patterns->at(0);
     QCOMPARE(firstPat->captures.size(), 2);
-    QVERIFY(!firstPat->match.regex->pattern().isEmpty());
+    QVERIFY(!firstPat->match->pattern().isEmpty());
     QCOMPARE(firstPat->name, QString("meta.function-call.c"));
 
     // scopeName
@@ -225,6 +225,16 @@ class LanguageParserTest : public QObject {
 
     QTextStream resIn(&resFile);
     compareLineByLine(root->toString(), resIn.readAll());
+  }
+
+  void hasBackReference() {
+    QVERIFY(Regex::hasBackReference(R"(\1)"));
+    QVERIFY(Regex::hasBackReference(R"(\7)"));
+    QVERIFY(Regex::hasBackReference(R"(\10)"));
+    QVERIFY(Regex::hasBackReference(R"(\35)"));
+    QVERIFY(!Regex::hasBackReference(R"(\\10)"));
+    QVERIFY(Regex::hasBackReference(R"(\\\10)"));
+    QVERIFY(!Regex::hasBackReference(R"(\\\\10)"));
   }
 };
 

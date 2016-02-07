@@ -27,24 +27,63 @@ struct Capture {
 typedef QVector<Capture> Captures;
 
 struct Regex {
-  std::unique_ptr<Regexp> regex;
+  static Regex* create(const QString& pattern);
+
   int lastFound;
 
-  Regex() : lastFound(0) {}
-  explicit Regex(const QString& pattern) : regex(Regexp::compile(pattern)), lastFound(0) {}
+  virtual ~Regex() = default;
 
-  boost::optional<QVector<Region> > find(const QString& str, int beginPos);
+  boost::optional<QVector<Region>> find(const QString& str,
+                                        int beginPos,
+                                        QList<QStringRef> capturedStrs = QList<QStringRef>());
+
+  virtual QString pattern() = 0;
+
+ protected:
+  Regex() : lastFound(0) {}
+
+ private:
+  friend class LanguageParserTest;
+
+  static bool hasBackReference(const QString& str);
+
+  virtual Regexp* regexp(QList<QStringRef> capturedStrs) = 0;
+};
+
+// regex without back reference
+struct FixedRegex : public Regex {
+  std::unique_ptr<Regexp> regex;
+
+  explicit FixedRegex(const QString& pattern);
+
+  QString pattern();
+
+ private:
+  Regexp* regexp(QList<QStringRef> ) { return regex.get(); }
+};
+
+// regex with back reference. e.g. \s*\2$\n?
+// end pattern can have back references captured in begin regex
+struct RegexWithBackReference : public Regex {
+  QString patternStr;
+
+  explicit RegexWithBackReference(const QString& pattern) : Regex(), patternStr(pattern) {}
+
+  QString pattern() { return patternStr; }
+
+ private:
+  Regexp* regexp(QList<QStringRef> capturedStrs);
 };
 
 // This struct is mutable because it has cache
 struct Pattern {
   QString name;
   QString include;
-  Regex match;
+  std::unique_ptr<Regex> match;
   Captures captures;
-  Regex begin;
+  std::unique_ptr<Regex> begin;
   Captures beginCaptures;
-  Regex end;
+  std::unique_ptr<Regex> end;
   Captures endCaptures;
   std::unique_ptr<QVector<Pattern*>> patterns;
   Language* lang;
@@ -60,8 +99,9 @@ struct Pattern {
   explicit Pattern(const QString& p_include);
   virtual ~Pattern() = default;
 
-  std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data, int pos);
-  std::pair<Pattern *, boost::optional<QVector<Region> > > find(const QString& data, int pos);
+  std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
+                                                                         int pos);
+  std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int pos);
   Node* createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
   void createCaptureNodes(LanguageParser* parser,
                           QVector<Region> regions,

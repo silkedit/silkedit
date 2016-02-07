@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <iterator>
 #include <QStringList>
 #include <QStringBuilder>
 #include <QDebug>
@@ -73,7 +74,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   // match
   const QString match = "match";
   if (map.contains(match)) {
-    pat->match = Regex(map.value(match).toString());
+    pat->match.reset(new FixedRegex(map.value(match).toString()));
   }
 
   // name
@@ -85,7 +86,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   // begin
   const QString begin = "begin";
   if (map.contains(begin)) {
-    pat->begin = Regex(map.value(begin).toString());
+    pat->begin.reset(new FixedRegex(map.value(begin).toString()));
   }
 
   // beginCaptures
@@ -100,7 +101,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   // end
   const QString end = "end";
   if (map.contains(end)) {
-    pat->end = Regex(map.value(end).toString());
+    pat->end.reset(Regex::create(map.value(end).toString()));
   }
 
   // endCaptures
@@ -139,6 +140,46 @@ Pattern* toPattern(QVariantMap map) {
   Pattern* pat = new Pattern();
   toPattern(map, pat);
   return pat;
+}
+
+template <typename _OutputIter>
+_OutputIter escapeRegexp(QChar const* it, QChar const* last, _OutputIter out) {
+  static QString special = QStringLiteral("\\|([{}]).?*+^$");
+  while (it != last) {
+    if (special.contains(*it)) {
+      *out++ = '\\';
+    }
+    *out++ = *it++;
+  }
+  return out;
+}
+
+QString expandBackReferences(QString const& ptrn, QList<QStringRef> m) {
+  bool escape = false;
+  QString res;
+  for (auto const& it : ptrn) {
+    if (escape && it.isDigit()) {
+      int i = it.digitValue();
+      if (i < m.size())
+        escapeRegexp(m[i].begin(), m[i].end(), std::back_inserter(res));
+      escape = false;
+      continue;
+    }
+
+    if (escape)
+      res += '\\';
+    if (!(escape = !escape && it == '\\'))
+      res += it;
+  }
+  return res;
+}
+
+QList<QStringRef> getCaptures(const QStringRef& str, QVector<Region> regions) {
+  QList<QStringRef> capturedStrs;
+  for (const auto& reg : regions) {
+    capturedStrs.append(str.mid(reg.begin(), reg.length()));
+  }
+  return capturedStrs;
 }
 }
 
@@ -281,6 +322,69 @@ QString Node::data() const {
   return parser->getData(region.begin(), region.end());
 }
 
+bool Regex::hasBackReference(const QString& str) {
+  bool escape = false;
+  for (const QChar& ch : str) {
+    if (escape && ch.isDigit()) {
+      return true;
+    }
+    escape = !escape && ch == '\\';
+  }
+  return false;
+}
+
+boost::optional<QVector<Region>> Regex::find(const QString& str,
+                                             int beginPos,
+                                             QList<QStringRef> capturedStrs) {
+  //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
+
+  Regexp* regex = regexp(capturedStrs);
+  if (!regex) {
+    return boost::none;
+  }
+
+  while (lastFound < str.length()) {
+    if (const auto maybeIndices = regex->findStringSubmatchIndex(str.midRef(lastFound), false)) {
+      QVector<int> indices = *maybeIndices;
+      if ((indices.at(0) + lastFound) < beginPos) {
+        if (indices.at(0) == 0) {
+          lastFound++;
+        } else {
+          lastFound += indices.at(0);
+        }
+        continue;
+      }
+
+      Q_ASSERT(!indices.isEmpty());
+      Q_ASSERT(indices.size() % 2 == 0);
+      for (int i = 0; i < indices.size(); i++) {
+        if (indices.at(i) != -1) {
+          indices[i] += lastFound;
+        }
+      }
+
+      QVector<Region> regions(indices.size() / 2);
+      for (int i = 0; i < indices.size() / 2; i++) {
+        regions[i] = Region(indices.at(i * 2), indices.at(i * 2 + 1));
+      }
+      return regions;
+
+    } else {
+      break;
+    }
+  }
+
+  return boost::none;
+}
+
+Regex* Regex::create(const QString& pattern) {
+  if (hasBackReference(pattern)) {
+    return new RegexWithBackReference(pattern);
+  } else {
+    return new FixedRegex(pattern);
+  }
+}
+
 Pattern::Pattern() : Pattern("") {}
 
 Pattern::Pattern(const QString& p_include)
@@ -364,12 +468,12 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
 
   Pattern* pattern = nullptr;
   boost::optional<QVector<Region>> regions;
-  if (match.regex) {
+  if (match) {
     pattern = this;
-    regions = match.find(str, beginPos);
-  } else if (begin.regex) {
+    regions = match->find(str, beginPos);
+  } else if (begin) {
     pattern = this;
-    regions = begin.find(str, beginPos);
+    regions = begin->find(str, beginPos);
   } else if (!include.isEmpty()) {
     // # means an item name in the repository
     if (include.startsWith('#')) {
@@ -422,11 +526,11 @@ Node* Pattern::createNode(const QString& str,
   //  qDebug() << "createNode. mo:" << *mo;
   Node* node = new Node(name, regions[0], parser);
 
-  if (match.regex) {
+  if (match) {
     createCaptureNodes(parser, regions, node, captures);
   }
 
-  if (!begin.regex) {
+  if (!begin) {
     node->updateRegion();
     return node;
   }
@@ -437,7 +541,7 @@ Node* Pattern::createNode(const QString& str,
     createCaptureNodes(parser, regions, node, captures);
   }
 
-  if (!end.regex) {
+  if (!end) {
     node->updateRegion();
     return node;
   }
@@ -447,7 +551,12 @@ Node* Pattern::createNode(const QString& str,
 
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
-    boost::optional<QVector<Region>> endMatchedRegions = end.find(str, i);
+    boost::optional<QVector<Region>> endMatchedRegions;
+    if (cachedRegions) {
+      endMatchedRegions = end->find(str, i, getCaptures(cachedStr, *cachedRegions));
+    } else {
+      endMatchedRegions = end->find(str, i);
+    }
     if (endMatchedRegions) {
       endPos = (*endMatchedRegions)[0].end();
     } else {
@@ -491,7 +600,7 @@ Node* Pattern::createNode(const QString& str,
         // <string>(?=(?://|/\*))|$</string>
         // <key>name</key>
         // <string>meta.preprocessor.macro.c</string>
-        if (i != endPos + 1 || !end.regex->pattern().contains("$") || str.mid(endPos, 1) != "\n") {
+        if (i != endPos + 1 || !end->pattern().contains("$") || str.mid(endPos, 1) != "\n") {
           continue;
         }
       }
@@ -564,17 +673,21 @@ void Pattern::clearCache() {
   cachedPattern = nullptr;
   cachedPatterns.reset(nullptr);
   includedLanguage.reset(nullptr);
-  if (cachedRegions) {
-    cachedRegions = boost::none;
-  }
+  cachedRegions = boost::none;
   cachedStr.clear();
   if (patterns) {
     foreach (Pattern* pat, *patterns) { pat->clearCache(); }
   }
 
-  match.lastFound = 0;
-  begin.lastFound = 0;
-  end.lastFound = 0;
+  if (match) {
+    match->lastFound = 0;
+  }
+  if (begin) {
+    begin->lastFound = 0;
+  }
+  if (end) {
+    end->lastFound = 0;
+  }
 }
 
 QVector<QPair<QString, QString>> LanguageProvider::m_scopeAndLangNamePairs(0);
@@ -680,41 +793,10 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   return lang;
 }
 
-boost::optional<QVector<Region>> Regex::find(const QString& str, int beginPos) {
-  //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
+FixedRegex::FixedRegex(const QString& pattern) : Regex(), regex(Regexp::compile(pattern)) {}
 
-  while (lastFound < str.length()) {
-    if (const auto maybeIndices = regex->findStringSubmatchIndex(str.midRef(lastFound), false)) {
-      QVector<int> indices = *maybeIndices;
-      if ((indices.at(0) + lastFound) < beginPos) {
-        if (indices.at(0) == 0) {
-          lastFound++;
-        } else {
-          lastFound += indices.at(0);
-        }
-        continue;
-      }
-
-      Q_ASSERT(!indices.isEmpty());
-      Q_ASSERT(indices.size() % 2 == 0);
-      for (int i = 0; i < indices.size(); i++) {
-        if (indices.at(i) != -1) {
-          indices[i] += lastFound;
-        }
-      }
-
-      QVector<Region> regions(indices.size() / 2);
-      for (int i = 0; i < indices.size() / 2; i++) {
-        regions[i] = Region(indices.at(i * 2), indices.at(i * 2 + 1));
-      }
-      return regions;
-
-    } else {
-      break;
-    }
-  }
-
-  return boost::none;
+QString FixedRegex::pattern() {
+  return regex ? regex->pattern() : "";
 }
 
 void Language::tweak() {
@@ -780,6 +862,14 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
 
   qDebug("new children.size: %d", (int)children.size());
   //  qDebug() << *this;
+}
+
+Regexp* RegexWithBackReference::regexp(QList<QStringRef> capturedStrs) {
+  auto regex = Regexp::compile(expandBackReferences(patternStr, capturedStrs));
+  if (!regex) {
+    qWarning() << "failed to compile" << expandBackReferences(patternStr, capturedStrs);
+  }
+  return regex;
 }
 
 }  // namespace core
