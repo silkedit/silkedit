@@ -19,7 +19,7 @@ class Regexp {
   ~Regexp();
   DEFAULT_MOVE(Regexp)
 
-  static Regexp* compile(const QString& expr);
+  static std::unique_ptr<Regexp> compile(const QString& expr);
   static QString escape(const QString& expr);
 
   QString pattern() const { return m_pattern; }
