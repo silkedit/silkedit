@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <memory>
 #include <boost/optional.hpp>
 #include <QVector>
 #include <QStringRef>
