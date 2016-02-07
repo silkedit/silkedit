@@ -11,7 +11,7 @@ class RegexpTest : public QObject {
   void compile() {
     std::unique_ptr<Regexp> reg;
     for (int i = 0; i < 100; i++) {
-      reg.reset(Regexp::compile(R"((?x)
+      reg = std::move(Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -27,7 +27,7 @@ class RegexpTest : public QObject {
     }
 
     // This includes invalid \? pattern
-    reg.reset(Regexp::compile(R"((?x)
+    reg = std::move(Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((\?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -43,7 +43,7 @@ class RegexpTest : public QObject {
   }
 
   void findStringSubmatchIndex() {
-    Regexp* reg = Regexp::compile(R"((<\?)\s*([-_a-zA-Z0-9]+))");
+    auto reg = Regexp::compile(R"((<\?)\s*([-_a-zA-Z0-9]+))");
     QString str = R"(<?xml version="1.0" encoding="UTF-8"?>)";
     auto indices = reg->findStringSubmatchIndex(QStringRef(&str));
     QVERIFY(static_cast<bool>(indices));
@@ -57,7 +57,7 @@ class RegexpTest : public QObject {
   }
 
   void findStringSubmatchIndexInJapanese() {
-    Regexp* reg = Regexp::compile(u8R"((いう(?:(a))?)\s*([あいうえお]+))");
+    auto reg = Regexp::compile(u8R"((いう(?:(a))?)\s*([あいうえお]+))");
     QString str = u8R"(あいうあいうえおかきくけこ)";
     auto indices = reg->findStringSubmatchIndex(QStringRef(&str));
     QVERIFY(static_cast<bool>(indices));
@@ -71,7 +71,7 @@ class RegexpTest : public QObject {
   }
 
   void findStringSubmatchIndexBackward() {
-    Regexp* reg = Regexp::compile("ab");
+    auto reg = Regexp::compile("ab");
     QString str = "abcdabcd";
     auto indices = reg->findStringSubmatchIndex(QStringRef(&str), true);
     QVERIFY(static_cast<bool>(indices));
@@ -85,7 +85,7 @@ class RegexpTest : public QObject {
   }
 
   void findJapaneseChar() {
-    Regexp* reg = Regexp::compile(u8"い");
+    auto reg = Regexp::compile(u8"い");
     QString str = u8"あいうえお";
     const auto indices = reg->findStringSubmatchIndex(QStringRef(&str), true);
     QVERIFY(static_cast<bool>(indices));
@@ -95,7 +95,7 @@ class RegexpTest : public QObject {
 
   void findNotEmpty() {
     // Without ONIG_OPTION_FIND_NOT_EMPTY option, \b matches to an empty region in this test
-    Regexp* reg = Regexp::compile(R"(\b\b)");
+    auto reg = Regexp::compile(R"(\b\b)");
     QString str = "a";
     bool findNotEmpty = true;
     auto indices = reg->findStringSubmatchIndex(str.midRef(0), false, findNotEmpty);

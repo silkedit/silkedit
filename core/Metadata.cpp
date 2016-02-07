@@ -24,23 +24,23 @@ Metadata::Metadata(const QString& scope) : m_scope(scope) {
 }
 
 void Metadata::setIncreaseIndentPattern(const QString& pattern) {
-  m_increaseIndentPattern.reset(Regexp::compile(pattern));
+  m_increaseIndentPattern = std::move(Regexp::compile(pattern));
 }
 
 void Metadata::setDecreateIndentPattern(const QString& pattern) {
-  m_decreaseIndentPattern.reset(Regexp::compile(pattern));
+  m_decreaseIndentPattern = std::move(Regexp::compile(pattern));
 }
 
 void Metadata::setBracketIndentNextLinePattern(const QString& pattern) {
-  m_bracketIndentNextLinePattern.reset(Regexp::compile(pattern));
+  m_bracketIndentNextLinePattern = std::move(Regexp::compile(pattern));
 }
 
 void Metadata::setDisableIndentNextLinePattern(const QString& pattern) {
-  m_disableIndentNextLinePattern.reset(Regexp::compile(pattern));
+  m_disableIndentNextLinePattern = std::move(Regexp::compile(pattern));
 }
 
 void Metadata::setUnIndentedLinePattern(const QString& pattern) {
-  m_unIndentedLinePattern.reset(Regexp::compile(pattern));
+  m_unIndentedLinePattern = std::move(Regexp::compile(pattern));
 }
 
 Metadata* Metadata::get(const QString& scope) {

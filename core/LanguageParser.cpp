@@ -333,12 +333,9 @@ bool Regex::hasBackReference(const QString& str) {
   return false;
 }
 
-boost::optional<QVector<Region>> Regex::find(const QString& str,
-                                             int beginPos,
-                                             QList<QStringRef> capturedStrs) {
+boost::optional<QVector<Region>> Regex::find(Regexp* regex, const QString& str, int beginPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
-  Regexp* regex = regexp(capturedStrs);
   if (!regex) {
     return boost::none;
   }
@@ -799,6 +796,12 @@ QString FixedRegex::pattern() {
   return regex ? regex->pattern() : "";
 }
 
+boost::optional<QVector<Region>> FixedRegex::find(const QString& str,
+                                                  int beginPos,
+                                                  QList<QStringRef>) {
+  return Regex::find(regex.get(), str, beginPos);
+}
+
 void Language::tweak() {
   rootPattern->tweak(this);
   //  foreach (Pattern* p, repository) { p->tweak(this); }
@@ -864,12 +867,15 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   //  qDebug() << *this;
 }
 
-Regexp* RegexWithBackReference::regexp(QList<QStringRef> capturedStrs) {
+boost::optional<QVector<Region>> RegexWithBackReference::find(const QString& str,
+                                                              int beginPos,
+                                                              QList<QStringRef> capturedStrs) {
   auto regex = Regexp::compile(expandBackReferences(patternStr, capturedStrs));
   if (!regex) {
     qWarning() << "failed to compile" << expandBackReferences(patternStr, capturedStrs);
+    return boost::none;
   }
-  return regex;
+  return Regex::find(regex.get(), str, beginPos);
 }
 
 }  // namespace core

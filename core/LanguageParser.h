@@ -33,21 +33,20 @@ struct Regex {
 
   virtual ~Regex() = default;
 
-  boost::optional<QVector<Region>> find(const QString& str,
-                                        int beginPos,
-                                        QList<QStringRef> capturedStrs = QList<QStringRef>());
+  virtual boost::optional<QVector<Region>>
+  find(const QString& str, int beginPos, QList<QStringRef> capturedStrs = QList<QStringRef>()) = 0;
 
   virtual QString pattern() = 0;
 
  protected:
   Regex() : lastFound(0) {}
 
+  boost::optional<QVector<Region>> find(Regexp* regex, const QString& str, int beginPos);
+
  private:
   friend class LanguageParserTest;
 
   static bool hasBackReference(const QString& str);
-
-  virtual Regexp* regexp(QList<QStringRef> capturedStrs) = 0;
 };
 
 // regex without back reference
@@ -56,10 +55,12 @@ struct FixedRegex : public Regex {
 
   explicit FixedRegex(const QString& pattern);
 
-  QString pattern();
+  QString pattern() override;
 
- private:
-  Regexp* regexp(QList<QStringRef> ) { return regex.get(); }
+  boost::optional<QVector<Region>> find(
+      const QString& str,
+      int beginPos,
+      QList<QStringRef> capturedStrs = QList<QStringRef>()) override;
 };
 
 // regex with back reference. e.g. \s*\2$\n?
@@ -69,10 +70,12 @@ struct RegexWithBackReference : public Regex {
 
   explicit RegexWithBackReference(const QString& pattern) : Regex(), patternStr(pattern) {}
 
-  QString pattern() { return patternStr; }
+  QString pattern() override { return patternStr; }
 
- private:
-  Regexp* regexp(QList<QStringRef> capturedStrs);
+  boost::optional<QVector<Region>> find(
+      const QString& str,
+      int beginPos,
+      QList<QStringRef> capturedStrs = QList<QStringRef>()) override;
 };
 
 // This struct is mutable because it has cache

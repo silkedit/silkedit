@@ -52,7 +52,7 @@ QString Regexp::escape(const QString& expr) {
   return escapedStr;
 }
 
-Regexp* Regexp::compile(const QString& expr) {
+std::unique_ptr<Regexp> Regexp::compile(const QString& expr) {
   //  qDebug("compile Regexp: %s", qPrintable(expr));
   if (expr.isEmpty()) {
     return nullptr;
@@ -76,7 +76,7 @@ Regexp* Regexp::compile(const QString& expr) {
   }
 
   Q_ASSERT(reg);
-  return new Regexp(reg, expr);
+  return std::move(std::unique_ptr<Regexp>(new Regexp(reg, expr)));
 }
 
 boost::optional<QVector<int>> Regexp::findStringSubmatchIndex(const QStringRef& s,

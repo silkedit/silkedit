@@ -19,14 +19,14 @@ class TextEditViewLogicTest : public QObject {
     QString currentLineText = "    }";
     QString prevLineText = "    hoge";
     // NOTE: If we use raw string literal like R"(^.*\{[^}"']*$)", a link error occurs.
-    Regexp* increaseIndentPattern = Regexp::compile("^.*\\{[^}\"']*$");
+    auto increaseIndentPattern = Regexp::compile("^.*\\{[^}\"']*$");
     auto decreaseIndentPattern = Regexp::compile("^(.*\\*/)?\\s*\\}.*$");
     bool atBlockEnd = true;
     int tabWidth = 2;
 
     // When
     bool result =
-        TextEditViewLogic::isOutdentNecessary(increaseIndentPattern, decreaseIndentPattern,
+        TextEditViewLogic::isOutdentNecessary(increaseIndentPattern.get(), decreaseIndentPattern.get(),
                                               currentLineText, prevLineText, atBlockEnd, tabWidth);
     // Then
     QVERIFY(result);
