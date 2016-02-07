@@ -50,3 +50,20 @@ rescue StandardError => msg
 end
 
 print "D: ", a.get, " ", b.get,"\n";
+
+# Here Document
+
+lang = 'language'
+RUBY = 'Ruby'
+
+json = <<"EOS" # ここをダブルコーテーションで囲う
+{
+  "#{lang}": "#{RUBY}"
+}
+EOS
+
+json = <<EOS # コーテーション無しでもOK
+{
+  "#{lang}": "#{RUBY}"
+}
+EOS

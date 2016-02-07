@@ -71,7 +71,7 @@ Regexp* Regexp::compile(const QString& expr) {
   if (r != ONIG_NORMAL) {
     unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
     onig_error_code_to_str(s, r, &einfo);
-    qWarning() << QString::fromUtf8((const char*)s);
+    qWarning() << "Onigmo warning:" << QString::fromUtf8((const char*)s) << "expr:" << expr;
     return nullptr;
   }
 
