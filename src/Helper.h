@@ -76,6 +76,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
   void reloadKeymaps();
   void quitApplication();
+  void eval(const QString& code);
   node::Environment* uvEnv();
 
 public slots:
