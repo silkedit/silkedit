@@ -21,10 +21,10 @@ void MessageHandler::handler(QtMsgType type,
       case QtInfoMsg:
       case QtWarningMsg:
       case QtCriticalMsg:
-        MessageHandler::singleton().handleMessage(msg);
+        MessageHandler::singleton().handleMessage(type, msg);
         break;
       case QtFatalMsg:
-        MessageHandler::singleton().handleMessage(msg);
+        MessageHandler::singleton().handleMessage(type, msg);
         abort();
     }
   } else {
@@ -60,20 +60,20 @@ void MessageHandler::handler(QtMsgType type,
   }
 }
 
-void MessageHandler::handleMessage(const QString& msg) {
+void MessageHandler::handleMessage(QtMsgType type, const QString& msg) {
   static const QMetaMethod messageSignal = QMetaMethod::fromSignal(&MessageHandler::message);
   if (isSignalConnected(messageSignal)) {
-    emit message(msg);
+    emit message(type, msg);
   } else {
     // buffer messages when no connection
-    m_storedMessages.append(msg);
+    m_storedMessages.append(MessageInfo{type, msg});
   }
 }
 
 void MessageHandler::connectNotify(const QMetaMethod& signal) {
   if (signal == QMetaMethod::fromSignal(&MessageHandler::message)) {
-    for (const auto& msg : m_storedMessages) {
-      emit message(msg);
+    for (const auto& msgInfo : m_storedMessages) {
+      emit message(msgInfo.type, msgInfo.msg);
     }
     m_storedMessages.clear();
   }

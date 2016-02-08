@@ -9,8 +9,23 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   ui->setupUi(this);
   setLayout(ui->layout);
   connect(&MessageHandler::singleton(), &MessageHandler::message,
-          [=](const QString& msg) {
-            ui->output->append(msg);
+          [=](QtMsgType type, const QString& msg) {
+            QString text = "<div style='color:%1;'>%2</div>";
+            QString color;
+            switch (type) {
+              case QtDebugMsg:
+              case QtInfoMsg:
+                color = "black";
+                break;
+              case QtWarningMsg:
+                color = "yellow";
+                break;
+              case QtCriticalMsg:
+              case QtFatalMsg:
+                color = "red";
+                break;
+            }
+            ui->output->append(text.arg(color).arg(msg));
           });
 
   connect(ui->input, &QLineEdit::returnPressed, [=] {
