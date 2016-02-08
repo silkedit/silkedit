@@ -10,8 +10,7 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   setLayout(ui->layout);
   connect(&MessageHandler::singleton(), &MessageHandler::message,
           [=](const QString& msg) {
-            ui->output->insertPlainText(msg);
-            ui->output->insertPlainText("\n");
+            ui->output->append(msg);
           });
 
   connect(ui->input, &QLineEdit::returnPressed, [=] {
