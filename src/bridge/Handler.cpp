@@ -252,7 +252,7 @@ void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qInfo() << V8Util::toQString(msg);
+    qInfo().noquote() << V8Util::toQString(msg);
   }
 }
 
@@ -262,7 +262,7 @@ void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qWarning() << V8Util::toQString(msg);
+    qWarning().noquote() << V8Util::toQString(msg);
   }
 }
 
@@ -272,7 +272,7 @@ void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qCritical() << V8Util::toQString(msg);
+    qCritical().noquote() << V8Util::toQString(msg);
   }
 }
 
