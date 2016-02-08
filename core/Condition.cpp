@@ -19,7 +19,6 @@ using v8::String;
 using v8::Value;
 using v8::Exception;
 using v8::MaybeLocal;
-using v8::TryCatch;
 using v8::ObjectTemplate;
 using v8::Maybe;
 using v8::Boolean;

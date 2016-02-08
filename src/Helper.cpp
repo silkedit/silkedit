@@ -186,6 +186,12 @@ void Helper::quitApplication() {
   App::instance()->quit();
 }
 
+void Helper::eval(const QString &code)
+{
+  const QVariantList& args = QVariantList{QVariant::fromValue(code)};
+  d->callFunc("eval", args);
+}
+
 node::Environment* Helper::uvEnv() {
   return m_nodeBindings->uv_env();
 }
