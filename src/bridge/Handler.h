@@ -20,6 +20,9 @@ class Handler {
                    v8::Local<v8::Context> context,
                    void* priv);
   static void lateInit(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void info(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void warn(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void error(const v8::FunctionCallbackInfo<v8::Value>& args);
 
  private:
   static void setSingletonObj(v8::Local<v8::Object>& exports, QObject* sourceObj, const char* name);
