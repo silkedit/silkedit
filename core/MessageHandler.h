@@ -13,6 +13,11 @@ Q_DECLARE_LOGGING_CATEGORY(silkedit)
 
 namespace core {
 
+struct MessageInfo {
+  QtMsgType type;
+  QString msg;
+};
+
 class MessageHandler : public QObject, public Singleton<MessageHandler> {
   Q_OBJECT
   DISABLE_COPY(MessageHandler)
@@ -23,10 +28,10 @@ class MessageHandler : public QObject, public Singleton<MessageHandler> {
   ~MessageHandler() = default;
   DEFAULT_MOVE(MessageHandler)
 
-  void handleMessage(const QString& msg);
+  void handleMessage(QtMsgType type, const QString& msg);
 
  signals:
-  void message(const QString& msg);
+  void message(QtMsgType type, const QString& msg);
 
  protected:
   void connectNotify(const QMetaMethod& signal);
@@ -35,7 +40,7 @@ class MessageHandler : public QObject, public Singleton<MessageHandler> {
   friend class Singleton<MessageHandler>;
   MessageHandler() = default;
 
-  QStringList m_storedMessages;
+  QList<MessageInfo> m_storedMessages;
 };
 
 }  // namespace core
