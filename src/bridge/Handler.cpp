@@ -41,6 +41,7 @@
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
 #include "core/Url.h"
+#include "core/MessageHandler.h"
 #include "atom/node_includes.h"
 
 using core::Config;
@@ -252,7 +253,8 @@ void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qInfo().noquote() << V8Util::toQString(msg);
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCInfo(category).noquote() << V8Util::toQString(msg);
   }
 }
 
@@ -262,7 +264,8 @@ void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qWarning().noquote() << V8Util::toQString(msg);
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCWarning(category).noquote() << V8Util::toQString(msg);
   }
 }
 
@@ -272,7 +275,8 @@ void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value> &args)
 
   if (args.Length() > 0 && args[0]->IsString()) {
     Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
-    qCritical().noquote() << V8Util::toQString(msg);
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCCritical(category).noquote() << V8Util::toQString(msg);
   }
 }
 

@@ -9,7 +9,7 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   ui->setupUi(this);
   setLayout(ui->layout);
   connect(&MessageHandler::singleton(), &MessageHandler::message,
-          [=](QtMsgType, const QString& msg) {
+          [=](const QString& msg) {
             ui->output->insertPlainText(msg);
             ui->output->insertPlainText("\n");
           });

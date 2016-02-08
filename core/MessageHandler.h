@@ -2,31 +2,31 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QLoggingCategory>
 
 #include "macros.h"
 #include "Singleton.h"
 
-namespace core {
+#define SILKEDIT_CATEGORY "silkedit"
 
-struct MessageInfo {
-  QtMsgType type;
-  QString msg;
-};
+Q_DECLARE_LOGGING_CATEGORY(silkedit)
+
+namespace core {
 
 class MessageHandler : public QObject, public Singleton<MessageHandler> {
   Q_OBJECT
   DISABLE_COPY(MessageHandler)
 
  public:
-  static void handler(QtMsgType type, const QMessageLogContext&, const QString& msg);
+  static void handler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
 
   ~MessageHandler() = default;
   DEFAULT_MOVE(MessageHandler)
 
-  void handleMessage(QtMsgType type, const QString& msg);
+  void handleMessage(const QString& msg);
 
  signals:
-  void message(QtMsgType type, const QString& msg);
+  void message(const QString& msg);
 
  protected:
   void connectNotify(const QMetaMethod& signal);
@@ -35,7 +35,7 @@ class MessageHandler : public QObject, public Singleton<MessageHandler> {
   friend class Singleton<MessageHandler>;
   MessageHandler() = default;
 
-  QList<MessageInfo> m_msgInfoList;
+  QStringList m_storedMessages;
 };
 
 }  // namespace core
