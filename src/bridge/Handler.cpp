@@ -186,6 +186,9 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "disconnect", JSObjectHelper::disconnect);
   NODE_SET_METHOD(exports, "emit", V8Util::emitQObjectSignal);
   NODE_SET_METHOD(exports, "lateInit", lateInit);
+  NODE_SET_METHOD(exports, "info", info);
+  NODE_SET_METHOD(exports, "warn", warn);
+  NODE_SET_METHOD(exports, "error", error);
 
   // register enums in Qt namespace
   registerQtEnum<Qt::Orientation>(context, exports, isolate, "Qt::Orientation");
@@ -241,6 +244,36 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   Condition::Init(exports);
+}
+
+void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value> &args)
+{
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    qInfo() << V8Util::toQString(msg);
+  }
+}
+
+void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value> &args)
+{
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    qWarning() << V8Util::toQString(msg);
+  }
+}
+
+void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value> &args)
+{
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    qCritical() << V8Util::toQString(msg);
+  }
 }
 
 template <typename T>

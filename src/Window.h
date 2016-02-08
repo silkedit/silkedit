@@ -15,6 +15,7 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 class Toolbar;
+class Console;
 
 namespace core {
 class Document;
@@ -95,6 +96,7 @@ protected:
   TabViewGroup* m_tabViewGroup;
   ProjectTreeView* m_projectView;
   FindReplaceView* m_findReplaceView;
+  Console* m_console;
   bool m_firstPaintEventFired;
 
   static bool closeTabIncludingDocInternal(core::Document* doc);

@@ -19,6 +19,7 @@
 #include "util/YamlUtils.h"
 #include "Helper.h"
 #include "PlatformUtil.h"
+#include "Console.h"
 #include "core/Document.h"
 
 QMap<QString, QString> Window::s_toolbarsDefinitions;
@@ -29,6 +30,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_tabViewGroup(new TabViewGroup(this)),
       m_projectView(nullptr),
       m_findReplaceView(new FindReplaceView(this)),
+      m_console(new Console(this)),
       m_firstPaintEventFired(false) {
   qDebug("creating Window");
   ui->setupUi(this);
@@ -63,7 +65,11 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   QWidget* editorWidget = new QWidget(this);
   editorWidget->setLayout(layout);
 
-  ui->rootSplitter->addWidget(editorWidget);
+  auto contentSplitter = new QSplitter(Qt::Vertical);
+  contentSplitter->addWidget(editorWidget);
+  contentSplitter->addWidget(m_console);
+
+  ui->rootSplitter->addWidget(contentSplitter);
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
