@@ -6,7 +6,7 @@ core::PackageAction::PackageAction(const QString& text,
                                    QObject* parent,
                                    boost::optional<AndConditionExpression> cond)
     : QAction(text, parent), m_pkgParent(new PackageParent(pkgName, this)), m_cond(cond) {
-  updateVisibility();
+  updateVisibilityAndShortcut();
 }
 
 core::PackageAction::PackageAction(const QIcon& icon,
@@ -15,10 +15,10 @@ core::PackageAction::PackageAction(const QIcon& icon,
                                    QObject* parent,
                                    boost::optional<AndConditionExpression> cond)
     : QAction(icon, text, parent), m_pkgParent(new PackageParent(pkgName, this)), m_cond(cond) {
-  updateVisibility();
+  updateVisibilityAndShortcut();
 }
 
-void core::PackageAction::updateVisibility()
+void core::PackageAction::updateVisibilityAndShortcut()
 {
   if (m_cond) {
     setVisible((*m_cond).isSatisfied());

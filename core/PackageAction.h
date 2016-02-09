@@ -22,7 +22,7 @@ class PackageAction : public QAction {
   virtual ~PackageAction() = default;
   DEFAULT_COPY_AND_MOVE(PackageAction)
 
-  void updateVisibility();
+  virtual void updateVisibilityAndShortcut();
 
  private:
   PackageParent* m_pkgParent;

@@ -23,8 +23,11 @@ class CommandAction : public core::PackageAction {
   ~CommandAction() = default;
   DEFAULT_COPY_AND_MOVE(CommandAction)
 
+  void updateVisibilityAndShortcut() override;
+
  private:
   QString m_cmdName;
 
-  void init(const QString& id, const QString& cmdName);
+  void init(const QString& id);
+  void updateShortcut();
 };
