@@ -28,11 +28,11 @@ class Condition : public QObject {
   static void Init(v8::Local<v8::Object> exports);
   static void init();
   static bool isStatic(const QString& keyValue);
-  static bool isSatisfied(const QString& keyValue, core::Condition::Operator op, const QString& value);
+  static bool isSatisfied(const QString& keyValue, core::Condition::Operator op, const QVariant& value);
 
   virtual ~Condition() = default;
 
-  virtual bool isSatisfied(Operator op, const QString& operand);
+  virtual bool isSatisfied(Operator op, const QVariant& operand);
 
   /**
    * @brief if condition is static or not
@@ -48,12 +48,12 @@ class Condition : public QObject {
 
   static void add(const QString& keyValue, std::unique_ptr<Condition> condition);
   static void remove(const QString& keyValue);
-  static bool check(const QString &keyValue, Operator op, const QString& operand);
+  static bool check(const QVariant &keyValue, Operator op, const QVariant &operand);
   static void Add(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Remove(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Check(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  virtual QString keyValue() = 0;
+  virtual QVariant keyValue() = 0;
 };
 
 }  // namespace core

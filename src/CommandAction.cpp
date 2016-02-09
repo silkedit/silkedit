@@ -30,8 +30,9 @@ CommandAction::CommandAction(const QString& id,
                              const QString& text,
                              const QString& cmdName,
                              QObject* parent,
+                             boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(text, pkgName, parent), m_cmdName(cmdName) {
+    : PackageAction(text, pkgName, parent, cond), m_cmdName(cmdName) {
   init(id, cmdName);
 }
 
@@ -39,7 +40,8 @@ CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QIcon& icon,
                              QObject* parent,
+                             boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(icon, id, pkgName, parent), m_cmdName(cmdName) {
+    : PackageAction(icon, id, pkgName, parent, cond), m_cmdName(cmdName) {
   init(id, cmdName);
 }

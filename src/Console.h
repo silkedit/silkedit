@@ -18,3 +18,5 @@ class Console : public QWidget {
 
   void runJSCode(const QString& code);
 };
+
+Q_DECLARE_METATYPE(Console*)

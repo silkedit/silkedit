@@ -21,7 +21,7 @@
 #include "core/modifiers.h"
 #include "core/V8Util.h"
 #include "core/QKeyEventWrap.h"
-#include "util/YamlUtils.h"
+#include "util/YamlUtil.h"
 #include "core/FunctionInfo.h"
 #include "atom/node_includes.h"
 
@@ -127,7 +127,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
       if (ifNode.IsDefined()) {
         YAML::Node conditionNode = keymapDefNode["if"];
         if (conditionNode.IsDefined()) {
-          condition = YamlUtils::parseCondition(conditionNode);
+          condition = YamlUtil::parseCondition(conditionNode);
           if (!condition) {
             qWarning() << "can't find a condition: "
                        << QString::fromUtf8(conditionNode.as<std::string>().c_str());

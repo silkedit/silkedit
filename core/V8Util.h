@@ -69,6 +69,7 @@ class V8Util {
                              int numArgs,
                              std::function<bool()> validateFn);
 
+  static QString getErrorMessage(v8::Isolate *isolate, const v8::TryCatch &trycatch);
 private:
   friend class V8UtilTest;
 

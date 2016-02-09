@@ -6,7 +6,7 @@ using core::Condition;
 
 core::ConditionExpression::ConditionExpression(const QString& key,
                                                Condition::Operator op,
-                                               const QString& value)
+                                               const QVariant &value)
     : m_key(key), m_op(op), m_value(value) {}
 
 bool core::ConditionExpression::isSatisfied() const {
@@ -17,7 +17,7 @@ QString core::ConditionExpression::toString() const {
   if (m_op == Condition::Operator::EQUALS && m_value == "true") {
     return QString("%1").arg(m_key);
   } else {
-    return QString("%1 %2 %3").arg(m_key).arg(Condition::operatorString(m_op)).arg(m_value);
+    return QString("%1 %2 %3").arg(m_key).arg(Condition::operatorString(m_op)).arg(m_value.toString());
   }
 }
 
