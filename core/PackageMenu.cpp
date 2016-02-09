@@ -16,7 +16,7 @@ void PackageMenu::setupConnection() {
     qDebug() << "aboutToShow";
     for (const auto& action : actions()) {
       if (auto pkgAction = qobject_cast<PackageAction*>(action)) {
-        pkgAction->updateVisibility();
+        pkgAction->updateVisibilityAndShortcut();
       }
     }
   });

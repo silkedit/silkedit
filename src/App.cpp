@@ -12,6 +12,7 @@
 #include "Window.h"
 #include "version.h"
 #include "SilkStyle.h"
+#include "KeymapManager.h"
 #include "core/ObjectStore.h"
 #include "core/Constants.h"
 
@@ -126,6 +127,20 @@ bool App::eventFilter(QObject*, QEvent* event) {
                  ObjectStore::ObjectState::NewFromJS);
       }
       break;
+    }
+    case QEvent::KeyPress: {
+      auto keyEvent = static_cast<QKeyEvent*>(event);
+      if (keyEvent && TextEditViewKeyHandler::singleton().dispatchKeyPressEvent(keyEvent)) {
+        keyEvent->accept();
+        return true;
+      }
+      break;
+    }
+    // If we don't intercept ShortcutOverride event, KeyPress event doesn't come here
+    // https://bugreports.qt.io/browse/QTBUG-30164
+    case QEvent::ShortcutOverride: {
+      event->accept();
+      return true;
     }
     default:
       return false;

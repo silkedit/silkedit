@@ -252,16 +252,14 @@ void KeymapManager::loadUserKeymap() {
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
   auto foundIter = m_cmdKeymapHash.find(cmdName);
   if (foundIter != m_cmdKeymapHash.end()) {
-    auto range = m_keymaps.equal_range(foundIter->second.key);
+    auto range = m_cmdKeymapHash.equal_range(cmdName);
     for (auto it = range.first; it != range.second; it++) {
-      // Set shortcut if command event has no condition or it has static condition and it's
-      // satisfied
-      if (!it->second.hasCondition()) {
-        return m_cmdKeymapHash.at(cmdName).key;
+      if (!it->second.cmd.hasCondition()) {
+        return it->second.key;
       } else {
-        auto condition = it->second.condition();
-        if (condition->isStatic() && condition->isSatisfied()) {
-          return m_cmdKeymapHash.at(cmdName).key;
+        auto condition = it->second.cmd.condition();
+        if (condition->isSatisfied()) {
+          return it->second.key;
         }
       }
     }
@@ -314,6 +312,7 @@ void KeymapManager::addShortcut(const QKeySequence& key, CommandEvent cmdEvent) 
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   // If cmdEvent has static condition, evaluate it immediately
+  // e.g. filter out keymaps for different os
   auto condition = cmdEvent.condition();
   if (condition && condition->isStatic()) {
     if (!condition->isSatisfied()) {
@@ -335,7 +334,10 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     return;
   }
 
-  // Remove existing keymap if its priority is lower
+  // Remove existing keymap if it has same condition and its priority is lower
+  // e.g.
+  // - { key: 'ctrl+`', command: show_console, if on_mac}
+  // - { key: 'ctrl+`', command: hide_console, if on_mac}
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
@@ -353,14 +355,7 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  if (m_cmdKeymapHash.count(cmdEvent.cmdName()) == 0 || !cmdEvent.condition() ||
-      (m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition() &&
-       // shorter AND condition has higher priority
-       // e.g. 'onMac' has higher priority than 'onMac && vim.mode == normal'
-       cmdEvent.condition()->size() <
-           m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition()->size())) {
-    addShortcut(key, cmdEvent);
-  }
+  addShortcut(key, cmdEvent);
 
   m_keymaps.insert(std::make_pair(key, cmdEvent));
 }

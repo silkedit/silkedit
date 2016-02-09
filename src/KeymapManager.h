@@ -52,7 +52,18 @@ public slots:
   // use multimap to store multiple keymaps that have same key combination but with different
   // condition
   std::unordered_multimap<QKeySequence, CommandEvent> m_keymaps;
-  std::unordered_map<QString, Keymap> m_cmdKeymapHash;
+
+  // store shortcuts with same key but different condition
+  // e.g.
+  // - { key: 'ctrl+`', command: show_console, if: console_visible == false}
+  // - { key: 'ctrl+`', command: hide_console, if: console_visible}
+  //
+  // must not have duplicate keymaps like this.
+  // - { key: 'ctrl+`', command: show_console}
+  // - { key: 'ctrl+`', command: hide_console}
+  // In this case, lower priority's keymap is removed
+  std::unordered_multimap<QString, Keymap> m_cmdKeymapHash;
+
   QString m_partiallyMatchedKeyString;
   std::unordered_map<QKeySequence, CommandEvent> m_emptyCmdKeymap;
   v8::UniquePersistent<v8::Function> m_jsKeyEventFilter;
