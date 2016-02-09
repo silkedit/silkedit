@@ -1,22 +1,23 @@
-﻿#include <vector>
-#include <QAction>
+﻿#include <QAction>
 #include <QMessageBox>
 
-#include "commands/ReopenLastClosedFileCommand.h"
 #include "MenuBar.h"
 #include "CommandAction.h"
 #include "OpenRecentItemManager.h"
-#include "core/ThemeManager.h"
-#include "core/Config.h"
 #include "App.h"
-#include "commands/PackageCommand.h"
 #include "CommandManager.h"
 #include "version.h"
 #include "ConfigDialog.h"
+#include "commands/ReopenLastClosedFileCommand.h"
+#include "commands/PackageCommand.h"
+#include "core/ThemeManager.h"
+#include "core/Config.h"
+#include "core/PackageMenu.h"
 
 using core::ThemeManager;
 using core::Theme;
 using core::Config;
+using core::PackageMenu;
 
 MenuBar* MenuBar::s_globalMenuBar;
 
@@ -27,13 +28,15 @@ void MenuBar::init() {
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu
   const QString& fileMenuStr = Config::singleton().enableMnemonic() ? tr("&File") : tr("File");
-  auto fileMenu = addMenu(fileMenuStr);
+  auto fileMenu = new PackageMenu(fileMenuStr);
+  addMenu(fileMenu);
   fileMenu->addMenu(OpenRecentItemManager::singleton().openRecentMenu());
   fileMenu->setObjectName("file");
 
   // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)
   const QString& textMenuStr = Config::singleton().enableMnemonic() ? tr("&Text") : tr("Text");
-  auto editMenu = addMenu(textMenuStr);
+  auto editMenu = new PackageMenu(textMenuStr);
+  addMenu(editMenu);
   editMenu->setObjectName("edit");
   // we need at least one sub menu to show the Text menu correctly because of this bug.
   // https://bugreports.qt.io/browse/QTBUG-44412?jql=text%20~%20%22qmenubar%20mac%22
@@ -42,7 +45,8 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
 
   // View menu
   const QString& viewMenuStr = Config::singleton().enableMnemonic() ? tr("&View") : tr("View");
-  auto viewMenu = addMenu(viewMenuStr);
+  auto viewMenu = new PackageMenu(viewMenuStr);
+  addMenu(viewMenu);
   viewMenu->setObjectName("view");
   const QString& themeMenuStr = Config::singleton().enableMnemonic() ? tr("&Theme") : tr("Theme");
   ThemeMenu* themeMenu = new ThemeMenu(themeMenuStr);
@@ -60,7 +64,8 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // Packages menu
   const QString& packageMenuStr =
       Config::singleton().enableMnemonic() ? tr("&Packages") : tr("Packages");
-  auto packagesMenu = addMenu(packageMenuStr);
+  auto packagesMenu = new PackageMenu(packageMenuStr);
+  addMenu(packagesMenu);
   packagesMenu->setObjectName("packages");
   auto bundleDevelopmentMenu = packagesMenu->addMenu(tr("Package Development"));
   bundleDevelopmentMenu->addAction(
@@ -74,7 +79,8 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
 // But QMenu can't trigger an action (QMenu::triggered doesn't work).
 // So On Mac, we need to create both top level QMenu and child Settings QAction.
 #ifdef Q_OS_MAC
-  auto settingsMenu = addMenu(settingsMenuStr);
+  auto settingsMenu = new PackageMenu(settingsMenuStr);
+  addMenu(settingsMenu);
   settingsMenu->setObjectName("settings");
   QAction* settingsAction = new QAction(settingsMenuStr, settingsMenu);
   settingsMenu->addAction(settingsAction);
@@ -88,7 +94,8 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
 
   // Help menu
   const QString& helpMenuStr = Config::singleton().enableMnemonic() ? tr("&Help") : tr("Help");
-  auto helpMenu = addMenu(helpMenuStr);
+  auto helpMenu = new PackageMenu(helpMenuStr);
+  addMenu(helpMenu);
   helpMenu->setObjectName("help");
   const QString& aboutMenuStr = Config::singleton().enableMnemonic() ? tr("&About") : tr("About");
   QAction* aboutAction = new QAction(aboutMenuStr, helpMenu);

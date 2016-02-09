@@ -3,6 +3,7 @@
 #include "TabViewGroup.h"
 #include "Window.h"
 #include "StatusBar.h"
+#include "Console.h"
 #include "TextEditView.h"
 #include "core/Condition.h"
 #include "core/FunctionInfo.h"
@@ -18,6 +19,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<TabViewGroup*>();
   qRegisterMetaType<Window*>();
   qRegisterMetaType<StatusBar*>();
+  qRegisterMetaType<Console*>();
   qRegisterMetaType<QPushButton*>();
   qRegisterMetaType<QLayout*>();
   qRegisterMetaType<core::Condition::Operator>();

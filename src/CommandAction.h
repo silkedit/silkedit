@@ -12,11 +12,13 @@ class CommandAction : public core::PackageAction {
                 const QString& text,
                 const QString& cmdName,
                 QObject* parent = nullptr,
+                boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
   CommandAction(const QString& id,
                 const QString& cmdName,
                 const QIcon& icon,
                 QObject* parent = nullptr,
+                boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
   ~CommandAction() = default;
   DEFAULT_COPY_AND_MOVE(CommandAction)

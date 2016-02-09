@@ -28,6 +28,7 @@
 #ifdef Q_OS_MAC
 #include "WebView.h"
 #endif
+#include "Console.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -223,6 +224,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
   // init classes for QObject subclasses
   registerClass<ConfigDialog>(exports);
+  registerClass<Console>(exports);
   registerClass<Dialog>(exports);
   registerClass<DialogButtonBox>(exports);
   registerClass<Event>(exports);
