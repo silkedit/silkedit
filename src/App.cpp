@@ -130,7 +130,7 @@ bool App::eventFilter(QObject*, QEvent* event) {
     }
     case QEvent::KeyPress: {
       auto keyEvent = static_cast<QKeyEvent*>(event);
-      if (keyEvent && TextEditViewKeyHandler::singleton().dispatchKeyPressEvent(keyEvent)) {
+      if (keyEvent && KeymapManager::singleton().handle(keyEvent)) {
         keyEvent->accept();
         return true;
       }

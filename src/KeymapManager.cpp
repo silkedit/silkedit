@@ -26,7 +26,6 @@
 #include "atom/node_includes.h"
 
 using core::Constants;
-using core::IKeyEventFilter;
 using core::Util;
 using core::AndConditionExpression;
 using core::PackageManager;
@@ -267,7 +266,7 @@ QKeySequence KeymapManager::findShortcut(QString cmdName) {
   return QKeySequence();
 }
 
-bool KeymapManager::keyEventFilter(QKeyEvent* event) {
+bool KeymapManager::handle(QKeyEvent* event) {
   bool result = runJSKeyEventFilter(event);
   if (result) {
     qDebug() << "key event is handled by an event filter";
@@ -358,26 +357,4 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   addShortcut(key, cmdEvent);
 
   m_keymaps.insert(std::make_pair(key, cmdEvent));
-}
-
-TextEditViewKeyHandler::TextEditViewKeyHandler() {
-  registerKeyEventFilter(&KeymapManager::singleton());
-}
-
-void TextEditViewKeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.insert(filter);
-}
-
-void TextEditViewKeyHandler::unregisterKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.erase(filter);
-}
-
-bool TextEditViewKeyHandler::dispatchKeyPressEvent(QKeyEvent* event) {
-  for (const auto& filter : m_keyEventFilters) {
-    if (filter->keyEventFilter(event)) {
-      return true;
-    }
-  }
-
-  return false;
 }
