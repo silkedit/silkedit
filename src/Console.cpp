@@ -1,3 +1,5 @@
+#include <QCompleter>
+
 #include "Console.h"
 #include "ui_Console.h"
 #include "Helper.h"
@@ -8,6 +10,11 @@ using core::MessageHandler;
 Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   ui->setupUi(this);
   setLayout(ui->layout);
+
+  QCompleter* completer = new QCompleter(this);
+  completer->setModel(&m_historyModel);
+  ui->input->setCompleter(completer);
+
   connect(&MessageHandler::singleton(), &MessageHandler::message,
           [=](QtMsgType type, const QString& msg) {
             QString text = "<div style='color:%1;'>%2</div>";
@@ -30,11 +37,17 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
 
   connect(ui->input, &QLineEdit::returnPressed, [=] {
     runJSCode(ui->input->text());
+    m_historyModel.prepend(ui->input->text());
     ui->input->clear();
   });
 }
 
 Console::~Console() {}
+
+void Console::showEvent(QShowEvent *)
+{
+  ui->input->setFocus();
+}
 
 void Console::runJSCode(const QString& code) {
   Helper::singleton().eval(code);
