@@ -1,4 +1,5 @@
-﻿#include <QDebug>
+﻿#include <cmath>
+#include <QDebug>
 #include <QFileInfo>
 #include <QDir>
 #include <QRegularExpression>
@@ -6,6 +7,7 @@
 
 #include "Util.h"
 #include "Wrapper.h"
+#include "JSValue.h"
 
 namespace {
 
@@ -255,6 +257,73 @@ bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
   }
 
   return metaObj->classInfo(infoIndex).value() == typeName;
+}
+
+// http://www.yaml.org/spec/1.2/spec.html#id2805071
+QVariant core::Util::toVariant(const QString &str)
+{
+  static QRegularExpression nullPattern("null|Null|NULL|~");
+  static QRegularExpression boolPattern("true|True|TRUE|false|False|FALSE");
+  static QRegularExpression base10IntPattern("[-+]?[0-9]+");
+  static QRegularExpression base8IntPattern("0o[0-7]+");
+  static QRegularExpression base16IntPattern("0x[0-9a-fA-F]+");
+  static QRegularExpression floatPattern(R"([-+]?(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?)");
+  static QRegularExpression infinityPattern(R"([-+]?(\.inf|\.Inf|\.INF))");
+  static QRegularExpression nanPattern(R"(\.nan|\.NaN|\.NAN)");
+
+  QRegularExpressionMatch* match = new QRegularExpressionMatch();
+  if (str.contains(nullPattern, match) && match->capturedLength(0) == str.size()) {
+    return QVariant::fromValue(JSNull());
+  } else if (str.contains(boolPattern, match) && match->capturedLength(0) == str.size()) {
+    if (str.toLower() == "true") {
+      return QVariant::fromValue(true);
+    } else {
+      return QVariant::fromValue(false);
+    }
+  } else if (str.contains(base10IntPattern, match) && match->capturedLength(0) == str.size()) {
+    bool ok;
+    int value = str.toInt(&ok, 10);
+    if (ok) {
+      return QVariant::fromValue(value);
+    } else {
+      qCritical() << "failed to convert" << str << "to int (base 10)";
+      return QVariant();
+    }
+  } else if (str.contains(base8IntPattern, match) && match->capturedLength(0) == str.size()) {
+    bool ok;
+    int value = str.mid(2).toInt(&ok, 8);
+    if (ok) {
+      return QVariant::fromValue(value);
+    } else {
+      qCritical() << "failed to convert" << str << "to int (base 8)";
+      return QVariant();
+    }
+  } else if (str.contains(base16IntPattern, match) && match->capturedLength(0) == str.size()) {
+    bool ok;
+    int value = str.toInt(&ok, 16);
+    if (ok) {
+      return QVariant::fromValue(value);
+    } else {
+      qCritical() << "failed to convert" << str << "to int (base 16)";
+      return QVariant();
+    }
+  } else if (str.contains(floatPattern, match) && match->capturedLength(0) == str.size()) {
+    bool ok;
+    double value = str.toDouble(&ok);
+    if (ok) {
+      return QVariant::fromValue(value);
+    } else {
+      qCritical() << "failed to convert" << str << "to double";
+      return QVariant();
+    }
+  } else if (str.contains(infinityPattern, match) && match->capturedLength(0) == str.size()) {
+    return str.startsWith('-') ? QVariant::fromValue(-1 * INFINITY)
+                                : QVariant::fromValue(INFINITY);
+  } else if (str.contains(nanPattern, match) && match->capturedLength(0) == str.size()) {
+    return QVariant::fromValue(NAN);
+  } else {
+    return QVariant::fromValue(str);
+  }
 }
 
 }  // namespace core

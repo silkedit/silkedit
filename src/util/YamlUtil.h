@@ -15,8 +15,8 @@ class AndConditionExpression;
 }
 class Window;
 
-class YamlUtils {
-  DISABLE_COPY_AND_MOVE(YamlUtils)
+class YamlUtil {
+  DISABLE_COPY_AND_MOVE(YamlUtil)
 
  public:
   static boost::optional<core::AndConditionExpression> parseCondition(
@@ -30,6 +30,6 @@ class YamlUtils {
   static QList<core::ConfigDefinition> parseConfig(const QString& pkgName, const QString& ymlPath);
 
  private:
-  YamlUtils() = delete;
-  ~YamlUtils() = delete;
+  YamlUtil() = delete;
+  ~YamlUtil() = delete;
 };

@@ -5,8 +5,9 @@
 #include <QUuid>
 #include <QToolbar>
 #include <QDir>
+#include <QRegularExpression>
 
-#include "YamlUtils.h"
+#include "YamlUtil.h"
 #include "core/ConditionExpression.h"
 #include "CommandAction.h"
 #include "Helper.h"
@@ -14,6 +15,9 @@
 #include "core/PackageToolBar.h"
 #include "core/PackageMenu.h"
 #include "core/PackageAction.h"
+#include "core/Regexp.h"
+#include "core/JSValue.h"
+#include "core/Util.h"
 
 using core::Condition;
 using core::PackageMenu;
@@ -22,6 +26,9 @@ using core::PackageToolBar;
 using core::ConfigDefinition;
 using core::ConditionExpression;
 using core::AndConditionExpression;
+using core::Regexp;
+using core::JSNull;
+using core::Util;
 
 namespace {
 QAction* findAction(QList<QAction*> actions, const QString& id) {
@@ -39,7 +46,7 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
-boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::Node& conditionNode) {
+boost::optional<AndConditionExpression> YamlUtil::parseCondition(const YAML::Node& conditionNode) {
   QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
   QStringList strList = conditionStr.trimmed().split("&&", QString::SkipEmptyParts);
   QSet<ConditionExpression> conSet;
@@ -56,16 +63,16 @@ boost::optional<AndConditionExpression> YamlUtils::parseCondition(const YAML::No
   }
 }
 
-boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QString& str) {
+boost::optional<ConditionExpression> YamlUtil::parseValueCondition(const QString& str) {
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
 
   QString key;
   Condition::Operator op;
-  QString value;
+  QVariant value;
   if (list.size() == 1) {
     key = list[0];
     op = Condition::Operator::EQUALS;
-    value = "true";
+    value = QVariant::fromValue(true);
   } else if (list.size() == 3) {
     key = list[0];
 
@@ -80,7 +87,8 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
       return boost::none;
     }
 
-    value = list[2];
+    // todo: convert string to QVariant based on YAML definition
+    value = Util::toVariant(list[2]);
   } else {
     qWarning() << "condition must be \"key operator operand\". size: " << list.size();
     return boost::none;
@@ -90,7 +98,7 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
 }
 
 /**
- * @brief YamlUtils::parseMenuNode
+ * @brief YamlUtil::parseMenuNode
  *
  * 'condition' decides whether the menu item is shown or not.
  * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted
@@ -107,7 +115,7 @@ boost::optional<ConditionExpression> YamlUtils::parseValueCondition(const QStrin
  * @param parent
  * @param menuNode
  */
-void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode) {
+void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode) {
   if (!menuNode.IsSequence()) {
     qWarning("menuNode must be a sequence.");
     return;
@@ -187,21 +195,22 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
     } else {
       // Check if condition
       YAML::Node ifNode = node["if"];
+      boost::optional<AndConditionExpression> condition;
       if (ifNode.IsDefined()) {
-        auto condition = parseCondition(ifNode);
-        if (!condition || !condition->isSatisfied()) {
-          continue;
-        }
+        condition = parseCondition(ifNode);
+        //        if (!condition || !condition->isSatisfied()) {
+        //          continue;
+        //        }
       }
 
       QAction* action = nullptr;
       if (commandNode.IsDefined() && !label.isEmpty()) {
         const QString& command = QString::fromUtf8(commandNode.as<std::string>().c_str());
-        action = new CommandAction(id, label, command, nullptr, pkgName);
+        action = new CommandAction(id, label, command, nullptr, condition, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
-          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent);
+          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent, condition);
           action->setObjectName(action->text());
           action->setSeparator(true);
         } else {
@@ -240,7 +249,7 @@ void YamlUtils::parseMenuNode(const QString& pkgName, QWidget* parent, const YAM
   }
 }
 
-void YamlUtils::parseToolbarNode(const QString& pkgName,
+void YamlUtil::parseToolbarNode(const QString& pkgName,
                                  const QString& ymlPath,
                                  QWidget* parent,
                                  const YAML::Node& toolbarNode) {
@@ -312,11 +321,12 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
     } else {
       // Check if condition
       YAML::Node ifNode = node["if"];
+      boost::optional<AndConditionExpression> condition;
       if (ifNode.IsDefined()) {
-        auto condition = parseCondition(ifNode);
-        if (!condition || !condition->isSatisfied()) {
-          continue;
-        }
+        condition = parseCondition(ifNode);
+        //        if (!condition || !condition->isSatisfied()) {
+        //          continue;
+        //        }
       }
 
       QAction* action = nullptr;
@@ -326,7 +336,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
         if (!iconPath.startsWith('/')) {
           iconPath = QFileInfo(ymlPath).dir().absoluteFilePath(iconPath);
         }
-        action = new CommandAction(id, command, QIcon(iconPath), nullptr, pkgName);
+        action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = Helper::singleton().translate(
@@ -339,7 +349,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         QString type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
-          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent);
+          action = new PackageAction(QUuid::createUuid().toString(), pkgName, parent, condition);
           action->setObjectName(action->text());
           action->setSeparator(true);
         } else {
@@ -369,7 +379,7 @@ void YamlUtils::parseToolbarNode(const QString& pkgName,
   }
 }
 
-QList<ConfigDefinition> YamlUtils::parseConfig(const QString& pkgName, const QString& ymlPath) {
+QList<ConfigDefinition> YamlUtil::parseConfig(const QString& pkgName, const QString& ymlPath) {
   QList<ConfigDefinition> defs;
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());

@@ -5,7 +5,7 @@
 #include "PlatformUtil.h"
 #include "MenuBar.h"
 #include "Window.h"
-#include "util/YamlUtils.h"
+#include "util/YamlUtil.h"
 
 #ifdef Q_OS_MAC
 extern void qt_set_sequence_auto_mnemonic(bool b);

@@ -28,6 +28,7 @@
 #ifdef Q_OS_MAC
 #include "WebView.h"
 #endif
+#include "Console.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -41,6 +42,7 @@
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
 #include "core/Url.h"
+#include "core/MessageHandler.h"
 #include "atom/node_includes.h"
 
 using core::Config;
@@ -106,6 +108,18 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
                       V8Util::toQString(args[1]->ToString()));
 }
 
+void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  auto windows = Window::windows();
+
+  Isolate* isolate = args.GetIsolate();
+  HandleScope handleScope(isolate);
+  Local<Array> array = Array::New(isolate, windows.size());
+  for (int i = 0; i < windows.size(); i++) {
+    array->Set(i, V8Util::toV8ObjectFrom(isolate, windows[i]));
+  }
+  args.GetReturnValue().Set(array);
+}
+
 /*
   ConfigDialog static methods
 */
@@ -118,21 +132,6 @@ void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()),
                                V8Util::toQString(args[1]->ToString()));
-}
-
-/*
-  Window static methods
-*/
-void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  auto windows = Window::windows();
-
-  Isolate* isolate = args.GetIsolate();
-  HandleScope handleScope(isolate);
-  Local<Array> array = Array::New(isolate, windows.size());
-  for (int i = 0; i < windows.size(); i++) {
-    array->Set(i, V8Util::toV8ObjectFrom(isolate, windows[i]));
-  }
-  args.GetReturnValue().Set(array);
 }
 }
 
@@ -186,6 +185,9 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "disconnect", JSObjectHelper::disconnect);
   NODE_SET_METHOD(exports, "emit", V8Util::emitQObjectSignal);
   NODE_SET_METHOD(exports, "lateInit", lateInit);
+  NODE_SET_METHOD(exports, "info", info);
+  NODE_SET_METHOD(exports, "warn", warn);
+  NODE_SET_METHOD(exports, "error", error);
 
   // register enums in Qt namespace
   registerQtEnum<Qt::Orientation>(context, exports, isolate, "Qt::Orientation");
@@ -219,6 +221,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
   // init classes for QObject subclasses
   registerClass<ConfigDialog>(exports);
+  registerClass<Console>(exports);
   registerClass<Dialog>(exports);
   registerClass<DialogButtonBox>(exports);
   registerClass<Event>(exports);
@@ -241,6 +244,36 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
   Condition::Init(exports);
+}
+
+void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCInfo(category).noquote() << V8Util::toQString(msg);
+  }
+}
+
+void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCWarning(category).noquote() << V8Util::toQString(msg);
+  }
+}
+
+void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() > 0 && args[0]->IsString()) {
+    Local<String> msg = args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked();
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCCritical(category).noquote() << V8Util::toQString(msg);
+  }
 }
 
 template <typename T>

@@ -16,9 +16,10 @@
 #include "FindReplaceView.h"
 #include "MenuBar.h"
 #include "CommandAction.h"
-#include "util/YamlUtils.h"
+#include "util/YamlUtil.h"
 #include "Helper.h"
 #include "PlatformUtil.h"
+#include "Console.h"
 #include "core/Document.h"
 
 QMap<QString, QString> Window::s_toolbarsDefinitions;
@@ -29,6 +30,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_tabViewGroup(new TabViewGroup(this)),
       m_projectView(nullptr),
       m_findReplaceView(new FindReplaceView(this)),
+      m_console(new Console(this)),
       m_firstPaintEventFired(false) {
   qDebug("creating Window");
   ui->setupUi(this);
@@ -63,7 +65,13 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   QWidget* editorWidget = new QWidget(this);
   editorWidget->setLayout(layout);
 
-  ui->rootSplitter->addWidget(editorWidget);
+  auto contentSplitter = new QSplitter(Qt::Vertical);
+  contentSplitter->addWidget(editorWidget);
+  contentSplitter->addWidget(m_console);
+  m_console->hide();
+  contentSplitter->setSizes(QList<int>{500, 100});
+
+  ui->rootSplitter->addWidget(contentSplitter);
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
@@ -156,11 +164,11 @@ void Window::loadMenu(const QString& pkgName, const QString& ymlPath) {
     YAML::Node menuNode = rootNode["menu"];
 #ifdef Q_OS_MAC
     // There's only 1 global menu bar on Mac.
-    YamlUtils::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
+    YamlUtil::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
     foreach (Window* win, s_windows) {
-      YamlUtils::parseMenuNode(pkgName, win->menuBar(), menuNode);
+      YamlUtil::parseMenuNode(pkgName, win->menuBar(), menuNode);
     }
 #endif
   } catch (const YAML::ParserException& ex) {
@@ -180,7 +188,7 @@ void Window::loadToolbar(Window* win, const QString& pkgName, const QString& yml
     s_toolbarsDefinitions.insert(pkgName, ymlPath);
 
     YAML::Node toolbarsNode = rootNode["toolbar"];
-    YamlUtils::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);
+    YamlUtil::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
   }

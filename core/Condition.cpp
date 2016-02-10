@@ -19,7 +19,6 @@ using v8::String;
 using v8::Value;
 using v8::Exception;
 using v8::MaybeLocal;
-using v8::TryCatch;
 using v8::ObjectTemplate;
 using v8::Maybe;
 using v8::Boolean;
@@ -28,12 +27,12 @@ namespace core {
 
   std::unordered_map<QString, std::unique_ptr<Condition>> Condition::s_conditions;
 
-bool Condition::check(const QString& key, Condition::Operator op, const QString& operand) {
+bool Condition::check(const QVariant& keyValue, Condition::Operator op, const QVariant& operand) {
   switch (op) {
     case Operator::EQUALS:
-      return key == operand;
+      return keyValue == operand;
     case Operator::NOT_EQUALS:
-      return key != operand;
+      return keyValue != operand;
     default:
       return false;
   }
@@ -81,7 +80,7 @@ bool core::Condition::isStatic(const QString& key) {
 
 bool core::Condition::isSatisfied(const QString& key,
                                   core::Condition::Operator op,
-                                  const QString& value) {
+                                  const QVariant &value) {
   if (s_conditions.find(key) == s_conditions.end()) {
     return false;
   }
@@ -97,7 +96,7 @@ void core::Condition::init() {
   add(OnWindowsCondition::name, std::move(std::unique_ptr<Condition>(new OnWindowsCondition())));
 }
 
-bool Condition::isSatisfied(Operator op, const QString& operand) {
+bool Condition::isSatisfied(Operator op, const QVariant &operand) {
   try {
     return check(keyValue(), op, operand);
   } catch (const std::exception& e) {
@@ -137,9 +136,10 @@ void Condition::Check(const v8::FunctionCallbackInfo<v8::Value>& args) {
     return;
   }
 
-  bool result = check(V8Util::toQString(args[0]->ToString()),
+  Isolate* isolate = args.GetIsolate();
+  bool result = check(V8Util::toVariant(isolate, args[0]),
                       static_cast<Condition::Operator>(args[1]->ToInt32()->Value()),
-                      V8Util::toQString(args[2]->ToString()));
+                      V8Util::toVariant(isolate, args[2]));
   args.GetReturnValue().Set(Boolean::New(args.GetIsolate(), result));
 }
 

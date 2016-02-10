@@ -154,11 +154,11 @@ operatorは"==", "!="をサポートしています。
 もう1つの書式は"<key>"のみ定義する場合です。この場合operatorは"==", operandは"true"に設定されます。
 
 ```
-- { key: ctrl+cmd+i, command: vim.toggle_vim_emulation, if: onMac }
-- { key: ctrl+alt+i, command: vim.toggle_vim_emulation, if: onWindows }
+- { key: ctrl+cmd+i, command: vim.toggle_vim_emulation, if: on_mac }
+- { key: ctrl+alt+i, command: vim.toggle_vim_emulation, if: on_windows }
 ```
 
-上記のonMac, onWindowsはSilkEdit組み込みの条件で、例えばonMacはMac上で動かす時にoperandがtrueになります。
+上記のon_mac, on_windowsはSilkEdit組み込みの条件で、例えばon_macはMac上で動かす時にoperandがtrueになります。
 
 パッケージ独自の条件を付加することも可能です。以下はvimパッケージの例です。
 
@@ -193,7 +193,7 @@ menu:
     - label: 'Say Hello!'
       id: hello
       command: hello.hello
-      if: onMac
+      if: on_mac
       before: save
 ```
 
@@ -224,7 +224,7 @@ toolbars:
     command: open
     tooltip: Open
     id: open
-    if: onMac
+    if: on_mac
 ```
 
 ツールバーはメニューと違い2階層しかありません。ルート要素でツールバーの定義、ツールバーの子要素でツールバーに表示するアイテムを定義します。

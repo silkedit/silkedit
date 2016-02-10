@@ -7,16 +7,15 @@
 using core::PackageManager;
 using core::Package;
 
-void CommandAction::init(const QString& id, const QString& cmdName) {
+void CommandAction::init(const QString& id) {
   setObjectName(id);
-  QKeySequence key = KeymapManager::singleton().findShortcut(cmdName);
+
   // WidgetShortcut makes QAction's shortcut disabled but visible in a menu
   // Shortcut is handled by TextEditViewKeyHandler.
   setShortcutContext(Qt::WidgetShortcut);
-  // todo: make reactive based on an associated condition
-  if (!key.isEmpty()) {
-    setShortcut(key);
-  }
+
+  updateVisibilityAndShortcut();
+
   connect(this, &QAction::triggered, [this] { CommandManager::singleton().runCommand(m_cmdName); });
   connect(&KeymapManager::singleton(), &KeymapManager::shortcutUpdated, this,
           [=](const QString& cmdName, const QKeySequence& key) {
@@ -30,16 +29,30 @@ CommandAction::CommandAction(const QString& id,
                              const QString& text,
                              const QString& cmdName,
                              QObject* parent,
+                             boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(text, pkgName, parent), m_cmdName(cmdName) {
-  init(id, cmdName);
+    : PackageAction(text, pkgName, parent, cond), m_cmdName(cmdName) {
+  init(id);
 }
 
 CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QIcon& icon,
                              QObject* parent,
+                             boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(icon, id, pkgName, parent), m_cmdName(cmdName) {
-  init(id, cmdName);
+    : PackageAction(icon, id, pkgName, parent, cond), m_cmdName(cmdName) {
+  init(id);
+}
+
+void CommandAction::updateShortcut()
+{
+  QKeySequence key = KeymapManager::singleton().findShortcut(m_cmdName);
+  setShortcut(key);
+}
+
+void CommandAction::updateVisibilityAndShortcut()
+{
+  PackageAction::updateVisibilityAndShortcut();
+  updateShortcut();
 }

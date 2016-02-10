@@ -21,12 +21,11 @@
 #include "core/modifiers.h"
 #include "core/V8Util.h"
 #include "core/QKeyEventWrap.h"
-#include "util/YamlUtils.h"
+#include "util/YamlUtil.h"
 #include "core/FunctionInfo.h"
 #include "atom/node_includes.h"
 
 using core::Constants;
-using core::IKeyEventFilter;
 using core::Util;
 using core::AndConditionExpression;
 using core::PackageManager;
@@ -127,7 +126,7 @@ void KeymapManager::load(const QString& filename, const QString& source) {
       if (ifNode.IsDefined()) {
         YAML::Node conditionNode = keymapDefNode["if"];
         if (conditionNode.IsDefined()) {
-          condition = YamlUtils::parseCondition(conditionNode);
+          condition = YamlUtil::parseCondition(conditionNode);
           if (!condition) {
             qWarning() << "can't find a condition: "
                        << QString::fromUtf8(conditionNode.as<std::string>().c_str());
@@ -249,27 +248,36 @@ void KeymapManager::loadUserKeymap() {
   }
 }
 
+// returns the command name which is activated when key is pressed
+QString KeymapManager::findCmdName(QKeySequence key) {
+  if (m_keymaps.find(key) != m_keymaps.end()) {
+    auto range = m_keymaps.equal_range(key);
+    for (auto it = range.first; it != range.second; it++) {
+      CommandEvent& ev = it->second;
+      if (!ev.condition() || ev.condition()->isSatisfied()) {
+        return ev.cmdName();
+      }
+    }
+  }
+
+  return "";
+}
+
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
   auto foundIter = m_cmdKeymapHash.find(cmdName);
   if (foundIter != m_cmdKeymapHash.end()) {
-    auto range = m_keymaps.equal_range(foundIter->second.key);
+    auto range = m_cmdKeymapHash.equal_range(cmdName);
     for (auto it = range.first; it != range.second; it++) {
-      // Set shortcut if command event has no condition or it has static condition and it's
-      // satisfied
-      if (!it->second.hasCondition()) {
-        return m_cmdKeymapHash.at(cmdName).key;
-      } else {
-        auto condition = it->second.condition();
-        if (condition->isStatic() && condition->isSatisfied()) {
-          return m_cmdKeymapHash.at(cmdName).key;
-        }
+      if ((!it->second.cmd.condition() || it->second.cmd.condition()->isSatisfied()) &&
+          findCmdName(it->second.key) == cmdName) {
+        return it->second.key;
       }
     }
   }
   return QKeySequence();
 }
 
-bool KeymapManager::keyEventFilter(QKeyEvent* event) {
+bool KeymapManager::handle(QKeyEvent* event) {
   bool result = runJSKeyEventFilter(event);
   if (result) {
     qDebug() << "key event is handled by an event filter";
@@ -314,6 +322,7 @@ void KeymapManager::addShortcut(const QKeySequence& key, CommandEvent cmdEvent) 
 
 void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   // If cmdEvent has static condition, evaluate it immediately
+  // e.g. filter out keymaps for different os
   auto condition = cmdEvent.condition();
   if (condition && condition->isStatic()) {
     if (!condition->isSatisfied()) {
@@ -335,7 +344,10 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     return;
   }
 
-  // Remove existing keymap if its priority is lower
+  // Remove existing keymap if it has same condition and its priority is lower
+  // e.g.
+  // - { key: 'ctrl+`', command: show_console, if on_mac}
+  // - { key: 'ctrl+`', command: hide_console, if on_mac}
   auto range = m_keymaps.equal_range(key);
   for (auto it = range.first; it != range.second; it++) {
     CommandEvent& ev = it->second;
@@ -353,36 +365,7 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
     }
   }
 
-  if (m_cmdKeymapHash.count(cmdEvent.cmdName()) == 0 || !cmdEvent.condition() ||
-      (m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition() &&
-       // shorter AND condition has higher priority
-       // e.g. 'onMac' has higher priority than 'onMac && vim.mode == normal'
-       cmdEvent.condition()->size() <
-           m_cmdKeymapHash.at(cmdEvent.cmdName()).cmd.condition()->size())) {
-    addShortcut(key, cmdEvent);
-  }
+  addShortcut(key, cmdEvent);
 
   m_keymaps.insert(std::make_pair(key, cmdEvent));
-}
-
-TextEditViewKeyHandler::TextEditViewKeyHandler() {
-  registerKeyEventFilter(&KeymapManager::singleton());
-}
-
-void TextEditViewKeyHandler::registerKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.insert(filter);
-}
-
-void TextEditViewKeyHandler::unregisterKeyEventFilter(IKeyEventFilter* filter) {
-  m_keyEventFilters.erase(filter);
-}
-
-bool TextEditViewKeyHandler::dispatchKeyPressEvent(QKeyEvent* event) {
-  for (const auto& filter : m_keyEventFilters) {
-    if (filter->keyEventFilter(event)) {
-      return true;
-    }
-  }
-
-  return false;
 }

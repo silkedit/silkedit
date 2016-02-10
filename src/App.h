@@ -31,6 +31,7 @@ public slots:
   TabViewGroup* activeTabViewGroup();
   Window* activeWindow();
   void setActiveWindow(QWidget* act);
+  QWidget* focusWidget();
 
 protected:
   bool event(QEvent*) override;

@@ -15,6 +15,7 @@ class AndConditionExpression {
 
   bool isSatisfied();
   QString toString();
+
   /**
    * @brief check if condition is static (e.g., os == mac)
    * @return

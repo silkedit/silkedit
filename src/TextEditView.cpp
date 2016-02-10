@@ -1052,10 +1052,6 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
       break;
   }
 
-  if (TextEditViewKeyHandler::singleton().dispatchKeyPressEvent(event)) {
-    return;
-  }
-
   QPlainTextEdit::keyPressEvent(event);
 }
 

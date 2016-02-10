@@ -44,12 +44,14 @@ class Util {
 
   static bool matchTypes(QList<QByteArray> types, QVariantList args);
 
-  static bool convertArgs(ParameterTypes parameterTypes, QVariantList &args);
+  static bool convertArgs(ParameterTypes parameterTypes, QVariantList& args);
 
   // Caller needs to call free argv after using it as follows
   //  free(argv[0]);
   //  free(argv);
   static char** toArgv(const QStringList& argsStrings);
+
+  static QVariant toVariant(const QString& str);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
