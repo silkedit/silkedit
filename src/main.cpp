@@ -22,6 +22,7 @@
 #include "core/ThemeManager.h"
 #include "core/Util.h"
 #include "core/Constants.h"
+#include "core/MessageHandler.h"
 #include "breakpad/crash_handler.h"
 #include "node_main.h"
 
@@ -31,10 +32,12 @@ using core::Condition;
 using core::ThemeManager;
 using core::Util;
 using core::Constants;
+using core::MessageHandler;
 
 int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
+  MessageHandler::init();
   App app(argc, argv);
 #ifdef QT_NO_DEBUG
   // crash dumps output location setting.
@@ -89,6 +92,7 @@ int main(int argc, char** argv) {
   }
 
   int passed = startTime.msecsTo(QTime::currentTime());
-  qDebug("startup time: %d [ms]", passed);
+  QLoggingCategory category(SILKEDIT_CATEGORY);
+  qCInfo(category) << "startup time:" << passed << "[ms]";
   return app.exec();
 }

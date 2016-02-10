@@ -15,17 +15,17 @@ class TabViewGroup;
 class FindReplaceView;
 class TextEditView;
 class Toolbar;
+class Console;
 
 namespace core {
 class Document;
 }
 
-
 namespace Ui {
 class Window;
 }
 
-class Window : public QMainWindow{
+class Window : public QMainWindow {
   Q_OBJECT
   DISABLE_COPY(Window)
 
@@ -68,17 +68,17 @@ class Window : public QMainWindow{
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
 
-public slots:
+ public slots:
   StatusBar* statusBar();
+  Console* console() { return m_console; }
   void openFindAndReplacePanel();
-
 
  signals:
   void activeViewChanged(QWidget* oldView, QWidget* newView);
   void firstPaintEventFired();
 
-protected:
-  void paintEvent(QPaintEvent * event) override;
+ protected:
+  void paintEvent(QPaintEvent* event) override;
 
  private:
   static QList<Window*> s_windows;
@@ -95,13 +95,14 @@ protected:
   TabViewGroup* m_tabViewGroup;
   ProjectTreeView* m_projectView;
   FindReplaceView* m_findReplaceView;
+  Console* m_console;
   bool m_firstPaintEventFired;
 
   static bool closeTabIncludingDocInternal(core::Document* doc);
 
-private slots:
+ private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
-  void updateConnection(QWidget *oldView, QWidget *newView);
+  void updateConnection(QWidget* oldView, QWidget* newView);
   void emitActiveViewChanged(TabView* oldTabView, TabView* newTabView);
 };
 

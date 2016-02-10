@@ -83,7 +83,8 @@ if (APPLE)
   # include the icns files in the target
   set( SILK_SOURCES ${SILK_SOURCES} ${OSX_ICON_FILES} )
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -g")
+  # -Wno-gnu-zero-variadic-macro-arguments: to suppress warnings of qCDebug(category, ...)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y -stdlib=libc++ -Wall -pedantic -Wextra -Wnon-virtual-dtor -Woverloaded-virtual -Wno-gnu-zero-variadic-macro-arguments -g")
   include_directories(SYSTEM
     /usr/local/include
     src

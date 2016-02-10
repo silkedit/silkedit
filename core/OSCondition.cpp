@@ -1,37 +1,38 @@
 ﻿#include <QString>
+
 #include "OSCondition.h"
 
 namespace core {
 
 const QString OSCondition::name = "os";
 
-QString OSCondition::keyValue() {
+QVariant OSCondition::keyValue() {
 #if defined Q_OS_WIN
-  return "windows";
+  return QVariant::fromValue(QStringLiteral("windows"));
 #elif defined Q_OS_LINUX
-  return "linux";
+  return QVariant::fromValue(QStringLiteral("linux"));
 #else
-  return "mac";
+  return QVariant::fromValue(QStringLiteral("mac"));
 #endif
 }
 
-const QString OnMacCondition::name = "onMac";
+const QString OnMacCondition::name = "on_mac";
 
-QString OnMacCondition::keyValue() {
+QVariant OnMacCondition::keyValue() {
 #if defined Q_OS_MAC
-  return "true";
+  return QVariant::fromValue(true);
 #else
-  return "false";
+  return QVariant::fromValue(false);
 #endif
 }
 
-const QString OnWindowsCondition::name = "onWindows";
+const QString OnWindowsCondition::name = "on_windows";
 
-QString OnWindowsCondition::keyValue() {
+QVariant OnWindowsCondition::keyValue() {
 #if defined Q_OS_WIN
-  return "true";
+  return QVariant::fromValue(true);
 #else
-  return "false";
+  return QVariant::fromValue(false);
 #endif
 }
 

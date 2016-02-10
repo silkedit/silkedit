@@ -4,7 +4,7 @@
 #include "ui_ConfigDialog.h"
 #include "PackagesView.h"
 #include "PackageConfigView.h"
-#include "util/YamlUtils.h"
+#include "util/YamlUtil.h"
 #include "core/Config.h"
 
 using core::ConfigDefinition;
@@ -14,7 +14,7 @@ QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 ConfigDialog* ConfigDialog::s_dialog = nullptr;
 
 void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configPath) {
-  auto configList = YamlUtils::parseConfig(pkgName, configPath);
+  auto configList = YamlUtil::parseConfig(pkgName, configPath);
   if (!configList.isEmpty()) {
     s_packageConfigs[pkgName] = configList;
   }

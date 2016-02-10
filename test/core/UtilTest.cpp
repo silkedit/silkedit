@@ -3,6 +3,7 @@
 #include "Util.h"
 #include "Url.h"
 #include "QObjectUtil.h"
+#include "JSValue.h"
 
 namespace core {
 
@@ -57,7 +58,7 @@ class UtilTest : public QObject {
     // Given QObject constructed by QMetaObject::newInstance
     auto url = QStringLiteral("url");
     QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
-                                                         QVariantList{QVariant::fromValue(url)});
+                                                     QVariantList{QVariant::fromValue(url)});
     // When
     auto result = Util::wrappedTypeCheck(QVariant::fromValue(newUrl), "QUrl");
 
@@ -76,11 +77,156 @@ class UtilTest : public QObject {
   void convertArgs() {
     auto url = QStringLiteral("url");
     QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
-                                                         QVariantList{QVariant::fromValue(url)});
+                                                     QVariantList{QVariant::fromValue(url)});
     QVariantList args = QVariantList{QVariant::fromValue(newUrl)};
     bool result = Util::convertArgs(ParameterTypes(), args);
     QVERIFY(result);
     QCOMPARE(args[0].typeName(), "QUrl");
+  }
+
+  void toVariantNull() {
+    auto var = Util::toVariant("null");
+    Q_ASSERT(var.canConvert<JSNull>());
+
+    var = Util::toVariant("NULL");
+    Q_ASSERT(var.canConvert<JSNull>());
+
+    var = Util::toVariant("~");
+    Q_ASSERT(var.canConvert<JSNull>());
+  }
+
+  void toVariantBool() {
+    auto var = Util::toVariant("true");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(var.toBool());
+
+    var = Util::toVariant("True");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(var.toBool());
+
+    var = Util::toVariant("TRUE");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(var.toBool());
+
+    var = Util::toVariant("false");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(!var.toBool());
+
+    var = Util::toVariant("False");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(!var.toBool());
+
+    var = Util::toVariant("FALSE");
+    Q_ASSERT(var.canConvert<bool>());
+    Q_ASSERT(!var.toBool());
+  }
+
+  void toVariantBase10Int() {
+    auto var = Util::toVariant("+0");
+    Q_ASSERT(var.canConvert<int>());
+    bool ok;
+    QCOMPARE(var.toInt(&ok), 0);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("0");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 0);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("-0");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 0);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("+10");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 10);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("-10000");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), -10000);
+    Q_ASSERT(ok);
+  }
+
+  void toVariantBase8Int() {
+    auto var = Util::toVariant("0o0");
+    Q_ASSERT(var.canConvert<int>());
+    bool ok;
+    QCOMPARE(var.toInt(&ok), 0);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("0o10");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 8);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("0o123");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 83);
+    Q_ASSERT(ok);
+  }
+
+  void toVariantBase16Int() {
+    auto var = Util::toVariant("0x0a");
+    Q_ASSERT(var.canConvert<int>());
+    bool ok;
+    QCOMPARE(var.toInt(&ok), 10);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("0x0aF");
+    Q_ASSERT(var.canConvert<int>());
+    QCOMPARE(var.toInt(&ok), 175);
+    Q_ASSERT(ok);
+  }
+
+  void toVariantFloat() {
+    auto var = Util::toVariant("+.0");
+    Q_ASSERT(var.canConvert<double>());
+    bool ok;
+    QCOMPARE(var.toDouble(&ok), 0.0);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("3.04");
+    Q_ASSERT(var.canConvert<double>());
+    QCOMPARE(var.toDouble(&ok), 3.04);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("-3.04");
+    Q_ASSERT(var.canConvert<double>());
+    QCOMPARE(var.toDouble(&ok), -3.04);
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("5.28e+1");
+    Q_ASSERT(var.canConvert<double>());
+    QCOMPARE(var.toDouble(&ok), 52.8);
+    Q_ASSERT(ok);
+  }
+
+  void toVariantInfinity() {
+    auto var = Util::toVariant("+.inf");
+    Q_ASSERT(var.canConvert<double>());
+    bool ok;
+    Q_ASSERT(std::isinf(var.toDouble(&ok)));
+    Q_ASSERT(ok);
+
+    var = Util::toVariant("-.INF");
+    Q_ASSERT(var.canConvert<double>());
+    Q_ASSERT(std::isinf(var.toDouble(&ok)));
+    Q_ASSERT(ok);
+  }
+
+  void toVariantNan() {
+    auto var = Util::toVariant(".nan");
+    Q_ASSERT(var.canConvert<double>());
+    bool ok;
+    Q_ASSERT(std::isnan(var.toDouble(&ok)));
+    Q_ASSERT(ok);
+
+    var = Util::toVariant(".NAN");
+    Q_ASSERT(var.canConvert<double>());
+    Q_ASSERT(std::isnan(var.toDouble(&ok)));
+    Q_ASSERT(ok);
   }
 };
 

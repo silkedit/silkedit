@@ -1,5 +1,6 @@
 ﻿#include <sstream>
 #include <QDebug>
+#include <QLoggingCategory>
 
 #include "PackageCondition.h"
 #include "V8Util.h"
@@ -23,17 +24,18 @@ namespace core {
 
 Persistent<Function> PackageCondition::constructor;
 
-PackageCondition::PackageCondition(v8::Isolate *isolate, v8::Local<v8::Object> object) : m_isolate(isolate) {
+PackageCondition::PackageCondition(v8::Isolate* isolate, v8::Local<v8::Object> object)
+    : m_isolate(isolate) {
   m_object.Reset(isolate, object);
 }
 
-bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
+bool PackageCondition::isSatisfied(Operator op, const QVariant &operand) {
   v8::Locker locker(m_isolate);
   v8::HandleScope handleScope(m_isolate);
 
   auto object = Local<Object>::New(m_isolate, m_object);
-  MaybeLocal<Value> maybeIsSatisfiedFn =
-      object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "isSatisfied"));
+  MaybeLocal<Value> maybeIsSatisfiedFn = object->Get(
+      m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "isSatisfied"));
   if (maybeIsSatisfiedFn.IsEmpty()) {
     return Condition::isSatisfied(op, operand);
   }
@@ -47,39 +49,20 @@ bool PackageCondition::isSatisfied(Operator op, const QString& operand) {
   const int argc = 2;
   Local<Value> argv[argc];
   argv[0] = v8::Int32::New(m_isolate, static_cast<int>(op));
-  argv[1] = V8Util::toV8String(m_isolate, operand);
+  argv[1] = V8Util::toV8Value(m_isolate, operand);
 
-  TryCatch trycatch(m_isolate);
-  MaybeLocal<Value> maybeResult =
-      isSatisfiedFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), argc, argv);
+  auto result = V8Util::callJSFunc(m_isolate, isSatisfiedFn, object, argc, argv);
 
-  if (trycatch.HasCaught()) {
-    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(m_isolate->GetCurrentContext());
-    Local<Value> exception = trycatch.Exception();
-    String::Utf8Value exceptionStr(exception);
-    std::stringstream ss;
-    ss << "error: " << *exceptionStr;
-    if (!maybeStackTrace.IsEmpty()) {
-      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
-      ss << " stack trace: " << *stackTraceStr;
-    }
-    qWarning() << ss.str().c_str();
-    return false;
-  } else if (maybeResult.IsEmpty()) {
-    qWarning() << "maybeResult is empty (but exception is not thrown...)";
+  if (!result.canConvert<bool>()) {
+    QLoggingCategory category("silkedit");
+    qCCritical(category) << "result is not boolean";
     return false;
   }
 
-  Local<Value> result = maybeResult.ToLocalChecked();
-  if (!result->IsBoolean()) {
-    qWarning() << "result is not boolean";
-    return false;
-  }
-
-  return result->ToBoolean()->Value();
+  return result.toBool();
 }
 
-QString PackageCondition::keyValue() {
+QVariant PackageCondition::keyValue() {
   auto object = Local<Object>::New(m_isolate, m_object);
   MaybeLocal<Value> maybeKeyValueFn =
       object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "keyValue"));
@@ -114,11 +97,11 @@ QString PackageCondition::keyValue() {
   }
 
   Local<Value> result = maybeResult.ToLocalChecked();
-  if (!result->IsString()) {
-    throw std::runtime_error("result is not string");
+  if (result.IsEmpty()) {
+    throw std::runtime_error("result is empty");
   }
 
-  return V8Util::toQString(result->ToString());
+  return V8Util::toVariant(m_isolate, result);
 }
 
 }  // namespace core

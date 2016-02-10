@@ -1,6 +1,7 @@
 #include <vendor/node/src/node_buffer.h>
 #include <sstream>
 #include <QDebug>
+#include <QLoggingCategory>
 
 #include "V8Util.h"
 #include "ObjectStore.h"
@@ -8,6 +9,7 @@
 #include "ConstructorStore.h"
 #include "FunctionInfo.h"
 #include "QObjectUtil.h"
+#include "JSValue.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -109,6 +111,8 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
       array->Set(i++, toV8Value(isolate, v));
     }
     return array;
+  } else if (var.canConvert<JSNull>()) {
+    return v8::Null(isolate);
   }
 
   switch (var.type()) {
@@ -318,6 +322,31 @@ void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) 
   }
 }
 
+QString V8Util::getErrorMessage(Isolate* isolate, const TryCatch& trycatch) {
+  if (trycatch.HasCaught()) {
+    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
+    Local<Value> exception = trycatch.Exception();
+    std::stringstream ss;
+    if (!maybeStackTrace.IsEmpty()) {
+      auto str = maybeStackTrace.ToLocalChecked();
+      if (str->IsString()) {
+        String::Utf8Value stackTraceStr(str);
+        ss << *stackTraceStr;
+      }
+    } else if (!exception.IsEmpty() && exception->IsString()) {
+      String::Utf8Value exceptionStr(exception);
+      ss << "error: " << *exceptionStr;
+    } else {
+      qWarning() << "Can't get an error message from an exception";
+      return "";
+    }
+
+    return ss.str().c_str();
+  }
+
+  return "";
+}
+
 QVariant V8Util::callJSFunc(v8::Isolate* isolate,
                             v8::Local<v8::Function> fn,
                             Local<Value> recv,
@@ -326,19 +355,13 @@ QVariant V8Util::callJSFunc(v8::Isolate* isolate,
   TryCatch trycatch(isolate);
   MaybeLocal<Value> maybeResult = fn->Call(isolate->GetCurrentContext(), recv, argc, argv);
   if (trycatch.HasCaught()) {
-    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
-    Local<Value> exception = trycatch.Exception();
-    String::Utf8Value exceptionStr(exception);
-    std::stringstream ss;
-    ss << "error: " << *exceptionStr;
-    if (!maybeStackTrace.IsEmpty()) {
-      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
-      ss << " stack trace: " << *stackTraceStr;
-    }
-    qWarning() << ss.str().c_str();
+    QLoggingCategory category("silkedit");
+    qCCritical(category) << getErrorMessage(isolate, trycatch);
+
     return QVariant();
   } else if (maybeResult.IsEmpty()) {
-    qWarning() << "maybeResult is empty (but exception is not thrown...)";
+    QLoggingCategory category("silkedit");
+    qCCritical(category) << "maybeResult is empty (but exception is not thrown...)";
     return QVariant();
   }
 

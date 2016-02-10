@@ -1,21 +1,18 @@
 ﻿#pragma once
 
-#include <memory>
-#include <unordered_map>
 #include <QString>
-#include <QHash>
+#include <QVariant>
 
 #include "Condition.h"
-#include "stlSpecialization.h"
 
 namespace core {
 
 struct ConditionExpression {
   QString m_key;
   Condition::Operator m_op;
-  QString m_value;
+  QVariant m_value;
 
-  ConditionExpression(const QString& key, Condition::Operator op, const QString& value);
+  ConditionExpression(const QString& key, Condition::Operator op, const QVariant& value);
   bool isSatisfied() const;
   QString toString() const;
 
