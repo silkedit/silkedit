@@ -15,7 +15,7 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   completer->setModel(&m_historyModel);
   ui->input->setCompleter(completer);
 
-  connect(&MessageHandler::singleton(), &MessageHandler::message,
+  connect(&MessageHandler::singleton(), &MessageHandler::message, this,
           [=](QtMsgType type, const QString& msg) {
             QString text = "<div style='color:%1;'>%2</div>";
             QString color;
@@ -35,7 +35,7 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
             ui->output->append(text.arg(color).arg(msg));
           });
 
-  connect(ui->input, &QLineEdit::returnPressed, [=] {
+  connect(ui->input, &QLineEdit::returnPressed, this, [=] {
     runJSCode(ui->input->text());
     m_historyModel.prepend(ui->input->text());
     ui->input->clear();
