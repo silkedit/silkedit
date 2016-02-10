@@ -108,6 +108,18 @@ void loadToolbar(const v8::FunctionCallbackInfo<v8::Value>& args) {
                       V8Util::toQString(args[1]->ToString()));
 }
 
+void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  auto windows = Window::windows();
+
+  Isolate* isolate = args.GetIsolate();
+  HandleScope handleScope(isolate);
+  Local<Array> array = Array::New(isolate, windows.size());
+  for (int i = 0; i < windows.size(); i++) {
+    array->Set(i, V8Util::toV8ObjectFrom(isolate, windows[i]));
+  }
+  args.GetReturnValue().Set(array);
+}
+
 /*
   ConfigDialog static methods
 */
@@ -120,21 +132,6 @@ void loadConfigDefinition(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   ConfigDialog::loadDefinition(V8Util::toQString(args[0]->ToString()),
                                V8Util::toQString(args[1]->ToString()));
-}
-
-/*
-  Window static methods
-*/
-void windows(const v8::FunctionCallbackInfo<v8::Value>& args) {
-  auto windows = Window::windows();
-
-  Isolate* isolate = args.GetIsolate();
-  HandleScope handleScope(isolate);
-  Local<Array> array = Array::New(isolate, windows.size());
-  for (int i = 0; i < windows.size(); i++) {
-    array->Set(i, V8Util::toV8ObjectFrom(isolate, windows[i]));
-  }
-  args.GetReturnValue().Set(array);
 }
 }
 
@@ -249,8 +246,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   Condition::Init(exports);
 }
 
-void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value> &args)
-{
+void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() > 0 && args[0]->IsString()) {
@@ -260,8 +256,7 @@ void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value> &args)
   }
 }
 
-void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value> &args)
-{
+void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() > 0 && args[0]->IsString()) {
@@ -271,8 +266,7 @@ void bridge::Handler::warn(const v8::FunctionCallbackInfo<v8::Value> &args)
   }
 }
 
-void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value> &args)
-{
+void bridge::Handler::error(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
   if (args.Length() > 0 && args[0]->IsString()) {

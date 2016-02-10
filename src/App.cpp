@@ -217,6 +217,10 @@ void App::setActiveWindow(QWidget* act) {
   QApplication::setActiveWindow(act);
 }
 
+QWidget* App::focusWidget() {
+  return QApplication::focusWidget();
+}
+
 void App::restart() {
   if (s_app) {
     QProcess::startDetached(QApplication::applicationFilePath());
