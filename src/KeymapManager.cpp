@@ -248,18 +248,29 @@ void KeymapManager::loadUserKeymap() {
   }
 }
 
+// returns the command name which is activated when key is pressed
+QString KeymapManager::findCmdName(QKeySequence key) {
+  if (m_keymaps.find(key) != m_keymaps.end()) {
+    auto range = m_keymaps.equal_range(key);
+    for (auto it = range.first; it != range.second; it++) {
+      CommandEvent& ev = it->second;
+      if (!ev.condition() || ev.condition()->isSatisfied()) {
+        return ev.cmdName();
+      }
+    }
+  }
+
+  return "";
+}
+
 QKeySequence KeymapManager::findShortcut(QString cmdName) {
   auto foundIter = m_cmdKeymapHash.find(cmdName);
   if (foundIter != m_cmdKeymapHash.end()) {
     auto range = m_cmdKeymapHash.equal_range(cmdName);
     for (auto it = range.first; it != range.second; it++) {
-      if (!it->second.cmd.hasCondition()) {
+      if ((!it->second.cmd.condition() || it->second.cmd.condition()->isSatisfied()) &&
+          findCmdName(it->second.key) == cmdName) {
         return it->second.key;
-      } else {
-        auto condition = it->second.cmd.condition();
-        if (condition->isSatisfied()) {
-          return it->second.key;
-        }
       }
     }
   }
