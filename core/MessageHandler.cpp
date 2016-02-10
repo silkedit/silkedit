@@ -1,3 +1,4 @@
+#include <string>
 #include <QMetaMethod>
 
 #include "MessageHandler.h"
@@ -6,17 +7,15 @@ Q_LOGGING_CATEGORY(silkedit, SILKEDIT_CATEGORY)
 
 namespace core {
 
+QtMessageHandler MessageHandler::s_defaultMsgHandler = nullptr;
+
 void MessageHandler::handler(QtMsgType type,
                              const QMessageLogContext& context,
                              const QString& msg) {
-  if (context.category == SILKEDIT_CATEGORY) {
+  if (strcmp(context.category, SILKEDIT_CATEGORY) == 0) {
     switch (type) {
       case QtDebugMsg:
-        // this sets Qt's default message handler
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).debug() << msg;
-        // Restore SilkEdit's message handler
-        qInstallMessageHandler(MessageHandler::handler);
+        s_defaultMsgHandler(type, context, msg);
         break;
       case QtInfoMsg:
       case QtWarningMsg:
@@ -28,36 +27,17 @@ void MessageHandler::handler(QtMsgType type,
         abort();
     }
   } else {
-    switch (type) {
-      case QtDebugMsg:
-        // this sets Qt's default message handler
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).debug() << msg;
-        // Restore SilkEdit's message handler
-        qInstallMessageHandler(MessageHandler::handler);
-        break;
-      case QtInfoMsg:
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).info() << msg;
-        qInstallMessageHandler(MessageHandler::handler);
-        break;
-      case QtWarningMsg:
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).warning() << msg;
-        qInstallMessageHandler(MessageHandler::handler);
-        break;
-      case QtCriticalMsg:
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).critical() << msg;
-        qInstallMessageHandler(MessageHandler::handler);
-        break;
-      case QtFatalMsg:
-        qInstallMessageHandler(0);
-        QMessageLogger(context.file, context.line, context.function).fatal("%s", msg.toUtf8().constData());
-        qInstallMessageHandler(MessageHandler::handler);
-        abort();
-    }
+    s_defaultMsgHandler(type, context, msg);
   }
+}
+
+void MessageHandler::init() {
+  qSetMessagePattern(
+      "[%{time h:mm:ss.zzz} "
+      "%{if-debug}D%{endif}%{if-info}I%{endif}%{if-warning}W%{endif}%{if-critical}C%{endif}%{if-"
+      "fatal}F%{endif}] %{file}:%{line} - %{message}");
+  s_defaultMsgHandler = qInstallMessageHandler(MessageHandler::handler);
+  Q_ASSERT(s_defaultMsgHandler);
 }
 
 void MessageHandler::handleMessage(QtMsgType type, const QString& msg) {

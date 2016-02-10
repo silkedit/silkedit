@@ -175,12 +175,14 @@ resolve() {
         fi
 
   			# build node.dll
-        cd vendor/node
+            if [ $1 != '--skip-build' ]; then
+                        cd vendor/node
         # Build Release version
         ./vcbuild.bat nosign shared ${ARCH}
         # Build Debug version
         ./vcbuild.bat nosign shared debug ${ARCH}
         cd ../..
+            fi
 
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
@@ -546,7 +548,7 @@ generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer
 rebuild        build from scratch (-edge: Edge build)
-resolve        resolve dependency
+resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
 set_version    set version number
 set_build      set build number
