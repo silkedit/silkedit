@@ -7,7 +7,6 @@
 
 #include "CommandEvent.h"
 #include "Keymap.h"
-#include "core/IKeyEventFilter.h"
 #include "core/macros.h"
 #include "core/Singleton.h"
 #include "core/stlSpecialization.h"
@@ -17,9 +16,7 @@ class QKeySequence;
 class QKeyEvent;
 class QString;
 
-class KeymapManager : public QObject,
-                      public core::Singleton<KeymapManager>,
-                      public core::IKeyEventFilter {
+class KeymapManager : public QObject, public core::Singleton<KeymapManager> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(KeymapManager)
 
@@ -28,10 +25,10 @@ class KeymapManager : public QObject,
 
   void loadUserKeymap();
   QKeySequence findShortcut(QString cmdName);
-  bool keyEventFilter(QKeyEvent* event);
+  bool handle(QKeyEvent* event);
   const std::unordered_multimap<QKeySequence, CommandEvent>& keymaps() { return m_keymaps; }
 
-public slots:
+ public slots:
   bool dispatch(QKeyEvent* ev, int repeat = 1);
   void load(const QString& filename, const QString& source);
 
@@ -71,21 +68,4 @@ public slots:
   void removeKeymap();
   void removeShortcut(const QString& cmdName);
   void addShortcut(const QKeySequence& key, CommandEvent cmdEvent);
-};
-
-class TextEditViewKeyHandler : public QObject, public core::Singleton<TextEditViewKeyHandler> {
-  Q_OBJECT
-  DISABLE_COPY_AND_MOVE(TextEditViewKeyHandler)
- public:
-  ~TextEditViewKeyHandler() = default;
-
-  void registerKeyEventFilter(core::IKeyEventFilter* filter);
-  void unregisterKeyEventFilter(core::IKeyEventFilter* filter);
-  bool dispatchKeyPressEvent(QKeyEvent* event);
-
- private:
-  friend class core::Singleton<TextEditViewKeyHandler>;
-  TextEditViewKeyHandler();
-
-  std::unordered_set<core::IKeyEventFilter*> m_keyEventFilters;
 };
