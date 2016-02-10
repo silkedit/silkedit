@@ -14,7 +14,7 @@ void MessageHandler::handler(QtMsgType type,
       case QtDebugMsg:
         // this sets Qt's default message handler
         qInstallMessageHandler(0);
-        qDebug() << msg;
+        QMessageLogger(context.file, context.line, context.function).debug() << msg;
         // Restore SilkEdit's message handler
         qInstallMessageHandler(MessageHandler::handler);
         break;
@@ -32,28 +32,28 @@ void MessageHandler::handler(QtMsgType type,
       case QtDebugMsg:
         // this sets Qt's default message handler
         qInstallMessageHandler(0);
-        qDebug() << msg;
+        QMessageLogger(context.file, context.line, context.function).debug() << msg;
         // Restore SilkEdit's message handler
         qInstallMessageHandler(MessageHandler::handler);
         break;
       case QtInfoMsg:
         qInstallMessageHandler(0);
-        qInfo() << msg;
+        QMessageLogger(context.file, context.line, context.function).info() << msg;
         qInstallMessageHandler(MessageHandler::handler);
         break;
       case QtWarningMsg:
         qInstallMessageHandler(0);
-        qWarning() << msg;
+        QMessageLogger(context.file, context.line, context.function).warning() << msg;
         qInstallMessageHandler(MessageHandler::handler);
         break;
       case QtCriticalMsg:
         qInstallMessageHandler(0);
-        qCritical() << msg;
+        QMessageLogger(context.file, context.line, context.function).critical() << msg;
         qInstallMessageHandler(MessageHandler::handler);
         break;
       case QtFatalMsg:
         qInstallMessageHandler(0);
-        qFatal("%s", msg.toUtf8().constData());
+        QMessageLogger(context.file, context.line, context.function).fatal("%s", msg.toUtf8().constData());
         qInstallMessageHandler(MessageHandler::handler);
         abort();
     }
