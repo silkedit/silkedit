@@ -68,4 +68,5 @@ class KeymapManager : public QObject, public core::Singleton<KeymapManager> {
   void removeKeymap();
   void removeShortcut(const QString& cmdName);
   void addShortcut(const QKeySequence& key, CommandEvent cmdEvent);
+  QString findCmdName(QKeySequence keySeq);
 };
