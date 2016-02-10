@@ -16,7 +16,7 @@ QVariant OSCondition::keyValue() {
 #endif
 }
 
-const QString OnMacCondition::name = "onMac";
+const QString OnMacCondition::name = "on_mac";
 
 QVariant OnMacCondition::keyValue() {
 #if defined Q_OS_MAC
@@ -26,7 +26,7 @@ QVariant OnMacCondition::keyValue() {
 #endif
 }
 
-const QString OnWindowsCondition::name = "onWindows";
+const QString OnWindowsCondition::name = "on_windows";
 
 QVariant OnWindowsCondition::keyValue() {
 #if defined Q_OS_WIN
