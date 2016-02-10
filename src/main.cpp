@@ -37,11 +37,7 @@ using core::MessageHandler;
 int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
   PlatformUtil::enableMnemonicOnMac();
-  qSetMessagePattern(
-      "[%{time h:mm:ss.zzz} "
-      "%{if-debug}D%{endif}%{if-info}I%{endif}%{if-warning}W%{endif}%{if-critical}C%{endif}%{if-"
-      "fatal}F%{endif}] %{file}:%{line} - %{message}");
-  qInstallMessageHandler(MessageHandler::handler);
+  MessageHandler::init();
   App app(argc, argv);
 #ifdef QT_NO_DEBUG
   // crash dumps output location setting.

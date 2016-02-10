@@ -24,6 +24,7 @@ class MessageHandler : public QObject, public Singleton<MessageHandler> {
 
  public:
   static void handler(QtMsgType type, const QMessageLogContext& context, const QString& msg);
+  static void init();
 
   ~MessageHandler() = default;
   DEFAULT_MOVE(MessageHandler)
@@ -37,6 +38,8 @@ class MessageHandler : public QObject, public Singleton<MessageHandler> {
   void connectNotify(const QMetaMethod& signal);
 
  private:
+  static QtMessageHandler s_defaultMsgHandler;
+
   friend class Singleton<MessageHandler>;
   MessageHandler() = default;
 
