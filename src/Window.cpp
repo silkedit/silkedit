@@ -68,6 +68,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   auto contentSplitter = new QSplitter(Qt::Vertical);
   contentSplitter->addWidget(editorWidget);
   contentSplitter->addWidget(m_console);
+  m_console->hide();
   contentSplitter->setSizes(QList<int>{500, 100});
 
   ui->rootSplitter->addWidget(contentSplitter);
