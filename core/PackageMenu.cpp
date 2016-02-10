@@ -13,7 +13,6 @@ PackageMenu::PackageMenu(const QString& title, const QString& pkgName, QWidget* 
 
 void PackageMenu::setupConnection() {
   connect(this, &QMenu::aboutToShow, [=] {
-    qDebug() << "aboutToShow";
     for (const auto& action : actions()) {
       if (auto pkgAction = qobject_cast<PackageAction*>(action)) {
         pkgAction->updateVisibilityAndShortcut();
