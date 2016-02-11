@@ -341,8 +341,8 @@ boost::optional<QVector<Region>> Regex::find(Regexp* regex, const QString& str, 
   }
 
   while (lastFound < str.length()) {
-    if (const auto maybeIndices = regex->findStringSubmatchIndex(str.midRef(lastFound), false)) {
-      QVector<int> indices = *maybeIndices;
+    auto indices = regex->findStringSubmatchIndex(str.midRef(lastFound), 0, -1, false);
+    if (!indices.isEmpty()) {
       if ((indices.at(0) + lastFound) < beginPos) {
         if (indices.at(0) == 0) {
           lastFound++;

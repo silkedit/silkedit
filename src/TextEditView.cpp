@@ -341,6 +341,47 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
                    SLOT(outdentCurrentLineIfNecessary()));
 }
 
+boost::optional<Region> TextEditViewPrivate::find(const QString& text,
+                               int from,
+                               int begin,
+                               int end,
+                               Document::FindFlags flags) {
+  if (text.isEmpty())
+    return boost::none;
+
+  auto isBackward = flags.testFlag(Document::FindFlag::FindBackward);
+
+  if (Document* doc = q_ptr->document()) {
+    const QTextCursor& resultCursor = doc->find(text, from, begin, end, flags);
+    if (!resultCursor.isNull()) {
+      q_ptr->setTextCursor(resultCursor);
+      return Region(resultCursor.selectionStart(), resultCursor.selectionEnd());
+    } else {
+      // try to find from the end of file when backward or the beginning of file.
+      QTextCursor nextFindCursor(doc);
+      if (isBackward) {
+        if (end < 0) {
+          nextFindCursor.movePosition(QTextCursor::End);
+          from = nextFindCursor.position();
+        } else {
+          nextFindCursor.setPosition(end);
+          from = end;
+        }
+      } else {
+        nextFindCursor.setPosition(begin);
+        from = begin;
+      }
+      const QTextCursor& cursor2 = doc->find(text, from, begin, end, flags);
+      if (!cursor2.isNull()) {
+        q_ptr->setTextCursor(cursor2);
+        return Region(cursor2.selectionStart(), cursor2.selectionEnd());
+      }
+    }
+  }
+
+  return boost::none;
+}
+
 void TextEditViewPrivate::highlightCurrentLine() {
   if (q_ptr->textCursor().hasSelection()) {
     return;
@@ -597,49 +638,12 @@ void TextEditView::setPath(const QString& path) {
   d_ptr->m_document->setPath(path);
 }
 
-void TextEditView::find(const QString& text, int begin, int end, Document::FindFlags flags) {
-  find(text, textCursor(), begin, end, flags);
-}
-
-void TextEditView::find(const QString& text,
-                        int searchStartPos,
+boost::optional<Region> TextEditView::find(const QString& text,
+                        int from,
                         int begin,
                         int end,
                         Document::FindFlags flags) {
-  qDebug("find: searchStartPos: %d, begin: %d, end: %d", searchStartPos, begin, end);
-  QTextCursor cursor(document());
-  cursor.setPosition(searchStartPos);
-  find(text, cursor, begin, end, flags);
-}
-
-void TextEditView::find(const QString& text,
-                        const QTextCursor& cursor,
-                        int begin,
-                        int end,
-                        Document::FindFlags flags) {
-  if (text.isEmpty())
-    return;
-  if (Document* doc = document()) {
-    const QTextCursor& resultCursor = doc->find(text, cursor, begin, end, flags);
-    if (!resultCursor.isNull()) {
-      setTextCursor(resultCursor);
-    } else {
-      QTextCursor nextFindCursor(doc);
-      if (flags.testFlag(Document::FindFlag::FindBackward)) {
-        if (end < 0) {
-          nextFindCursor.movePosition(QTextCursor::End);
-        } else {
-          nextFindCursor.setPosition(end);
-        }
-      } else {
-        nextFindCursor.setPosition(begin);
-      }
-      const QTextCursor& cursor2 = doc->find(text, nextFindCursor, begin, end, flags);
-      if (!cursor2.isNull()) {
-        setTextCursor(cursor2);
-      }
-    }
-  }
+  return d_ptr->find(text, from, begin, end, flags);
 }
 
 int TextEditView::lineNumberAreaWidth() {
@@ -768,7 +772,7 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   // highlight search matched texts
   foreach (const Region& region, d_ptr->m_searchMatchedRegions) {
     QTextCursor beginCursor(document()->docHandle(), region.begin());
-    QTextCursor endCursor(document()->docHandle(), region.end() - 1);
+    QTextCursor endCursor(document()->docHandle(), region.end());
     int beginPos = beginCursor.positionInBlock();
     int endPos = endCursor.positionInBlock();
     QTextBlock block = beginCursor.block();
@@ -866,15 +870,16 @@ void TextEditView::highlightSearchMatches(const QString& text,
                                           Document::FindFlags flags) {
   d_ptr->m_searchMatchedRegions.clear();
 
+  if (text.isEmpty()) {
+    return;
+  }
+
   QTextCursor cursor(document());
   cursor.setPosition(begin);
 
-  while (!cursor.isNull() && !cursor.atEnd()) {
-    cursor = document()->find(text, cursor, begin, end, flags);
-    if (!cursor.isNull()) {
-      d_ptr->m_searchMatchedRegions.append(
-          Region(cursor.selectionStart(), cursor.selectionEnd() + 1));
-    }
+  auto regions = document()->findAll(text, begin, end, flags);
+  for (const auto& region : regions) {
+    d_ptr->m_searchMatchedRegions.append(region);
   }
   update();
 }

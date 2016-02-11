@@ -15,6 +15,7 @@
 #include "LineEdit.h"
 
 using core::Document;
+using core::Region;
 
 namespace {
 const char* PREVIOUS_MATCH_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Previous match");
@@ -82,6 +83,7 @@ void FindReplaceView::show() {
 
 void FindReplaceView::showEvent(QShowEvent*) {
   ui->inSelectionChk->setChecked(false);
+  m_selectedRegion = boost::none;
   if (TextEditView* editView = App::instance()->activeTextEditView()) {
     QString selectedText = editView->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
@@ -129,14 +131,65 @@ void FindReplaceView::paintEvent(QPaintEvent*) {
 
 void FindReplaceView::findNext() {
   Q_ASSERT(ui->lineEditForFind);
-  findText(ui->lineEditForFind->text());
-  m_searchHistoryModel.prepend(ui->lineEditForFind->text());
+  Document::FindFlags flags = getFindFlags();
+  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+    int pos;
+    // empty match case like /^/
+    if (m_selectedRegion && m_selectedRegion->isEmpty()) {
+      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+        if (m_selectedRegion->end() == m_selectionEndPos) {
+          pos = m_selectionStartPos;
+        } else {
+          pos = m_selectedRegion->end() + 1;
+        }
+      } else {
+        auto cursor = QTextCursor(editView->document());
+        cursor.movePosition(QTextCursor::End);
+        if (m_selectedRegion->end() == cursor.position()) {
+          pos = 0;
+        } else {
+          pos = m_selectedRegion->end() + 1;
+        }
+      }
+    } else {
+      pos = m_selectedRegion->end();
+    }
+
+    findText(ui->lineEditForFind->text(), pos);
+    m_searchHistoryModel.prepend(ui->lineEditForFind->text());
+  }
 }
 
 void FindReplaceView::findPrev() {
   Q_ASSERT(ui->lineEditForFind);
-  findText(ui->lineEditForFind->text(), Document::FindFlag::FindBackward);
-  m_searchHistoryModel.prepend(ui->lineEditForFind->text());
+
+  Document::FindFlags flags = getFindFlags();
+
+  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+    int pos;
+    if (m_selectedRegion && m_selectedRegion->isEmpty()) {
+      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+        if (m_selectedRegion->begin() == m_selectionStartPos) {
+          pos = m_selectionEndPos;
+        } else {
+          pos = m_selectedRegion->begin() - 1;
+        }
+      } else {
+        auto cursor = QTextCursor(editView->document());
+        cursor.movePosition(QTextCursor::End);
+        if (m_selectedRegion->begin() == 0) {
+          pos = cursor.position();
+        } else {
+          pos = m_selectedRegion->begin() - 1;
+        }
+      }
+    } else {
+      pos = m_selectedRegion->begin();
+    }
+
+    findText(ui->lineEditForFind->text(), pos, Document::FindFlag::FindBackward);
+    m_searchHistoryModel.prepend(ui->lineEditForFind->text());
+  }
 }
 
 void FindReplaceView::findFromActiveCursor() {
@@ -156,11 +209,7 @@ void FindReplaceView::findText(const QString& text,
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    if (searchStartPos >= 0) {
-      editView->find(text, searchStartPos, begin, end, flags);
-    } else {
-      editView->find(text, begin, end, flags);
-    }
+    m_selectedRegion = editView->find(text, searchStartPos, begin, end, flags);
   }
 }
 
@@ -176,11 +225,9 @@ void FindReplaceView::highlightMatches() {
       end = m_selectionEndPos;
     }
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
-    connect(editView->document(), &core::Document::contentsChanged, editView,
-            [=] {
-              editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end,
-                                               getFindFlags());
-            });
+    connect(editView->document(), &core::Document::contentsChanged, editView, [=] {
+      editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
+    });
     selectFirstMatch();
   }
 }
