@@ -49,17 +49,11 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   int lineNumberAreaWidth();
   TextEditView* clone() override;
   void setPath(const QString& path);
-  void find(const QString& text, int begin = 0, int end = -1, core::Document::FindFlags flags = 0);
-  void find(const QString& text,
-            int searchStartPos = -1,
-            int begin = 0,
-            int end = -1,
-            core::Document::FindFlags flags = 0);
-  void find(const QString& text,
-            const QTextCursor& cursor,
-            int begin = 0,
-            int end = -1,
-            core::Document::FindFlags flags = 0);
+  boost::optional<core::Region> find(const QString& text,
+                    int from,
+                    int begin = 0,
+                    int end = -1,
+                    core::Document::FindFlags flags = 0);
   void highlightSearchMatches(const QString& text,
                               int begin,
                               int end,
@@ -123,6 +117,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   friend class TextEditViewPrivate;
 
   std::unique_ptr<TextEditViewPrivate> d_ptr;
+
   void setViewportMargins(int left, int top, int right, int bottom);
 
   inline TextEditViewPrivate* d_func() { return d_ptr.get(); }

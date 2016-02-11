@@ -163,15 +163,8 @@ void Document::setBOM(const BOM& bom) {
   }
 }
 
-QTextCursor Document::find(const QString& subString,
-                           int from,
-                           int begin,
-                           int end,
-                           Document::FindFlags options) const {
-  if (subString.isEmpty()) {
-    return QTextCursor();
-  }
-
+std::unique_ptr<Regexp> Document::createRegexp(const QString& subString,
+                                               Document::FindFlags options) const {
   bool isCaseSensitive = options & FindFlag::FindCaseSensitively;
   bool isRegex = options & FindFlag::FindRegex;
   bool isWholeWord = options & FindFlag::FindWholeWords;
@@ -188,7 +181,20 @@ QTextCursor Document::find(const QString& subString,
     str = "(?i)" + str;
   }
 
-  std::unique_ptr<Regexp> regexp(Regexp::compile(str));
+  return Regexp::compile(str);
+}
+
+QTextCursor Document::find(const QString& subString,
+                           int from,
+                           int begin,
+                           int end,
+                           Document::FindFlags options) const {
+  if (subString.isEmpty()) {
+    return QTextCursor();
+  }
+
+  std::unique_ptr<Regexp> regexp = createRegexp(subString, options);
+
   if (regexp) {
     return find(regexp.get(), from, begin, end, options);
   } else {
@@ -206,11 +212,50 @@ QTextCursor Document::find(const QString& subString,
 
   int pos;
   if (options & FindFlag::FindBackward) {
-    pos = cursor.selectionStart();
+    if (cursor.selectedText().size() == 0) {
+      if (cursor.atStart()) {
+        QTextCursor newCursor(cursor);
+        newCursor.movePosition(QTextCursor::End);
+        pos = newCursor.position();
+      } else {
+        pos = cursor.selectionStart() - 1;
+      }
+    } else {
+      pos = cursor.selectionStart();
+    }
   } else {
-    pos = cursor.selectionEnd();
+    if (cursor.selectedText().size() == 0) {
+      if (cursor.atEnd()) {
+        pos = 0;
+      } else {
+        pos = cursor.selectionEnd() + 1;
+      }
+    } else {
+      pos = cursor.selectionEnd();
+    }
   }
+
   return find(subString, pos, begin, end, options);
+}
+
+QVector<Region> Document::findAll(const QString& text,
+                                  int begin,
+                                  int end,
+                                  Document::FindFlags flags) const {
+  return findAll(createRegexp(text, flags).get(), begin, end);
+}
+
+QVector<Region> Document::findAll(const Regexp* expr, int begin, int end) const {
+  qDebug("findAll: %s, begin: %d, end: %d", qPrintable(expr->pattern()), begin, end);
+  auto indicesList = expr->findAllStringSubmatchIndex(toPlainText(), begin, end);
+  QVector<Region> regions(indicesList.size());
+  if (!indicesList.isEmpty()) {
+    std::transform(indicesList.begin(), indicesList.end(), regions.begin(),
+                   [=](QVector<int> indices) { return Region(indices[0], indices[1]); });
+    return regions;
+  }
+
+  return QVector<Region>();
 }
 
 QTextCursor Document::find(const Regexp* expr,
@@ -221,19 +266,17 @@ QTextCursor Document::find(const Regexp* expr,
   bool isBackward = options.testFlag(FindFlag::FindBackward);
   qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
          (options.testFlag(FindFlag::FindBackward)), from, begin, end);
-  QString str = toPlainText();
-  QStringRef text = isBackward ? str.midRef(begin, from - begin) : str.midRef(from, end - from);
-  if (const auto maybeIndices = expr->findStringSubmatchIndex(text, isBackward)) {
-    auto indices = *maybeIndices;
-    if (indices.size() > 1) {
-      int startPos, endPos;
-      if (isBackward) {
-        startPos = begin + indices.at(0);
-        endPos = begin + indices.at(1);
-      } else {
-        startPos = from + indices.at(0);
-        endPos = from + indices.at(1);
-      }
+  QVector<int> indices;
+  if (isBackward) {
+    indices = expr->findStringSubmatchIndex(toPlainText(), begin, from, isBackward);
+  } else {
+    indices = expr->findStringSubmatchIndex(toPlainText(), from, end, isBackward);
+  }
+  if (indices.size() > 1) {
+    int endPos = indices.at(1);
+
+    if (endPos >= 0) {
+      int startPos = indices.at(0);
       QTextCursor resultCursor(docHandle(), startPos);
       resultCursor.setPosition(endPos, QTextCursor::KeepAnchor);
       return resultCursor;
