@@ -34,7 +34,7 @@ public slots:
 
 protected:
   bool event(QEvent*) override;
-  bool notify(QObject * receiver, QEvent * event);
+  bool notify(QObject * receiver, QEvent * event) override;
 
  private:
   static App* s_app;

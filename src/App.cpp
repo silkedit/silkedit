@@ -145,6 +145,8 @@ bool App::notify(QObject* receiver, QEvent* event) {
       event->accept();
       return true;
     }
+    default:
+      break;
   }
 
   return QApplication::notify(receiver, event);
