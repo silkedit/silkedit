@@ -27,7 +27,8 @@ const char* PRESERVE_CASE_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "Preserve 
 const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In Selection");
 }
 
-FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::FindReplaceView) {
+FindReplaceView::FindReplaceView(QWidget* parent)
+    : QWidget(parent), ui(new Ui::FindReplaceView), m_activeTextEdit(nullptr) {
   ui->setupUi(this);
 
   // Make 'Replace' and 'Replace All' fonts 2 points smaller
@@ -59,6 +60,11 @@ FindReplaceView::FindReplaceView(QWidget* parent) : QWidget(parent), ui(new Ui::
   connect(ui->replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
   connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
   connect(ui->nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
+  connect(ui->regexChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->matchCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->wholeWordChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->inSelectionChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->preserveCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
 
   // todo: configure mnemonic in keymap.yml using condition
   ui->prevButton->setToolTip(tr(PREVIOUS_MATCH_TEXT));
@@ -131,28 +137,33 @@ void FindReplaceView::paintEvent(QPaintEvent*) {
 
 void FindReplaceView::findNext() {
   Q_ASSERT(ui->lineEditForFind);
+
   Document::FindFlags flags = getFindFlags();
   if (TextEditView* editView = App::instance()->activeTextEditView()) {
     int pos;
-    // empty match case like /^/
-    if (m_selectedRegion && m_selectedRegion->isEmpty()) {
-      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
-        if (m_selectedRegion->end() == m_selectionEndPos) {
-          pos = m_selectionStartPos;
+    auto cursor = QTextCursor(editView->document());
+    if (m_selectedRegion) {
+      // empty match case like /^/
+      if (m_selectedRegion->isEmpty()) {
+        if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+          if (m_selectedRegion->end() == m_selectionEndPos) {
+            pos = m_selectionStartPos;
+          } else {
+            pos = m_selectedRegion->end() + 1;
+          }
         } else {
-          pos = m_selectedRegion->end() + 1;
+          cursor.movePosition(QTextCursor::End);
+          if (m_selectedRegion->end() == cursor.position()) {
+            pos = 0;
+          } else {
+            pos = m_selectedRegion->end() + 1;
+          }
         }
       } else {
-        auto cursor = QTextCursor(editView->document());
-        cursor.movePosition(QTextCursor::End);
-        if (m_selectedRegion->end() == cursor.position()) {
-          pos = 0;
-        } else {
-          pos = m_selectedRegion->end() + 1;
-        }
+        pos = m_selectedRegion->end();
       }
     } else {
-      pos = m_selectedRegion->end();
+      pos = cursor.position();
     }
 
     findText(ui->lineEditForFind->text(), pos);
@@ -164,27 +175,31 @@ void FindReplaceView::findPrev() {
   Q_ASSERT(ui->lineEditForFind);
 
   Document::FindFlags flags = getFindFlags();
-
   if (TextEditView* editView = App::instance()->activeTextEditView()) {
     int pos;
-    if (m_selectedRegion && m_selectedRegion->isEmpty()) {
-      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
-        if (m_selectedRegion->begin() == m_selectionStartPos) {
-          pos = m_selectionEndPos;
+    auto cursor = QTextCursor(editView->document());
+    if (m_selectedRegion) {
+      // empty match case like /^/
+      if (m_selectedRegion->isEmpty()) {
+        if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+          if (m_selectedRegion->begin() == m_selectionStartPos) {
+            pos = m_selectionEndPos;
+          } else {
+            pos = m_selectedRegion->begin() - 1;
+          }
         } else {
-          pos = m_selectedRegion->begin() - 1;
+          cursor.movePosition(QTextCursor::End);
+          if (m_selectedRegion->begin() == 0) {
+            pos = cursor.position();
+          } else {
+            pos = m_selectedRegion->begin() - 1;
+          }
         }
       } else {
-        auto cursor = QTextCursor(editView->document());
-        cursor.movePosition(QTextCursor::End);
-        if (m_selectedRegion->begin() == 0) {
-          pos = cursor.position();
-        } else {
-          pos = m_selectedRegion->begin() - 1;
-        }
+        pos = m_selectedRegion->begin();
       }
     } else {
-      pos = m_selectedRegion->begin();
+      pos = cursor.position();
     }
 
     findText(ui->lineEditForFind->text(), pos, Document::FindFlag::FindBackward);
@@ -224,10 +239,15 @@ void FindReplaceView::highlightMatches() {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
+    if (m_activeTextEdit != editView) {
+      QObject::disconnect(m_connection);
+
+      m_activeTextEdit = editView;
+      m_connection = connect(editView->document(), &core::Document::contentsChanged, editView, [=] {
+        editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
+      }, Qt::UniqueConnection);
+    }
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
-    connect(editView->document(), &core::Document::contentsChanged, editView, [=] {
-      editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
-    });
     selectFirstMatch();
   }
 }
