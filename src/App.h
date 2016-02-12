@@ -23,7 +23,6 @@ class App : public QApplication {
   ~App() = default;
 
   void setupTranslator(const QString& locale);
-  bool eventFilter(QObject *, QEvent *event) override;
 
 public slots:
   TextEditView* activeTextEditView();
@@ -35,6 +34,7 @@ public slots:
 
 protected:
   bool event(QEvent*) override;
+  bool notify(QObject * receiver, QEvent * event);
 
  private:
   static App* s_app;
