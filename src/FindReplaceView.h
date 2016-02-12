@@ -11,6 +11,8 @@
 #include "core/Region.h"
 
 class LineEdit;
+class TextEditView;
+
 namespace Ui {
 class FindReplaceView;
 }
@@ -47,6 +49,8 @@ class FindReplaceView : public QWidget {
   boost::optional<core::Region> m_selectedRegion;
   core::HistoryModel m_searchHistoryModel;
   core::HistoryModel m_replaceHistoryModel;
+  TextEditView* m_activeTextEdit;
+  QMetaObject::Connection m_connection;
 
   void findNext();
   void findPrev();
