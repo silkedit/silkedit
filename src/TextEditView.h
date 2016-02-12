@@ -78,6 +78,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void paste();
   void selectAll();
   void indent();
+  void outdent();
   QString text();
   void performCompletion();
   void insertNewLine();
