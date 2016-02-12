@@ -135,8 +135,8 @@ axb-)";
   }
 
   void findAllStringSubmatchIndexInJapanese() {
-    auto reg = Regexp::compile(R"(あ(け*)い)");
-    QString str = R"(-あい-あけい-)";
+    auto reg = Regexp::compile(u8R"(あ(け*)い)");
+    QString str = u8R"(-あい-あけい-)";
     auto indices = reg->findAllStringSubmatchIndex(str);
     QVERIFY(!indices.isEmpty());
     QCOMPARE(indices.size(), 2);
@@ -155,7 +155,7 @@ axb-)";
 
   void findAllStringSubmatchIndexForBOL() {
     auto reg = Regexp::compile(R"(^)");
-    QString str = R"(あああ
+    QString str = u8R"(あああ
 いいい
 ううう)";
     auto indices = reg->findAllStringSubmatchIndex(str);
@@ -168,7 +168,7 @@ axb-)";
 
   void findAllStringSubmatchIndexForBOLInRegion() {
     auto reg = Regexp::compile(R"(^)");
-    QString str = R"(あああ
+    QString str = u8R"(あああ
 いいい
 ううう)";
     auto indices = reg->findAllStringSubmatchIndex(str, 1, 6);
