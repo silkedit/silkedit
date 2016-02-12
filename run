@@ -283,21 +283,12 @@ build() {
         fi
 
         ninja
-
-        # crashreporter
-        # todo: do these in cmake
-        cp -r crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter SilkEdit.app/Contents/MacOS
-        cp crashreporter/CrashReporter.app/Contents/Resources/translations/crashreporter_*.qm SilkEdit.app/Contents/Resources/translations
     else
         if [ "$1" = '-edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
         fi
-
-        # crashreporter
-        cp crashreporter/crashreporter.exe .
-        cp crashreporter/crashreporter_*.qm .
     fi
 
     cd ..
