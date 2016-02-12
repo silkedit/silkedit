@@ -6,6 +6,7 @@
 #include "macros.h"
 #include "Encoding.h"
 #include "BOM.h"
+#include "Region.h"
 
 namespace core {
 
@@ -49,26 +50,25 @@ class Document : public QTextDocument {
   BOM bom() { return m_bom; }
   void setBOM(const BOM& bom);
 
-  QTextCursor find(const QString& subString,
+  boost::optional<Region> find(const QString& subString,
                    int from = 0,
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
-  QTextCursor find(const QString& subString,
-                   const QTextCursor& from,
-                   int begin = 0,
-                   int end = -1,
-                   FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr,
+
+  boost::optional<Region> find(const Regexp* expr,
                    int from = 0,
                    int begin = 0,
                    int end = -1,
                    FindFlags options = 0) const;
-  QTextCursor find(const Regexp* expr,
-                   const QTextCursor& cursor,
-                   int begin = 0,
-                   int end = -1,
-                   FindFlags options = 0) const;
+
+  QVector<core::Region> findAll(const QString& text,
+                                int begin,
+                                int end,
+                                core::Document::FindFlags flags) const;
+
+  QVector<core::Region> findAll(const Regexp* expr, int begin, int end) const;
+
   QString scopeName(int pos) const;
   QString scopeTree() const;
 
@@ -91,6 +91,8 @@ class Document : public QTextDocument {
   void bomChanged(const BOM& bom);
 
  private:
+  friend class DocumentTest;
+
   QString m_path;
   std::unique_ptr<Language> m_lang;
   Encoding m_encoding;
@@ -108,6 +110,7 @@ class Document : public QTextDocument {
   void setupLayout();
   void setupSyntaxHighlighter(Language* lang, const QString& text = "");
   void init();
+  std::unique_ptr<Regexp> createRegexp(const QString& subString, Document::FindFlags options) const;
 };
 
 }  // namespace core
