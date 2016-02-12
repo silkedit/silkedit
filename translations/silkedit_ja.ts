@@ -4,12 +4,12 @@
 <context>
     <name>AvailablePackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="377"/>
+        <location filename="../src/PackagesView.cpp" line="375"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="381"/>
+        <location filename="../src/PackagesView.cpp" line="379"/>
         <source>Installed</source>
         <translation>インストール済み</translation>
     </message>
@@ -53,7 +53,7 @@
 <context>
     <name>DocumentManager</name>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="38"/>
+        <location filename="../src/DocumentManager.cpp" line="39"/>
         <source>%1 
 
 has changed on disk. Do you want to reload?</source>
@@ -62,7 +62,7 @@ has changed on disk. Do you want to reload?</source>
 はディスク上で変更されました。再度読み込みますか？</translation>
     </message>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="49"/>
+        <location filename="../src/DocumentManager.cpp" line="50"/>
         <source>%1 
 
 has been removed on disk. Do you want to close its tab?</source>
@@ -118,37 +118,37 @@ has been removed on disk. Do you want to close its tab?</source>
         <translation>全て置換</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="20"/>
+        <location filename="../src/FindReplaceView.cpp" line="21"/>
         <source>Previous match</source>
         <translation>前を検索</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="21"/>
+        <location filename="../src/FindReplaceView.cpp" line="22"/>
         <source>Next match</source>
         <translation>次を検索</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="22"/>
+        <location filename="../src/FindReplaceView.cpp" line="23"/>
         <source>Match Case</source>
         <translation>大文字・小文字の区別</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="23"/>
+        <location filename="../src/FindReplaceView.cpp" line="24"/>
         <source>Regex</source>
         <translation>正規表現</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="24"/>
+        <location filename="../src/FindReplaceView.cpp" line="25"/>
         <source>Whole Word</source>
         <translation>単語の検索</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="25"/>
+        <location filename="../src/FindReplaceView.cpp" line="26"/>
         <source>Preserve Case</source>
         <translation>大文字小文字の違いを保存</translation>
     </message>
     <message>
-        <location filename="../src/FindReplaceView.cpp" line="26"/>
+        <location filename="../src/FindReplaceView.cpp" line="27"/>
         <source>In Selection</source>
         <translation>選択した範囲内のみ</translation>
     </message>
@@ -274,12 +274,12 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>InstalledPackagesViewModel</name>
     <message>
-        <location filename="../src/PackagesView.cpp" line="473"/>
+        <location filename="../src/PackagesView.cpp" line="471"/>
         <source>Remove</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="477"/>
+        <location filename="../src/PackagesView.cpp" line="475"/>
         <source>Removed</source>
         <translation>削除済み</translation>
     </message>
@@ -336,112 +336,112 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>MenuBar</name>
     <message>
-        <location filename="../src/MenuBar.cpp" line="29"/>
+        <location filename="../src/MenuBar.cpp" line="30"/>
         <source>&amp;File</source>
         <translation>ファイル(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="29"/>
+        <location filename="../src/MenuBar.cpp" line="30"/>
         <source>File</source>
         <translation>ファイル</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="35"/>
+        <location filename="../src/MenuBar.cpp" line="37"/>
         <source>&amp;Text</source>
         <translation>編集(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="35"/>
+        <location filename="../src/MenuBar.cpp" line="37"/>
         <source>Text</source>
         <translation>編集</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="40"/>
+        <location filename="../src/MenuBar.cpp" line="43"/>
         <source>&amp;Undo</source>
         <translation>元に戻す(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="40"/>
+        <location filename="../src/MenuBar.cpp" line="43"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="44"/>
+        <location filename="../src/MenuBar.cpp" line="47"/>
         <source>&amp;View</source>
         <translation>ビュー(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="44"/>
+        <location filename="../src/MenuBar.cpp" line="47"/>
         <source>View</source>
         <translation>ビュー</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="47"/>
+        <location filename="../src/MenuBar.cpp" line="51"/>
         <source>&amp;Theme</source>
         <translation>テーマ(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="47"/>
+        <location filename="../src/MenuBar.cpp" line="51"/>
         <source>Theme</source>
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="62"/>
+        <location filename="../src/MenuBar.cpp" line="66"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="62"/>
+        <location filename="../src/MenuBar.cpp" line="66"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="65"/>
+        <location filename="../src/MenuBar.cpp" line="70"/>
         <source>Package Development</source>
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="67"/>
+        <location filename="../src/MenuBar.cpp" line="72"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="72"/>
+        <location filename="../src/MenuBar.cpp" line="77"/>
         <source>&amp;Settings</source>
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="72"/>
+        <location filename="../src/MenuBar.cpp" line="77"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="90"/>
+        <location filename="../src/MenuBar.cpp" line="96"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="90"/>
+        <location filename="../src/MenuBar.cpp" line="96"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="93"/>
+        <location filename="../src/MenuBar.cpp" line="100"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="93"/>
+        <location filename="../src/MenuBar.cpp" line="100"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="107"/>
+        <location filename="../src/MenuBar.cpp" line="114"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="109"/>
+        <location filename="../src/MenuBar.cpp" line="116"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>
@@ -466,7 +466,7 @@ has been removed on disk. Do you want to close its tab?</source>
         <translation type="vanished">インストール済み</translation>
     </message>
     <message>
-        <location filename="../src/PackagesView.cpp" line="271"/>
+        <location filename="../src/PackagesView.cpp" line="269"/>
         <source>Install</source>
         <translation>インストール</translation>
     </message>
@@ -487,22 +487,22 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>ProjectTreeView</name>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="85"/>
+        <location filename="../src/ProjectTreeView.cpp" line="89"/>
         <source>Rename</source>
         <translation>名前変更</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="86"/>
+        <location filename="../src/ProjectTreeView.cpp" line="90"/>
         <source>Delete</source>
         <translation>削除</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="87"/>
+        <location filename="../src/ProjectTreeView.cpp" line="91"/>
         <source>New File</source>
         <translation>新しいファイル</translation>
     </message>
     <message>
-        <location filename="../src/ProjectTreeView.cpp" line="88"/>
+        <location filename="../src/ProjectTreeView.cpp" line="92"/>
         <source>New Folder</source>
         <translation>新しいフォルダ</translation>
     </message>
@@ -510,7 +510,7 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="98"/>
+        <location filename="../src/DocumentManager.cpp" line="103"/>
         <source>Save As</source>
         <translation>名前を付けて保存</translation>
     </message>
@@ -789,12 +789,12 @@ Convert: convert current text in %1</source>
 <context>
     <name>TabView</name>
     <message>
-        <location filename="../src/TabView.cpp" line="299"/>
+        <location filename="../src/TabView.cpp" line="301"/>
         <source>Do you want to save the changes made to the document %1?</source>
         <translation>%1は変更されています。保存しますか？</translation>
     </message>
     <message>
-        <location filename="../src/TabView.cpp" line="301"/>
+        <location filename="../src/TabView.cpp" line="303"/>
         <source>Your changes will be lost if you don’t save them.</source>
         <translation>保存しないと変更した内容は破棄されます。</translation>
     </message>
