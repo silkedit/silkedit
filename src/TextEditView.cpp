@@ -21,6 +21,7 @@
 #include "core/Theme.h"
 #include "core/Constants.h"
 #include "core/BOM.h"
+#include "core/Region.h"
 
 using core::Document;
 using core::Encoding;
@@ -34,6 +35,7 @@ using core::ColorSettings;
 using core::Regexp;
 using core::Constants;
 using core::BOM;
+using core::Region;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -342,20 +344,22 @@ void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> docum
 }
 
 boost::optional<Region> TextEditViewPrivate::find(const QString& text,
-                               int from,
-                               int begin,
-                               int end,
-                               Document::FindFlags flags) {
+                                                  int from,
+                                                  int begin,
+                                                  int end,
+                                                  Document::FindFlags flags) {
   if (text.isEmpty())
     return boost::none;
 
   auto isBackward = flags.testFlag(Document::FindFlag::FindBackward);
 
   if (Document* doc = q_ptr->document()) {
-    const QTextCursor& resultCursor = doc->find(text, from, begin, end, flags);
-    if (!resultCursor.isNull()) {
+    auto maybeRegion = doc->find(text, from, begin, end, flags);
+    if (maybeRegion) {
+      QTextCursor resultCursor = QTextCursor(doc->docHandle(), maybeRegion->begin());
+      resultCursor.setPosition(maybeRegion->end(), QTextCursor::KeepAnchor);
       q_ptr->setTextCursor(resultCursor);
-      return Region(resultCursor.selectionStart(), resultCursor.selectionEnd());
+      return maybeRegion;
     } else {
       // try to find from the end of file when backward or the beginning of file.
       QTextCursor nextFindCursor(doc);
@@ -371,10 +375,12 @@ boost::optional<Region> TextEditViewPrivate::find(const QString& text,
         nextFindCursor.setPosition(begin);
         from = begin;
       }
-      const QTextCursor& cursor2 = doc->find(text, from, begin, end, flags);
-      if (!cursor2.isNull()) {
-        q_ptr->setTextCursor(cursor2);
-        return Region(cursor2.selectionStart(), cursor2.selectionEnd());
+      maybeRegion = doc->find(text, from, begin, end, flags);
+      if (maybeRegion) {
+        QTextCursor resultCursor = QTextCursor(doc->docHandle(), maybeRegion->begin());
+        resultCursor.setPosition(maybeRegion->end(), QTextCursor::KeepAnchor);
+        q_ptr->setTextCursor(resultCursor);
+        return maybeRegion;
       }
     }
   }
@@ -639,10 +645,10 @@ void TextEditView::setPath(const QString& path) {
 }
 
 boost::optional<Region> TextEditView::find(const QString& text,
-                        int from,
-                        int begin,
-                        int end,
-                        Document::FindFlags flags) {
+                                           int from,
+                                           int begin,
+                                           int end,
+                                           Document::FindFlags flags) {
   return d_ptr->find(text, from, begin, end, flags);
 }
 
@@ -903,12 +909,12 @@ void TextEditView::replaceAllSelection(const QString& findText,
 
     QTextCursor cursor(doc);
     cursor.setPosition(begin);
-    while (!cursor.isNull() && !cursor.atEnd()) {
-      cursor = doc->find(findText, cursor, begin, end, flags);
-      if (!cursor.isNull()) {
-        Q_ASSERT(cursor.hasSelection());
-        insertText(cursor, replaceText, preserveCase);
-      }
+
+    for (const auto& region : doc->findAll(findText, begin, end, flags)) {
+      QTextCursor cursor(doc->docHandle(), region.begin());
+      cursor.setPosition(region.end(), QTextCursor::KeepAnchor);
+      Q_ASSERT(cursor.hasSelection());
+      insertText(cursor, replaceText, preserveCase);
     }
 
     currentCursor.endEditBlock();

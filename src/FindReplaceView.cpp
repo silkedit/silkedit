@@ -53,9 +53,10 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(ui->lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
   connect(ui->lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
-  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateSelectionRegion);
-  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::updateActiveCursorPos);
-  connect(ui->lineEditForFind, &LineEdit::focusIn, this, &FindReplaceView::highlightMatches);
+  connect(ui->lineEditForFind, &LineEdit::focusIn, this, [=] {
+    updateActiveCursorPos();
+    highlightMatches();
+  });
   connect(ui->replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
   connect(ui->replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
   connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
@@ -63,7 +64,11 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(ui->regexChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
   connect(ui->matchCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
   connect(ui->wholeWordChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
-  connect(ui->inSelectionChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->inSelectionChk, &CheckBox::stateChanged, this, [=] {
+    updateSelectionRegion();
+    highlightMatches();
+  });
+
   connect(ui->preserveCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
 
   // todo: configure mnemonic in keymap.yml using condition
@@ -163,7 +168,11 @@ void FindReplaceView::findNext() {
         pos = m_selectedRegion->end();
       }
     } else {
-      pos = cursor.position();
+      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+        pos = m_selectionStartPos;
+      } else {
+        pos = cursor.position();
+      }
     }
 
     findText(ui->lineEditForFind->text(), pos);
@@ -199,7 +208,11 @@ void FindReplaceView::findPrev() {
         pos = m_selectedRegion->begin();
       }
     } else {
-      pos = cursor.position();
+      if (flags.testFlag(Document::FindFlag::FindInSelection)) {
+        pos = m_selectionEndPos;
+      } else {
+        pos = cursor.position();
+      }
     }
 
     findText(ui->lineEditForFind->text(), pos, Document::FindFlag::FindBackward);
@@ -240,6 +253,7 @@ void FindReplaceView::highlightMatches() {
       end = m_selectionEndPos;
     }
 
+    editView->clearSelection();
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
   }
 }
