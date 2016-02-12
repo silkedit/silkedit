@@ -241,7 +241,6 @@ void FindReplaceView::highlightMatches() {
     }
 
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
-    selectFirstMatch();
   }
 }
 
