@@ -358,7 +358,11 @@ boost::optional<Region> TextEditViewPrivate::find(const QString& text,
     if (maybeRegion) {
       QTextCursor resultCursor = QTextCursor(doc->docHandle(), maybeRegion->begin());
       resultCursor.setPosition(maybeRegion->end(), QTextCursor::KeepAnchor);
+      int oldScrollValue = q_ptr->verticalScrollBar()->value();
       q_ptr->setTextCursor(resultCursor);
+      if (q_ptr->verticalScrollBar()->value() != oldScrollValue) {
+        q_ptr->centerCursor();
+      }
       return maybeRegion;
     } else {
       // try to find from the end of file when backward or the beginning of file.
@@ -379,7 +383,11 @@ boost::optional<Region> TextEditViewPrivate::find(const QString& text,
       if (maybeRegion) {
         QTextCursor resultCursor = QTextCursor(doc->docHandle(), maybeRegion->begin());
         resultCursor.setPosition(maybeRegion->end(), QTextCursor::KeepAnchor);
+        int oldScrollValue = q_ptr->verticalScrollBar()->value();
         q_ptr->setTextCursor(resultCursor);
+        if (q_ptr->verticalScrollBar()->value() != oldScrollValue) {
+          q_ptr->centerCursor();
+        }
         return maybeRegion;
       }
     }
