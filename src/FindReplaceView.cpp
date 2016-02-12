@@ -357,5 +357,8 @@ void FindReplaceView::replaceAll() {
 void FindReplaceView::hide() {
   QObject::disconnect(m_connection);
   clearSearchHighlight();
+  if (m_activeView) {
+    m_activeView->setFocus();
+  }
   QWidget::hide();
 }
