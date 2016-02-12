@@ -67,10 +67,11 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   auto packagesMenu = new PackageMenu(packageMenuStr);
   addMenu(packagesMenu);
   packagesMenu->setObjectName("packages");
-  auto bundleDevelopmentMenu = packagesMenu->addMenu(tr("Package Development"));
-  bundleDevelopmentMenu->addAction(
+  auto packageDevMenu = new PackageMenu(tr("Package Development"));
+  packagesMenu->addMenu(packageDevMenu);
+  packageDevMenu->addAction(
       new CommandAction("new_package", tr("&New Package"), "new_package"));
-  bundleDevelopmentMenu->setObjectName("package_development");
+  packageDevMenu->setObjectName("package_development");
 
   // Settings menu
   const QString& settingsMenuStr =
