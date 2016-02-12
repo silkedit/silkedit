@@ -13,9 +13,9 @@ using core::Regexp;
 int indentLength(const QString& str, int tabWidth) {
   int len = 0;
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
-  if (const auto maybeRegions = regex->findStringSubmatchIndex(QStringRef(&str))) {
-    auto regions = *maybeRegions;
-    QString indentStr = str.left(regions.at(1));
+  auto indices = regex->findStringSubmatchIndex(str);
+  if (!indices.isEmpty()) {
+    QString indentStr = str.left(indices.at(1));
     foreach (const QChar& ch, indentStr) {
       if (ch == '\t') {
         len += tabWidth;
@@ -119,8 +119,9 @@ void TextEditViewLogic::indentCurrentLine(QTextDocument* doc,
                                           int tabWidth) {
   std::unique_ptr<Regexp> regex(Regexp::compile(R"r(^\s+)r"));
   // align the current line with the previous line
-  if (const auto maybeRegions = regex->findStringSubmatchIndex(QStringRef(&prevLineText))) {
-    cursor.insertText(prevLineText.left((*maybeRegions).at(1)));
+  auto indices = regex->findStringSubmatchIndex(prevLineText);
+  if (!indices.isEmpty()) {
+    cursor.insertText(prevLineText.left(indices.at(1)));
   }
 
   // check increaseIndentPattern for additional indent

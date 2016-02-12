@@ -85,8 +85,6 @@ App::App(int& argc, char** argv)
       }
     }
   });
-
-  installEventFilter(this);
 }
 
 bool App::event(QEvent* event) {
@@ -100,7 +98,7 @@ bool App::event(QEvent* event) {
   }
 }
 
-bool App::eventFilter(QObject*, QEvent* event) {
+bool App::notify(QObject* receiver, QEvent* event) {
   switch (event->type()) {
     case QEvent::ChildAdded: {
       QObject* child = static_cast<QChildEvent*>(event)->child();
@@ -129,10 +127,15 @@ bool App::eventFilter(QObject*, QEvent* event) {
       break;
     }
     case QEvent::KeyPress: {
-      auto keyEvent = static_cast<QKeyEvent*>(event);
-      if (keyEvent && KeymapManager::singleton().handle(keyEvent)) {
-        keyEvent->accept();
-        return true;
+      // KeyPress event is sent multiple times to each different receivers.
+      // We hadle key press event only when receiver is window type
+      if (receiver->isWindowType()) {
+        auto keyEvent = static_cast<QKeyEvent*>(event);
+        qDebug() << keyEvent;
+        if (keyEvent && KeymapManager::singleton().handle(keyEvent)) {
+          keyEvent->accept();
+          return true;
+        }
       }
       break;
     }
@@ -143,9 +146,10 @@ bool App::eventFilter(QObject*, QEvent* event) {
       return true;
     }
     default:
-      return false;
+      break;
   }
-  return false;
+
+  return QApplication::notify(receiver, event);
 }
 
 void App::setupTranslator(const QString& locale) {

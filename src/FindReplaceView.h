@@ -8,8 +8,11 @@
 #include "core/macros.h"
 #include "core/Document.h"
 #include "core/HistoryModel.h"
+#include "core/Region.h"
 
 class LineEdit;
+class TextEditView;
+
 namespace Ui {
 class FindReplaceView;
 }
@@ -26,6 +29,7 @@ class FindReplaceView : public QWidget {
   void show();
   void hide();
   void highlightMatches();
+  void setActiveView(QWidget* view);
 
  protected:
   void showEvent(QShowEvent* event) override;
@@ -43,13 +47,16 @@ class FindReplaceView : public QWidget {
   int m_selectionStartPos;
   int m_selectionEndPos;
   int m_activeCursorPos;
+  boost::optional<core::Region> m_selectedRegion;
   core::HistoryModel m_searchHistoryModel;
   core::HistoryModel m_replaceHistoryModel;
+  QWidget* m_activeView;
+  QMetaObject::Connection m_connection;
 
   void findNext();
   void findPrev();
   void findFromActiveCursor();
-  void findText(const QString& text, int searchStartPos = -1, core::Document::FindFlags flags = 0);
+  void findText(const QString& text, int searchStartPos, core::Document::FindFlags flags = 0);
   void findText(const QString& text, core::Document::FindFlags flags);
   void clearSearchHighlight();
   core::Document::FindFlags getFindFlags();
