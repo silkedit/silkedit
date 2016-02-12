@@ -261,7 +261,9 @@ void FindReplaceView::highlightMatches() {
 }
 
 void FindReplaceView::setActiveView(QWidget* view) {
-  QObject::disconnect(m_connection);
+  if (m_connection) {
+    QObject::disconnect(m_connection);
+  }
   clearSearchHighlight();
 
   m_activeView = view;
@@ -355,7 +357,9 @@ void FindReplaceView::replaceAll() {
 }
 
 void FindReplaceView::hide() {
-  QObject::disconnect(m_connection);
+  if (m_connection) {
+    QObject::disconnect(m_connection);
+  }
   clearSearchHighlight();
   if (m_activeView) {
     m_activeView->setFocus();

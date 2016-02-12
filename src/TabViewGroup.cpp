@@ -59,7 +59,9 @@ void TabViewGroup::setActiveTab(TabView* newTabView) {
   if (m_activeTabView != newTabView) {
     TabView* oldtabView = m_activeTabView;
     m_activeTabView = newTabView;
-    disconnect(oldtabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
+    if (oldtabView) {
+      disconnect(oldtabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
+    }
     connect(m_activeTabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
     emit activeTabViewChanged(oldtabView, newTabView);
     emitCurrentChanged(newTabView->currentIndex());
