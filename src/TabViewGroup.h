@@ -23,13 +23,14 @@ class TabViewGroup : public QWidget {
 
   // accessor
   TabView* activeTab();
-  void setActiveTab(TabView* tab);
+  void setActiveTab(TabView* newTabView);
 
   bool closeAllTabs();
   TabBar* tabBarAt(int screenX, int screenY);
   QLinkedList<TabView*> tabViews() { return m_tabViews; }
 
- public slots:
+
+public slots:
   void splitHorizontally();
   void splitVertically();
   void splitHorizontally(QWidget* initialWidget, const QString& label);
@@ -37,6 +38,7 @@ class TabViewGroup : public QWidget {
 
  signals:
   void activeTabViewChanged(TabView* oldTabView, TabView* newTabView);
+  void currentViewChanged(QWidget* view);
 
  private:
   TabView* m_activeTabView;
@@ -54,6 +56,7 @@ class TabViewGroup : public QWidget {
                   Qt::Orientation activeLayoutDirection,
                   Qt::Orientation newDirection);
   void splitTextEditView(std::function<void(QWidget*, const QString&)> func);
+  void emitCurrentChanged(int index);
 };
 
 Q_DECLARE_METATYPE(TabViewGroup*)

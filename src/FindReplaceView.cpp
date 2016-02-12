@@ -28,7 +28,7 @@ const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In Selecti
 }
 
 FindReplaceView::FindReplaceView(QWidget* parent)
-    : QWidget(parent), ui(new Ui::FindReplaceView), m_activeTextEdit(nullptr) {
+    : QWidget(parent), ui(new Ui::FindReplaceView), m_activeView(nullptr) {
   ui->setupUi(this);
 
   // Make 'Replace' and 'Replace All' fonts 2 points smaller
@@ -90,7 +90,7 @@ void FindReplaceView::show() {
 void FindReplaceView::showEvent(QShowEvent*) {
   ui->inSelectionChk->setChecked(false);
   m_selectedRegion = boost::none;
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     QString selectedText = editView->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
       // If the selection obtained from an editor spans a line break, the text will contain a
@@ -139,7 +139,7 @@ void FindReplaceView::findNext() {
   Q_ASSERT(ui->lineEditForFind);
 
   Document::FindFlags flags = getFindFlags();
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     int pos;
     auto cursor = QTextCursor(editView->document());
     if (m_selectedRegion) {
@@ -175,7 +175,7 @@ void FindReplaceView::findPrev() {
   Q_ASSERT(ui->lineEditForFind);
 
   Document::FindFlags flags = getFindFlags();
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     int pos;
     auto cursor = QTextCursor(editView->document());
     if (m_selectedRegion) {
@@ -215,7 +215,7 @@ void FindReplaceView::findFromActiveCursor() {
 void FindReplaceView::findText(const QString& text,
                                int searchStartPos,
                                Document::FindFlags otherFlags) {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     Document::FindFlags flags = getFindFlags();
     flags |= otherFlags;
     int begin = 0, end = -1;
@@ -233,27 +233,45 @@ void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
 }
 
 void FindReplaceView::highlightMatches() {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (TextEditView* editView = qobject_cast<TextEditView*>(m_activeView)) {
     int begin = 0, end = -1;
     if (ui->inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;
       end = m_selectionEndPos;
     }
-    if (m_activeTextEdit != editView) {
-      QObject::disconnect(m_connection);
 
-      m_activeTextEdit = editView;
-      m_connection = connect(editView->document(), &core::Document::contentsChanged, editView, [=] {
-        editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
-      }, Qt::UniqueConnection);
-    }
     editView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
     selectFirstMatch();
   }
 }
 
+void FindReplaceView::setActiveView(QWidget* view) {
+  QObject::disconnect(m_connection);
+  clearSearchHighlight();
+
+  m_activeView = view;
+
+  if (isVisible()) {
+    if (auto newEditView = qobject_cast<TextEditView*>(view)) {
+      qDebug() << "new TextEdit:" << newEditView->document()->path();
+      int begin = 0, end = -1;
+      if (ui->inSelectionChk->isChecked()) {
+        begin = m_selectionStartPos;
+        end = m_selectionEndPos;
+      }
+      m_connection =
+          connect(newEditView->document(), &core::Document::contentsChanged, newEditView, [=] {
+            newEditView->highlightSearchMatches(ui->lineEditForFind->text(), begin, end,
+                                                getFindFlags());
+          }, Qt::UniqueConnection);
+    }
+
+    highlightMatches();
+  }
+}
+
 void FindReplaceView::clearSearchHighlight() {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     editView->clearSearchHighlight();
   }
 }
@@ -276,7 +294,7 @@ Document::FindFlags FindReplaceView::getFindFlags() {
 }
 
 void FindReplaceView::updateSelectionRegion() {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     QTextCursor cursor = editView->textCursor();
     if (cursor.hasSelection()) {
       m_selectionStartPos = cursor.selectionStart();
@@ -289,7 +307,7 @@ void FindReplaceView::updateSelectionRegion() {
 }
 
 void FindReplaceView::updateActiveCursorPos() {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     m_activeCursorPos = editView->textCursor().selectionStart();
   }
 }
@@ -301,7 +319,7 @@ void FindReplaceView::selectFirstMatch() {
 
 void FindReplaceView::replace() {
   Q_ASSERT(ui->lineEditForReplace);
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     editView->replaceSelection(ui->lineEditForReplace->text(), ui->preserveCaseChk->isChecked());
     highlightMatches();
     m_replaceHistoryModel.prepend(ui->lineEditForReplace->text());
@@ -309,7 +327,7 @@ void FindReplaceView::replace() {
 }
 
 void FindReplaceView::replaceAll() {
-  if (TextEditView* editView = App::instance()->activeTextEditView()) {
+  if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
     int begin = 0, end = -1;
     if (ui->inSelectionChk->isChecked()) {
       begin = m_selectionStartPos;
@@ -322,6 +340,7 @@ void FindReplaceView::replaceAll() {
 }
 
 void FindReplaceView::hide() {
+  QObject::disconnect(m_connection);
   clearSearchHighlight();
   QWidget::hide();
 }

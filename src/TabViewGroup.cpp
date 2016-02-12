@@ -51,11 +51,18 @@ TabView* TabViewGroup::activeTab() {
   return createInitialTabView();
 }
 
-void TabViewGroup::setActiveTab(TabView* tabView) {
-  if (m_activeTabView != tabView) {
+void TabViewGroup::emitCurrentChanged(int index) {
+  emit currentViewChanged(m_activeTabView->widget(index));
+}
+
+void TabViewGroup::setActiveTab(TabView* newTabView) {
+  if (m_activeTabView != newTabView) {
     TabView* oldtabView = m_activeTabView;
-    m_activeTabView = tabView;
-    emit activeTabViewChanged(oldtabView, tabView);
+    m_activeTabView = newTabView;
+    disconnect(oldtabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
+    connect(m_activeTabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
+    emit activeTabViewChanged(oldtabView, newTabView);
+    emitCurrentChanged(newTabView->currentIndex());
   }
 }
 
