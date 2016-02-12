@@ -35,6 +35,7 @@ class TextEditViewPrivate {
   bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
+  void outdentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);
   void highlightCurrentLine();
@@ -52,5 +53,5 @@ class TextEditViewPrivate {
                           int from,
                           int begin,
                           int end,
-                          core::Document::FindFlags flags);
+                                     core::Document::FindFlags flags);
 };

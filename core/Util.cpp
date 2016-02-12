@@ -93,14 +93,16 @@ std::list<std::string> Util::toStdStringList(const QStringList& qStrList) {
 QKeySequence Util::toSequence(const QString& aStr) {
   QString str = aStr;
 #ifdef Q_OS_MAC
-  replace(str, "ctrl|control", "meta");
-  replace(str, "cmd|command", "ctrl");
-  replace(str, "opt|option", "alt");
+  replace(str, R"(ctrl|control)", "meta");
+  replace(str, R"(cmd|command)", "ctrl");
+  replace(str, R"(opt|option)", "alt");
 #endif
 
   replace(str, "enter", "return");
+  // When pressing shfit+tab, Qt recognizes it as Shift + Qt::Key_Backtab
+  replace(str, R"(shift\s*\+\s*tab)", "shift+backtab");
 
-  return str;
+  return QKeySequence(str);
 }
 
 QString Util::toString(const QKeySequence& keySeq) {

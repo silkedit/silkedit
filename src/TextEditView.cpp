@@ -437,6 +437,11 @@ void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
                                     Config::singleton().tabWidth());
 }
 
+void TextEditViewPrivate::outdentOneLevel(QTextCursor& currentVisibleCursor) {
+  TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
+                             Config::singleton().tabWidth());
+}
+
 /**
  * @brief Outdent one level
  * @param currentVisibleCursor
@@ -1123,6 +1128,12 @@ void TextEditView::indent() {
   Q_D(TextEditView);
   auto cursor = textCursor();
   d->indentOneLevel(cursor);
+}
+
+void TextEditView::outdent() {
+  Q_D(TextEditView);
+  auto cursor = textCursor();
+  d->outdentOneLevel(cursor);
 }
 
 QString TextEditView::text() {
