@@ -222,6 +222,10 @@ if(APPLE)
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
 
+  # copy CrashReporter
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -R ${PROJECT_BINARY_DIR}/crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter ${PROJECT_NAME}.app/Contents/MacOS)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_*.qm ${PROJECT_NAME}.app/Contents/Resources/translations)
+
 elseif (MSVC)
   # Copy themes
   file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION .)
@@ -252,4 +256,8 @@ elseif (MSVC)
   else ()
     file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll DESTINATION .)
   endif ()
+
+  # copy CrashReporter
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -R ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_*.qm ${PROJECT_NAME})
 endif()
