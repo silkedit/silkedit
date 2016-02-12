@@ -184,13 +184,13 @@ std::unique_ptr<Regexp> Document::createRegexp(const QString& subString,
   return Regexp::compile(str);
 }
 
-QTextCursor Document::find(const QString& subString,
+boost::optional<Region> Document::find(const QString& subString,
                            int from,
                            int begin,
                            int end,
                            Document::FindFlags options) const {
   if (subString.isEmpty()) {
-    return QTextCursor();
+    return boost::none;
   }
 
   std::unique_ptr<Regexp> regexp = createRegexp(subString, options);
@@ -198,44 +198,8 @@ QTextCursor Document::find(const QString& subString,
   if (regexp) {
     return find(regexp.get(), from, begin, end, options);
   } else {
-    return QTextCursor();
+    return boost::none;
   }
-}
-
-QTextCursor Document::find(const QString& subString,
-                           const QTextCursor& cursor,
-                           int begin,
-                           int end,
-                           Document::FindFlags options) const {
-  if (cursor.isNull())
-    return QTextCursor();
-
-  int pos;
-  if (options & FindFlag::FindBackward) {
-    if (cursor.selectedText().size() == 0) {
-      if (cursor.atStart()) {
-        QTextCursor newCursor(cursor);
-        newCursor.movePosition(QTextCursor::End);
-        pos = newCursor.position();
-      } else {
-        pos = cursor.selectionStart() - 1;
-      }
-    } else {
-      pos = cursor.selectionStart();
-    }
-  } else {
-    if (cursor.selectedText().size() == 0) {
-      if (cursor.atEnd()) {
-        pos = 0;
-      } else {
-        pos = cursor.selectionEnd() + 1;
-      }
-    } else {
-      pos = cursor.selectionEnd();
-    }
-  }
-
-  return find(subString, pos, begin, end, options);
 }
 
 QVector<Region> Document::findAll(const QString& text,
@@ -262,7 +226,7 @@ QVector<Region> Document::findAll(const Regexp* expr, int begin, int end) const 
   return QVector<Region>();
 }
 
-QTextCursor Document::find(const Regexp* expr,
+boost::optional<Region> Document::find(const Regexp* expr,
                            int from,
                            int begin,
                            int end,
@@ -280,31 +244,11 @@ QTextCursor Document::find(const Regexp* expr,
     int endPos = indices.at(1);
 
     if (endPos >= 0) {
-      int startPos = indices.at(0);
-      QTextCursor resultCursor(docHandle(), startPos);
-      resultCursor.setPosition(endPos, QTextCursor::KeepAnchor);
-      return resultCursor;
+      return Region(indices.at(0), endPos);
     }
   }
 
-  return QTextCursor();
-}
-
-QTextCursor Document::find(const Regexp* expr,
-                           const QTextCursor& cursor,
-                           int begin,
-                           int end,
-                           Document::FindFlags options) const {
-  if (cursor.isNull())
-    return QTextCursor();
-
-  int pos;
-  if (options & QTextDocument::FindBackward) {
-    pos = cursor.selectionStart();
-  } else {
-    pos = cursor.selectionEnd();
-  }
-  return find(expr, pos, begin, end, options);
+  return boost::none;
 }
 
 QString Document::scopeName(int pos) const {
