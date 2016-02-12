@@ -925,8 +925,8 @@ void TextEditView::replaceAllSelection(const QString& findText,
     }
 
     currentCursor.endEditBlock();
-    update();
     clearSearchHighlight();
+    update();
   }
 }
 
