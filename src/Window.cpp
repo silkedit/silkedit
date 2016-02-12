@@ -77,6 +77,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           &Window::emitActiveViewChanged);
+  connect(m_tabViewGroup, &TabViewGroup::currentViewChanged, m_findReplaceView,
+          &FindReplaceView::setActiveView);
   connect(this, &Window::activeViewChanged, ui->statusBar, &StatusBar::onActiveViewChanged);
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
@@ -167,9 +169,7 @@ void Window::loadMenu(const QString& pkgName, const QString& ymlPath) {
     YamlUtil::parseMenuNode(pkgName, MenuBar::globalMenuBar(), menuNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
-    foreach (Window* win, s_windows) {
-      YamlUtil::parseMenuNode(pkgName, win->menuBar(), menuNode);
-    }
+    foreach (Window* win, s_windows) { YamlUtil::parseMenuNode(pkgName, win->menuBar(), menuNode); }
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());

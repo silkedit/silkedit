@@ -29,6 +29,7 @@ class FindReplaceView : public QWidget {
   void show();
   void hide();
   void highlightMatches();
+  void setActiveView(QWidget* view);
 
  protected:
   void showEvent(QShowEvent* event) override;
@@ -49,7 +50,7 @@ class FindReplaceView : public QWidget {
   boost::optional<core::Region> m_selectedRegion;
   core::HistoryModel m_searchHistoryModel;
   core::HistoryModel m_replaceHistoryModel;
-  TextEditView* m_activeTextEdit;
+  QWidget* m_activeView;
   QMetaObject::Connection m_connection;
 
   void findNext();
