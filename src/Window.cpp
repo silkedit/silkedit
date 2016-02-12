@@ -54,7 +54,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
 
-  QVBoxLayout* layout = new QVBoxLayout(this);
+  QWidget* editorWidget = new QWidget(this);
+  QVBoxLayout* layout = new QVBoxLayout(editorWidget);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   layout->setMargin(0);
@@ -62,7 +63,6 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   layout->addWidget(m_tabViewGroup);
   layout->addWidget(m_findReplaceView);
   m_findReplaceView->hide();
-  QWidget* editorWidget = new QWidget(this);
   editorWidget->setLayout(layout);
 
   auto contentSplitter = new QSplitter(Qt::Vertical);
