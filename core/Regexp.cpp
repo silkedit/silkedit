@@ -26,20 +26,6 @@ Regexp::~Regexp() {
 QString Regexp::escape(const QString& expr) {
   QString escapedStr;
   for (int i = 0; i < expr.length();) {
-    // skip consecutive backslashes (\\)
-    if (expr[i] == '\\' && i + 1 < expr.length() && expr[i + 1] == '\\') {
-      escapedStr = escapedStr % "\\\\";
-      i += 2;
-      continue;
-    }
-
-    // single backslash. Check if it escapes a following meta char.
-    if (expr[i] == '\\' && i + 1 < expr.length() && isMetaChar(expr[i + 1])) {
-      escapedStr = escapedStr % "\\" % expr[i + 1];
-      i += 2;
-      continue;
-    }
-
     // escape a meta char
     if (isMetaChar(expr[i])) {
       escapedStr = escapedStr % '\\';
