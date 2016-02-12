@@ -242,6 +242,10 @@ QVector<Region> Document::findAll(const QString& text,
                                   int begin,
                                   int end,
                                   Document::FindFlags flags) const {
+  if (text.isEmpty()) {
+    return QVector<Region>();
+  }
+
   return findAll(createRegexp(text, flags).get(), begin, end);
 }
 

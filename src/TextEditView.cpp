@@ -870,13 +870,6 @@ void TextEditView::highlightSearchMatches(const QString& text,
                                           Document::FindFlags flags) {
   d_ptr->m_searchMatchedRegions.clear();
 
-  if (text.isEmpty()) {
-    return;
-  }
-
-  QTextCursor cursor(document());
-  cursor.setPosition(begin);
-
   auto regions = document()->findAll(text, begin, end, flags);
   for (const auto& region : regions) {
     d_ptr->m_searchMatchedRegions.append(region);
