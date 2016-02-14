@@ -175,7 +175,7 @@ resolve() {
         fi
 
   			# build node.dll
-            if [ $1 != '--skip-build' ]; then
+            if [ "$1" != '--skip-build' ]; then
                         cd vendor/node
         # Build Release version
         ./vcbuild.bat nosign shared ${ARCH}
