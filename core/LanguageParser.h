@@ -107,7 +107,7 @@ struct Pattern {
   std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
                                                                          int pos);
   std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int pos);
-  Node* createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
+  std::unique_ptr<Node> createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
   void createCaptureNodes(LanguageParser* parser,
                           QVector<Region> regions,
                           Node* parent,
@@ -169,8 +169,8 @@ class LanguageParser {
   ~LanguageParser() = default;
   DEFAULT_MOVE(LanguageParser)
 
-  RootNode* parse();
-  QVector<Node*> parse(const Region& region);
+  std::unique_ptr<RootNode> parse();
+  std::vector<std::unique_ptr<Node> > parse(const Region& region);
   QString getData(int start, int end);
   void setText(const QString& text) { m_text = text; }
   void clearCache();
@@ -195,7 +195,7 @@ struct Node {
   virtual ~Node() = default;
   DEFAULT_MOVE(Node)
 
-  void append(Node* child);
+  void append(std::unique_ptr<Node> child);
   Region updateRegion();
   QString toString() const;
   bool isLeaf() const { return children.size() == 0; }

@@ -41,7 +41,7 @@ void SyntaxHighlighter::setParser(LanguageParser* parser) {
     return;
 
   m_parser.reset(parser);
-  m_rootNode.reset(parser->parse());
+  m_rootNode = std::move(parser->parse());
   m_lastScopeNode = nullptr;
 }
 
