@@ -237,9 +237,6 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
     boost::optional<QVector<Region>> regions = pair.second;
 
     int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
-    if (newlinePos != -1) {
-      newlinePos += pos;
-    }
 
     if (!regions) {
       break;
