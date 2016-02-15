@@ -29,8 +29,6 @@ typedef QVector<Capture> Captures;
 struct Regex {
   static Regex* create(const QString& pattern);
 
-  int lastFound;
-
   virtual ~Regex() = default;
 
   virtual boost::optional<QVector<Region>>
@@ -39,7 +37,7 @@ struct Regex {
   virtual QString pattern() = 0;
 
  protected:
-  Regex() : lastFound(0) {}
+  Regex() {}
 
   boost::optional<QVector<Region>> find(Regexp* regex, const QString& str, int beginPos);
 
@@ -80,7 +78,11 @@ struct RegexWithBackReference : public Regex {
 
 // This struct is mutable because it has cache
 struct Pattern {
+  // name could be empty
+  // e.g. root patterns in Property List (XML)
   QString name;
+
+  QString contentName;
   QString include;
   std::unique_ptr<Regex> match;
   Captures captures;
