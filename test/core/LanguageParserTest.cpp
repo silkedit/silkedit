@@ -361,6 +361,37 @@ WHERE email = <%= quote @email %>)";
 
     compareLineByLine(root->toString(), result);
   }
+
+  // Makefile.plist includes \G pattern
+  /*
+          <key>begin</key>
+          <string>\G</string>
+          <key>end</key>
+          <string>^</string>
+          <key>name</key>
+          <string>meta.scope.prerequisites.makefile</string>
+   */
+  void makefileTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/Makefile.plist", "testdata/grammers/Shell-Unix-Bash.tmLanguage", "testdata/grammers/Ruby.plist", "testdata/grammers/Python.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QFile file("testdata/Makefile");
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+
+    LanguageParser* parser = LanguageParser::create("source.makefile", in.readAll());
+
+    // When
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    // Then
+    // at least no infinite loop
+    // todo: support while and \G to parse Makefile grammer correctly
+  }
 };
 
 }  // namespace core

@@ -2,6 +2,7 @@
 #include <tuple>
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
+#include <QDir>
 
 #include "Document.h"
 #include "LineSeparator.h"
@@ -70,9 +71,12 @@ Document::Document(const QString& path,
         from = dotPos + 1;
       }
     } else {
-      qDebug() << "extension not found. path:" << path;
-      lang = LanguageProvider::defaultLanguage();
-      Q_ASSERT(lang);
+      const auto& filename = path.mid(path.lastIndexOf(QDir::separator()) + 1);
+      lang = LanguageProvider::languageFromExtension(filename);
+      if (!lang) {
+        lang = LanguageProvider::defaultLanguage();
+        Q_ASSERT(lang);
+      }
     }
   }
 
