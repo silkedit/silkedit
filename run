@@ -380,7 +380,6 @@ analyze() {
 }
 
 run_tests() {
-    ensure_dir build
     cd build
     if [ $OS == 'Mac' ]; then
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
