@@ -97,7 +97,7 @@ class LanguageParserTest : public QObject {
 
     QTextStream in(&file);
     LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/plist.tmlang.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -118,7 +118,7 @@ class LanguageParserTest : public QObject {
 }
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString out = R"r(0-25: "source.c++"
   0-3: "storage.type.c" - Data: "int"
@@ -142,7 +142,7 @@ class LanguageParserTest : public QObject {
   int hoge = "foo";
 })";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString out = R"r(0-33: "source.c++"
   0-33: "meta.namespace-block.c++"
@@ -170,7 +170,7 @@ class LanguageParserTest : public QObject {
     bar(a)
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-27: "source.c++"
@@ -197,7 +197,7 @@ class LanguageParserTest : public QObject {
 
     QString text = R"(#include <string>)";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString result = R"r(0-17: "source.c++"
   0-17: "meta.preprocessor.c.include"
@@ -220,7 +220,7 @@ class LanguageParserTest : public QObject {
     QTextStream in(&file);
 
     LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/cppFunctionTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -240,7 +240,7 @@ class LanguageParserTest : public QObject {
     QTextStream in(&file);
 
     LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/cppTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -267,7 +267,7 @@ class LanguageParserTest : public QObject {
     QString text = R"(web = http\:/\/en.wikipedia.org/
 language = English)";
     LanguageParser* parser = LanguageParser::create("source.java-properties", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-51: "source.java-properties"
@@ -291,7 +291,7 @@ language = English)";
     QString text = R"(Q(0, 0, 3))";
 
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-10: "source.c++"
@@ -316,7 +316,7 @@ language = English)";
     QTextStream in(&file);
 
     LanguageParser* parser = LanguageParser::create("source.java-properties", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/javaProperties.properties.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));

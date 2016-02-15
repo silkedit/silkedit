@@ -1,5 +1,7 @@
-﻿#include <algorithm>
+﻿#include <memory>
+#include <algorithm>
 #include <iterator>
+#include <vector>
 #include <QStringList>
 #include <QStringBuilder>
 #include <QDebug>
@@ -199,24 +201,29 @@ LanguageParser* LanguageParser::create(const QString& scopeName, const QString& 
   }
 }
 
-RootNode* LanguageParser::parse() {
-  RootNode* rootNode = new RootNode(this, m_lang->scopeName);
-  QVector<Node*> children = parse(Region(0, m_text.length()));
-  foreach (Node* child, children) { rootNode->append(child); }
+std::unique_ptr<RootNode> LanguageParser::parse() {
+  std::unique_ptr<RootNode> rootNode(new RootNode(this, m_lang->scopeName));
+  std::vector<std::unique_ptr<Node>> children = parse(Region(0, m_text.length()));
+
+  std::for_each(std::make_move_iterator(std::begin(children)),
+                std::make_move_iterator(std::end(children)),
+                [&](decltype(children)::value_type&& child) {
+                  rootNode->append(std::move(child));
+                });
 
   rootNode->updateRegion();
-  return rootNode;
+  return std::move(rootNode);
 }
 
 // parse in [begin, end) (doensn't include end)
-QVector<Node*> LanguageParser::parse(const Region& region) {
+std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
   qDebug("parse. region: %s. lang: %s", qPrintable(region.toString()),
          qPrintable(m_lang->scopeName));
   QTime t;
   t.start();
 
   int iter = MAX_ITER_COUNT;
-  QVector<Node*> nodes(0);
+  std::vector<std::unique_ptr<Node>> nodes(0);
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
     // Try to find a root pattern in m_text from pos.
     auto pair = m_lang->rootPattern->find(m_text, pos);
@@ -244,11 +251,11 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
       }
     } else {
       Q_ASSERT(regions);
-      Node* n = pattern->createNode(m_text, this, *regions);
-      if (region.intersects(n->region)) {
-        nodes.append(n);
-      }
+      std::unique_ptr<Node> n = pattern->createNode(m_text, this, *regions);
       pos = n->region.end();
+      if (region.intersects(n->region)) {
+        nodes.push_back(std::move(n));
+      }
     }
   }
 
@@ -257,7 +264,7 @@ QVector<Node*> LanguageParser::parse(const Region& region) {
   }
 
   qDebug("parse finished. elapsed: %d ms", t.elapsed());
-  return nodes;
+  return std::move(nodes);
 }
 
 QString LanguageParser::getData(int a, int b) {
@@ -283,11 +290,10 @@ Node::Node(const QString& p_name, Region p_region, LanguageParser* p_p)
   Q_ASSERT(p_p);
 }
 
-void Node::append(Node* child) {
-  std::unique_ptr<Node> node(child);
+void Node::append(std::unique_ptr<Node> child) {
   // skip empty region
-  if (!node->region.isEmpty()) {
-    children.push_back(std::move(node));
+  if (child && !child->region.isEmpty()) {
+    children.push_back(std::move(child));
   }
 }
 
@@ -510,32 +516,33 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
   return std::make_pair(pattern, regions);
 }
 
-Node* Pattern::createNode(const QString& str,
-                          LanguageParser* parser,
-                          const QVector<Region>& regions) {
+std::unique_ptr<Node> Pattern::createNode(const QString& str,
+                                          LanguageParser* parser,
+                                          const QVector<Region>& regions) {
   Q_ASSERT(!regions.isEmpty());
 
   //  qDebug() << "createNode. mo:" << *mo;
-  Node* node = new Node(name, regions[0], parser);
+
+  std::unique_ptr<Node> node(new Node(name, regions[0], parser));
 
   if (match) {
-    createCaptureNodes(parser, regions, node, captures);
+    createCaptureNodes(parser, regions, node.get(), captures);
   }
 
   if (!begin) {
     node->updateRegion();
-    return node;
+    return std::move(node);
   }
 
   if (beginCaptures.length() > 0) {
-    createCaptureNodes(parser, regions, node, beginCaptures);
+    createCaptureNodes(parser, regions, node.get(), beginCaptures);
   } else {
-    createCaptureNodes(parser, regions, node, captures);
+    createCaptureNodes(parser, regions, node.get(), captures);
   }
 
   if (!end) {
     node->updateRegion();
-    return node;
+    return std::move(node);
   }
 
   bool found = false;
@@ -580,9 +587,9 @@ Node* Pattern::createNode(const QString& str,
            ((*regionsBeforeEnd)[0].begin() == (*endMatchedRegions)[0].begin() &&
             node->region.isEmpty()))) {
         found = true;
-        Node* r = patternBeforeEnd->createNode(str, parser, *regionsBeforeEnd);
-        node->append(r);
+        std::unique_ptr<Node> r(patternBeforeEnd->createNode(str, parser, *regionsBeforeEnd));
         i = r->region.end();
+        node->append(std::move(r));
 
         /*
          e.g. text for match
@@ -618,14 +625,15 @@ Node* Pattern::createNode(const QString& str,
 
     // set contentName
     if (!contentName.isEmpty()) {
-      node->append(new Node(contentName,
-                            Region(node->region.end(), (*endMatchedRegions)[0].begin()), parser));
+      std::unique_ptr<Node> newNode(new Node(
+          contentName, Region(node->region.end(), (*endMatchedRegions)[0].begin()), parser));
+      node->append(std::move(newNode));
     }
 
     if (endCaptures.length() > 0) {
-      createCaptureNodes(parser, *endMatchedRegions, node, endCaptures);
+      createCaptureNodes(parser, *endMatchedRegions, node.get(), endCaptures);
     } else {
-      createCaptureNodes(parser, *endMatchedRegions, node, captures);
+      createCaptureNodes(parser, *endMatchedRegions, node.get(), captures);
     }
 
     break;
@@ -633,7 +641,7 @@ Node* Pattern::createNode(const QString& str,
 
   node->region.setEnd(endPos);
   node->updateRegion();
-  return node;
+  return std::move(node);
 }
 
 void Pattern::createCaptureNodes(LanguageParser* parser,
@@ -660,11 +668,11 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
     if (i >= parents.length() || regions[i].begin() == -1) {
       continue;
     }
-    Node* child = new Node(v.name, regions[i], parser);
-    parents[i] = child;
+    std::unique_ptr<Node> child(new Node(v.name, regions[i], parser));
+    parents[i] = child.get();
 
     if (i == 0) {
-      parent->append(child);
+      parent->append(std::move(child));
       continue;
     }
 
@@ -673,7 +681,7 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
       i = parentIndices[i];
       p = parents[i];
     }
-    p->append(child);
+    p->append(std::move(child));
   }
 }
 
@@ -861,11 +869,12 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
     }
   }
 
-  QVector<Node*> newNodes = parser->parse(affectedRegion);
-  foreach (Node* node, newNodes) {
-    //    qDebug("new node: %s", qPrintable(node->toString()));
-    children.push_back(std::move(std::unique_ptr<Node>(node)));
-  }
+  std::vector<std::unique_ptr<Node>> newNodes = parser->parse(affectedRegion);
+
+  std::for_each(
+      std::make_move_iterator(newNodes.begin()), std::make_move_iterator(newNodes.end()),
+      [&](decltype(newNodes)::value_type&& node) { children.push_back(std::move(node)); });
+
   std::sort(children.begin(), children.end(),
             [](const std::unique_ptr<Node>& x, const std::unique_ptr<Node>& y) {
               return x->region.begin() < y->region.begin();
