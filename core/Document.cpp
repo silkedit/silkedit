@@ -71,7 +71,7 @@ Document::Document(const QString& path,
         from = dotPos + 1;
       }
     } else {
-      const auto& filename = path.mid(path.lastIndexOf(QDir::separator()) + 1);
+      const auto& filename = path.mid(path.lastIndexOf('/') + 1);
       lang = LanguageProvider::languageFromExtension(filename);
       if (!lang) {
         lang = LanguageProvider::defaultLanguage();
