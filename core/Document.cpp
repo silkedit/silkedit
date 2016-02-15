@@ -56,15 +56,28 @@ Document::Document(const QString& path,
       m_syntaxHighlighter(nullptr) {
   init();
 
-  int dotPos = path.lastIndexOf('.');
-  if (dotPos >= 0) {
-    QString ext = path.mid(dotPos + 1);
-    qDebug("ext: %s", qPrintable(ext));
-    // todo: support firstLineMatch
-    setupSyntaxHighlighter(LanguageProvider::languageFromExtension(ext), toPlainText());
-  } else {
-    qDebug("extension not found. path: %s", qPrintable(path));
+  Language* lang = nullptr;
+  int from = 0, dotPos = -1;
+
+  while (!lang) {
+    dotPos = path.indexOf('.', from);
+    if (dotPos >= 0) {
+      const QString& ext = path.mid(dotPos + 1);
+      qDebug() << "ext:" << ext;
+      // todo: support firstLineMatch
+      lang = LanguageProvider::languageFromExtension(ext);
+      if (!lang) {
+        from = dotPos + 1;
+      }
+    } else {
+      qDebug() << "extension not found. path:" << path;
+      lang = LanguageProvider::defaultLanguage();
+      Q_ASSERT(lang);
+    }
   }
+
+  Q_ASSERT(lang);
+  setupSyntaxHighlighter(lang, toPlainText());
 }
 
 void Document::init() {
@@ -185,10 +198,10 @@ std::unique_ptr<Regexp> Document::createRegexp(const QString& subString,
 }
 
 boost::optional<Region> Document::find(const QString& subString,
-                           int from,
-                           int begin,
-                           int end,
-                           Document::FindFlags options) const {
+                                       int from,
+                                       int begin,
+                                       int end,
+                                       Document::FindFlags options) const {
   if (subString.isEmpty()) {
     return boost::none;
   }
@@ -227,10 +240,10 @@ QVector<Region> Document::findAll(const Regexp* expr, int begin, int end) const 
 }
 
 boost::optional<Region> Document::find(const Regexp* expr,
-                           int from,
-                           int begin,
-                           int end,
-                           Document::FindFlags options) const {
+                                       int from,
+                                       int begin,
+                                       int end,
+                                       Document::FindFlags options) const {
   bool isBackward = options.testFlag(FindFlag::FindBackward);
   qDebug("find: %s, back: %d, from: %d, begin: %d, end: %d", qPrintable(expr->pattern()),
          (options.testFlag(FindFlag::FindBackward)), from, begin, end);

@@ -28,7 +28,7 @@ class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
   void loadLanguage() {
-    Language* lang = LanguageProvider::loadLanguage("testdata/C++.tmLanguage");
+    Language* lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
     Q_ASSERT(lang);
 
     // fileTypes
@@ -78,17 +78,16 @@ class LanguageParserTest : public QObject {
   }
 
   void LanguageFromScope() {
-    Language* lang = LanguageProvider::loadLanguage("testdata/C++.tmLanguage");
+    Language* lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
     Language* langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
     QVERIFY(langFromScope);
     QVERIFY(!LanguageProvider::languageFromScope("missing scope"));
   }
 
   void parseTmLanguage() {
-    const QVector<QString> files({"testdata/C++.tmLanguage",
-                                  "testdata/C.tmLanguage",
-                                  "testdata/Property List (XML).tmLanguage",
-                                  "testdata/XML.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C++.tmLanguage", "testdata/grammers/C.tmLanguage",
+         "testdata/grammers/Property List (XML).tmLanguage", "testdata/grammers/XML.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -109,7 +108,8 @@ class LanguageParserTest : public QObject {
   // Test for $base when it has a parent syntax.
   // When source.c++ includes source.c, "include $base" in source.c means including source.c++
   void baseWithParentTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -134,7 +134,7 @@ class LanguageParserTest : public QObject {
 
   //  // Test for $base when it doesn't have a parent syntax.
   void baseWithoutParentTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files({"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -162,7 +162,8 @@ class LanguageParserTest : public QObject {
   // <key>name</key>
   // <string>meta.preprocessor.macro.c</string>
   void endOfLineMatchTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -171,7 +172,7 @@ class LanguageParserTest : public QObject {
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
     std::unique_ptr<Node> root = parser->parse();
-//    qDebug().noquote() << root->toString();
+    //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-27: "source.c++"
   0-17: "meta.preprocessor.macro.c"
@@ -191,7 +192,8 @@ class LanguageParserTest : public QObject {
   }
 
   void cppIncludeTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -210,7 +212,8 @@ class LanguageParserTest : public QObject {
   }
 
   void cppFunctionTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -230,7 +233,8 @@ class LanguageParserTest : public QObject {
   }
 
   void cppTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -260,7 +264,7 @@ class LanguageParserTest : public QObject {
   }
 
   void contentNameTest() {
-    const QVector<QString> files({"testdata/JavaProperties.plist"});
+    const QVector<QString> files({"testdata/grammers/JavaProperties.plist"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -268,7 +272,7 @@ class LanguageParserTest : public QObject {
 language = English)";
     LanguageParser* parser = LanguageParser::create("source.java-properties", text);
     std::unique_ptr<Node> root = parser->parse();
-//    qDebug().noquote() << root->toString();
+    //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-51: "source.java-properties"
   0-33: "meta.key-value.java-properties"
@@ -284,7 +288,8 @@ language = English)";
   }
 
   void cppParensTest() {
-    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -292,7 +297,7 @@ language = English)";
 
     LanguageParser* parser = LanguageParser::create("source.c++", text);
     std::unique_ptr<Node> root = parser->parse();
-//    qDebug().noquote() << root->toString();
+    //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-10: "source.c++"
   0-10: "meta.function.c"
@@ -306,7 +311,7 @@ language = English)";
   }
 
   void javaPropertiesTest() {
-    const QVector<QString> files({"testdata/JavaProperties.plist"});
+    const QVector<QString> files({"testdata/grammers/JavaProperties.plist"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -323,6 +328,38 @@ language = English)";
 
     QTextStream resIn(&resFile);
     compareLineByLine(root->toString(), resIn.readAll());
+  }
+
+  void sqlErbTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/SQL.plist", "testdata/grammers/Rails/SQL (Rails).plist",
+         "testdata/grammers/Rails/Ruby on Rails.plist", "testdata/grammers/Ruby.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(# app/sql_queries/get_player_by_email.sql.erb
+SELECT *
+FROM players
+WHERE email = <%= quote @email %>)";
+
+    LanguageParser* parser = LanguageParser::create("source.sql.ruby", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-101: "source.sql.ruby"
+  0-46: ""
+    0-46: "comment.line.number-sign.sql"
+      0-1: "punctuation.definition.comment.sql" - Data: "#"
+  46-52: "keyword.other.DML.sql" - Data: "SELECT"
+  53-54: "keyword.operator.star.sql" - Data: "*"
+  55-59: "keyword.other.DML.sql" - Data: "FROM"
+  68-73: "keyword.other.DML.sql" - Data: "WHERE"
+  80-81: "keyword.operator.comparison.sql" - Data: "="
+  82-101: "source.ruby.rails.embedded.sql"
+    92-98: "variable.other.readwrite.instance.ruby"
+      92-93: "punctuation.definition.variable.ruby" - Data: "@")r";
+
+    compareLineByLine(root->toString(), result);
   }
 };
 

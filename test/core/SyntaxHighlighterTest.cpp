@@ -29,7 +29,7 @@ class SyntaxHighlighterTest : public QObject {
 
 void SyntaxHighlighterTest::scopeExtent() {
   const QVector<QString> files(
-      {"testdata/Property List (XML).tmLanguage", "testdata/XML.tmLanguage"});
+      {"testdata/grammers/Property List (XML).tmLanguage", "testdata/grammers/XML.tmLanguage"});
 
   foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -79,7 +79,7 @@ void SyntaxHighlighterTest::scopeExtent() {
 }
 
 void SyntaxHighlighterTest::updateNode() {
-  const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+  const QVector<QString> files({"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
   foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
   QString text = QString(R"(

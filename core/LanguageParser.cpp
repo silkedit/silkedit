@@ -224,18 +224,17 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
 
   int iter = MAX_ITER_COUNT;
   std::vector<std::unique_ptr<Node>> nodes(0);
+  int prevPos;
+
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
+    prevPos = pos;
     // Try to find a root pattern in m_text from pos.
     auto pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
-    boost::optional<QVector<Region>> regions = pair.second;
 
-    // The matched region must NOT include empty region [0,0], otherwise this for loop never ends
-    // because pos doesn't increase.
-    if (regions && (*regions)[0].isEmpty()) {
-      pos++;
-      continue;
-    }
+    // This regions could include empty region
+    // e.g. /(^[ \t]+)?(?=#)/ in SQL.plist
+    boost::optional<QVector<Region>> regions = pair.second;
 
     int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
     if (newlinePos != -1) {
@@ -256,6 +255,11 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
       if (region.intersects(n->region)) {
         nodes.push_back(std::move(n));
       }
+    }
+
+    // pos doesn't increase. Increment pos to avoid infinite loop
+    if (prevPos == pos) {
+      pos++;
     }
   }
 
@@ -724,7 +728,7 @@ Language* LanguageProvider::languageFromExtension(const QString& ext) {
   if (m_extensionLangFilePathMap.contains(ext)) {
     return loadLanguage(m_extensionLangFilePathMap.value(ext));
   } else {
-    return defaultLanguage();
+    return nullptr;
   }
 }
 
