@@ -590,6 +590,11 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
         found = true;
         std::unique_ptr<Node> r(patternBeforeEnd->createNode(str, parser, *regionsBeforeEnd));
         i = r->region.end();
+
+        // If r->region is empty, it leads infinite loop without i++;
+        if (r->region.isEmpty()) {
+          i++;
+        }
         node->append(std::move(r));
 
         /*

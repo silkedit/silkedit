@@ -32,7 +32,7 @@ ccc)";
 
   void selectGrammerFromExtension() {
     const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage", "testdata/grammers/Rails/HTML (Rails).plist",
-                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage"});
+                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage", "testdata/grammers/Makefile.plist"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -55,6 +55,11 @@ ccc)";
     Document emptyPathDoc("", "", Encoding::defaultEncoding(), "", BOM::defaultBOM());
     // Then
     QCOMPARE(emptyPathDoc.language()->scopeName, QStringLiteral("text.plain"));
+
+    // When
+    Document makefile("hoge/foo/Makefile", "", Encoding::defaultEncoding(), "", BOM::defaultBOM());
+    // Then
+    QCOMPARE(makefile.language()->scopeName, QStringLiteral("source.makefile"));
   }
 };
 
