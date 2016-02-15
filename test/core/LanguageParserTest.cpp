@@ -12,7 +12,7 @@ void compareLineByLine(const QString& str1, const QString& str2) {
   QStringList list1 = str1.trimmed().split('\n');
   QStringList list2 = str2.trimmed().split('\n');
   if (str1.trimmed().size() != str2.trimmed().size()) {
-    qDebug() << str1;
+    qDebug().noquote() << str1;
   }
   QCOMPARE(list1.size(), list2.size());
 
@@ -97,7 +97,7 @@ class LanguageParserTest : public QObject {
 
     QTextStream in(&file);
     LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/plist.tmlang.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -118,7 +118,7 @@ class LanguageParserTest : public QObject {
 }
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString out = R"r(0-25: "source.c++"
   0-3: "storage.type.c" - Data: "int"
@@ -142,7 +142,7 @@ class LanguageParserTest : public QObject {
   int hoge = "foo";
 })";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString out = R"r(0-33: "source.c++"
   0-33: "meta.namespace-block.c++"
@@ -170,7 +170,8 @@ class LanguageParserTest : public QObject {
     bar(a)
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
+//    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-27: "source.c++"
   0-17: "meta.preprocessor.macro.c"
@@ -183,7 +184,8 @@ class LanguageParserTest : public QObject {
 "
   17-27: "meta.function.c"
     17-21: "punctuation.whitespace.function.leading.c" - Data: "    "
-    21-24: "entity.name.function.c" - Data: "bar")r";
+    21-24: "entity.name.function.c" - Data: "bar"
+    24-27: "meta.parens.c" - Data: "(a)")r";
 
     compareLineByLine(root->toString(), result);
   }
@@ -195,7 +197,7 @@ class LanguageParserTest : public QObject {
 
     QString text = R"(#include <string>)";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QString result = R"r(0-17: "source.c++"
   0-17: "meta.preprocessor.c.include"
@@ -218,9 +220,29 @@ class LanguageParserTest : public QObject {
     QTextStream in(&file);
 
     LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
-    Node* root = parser->parse();
+    std::unique_ptr<Node> root = parser->parse();
 
     QFile resFile("testdata/cppFunctionTest.cpp.res");
+    QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream resIn(&resFile);
+    compareLineByLine(root->toString(), resIn.readAll());
+  }
+
+  void cppTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QFile file("testdata/cppTest.cpp");
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+
+    LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
+    std::unique_ptr<Node> root = parser->parse();
+
+    QFile resFile("testdata/cppTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
@@ -235,6 +257,72 @@ class LanguageParserTest : public QObject {
     QVERIFY(!Regex::hasBackReference(R"(\\10)"));
     QVERIFY(Regex::hasBackReference(R"(\\\10)"));
     QVERIFY(!Regex::hasBackReference(R"(\\\\10)"));
+  }
+
+  void contentNameTest() {
+    const QVector<QString> files({"testdata/JavaProperties.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(web = http\:/\/en.wikipedia.org/
+language = English)";
+    LanguageParser* parser = LanguageParser::create("source.java-properties", text);
+    std::unique_ptr<Node> root = parser->parse();
+//    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-51: "source.java-properties"
+  0-33: "meta.key-value.java-properties"
+    0-3: "support.constant.java-properties" - Data: "web"
+    4-5: "punctuation.separator.key-value.java-properties" - Data: "="
+    6-32: "string.unquoted.java-properties" - Data: "http\:/\/en.wikipedia.org/"
+  33-51: "meta.key-value.java-properties"
+    33-41: "support.constant.java-properties" - Data: "language"
+    42-43: "punctuation.separator.key-value.java-properties" - Data: "="
+    44-51: "string.unquoted.java-properties" - Data: "English")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+  void cppParensTest() {
+    const QVector<QString> files({"testdata/C.tmLanguage", "testdata/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(Q(0, 0, 3))";
+
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    std::unique_ptr<Node> root = parser->parse();
+//    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-10: "source.c++"
+  0-10: "meta.function.c"
+    0-1: "entity.name.function.c" - Data: "Q"
+    1-10: "meta.parens.c"
+      2-3: "constant.numeric.c" - Data: "0"
+      5-6: "constant.numeric.c" - Data: "0"
+      8-9: "constant.numeric.c" - Data: "3")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+  void javaPropertiesTest() {
+    const QVector<QString> files({"testdata/JavaProperties.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QFile file("testdata/javaProperties.properties");
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+
+    LanguageParser* parser = LanguageParser::create("source.java-properties", in.readAll());
+    std::unique_ptr<Node> root = parser->parse();
+
+    QFile resFile("testdata/javaProperties.properties.res");
+    QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream resIn(&resFile);
+    compareLineByLine(root->toString(), resIn.readAll());
   }
 };
 
