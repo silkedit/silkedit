@@ -61,8 +61,8 @@ class LanguageParserTest : public QObject {
     QCOMPARE(beginEndPattern->patterns->size(), 1);
 
     // repository
-    QVERIFY(!lang->repository.empty());
-    Pattern* blockPat = lang->repository.at("block").get();
+    QVERIFY(!rootPattern->repository.empty());
+    Pattern* blockPat = rootPattern->repository.at("block").get();
     QCOMPARE(blockPat->begin->pattern(), QString("\\{"));
     QCOMPARE(blockPat->end->pattern(), QString("\\}"));
     QCOMPARE(blockPat->name, QString("meta.block.c++"));

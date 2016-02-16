@@ -91,23 +91,26 @@ struct Pattern {
   std::unique_ptr<Regex> end;
   Captures endCaptures;
   std::unique_ptr<QVector<Pattern*>> patterns;
+  std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   Language* lang;
   QStringRef cachedStr;
   Pattern* cachedPattern;
   std::unique_ptr<QVector<Pattern*>> cachedPatterns;
   boost::optional<QVector<Region>> cachedRegions;
+  Pattern* parent;
   std::unique_ptr<Language> includedLanguage;
   int hits;
   int misses;
 
-  Pattern();
-  explicit Pattern(const QString& p_include);
+  explicit Pattern(Pattern* parent = nullptr);
   virtual ~Pattern() = default;
 
   std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
                                                                          int pos);
   std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int pos);
-  std::unique_ptr<Node> createNode(const QString& data, LanguageParser* parser, const QVector<Region>& regions);
+  std::unique_ptr<Node> createNode(const QString& data,
+                                   LanguageParser* parser,
+                                   const QVector<Region>& regions);
   void createCaptureNodes(LanguageParser* parser,
                           QVector<Region> regions,
                           Node* parent,
@@ -141,13 +144,12 @@ class LanguageProvider {
 };
 
 // todo: check who is the owner of Language?
-// Language cannot be shared (means mutable) across multiple documents because RootPattern and
-// patterns in a repository have some cache and they are unique for a certain document.
+// Language cannot be shared (means mutable) across multiple documents because RootPattern has some
+// cache and is unique for a certain document.
 struct Language {
   QVector<QString> fileTypes;
   QString firstLineMatch;
   std::unique_ptr<RootPattern> rootPattern;  // patterns
-  std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   QString scopeName;
   Language* baseLanguage;
   bool hideFromUser;
@@ -170,7 +172,7 @@ class LanguageParser {
   DEFAULT_MOVE(LanguageParser)
 
   std::unique_ptr<RootNode> parse();
-  std::vector<std::unique_ptr<Node> > parse(const Region& region);
+  std::vector<std::unique_ptr<Node>> parse(const Region& region);
   QString getData(int start, int end);
   void setText(const QString& text) { m_text = text; }
   void clearCache();

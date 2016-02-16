@@ -23,7 +23,6 @@ const QString HIDE_FROM_USER_KEY = QStringLiteral("hideFromUser");
 const QString FILE_TYPES_KEY = QStringLiteral("fileTypes");
 const QString FIRST_LINE_MATCH_KEY = QStringLiteral("firstLineMatch");
 const QString SCOPE_NAME_KEY = QStringLiteral("scopeName");
-const QString REPOSITORY_KEY = QStringLiteral("repository");
 
 // Clamps v to be in the region of _min and _max
 int clamp(int min, int max, int v) {
@@ -51,15 +50,15 @@ Captures toCaptures(QVariantMap map) {
   return captures;
 }
 
-Pattern* toPattern(QVariantMap map);
+Pattern *toChildPattern(QVariantMap map, Pattern *parent);
 
-QVector<Pattern*>* toPatterns(QVariant patternsVar) {
+QVector<Pattern*>* toPatterns(QVariant patternsVar, Pattern* parent) {
   if (patternsVar.canConvert<QVariantList>()) {
     QVector<Pattern*>* patterns = new QVector<Pattern*>(0);
     QSequentialIterable iterable = patternsVar.value<QSequentialIterable>();
     foreach (const QVariant& v, iterable) {
       if (v.canConvert<QVariantMap>()) {
-        patterns->append(toPattern(v.toMap()));
+        patterns->append(toChildPattern(v.toMap(), parent));
       }
     }
     return patterns;
@@ -135,7 +134,24 @@ void toPattern(QVariantMap map, Pattern* pat) {
   static const QString patternsStr = QStringLiteral("patterns");
   if (map.contains(patternsStr)) {
     QVariant patternsVar = map.value(patternsStr);
-    pat->patterns.reset(toPatterns(patternsVar));
+    pat->patterns.reset(toPatterns(patternsVar, pat));
+  }
+
+  // repository
+  static const QString repositoryStr = QStringLiteral("repository");
+  if (map.contains(repositoryStr)) {
+    QVariantMap repositoryMap = map.value(repositoryStr).toMap();
+    QMapIterator<QString, QVariant> iter(repositoryMap);
+    while (iter.hasNext()) {
+      iter.next();
+      QString key = iter.key();
+      if (iter.value().canConvert<QVariantMap>()) {
+        QVariantMap subMap = iter.value().toMap();
+        if (Pattern* pattern = toChildPattern(subMap, pat)) {
+          pat->repository[key] = std::move(std::unique_ptr<Pattern>(pattern));
+        }
+      }
+    }
   }
 }
 
@@ -145,9 +161,9 @@ RootPattern* toRootPattern(QVariantMap map) {
   return pat;
 }
 
-Pattern* toPattern(QVariantMap map) {
-  // todo: check ownership
-  Pattern* pat = new Pattern();
+// todo: check ownership
+Pattern* toChildPattern(QVariantMap map, Pattern* parent) {
+  Pattern* pat = new Pattern(parent);
   toPattern(map, pat);
   return pat;
 }
@@ -191,6 +207,18 @@ QList<QStringRef> getCaptures(const QStringRef& str, QVector<Region> regions) {
   }
   return capturedStrs;
 }
+
+Pattern* findInRepository(Pattern* pattern, const QString& key) {
+  if (!pattern) {
+    return nullptr;
+  }
+
+  if (pattern->repository.find(key) != pattern->repository.end()) {
+    return pattern->repository.at(key).get();
+  }
+
+  return findInRepository(pattern->parent, key);
+}
 }
 
 LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
@@ -205,11 +233,9 @@ std::unique_ptr<RootNode> LanguageParser::parse() {
   std::unique_ptr<RootNode> rootNode(new RootNode(this, m_lang->scopeName));
   std::vector<std::unique_ptr<Node>> children = parse(Region(0, m_text.length()));
 
-  std::for_each(std::make_move_iterator(std::begin(children)),
-                std::make_move_iterator(std::end(children)),
-                [&](decltype(children)::value_type&& child) {
-                  rootNode->append(std::move(child));
-                });
+  std::for_each(
+      std::make_move_iterator(std::begin(children)), std::make_move_iterator(std::end(children)),
+      [&](decltype(children)::value_type&& child) { rootNode->append(std::move(child)); });
 
   rootNode->updateRegion();
   return std::move(rootNode);
@@ -384,10 +410,8 @@ Regex* Regex::create(const QString& pattern) {
   }
 }
 
-Pattern::Pattern() : Pattern("") {}
-
-Pattern::Pattern(const QString& p_include)
-    : include(p_include), lang(nullptr), cachedPattern(nullptr), cachedPatterns(nullptr) {}
+Pattern::Pattern(Pattern* parent)
+    : lang(nullptr), cachedPattern(nullptr), cachedPatterns(nullptr), parent(parent) {}
 
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(const QString& str,
                                                                                 int beginPos) {
@@ -477,9 +501,8 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
     // # means an item name in the repository
     if (include.startsWith('#')) {
       QString key = include.mid(1);
-      if (lang->repository.find(key) != lang->repository.end()) {
+      if (auto p2 = findInRepository(this, key)) {
         //        qDebug("include %s", qPrintable(include));
-        Pattern* p2 = lang->repository.at(key).get();
         auto pair = p2->find(str, beginPos);
         pattern = pair.first;
         regions = pair.second;
@@ -697,6 +720,9 @@ void Pattern::tweak(Language* l) {
   if (patterns) {
     foreach (Pattern* p, *patterns) { p->tweak(l); }
   }
+  for (auto& pair : repository) {
+    pair.second->tweak(lang);
+  }
 }
 
 void Pattern::clearCache() {
@@ -707,6 +733,9 @@ void Pattern::clearCache() {
   cachedStr.clear();
   if (patterns) {
     foreach (Pattern* pat, *patterns) { pat->clearCache(); }
+  }
+  for (auto& pair : repository) {
+    pair.second->clearCache();
   }
 }
 
@@ -785,24 +814,6 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
   // patterns
   lang->rootPattern.reset(toRootPattern(rootMap));
 
-  // repository
-  if (rootMap.contains(REPOSITORY_KEY)) {
-    QVariantMap repositoryMap = rootMap.value(REPOSITORY_KEY).toMap();
-    if (!REPOSITORY_KEY.isEmpty()) {
-      QMapIterator<QString, QVariant> iter(repositoryMap);
-      while (iter.hasNext()) {
-        iter.next();
-        QString key = iter.key();
-        if (iter.value().canConvert<QVariantMap>()) {
-          QVariantMap subMap = iter.value().toMap();
-          if (Pattern* pattern = toPattern(subMap)) {
-            lang->repository[key] = std::move(std::unique_ptr<Pattern>(pattern));
-          }
-        }
-      }
-    }
-  }
-
   if (!m_scopeLangFilePathMap.contains(lang->scopeName)) {
     foreach (const QString& ext, lang->fileTypes) { m_extensionLangFilePathMap[ext] = path; }
     m_scopeLangFilePathMap[lang->scopeName] = path;
@@ -827,9 +838,6 @@ boost::optional<QVector<Region>> FixedRegex::find(const QString& str,
 
 void Language::tweak() {
   rootPattern->tweak(this);
-  for (auto& pair : repository) {
-    pair.second->tweak(this);
-  }
 }
 
 QString Language::name() {
@@ -839,9 +847,6 @@ QString Language::name() {
 void Language::clearCache() {
   if (rootPattern) {
     rootPattern->clearCache();
-  }
-  for (auto& pair : repository) {
-    pair.second->clearCache();
   }
 }
 
