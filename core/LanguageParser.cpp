@@ -574,11 +574,17 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
   bool found = false;
   int i, endPos;
 
+  // Store cached regions and patterns because searchInPatterns may overwrite cache.
+  // If they are overwritten, next iteration in for loop has different regions and pattern compared
+  // by previous iteration
+  auto tmpCachedRegions = cachedRegions;
+  auto tmpCachedPatterns = cachedPatterns.get();
+
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
     boost::optional<QVector<Region>> endMatchedRegions;
-    if (cachedRegions) {
-      endMatchedRegions = end->find(str, i, getCaptures(cachedStr, *cachedRegions));
+    if (tmpCachedRegions) {
+      endMatchedRegions = end->find(str, i, getCaptures(cachedStr, *tmpCachedRegions));
     } else {
       endMatchedRegions = end->find(str, i);
     }
@@ -604,7 +610,7 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
     Q_ASSERT(endMatchedRegions);
 
     // Search patterns between begin and end
-    if (cachedPatterns->length() > 0) {
+    if (tmpCachedPatterns->length() > 0) {
       auto pair = searchInPatterns(str, i);
       Pattern* patternBeforeEnd = pair.first;
       boost::optional<QVector<Region>> regionsBeforeEnd = pair.second;

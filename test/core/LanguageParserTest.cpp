@@ -425,6 +425,40 @@ WHERE email = <%= quote @email %>)";
 
     compareLineByLine(root->toString(), result);
   }
+
+  void rubyHeredocTest() {
+    const QVector<QString> files({"testdata/grammers/Ruby.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(json = <<EOS # コーテーション無しでもOK
+{
+  "#{lang}": "#{RUBY}"
+}
+EOS)";
+
+    LanguageParser* parser = LanguageParser::create("source.ruby", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-59: "source.ruby"
+  5-59: "string.unquoted.heredoc.ruby"
+    5-12: "punctuation.definition.string.begin.ruby" - Data: "= <<EOS"
+    34-41: "meta.embedded.line.ruby"
+      34-36: "punctuation.section.embedded.begin.ruby" - Data: "#{"
+      36-40: "source.ruby" - Data: "lang"
+      40-41: "punctuation.section.embedded.end.ruby"
+        40-41: "source.ruby" - Data: "}"
+    45-52: "meta.embedded.line.ruby"
+      45-47: "punctuation.section.embedded.begin.ruby" - Data: "#{"
+      47-51: "variable.other.constant.ruby" - Data: "RUBY"
+      47-51: "source.ruby" - Data: "RUBY"
+      51-52: "punctuation.section.embedded.end.ruby"
+        51-52: "source.ruby" - Data: "}"
+    56-59: "punctuation.definition.string.end.ruby" - Data: "EOS")r";
+
+    compareLineByLine(root->toString(), result);
+  }
 };
 
 }  // namespace core
