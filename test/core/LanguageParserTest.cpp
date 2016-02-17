@@ -134,7 +134,8 @@ class LanguageParserTest : public QObject {
 
   //  // Test for $base when it doesn't have a parent syntax.
   void baseWithoutParentTest() {
-    const QVector<QString> files({"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -373,7 +374,8 @@ WHERE email = <%= quote @email %>)";
    */
   void makefileTest() {
     const QVector<QString> files(
-        {"testdata/grammers/Makefile.plist", "testdata/grammers/Shell-Unix-Bash.tmLanguage", "testdata/grammers/Ruby.plist", "testdata/grammers/Python.tmLanguage"});
+        {"testdata/grammers/Makefile.plist", "testdata/grammers/Shell-Unix-Bash.tmLanguage",
+         "testdata/grammers/Ruby.plist", "testdata/grammers/Python.tmLanguage"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -391,6 +393,37 @@ WHERE email = <%= quote @email %>)";
     // Then
     // at least no infinite loop
     // todo: support while and \G to parse Makefile grammer correctly
+  }
+
+  void yamlTest() {
+    const QVector<QString> files({"testdata/grammers/YAML.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(- { key: ctrl+b, command: move_cursor_left, if: onMac })";
+
+    LanguageParser* parser = LanguageParser::create("source.yaml", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-54: "source.yaml"
+  0-2: "string.unquoted.yaml"
+    0-1: "punctuation.definition.entry.yaml" - Data: "-"
+    1-2: "string.unquoted.yaml" - Data: " "
+  4-15: "string.unquoted.yaml"
+    4-8: "entity.name.tag.yaml"
+      7-8: "punctuation.separator.key-value.yaml" - Data: ":"
+    9-15: "string.unquoted.yaml" - Data: "ctrl+b"
+  17-42: "string.unquoted.yaml"
+    17-25: "entity.name.tag.yaml"
+      24-25: "punctuation.separator.key-value.yaml" - Data: ":"
+    26-42: "string.unquoted.yaml" - Data: "move_cursor_left"
+  44-54: "string.unquoted.yaml"
+    44-47: "entity.name.tag.yaml"
+      46-47: "punctuation.separator.key-value.yaml" - Data: ":"
+    48-54: "string.unquoted.yaml" - Data: "onMac ")r";
+
+    compareLineByLine(root->toString(), result);
   }
 };
 

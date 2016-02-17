@@ -47,10 +47,12 @@ Captures toCaptures(QVariantMap map) {
     }
   }
 
+  std::sort(captures.begin(), captures.end(),
+            [](const Capture& x, const Capture& y) { return x.key < y.key; });
   return captures;
 }
 
-Pattern *toChildPattern(QVariantMap map, Pattern *parent);
+Pattern* toChildPattern(QVariantMap map, Pattern* parent);
 
 QVector<Pattern*>* toPatterns(QVariant patternsVar, Pattern* parent) {
   if (patternsVar.canConvert<QVariantList>()) {
