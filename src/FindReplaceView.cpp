@@ -52,7 +52,10 @@ FindReplaceView::FindReplaceView(QWidget* parent)
 
   connect(ui->lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
-  connect(ui->lineEditForFind, &LineEdit::textChanged, this, &FindReplaceView::highlightMatches);
+  connect(ui->lineEditForFind, &LineEdit::textChanged, this, [=](const QString&) {
+    highlightMatches();
+    selectFirstMatch();
+  });
   connect(ui->lineEditForFind, &LineEdit::focusIn, this, [=] {
     updateActiveCursorPos();
     highlightMatches();
