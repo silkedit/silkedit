@@ -26,6 +26,7 @@ class CommandAction : public core::PackageAction {
                 const QString& cmdName,
                 const QMap<QString, QString>& icons,
                 QObject* parent = nullptr,
+                boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
 
   ~CommandAction() = default;
@@ -38,7 +39,6 @@ class CommandAction : public core::PackageAction {
   QString m_cmdName;
 
   void init(const QString& id);
-  void init(const QString& id, const QString& cmdName);  
   void updateShortcut();
   void setTheme();
 
