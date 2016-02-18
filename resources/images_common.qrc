@@ -1,18 +1,20 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>images/find-and-replace-icon-case.png</file>
-    <file>images/find-and-replace-icon-case-unchecked.png</file>
-    <file>images/find-and-replace-icon-regex.png</file>
-    <file>images/find-and-replace-icon-regex-unchecked.png</file>
-    <file>images/find-and-replace-icon-word.png</file>
-    <file>images/find-and-replace-icon-word-unchecked.png</file>
-    <file>images/find-and-replace-icon-preserve-case.png</file>
-    <file>images/find-and-replace-icon-preserve-case-unchecked.png</file>
-    <file>images/find-and-replace-icon-selection.png</file>
-    <file>images/find-and-replace-icon-selection-unchecked.png</file>
-    <file>images/find-and-replace-left-arrow.png</file>
-    <file>images/find-and-replace-right-arrow.png</file>
-    <file>images/down-arrow.png</file>
-    <file>images/indicator.gif</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>images/down-arrow.png</file>
+        <file>images/indicator.gif</file>
+        <file>images/inSelectionChk-black.svg</file>
+        <file>images/inSelectionChk-white.svg</file>
+        <file>images/wholeWordChk-black.svg</file>
+        <file>images/wholeWordChk-white.svg</file>
+        <file>images/matchCaseChk-black.svg</file>
+        <file>images/matchCaseChk-white.svg</file>
+        <file>images/preserveCaseChk-white.svg</file>
+        <file>images/preserveCaseChk-black.svg</file>
+        <file>images/regexChk-black.svg</file>
+        <file>images/regexChk-white.svg</file>
+        <file>images/nextButton-white.svg</file>
+        <file>images/nextButton-black.svg</file>
+        <file>images/prevButton-white.svg</file>
+        <file>images/prevButton-black.svg</file>
+    </qresource>
 </RCC>

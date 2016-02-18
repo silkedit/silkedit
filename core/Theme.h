@@ -32,7 +32,16 @@ class Theme {
   DISABLE_COPY(Theme)
 
  public:
-  Theme() : gutterSettings(nullptr), scopeSettings(QVector<ScopeSetting*>(0)) {}
+  Theme()
+      : textEditViewSettings(nullptr),
+        gutterSettings(nullptr),
+        statusBarSettings(nullptr),
+        tabBarSettings(nullptr),
+        tabViewSettings(nullptr),
+        projectTreeViewSettings(nullptr),
+        windowSettings(nullptr),
+        packageToolBarSettings(nullptr),
+        scopeSettings(QVector<ScopeSetting*>(0)) {}
   ~Theme() = default;
   DEFAULT_MOVE(Theme)
 
@@ -41,19 +50,37 @@ class Theme {
 
   std::shared_ptr<QTextCharFormat> getFormat(const QString& scope);
 
+  std::unique_ptr<ColorSettings> textEditViewSettings;
   std::unique_ptr<ColorSettings> gutterSettings;
+  std::unique_ptr<ColorSettings> statusBarSettings;
+  std::unique_ptr<ColorSettings> tabBarSettings;
+  std::unique_ptr<ColorSettings> tabViewSettings;
+  std::unique_ptr<ColorSettings> projectTreeViewSettings;
+  std::unique_ptr<ColorSettings> windowSettings;
+  std::unique_ptr<ColorSettings> packageToolBarSettings;
+  std::unique_ptr<ColorSettings> findReplaceViewSettings;
+
   QFont::Weight gutterFontWeight;
   bool isGutterItalic;
   bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> scopeSettings;
+  bool isDarkTheme() const;
 
  private:
   static ScopeSetting* matchedSetting(const QString& scope);
-
   QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
-
   QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
+
+  static ColorSettings createTextEditViewSettingsColors(const Theme* theme);
+  static ColorSettings createGutterSettingsColors(const Theme* theme);
+  static ColorSettings createStatusBarSettingsColors(const Theme* theme);
+  static ColorSettings createTabBarSettingsColors(const Theme* theme);
+  static ColorSettings createTabViewSettingsColors(const Theme* theme);
+  static ColorSettings createProjectTreeViewSettingsColors(const Theme* theme);
+  static ColorSettings createWindowSettingsColors(const Theme* theme);
+  static ColorSettings createPackageToolBarSettingsColors(const Theme* theme);
+  static ColorSettings createFindReplaceViewSettingsColors(const Theme* theme);
 };
 
 class Rank {

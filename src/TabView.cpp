@@ -16,10 +16,12 @@
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Constants.h"
+#include "core/Util.h"
 
 using core::Document;
 using core::Config;
 using core::Theme;
+using core::Util;
 using core::ColorSettings;
 using core::Constants;
 
@@ -31,11 +33,6 @@ QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
   return info.fileName().isEmpty() ? DocumentManager::DEFAULT_FILE_NAME : info.fileName();
 }
-
-// http://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color/3943023#3943023
-bool isLightColor(const QColor& color) {
-  return (color.red() * 0.299 + color.green() * 0.587 + color.blue() * 0.114) > 186;
-}
 }
 
 TabView::TabView(QWidget* parent)
@@ -44,7 +41,7 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  changeTabStyle(Config::singleton().theme());
+  setTheme(Config::singleton().theme());
   // Note: setDocumentMode also calls setDrawBase
   tabBar()->setDrawBase(false);
 
@@ -54,7 +51,7 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
   connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
-  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::changeTabStyle);
+  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::setTheme);
 }
 
 TabView::~TabView() {
@@ -270,17 +267,20 @@ void TabView::setActiveView(QWidget* activeView) {
   }
 }
 
-void TabView::changeTabStyle(Theme* theme) {
-  if (theme) {
-    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
-    if (settings->contains("background")) {
-      QColor color = settings->value("background");
-      bool isLight = isLightColor(color);
-      QString selectedTabTextColor = isLight ? "gray" : "lightGray";
-      tabBar()->setStyleSheet(QString("QTabBar::tab:selected { background-color: %1; color: %2; } ")
-                                  .arg(color.name())
-                                  .arg(selectedTabTextColor));
-    }
+void TabView::setTheme(const Theme* theme) {
+  qDebug("TabView theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->tabViewSettings != nullptr) {
+    QString style;
+    ColorSettings* tabViewSettings = theme->tabViewSettings.get();
+
+    style = QString("background-color: %1;")
+                .arg(Util::qcolorForStyleSheet(tabViewSettings->value("background")));
+    this->setStyleSheet(style);
   }
 }
 

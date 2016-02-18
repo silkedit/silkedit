@@ -1,4 +1,5 @@
-﻿#include "Theme.h"
+﻿#include <QDebug>
+#include "Theme.h"
 #include "PListParser.h"
 
 namespace core {
@@ -10,6 +11,23 @@ const QString scopeStr = "scope";
 const QString settingsStr = "settings";
 const QString foregroundStr = "foreground";
 const QString backgroundStr = "background";
+const int brightnessThresholdWhite = 180;
+const int brightnessThresholdGray = 125;
+const int brightnessThresholdBlack = 60;
+
+// Change RGBA color code to ARGB color code
+//   thTheme in package defines color ilke below.
+//     #RRGGBBAA
+//   But QColor::setNamedColor is below (http://doc.qt.io/qt-5/qcolor.html#setNamedColor)
+//   #AARRGGBB (Since 5.2)
+QString convertColorCodeToARGB(QString colorCode) {
+  QString colorRgb = colorCode.mid(1, 6);
+  QString colorAlpha = "FF";
+  if (colorCode.length() == 9) {
+    colorAlpha = colorCode.right(2);
+  }
+  return QString("#%1%2").arg(colorAlpha, colorRgb);
+}
 
 void parseSettings(ColorSettings* settings,
                    QFont::Weight* fontWeight,
@@ -37,7 +55,10 @@ void parseSettings(ColorSettings* settings,
         }
       }
     } else {
-      QColor color(iter.value().toString());
+      QString colorCode = iter.value().toString();
+      QColor color;
+
+      color.setNamedColor(convertColorCodeToARGB(colorCode));
       if (color.isValid()) {
         (*settings)[key] = color;
       }
@@ -45,8 +66,8 @@ void parseSettings(ColorSettings* settings,
   }
 }
 
-void parseSettings(ColorSettings* settings, QHash<QString, QColor> defaultColors) {
-  QHashIterator<QString, QColor> i(defaultColors);
+void parseSettings(ColorSettings* settings, ColorSettings defaultColors) {
+  QMapIterator<QString, QColor> i(defaultColors);
   while (i.hasNext()) {
     i.next();
     if (i.value().isValid()) {
@@ -55,14 +76,55 @@ void parseSettings(ColorSettings* settings, QHash<QString, QColor> defaultColors
   }
 }
 
-QColor changeColorBrightness(QColor const color, int threshold = 125) {
+QColor changeColorBrightness(QColor const color,
+                             int value = 10,
+                             int threshold = brightnessThresholdGray) {
   QColor newColor;
 
   // 0 is black; 255 is as far from black as possible.
   if (color.value() < threshold) {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 10);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + value);
   } else {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 10);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
+  }
+  return newColor;
+}
+
+QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
+  QColor newColor;
+  newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
+  return newColor;
+}
+
+QColor getAppropriateGray(QColor const color, bool reverse = false) {
+  QColor newColor;
+  int brightness = color.value();
+  if (reverse) {
+    brightness = 255 - brightness;
+  }
+  // use material color
+  //  - http://www.materialui.co/colors
+  if (brightness < brightnessThresholdBlack) {
+    newColor.setRgb(224, 224, 224);  // 300
+  } else if (brightness < brightnessThresholdGray) {
+    newColor.setRgb(158, 158, 158);  // 500
+  } else if (brightness < brightnessThresholdWhite) {
+    newColor.setRgb(97, 97, 97);  // 700
+  } else {
+    newColor.setRgb(33, 33, 33);  // 900
+  }
+  return newColor;
+}
+
+QColor getSelectedTabBorderColor(QColor const color) {
+  QColor newColor;
+  int brightness = color.value();
+  // use material color
+  //  - http://www.materialui.co/colors
+  if (brightness < brightnessThresholdGray) {
+    newColor.setRgb(130, 177, 255);  // Blue A100
+  } else {
+    newColor.setRgb(41, 98, 255);  // Blue A700
   }
   return newColor;
 }
@@ -121,11 +183,18 @@ Theme* Theme::loadTheme(const QString& filename) {
     theme->name = rootMap.value(nameStr).toString();
   }
 
-  // main editor settings (TextEditView)
+  // create base theme
   if (rootMap.contains(settingsStr)) {
     QVariantList settingList = rootMap.value(settingsStr).toList();
-    foreach (const QVariant& var, settingList) { theme->scopeSettings.append(toScopeSetting(var)); }
+    foreach (const QVariant& var, settingList) {
+      // This is the base color in the following process,
+      theme->scopeSettings.append(toScopeSetting(var));
+    }
   }
+
+  // text edit view settings (TextEditView)
+  theme->textEditViewSettings.reset(new ColorSettings());
+  parseSettings(theme->textEditViewSettings.get(), createTextEditViewSettingsColors(theme));
 
   // gutter settings (LineNumberArea)
   const QString gutterSettingsStr = "gutterSettings";
@@ -135,31 +204,222 @@ Theme* Theme::loadTheme(const QString& filename) {
     parseSettings(theme->gutterSettings.get(), &(theme->gutterFontWeight), &(theme->isGutterItalic),
                   &(theme->isGutterUnderline), rootMap.value(gutterSettingsStr));
   } else {
-    QColor backgroundColor = QColor(Qt::gray);
-    QColor foregroundColor = QColor(Qt::black);
-
-    if (!theme->scopeSettings.isEmpty()) {
-      ColorSettings* textEditViewColorSettings = theme->scopeSettings.first()->colorSettings.get();
-
-      if (!textEditViewColorSettings->isEmpty()) {
-        if (textEditViewColorSettings->contains("background")) {
-          backgroundColor =
-              changeColorBrightness(textEditViewColorSettings->value("background").name());
-        }
-
-        if (textEditViewColorSettings->contains("foreground")) {
-          foregroundColor =
-              changeColorBrightness(textEditViewColorSettings->value("foreground").name());
-        }
-      }
-    }
-
-    QHash<QString, QColor> defaultGutterColors = {{"background", backgroundColor},
-                                                  {"foreground", foregroundColor}};
-    parseSettings(theme->gutterSettings.get(), defaultGutterColors);
+    parseSettings(theme->gutterSettings.get(), createGutterSettingsColors(theme));
   }
 
+  // status bar settings(StatusBar)
+  theme->statusBarSettings.reset(new ColorSettings());
+  parseSettings(theme->statusBarSettings.get(), createStatusBarSettingsColors(theme));
+
+  // tab bar settings(TabBar)
+  theme->tabBarSettings.reset(new ColorSettings());
+  parseSettings(theme->tabBarSettings.get(), createTabBarSettingsColors(theme));
+
+  // tab view settings(TabView)
+  theme->tabViewSettings.reset(new ColorSettings());
+  parseSettings(theme->tabViewSettings.get(), createTabViewSettingsColors(theme));
+
+  // project tree view settings(ProjectTreeView)
+  theme->projectTreeViewSettings.reset(new ColorSettings());
+  parseSettings(theme->projectTreeViewSettings.get(), createProjectTreeViewSettingsColors(theme));
+
+  // window settings(window)
+  theme->windowSettings.reset(new ColorSettings());
+  parseSettings(theme->windowSettings.get(), createWindowSettingsColors(theme));
+
+  // package tool bar settings(PackageToolBar)
+  theme->packageToolBarSettings.reset(new ColorSettings());
+  parseSettings(theme->packageToolBarSettings.get(), createPackageToolBarSettingsColors(theme));
+
+  // Find Replace View settings(FindReplaceView)
+  theme->findReplaceViewSettings.reset(new ColorSettings());
+  parseSettings(theme->findReplaceViewSettings.get(), createFindReplaceViewSettingsColors(theme));
+
   return theme;
+}
+
+bool Theme::isDarkTheme() const {
+  bool ret = false;
+  if (scopeSettings.isEmpty()) {
+    return ret;
+  }
+
+  ColorSettings* baseColorSettings = scopeSettings.first()->colorSettings.get();
+  if (baseColorSettings->isEmpty()) {
+    return ret;
+  }
+
+  if (!baseColorSettings->contains("background")) {
+    return ret;
+  }
+
+  QColor backgroundColor = baseColorSettings->value("background");
+  if (backgroundColor.value() < brightnessThresholdGray) {
+    ret = true;
+  }
+  return ret;
+}
+
+ColorSettings Theme::createTextEditViewSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::gray);
+  QColor foregroundColor = QColor(Qt::black);
+  QColor lineHighlight = QColor(Qt::gray);
+  QColor selectionBackgroundColor = QColor(Qt::gray);
+  QColor selectionForegroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("foreground")) {
+        foregroundColor = baseColorSettings->value("foreground");
+      }
+
+      if (baseColorSettings->contains("background")) {
+        backgroundColor = baseColorSettings->value("background");
+      }
+
+      if (baseColorSettings->contains("lineHighlight")) {
+        lineHighlight = baseColorSettings->value("lineHighlight");
+      }
+
+      if (baseColorSettings->contains("selection")) {
+        selectionBackgroundColor = baseColorSettings->value("selection");
+      } else if (baseColorSettings->contains("selectionBackground")) {
+        selectionBackgroundColor = baseColorSettings->value("selectionBackground");
+      }
+
+      // for selection foreground color, we use foreground color if selectionForeground is not
+      // found.
+      // The reason is that Qt ignores syntax highlighted color for a selected text and sets
+      // selection
+      // foreground color something.
+      // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
+      // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
+      if (baseColorSettings->contains("selectionForeground")) {
+        selectionForegroundColor = baseColorSettings->value("selectionForeground");
+      } else {
+        selectionForegroundColor = foregroundColor;
+      }
+    }
+  }
+
+  return defaultColors = {{"background", backgroundColor},
+                          {"foreground", foregroundColor},
+                          {"lineHighlight", lineHighlight},
+                          {"selectionBackground", selectionBackgroundColor},
+                          {"selectionForeground", selectionForegroundColor}};
+}
+
+ColorSettings Theme::createGutterSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::gray);
+  QColor foregroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("background")) {
+        backgroundColor = changeColorBrightness(baseColorSettings->value("background"));
+      }
+
+      if (baseColorSettings->contains("foreground")) {
+        foregroundColor = changeColorBrightness(baseColorSettings->value("foreground"));
+      }
+    }
+  }
+
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+}
+
+ColorSettings Theme::createStatusBarSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::Window);
+  QColor foregroundColor = QColor(Qt::black);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (baseColorSettings->contains("background")) {
+      backgroundColor = changeColorBrightnessDarker(baseColorSettings->value("background"), 20);
+    }
+    if (baseColorSettings->contains("foreground")) {
+      foregroundColor = changeColorBrightness(baseColorSettings->value("foreground"));
+    }
+  }
+
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+}
+
+ColorSettings Theme::createTabViewSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
+}
+
+ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(Qt::Window);
+  QColor foregroundColor = QColor(Qt::gray);
+  QColor selectedColor = QColor(Qt::black);
+  QColor selectedBorderColor = QColor(Qt::white);
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (!baseColorSettings->isEmpty()) {
+      if (baseColorSettings->contains("background")) {
+        selectedColor = baseColorSettings->value("background");
+        selectedBorderColor = getSelectedTabBorderColor(baseColorSettings->value("background"));
+        backgroundColor = changeColorBrightness(baseColorSettings->value("background"));
+      }
+
+      if (baseColorSettings->contains("foreground")) {
+        foregroundColor = changeColorBrightness(baseColorSettings->value("foreground"));
+      }
+    }
+  }
+  return defaultColors = {{"background", backgroundColor},
+                          {"foreground", foregroundColor},
+                          {"selected", selectedColor},
+                          {"selectedBorder", selectedBorderColor}};
+}
+
+ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
+  ColorSettings textEditViewSettingsColors = createTextEditViewSettingsColors(theme);
+  ColorSettings defaultColors = createStatusBarSettingsColors(theme);
+  defaultColors["lineHighlight"] = textEditViewSettingsColors.value("lineHighlight");
+  defaultColors["selectionBackground"] = textEditViewSettingsColors.value("selectionBackground");
+  defaultColors["selectionForeground"] = textEditViewSettingsColors.value("selectionForeground");
+
+  return defaultColors;
+}
+
+ColorSettings Theme::createWindowSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors;
+  QColor backgroundColor = QColor(33, 33, 33);     // Gray 900
+  QColor foregroundColor = QColor(117, 117, 117);  // Gray 600
+
+  if (!theme->scopeSettings.isEmpty()) {
+    ColorSettings* baseColorSettings = theme->scopeSettings.first()->colorSettings.get();
+
+    if (baseColorSettings->contains("background")) {
+      backgroundColor = baseColorSettings->value("background");
+      foregroundColor = getAppropriateGray(baseColorSettings->value("background"));
+    }
+  }
+  return defaultColors = {{"background", backgroundColor}, {"foreground", foregroundColor}};
+}
+
+ColorSettings Theme::createPackageToolBarSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
+}
+
+ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
+  ColorSettings defaultColors = createStatusBarSettingsColors(theme);
+  defaultColors["buttonCheckedBackgroundColor"] =
+      getAppropriateGray(defaultColors.value("background"));
+
+  return defaultColors;
 }
 
 // Return the rank of scopeSelector for scope
