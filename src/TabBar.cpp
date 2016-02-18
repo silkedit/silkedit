@@ -7,7 +7,6 @@
 #include "FakeWindow.h"
 #include "Window.h"
 #include "App.h"
-#include "SilkApp.h"
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Util.h"

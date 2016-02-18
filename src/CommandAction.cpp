@@ -66,9 +66,10 @@ CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QMap<QString, QString>& icons,
                              QObject* parent,
+                             boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(id, pkgName, parent), m_icons(icons), m_cmdName(cmdName) {
-  init(id, cmdName);
+    : PackageAction(id, pkgName, parent, cond), m_icons(icons), m_cmdName(cmdName) {
+  init(id);
   setTheme();
   connect(&Config::singleton(), &Config::themeChanged, this, &CommandAction::setTheme);
 }
