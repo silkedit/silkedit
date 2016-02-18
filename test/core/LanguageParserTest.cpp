@@ -439,7 +439,7 @@ EOS)";
 
     LanguageParser* parser = LanguageParser::create("source.ruby", text);
     std::unique_ptr<Node> root = parser->parse();
-    //    qDebug().noquote() << root->toString();
+//    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-59: "source.ruby"
   5-59: "string.unquoted.heredoc.ruby"
@@ -456,6 +456,74 @@ EOS)";
       51-52: "punctuation.section.embedded.end.ruby"
         51-52: "source.ruby" - Data: "}"
     56-59: "punctuation.definition.string.end.ruby" - Data: "EOS")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+  void rubyClassTest() {
+    const QVector<QString> files({"testdata/grammers/Ruby.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(class Fred
+  def initialize(v)
+    @val = v
+  end
+
+  # Set it and get it.
+  def set(v)
+    @val = v
+  end
+
+  def get
+    return @val
+  end
+end)";
+
+    LanguageParser* parser = LanguageParser::create("source.ruby", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-142: "source.ruby"
+  0-10: "meta.class.ruby"
+    0-5: "keyword.control.class.ruby" - Data: "class"
+    6-10: "entity.name.type.class.ruby" - Data: "Fred"
+  13-30: "meta.function.method.with-arguments.ruby"
+    13-16: "keyword.control.def.ruby" - Data: "def"
+    17-27: "entity.name.function.ruby" - Data: "initialize"
+    27-28: "punctuation.definition.parameters.ruby" - Data: "("
+    28-29: ""
+      28-29: ""
+        28-29: "variable.parameter.function.ruby" - Data: "v"
+    29-30: "punctuation.definition.parameters.ruby" - Data: ")"
+  35-39: "variable.other.readwrite.instance.ruby"
+    35-36: "punctuation.definition.variable.ruby" - Data: "@"
+  40-41: "keyword.operator.assignment.ruby" - Data: "="
+  46-49: "keyword.control.ruby" - Data: "end"
+  51-74: ""
+    51-53: "punctuation.whitespace.comment.leading.ruby" - Data: "  "
+    53-74: "comment.line.number-sign.ruby"
+      53-54: "punctuation.definition.comment.ruby" - Data: "#"
+  76-86: "meta.function.method.with-arguments.ruby"
+    76-79: "keyword.control.def.ruby" - Data: "def"
+    80-83: "entity.name.function.ruby" - Data: "set"
+    83-84: "punctuation.definition.parameters.ruby" - Data: "("
+    84-85: ""
+      84-85: ""
+        84-85: "variable.parameter.function.ruby" - Data: "v"
+    85-86: "punctuation.definition.parameters.ruby" - Data: ")"
+  91-95: "variable.other.readwrite.instance.ruby"
+    91-92: "punctuation.definition.variable.ruby" - Data: "@"
+  96-97: "keyword.operator.assignment.ruby" - Data: "="
+  102-105: "keyword.control.ruby" - Data: "end"
+  109-116: "meta.function.method.without-arguments.ruby"
+    109-112: "keyword.control.def.ruby" - Data: "def"
+    113-116: "entity.name.function.ruby" - Data: "get"
+  121-127: "keyword.control.pseudo-method.ruby" - Data: "return"
+  128-132: "variable.other.readwrite.instance.ruby"
+    128-129: "punctuation.definition.variable.ruby" - Data: "@"
+  135-138: "keyword.control.ruby" - Data: "end"
+  139-142: "keyword.control.ruby" - Data: "end")r";
 
     compareLineByLine(root->toString(), result);
   }

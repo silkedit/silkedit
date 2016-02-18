@@ -32,14 +32,14 @@ struct Regex {
   virtual ~Regex() = default;
 
   virtual boost::optional<QVector<Region>>
-  find(const QString& str, int beginPos, QList<QStringRef> capturedStrs = QList<QStringRef>()) = 0;
+  find(const QString& str, int beginPos, int endPos = -1, QList<QStringRef> capturedStrs = QList<QStringRef>()) = 0;
 
   virtual QString pattern() = 0;
 
  protected:
   Regex() {}
 
-  boost::optional<QVector<Region>> find(Regexp* regex, const QString& str, int beginPos);
+  boost::optional<QVector<Region>> find(Regexp* regex, const QString& str, int beginPos, int endPos);
 
  private:
   friend class LanguageParserTest;
@@ -58,6 +58,7 @@ struct FixedRegex : public Regex {
   boost::optional<QVector<Region>> find(
       const QString& str,
       int beginPos,
+      int endPos,
       QList<QStringRef> capturedStrs = QList<QStringRef>()) override;
 };
 
@@ -73,6 +74,7 @@ struct RegexWithBackReference : public Regex {
   boost::optional<QVector<Region>> find(
       const QString& str,
       int beginPos,
+      int endPos,
       QList<QStringRef> capturedStrs = QList<QStringRef>()) override;
 };
 
@@ -94,9 +96,9 @@ struct Pattern {
   std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   Language* lang;
   QStringRef cachedStr;
-  Pattern* cachedPattern;
+  Pattern* cachedResultPattern;
   std::unique_ptr<QVector<Pattern*>> cachedPatterns;
-  boost::optional<QVector<Region>> cachedRegions;
+  boost::optional<QVector<Region>> cachedResultRegions;
   Pattern* parent;
   std::unique_ptr<Language> includedLanguage;
   int hits;
@@ -107,7 +109,10 @@ struct Pattern {
 
   std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
                                                                          int pos);
-  std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int pos);
+
+  // Note: Don't add endPos because Pattern caches the result matched in [beginPos, end of data)
+  // When you call find next time, find returns the chached result if beginPos > cached result's begin pos
+  std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int beginPos);
   std::unique_ptr<Node> createNode(const QString& data,
                                    LanguageParser* parser,
                                    const QVector<Region>& regions);

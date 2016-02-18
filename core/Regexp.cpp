@@ -141,7 +141,8 @@ QVector<int> Regexp::onigSearch(unsigned char* str,
   OnigRegion* region = onig_region_new();
   scoped_guard guard([=] { onig_region_free(region, 1 /* 1:free self, 0:free contents only */); });
 
-  int r = onig_search(m_reg, str, endOfStr, start, range, region, ONIG_OPTION_NONE);
+  unsigned char* gpos = start ? start : str;
+  int r = onig_search_gpos(m_reg, str, endOfStr, gpos, start, range, region, ONIG_OPTION_NONE);
 
   // ONIG_OPTION_FIND_NOT_EMPTY doesn't work...
   if (findNotEmpty && region->beg[0] == region->end[0]) {
