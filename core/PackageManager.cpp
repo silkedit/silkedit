@@ -40,7 +40,7 @@ void loadPreferences(const QString& path) {
 }
 
 namespace core {
-const auto PackageManager::DEPENDENCIES = QStringLiteral("dependencies");
+const QString PackageManager::DEPENDENCIES = QStringLiteral("dependencies");
 
 void PackageManager::loadFiles() {
   for (const QString& path : Constants::singleton().packagesPaths()) {
