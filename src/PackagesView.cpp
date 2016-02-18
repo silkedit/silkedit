@@ -119,6 +119,10 @@ void PackagesView::processWithPackage(const QModelIndex& index) {
     return;
   }
 
+  if (!PackageManager::singleton()._ensureRootPackageJson()) {
+    emit m_viewModel->processFailed(index);
+  }
+
   m_viewModel->processWithPackage(index, pkg);
 }
 
@@ -412,32 +416,25 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
               return;
             }
 
-            QDir node_modules = QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
+            QDir node_modules =
+                QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
             if (!node_modules.exists()) {
               qWarning() << node_modules.absolutePath() << "doesn't exist";
               emit processFailed(index);
               return;
             }
 
-            // Add package.json content to packages.json
-            QFile packagesJson(Constants::singleton().userPackagesJsonPath());
-            if (!packagesJson.open(QIODevice::ReadWrite | QIODevice::Text)) {
-              qWarning() << "Failed to open" << Constants::singleton().userPackagesJsonPath();
-              emit processFailed(index);
-              return;
-            }
-            const QJsonDocument& doc = QJsonDocument::fromJson(packagesJson.readAll());
-            QJsonArray packages = doc.array();
-            packages.append(pkg.toJson());
-            QJsonDocument newDoc(packages);
-            packagesJson.resize(0);
-            packagesJson.write(newDoc.toJson());
-
             qDebug("installation succeeded. row: %d", index.row());
             emit processSucceeded(index);
             Helper::singleton().loadPackage(pkg.name);
           });
-  const QStringList args{Constants::RUN_AS_NODE, Constants::singleton().npmCliPath(), "i", "--production", "--prefix", Constants::singleton().userPackagesRootDirPath(),
+  const QStringList args{Constants::RUN_AS_NODE,
+                         Constants::singleton().npmCliPath(),
+                         "i",
+                         "--production",
+                         "--save",
+                         "--prefix",
+                         Constants::singleton().userPackagesRootDirPath(),
                          tarballUrl};
   npmProcess->start(Constants::singleton().nodePath(), args);
 }
@@ -445,12 +442,8 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
 PackagesViewModel::PackagesViewModel(QObject* parent) : QObject(parent) {}
 
 QSet<Package> PackagesViewModel::installedPackages() {
-  QFile packagesJson(Constants::singleton().userPackagesJsonPath());
-  if (!packagesJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    return QSet<Package>();
-  }
-
-  if (const auto& packages = PackageManager::loadPackagesJson(packagesJson.readAll())) {
+  if (const auto& packages =
+          PackageManager::loadRootPackageJson(Constants::singleton().userRootPackageJsonPath())) {
     return QSet<Package>::fromList(*packages);
   } else {
     return QSet<Package>();
@@ -496,49 +489,35 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
             npmProcess->terminate();
             emit processFailed(index);
           });
-  connect(
-      npmProcess, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
-      this, [this, npmProcess, index, pkg](int exitCode, QProcess::ExitStatus exitStatus) {
-        npmProcess->deleteLater();
+  connect(npmProcess,
+          static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this,
+          [this, npmProcess, index, pkg](int exitCode, QProcess::ExitStatus exitStatus) {
+            npmProcess->deleteLater();
 
-        if (exitStatus == QProcess::CrashExit || exitCode != 0) {
-          qWarning("npm uninstall failed");
-          emit processFailed(index);
-          return;
-        }
+            if (exitStatus == QProcess::CrashExit || exitCode != 0) {
+              qWarning("npm uninstall failed");
+              emit processFailed(index);
+              return;
+            }
 
-        QDir node_modules = QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
-        if (node_modules.exists()) {
-          qWarning() << node_modules.absolutePath() << "still exists";
-          emit processFailed(index);
-          return;
-        }
+            QDir node_modules =
+                QDir(Constants::singleton().userPackagesNodeModulesPath() + "/" + pkg.name);
+            if (node_modules.exists()) {
+              qWarning() << node_modules.absolutePath() << "still exists";
+              emit processFailed(index);
+              return;
+            }
 
-        // Removes package.json content in packages.json
-        QFile packagesJson(Constants::singleton().userPackagesJsonPath());
-        if (!packagesJson.open(QIODevice::ReadWrite | QIODevice::Text)) {
-          qWarning() << "Failed to open" << Constants::singleton().userPackagesJsonPath();
-          emit processFailed(index);
-          return;
-        }
-        const QJsonDocument& doc = QJsonDocument::fromJson(packagesJson.readAll());
-        QJsonArray packages = doc.array();
-        auto it = std::find_if(packages.begin(), packages.end(),
-                               [&](QJsonValueRef v) { return v.toObject()["name"] == pkg.name; });
-        if (it != packages.end()) {
-          packages.erase(it);
-        } else {
-          qWarning() << "Can't find" << pkg.name << "in packages.json";
-        }
-
-        QJsonDocument newDoc(packages);
-        packagesJson.resize(0);
-        packagesJson.write(newDoc.toJson());
-
-        qDebug("%s removed successfully", qPrintable(pkg.name));
-        emit processSucceeded(index);
-        emit PackageManager::singleton().packageRemoved(pkg);
-      });
-  const QStringList args{Constants::RUN_AS_NODE, Constants::singleton().npmCliPath(), "r", "--prefix", Constants::singleton().userPackagesRootDirPath(), pkg.name};
+            qDebug("%s removed successfully", qPrintable(pkg.name));
+            emit processSucceeded(index);
+            emit PackageManager::singleton().packageRemoved(pkg);
+          });
+  const QStringList args{Constants::RUN_AS_NODE,
+                         Constants::singleton().npmCliPath(),
+                         "r",
+                         "--save",
+                         "--prefix",
+                         Constants::singleton().userPackagesRootDirPath(),
+                         pkg.name};
   npmProcess->start(Constants::singleton().nodePath(), args);
 }

@@ -12,7 +12,7 @@ class Constants : public QObject, public core::Singleton<Constants> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 
-  Q_PROPERTY(QString userPackagesJsonPath READ userPackagesJsonPath CONSTANT)
+  Q_PROPERTY(QString userRootPackageJsonPath READ userRootPackageJsonPath CONSTANT)
   Q_PROPERTY(QString userPackagesNodeModulesPath READ userPackagesNodeModulesPath CONSTANT)
   Q_PROPERTY(QString silkHomePath READ silkHomePath CONSTANT)
 
@@ -44,7 +44,7 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QString tabViewInformationPath();
   QStringList themePaths();
   QStringList packagesPaths();
-  QString userPackagesJsonPath() const;
+  QString userRootPackageJsonPath() const;
   QString userPackagesNodeModulesPath() const;
 
  private:
