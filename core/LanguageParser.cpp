@@ -221,6 +221,10 @@ Pattern* findInRepository(Pattern* pattern, const QString& key) {
 
   return findInRepository(pattern->parent, key);
 }
+
+bool inSameLine(const QString& text, int begin, int end) {
+  return !text.midRef(begin, end - begin).contains('\n');
+}
 }
 
 LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
@@ -383,14 +387,17 @@ bool Regex::hasBackReference(const QString& str) {
   return false;
 }
 
-boost::optional<QVector<Region>> Regex::find(Regexp* regex, const QString& str, int beginPos) {
+boost::optional<QVector<Region>> Regex::find(Regexp* regex,
+                                             const QString& str,
+                                             int beginPos,
+                                             int endPos) {
   //  qDebug("find. pattern: %s, pos: %d", qPrintable(re->pattern()), pos);
 
   if (!regex) {
     return boost::none;
   }
 
-  QVector<int> indices = regex->findStringSubmatchIndex(str, beginPos, -1, false);
+  QVector<int> indices = regex->findStringSubmatchIndex(str, beginPos, endPos, false);
   if (!indices.isEmpty()) {
     Q_ASSERT(!indices.isEmpty());
     Q_ASSERT(indices.size() % 2 == 0);
@@ -413,7 +420,7 @@ Regex* Regex::create(const QString& pattern) {
 }
 
 Pattern::Pattern(Pattern* parent)
-    : lang(nullptr), cachedPattern(nullptr), cachedPatterns(nullptr), parent(parent) {}
+    : lang(nullptr), cachedResultPattern(nullptr), cachedPatterns(nullptr), parent(parent) {}
 
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(const QString& str,
                                                                                 int beginPos) {
@@ -422,6 +429,9 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
   Pattern* resultPattern = nullptr;
   boost::optional<QVector<Region>> resultRegions;
   int i = 0;
+  // todo: think about better cache not to use this
+  QVector<Pattern*> backslashGPatterns;
+
   while (i < cachedPatterns->length()) {
     auto pair = (*cachedPatterns)[i]->find(str, beginPos);
     Pattern* pattern = pair.first;
@@ -440,10 +450,19 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
       i++;
     } else {
       // If it wasn't found now, it'll never be found, so the pattern can be popped from the cache
+      // But don't remove pattern with \G because it may match in the future with another \G
+      if ((*cachedPatterns)[i]->match && (*cachedPatterns)[i]->match->pattern().contains(R"(\G)")) {
+        backslashGPatterns.append((*cachedPatterns)[i]);
+        (*cachedPatterns)[i]->clearCache();
+      }
+
       cachedPatterns->removeAt(i);
     }
   }
 
+  for (auto p : backslashGPatterns) {
+    cachedPatterns->prepend(p);
+  }
   return std::make_pair(resultPattern, resultRegions);
 }
 
@@ -458,16 +477,17 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QString& str,
                                                                     int beginPos) {
   //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
+
   if (!cachedStr.isEmpty() && cachedStr == str) {
-    if (!cachedRegions) {
+    if (!cachedResultRegions) {
       //      qDebug("cachedMatch is null");
       return std::make_pair(nullptr, boost::none);
     }
 
-    if ((*cachedRegions)[0].begin() >= beginPos && cachedPattern->cachedRegions) {
+    if ((*cachedResultRegions)[0].begin() >= beginPos && cachedResultPattern->cachedResultRegions) {
       //      qDebug("hits++");
       //      hits++;
-      return std::make_pair(cachedPattern, cachedRegions);
+      return std::make_pair(cachedResultPattern, cachedResultRegions);
     }
   } else {
     //    qDebug("cachedPatterns = nullptr");
@@ -536,8 +556,8 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
   }
 
   cachedStr = QStringRef(&str);
-  cachedRegions = regions;
-  cachedPattern = pattern;
+  cachedResultRegions = regions;
+  cachedResultPattern = pattern;
 
   return std::make_pair(pattern, regions);
 }
@@ -574,17 +594,17 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
   bool found = false;
   int i, endPos;
 
-  // Store cached regions and patterns because searchInPatterns may overwrite cache.
-  // If they are overwritten, next iteration in for loop has different regions and pattern compared
-  // by previous iteration
-  auto tmpCachedRegions = cachedRegions;
-  auto tmpCachedPatterns = cachedPatterns.get();
+  // Store cached result regions because searchInPatterns may overwrite it.
+  // If it's overwritten, next iteration in for loop has different result regions compared by
+  // previous iteration
+  // Don't cache cachedPatterns. It's supposed to be overwritten in searchInPatterns.
+  auto tmpCachedRegions = cachedResultRegions;
 
   for (i = node->region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
     boost::optional<QVector<Region>> endMatchedRegions;
     if (tmpCachedRegions) {
-      endMatchedRegions = end->find(str, i, getCaptures(cachedStr, *tmpCachedRegions));
+      endMatchedRegions = end->find(str, i, -1, getCaptures(cachedStr, *tmpCachedRegions));
     } else {
       endMatchedRegions = end->find(str, i);
     }
@@ -609,12 +629,38 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
 
     Q_ASSERT(endMatchedRegions);
 
+    // check if begin and end are in a same line
+    bool isEndInSameLine = inSameLine(str, i, (*endMatchedRegions)[0].begin());
+
     // Search patterns between begin and end
-    if (tmpCachedPatterns->length() > 0) {
-      auto pair = searchInPatterns(str, i);
+    if (cachedPatterns && cachedPatterns->length() > 0) {
+      std::pair<Pattern*, boost::optional<QVector<Region>>> pair;
+      /*
+       In the following rule, punctuation.separator.continuation.c exceeds the end pos of end
+       pattern
+       because $ doesn't include \n
+       But both TextMate and Sublime allow this, so we need to support this behavior as well.
+
+       * <key>end</key>
+         <string>(?=(?://|/\*))|$</string>
+         <key>name</key>
+         <string>meta.preprocessor.macro.c</string>
+         <key>patterns</key>
+         <array>
+           <dict>
+             <key>match</key>
+             <string>(?&gt;\\\s*\n)</string>
+             <key>name</key>
+             <string>punctuation.separator.continuation.c</string>
+       */
+      pair = searchInPatterns(str, i);
+
       Pattern* patternBeforeEnd = pair.first;
       boost::optional<QVector<Region>> regionsBeforeEnd = pair.second;
       if (regionsBeforeEnd && endMatchedRegions &&
+          // If end pattern exists in a same line, the begin pos of patterns must not exceed the
+          // beginning of the end pattern
+          (!isEndInSameLine || (*regionsBeforeEnd)[0].begin() < (*endMatchedRegions)[0].begin()) &&
           ((*regionsBeforeEnd)[0].begin() < (*endMatchedRegions)[0].begin() ||
            ((*regionsBeforeEnd)[0].begin() == (*endMatchedRegions)[0].begin() &&
             node->region.isEmpty()))) {
@@ -734,10 +780,10 @@ void Pattern::tweak(Language* l) {
 }
 
 void Pattern::clearCache() {
-  cachedPattern = nullptr;
+  cachedResultPattern = nullptr;
   cachedPatterns.reset(nullptr);
   includedLanguage.reset(nullptr);
-  cachedRegions = boost::none;
+  cachedResultRegions = boost::none;
   cachedStr.clear();
   if (patterns) {
     foreach (Pattern* pat, *patterns) { pat->clearCache(); }
@@ -840,8 +886,9 @@ QString FixedRegex::pattern() {
 
 boost::optional<QVector<Region>> FixedRegex::find(const QString& str,
                                                   int beginPos,
+                                                  int endPos,
                                                   QList<QStringRef>) {
-  return Regex::find(regex.get(), str, beginPos);
+  return Regex::find(regex.get(), str, beginPos, endPos);
 }
 
 void Language::tweak() {
@@ -905,13 +952,14 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
 
 boost::optional<QVector<Region>> RegexWithBackReference::find(const QString& str,
                                                               int beginPos,
+                                                              int endPos,
                                                               QList<QStringRef> capturedStrs) {
   auto regex = Regexp::compile(expandBackReferences(patternStr, capturedStrs));
   if (!regex) {
     qWarning() << "failed to compile" << expandBackReferences(patternStr, capturedStrs);
     return boost::none;
   }
-  return Regex::find(regex.get(), str, beginPos);
+  return Regex::find(regex.get(), str, beginPos, endPos);
 }
 
 }  // namespace core
