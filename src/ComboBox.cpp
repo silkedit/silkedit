@@ -33,8 +33,7 @@ ComboBox::ComboBox(QWidget* parent) : QComboBox(parent) {
   setItemDelegate(new ComboDelegate);
 }
 
-ComboBox::~ComboBox() {
-}
+ComboBox::~ComboBox() {}
 
 void ComboBox::addItemWithPopupText(const QString& text,
                                     const QString& popupText,
@@ -51,9 +50,11 @@ void ComboBox::addItemWithPopupText(const QString& text,
 QString ComboBox::currentText() const {
   if (QStandardItemModel* m = qobject_cast<QStandardItemModel*>(model())) {
     QStandardItem* item = m->item(currentIndex());
-    QVariant v = item->data(Qt::WhatsThisRole);
-    if (v.isValid()) {
-      return v.toString();
+    if (item) {
+      QVariant v = item->data(Qt::WhatsThisRole);
+      if (v.isValid()) {
+        return v.toString();
+      }
     }
   }
 
