@@ -19,6 +19,7 @@
 #include "util/YamlUtil.h"
 #include "Helper.h"
 #include "PlatformUtil.h"
+
 #include "Console.h"
 #include "core/Document.h"
 #include "core/Config.h"
@@ -110,8 +111,8 @@ void Window::setTheme(const core::Theme* theme) {
                 "background-color: %1;"
                 "color: %2;"
                 "}")
-        .arg(Util::qcolorForStyleSheet(windowSettings->value("background")))
-        .arg(Util::qcolorForStyleSheet(windowSettings->value("foregound")));
+                .arg(Util::qcolorForStyleSheet(windowSettings->value("background")))
+                .arg(Util::qcolorForStyleSheet(windowSettings->value("foregound")));
 
     this->setStyleSheet(style);
   }
