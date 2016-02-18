@@ -4,7 +4,6 @@
 #include <QtWidgets>
 #include <QStringBuilder>
 
-#include "vi.h"
 #include "TextEditView_p.h"
 #include "LineNumberArea.h"
 #include "core/TextEditViewLogic.h"
@@ -73,31 +72,6 @@ void insertText(QTextCursor& cursor, const QString& text, bool preserveCase) {
     cursor.insertText(preservedCaseText(cursor.selectedText(), text));
   } else {
     cursor.insertText(text);
-  }
-}
-
-int toMoveOperation(const QString& str) {
-  const QString& opStr = str.toLower();
-  if (opStr == "up") {
-    return QTextCursor::Up;
-  } else if (opStr == "down") {
-    return QTextCursor::Down;
-  } else if (opStr == "left") {
-    return QTextCursor::Left;
-  } else if (opStr == "right") {
-    return QTextCursor::Right;
-  } else if (opStr == "start_of_line") {
-    return QTextCursor::StartOfBlock;
-  } else if (opStr == "first_non_blank_char") {
-    return ViMoveOperation::FirstNonBlankChar;
-  } else if (opStr == "last_char") {
-    return ViMoveOperation::LastChar;
-  } else if (opStr == "next_line") {
-    return ViMoveOperation::NextLine;
-  } else if (opStr == "prev_line") {
-    return ViMoveOperation::PrevLine;
-  } else {
-    return QTextCursor::NoMove;
   }
 }
 
@@ -525,6 +499,16 @@ QString TextEditView::path() {
   return d_ptr->m_document ? d_ptr->m_document->path() : "";
 }
 
+void TextEditView::setTextCursor(const QTextCursor &cursor)
+{
+  QPlainTextEdit::setTextCursor(cursor);
+}
+
+QTextCursor TextEditView::textCursor() const
+{
+  return QPlainTextEdit::textCursor();
+}
+
 Document* TextEditView::document() {
   return d_ptr->m_document ? d_ptr->m_document.get() : nullptr;
 }
@@ -678,67 +662,6 @@ int TextEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void TextEditView::moveCursor(const QString& op, int repeat) {
-  // tood: use QTextCursor::MoveOperation
-  int mv = toMoveOperation(op);
-  QTextCursor cur = textCursor();
-  const int pos = cur.position();
-  QTextBlock block = cur.block();
-  const int blockPos = block.position();
-  const QString blockText = block.text();
-  bool moved = false;
-  switch (mv) {
-    case QTextCursor::Left: {
-      repeat = qMin(repeat, pos - blockPos);
-      break;
-    }
-    case QTextCursor::Right: {
-      const QString text = block.text();
-      if (text.isEmpty())
-        return;  // new line or EOF only
-      int endpos = blockPos + text.length();
-      // If the cursor is block mode, don't allow it to move at EOL
-      if (!isThinCursor()) {
-        endpos -= 1;
-      }
-      if (pos >= endpos)
-        return;
-      repeat = qMin(repeat, endpos - pos);
-      break;
-    }
-    case ViMoveOperation::FirstNonBlankChar:
-      cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
-      moved = true;
-      break;
-    case ViMoveOperation::LastChar: {
-      int ix = blockText.length();
-      if (ix != 0)
-        --ix;
-      cur.setPosition(blockPos + ix);
-      moved = true;
-      break;
-    }
-    case ViMoveOperation::NextLine:
-      cur.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor, repeat);
-      moveToFirstNonBlankChar(cur);
-      moved = true;
-      break;
-    case ViMoveOperation::PrevLine:
-      cur.movePosition(QTextCursor::PreviousBlock, QTextCursor::MoveAnchor, repeat);
-      moveToFirstNonBlankChar(cur);
-      moved = true;
-      break;
-    default:
-      break;
-  }
-
-  if (!moved) {
-    cur.movePosition(static_cast<QTextCursor::MoveOperation>(mv), QTextCursor::MoveAnchor, repeat);
-  }
-
-  setTextCursor(cur);
-}
-
 void TextEditView::performCompletion() {
   QTextCursor cursor = textCursor();
   cursor.movePosition(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
@@ -851,27 +774,6 @@ void TextEditView::makeFontBigger(bool bigger) {
   } else if (!--sz)
     return;
   setFontPointSize(sz);
-}
-
-int TextEditView::firstNonBlankCharPos(const QString& text) {
-  int ix = 0;
-  while (ix < text.length() && isTabOrSpace(text[ix])) {
-    ++ix;
-  }
-  return ix;
-}
-
-inline bool TextEditView::isTabOrSpace(const QChar ch) {
-  return ch == '\t' || ch == ' ';
-}
-
-void TextEditView::moveToFirstNonBlankChar(QTextCursor& cur) {
-  QTextBlock block = cur.block();
-  const int blockPos = block.position();
-  const QString blockText = block.text();
-  if (!blockText.isEmpty()) {
-    cur.setPosition(blockPos + firstNonBlankCharPos(blockText));
-  }
 }
 
 void TextEditView::setViewportMargins(int left, int top, int right, int bottom) {
