@@ -80,7 +80,6 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   contentSplitter->setSizes(QList<int>{500, 100});
 
   ui->rootSplitter->addWidget(contentSplitter);
-  ui->rootSplitter->addWidget(editorWidget);
   setTheme(Config::singleton().theme());
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
