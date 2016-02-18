@@ -7,6 +7,10 @@
 class QMouseEvent;
 class QWindow;
 class FakeWindow;
+namespace core {
+    class Theme;
+}
+
 
 class TabBar : public QTabBar {
   Q_OBJECT
@@ -45,4 +49,5 @@ signals:
   void grabMouse();
   void hideAllCloseButtons();
   void showCloseButtonOnActiveTab(const QPoint& pos);
+  void setTheme(const core::Theme* theme);
 };

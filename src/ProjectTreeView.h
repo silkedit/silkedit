@@ -7,6 +7,9 @@
 #include "core/macros.h"
 
 class MyFileSystemModel;
+namespace core {
+    class Theme;
+}
 
 class ProjectTreeView : public QTreeView {
   Q_OBJECT
@@ -30,6 +33,8 @@ class ProjectTreeView : public QTreeView {
   MyFileSystemModel* m_model;
   QMetaObject::Connection m_connection;
 
+  void setTheme(const core::Theme* theme);
+  void setFont(const QFont& font);
   void createNewFile(const QDir& dir);
   void createNewDir(const QDir& dir);
 

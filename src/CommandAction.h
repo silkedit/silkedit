@@ -5,6 +5,10 @@
 #include "core/macros.h"
 #include "core/PackageAction.h"
 
+namespace core {
+class Theme;
+}
+
 class CommandAction : public core::PackageAction {
   Q_OBJECT
  public:
@@ -14,20 +18,31 @@ class CommandAction : public core::PackageAction {
                 QObject* parent = nullptr,
                 boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
+
   CommandAction(const QString& id,
                 const QString& cmdName,
                 const QIcon& icon,
                 QObject* parent = nullptr,
                 boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
+
+  CommandAction(const QString& id,
+                const QString& cmdName,
+                const QMap<QString, QString>& icons,
+                QObject* parent = nullptr,
+                boost::optional<core::AndConditionExpression> cond = boost::none,
+                const QString& pkgName = "");
+
   ~CommandAction() = default;
   DEFAULT_COPY_AND_MOVE(CommandAction)
 
   void updateVisibilityAndShortcut() override;
 
  private:
+  QMap<QString, QString> m_icons;
   QString m_cmdName;
 
   void init(const QString& id);
   void updateShortcut();
+  void setTheme(const core::Theme* theme);
 };

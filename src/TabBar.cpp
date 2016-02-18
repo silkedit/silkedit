@@ -7,15 +7,60 @@
 #include "FakeWindow.h"
 #include "Window.h"
 #include "App.h"
+#include "core/Config.h"
+#include "core/Theme.h"
+#include "core/Util.h"
+
+using core::Config;
+using core::Theme;
+using core::Util;
+using core::ColorSettings;
 
 TabBar::TabBar(QWidget* parent)
     : QTabBar(parent), m_fakeWindow(nullptr), m_isGrabbingMouse(false), m_sourceTabBar(nullptr) {
+  setTheme(Config::singleton().theme());
   setAcceptDrops(true);
   setElideMode(Qt::ElideRight);
   setSelectionBehaviorOnRemove(QTabBar::SelectLeftTab);
   setMouseTracking(true);
   setUsesScrollButtons(true);
   hideAllCloseButtons();
+
+  connect(&Config::singleton(), &Config::themeChanged, this, &TabBar::setTheme);
+}
+
+void TabBar::setTheme(const Theme* theme) {
+  qDebug("TabBar theme is changed");
+  if (!theme) {
+    qWarning("theme is null");
+    return;
+  }
+
+  if (theme->tabBarSettings != nullptr) {
+    QString style;
+    ColorSettings* tabBarSettings = theme->tabBarSettings.get();
+
+    style = QString(
+                "TabBar::tab {"
+                "background-color: %1;"
+                "color: %2;"
+                "}")
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("background")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")));
+
+    style += QString(
+                 "TabBar::tab:selected {"
+                 "background-color: %1;"
+                 "color: %2;"
+                 "border-left: 2px solid;"
+                 "border-color: %3;"
+                 "}")
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selected")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")))
+        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selectedBorder")));
+
+    this->setStyleSheet(style);
+  }
 }
 
 void TabBar::startMovingTab(const QPoint& tabPos) {

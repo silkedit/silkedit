@@ -21,6 +21,7 @@
 #include "core/Constants.h"
 #include "core/BOM.h"
 #include "core/Region.h"
+#include "core/Util.h"
 
 using core::Document;
 using core::Encoding;
@@ -35,6 +36,8 @@ using core::Regexp;
 using core::Constants;
 using core::BOM;
 using core::Region;
+using core::Util;
+
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -106,60 +109,29 @@ void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
 }
 
 void TextEditViewPrivate::setTheme(Theme* theme) {
-  qDebug("changeTheme");
+  qDebug("TextEditView theme is changed");
   if (!theme) {
     qWarning("theme is null");
     return;
   }
 
-  m_lineNumberArea->setTheme(theme);
+  if (theme->textEditViewSettings != nullptr) {
+    QString style;
+    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
 
-  QString style;
-  if (!theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
-    if (settings->contains("foreground")) {
-      style = style % QString("color: %1;").arg(settings->value("foreground").name());
-      qDebug() << QString("color: %1;").arg(settings->value("foreground").name());
-    }
+    style = QString(
+                "QPlainTextEdit {"
+                "color: %1;"
+                "background-color: %2;"
+                "selection-color:%3;"
+                "selection-background-color: %4;"
+                "}")
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("foreground")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("background")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionForeground")))
+                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionBackground")));
 
-    if (settings->contains("background")) {
-      style = style % QString("background-color: %1;").arg(settings->value("background").name());
-      qDebug() << QString("background-color: %1;").arg(settings->value("background").name());
-    }
-
-    QString selectionBackgroundColor = "";
-    if (settings->contains("selection")) {
-      selectionBackgroundColor = settings->value("selection").name();
-    } else if (settings->contains("selectionBackground")) {
-      selectionBackgroundColor = settings->value("selectionBackground").name();
-    }
-    if (!selectionBackgroundColor.isEmpty()) {
-      style = style % QString("selection-background-color: %1;").arg(selectionBackgroundColor);
-      qDebug() << QString("selection-background-color: %1;")
-                      .arg(settings->value("selection").name());
-    }
-
-    // for selection foreground color, we use foreground color if selectionForeground is not
-    // found.
-    // The reason is that Qt ignores syntax highlighted color for a selected text and sets
-    // selection
-    // foreground color something.
-    // Sometimes it becomes the color hard to see. We use foreground color instead to prevent it.
-    // https://bugreports.qt.io/browse/QTBUG-1344?jql=project%20%3D%20QTBUG%20AND%20text%20~%20%22QTextEdit%20selection%20color%22
-    QString selectionColor = "";
-    if (settings->contains("selectionForeground")) {
-      selectionColor = settings->value("selectionForeground").name();
-    } else if (settings->contains("foreground")) {
-      selectionColor = settings->value("foreground").name();
-    }
-
-    if (!selectionColor.isEmpty()) {
-      style = style % QString("selection-color: %1;").arg(selectionColor);
-      qDebug() << QString("selection-color: %1;")
-                      .arg(settings->value("selectionForeground").name());
-    }
-
-    q_ptr->setStyleSheet(QString("QPlainTextEdit{%1}").arg(style));
+    q_ptr->setStyleSheet(style);
   }
 
   highlightCurrentLine();
@@ -374,31 +346,21 @@ void TextEditViewPrivate::highlightCurrentLine() {
   if (q_ptr->textCursor().hasSelection()) {
     return;
   }
-
   Theme* theme = Config::singleton().theme();
-  if (theme && !theme->scopeSettings.isEmpty()) {
-    ColorSettings* settings = theme->scopeSettings.first()->colorSettings.get();
-    if (settings->contains("lineHighlight")) {
-      QList<QTextEdit::ExtraSelection> extraSelections;
+  if (theme->textEditViewSettings != nullptr) {
+    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
 
-      if (!q_ptr->isReadOnly()) {
-        QTextEdit::ExtraSelection selection;
-
-        QColor lineColor = QColor(settings->value("lineHighlight"));
-
-        selection.format.setBackground(lineColor);
-        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-        selection.cursor = q_ptr->textCursor();
-        selection.cursor.clearSelection();
-        extraSelections.append(selection);
-      }
-
-      q_ptr->setExtraSelections(extraSelections);
-    } else {
-      qDebug("lineHighlight not found");
+    QList<QTextEdit::ExtraSelection> extraSelections;
+    if (!q_ptr->isReadOnly()) {
+      QTextEdit::ExtraSelection selection;
+      QColor lineColor = QColor(textEditViewSettings->value("lineHighlight"));
+      selection.format.setBackground(lineColor);
+      selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+      selection.cursor = q_ptr->textCursor();
+      selection.cursor.clearSelection();
+      extraSelections.append(selection);
     }
-  } else {
-    qDebug("theme is null or theme->scopeSettings is empty");
+    q_ptr->setExtraSelections(extraSelections);
   }
 }
 
@@ -472,11 +434,11 @@ TextEditView::TextEditView(QWidget* parent)
   connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
           SLOT(setTabStopWidthFromSession()));
 
+  // Set default values
   d->updateLineNumberAreaWidth(0);
-
+  d_ptr->setTheme(Config::singleton().theme());
   QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
-  d_ptr->setTheme(Config::singleton().theme());
 
   // setup for completion
   d_ptr->m_completer->setWidget(this);

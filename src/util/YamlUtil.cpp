@@ -31,6 +31,15 @@ using core::JSNull;
 using core::Util;
 
 namespace {
+
+QString getAbsolutePath(const QString& ymlPath, const QString& path) {
+  QString targetPath = path;
+  if (!path.startsWith('/')) {
+    targetPath = QFileInfo(ymlPath).dir().absoluteFilePath(path);
+  }
+  return targetPath;
+}
+
 QAction* findAction(QList<QAction*> actions, const QString& id) {
   if (id.isEmpty())
     return nullptr;
@@ -250,9 +259,9 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
 }
 
 void YamlUtil::parseToolbarNode(const QString& pkgName,
-                                 const QString& ymlPath,
-                                 QWidget* parent,
-                                 const YAML::Node& toolbarNode) {
+                                const QString& ymlPath,
+                                QWidget* parent,
+                                const YAML::Node& toolbarNode) {
   if (!toolbarNode.IsSequence()) {
     qWarning("toolbarNode must be a sequence.");
     return;
@@ -332,11 +341,21 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
       QAction* action = nullptr;
       if (commandNode.IsDefined() && iconNode.IsDefined()) {
         QString command = QString::fromUtf8(commandNode.as<std::string>().c_str());
-        QString iconPath = QString::fromUtf8(iconNode.as<std::string>().c_str());
-        if (!iconPath.startsWith('/')) {
-          iconPath = QFileInfo(ymlPath).dir().absoluteFilePath(iconPath);
+        if (iconNode.Type() == YAML::NodeType::Scalar) {
+          QString iconPath =
+              getAbsolutePath(ymlPath, QString::fromUtf8(iconNode.as<std::string>().c_str()));
+          action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
+        } else if (iconNode.Type() == YAML::NodeType::Map) {
+          QMap<QString, QString> icons;
+          for (auto it = iconNode.begin(); it != iconNode.end(); ++it) {
+            YAML::Node key = it->first;
+            YAML::Node value = it->second;
+            icons.insert(
+                QString::fromUtf8(key.as<std::string>().c_str()),
+                getAbsolutePath(ymlPath, QString::fromUtf8(value.as<std::string>().c_str())));
+          }
+          action = new CommandAction(id, command, icons, nullptr, condition, pkgName);
         }
-        action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
         if (tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = Helper::singleton().translate(
