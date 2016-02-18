@@ -16,10 +16,20 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
   DISABLE_COPY_AND_MOVE(PackageManager)
 
  public:
+  static const QString DEPENDENCIES;
   static void loadFiles();
+
+  // for installed packages
+  static boost::optional<QList<Package>> loadRootPackageJson(const QString& path);
+
+  // for available packages
   static boost::optional<QList<Package>> loadPackagesJson(const QByteArray& json);
 
   ~PackageManager() = default;
+
+public slots:
+  // This is called from JS internally
+  bool _ensureRootPackageJson();
 
  signals:
   void packageRemoved(const Package& pkg);

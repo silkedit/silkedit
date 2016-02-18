@@ -3,6 +3,7 @@
 #include <QStandardPaths>
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QJsonObject>
 
 #include "PackageManager.h"
 #include "LanguageParser.h"
@@ -39,20 +40,29 @@ void loadPreferences(const QString& path) {
 }
 
 namespace core {
+const auto PackageManager::DEPENDENCIES = QStringLiteral("dependencies");
 
 void PackageManager::loadFiles() {
   for (const QString& path : Constants::singleton().packagesPaths()) {
-    QFile packagesJson(path + "/packages.json");
-    if (!packagesJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
-      //    qDebug() << "Can't open" << dirName + "/packages.json";
-      return;
+    QFile rootPackageJson(path + "/package.json");
+    if (!rootPackageJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
+      //    qDebug() << "Can't open" << dirName + "/package.json";
+      continue;
+    }
+    const QJsonDocument& doc = QJsonDocument::fromJson(rootPackageJson.readAll());
+    if (doc.isNull()) {
+      continue;
     }
 
-    if (const auto& packages = loadPackagesJson(packagesJson.readAll())) {
-      for (const Package& pkg : *packages) {
-        loadGrammers(path + "/node_modules/" + pkg.name + "/grammers");
-        loadPreferences(path + "/node_modules/" + pkg.name + "/preferences");
-      }
+    const auto& rootObj = doc.object();
+    if (rootObj.isEmpty() || !rootObj.contains(DEPENDENCIES) || !rootObj[DEPENDENCIES].isObject()) {
+      continue;
+    }
+
+    Q_ASSERT(rootObj[DEPENDENCIES].isObject());
+    for (const auto& pkg : rootObj[DEPENDENCIES].toObject().keys()) {
+      loadGrammers(path + "/node_modules/" + pkg + "/grammers");
+      loadPreferences(path + "/node_modules/" + pkg + "/preferences");
     }
   }
 }
@@ -70,6 +80,75 @@ boost::optional<QList<Package>> PackageManager::loadPackagesJson(const QByteArra
   for (const QJsonValue& value : jsonPackages) {
     packages.append(Package::fromJson(value));
   }
+  return packages;
+}
+
+bool PackageManager::_ensureRootPackageJson()
+{
+  // ensure that user packgaes directory exists
+  if (!QFileInfo::exists(Constants::singleton().userPackagesRootDirPath())) {
+    QDir dir(Constants::singleton().silkHomePath());
+    if (!dir.mkdir("packages")) {
+      qCritical() << "failed to create:" << Constants::singleton().userPackagesRootDirPath();
+      return false;
+    }
+  }
+
+  Q_ASSERT(QFileInfo::exists(Constants::singleton().userPackagesRootDirPath()));
+
+  // copy root package.json if it doesn't exist
+  if (!QFileInfo::exists(Constants::singleton().userRootPackageJsonPath())) {
+    QFile packageJsonInResource(":/root_package.json");
+    if (!packageJsonInResource.open(QIODevice::ReadOnly)) {
+      qCritical() << "failed to open root_package.json in resource";
+      return false;
+    }
+
+    QFile rootPackageJson(Constants::singleton().userRootPackageJsonPath());
+    if (!rootPackageJson.open(QIODevice::WriteOnly | QIODevice::Text)) {
+      qCritical() << "failed to open package.json";
+      return false;
+    }
+
+    QTextStream in(&packageJsonInResource);
+    QTextStream out(&rootPackageJson);
+    while (!in.atEnd()) {
+      out << in.readLine() << endl;
+    }
+    out.flush();
+  }
+
+  return true;
+}
+
+boost::optional<QList<Package>> PackageManager::loadRootPackageJson(const QString& path) {
+  QFile rootPackageJson(path);
+  if (!rootPackageJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    return QList<Package>();
+  }
+
+  const QJsonDocument& doc = QJsonDocument::fromJson(rootPackageJson.readAll());
+  if (doc.isNull()) {
+    return boost::none;
+  }
+
+  const QJsonObject& rootObj = doc.object();
+  QList<Package> packages;
+  if (!rootObj.isEmpty() && rootObj.contains(DEPENDENCIES) && rootObj[DEPENDENCIES].isObject()) {
+    for (const auto& name : rootObj[DEPENDENCIES].toObject().keys()) {
+      QFile pkgJsonPath(QFileInfo(path).dir().absolutePath() + "/node_modules/" + name + "/package.json");
+      if (!pkgJsonPath.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        continue;
+      }
+      const QJsonDocument& pkgDoc = QJsonDocument::fromJson(pkgJsonPath.readAll());
+      if (pkgDoc.isNull()) {
+        continue;
+      }
+
+      packages.append(Package::fromJson(pkgDoc.object()));
+    }
+  }
+
   return packages;
 }
 

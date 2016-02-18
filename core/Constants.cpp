@@ -55,8 +55,8 @@ QString Constants::userPackagesNodeModulesPath() const {
   return userPackagesRootDirPath() + "/node_modules";
 }
 
-QString Constants::userPackagesJsonPath() const {
-  return userPackagesRootDirPath() + "/packages.json";
+QString Constants::userRootPackageJsonPath() const {
+  return userPackagesRootDirPath() + "/package.json";
 }
 
 // To run SilkEdit as Node.js, pass --run-as-node

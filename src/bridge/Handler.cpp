@@ -45,6 +45,7 @@
 #include "core/TextCursor.h"
 #include "core/TextBlock.h"
 #include "core/MessageHandler.h"
+#include "core/PackageManager.h"
 #include "atom/node_includes.h"
 
 using core::Config;
@@ -60,6 +61,7 @@ using core::Event;
 using core::Url;
 using core::TextCursor;
 using core::TextBlock;
+using core::PackageManager;
 
 #ifdef Q_OS_WIN
 // MessageBox is defined in winuser.h
@@ -218,6 +220,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stripNamespace(KeymapManager::staticMetaObject.className()));
   setSingletonObj(exports, &ProjectManager::singleton(),
                   Util::stripNamespace(ProjectManager::staticMetaObject.className()));
+  setSingletonObj(exports, &PackageManager::singleton(),
+                  Util::stripNamespace(PackageManager::staticMetaObject.className()));
 
   // Config::get returns config whose type is decided based on ConfigDefinition, so we need to
   // handle it specially

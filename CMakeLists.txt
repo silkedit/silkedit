@@ -32,7 +32,7 @@ if (MSVC)
 endif()
 
 file(GLOB_RECURSE SILK_UIS src/*.ui)
-set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc)
+set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc resources/files.qrc)
 if (BUILD_EDGE)
   set(SILK_RESOURCES ${SILK_RESOURCES} resources/images_edge.qrc)
 else ()
