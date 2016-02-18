@@ -431,7 +431,7 @@ WHERE email = <%= quote @email %>)";
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QString text = R"(json = <<EOS # コーテーション無しでもOK
+    QString text = u8R"(json = <<EOS # コーテーション無しでもOK
 {
   "#{lang}": "#{RUBY}"
 }
