@@ -23,10 +23,10 @@ using core::Language;
 using core::LanguageParser;
 using core::LanguageProvider;
 using core::LineSeparator;
+using core::ColorSettings;
 using core::BOM;
 using core::ColorSettings;
 using core::Util;
-
 
 StatusBar::StatusBar(QMainWindow* window)
     : QStatusBar(window),
@@ -60,9 +60,8 @@ StatusBar::StatusBar(QMainWindow* window)
   connect(m_separatorComboBox,
           static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
           &StatusBar::setActiveTextEditViewLineSeparator);
-  connect(m_bomComboBox,
-          static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
-          &StatusBar::setActiveTextEditViewBOM);
+  connect(m_bomComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          this, &StatusBar::setActiveTextEditViewBOM);
 
   // Set default values
   setTheme(Config::singleton().theme());
@@ -73,7 +72,7 @@ StatusBar::StatusBar(QMainWindow* window)
 }
 
 void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
-//  qDebug("onActiveViewChanged");
+  //  qDebug("onActiveViewChanged");
   TextEditView* textEdit = qobject_cast<TextEditView*>(newView);
   if (textEdit) {
     setCurrentLanguage(textEdit->language());
@@ -205,9 +204,9 @@ void StatusBar::setTheme(const Theme* theme) {
     ColorSettings* statusBarSettings = theme->statusBarSettings.get();
 
     style = QString("background-color: %1;")
-        .arg(Util::qcolorForStyleSheet(statusBarSettings->value("background")));
+                .arg(Util::qcolorForStyleSheet(statusBarSettings->value("background")));
     style += QString("color: %1;")
-        .arg(Util::qcolorForStyleSheet(statusBarSettings->value("foreground")));
+                 .arg(Util::qcolorForStyleSheet(statusBarSettings->value("foreground")));
     this->setStyleSheet(QString("StatusBar, StatusBar QComboBox{%1}").arg(style));
   }
 }

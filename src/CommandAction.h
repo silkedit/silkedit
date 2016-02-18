@@ -5,6 +5,10 @@
 #include "core/macros.h"
 #include "core/PackageAction.h"
 
+namespace core {
+class Theme;
+}
+
 class CommandAction : public core::PackageAction {
   Q_OBJECT
  public:
@@ -40,6 +44,5 @@ class CommandAction : public core::PackageAction {
 
   void init(const QString& id);
   void updateShortcut();
-  void setTheme();
-
+  void setTheme(const core::Theme* theme);
 };

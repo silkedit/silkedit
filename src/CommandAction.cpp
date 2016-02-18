@@ -50,14 +50,12 @@ CommandAction::CommandAction(const QString& id,
   init(id);
 }
 
-void CommandAction::updateShortcut()
-{
+void CommandAction::updateShortcut() {
   QKeySequence key = KeymapManager::singleton().findShortcut(m_cmdName);
   setShortcut(key);
 }
 
-void CommandAction::updateVisibilityAndShortcut()
-{
+void CommandAction::updateVisibilityAndShortcut() {
   PackageAction::updateVisibilityAndShortcut();
   updateShortcut();
 }
@@ -70,15 +68,14 @@ CommandAction::CommandAction(const QString& id,
                              const QString& pkgName)
     : PackageAction(id, pkgName, parent, cond), m_icons(icons), m_cmdName(cmdName) {
   init(id);
-  setTheme();
+  setTheme(Config::singleton().theme());
   connect(&Config::singleton(), &Config::themeChanged, this, &CommandAction::setTheme);
 }
 
-void CommandAction::setTheme() {
-  if(Config::singleton().theme()->isDarkTheme()){
+void CommandAction::setTheme(const Theme* theme) {
+  if (theme->isDarkTheme()) {
     setIcon(QIcon(m_icons.value("light", NULL)));
   } else {
     setIcon(QIcon(m_icons.value("dark", NULL)));
   }
 }
-
