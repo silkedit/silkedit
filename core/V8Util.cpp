@@ -10,6 +10,8 @@
 #include "FunctionInfo.h"
 #include "QObjectUtil.h"
 #include "JSValue.h"
+#include "TextCursor.h"
+#include "TextBlock.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -99,6 +101,10 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
 v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var) {
   if (var.canConvert<QObject*>()) {
     return toV8ObjectFrom(isolate, var.value<QObject*>());
+  } else if (var.canConvert<QTextBlock>()) {
+    return toV8ObjectFrom(isolate, new TextBlock(var.value<QTextBlock>()));
+  } else if (var.canConvert<QTextCursor>()) {
+    return toV8ObjectFrom(isolate, new TextCursor(var.value<QTextCursor>()));
   } else if (var.canConvert<CommandArgument>()) {
     return toV8Object(isolate, var.value<CommandArgument>());
   } else if (var.canConvert<std::string>()) {

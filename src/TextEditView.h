@@ -84,11 +84,12 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void insertNewLine();
   void save();
   void saveAs();
-  void moveCursor(const QString& op, int repeat = 1);
   void deleteChar(int repeat = 1);
   bool isThinCursor();
   void setThinCursor(bool on);
   QString path();
+  void setTextCursor(const QTextCursor &cursor);
+  QTextCursor textCursor() const;
 
  signals:
   void pathUpdated(const QString& path);
@@ -110,9 +111,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void mousePressEvent(QMouseEvent* e) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
-  int firstNonBlankCharPos(const QString& text);
-  bool isTabOrSpace(const QChar ch);
-  void moveToFirstNonBlankChar(QTextCursor& cur);
 
  private:
   friend class TextEditViewPrivate;

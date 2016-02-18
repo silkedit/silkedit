@@ -42,6 +42,8 @@
 #include "core/QKeyEventWrap.h"
 #include "core/Event.h"
 #include "core/Url.h"
+#include "core/TextCursor.h"
+#include "core/TextBlock.h"
 #include "core/MessageHandler.h"
 #include "atom/node_includes.h"
 
@@ -56,6 +58,8 @@ using core::ObjectStore;
 using core::QKeyEventWrap;
 using core::Event;
 using core::Url;
+using core::TextCursor;
+using core::TextBlock;
 
 #ifdef Q_OS_WIN
 // MessageBox is defined in winuser.h
@@ -237,9 +241,11 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<Window>(exports);
 
   // Wrappers
-  registerClass<Url>(exports);
   registerClass<Font>(exports);
   registerClass<QKeyEventWrap>(exports);
+  registerClass<TextBlock>(exports);
+  registerClass<TextCursor>(exports);
+  registerClass<Url>(exports);
 
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)

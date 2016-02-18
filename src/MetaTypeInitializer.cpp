@@ -10,6 +10,8 @@
 #include "core/Url.h"
 #include "core/Font.h"
 #include "core/QKeyEventWrap.h"
+#include "core/TextCursor.h"
+#include "core/TextBlock.h"
 
 void MetaTypeInitializer::init()
 {
@@ -32,5 +34,12 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::Font*>("core::Font*");
   qRegisterMetaType<core::QKeyEventWrap*>("QKeyEventWrap*");
   qRegisterMetaType<core::QKeyEventWrap*>("core::QKeyEventWrap*");
+  qRegisterMetaType<core::TextCursor*>("TextCursor*");
+  qRegisterMetaType<core::TextCursor*>("core::TextCursor*");
+  qRegisterMetaType<core::TextCursor::MoveMode>("MoveMode");
+  qRegisterMetaType<core::TextCursor::MoveOperation>("MoveOperation");
+  qRegisterMetaType<core::TextCursor::SelectionType>("SelectionType");
+  qRegisterMetaType<core::TextBlock*>("TextBlock*");
+  qRegisterMetaType<core::TextBlock*>("core::TextBlock*");
 }
 
