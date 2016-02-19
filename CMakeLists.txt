@@ -53,6 +53,8 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
+find_package(Qt5Svg REQUIRED)
+
 if (APPLE)
   find_package(Qt5WebEngineWidgets REQUIRED)
   if (USE_DEBUG_NODE)
@@ -154,6 +156,7 @@ if(APPLE)
                         Qt5::Widgets
                         Qt5::Network
                         Qt5::Xml
+                        Qt5::Svg
                         Qt5::WebEngineWidgets
                         ${YAML_CPP_LIBRARY}
                         ${NODE_LIBRARY})
@@ -168,6 +171,7 @@ elseif (MSVC)
                         Qt5::Widgets
                         Qt5::Network
                         Qt5::Xml
+                        Qt5::Svg
                         ${YAML_CPP_LIBRARY}
                         NODE_LIBRARY
   )

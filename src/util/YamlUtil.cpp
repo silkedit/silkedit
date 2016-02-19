@@ -338,15 +338,23 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
         if (iconNode.Type() == YAML::NodeType::Scalar) {
           QString iconPath =
               getAbsolutePath(ymlPath, QString::fromUtf8(iconNode.as<std::string>().c_str()));
-          action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
+          if (QFileInfo::exists(iconPath)) {
+            action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
+          } else {
+            qWarning() << iconPath << "doesn't exist";
+          }
         } else if (iconNode.Type() == YAML::NodeType::Map) {
           QMap<QString, QString> icons;
           for (auto it = iconNode.begin(); it != iconNode.end(); ++it) {
             YAML::Node key = it->first;
             YAML::Node value = it->second;
-            icons.insert(
-                QString::fromUtf8(key.as<std::string>().c_str()),
-                getAbsolutePath(ymlPath, QString::fromUtf8(value.as<std::string>().c_str())));
+            const auto& iconPath =
+                getAbsolutePath(ymlPath, QString::fromUtf8(value.as<std::string>().c_str()));
+            if (QFileInfo::exists(iconPath)) {
+              icons.insert(QString::fromUtf8(key.as<std::string>().c_str()), iconPath);
+            } else {
+              qWarning() << iconPath << "doesn't exist";
+            }
           }
           action = new CommandAction(id, command, icons, nullptr, condition, pkgName);
         }
