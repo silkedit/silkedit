@@ -62,6 +62,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   }
 
   ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
+  ui->rootSplitter->setChildrenCollapsible(false);
 
   QWidget* editorWidget = new QWidget(this);
   QVBoxLayout* layout = new QVBoxLayout(editorWidget);
@@ -75,6 +76,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   editorWidget->setLayout(layout);
 
   auto contentSplitter = new QSplitter(Qt::Vertical);
+  contentSplitter->setHandleWidth(0);
+  contentSplitter->setContentsMargins(0, 0, 0, 0);
   contentSplitter->addWidget(editorWidget);
   contentSplitter->addWidget(m_console);
   m_console->hide();
@@ -307,7 +310,6 @@ bool Window::openDir(const QString& dirPath) {
   if (m_projectView->openDirOrExpand(dirPath)) {
     // root splitter becomes the owner of a project view.
     ui->rootSplitter->insertWidget(0, m_projectView);
-    ui->rootSplitter->setCollapsible(0, false);
     // Set the initial sizes for QSplitter widgets
     QList<int> sizes;
     sizes << 50 << 300;

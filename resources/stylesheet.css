@@ -199,3 +199,19 @@ PackagesView #reloadButton {
   border: none;
   margin: 0px 5px 0px 5px;
 }
+
+
+/* Console */
+
+#Console #output {
+  margin: 2px 2px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+#Console #input {
+  margin: 0 2px 2px 2px;
+  padding: 0 0 0 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}

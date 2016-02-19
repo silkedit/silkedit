@@ -1,4 +1,5 @@
 #include <QCompleter>
+#include <QVBoxLayout>
 
 #include "Console.h"
 #include "ui_Console.h"
@@ -9,6 +10,9 @@ using core::MessageHandler;
 
 Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   ui->setupUi(this);
+  ui->layout->setContentsMargins(0, 0, 0, 0);
+  ui->layout->setSpacing(0);
+  ui->layout->setMargin(0);
   setLayout(ui->layout);
 
   QCompleter* completer = new QCompleter(this);
