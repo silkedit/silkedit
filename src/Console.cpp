@@ -20,23 +20,24 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
   ui->input->setCompleter(completer);
 
   connect(&MessageHandler::singleton(), &MessageHandler::message, this,
-          [=](QtMsgType type, const QString& msg) {
-            QString text = "<div style='color:%1;'>%2</div>";
+          [=](QtMsgType type, QString msg) {
+            const QString& htmlMsg = msg.replace(QLatin1String(R"(\n)"), QLatin1String("<br>"));
+            QString text = QStringLiteral("<div style='color:%1;'>%2</div>");
             QString color;
             switch (type) {
               case QtDebugMsg:
               case QtInfoMsg:
-                color = "black";
+                color = QStringLiteral("black");
                 break;
               case QtWarningMsg:
-                color = "yellow";
+                color = QStringLiteral("#9F6000");
                 break;
               case QtCriticalMsg:
               case QtFatalMsg:
-                color = "red";
+                color = QStringLiteral("red");
                 break;
             }
-            ui->output->append(text.arg(color).arg(msg));
+            ui->output->append(text.arg(color).arg(htmlMsg));
           });
 
   connect(ui->input, &QLineEdit::returnPressed, this, [=] {
