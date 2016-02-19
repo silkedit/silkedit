@@ -84,7 +84,7 @@ resolve() {
     # Update submodules
     git submodule sync
     git submodule update --init
-    
+
     # jsdoc
     npm install -g jsdoc@latest
 
@@ -109,10 +109,12 @@ resolve() {
       brew list boost || brew install boost --c++11
 
       # Onigmo
-      echo 'Building Onigmo...'
-      cd Onigmo
-      ./configure && make && make install
-      cd ..
+      if [ "$1" != '--skip-build' ]; then
+        echo 'Building Onigmo...'
+        cd Onigmo
+        ./configure && make && make install
+        cd ..
+			fi
 
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
@@ -133,15 +135,17 @@ resolve() {
       cd ..
 
 			# build libnode.dylib
-			cd vendor/node
-			# Build Release version
-			./configure --enable-shared
-			make -j8
-      # Build Debug version
-			./configure --debug --enable-shared
-			make -j8
-			mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
-			cd ../..
+      if [ "$1" != '--skip-build' ]; then
+			  cd vendor/node
+			  # Build Release version
+			  ./configure --enable-shared
+			  make -j8
+        # Build Debug version
+			  ./configure --debug --enable-shared
+			  make -j8
+			  mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
+			  cd ../..
+      fi
 
     else
         # yaml-cpp
@@ -199,13 +203,15 @@ resolve() {
         fi
 
         # Onigmo
-        echo 'Building Onigmo...'
-        cd Onigmo
-        cp win32/Makefile .
-        cp win32/config.h .
-        echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
-        cp onig.lib onig.dll ../lib
-        cd ..
+        if [ "$1" != '--skip-build' ]; then
+          echo 'Building Onigmo...'
+          cd Onigmo
+          cp win32/Makefile .
+          cp win32/config.h .
+          echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
+          cp onig.lib onig.dll ../lib
+          cd ..
+				fi
 
 		#breakpad
 		if [ ! -f lib/breakpad/Release/common.lib ]; then
@@ -439,11 +445,11 @@ send_symbol() {
 
 generate_doc() {
   rm -rf ${API_DOC_DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${API_DOC_DIR}
-  
+
   # change JSDoc hard coded title
   TITLE="SilkEdit APIリファレンス"
   sed -i -E "s/JSDoc: Home/${TITLE}/" ${API_DOC_DIR}/SilkEdit/${VERSION}/index.html
-  
+
   # set favicon
   FAVICON="http://silksmiths.sakura.ne.jp/files/SilkEdit/favicon.ico"
   sed -i -E "s#</head>#<link rel=\"icon\" href=\"${FAVICON}\"></head>#" ${API_DOC_DIR}/SilkEdit/${VERSION}/index.html
@@ -453,10 +459,10 @@ generate_doc() {
 
 upload_doc() {
   generate_doc
-  
+
   # upload to FTP
   scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
-  
+
   # make current version as the latest API document
   cp -r ${API_DOC_DIR}/SilkEdit/${VERSION} ${API_DOC_DIR}/SilkEdit/latest
   scp -r ${API_DOC_DIR}/SilkEdit/latest silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
