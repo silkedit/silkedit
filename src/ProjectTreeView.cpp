@@ -50,7 +50,6 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(n
   setFocusPolicy(Qt::ClickFocus);
 
   connect(this, &ProjectTreeView::activated, this, &ProjectTreeView::openOrExpand);
-  connect(this, SIGNAL(activated(QModelIndex)), this, SLOT(open(QModelIndex)));
   connect(&Config::singleton(), &Config::themeChanged, this, &ProjectTreeView::setTheme);
   connect(&Config::singleton(), &Config::fontChanged, this, &ProjectTreeView::setFont);
 }

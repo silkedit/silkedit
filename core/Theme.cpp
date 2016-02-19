@@ -83,16 +83,16 @@ QColor changeColorBrightness(QColor const color,
 
   // 0 is black; 255 is as far from black as possible.
   if (color.value() < threshold) {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + value);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), qMin(color.value() + value, 255));
   } else {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
   }
   return newColor;
 }
 
 QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
   QColor newColor;
-  newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - value);
+  newColor = QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
   return newColor;
 }
 
