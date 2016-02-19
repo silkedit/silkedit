@@ -83,9 +83,9 @@ QColor adjustForEOL(QColor const color, int threshold = 125) {
 
   // 0 is black; 255 is as far from black as possible.
   if (color.value() < threshold) {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() - 30);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - 30, 0));
   } else {
-    newColor = QColor::fromHsv(color.hue(), color.saturation(), color.value() + 30);
+    newColor = QColor::fromHsv(color.hue(), color.saturation(), qMin(color.value() + 30, 255));
   }
   newColor.setAlpha(128);
   return newColor;
