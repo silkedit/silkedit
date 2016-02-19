@@ -9,10 +9,6 @@ QPlainTextEdit {
   border: none;
 }
 
-/*TabView::pane {
-    background-color: black;
-}*/
-
 TabView::tab-bar {
     left: 0px;
 }
@@ -88,14 +84,14 @@ QWidget#FindReplaceView {
 #FindReplaceView QLineEdit {
     width: 18px;
     height: 18px;
-    padding: 0 0 0 5px;
+    padding: 0 0 0 2px;
     border: 1px solid transparent;
     border-radius: 2px;
 }
 
 
 #FindReplaceView QLineEdit#lineEditForFind {
-    margin: 2px 2px 2px 0;   
+    margin: 2px 2px 2px 0;
 }
 
 #FindReplaceView QLineEdit#lineEditForReplace {
