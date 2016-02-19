@@ -235,6 +235,10 @@ Theme* Theme::loadTheme(const QString& filename) {
   theme->findReplaceViewSettings.reset(new ColorSettings());
   parseSettings(theme->findReplaceViewSettings.get(), createFindReplaceViewSettingsColors(theme));
 
+  // Console settings(Console)
+  theme->consoleSettings.reset(new ColorSettings());
+  parseSettings(theme->consoleSettings.get(), createConsleSettingsColors(theme));
+
   return theme;
 }
 
@@ -420,6 +424,10 @@ ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
       getAppropriateGray(defaultColors.value("background"));
 
   return defaultColors;
+}
+
+ColorSettings Theme::createConsleSettingsColors(const Theme* theme) {
+  return createStatusBarSettingsColors(theme);
 }
 
 // Return the rank of scopeSelector for scope

@@ -59,6 +59,7 @@ class Theme {
   std::unique_ptr<ColorSettings> windowSettings;
   std::unique_ptr<ColorSettings> packageToolBarSettings;
   std::unique_ptr<ColorSettings> findReplaceViewSettings;
+  std::unique_ptr<ColorSettings> consoleSettings;
 
   QFont::Weight gutterFontWeight;
   bool isGutterItalic;
@@ -81,6 +82,7 @@ class Theme {
   static ColorSettings createWindowSettingsColors(const Theme* theme);
   static ColorSettings createPackageToolBarSettingsColors(const Theme* theme);
   static ColorSettings createFindReplaceViewSettingsColors(const Theme* theme);
+  static ColorSettings createConsleSettingsColors(const Theme *theme);
 };
 
 class Rank {
