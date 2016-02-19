@@ -356,7 +356,7 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
           }
           action = new CommandAction(id, command, icons, nullptr, condition, pkgName);
         }
-        if (tooltipNode.IsDefined()) {
+        if (action && tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = Helper::singleton().translate(
               QString("%1:toolbar.%2.tooltip")
