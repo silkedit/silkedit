@@ -3,7 +3,6 @@
 #include <iterator>
 #include <vector>
 #include <QStringList>
-#include <QStringBuilder>
 #include <QDebug>
 #include <QRegularExpression>
 #include <QFile>
@@ -357,17 +356,17 @@ void Node::adjust(int pos, int delta) {
 QString Node::format(QString indent) const {
   if (isLeaf()) {
     return indent +
-           QString("%1-%2: \"%3\" - Data: \"%4\"\n")
+           QStringLiteral("%1-%2: \"%3\" - Data: \"%4\"\n")
                .arg(region.begin())
                .arg(region.end())
                .arg(name)
                .arg(data());
   }
-  QString ret;
-  ret = ret % indent % QString("%1-%2: \"%3\"\n").arg(region.begin()).arg(region.end()).arg(name);
+  QString ret =
+      indent + QStringLiteral("%1-%2: \"%3\"\n").arg(region.begin()).arg(region.end()).arg(name);
   indent += "  ";
   for (auto& child : children) {
-    ret = ret % child.get()->format(indent);
+    ret = ret + child.get()->format(indent);
   }
   return ret;
 }

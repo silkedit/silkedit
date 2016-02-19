@@ -14,6 +14,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Node.js defines HAVE_OPENSSL by default
 ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
+# '+' will automatically be performed as the QStringBuilder '%' everywhere.
+ADD_DEFINITIONS(-DQT_USE_QSTRINGBUILDER)
+
 # These are necessary to import v8 and libuv symbols in node.dll
 ADD_DEFINITIONS(-DUSING_V8_SHARED)
 ADD_DEFINITIONS(-DUSING_UV_SHARED)

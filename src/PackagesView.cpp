@@ -8,7 +8,6 @@
 #include <QMouseEvent>
 #include <QDir>
 #include <QProcess>
-#include <QStringBuilder>
 
 #include "PackagesView.h"
 #include "ui_PackagesView.h"

@@ -1,7 +1,6 @@
 ﻿#include <oniguruma.h>
 #include <memory>
 #include <QString>
-#include <QStringBuilder>
 #include <QDebug>
 
 #include "Regexp.h"
@@ -28,10 +27,10 @@ QString Regexp::escape(const QString& expr) {
   for (int i = 0; i < expr.length();) {
     // escape a meta char
     if (isMetaChar(expr[i])) {
-      escapedStr = escapedStr % '\\';
+      escapedStr = escapedStr + '\\';
     }
 
-    escapedStr = escapedStr % expr[i];
+    escapedStr = escapedStr + expr[i];
     i++;
   }
 
