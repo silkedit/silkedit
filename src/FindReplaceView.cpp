@@ -394,8 +394,8 @@ void FindReplaceView::setTheme(core::Theme* theme) {
   if (theme->findReplaceViewSettings != nullptr) {
     ColorSettings* findReplaceViewSettings = theme->findReplaceViewSettings.get();
 
-    QString defaultIconColor = "black";
-    QString checkedIconColor = "white";
+    QString defaultIconColor = QStringLiteral("black");
+    QString checkedIconColor = QStringLiteral("white");
 
     if (theme->isDarkTheme()) {
       defaultIconColor = "white";
@@ -406,65 +406,63 @@ void FindReplaceView::setTheme(core::Theme* theme) {
 
     QList<QCheckBox*> allCkButtons = this->findChildren<QCheckBox*>();
     for (int i = 0; i < allCkButtons.size(); i++) {
-      QString style;
-      style = QString(
-                  "#%1::indicator {"
-                  "image: url(:/images/%1-%2);"
-                  "}"
-                  "#%1::indicator:checked {"
-                  "image: url(:/images/%1-%3);"
-                  "}")
-                  .arg(allCkButtons.at(i)->objectName())
-                  .arg(defaultIconColor)
-                  .arg(checkedIconColor);
+      const QString& style = QStringLiteral(
+                                 "#%1::indicator {"
+                                 "image: url(:/images/%1-%2);"
+                                 "}"
+                                 "#%1::indicator:checked {"
+                                 "image: url(:/images/%1-%3);"
+                                 "}")
+                                 .arg(allCkButtons.at(i)->objectName())
+                                 .arg(defaultIconColor)
+                                 .arg(checkedIconColor);
       allCkButtons.at(i)->setStyleSheet(style);
     };
 
-    QString style;
-    style = QString(
-                "#%1 {"
-                "background-color: %2;"
-                "}")
-                .arg(this->objectName())
-        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("background")));
-
-    style += QString(
-                 "#%1 QPushButton {"
-                 "color: %2;"
-                 "}"
-                 "#%1 QCheckBox:checked {"
-                 "background-color: %3;"
-                 "}")
-                 .arg(this->objectName())
-        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("foreground")))
-        .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("buttonCheckedBackgroundColor")));
-
-    style += QString(
-                 "#%1 QPushButton:hover {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #919191, stop:1 "
-                 "#7E7E7E);"
-                 "}"
-                 "#%1 QPushButton:pressed {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #6A6A6A, stop:1 "
-                 "#595959);"
-                 "}"
-                 "#%1 QCheckBox:unchecked:hover {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
-                 "#7E7E7E);"
-                 "}"
-                 "#%1 QCheckBox:unchecked:pressed {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #575757, stop:1 "
-                 "#444444);"
-                 "}"
-                 "#%1 QCheckBox:checked:hover {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
-                 "#7E7E7E);"
-                 "}"
-                 "#%1 QCheckBox:checked:pressed {"
-                 "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #6A6A6A, stop:1 "
-                 "#595959);"
-                 "}")
-                 .arg(this->objectName());
+    const QString& style =
+        QStringLiteral(
+            "#%1 {"
+            "background-color: %2;"
+            "}")
+            .arg(this->objectName())
+            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("background"))) +
+        QStringLiteral(
+            "#%1 QPushButton {"
+            "color: %2;"
+            "}"
+            "#%1 QCheckBox:checked {"
+            "background-color: %3;"
+            "}")
+            .arg(this->objectName())
+            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("foreground")))
+            .arg(Util::qcolorForStyleSheet(
+                findReplaceViewSettings->value("buttonCheckedBackgroundColor"))) +
+        QStringLiteral(
+            "#%1 QPushButton:hover {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #919191, stop:1 "
+            "#7E7E7E);"
+            "}"
+            "#%1 QPushButton:pressed {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #6A6A6A, stop:1 "
+            "#595959);"
+            "}"
+            "#%1 QCheckBox:unchecked:hover {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
+            "#7E7E7E);"
+            "}"
+            "#%1 QCheckBox:unchecked:pressed {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #575757, stop:1 "
+            "#444444);"
+            "}"
+            "#%1 QCheckBox:checked:hover {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
+            "#7E7E7E);"
+            "}"
+            "#%1 QCheckBox:checked:pressed {"
+            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #6A6A6A, stop:1 "
+            "#595959);"
+            "}")
+            .arg(this->objectName());
 
     this->setStyleSheet(style);
   }

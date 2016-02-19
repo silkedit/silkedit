@@ -2,7 +2,6 @@
 #include <string>
 #include <algorithm>
 #include <QtWidgets>
-#include <QStringBuilder>
 
 #include "TextEditView_p.h"
 #include "LineNumberArea.h"
@@ -61,9 +60,9 @@ QString preservedCaseText(const QString& oldStr, const QString& newStr) {
     }
 
     if (oldStr[oldStrIndex].isUpper()) {
-      resultStr = resultStr % newStr[i].toUpper();
+      resultStr = resultStr + newStr[i].toUpper();
     } else {
-      resultStr = resultStr % newStr[i].toLower();
+      resultStr = resultStr + newStr[i].toLower();
     }
   }
 
