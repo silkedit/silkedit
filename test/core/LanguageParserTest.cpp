@@ -527,6 +527,35 @@ end)";
 
     compareLineByLine(root->toString(), result);
   }
+
+  void cssTest() {
+    const QVector<QString> files({"testdata/grammers/CSS.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(a {
+  hoge: 0;
+})";
+
+    LanguageParser* parser = LanguageParser::create("source.css", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    QString result = R"r(0-16: "source.css"
+  0-2: "meta.selector.css"
+    0-1: "entity.name.tag.css" - Data: "a"
+  2-16: ""
+    2-16: "meta.property-list.css"
+      2-3: "punctuation.section.property-list.begin.css" - Data: "{"
+      6-10: "meta.property-name.css" - Data: "hoge"
+      10-14: "meta.property-value.css"
+        10-11: "punctuation.separator.key-value.css" - Data: ":"
+        12-13: "constant.numeric.css" - Data: "0"
+        13-14: "punctuation.terminator.rule.css" - Data: ";"
+      15-16: "punctuation.section.property-list.end.css" - Data: "}")r";
+
+    compareLineByLine(root->toString(), result);
+  }
 };
 
 }  // namespace core
