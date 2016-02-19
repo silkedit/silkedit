@@ -207,9 +207,6 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       boost::optional<AndConditionExpression> condition;
       if (ifNode.IsDefined()) {
         condition = parseCondition(ifNode);
-        //        if (!condition || !condition->isSatisfied()) {
-        //          continue;
-        //        }
       }
 
       QAction* action = nullptr;
@@ -333,9 +330,6 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
       boost::optional<AndConditionExpression> condition;
       if (ifNode.IsDefined()) {
         condition = parseCondition(ifNode);
-        //        if (!condition || !condition->isSatisfied()) {
-        //          continue;
-        //        }
       }
 
       QAction* action = nullptr;
