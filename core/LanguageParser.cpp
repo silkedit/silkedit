@@ -611,13 +611,8 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
       endPos = (*endMatchedRegions)[0].end();
     } else {
       if (!found) {
-        // oops.. no end found at all, set it to the next line
-        int e2 = str.midRef(i).indexOf('\n');
-        if (e2 != -1) {
-          endPos = i + e2;
-        } else {
-          endPos = str.length();
-        }
+        // If there is no match for the end pattern, the end of the document is used
+        endPos = str.length();
       } else {
         endPos = i;
       }
@@ -914,7 +909,7 @@ void RootNode::adjust(int pos, int delta) {
 }
 
 void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
-  qDebug("updateChildren. region: %s", qPrintable(region.toString()));
+  qDebug() << "updateChildren. region:" << region.toString();
   parser->clearCache();
 
   Region affectedRegion(region);
@@ -922,7 +917,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   Q_ASSERT(affectedRegion.end() == region.end());
 
   for (auto it = children.begin(); it != children.end();) {
-    qDebug("child region: %s", qPrintable((*it)->region.toString()));
+    qDebug() << "child region:" << (*it)->region.toString();
     if ((*it)->region.intersects(region)) {
       //      qDebug() << "affected child:" << (*it)->region;
       // update affected region
@@ -946,7 +941,7 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
             });
 
   qDebug("new children.size: %d", (int)children.size());
-  //  qDebug() << *this;
+//  qDebug().noquote() << *this;
 }
 
 boost::optional<QVector<Region>> RegexWithBackReference::find(const QString& str,
