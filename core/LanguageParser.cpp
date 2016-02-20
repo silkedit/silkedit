@@ -242,7 +242,8 @@ std::unique_ptr<RootNode> LanguageParser::parse() {
       std::make_move_iterator(std::begin(children)), std::make_move_iterator(std::end(children)),
       [&](decltype(children)::value_type&& child) { rootNode->append(std::move(child)); });
 
-  rootNode->updateRegion();
+  // root node covers everything
+  rootNode->region = Region(0, m_text.length());
   return std::move(rootNode);
 }
 
