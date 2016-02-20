@@ -556,6 +556,26 @@ end)";
 
     compareLineByLine(root->toString(), result);
   }
+
+  void cssCommentTest() {
+    const QVector<QString> files({"testdata/grammers/CSS.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(/* a *
+a)";
+
+    LanguageParser* parser = LanguageParser::create("source.css", text);
+    std::unique_ptr<Node> root = parser->parse();
+    //    qDebug().noquote() << root->toString();
+
+    // If we use raw string, it gives a compilation error...
+    QString result = "0-8: \"source.css\"\n"
+"  0-8: \"comment.block.css\"\n"
+"    0-2: \"punctuation.definition.comment.css\" - Data: \"/*\"";
+
+    compareLineByLine(root->toString(), result);
+  }
 };
 
 }  // namespace core

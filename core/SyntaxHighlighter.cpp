@@ -63,7 +63,7 @@ QString SyntaxHighlighter::scopeTree() const {
 }
 
 void SyntaxHighlighter::adjust(int pos, int delta) {
-  //  qDebug("SyntaxHighlighter::adjust(pos: %d, delta: %d)", pos, delta);
+//  qDebug() << "SyntaxHighlighter::adjust(pos:" << pos << ", delta:" << delta << ")";
   if (m_rootNode) {
     m_rootNode->adjust(pos, delta);
   }
