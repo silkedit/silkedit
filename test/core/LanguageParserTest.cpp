@@ -120,7 +120,7 @@ class LanguageParserTest : public QObject {
     LanguageParser* parser = LanguageParser::create("source.c++", in);
     std::unique_ptr<Node> root = parser->parse();
 
-    QString out = R"r(0-25: "source.c++"
+    QString out = R"r(0-26: "source.c++"
   0-3: "storage.type.c" - Data: "int"
   3-25: "meta.function.c"
     3-4: "punctuation.whitespace.function.leading.c" - Data: " "
@@ -175,7 +175,7 @@ class LanguageParserTest : public QObject {
     std::unique_ptr<Node> root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
-    QString result = R"r(0-27: "source.c++"
+    QString result = R"r(0-28: "source.c++"
   0-17: "meta.preprocessor.macro.c"
     1-7: "keyword.control.import.define.c" - Data: "define"
     8-11: "entity.name.function.preprocessor.c" - Data: "foo"
@@ -208,6 +208,36 @@ class LanguageParserTest : public QObject {
     9-17: "string.quoted.other.lt-gt.include.c"
       9-10: "punctuation.definition.string.begin.c" - Data: "<"
       16-17: "punctuation.definition.string.end.c" - Data: ">")r";
+
+    compareLineByLine(root->toString(), result);
+  }
+
+  void cppRangeTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(class hoge {
+  void foo();
+};)";
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    std::unique_ptr<Node> root = parser->parse();
+
+    // ';' at the end of document is not included in any pattern, but root scope(source.c++)
+    QString result = QStringLiteral(R"r(
+0-29: "source.c++"
+  0-28: "meta.class-struct-block.c++"
+    0-5: "storage.type.c++" - Data: "class"
+    6-10: "entity.name.type.c++" - Data: "hoge"
+    11-28: ""
+      11-12: "punctuation.definition.scope.c++" - Data: "{"
+      15-19: "storage.type.c" - Data: "void"
+      19-26: "meta.function.c"
+        19-20: "punctuation.whitespace.function.leading.c" - Data: " "
+        20-23: "entity.name.function.c" - Data: "foo"
+        23-25: "meta.parens.c" - Data: "()"
+      27-28: "punctuation.definition.invalid.c++" - Data: "}")r").trimmed();
 
     compareLineByLine(root->toString(), result);
   }
@@ -406,7 +436,7 @@ WHERE email = <%= quote @email %>)";
     std::unique_ptr<Node> root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
-    QString result = R"r(0-54: "source.yaml"
+    QString result = R"r(0-55: "source.yaml"
   0-2: "string.unquoted.yaml"
     0-1: "punctuation.definition.entry.yaml" - Data: "-"
     1-2: "string.unquoted.yaml" - Data: " "
