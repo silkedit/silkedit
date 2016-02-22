@@ -178,8 +178,10 @@ elseif (MSVC)
   target_link_libraries(${PROJECT_NAME} ${BREAKPAD_LIBS}/common ${BREAKPAD_LIBS}/exception_handler ${BREAKPAD_LIBS}/crash_generation_client)
 endif()
 
-# Minify jslib
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND npm run babel WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+# Minify jslib and default package
+file(COPY ${PROJECT_SOURCE_DIR}/default DESTINATION ${PROJECT_SOURCE_DIR}/minified)
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND npm run babel-jslib WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND npm run babel-default WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD COMMAND npm run minify WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 
 if(APPLE)
@@ -204,7 +206,11 @@ if(APPLE)
 
   # bundle jslib
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_SOURCE_DIR}/jslib_out ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
+
+  # bundle default package
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/packages/node_modules/default)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_SOURCE_DIR}/minified/default ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/packages/node_modules/default)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
@@ -248,6 +254,10 @@ elseif (MSVC)
   # bundle jslib
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./jslib)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_SOURCE_DIR}/jslib_out ./jslib)
+
+  # bundle default package
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./default)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_SOURCE_DIR}/minified/default ./jslib)
 
   # copy npm
   file(COPY
