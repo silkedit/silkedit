@@ -2,7 +2,8 @@
   "name": "silkedit",
   "version": "1.0.0",
   "scripts": {
-    "babel": "babel jslib -d jslib_out",
+    "babel-jslib": "babel jslib -d minified/jslib",
+    "babel-default": "babel minified/default -d minified/default --ignore resources",
     "minify": "grunt"
   },
   "devDependencies": {

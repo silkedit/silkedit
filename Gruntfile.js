@@ -3,13 +3,20 @@ module.exports = function (grunt) {
 
     // define source files and their destinations
     uglify: {
-        files: {
-            src: 'jslib_out/**/*.js',  // source files mask
+			jslib: {
+            src: 'minified/jslib/**/*.js',  // source files mask
             dest: '.',    // destination folder
             expand: true,    // allow dynamic building
             flatten: false,   // remove all unnecessary nesting
             ext: '.js'   // replace .js to .min.js
-        }
+			},
+			defualt: {
+            src: ['minified/default/index.js', 'minified/default/lib/**/*.js'],  // source files mask
+            dest: '.',    // destination folder
+            expand: true,    // allow dynamic building
+            flatten: false,   // remove all unnecessary nesting
+            ext: '.js'   // replace .js to .min.js
+			}
     }
 });
 
