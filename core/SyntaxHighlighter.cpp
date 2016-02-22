@@ -93,32 +93,30 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     endPos = pos;
   }
 
-  /*
-   We need to extend affectedRegion to the region from the beginning of the line at beginPos to
-   the end of the line at endPos to support look ahead and behind regex.
-   e.g.
+//   We need to extend affectedRegion to the region from the beginning of the line at beginPos to
+//   the end of the line at endPos to support look ahead and behind regex.
+//   e.g.
 
-   text:
-     StatusBar QComboBox::down-arrow {
-        /*image: url(noimg);
+//   text:
+//     StatusBar QComboBox::down-arrow {
+//        /*image: url(noimg);*/
 
 
-   pattern:
-      <key>begin</key>
-      <string>\s*(?=[:.*#a-zA-Z])</string>
-      <key>end</key>
-      <string>(?=[/@{)])</string>
-      <key>name</key>
-      <string>meta.selector.css</string>
+//   pattern:
+//      <key>begin</key>
+//      <string>\s*(?=[:.*#a-zA-Z])</string>
+//      <key>end</key>
+//      <string>(?=[/@{)])</string>
+//      <key>name</key>
+//      <string>meta.selector.css</string>
 
-   scope:
-     0-32: "meta.selector.css" - Data: "StatusBar QComboBox::down-arrow "
+//   scope:
+//     0-32: "meta.selector.css" - Data: "StatusBar QComboBox::down-arrow "
 
-   When we delete '{' at the end of line, beginPos is 32 and endPos is 33.
-   In this case, [0-32) is not updated without expansion because [0-32) doesn't intersect [32-33).
-   But we need to update [0-32) because its end pattern has /(?=/ and end pattern should match with
-   '/' at pos 36
-   */
+//   When we delete '{' at the end of line, beginPos is 32 and endPos is 33.
+//   In this case, [0-32) is not updated without expansion because [0-32) doesn't intersect [32-33).
+//   But we need to update [0-32) because its end pattern has /(?=/ and end pattern should match with
+//   '/' at pos 36
 
   QTextBlock beginBlock = document()->findBlock(beginPos);
   if (!beginBlock.isValid()) {
