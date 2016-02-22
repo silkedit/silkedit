@@ -909,7 +909,7 @@ void RootNode::adjust(int pos, int delta) {
   }
 }
 
-void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
+Region RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   qDebug() << "updateChildren. region:" << region.toString();
   parser->clearCache();
 
@@ -932,6 +932,21 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
 
   std::vector<std::unique_ptr<Node>> newNodes = parser->parse(affectedRegion);
 
+  if (newNodes.size() > 0) {
+    // Extend affectedRegion based on newNodes
+    affectedRegion.setBegin(newNodes[0]->region.begin());
+    affectedRegion.setEnd(newNodes[newNodes.size() - 1]->region.end());
+  }
+
+  // Remove children that intersect affectedRegion
+  for (auto it = children.begin(); it != children.end();) {
+    if ((*it)->region.intersects(affectedRegion)) {
+      it = children.erase(it);
+    } else {
+      it++;
+    }
+  }
+
   std::for_each(
       std::make_move_iterator(newNodes.begin()), std::make_move_iterator(newNodes.end()),
       [&](decltype(newNodes)::value_type&& node) { children.push_back(std::move(node)); });
@@ -942,7 +957,9 @@ void RootNode::updateChildren(const Region& region, LanguageParser* parser) {
             });
 
   qDebug("new children.size: %d", (int)children.size());
-//  qDebug().noquote() << *this;
+  //  qDebug().noquote() << *this;
+
+  return affectedRegion;
 }
 
 boost::optional<QVector<Region>> RegexWithBackReference::find(const QString& str,

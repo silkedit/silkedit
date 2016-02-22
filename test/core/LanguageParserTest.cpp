@@ -5,22 +5,7 @@
 #include <QTextDocument>
 
 #include "LanguageParser.h"
-
-namespace {
-
-void compareLineByLine(const QString& str1, const QString& str2) {
-  QStringList list1 = str1.trimmed().split('\n');
-  QStringList list2 = str2.trimmed().split('\n');
-  if (str1.trimmed().size() != str2.trimmed().size()) {
-    qDebug().noquote() << str1;
-  }
-  QCOMPARE(list1.size(), list2.size());
-
-  for (int i = 0; i < list1.size(); i++) {
-    QCOMPARE(list1.at(i).trimmed(), list2.at(i).trimmed());
-  }
-}
-}
+#include "TestUtil.h"
 
 namespace core {
 
@@ -102,7 +87,7 @@ class LanguageParserTest : public QObject {
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
   }
 
   // Test for $base when it has a parent syntax.
@@ -129,7 +114,7 @@ class LanguageParserTest : public QObject {
     11-25: "meta.block.c"
       15-22: "constant.language.c++" - Data: "nullptr"
 )r";
-    compareLineByLine(root->toString(), out);
+    TestUtil::compareLineByLine(root->toString(), out);
   }
 
   //  // Test for $base when it doesn't have a parent syntax.
@@ -153,7 +138,7 @@ class LanguageParserTest : public QObject {
       25-30: "string.quoted.double.c"
         25-26: "punctuation.definition.string.begin.c" - Data: """
         29-30: "punctuation.definition.string.end.c" - Data: """)r";
-    compareLineByLine(root->toString(), out);
+    TestUtil::compareLineByLine(root->toString(), out);
   }
 
   // Test to check if $ end pattern doesn't match every line
@@ -189,7 +174,7 @@ class LanguageParserTest : public QObject {
     21-24: "entity.name.function.c" - Data: "bar"
     24-27: "meta.parens.c" - Data: "(a)")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cppIncludeTest() {
@@ -209,7 +194,7 @@ class LanguageParserTest : public QObject {
       9-10: "punctuation.definition.string.begin.c" - Data: "<"
       16-17: "punctuation.definition.string.end.c" - Data: ">")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cppRangeTest() {
@@ -239,7 +224,7 @@ class LanguageParserTest : public QObject {
         23-25: "meta.parens.c" - Data: "()"
       27-28: "punctuation.definition.invalid.c++" - Data: "}")r").trimmed();
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cppFunctionTest() {
@@ -260,7 +245,7 @@ class LanguageParserTest : public QObject {
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
   }
 
   void cppTest() {
@@ -281,7 +266,7 @@ class LanguageParserTest : public QObject {
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
   }
 
   void hasBackReference() {
@@ -315,7 +300,7 @@ language = English)";
     42-43: "punctuation.separator.key-value.java-properties" - Data: "="
     44-51: "string.unquoted.java-properties" - Data: "English")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cppParensTest() {
@@ -338,7 +323,7 @@ language = English)";
       5-6: "constant.numeric.c" - Data: "0"
       8-9: "constant.numeric.c" - Data: "3")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void javaPropertiesTest() {
@@ -358,7 +343,7 @@ language = English)";
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
   }
 
   void sqlErbTest() {
@@ -390,7 +375,7 @@ WHERE email = <%= quote @email %>)";
     92-98: "variable.other.readwrite.instance.ruby"
       92-93: "punctuation.definition.variable.ruby" - Data: "@")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   // Makefile.plist includes \G pattern
@@ -453,7 +438,7 @@ WHERE email = <%= quote @email %>)";
       46-47: "punctuation.separator.key-value.yaml" - Data: ":"
     48-54: "string.unquoted.yaml" - Data: "onMac ")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void rubyHeredocTest() {
@@ -487,7 +472,7 @@ EOS)";
         51-52: "source.ruby" - Data: "}"
     56-59: "punctuation.definition.string.end.ruby" - Data: "EOS")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void rubyClassTest() {
@@ -555,7 +540,7 @@ end)";
   135-138: "keyword.control.ruby" - Data: "end"
   139-142: "keyword.control.ruby" - Data: "end")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cssTest() {
@@ -584,7 +569,7 @@ end)";
         13-14: "punctuation.terminator.rule.css" - Data: ";"
       15-16: "punctuation.section.property-list.end.css" - Data: "}")r";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 
   void cssCommentTest() {
@@ -604,7 +589,7 @@ a)";
 "  0-8: \"comment.block.css\"\n"
 "    0-2: \"punctuation.definition.comment.css\" - Data: \"/*\"";
 
-    compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(), result);
   }
 };
 

@@ -222,7 +222,7 @@ struct RootNode : public Node {
   RootNode(LanguageParser* parser, const QString& name);
 
   void adjust(int pos, int delta) override;
-  void updateChildren(const Region& region, LanguageParser* parser);
+  Region updateChildren(const Region& region, LanguageParser* parser);
 };
 
 }  // namespace core

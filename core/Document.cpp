@@ -108,8 +108,8 @@ void Document::setupLayout() {
 void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
   m_lang.reset(lang);
   if (m_lang) {
-    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, text);
-    m_syntaxHighlighter = new SyntaxHighlighter(this, parser);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create(m_lang->scopeName, text));
+    m_syntaxHighlighter = new SyntaxHighlighter(this, std::move(parser), Config::singleton().theme(), Config::singleton().font());
   } else {
     qDebug("lang is null");
   }
