@@ -256,6 +256,9 @@ resolve() {
 			cd ..
 		fi
     fi
+    
+    # npm install for minifying JS
+    npm install
 
     # npm install for silkedit package
     cd jslib/node_modules/silkedit
