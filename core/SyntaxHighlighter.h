@@ -18,7 +18,7 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   DISABLE_COPY(SyntaxHighlighter)
 
  public:
-  SyntaxHighlighter(QTextDocument* doc, LanguageParser* parser);
+  SyntaxHighlighter(QTextDocument* doc, std::unique_ptr<LanguageParser> parser, Theme* theme, QFont font);
   ~SyntaxHighlighter();
   DEFAULT_MOVE(SyntaxHighlighter)
 
@@ -42,7 +42,9 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
    */
   void adjust(int pos, int delta);
 
- public slots:
+  QString asHtml();
+
+public slots:
   void updateNode(int position, int charsRemoved, int charsAdded);
 
  protected:
@@ -53,8 +55,8 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
   Node* m_lastScopeNode;
   QByteArray m_lastScopeBuf;
   QString m_lastScopeName;
-  Theme* m_theme;
   std::unique_ptr<LanguageParser> m_parser;
+  Theme* m_theme;
   QFont m_font;
 
   // Given a text region, returns the innermost node covering that region.
