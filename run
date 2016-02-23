@@ -81,6 +81,9 @@ clean() {
 
 # resolve dependency
 resolve() {
+    # Clean node modules
+    git clean -dfx jslib packages
+    
     # Update submodules
     git submodule sync
     git submodule update --init
