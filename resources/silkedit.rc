@@ -11,10 +11,10 @@ PRODUCTVERSION VER_VERSION
 	 {
 		 BLOCK "040904E4"
 		 {
-			 VALUE "CompanyName", "SilkEdit dev team"
+			 VALUE "CompanyName", "SilkEdit team"
 			 VALUE "FileVersion", VER_VERSION_STR
 			 VALUE "FileDescription", "SilkEdit"
-			 VALUE "LegalCopyright", "Copyright (C) 2014-2015 Shinichi Katayama"
+			 VALUE "LegalCopyright", "Copyright (C) 2014-2016 Shinichi Katayama"
 			 VALUE "OriginalFilename", "silkedit.exe"
 			 VALUE "ProductName", "SilkEdit"
 			 VALUE "ProductVersion", VER_VERSION_STR

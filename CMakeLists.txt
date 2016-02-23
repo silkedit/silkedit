@@ -185,9 +185,6 @@ if(APPLE)
   # bundle builtin packages
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
 
-  # bundle JS libraries
-  file(COPY ${PROJECT_SOURCE_DIR}/jslib DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
-
   # copy npm
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
@@ -200,6 +197,10 @@ if(APPLE)
      ${PROJECT_SOURCE_DIR}/npm/package.json
      DESTINATION
      ${PROJECT_NAME}.app/Contents/MacOS/npm)
+
+  # bundle jslib
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
@@ -240,8 +241,9 @@ elseif (MSVC)
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
 
-  # bundle JS libraries
-  file(COPY ${PROJECT_SOURCE_DIR}/jslib DESTINATION .)
+  # bundle jslib
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./jslib)
 
   # copy npm
   file(COPY

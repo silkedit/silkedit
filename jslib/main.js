@@ -14,8 +14,8 @@ if (process.env.NODE_PATH) {
 require('module').Module._initPaths();
 
 if (process.argv.length < 2) {
-  console.log('missing argument.');
-  return;
+  console.error('missing argument.');
+  process.exit();
 }
 
 // cache silkedit module to share it globaly
