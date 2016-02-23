@@ -4,7 +4,6 @@
   "description": "SilkEdit built-in packages",
   "author": "SilkEdit team",
   "dependencies": {
-    "default": "",
     "vim": "silkedit/vim#0.1.11",
     "language-javascript": "silkedit/language-javascript#0.1.0",
     "language-c": "silkedit/language-c#0.1.0",
