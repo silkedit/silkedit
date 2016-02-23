@@ -181,6 +181,8 @@ class LanguageParser {
   QString getData(int start, int end);
   void setText(const QString& text) { m_text = text; }
   void clearCache();
+  int beginOfLine(int pos);
+  int endOfLine(int pos);
 
  private:
   std::unique_ptr<Language> m_lang;
