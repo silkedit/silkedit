@@ -110,7 +110,6 @@ void FindReplaceView::showEvent(QShowEvent*) {
   ui->inSelectionChk->setChecked(false);
   m_selectedRegion = boost::none;
   if (auto editView = qobject_cast<TextEditView*>(m_activeView)) {
-    setActiveView(editView);
 
     QString selectedText = editView->textCursor().selectedText();
     if (!selectedText.isEmpty()) {
