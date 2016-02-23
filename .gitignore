@@ -10,8 +10,10 @@ CMakeLists.txt.user
 /include/
 /jsdoc_out/
 /jslib/node_modules/silkedit/node_modules/
+!/jslib/node_modules/silkedit/node_modules/default
 /lib/
 /libnode/
+/minified/
 /node_modules/
 /yaml-cpp-*
 /packages/node_modules/*

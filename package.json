@@ -2,9 +2,7 @@
   "name": "silkedit",
   "version": "1.0.0",
   "scripts": {
-    "babel-jslib": "babel jslib -d minified/jslib",
-    "babel-default": "babel minified/default -d minified/default --ignore resources",
-    "minify": "grunt"
+    "minify": "cmake -E remove_directory minified && cmake -E copy_directory jslib minified/jslib && babel minified/jslib -d minified/jslib --ignore resources && grunt"
   },
   "devDependencies": {
     "babel-cli": "^6.0.0",

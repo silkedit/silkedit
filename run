@@ -264,15 +264,13 @@ resolve() {
     cd jslib/node_modules/silkedit
     npm install --production
     cd ../../..
-
-    # npm install for default packages
-    cd packages/node_modules
-    npm install --production
-    cd ../..
 }
 
 # release build
 build() {
+    echo "Minifying JS files"
+    npm run minify
+
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
         ensure_dir build
