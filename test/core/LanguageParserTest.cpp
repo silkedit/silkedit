@@ -591,6 +591,59 @@ a)";
 
     TestUtil::compareLineByLine(root->toString(), result);
   }
+
+  void beginOfLine() {
+    const QVector<QString> files({"testdata/grammers/CSS.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(
+a {
+  hoge: 0;
+})";
+
+    LanguageParser* parser = LanguageParser::create("source.css", text);
+    QCOMPARE(parser->beginOfLine(-1), -1);
+    QCOMPARE(parser->beginOfLine(0), 0); // '\n'
+    QCOMPARE(parser->beginOfLine(1), 1); // 'a'
+    QCOMPARE(parser->beginOfLine(2), 1); // ' '
+    QCOMPARE(parser->beginOfLine(3), 1); // '{'
+    QCOMPARE(parser->beginOfLine(4), 1); // '\n'
+    QCOMPARE(parser->beginOfLine(5), 5); // ' '
+    QCOMPARE(parser->beginOfLine(6), 5); // ' '
+    QCOMPARE(parser->beginOfLine(7), 5); // 'h'
+    QCOMPARE(parser->beginOfLine(14), 5); // ';'
+    QCOMPARE(parser->beginOfLine(15), 5); // '\n'
+    QCOMPARE(parser->beginOfLine(16), 16); // '}'
+    QCOMPARE(parser->beginOfLine(17), -1); // end of document
+  }
+
+  void endOfLine() {
+    const QVector<QString> files({"testdata/grammers/CSS.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(
+a {
+  hoge: 0;
+})";
+
+    LanguageParser* parser = LanguageParser::create("source.css", text);
+    QCOMPARE(parser->endOfLine(-1), -1);
+    QCOMPARE(parser->endOfLine(0), 0); // '\n'
+    QCOMPARE(parser->endOfLine(1), 4); // 'a'
+    QCOMPARE(parser->endOfLine(2), 4); // ' '
+    QCOMPARE(parser->endOfLine(3), 4); // '{'
+    QCOMPARE(parser->endOfLine(4), 4); // '\n'
+    QCOMPARE(parser->endOfLine(5), 15); // ' '
+    QCOMPARE(parser->endOfLine(6), 15); // ' '
+    QCOMPARE(parser->endOfLine(7), 15); // 'h'
+    QCOMPARE(parser->endOfLine(14), 15); // ';'
+    QCOMPARE(parser->endOfLine(15), 15); // '\n'
+    QCOMPARE(parser->endOfLine(16), 16); // '}'
+    QCOMPARE(parser->endOfLine(17), 16); // end of document
+    QCOMPARE(parser->endOfLine(100), 16); // end of document
+  }
 };
 
 }  // namespace core

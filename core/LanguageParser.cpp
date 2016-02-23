@@ -312,6 +312,48 @@ void LanguageParser::clearCache() {
   }
 }
 
+int LanguageParser::beginOfLine(int pos) {
+  if (pos < 0 || m_text.size() - 1 < pos) {
+    return -1;
+  }
+
+  Q_ASSERT(0 <= pos && pos <= m_text.size() - 1);
+
+  if (m_text[pos] == '\n') {
+    pos--;
+  }
+
+  while (pos >= 0 && m_text[pos] != '\n') {
+    pos--;
+  }
+
+  // begin of the line is 0 or the next char of '\n'
+  pos++;
+
+  return pos;
+}
+
+// When QTextDocument#setPlainText is called, two contentsChange events are fired. But first one has
+// wrong charsRemoved and charsAdded (actual charsRemoved + 1 and actual charsAdded + 1 respectively), so we need to workaround it in this method.
+// contentsChange(pos: 0, charsRemoved: 6716, charsAdded: 0)
+// contentsChange(pos: 0, charsRemoved: 0, charsAdded: 6715)
+// https://bugreports.qt.io/browse/QTBUG-3495
+int LanguageParser::endOfLine(int pos) {
+  if (pos < 0) {
+    return -1;
+  }
+
+  while (pos < m_text.size() && m_text[pos] != '\n') {
+    pos++;
+  }
+
+  if (m_text.size() <= pos) {
+    return m_text.size() - 1;
+  }
+
+  return pos;
+}
+
 LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {}
 
 Node::Node(LanguageParser* p_p, const QString& p_name) : name(p_name), parser(p_p) {
@@ -918,7 +960,7 @@ Region RootNode::updateChildren(const Region& region, LanguageParser* parser) {
   Q_ASSERT(affectedRegion.end() == region.end());
 
   for (auto it = children.begin(); it != children.end();) {
-    qDebug() << "child region:" << (*it)->region.toString();
+//    qDebug() << "child region:" << (*it)->region.toString();
     if ((*it)->region.intersects(region)) {
       //      qDebug() << "affected child:" << (*it)->region;
       // update affected region

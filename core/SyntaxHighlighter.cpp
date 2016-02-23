@@ -84,56 +84,60 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     m_rootNode->adjust(pos, delta);
   }
 
+  //   We need to extend affectedRegion to the region from the beginning of the line at beginPos to
+  //   the end of the line at endPos to support look ahead and behind regex.
+  //   e.g.
+
+  //   text:
+  //     StatusBar QComboBox::down-arrow {
+  //        /*image: url(noimg);*/
+
+  //   pattern:
+  //      <key>begin</key>
+  //      <string>\s*(?=[:.*#a-zA-Z])</string>
+  //      <key>end</key>
+  //      <string>(?=[/@{)])</string>
+  //      <key>name</key>
+  //      <string>meta.selector.css</string>
+
+  //   scope:
+  //     0-32: "meta.selector.css" - Data: "StatusBar QComboBox::down-arrow "
+
+  //   When we delete '{' at the end of line, beginPos is 32 and endPos is 33.
+  //   In this case, [0-32) is not updated without expansion because [0-32) doesn't intersect
+  //   [32-33).
+  //   But we need to update [0-32) because its end pattern has /(?=/ and end pattern should match
+  //   with
+  //   '/' at pos 36
+
   int beginPos, endPos;
   if (delta > 0) {
     beginPos = pos;
     endPos = pos + delta;
+
+    // When text is added, we need to get begin and end pos based on current document.
+    m_parser->setText(document()->toPlainText());
+    beginPos = m_parser->beginOfLine(beginPos);
+    endPos = m_parser->endOfLine(endPos);
+
   } else {
     beginPos = pos + delta;
     endPos = pos;
+
+    // When text is removed, we need to get begin and end pos based on the text before removal
+    beginPos = m_parser->beginOfLine(beginPos);
+    endPos = m_parser->endOfLine(endPos);
+    m_parser->setText(document()->toPlainText());
   }
 
-//   We need to extend affectedRegion to the region from the beginning of the line at beginPos to
-//   the end of the line at endPos to support look ahead and behind regex.
-//   e.g.
-
-//   text:
-//     StatusBar QComboBox::down-arrow {
-//        /*image: url(noimg);*/
-
-
-//   pattern:
-//      <key>begin</key>
-//      <string>\s*(?=[:.*#a-zA-Z])</string>
-//      <key>end</key>
-//      <string>(?=[/@{)])</string>
-//      <key>name</key>
-//      <string>meta.selector.css</string>
-
-//   scope:
-//     0-32: "meta.selector.css" - Data: "StatusBar QComboBox::down-arrow "
-
-//   When we delete '{' at the end of line, beginPos is 32 and endPos is 33.
-//   In this case, [0-32) is not updated without expansion because [0-32) doesn't intersect [32-33).
-//   But we need to update [0-32) because its end pattern has /(?=/ and end pattern should match with
-//   '/' at pos 36
-
-  QTextBlock beginBlock = document()->findBlock(beginPos);
-  if (!beginBlock.isValid()) {
-    qWarning("beginBlock is invalid");
+  if (beginPos < 0 || endPos < 0) {
+    qWarning() << "invalid begin or end position. beginPos" << beginPos << "endPos" << endPos;
     return;
   }
 
-  QTextBlock endBlock = document()->findBlock(endPos);
-  if (!endBlock.isValid()) {
-    qWarning("endBlock is invalid");
-    return;
-  }
+  const auto& affectedRegion = m_rootNode->updateChildren(Region(beginPos, endPos), m_parser.get());
 
-  const auto& affectedRegion = m_rootNode->updateChildren(Region(beginBlock.position(), endBlock.position() + endBlock.length()),
-                             m_parser.get());
-
-//  qDebug().noquote() << "affectedRegion:" << affectedRegion;
+  //  qDebug().noquote() << "affectedRegion:" << affectedRegion;
 
   QTextBlock affectedBlock = document()->findBlock(affectedRegion.begin());
   while (affectedBlock.isValid() && affectedBlock.position() < affectedRegion.end()) {
@@ -150,7 +154,6 @@ void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdde
   qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
          charsAdded);
   if (document()) {
-    m_parser->setText(document()->toPlainText());
     // position is the position after removal happeened, so we need +charsRemoved
     //
     // NOTE: When pasting a text in an empty document, charsRemoved becomes 1 and charsAdded is the
@@ -172,7 +175,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
   }
 
   int posInDoc = currentBlock().position();
-//  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), posInDoc);
+  //  qDebug("highlightBlock. text: %s. current block pos: %d", qPrintable(text), posInDoc);
 
   for (int posInText = 0; posInText < text.length();) {
     updateScope(posInDoc + posInText);
@@ -210,7 +213,8 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 }
 
 Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
-  if (!node) return nullptr;
+  if (!node)
+    return nullptr;
 
   size_t idx = Util::binarySearch(node->children.size(), [search, node](size_t i) {
     return node->children[i]->region.begin() >= search.begin() ||
@@ -304,8 +308,7 @@ QString SyntaxHighlighter::asHtml() {
   end = end.next();
   const int selectionStart = cursor.selectionStart();
   const int endOfDocument = tempDocument->characterCount() - 1;
-  for (QTextBlock current = start; current.isValid() && current != end;
-       current = current.next()) {
+  for (QTextBlock current = start; current.isValid() && current != end; current = current.next()) {
     const QTextLayout* layout(current.layout());
 
     foreach (const QTextLayout::FormatRange& range, layout->additionalFormats()) {
