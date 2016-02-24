@@ -23,8 +23,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
       m_rootNode(parser->parse()),
       m_lastScopeNode(nullptr),
       m_parser(std::move(parser)),
-      m_theme(theme),
-      m_font(font) {
+      m_theme(theme) {
   setDocument(doc);
 
   /*
@@ -45,6 +44,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
   connect(&Config::singleton(), &Config::themeChanged, this, &SyntaxHighlighter::changeTheme);
   connect(&Config::singleton(), &Config::fontChanged, this, &SyntaxHighlighter::changeFont);
 
+  m_theme->setFont(font);
   rehighlight();
 }
 
@@ -186,8 +186,6 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
     if (format) {
-      // This font must match the Document default font
-      format->setFont(m_font);
       if (m_lastScopeNode->isLeaf()) {
         Region region = m_lastScopeNode->region;
         int length = region.end() - (posInDoc + posInText);
@@ -283,8 +281,10 @@ void SyntaxHighlighter::changeTheme(Theme* theme) {
 }
 
 void SyntaxHighlighter::changeFont(const QFont& font) {
-  m_font = font;
-  rehighlight();
+  if (m_theme) {
+    m_theme->setFont(font);
+    rehighlight();
+  }
 }
 
 QString SyntaxHighlighter::asHtml() {

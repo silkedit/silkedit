@@ -477,6 +477,15 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
   return matchedSettings;
 }
 
+void Theme::setFont(const QFont& font) {
+  m_font = font;
+
+  // Update cache
+  for (const auto& format : m_cachedFormats) {
+    format->setFont(font);
+  }
+}
+
 std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
   if (scopeSettings.isEmpty())
     return nullptr;
@@ -519,6 +528,8 @@ std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
       }
     }
   }
+
+  format->setFont(m_font);
 
   auto formatPtr = std::shared_ptr<QTextCharFormat>(format);
   m_cachedFormats.insert(scope, formatPtr);
