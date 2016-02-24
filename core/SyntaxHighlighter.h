@@ -57,7 +57,6 @@ public slots:
   QString m_lastScopeName;
   std::unique_ptr<LanguageParser> m_parser;
   Theme* m_theme;
-  QFont m_font;
 
   // Given a text region, returns the innermost node covering that region.
   // Side-effects: Writes to m_lastScopeBuf...

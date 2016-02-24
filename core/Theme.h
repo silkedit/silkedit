@@ -66,12 +66,13 @@ class Theme {
   bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> scopeSettings;
+
   bool isDarkTheme() const;
 
- private:
+  void setFont(const QFont &font);
+
+private:
   static ScopeSetting* matchedSetting(const QString& scope);
-  QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
-  QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
 
   static ColorSettings createTextEditViewSettingsColors(const Theme* theme);
   static ColorSettings createGutterSettingsColors(const Theme* theme);
@@ -82,7 +83,17 @@ class Theme {
   static ColorSettings createWindowSettingsColors(const Theme* theme);
   static ColorSettings createPackageToolBarSettingsColors(const Theme* theme);
   static ColorSettings createFindReplaceViewSettingsColors(const Theme* theme);
-  static ColorSettings createConsleSettingsColors(const Theme *theme);
+  static ColorSettings createConsleSettingsColors(const Theme* theme);
+
+  QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
+
+  // tmTheme file doesn't have a font setting.
+  // Ideally, SyntaxHighlighter should have a font setting, but calling setFont in highlightBlock
+  // method is VERY SLOW.
+  // As a workaround, Theme keeps a font setting and apply it when creating QTextCharFormat.
+  QFont m_font;
+
+  QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
 };
 
 class Rank {
