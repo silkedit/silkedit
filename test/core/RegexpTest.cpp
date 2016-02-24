@@ -134,6 +134,23 @@ axb-)";
     QVERIFY(indices.isEmpty());
   }
 
+  void findStringSubmatchIndexInSurrogatePairString() {
+    auto reg = Regexp::compile(u8R"(𩸽う)"); // 𩸽 U+29E3D
+    QString str = u8R"(あい𩸽うえお)";
+    auto indices = reg->findStringSubmatchIndex(str);
+    QVERIFY(!indices.isEmpty());
+    QCOMPARE(indices.size(), 2);
+    qDebug() << indices;
+    // Unicode characters with code values above 65535 are stored using surrogate pairs, two
+    // consecutive QChars.
+    QCOMPARE(indices, QVector<int>({2, 5}));
+
+    // search fail
+    str = "aaa";
+    indices = reg->findStringSubmatchIndex(str);
+    QVERIFY(indices.isEmpty());
+  }
+
   void findAllStringSubmatchIndexInJapanese() {
     auto reg = Regexp::compile(u8R"(あ(け*)い)");
     QString str = u8R"(-あい-あけい-)";
