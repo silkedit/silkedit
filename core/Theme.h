@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <QMap>
 #include <QString>
 #include <QColor>
@@ -9,6 +10,7 @@
 
 #include "macros.h"
 #include "LanguageParser.h"
+#include "stlSpecialization.h"
 
 namespace core {
 
@@ -48,7 +50,7 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   static int rank(const QString& scope, const QString& scope2);
 
-  std::shared_ptr<QTextCharFormat> getFormat(const QString& scope);
+  QTextCharFormat *getFormat(const QString& scope);
 
   std::unique_ptr<ColorSettings> textEditViewSettings;
   std::unique_ptr<ColorSettings> gutterSettings;
@@ -85,7 +87,7 @@ private:
   static ColorSettings createFindReplaceViewSettingsColors(const Theme* theme);
   static ColorSettings createConsleSettingsColors(const Theme* theme);
 
-  QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
+  std::unordered_map<QString, std::unique_ptr<QTextCharFormat>> m_cachedFormats;
 
   // tmTheme file doesn't have a font setting.
   // Ideally, SyntaxHighlighter should have a font setting, but calling setFont in highlightBlock
@@ -103,16 +105,15 @@ class Rank {
   Rank(const QString& scopeSelector, const QString& scope);
   ~Rank() = default;
 
-  bool isValid() { return m_state == State::Valid || m_state == State::Empty; }
-  bool isInvalid() { return m_state == State::Invalid; }
-  bool isEmpty() { return m_state == State::Empty; }
+  bool isValid() const { return m_state == State::Valid || m_state == State::Empty; }
+  bool isInvalid() const { return m_state == State::Invalid; }
+  bool isEmpty() const { return m_state == State::Empty; }
 
-  bool operator>(Rank& r);
-  bool operator<(Rank& r);
-  bool operator==(Rank& r);
-  bool operator>=(Rank&) { throw std::runtime_error("operator >= not implemented"); }
-  bool operator<=(Rank&) { throw std::runtime_error("operator <= not implemented"); }
-  bool operator!=(Rank&) { throw std::runtime_error("operator != not implemented"); }
+  bool operator>(const Rank& r) const;
+  bool operator<(const Rank& r) const;
+  bool operator>=(const Rank&) { throw std::runtime_error("operator >= not implemented"); }
+  bool operator<=(const Rank&) { throw std::runtime_error("operator <= not implemented"); }
+  bool operator!=(const Rank&) { throw std::runtime_error("operator != not implemented"); }
 
  private:
   static int calcRank(const QStringRef& scopeSelector, const QStringRef& singleScope);

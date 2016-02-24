@@ -257,24 +257,29 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
   int iter = MAX_ITER_COUNT;
   std::vector<std::unique_ptr<Node>> nodes(0);
   int prevPos;
+  const QLatin1Char lf('\n');
+  const QLatin1Char cr('\r');
 
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
     prevPos = pos;
     // Try to find a root pattern in m_text from pos.
-    auto pair = m_lang->rootPattern->find(m_text, pos);
+    const auto& pair = m_lang->rootPattern->find(m_text, pos);
     Pattern* pattern = pair.first;
 
     // This regions could include empty region
     // e.g. /(^[ \t]+)?(?=#)/ in SQL.plist
     boost::optional<QVector<Region>> regions = pair.second;
 
-    int newlinePos = m_text.indexOf(QRegularExpression(R"(\n|\r)"), pos);
+    int newlinePos = m_text.indexOf(lf, pos);
+    if (newlinePos > 0 && m_text[newlinePos - 1] == cr) {
+      newlinePos--;
+    }
 
     if (!regions) {
       break;
     } else if (newlinePos > 0 && newlinePos <= (*regions)[0].begin()) {
       pos = newlinePos;
-      while (pos < m_text.length() && (m_text[pos] == '\n' || m_text[pos] == '\r')) {
+      while (pos < m_text.length() && (m_text[pos] == lf || m_text[pos] == cr)) {
         pos++;
       }
     } else {

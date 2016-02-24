@@ -44,7 +44,9 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
   connect(&Config::singleton(), &Config::themeChanged, this, &SyntaxHighlighter::changeTheme);
   connect(&Config::singleton(), &Config::fontChanged, this, &SyntaxHighlighter::changeFont);
 
-  m_theme->setFont(font);
+  if (m_theme) {
+    m_theme->setFont(font);
+  }
   rehighlight();
 }
 
@@ -184,7 +186,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       return;
     }
 
-    std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
+    QTextCharFormat* format = m_theme->getFormat(m_lastScopeName);
     if (format) {
       if (m_lastScopeNode->isLeaf()) {
         Region region = m_lastScopeNode->region;
@@ -206,6 +208,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       }
     } else {
       qDebug("format not found for %s", qPrintable(m_lastScopeName));
+      posInText++;
     }
   }
 }
