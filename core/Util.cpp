@@ -262,8 +262,7 @@ bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
 }
 
 // http://www.yaml.org/spec/1.2/spec.html#id2805071
-QVariant core::Util::toVariant(const QString &str)
-{
+QVariant core::Util::toVariant(const QString& str) {
   static QRegularExpression nullPattern("null|Null|NULL|~");
   static QRegularExpression boolPattern("true|True|TRUE|false|False|FALSE");
   static QRegularExpression base10IntPattern("[-+]?[0-9]+");
@@ -319,8 +318,7 @@ QVariant core::Util::toVariant(const QString &str)
       return QVariant();
     }
   } else if (str.contains(infinityPattern, match) && match->capturedLength(0) == str.size()) {
-    return str.startsWith('-') ? QVariant::fromValue(-1 * INFINITY)
-                                : QVariant::fromValue(INFINITY);
+    return str.startsWith('-') ? QVariant::fromValue(-1 * INFINITY) : QVariant::fromValue(INFINITY);
   } else if (str.contains(nanPattern, match) && match->capturedLength(0) == str.size()) {
     return QVariant::fromValue(NAN);
   } else {
