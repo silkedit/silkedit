@@ -39,6 +39,8 @@ class Regexp {
                                                    bool findNotEmpty = false) const;
 
  private:
+  static QMutex s_mutex;
+
   regex_t* m_reg;
   QString m_pattern;
 

@@ -43,6 +43,11 @@ Region Region::intersection(const Region& other) const {
   return Region(qMax(begin(), other.begin()), qMin(end(), other.end()));
 }
 
+Region Region::sum(const Region &other) const
+{
+  return Region(qMin(begin(), other.begin()), qMax(end(), other.end()));
+}
+
 void Region::setBegin(int p) {
   if (p <= m_end) {
     m_begin = p;

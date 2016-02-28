@@ -15,9 +15,11 @@
 #include "KeymapManager.h"
 #include "core/ObjectStore.h"
 #include "core/Constants.h"
+#include "core/SyntaxHighlighter.h"
 
 using core::Constants;
 using core::ObjectStore;
+using core::SyntaxHighlighterThread;
 
 App* App::s_app = nullptr;
 
@@ -77,7 +79,7 @@ App::App(int& argc, char** argv)
   }
 
   // Track active TabView
-  QObject::connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
+  connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
     //    qDebug("focusChanged");
     if (TabView* tabView = findParent<TabView*>(focusedWidget)) {
       if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
@@ -85,6 +87,9 @@ App::App(int& argc, char** argv)
       }
     }
   });
+
+  connect(this, &App::aboutToQuit, &SyntaxHighlighterThread::singleton(),
+          &SyntaxHighlighterThread::quit);
 }
 
 bool App::event(QEvent* event) {

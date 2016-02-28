@@ -10,15 +10,15 @@
 namespace core {
 
 namespace {
-void checkRegion(Node* node, Region region) {
-  if (!region.fullyCovers(node->region)) {
+void checkRegion(const Node& node, Region region) {
+  if (!region.fullyCovers(node.region)) {
     qWarning("%s doesn't fully cover %s", qPrintable(region.toString()),
-             qPrintable(node->region.toString()));
+             qPrintable(node.region.toString()));
     QFAIL("");
   }
 
-  for (auto& child : node->children) {
-    checkRegion(child.get(), region);
+  for (auto child : node.children) {
+    checkRegion(child, region);
   }
 }
 }
@@ -30,6 +30,19 @@ class SyntaxHighlighterTest : public QObject {
   QFont font = QFont("Helvetica");
 
  private slots:
+
+  void initTestCase() {
+    qRegisterMetaType<QList<core::Node>>("QList<Node>");
+    qRegisterMetaType<QList<core::Node>>("QList<core::Node>");
+    qRegisterMetaType<core::RootNode>("RootNode");
+    qRegisterMetaType<core::RootNode>("core::RootNode");
+    qRegisterMetaType<core::LanguageParser>("LanguageParser");
+    qRegisterMetaType<core::LanguageParser>("core::LanguageParser");
+    qRegisterMetaType<core::Region>("Region");
+    qRegisterMetaType<core::Region>("core::Region");
+    qRegisterMetaType<core::SyntaxHighlighter*>("SyntaxHighlighter*");
+    qRegisterMetaType<core::SyntaxHighlighter*>("core::SyntaxHighlighter*");
+  }
 
   void scopeExtent() {
     const QVector<QString> files(
@@ -45,6 +58,11 @@ class SyntaxHighlighterTest : public QObject {
     std::unique_ptr<LanguageParser> plistParser(
         LanguageParser::create("text.xml.plist", doc.toPlainText()));
     SyntaxHighlighter plistHighlighter(&doc, std::move(plistParser), theme, font);
+    QSignalSpy spy(&plistHighlighter, &SyntaxHighlighter::parseFinished);
+
+    QVERIFY(spy.wait());
+
+    // When
     Region region = plistHighlighter.scopeExtent(10);
     QCOMPARE(region.begin(), 5);
     QCOMPARE(region.end(), 13);
@@ -63,6 +81,9 @@ class SyntaxHighlighterTest : public QObject {
     std::unique_ptr<LanguageParser> xmlParser(
         LanguageParser::create("text.xml", doc.toPlainText()));
     SyntaxHighlighter xmlHighlighter(&doc, std::move(xmlParser), theme, font);
+    QSignalSpy xmlSpy(&xmlHighlighter, &SyntaxHighlighter::parseFinished);
+
+    QVERIFY(xmlSpy.wait());
 
     // Node at 148 has an empty name like this
 
@@ -97,7 +118,10 @@ class hoge {
     std::unique_ptr<LanguageParser> parser(
         LanguageParser::create("source.c++", doc->toPlainText()));
     SyntaxHighlighter cppHighlighter(doc, std::move(parser), theme, font);
-    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode()->region);
+    QSignalSpy spy(&cppHighlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode().region);
 
     QTextCursor cursor(cppHighlighter.document());
     cursor.movePosition(QTextCursor::End);
@@ -105,18 +129,21 @@ class hoge {
     // needs to call updateNode manually because of this bug
     // https://bugreports.qt.io/browse/QTBUG-43695
     cppHighlighter.updateNode(text.length(), 0, 1);
-    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode()->region);
+    QVERIFY(spy.wait());
+    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode().region);
 
     cursor.movePosition(QTextCursor::End);
     QString str = "class aa {";
     cursor.insertText(str);
     cppHighlighter.updateNode(text.length() + 1, 0, str.length());
-    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode()->region);
+    QVERIFY(spy.wait());
+    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode().region);
 
     cursor.movePosition(QTextCursor::End);
     cursor.insertText("\n");
     cppHighlighter.updateNode(text.length() + 1 + str.length(), 0, 1);
-    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode()->region);
+    QVERIFY(spy.wait());
+    checkRegion(cppHighlighter.rootNode(), cppHighlighter.rootNode().region);
   }
 
   void updateNodeWithPaste() {
@@ -132,6 +159,8 @@ StatusBar QComboBox::down-arrow {
     QTextDocument doc(text);
     std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.css", doc.toPlainText()));
     SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
     //    qDebug().noquote() << highlighter.rootNode()->toString();
     //    qDebug().noquote() << highlighter.asHtml();
 
@@ -140,10 +169,12 @@ StatusBar QComboBox::down-arrow {
     cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
     highlighter.updateNode(0, text.length(), 0);
+    QVERIFY(spy.wait());
     QVERIFY(doc.isEmpty());
     cursor.insertText(text);
     // https://bugreports.qt.io/browse/QTBUG-3495
     highlighter.updateNode(0, 1, text.length() + 1);
+    QVERIFY(spy.wait());
     QCOMPARE(doc.toPlainText(), text);
 
     QFile output("testdata/highlighter_test/updateNodeWithPasteResult.html");
@@ -165,20 +196,24 @@ StatusBar QComboBox::down-arrow {
     QTextDocument doc(text);
     std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.css", doc.toPlainText()));
     SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
 
     QTextCursor cursor(&doc);
     cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::MoveAnchor);
     cursor.deletePreviousChar();
     highlighter.updateNode(32, 1, 0);
+    QVERIFY(spy.wait());
 
     QFile resFile("testdata/highlighter_test/cssHighlightTestAfterDeletion.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(highlighter.rootNode()->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resIn.readAll());
 
     cursor.insertText("{");
     highlighter.updateNode(32, 0, 1);
+    QVERIFY(spy.wait());
     QCOMPARE(doc.toPlainText(), text);
 
     QString result = QString(R"r(
@@ -199,10 +234,10 @@ StatusBar QComboBox::down-arrow {
         82-83: "punctuation.terminator.rule.css" - Data: ";"
       84-85: "punctuation.section.property-list.end.css" - Data: "}"
 )r").trimmed();
-    TestUtil::compareLineByLine(highlighter.rootNode()->toString(), result);
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
 
-//    qDebug().noquote() << highlighter.rootNode()->toString();
-//    qDebug().noquote() << highlighter.asHtml();
+    //    qDebug().noquote() << highlighter.rootNode()->toString();
+    //    qDebug().noquote() << highlighter.asHtml();
 
     QFile output("testdata/highlighter_test/updateNodeWithPasteResult.html");
     QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));

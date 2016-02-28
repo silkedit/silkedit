@@ -6,6 +6,8 @@
 #include <QVector>
 #include <QMap>
 #include <QDebug>
+#include <QReadWriteLock>
+#include <QThreadStorage>
 
 #include "macros.h"
 #include "Regexp.h"
@@ -31,15 +33,21 @@ struct Regex {
 
   virtual ~Regex() = default;
 
-  virtual boost::optional<QVector<Region>>
-  find(const QString& str, int beginPos, int endPos = -1, QList<QStringRef> capturedStrs = QList<QStringRef>()) = 0;
+  virtual boost::optional<QVector<Region>> find(
+      const QString& str,
+      int beginPos,
+      int endPos = -1,
+      QList<QStringRef> capturedStrs = QList<QStringRef>()) = 0;
 
   virtual QString pattern() = 0;
 
  protected:
   Regex() {}
 
-  boost::optional<QVector<Region>> find(Regexp* regex, const QString& str, int beginPos, int endPos);
+  boost::optional<QVector<Region>> find(Regexp* regex,
+                                        const QString& str,
+                                        int beginPos,
+                                        int endPos);
 
  private:
   friend class LanguageParserTest;
@@ -83,7 +91,6 @@ struct Pattern {
   // name could be empty
   // e.g. root patterns in Property List (XML)
   QString name;
-
   QString contentName;
   QString include;
   std::unique_ptr<Regex> match;
@@ -95,39 +102,40 @@ struct Pattern {
   std::unique_ptr<QVector<Pattern*>> patterns;
   std::unordered_map<QString, std::unique_ptr<Pattern>> repository;
   Language* lang;
-  QStringRef cachedStr;
-  Pattern* cachedResultPattern;
-  std::unique_ptr<QVector<Pattern*>> cachedPatterns;
-  boost::optional<QVector<Region>> cachedResultRegions;
-  Pattern* parent;
-  std::unique_ptr<Language> includedLanguage;
-  int hits;
-  int misses;
 
-  explicit Pattern(Pattern* parent = nullptr);
+  Pattern* parent;
+
+  QStringRef cachedStr;
+  QAtomicPointer<Pattern> cachedResultPattern;
+  QVector<Pattern*> cachedPatterns;
+  boost::optional<QVector<Region>> cachedResultRegions;
+  std::unique_ptr<Language> cachedIncludedLanguage;
+
+  explicit Pattern(Language* lang, Pattern* parent = nullptr);
   virtual ~Pattern() = default;
 
   std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
                                                                          int pos);
 
   // Note: Don't add endPos because Pattern caches the result matched in [beginPos, end of data)
-  // When you call find next time, find returns the chached result if beginPos > cached result's begin pos
+  // When you call find next time, find returns the chached result if beginPos > cached result's
+  // begin pos
   std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int beginPos);
-  std::unique_ptr<Node> createNode(const QString& data,
-                                   LanguageParser* parser,
-                                   const QVector<Region>& regions);
-  void createCaptureNodes(LanguageParser* parser,
-                          QVector<Region> regions,
+  Node* createNode(const QString& data, const QVector<Region>& regions);
+  void createCaptureNodes(QVector<Region> regions,
                           Node* parent,
                           Captures captures);
-  void tweak(Language* l);
   void clearCache();
+
+ private:
 };
 
 class RootPattern : public Pattern {
  public:
+  explicit RootPattern(Language* lang) : Pattern(lang) {}
 };
 
+// Thread safe
 class LanguageProvider {
   DISABLE_COPY_AND_MOVE(LanguageProvider)
  public:
@@ -135,20 +143,18 @@ class LanguageProvider {
   static Language* languageFromScope(const QString& scopeName);
   static Language* languageFromExtension(const QString& ext);
   static Language* loadLanguage(const QString& path);
-  static QVector<QPair<QString, QString>> scopeAndLangNamePairs() {
-    return m_scopeAndLangNamePairs;
-  }
+  static QVector<QPair<QString, QString>> scopeAndLangNamePairs();
 
  private:
-  static QVector<QPair<QString, QString>> m_scopeAndLangNamePairs;
-  static QMap<QString, QString> m_scopeLangFilePathMap;
-  static QMap<QString, QString> m_extensionLangFilePathMap;
+  static QVector<QPair<QString, QString>> s_scopeAndLangNamePairs;
+  static QMap<QString, QString> s_scopeLangFilePathMap;
+  static QMap<QString, QString> s_extensionLangFilePathMap;
+  static QReadWriteLock s_lock;
 
   LanguageProvider() = delete;
   ~LanguageProvider() = delete;
 };
 
-// todo: check who is the owner of Language?
 // Language cannot be shared (means mutable) across multiple documents because RootPattern has some
 // cache and is unique for a certain document.
 struct Language {
@@ -159,9 +165,8 @@ struct Language {
   Language* baseLanguage;
   bool hideFromUser;
 
-  Language() : rootPattern(nullptr), baseLanguage(this), hideFromUser(false) {}
+  explicit Language(QVariantMap rootMap);
 
-  void tweak();
   QString name();
   void clearCache();
 
@@ -169,62 +174,93 @@ struct Language {
 };
 
 class LanguageParser {
-  DISABLE_COPY(LanguageParser)
  public:
+  enum class State { Idle, FullParsing, PartialParsing, CancelRequested };
+
   static LanguageParser* create(const QString& scope, const QString& text);
 
+  // Don't call default consturctor in an application side. This is for invokeMethod
+  LanguageParser();
   ~LanguageParser() = default;
-  DEFAULT_MOVE(LanguageParser)
+  DEFAULT_COPY_AND_MOVE(LanguageParser)
 
-  std::unique_ptr<RootNode> parse();
-  std::vector<std::unique_ptr<Node>> parse(const Region& region);
+  boost::optional<RootNode> parse();
+  boost::optional<QList<Node> > parse(const Region& region);
   QString getData(int start, int end);
-  void setText(const QString& text) { m_text = text; }
-  void clearCache();
+
+  QString text();
+
+  void setText(const QString& text);
+
   int beginOfLine(int pos);
   int endOfLine(int pos);
 
- private:
-  std::unique_ptr<Language> m_lang;
-  QString m_text;
+  bool isIdle();
+  void setState(State state);
+  bool isFullParsing();
+  bool isParsing();
+  void cancel();
+  bool isCancelRequested();
 
-  LanguageParser(Language* lang, const QString& str);
+ private:
+  std::shared_ptr<Language> m_lang;
+  QString m_text;
+  State m_state;
+
+  LanguageParser(std::unique_ptr<Language> lang, const QString& str);
+
+  QList<Node> parse(const QString& text, const Region& region);
+  void clearCache();
 };
 
 struct Node {
-  DISABLE_COPY(Node)
-
   Region region;
   QString name;
-  std::vector<std::unique_ptr<Node>> children;
-  LanguageParser* parser;
+  QList<Node> children;
 
-  Node(LanguageParser* parser, const QString& name);
-  Node(const QString& p_name, Region p_range, LanguageParser* p_p);
+  // This is used in createCaptureNodes
+  QList<Node*> tmpChildren;
+
+  Node() = default;
+  Node(const QString& name);
+  Node(const QString& p_name, Region p_range);
   virtual ~Node() = default;
-  DEFAULT_MOVE(Node)
+  DEFAULT_COPY_AND_MOVE(Node)
 
-  void append(std::unique_ptr<Node> child);
+  void append(const Node& child);
+  void appendTmp(Node* child);
+  void moveTmpChildren();
+
   Region updateRegion();
-  QString toString() const;
-  bool isLeaf() const { return children.size() == 0; }
+  QString toString(const QString &text) const;
+  bool isLeaf() const;
   virtual void adjust(int pos, int delta);
 
-  friend QDebug operator<<(QDebug dbg, const Node& node) {
-    dbg.nospace() << node.toString();
-    return dbg.space();
+  void removeChildren(Region region);
+  Region coveringRegion(Region region);
+  void addChildren(QList<Node> newNodes);
+  void sortChildren();
+
+  inline bool operator==(const Node& other) const {
+    return region == other.region && name == other.name && children.size() == other.children.size();
   }
 
+  inline bool operator!=(const Node& other) const { return !(*this == other); }
+
  private:
-  QString data() const;
-  QString format(QString indent) const;
+  QString data(const QString &text) const;
+  QString format(QString indent, const QString &text) const;
 };
 
 struct RootNode : public Node {
-  RootNode(LanguageParser* parser, const QString& name);
+  RootNode();
+  RootNode(const QString& name);
 
   void adjust(int pos, int delta) override;
-  Region updateChildren(const Region& region, LanguageParser* parser);
 };
 
 }  // namespace core
+
+Q_DECLARE_METATYPE(core::Node)
+Q_DECLARE_METATYPE(core::RootNode)
+Q_DECLARE_METATYPE(core::LanguageParser)

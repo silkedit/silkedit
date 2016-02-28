@@ -1,4 +1,5 @@
-﻿#include <QStringList>
+﻿#include <oniguruma.h>
+#include <QStringList>
 #include <QTime>
 #include <QTranslator>
 #include <QLibraryInfo>
@@ -36,6 +37,9 @@ using core::MessageHandler;
 
 int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
+  // You have to call it explicitly from a specific thread (normally the main thread) before you use
+  // onig_new(), because onig_init() is not thread safe.
+  onig_init();
   PlatformUtil::enableMnemonicOnMac();
   MessageHandler::init();
   App app(argc, argv);
