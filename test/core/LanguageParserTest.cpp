@@ -13,7 +13,7 @@ class LanguageParserTest : public QObject {
   Q_OBJECT
  private slots:
   void loadLanguage() {
-    Language* lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
+    auto lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
     Q_ASSERT(lang);
 
     // fileTypes
@@ -24,7 +24,7 @@ class LanguageParserTest : public QObject {
     QCOMPARE(lang->firstLineMatch, QString("-\\*- C\\+\\+ -\\*-"));
 
     // rootPattern
-    Pattern* rootPattern = std::move(lang->rootPattern.get());
+    Pattern* rootPattern = lang->rootPattern.get();
     QVERIFY(!rootPattern->patterns->isEmpty());
     foreach (Pattern* pat, *(rootPattern->patterns)) { QVERIFY(pat); }
 
@@ -63,8 +63,8 @@ class LanguageParserTest : public QObject {
   }
 
   void LanguageFromScope() {
-    Language* lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
-    Language* langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
+    auto lang = LanguageProvider::loadLanguage("testdata/grammers/C++.tmLanguage");
+    auto langFromScope = LanguageProvider::languageFromScope(lang->scopeName);
     QVERIFY(langFromScope);
     QVERIFY(!LanguageProvider::languageFromScope("missing scope"));
   }
@@ -80,14 +80,16 @@ class LanguageParserTest : public QObject {
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
-    LanguageParser* parser = LanguageParser::create("text.xml.plist", in.readAll());
-    std::unique_ptr<Node> root = parser->parse();
+    const auto& text = in.readAll();
+    LanguageParser* parser = LanguageParser::create("text.xml.plist", text);
+    Q_ASSERT(parser);
+    auto root = parser->parse();
 
     QFile resFile("testdata/plist.tmlang.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(text), resIn.readAll());
   }
 
   // Test for $base when it has a parent syntax.
@@ -103,7 +105,7 @@ class LanguageParserTest : public QObject {
 }
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
 
     QString out = R"r(0-26: "source.c++"
   0-3: "storage.type.c" - Data: "int"
@@ -114,7 +116,7 @@ class LanguageParserTest : public QObject {
     11-25: "meta.block.c"
       15-22: "constant.language.c++" - Data: "nullptr"
 )r";
-    TestUtil::compareLineByLine(root->toString(), out);
+    TestUtil::compareLineByLine(root->toString(in), out);
   }
 
   //  // Test for $base when it doesn't have a parent syntax.
@@ -128,7 +130,7 @@ class LanguageParserTest : public QObject {
   int hoge = "foo";
 })";
     LanguageParser* parser = LanguageParser::create("source.c++", in);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
 
     QString out = R"r(0-33: "source.c++"
   0-33: "meta.namespace-block.c++"
@@ -138,7 +140,7 @@ class LanguageParserTest : public QObject {
       25-30: "string.quoted.double.c"
         25-26: "punctuation.definition.string.begin.c" - Data: """
         29-30: "punctuation.definition.string.end.c" - Data: """)r";
-    TestUtil::compareLineByLine(root->toString(), out);
+    TestUtil::compareLineByLine(root->toString(in), out);
   }
 
   // Test to check if $ end pattern doesn't match every line
@@ -157,7 +159,7 @@ class LanguageParserTest : public QObject {
     bar(a)
 )";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-28: "source.c++"
@@ -174,7 +176,7 @@ class LanguageParserTest : public QObject {
     21-24: "entity.name.function.c" - Data: "bar"
     24-27: "meta.parens.c" - Data: "(a)")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cppIncludeTest() {
@@ -185,7 +187,7 @@ class LanguageParserTest : public QObject {
 
     QString text = R"(#include <string>)";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
 
     QString result = R"r(0-17: "source.c++"
   0-17: "meta.preprocessor.c.include"
@@ -194,7 +196,7 @@ class LanguageParserTest : public QObject {
       9-10: "punctuation.definition.string.begin.c" - Data: "<"
       16-17: "punctuation.definition.string.end.c" - Data: ">")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cppRangeTest() {
@@ -207,7 +209,7 @@ class LanguageParserTest : public QObject {
   void foo();
 };)";
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
 
     // ';' at the end of document is not included in any pattern, but root scope(source.c++)
     QString result = QStringLiteral(R"r(
@@ -224,7 +226,7 @@ class LanguageParserTest : public QObject {
         23-25: "meta.parens.c" - Data: "()"
       27-28: "punctuation.definition.invalid.c++" - Data: "}")r").trimmed();
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cppFunctionTest() {
@@ -237,15 +239,16 @@ class LanguageParserTest : public QObject {
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
+    const auto& text = in.readAll();
 
-    LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
-    std::unique_ptr<Node> root = parser->parse();
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    auto root = parser->parse();
 
     QFile resFile("testdata/cppFunctionTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(text), resIn.readAll());
   }
 
   void cppTest() {
@@ -258,15 +261,16 @@ class LanguageParserTest : public QObject {
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
+    const auto& text = in.readAll();
 
-    LanguageParser* parser = LanguageParser::create("source.c++", in.readAll());
-    std::unique_ptr<Node> root = parser->parse();
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    auto root = parser->parse();
 
     QFile resFile("testdata/cppTest.cpp.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(text), resIn.readAll());
   }
 
   void hasBackReference() {
@@ -287,7 +291,7 @@ class LanguageParserTest : public QObject {
     QString text = R"(web = http\:/\/en.wikipedia.org/
 language = English)";
     LanguageParser* parser = LanguageParser::create("source.java-properties", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-51: "source.java-properties"
@@ -300,7 +304,7 @@ language = English)";
     42-43: "punctuation.separator.key-value.java-properties" - Data: "="
     44-51: "string.unquoted.java-properties" - Data: "English")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cppParensTest() {
@@ -312,7 +316,7 @@ language = English)";
     QString text = R"(Q(0, 0, 3))";
 
     LanguageParser* parser = LanguageParser::create("source.c++", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-10: "source.c++"
@@ -323,7 +327,7 @@ language = English)";
       5-6: "constant.numeric.c" - Data: "0"
       8-9: "constant.numeric.c" - Data: "3")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void javaPropertiesTest() {
@@ -335,15 +339,16 @@ language = English)";
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream in(&file);
+    const auto& text = in.readAll();
 
-    LanguageParser* parser = LanguageParser::create("source.java-properties", in.readAll());
-    std::unique_ptr<Node> root = parser->parse();
+    LanguageParser* parser = LanguageParser::create("source.java-properties", text);
+    auto root = parser->parse();
 
     QFile resFile("testdata/javaProperties.properties.res");
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(root->toString(), resIn.readAll());
+    TestUtil::compareLineByLine(root->toString(text), resIn.readAll());
   }
 
   void sqlErbTest() {
@@ -359,7 +364,7 @@ FROM players
 WHERE email = <%= quote @email %>)";
 
     LanguageParser* parser = LanguageParser::create("source.sql.ruby", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-101: "source.sql.ruby"
@@ -375,7 +380,7 @@ WHERE email = <%= quote @email %>)";
     92-98: "variable.other.readwrite.instance.ruby"
       92-93: "punctuation.definition.variable.ruby" - Data: "@")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   // Makefile.plist includes \G pattern
@@ -402,7 +407,7 @@ WHERE email = <%= quote @email %>)";
     LanguageParser* parser = LanguageParser::create("source.makefile", in.readAll());
 
     // When
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     // Then
@@ -418,8 +423,8 @@ WHERE email = <%= quote @email %>)";
     QString text = R"(- { key: ctrl+b, command: move_cursor_left, if: onMac })";
 
     LanguageParser* parser = LanguageParser::create("source.yaml", text);
-    std::unique_ptr<Node> root = parser->parse();
-    //    qDebug().noquote() << root->toString();
+    auto root = parser->parse();
+//    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-55: "source.yaml"
   0-2: "string.unquoted.yaml"
@@ -438,7 +443,7 @@ WHERE email = <%= quote @email %>)";
       46-47: "punctuation.separator.key-value.yaml" - Data: ":"
     48-54: "string.unquoted.yaml" - Data: "onMac ")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void rubyHeredocTest() {
@@ -453,8 +458,8 @@ WHERE email = <%= quote @email %>)";
 EOS)";
 
     LanguageParser* parser = LanguageParser::create("source.ruby", text);
-    std::unique_ptr<Node> root = parser->parse();
-//    qDebug().noquote() << root->toString();
+    auto root = parser->parse();
+    //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-59: "source.ruby"
   5-59: "string.unquoted.heredoc.ruby"
@@ -472,7 +477,7 @@ EOS)";
         51-52: "source.ruby" - Data: "}"
     56-59: "punctuation.definition.string.end.ruby" - Data: "EOS")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void rubyClassTest() {
@@ -496,7 +501,7 @@ EOS)";
 end)";
 
     LanguageParser* parser = LanguageParser::create("source.ruby", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-142: "source.ruby"
@@ -540,7 +545,7 @@ end)";
   135-138: "keyword.control.ruby" - Data: "end"
   139-142: "keyword.control.ruby" - Data: "end")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cssTest() {
@@ -553,7 +558,7 @@ end)";
 })";
 
     LanguageParser* parser = LanguageParser::create("source.css", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-16: "source.css"
@@ -569,7 +574,7 @@ end)";
         13-14: "punctuation.terminator.rule.css" - Data: ";"
       15-16: "punctuation.section.property-list.end.css" - Data: "}")r";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void cssCommentTest() {
@@ -581,7 +586,7 @@ end)";
 a)";
 
     LanguageParser* parser = LanguageParser::create("source.css", text);
-    std::unique_ptr<Node> root = parser->parse();
+    auto root = parser->parse();
     //    qDebug().noquote() << root->toString();
 
     // If we use raw string, it gives a compilation error...
@@ -589,7 +594,7 @@ a)";
 "  0-8: \"comment.block.css\"\n"
 "    0-2: \"punctuation.definition.comment.css\" - Data: \"/*\"";
 
-    TestUtil::compareLineByLine(root->toString(), result);
+    TestUtil::compareLineByLine(root->toString(text), result);
   }
 
   void beginOfLine() {
@@ -604,18 +609,18 @@ a {
 
     LanguageParser* parser = LanguageParser::create("source.css", text);
     QCOMPARE(parser->beginOfLine(-1), -1);
-    QCOMPARE(parser->beginOfLine(0), 0); // '\n'
-    QCOMPARE(parser->beginOfLine(1), 1); // 'a'
-    QCOMPARE(parser->beginOfLine(2), 1); // ' '
-    QCOMPARE(parser->beginOfLine(3), 1); // '{'
-    QCOMPARE(parser->beginOfLine(4), 1); // '\n'
-    QCOMPARE(parser->beginOfLine(5), 5); // ' '
-    QCOMPARE(parser->beginOfLine(6), 5); // ' '
-    QCOMPARE(parser->beginOfLine(7), 5); // 'h'
-    QCOMPARE(parser->beginOfLine(14), 5); // ';'
-    QCOMPARE(parser->beginOfLine(15), 5); // '\n'
-    QCOMPARE(parser->beginOfLine(16), 16); // '}'
-    QCOMPARE(parser->beginOfLine(17), -1); // end of document
+    QCOMPARE(parser->beginOfLine(0), 0);    // '\n'
+    QCOMPARE(parser->beginOfLine(1), 1);    // 'a'
+    QCOMPARE(parser->beginOfLine(2), 1);    // ' '
+    QCOMPARE(parser->beginOfLine(3), 1);    // '{'
+    QCOMPARE(parser->beginOfLine(4), 1);    // '\n'
+    QCOMPARE(parser->beginOfLine(5), 5);    // ' '
+    QCOMPARE(parser->beginOfLine(6), 5);    // ' '
+    QCOMPARE(parser->beginOfLine(7), 5);    // 'h'
+    QCOMPARE(parser->beginOfLine(14), 5);   // ';'
+    QCOMPARE(parser->beginOfLine(15), 5);   // '\n'
+    QCOMPARE(parser->beginOfLine(16), 16);  // '}'
+    QCOMPARE(parser->beginOfLine(17), -1);  // end of document
   }
 
   void endOfLine() {
@@ -630,19 +635,19 @@ a {
 
     LanguageParser* parser = LanguageParser::create("source.css", text);
     QCOMPARE(parser->endOfLine(-1), -1);
-    QCOMPARE(parser->endOfLine(0), 0); // '\n'
-    QCOMPARE(parser->endOfLine(1), 4); // 'a'
-    QCOMPARE(parser->endOfLine(2), 4); // ' '
-    QCOMPARE(parser->endOfLine(3), 4); // '{'
-    QCOMPARE(parser->endOfLine(4), 4); // '\n'
-    QCOMPARE(parser->endOfLine(5), 15); // ' '
-    QCOMPARE(parser->endOfLine(6), 15); // ' '
-    QCOMPARE(parser->endOfLine(7), 15); // 'h'
-    QCOMPARE(parser->endOfLine(14), 15); // ';'
-    QCOMPARE(parser->endOfLine(15), 15); // '\n'
-    QCOMPARE(parser->endOfLine(16), 16); // '}'
-    QCOMPARE(parser->endOfLine(17), 16); // end of document
-    QCOMPARE(parser->endOfLine(100), 16); // end of document
+    QCOMPARE(parser->endOfLine(0), 0);     // '\n'
+    QCOMPARE(parser->endOfLine(1), 4);     // 'a'
+    QCOMPARE(parser->endOfLine(2), 4);     // ' '
+    QCOMPARE(parser->endOfLine(3), 4);     // '{'
+    QCOMPARE(parser->endOfLine(4), 4);     // '\n'
+    QCOMPARE(parser->endOfLine(5), 15);    // ' '
+    QCOMPARE(parser->endOfLine(6), 15);    // ' '
+    QCOMPARE(parser->endOfLine(7), 15);    // 'h'
+    QCOMPARE(parser->endOfLine(14), 15);   // ';'
+    QCOMPARE(parser->endOfLine(15), 15);   // '\n'
+    QCOMPARE(parser->endOfLine(16), 16);   // '}'
+    QCOMPARE(parser->endOfLine(17), 16);   // end of document
+    QCOMPARE(parser->endOfLine(100), 16);  // end of document
   }
 };
 

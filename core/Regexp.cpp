@@ -23,9 +23,12 @@ bool isMetaChar(const QChar& ch) {
 
 namespace core {
 
+QMutex Regexp::s_mutex;
+
 Regexp::~Regexp() {
+  QMutexLocker locker(&s_mutex);
+
   onig_free(m_reg);
-  //  onig_end();
 }
 
 QString Regexp::escape(const QString& expr) {
@@ -54,6 +57,11 @@ std::unique_ptr<Regexp> Regexp::compile(const QString& expr) {
 
   const OnigUChar* pattern = reinterpret_cast<const OnigUChar*>(expr.utf16());
   Q_ASSERT(pattern);
+
+  // The plural threads should not do simultaneously that making new regexp objects or re-compiling
+  // objects or freeing objects, even if these objects are differ.
+  // https://github.com/k-takata/Onigmo/blob/master/doc/FAQ
+  QMutexLocker locker(&s_mutex);
 
   int r = onig_new(&reg, pattern, pattern + expr.size() * 2, ONIG_OPTION_CAPTURE_GROUP, encoding,
                    ONIG_SYNTAX_DEFAULT, &einfo);

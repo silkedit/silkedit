@@ -51,15 +51,15 @@ Captures toCaptures(QVariantMap map) {
   return captures;
 }
 
-Pattern* toChildPattern(QVariantMap map, Pattern* parent);
+Pattern* toChildPattern(QVariantMap map, Pattern* parent, Language* lang);
 
-QVector<Pattern*>* toPatterns(QVariant patternsVar, Pattern* parent) {
+QVector<Pattern*>* toPatterns(QVariant patternsVar, Pattern* parent, Language* lang) {
   if (patternsVar.canConvert<QVariantList>()) {
     QVector<Pattern*>* patterns = new QVector<Pattern*>(0);
     QSequentialIterable iterable = patternsVar.value<QSequentialIterable>();
     foreach (const QVariant& v, iterable) {
       if (v.canConvert<QVariantMap>()) {
-        patterns->append(toChildPattern(v.toMap(), parent));
+        patterns->append(toChildPattern(v.toMap(), parent, lang));
       }
     }
     return patterns;
@@ -67,7 +67,7 @@ QVector<Pattern*>* toPatterns(QVariant patternsVar, Pattern* parent) {
   return nullptr;
 }
 
-void toPattern(QVariantMap map, Pattern* pat) {
+void toPattern(QVariantMap map, Pattern* pat, Language* lang) {
   // include
   static const QString include = QStringLiteral("include");
   if (map.contains(include)) {
@@ -83,7 +83,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   // name
   static const QString name = QStringLiteral("name");
   if (map.contains(name)) {
-    pat->name = map.value(name).toString();
+    pat->name = map.value(name).toString().trimmed();
   }
 
   // begin
@@ -104,7 +104,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   // contentName
   static const QString contentName = QStringLiteral("contentName");
   if (map.contains(contentName)) {
-    pat->contentName = map.value(contentName).toString();
+    pat->contentName = map.value(contentName).toString().trimmed();
   }
 
   // end
@@ -135,7 +135,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
   static const QString patternsStr = QStringLiteral("patterns");
   if (map.contains(patternsStr)) {
     QVariant patternsVar = map.value(patternsStr);
-    pat->patterns.reset(toPatterns(patternsVar, pat));
+    pat->patterns.reset(toPatterns(patternsVar, pat, lang));
   }
 
   // repository
@@ -148,7 +148,7 @@ void toPattern(QVariantMap map, Pattern* pat) {
       QString key = iter.key();
       if (iter.value().canConvert<QVariantMap>()) {
         QVariantMap subMap = iter.value().toMap();
-        if (Pattern* pattern = toChildPattern(subMap, pat)) {
+        if (Pattern* pattern = toChildPattern(subMap, pat, lang)) {
           pat->repository[key] = std::move(std::unique_ptr<Pattern>(pattern));
         }
       }
@@ -156,16 +156,16 @@ void toPattern(QVariantMap map, Pattern* pat) {
   }
 }
 
-RootPattern* toRootPattern(QVariantMap map) {
-  RootPattern* pat = new RootPattern();
-  toPattern(map, pat);
+RootPattern* toRootPattern(QVariantMap map, Language* lang) {
+  RootPattern* pat = new RootPattern(lang);
+  toPattern(map, pat, lang);
   return pat;
 }
 
 // todo: check ownership
-Pattern* toChildPattern(QVariantMap map, Pattern* parent) {
-  Pattern* pat = new Pattern(parent);
-  toPattern(map, pat);
+Pattern* toChildPattern(QVariantMap map, Pattern* parent, Language* lang) {
+  Pattern* pat = new Pattern(lang, parent);
+  toPattern(map, pat, lang);
   return pat;
 }
 
@@ -227,51 +227,88 @@ bool inSameLine(const QString& text, int begin, int end) {
 }
 
 LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
-  if (Language* lang = LanguageProvider::languageFromScope(scopeName)) {
-    return new LanguageParser(lang, data);
+  if (auto lang = LanguageProvider::languageFromScope(scopeName)) {
+    return new LanguageParser(std::move(std::unique_ptr<Language>(lang)), data);
   } else {
     return nullptr;
   }
 }
 
-std::unique_ptr<RootNode> LanguageParser::parse() {
-  std::unique_ptr<RootNode> rootNode(new RootNode(this, m_lang->scopeName));
-  std::vector<std::unique_ptr<Node>> children = parse(Region(0, m_text.length()));
+// Thread safe
+boost::optional<RootNode> LanguageParser::parse() {
+  Q_ASSERT(isIdle());
+  setState(State::FullParsing);
 
-  std::for_each(
-      std::make_move_iterator(std::begin(children)), std::make_move_iterator(std::end(children)),
-      [&](decltype(children)::value_type&& child) { rootNode->append(std::move(child)); });
+  const auto& txt = text();
+  RootNode rootNode(m_lang->scopeName);
+  QList<Node> children = parse(txt, Region(0, txt.length()));
+
+  if (isCancelRequested()) {
+    setState(State::Idle);
+    return boost::none;
+  }
+
+  std::for_each(std::begin(children), std::end(children),
+                [&](const Node& child) { rootNode.append(child); });
 
   // root node covers everything
-  rootNode->region = Region(0, m_text.length());
-  return std::move(rootNode);
+  rootNode.region = Region(0, txt.length());
+  setState(State::Idle);
+  return rootNode;
 }
 
+// Thread safe
 // parse in [begin, end) (doensn't include end)
-std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
-  qDebug("parse. region: %s. lang: %s", qPrintable(region.toString()),
-         qPrintable(m_lang->scopeName));
+boost::optional<QList<Node>> LanguageParser::parse(const Region& region) {
+  Q_ASSERT(isIdle());
+  setState(State::PartialParsing);
+  auto nodes = parse(text(), region);
+
+  if (isCancelRequested()) {
+    setState(State::Idle);
+    return boost::none;
+  }
+
+  setState(State::Idle);
+  return nodes;
+}
+
+// Thread safe
+// The main thread MUST NOT run this method because this method calls
+// QCoreApplication::processEvents to cancel
+QList<Node> LanguageParser::parse(const QString& text, const Region& region) {
+  qDebug() << "parse. region:" << region.toString() << "lang:" << m_lang->scopeName;
+
   QTime t;
   t.start();
 
+  clearCache();
+
   int iter = MAX_ITER_COUNT;
-  std::vector<std::unique_ptr<Node>> nodes(0);
+  QList<Node> nodes;
   int prevPos;
   const QLatin1Char lf('\n');
   const QLatin1Char cr('\r');
 
   for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
+    // check if an another parse request comes before finishing this parse. In that case, cancel
+    // this parse
+    QCoreApplication::processEvents();
+    if (isCancelRequested()) {
+      return QList<Node>();
+    }
+
     prevPos = pos;
-    // Try to find a root pattern in m_text from pos.
-    const auto& pair = m_lang->rootPattern->find(m_text, pos);
+    // Try to find a root pattern in text from pos.
+    const auto& pair = m_lang->rootPattern->find(text, pos);
     Pattern* pattern = pair.first;
 
     // This regions could include empty region
     // e.g. /(^[ \t]+)?(?=#)/ in SQL.plist
     boost::optional<QVector<Region>> regions = pair.second;
 
-    int newlinePos = m_text.indexOf(lf, pos);
-    if (newlinePos > 0 && m_text[newlinePos - 1] == cr) {
+    int newlinePos = text.indexOf(lf, pos);
+    if (newlinePos > 0 && text[newlinePos - 1] == cr) {
       newlinePos--;
     }
 
@@ -279,15 +316,16 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
       break;
     } else if (newlinePos > 0 && newlinePos <= (*regions)[0].begin()) {
       pos = newlinePos;
-      while (pos < m_text.length() && (m_text[pos] == lf || m_text[pos] == cr)) {
+      while (pos < text.length() && (text[pos] == lf || text[pos] == cr)) {
         pos++;
       }
     } else {
       Q_ASSERT(regions);
-      std::unique_ptr<Node> n = pattern->createNode(m_text, this, *regions);
-      pos = n->region.end();
-      if (region.intersects(n->region)) {
-        nodes.push_back(std::move(n));
+      std::unique_ptr<Node> n(pattern->createNode(text, *regions));
+      const auto& newNodeRegion = n->region;
+      pos = newNodeRegion.end();
+      if (region.intersects(newNodeRegion)) {
+        nodes.push_back(*n);
       }
     }
 
@@ -302,13 +340,22 @@ std::vector<std::unique_ptr<Node>> LanguageParser::parse(const Region& region) {
   }
 
   qDebug("parse finished. elapsed: %d ms", t.elapsed());
-  return std::move(nodes);
+  return nodes;
 }
 
 QString LanguageParser::getData(int a, int b) {
-  a = clamp(0, m_text.length(), a);
-  b = clamp(0, m_text.length(), b);
-  return m_text.mid(a, b - a);
+  const auto& txt = text();
+  a = clamp(0, txt.length(), a);
+  b = clamp(0, txt.length(), b);
+  return txt.mid(a, b - a);
+}
+
+QString LanguageParser::text() {
+  return m_text;
+}
+
+void LanguageParser::setText(const QString& text) {
+  m_text = text;
 }
 
 void LanguageParser::clearCache() {
@@ -318,17 +365,18 @@ void LanguageParser::clearCache() {
 }
 
 int LanguageParser::beginOfLine(int pos) {
-  if (pos < 0 || m_text.size() - 1 < pos) {
+  const auto& txt = text();
+  if (pos < 0 || txt.size() - 1 < pos) {
     return -1;
   }
 
-  Q_ASSERT(0 <= pos && pos <= m_text.size() - 1);
+  Q_ASSERT(0 <= pos && pos <= txt.size() - 1);
 
-  if (m_text[pos] == '\n') {
+  if (txt[pos] == '\n') {
     pos--;
   }
 
-  while (pos >= 0 && m_text[pos] != '\n') {
+  while (pos >= 0 && txt[pos] != '\n') {
     pos--;
   }
 
@@ -339,47 +387,90 @@ int LanguageParser::beginOfLine(int pos) {
 }
 
 // When QTextDocument#setPlainText is called, two contentsChange events are fired. But first one has
-// wrong charsRemoved and charsAdded (actual charsRemoved + 1 and actual charsAdded + 1 respectively), so we need to workaround it in this method.
+// wrong charsRemoved and charsAdded (actual charsRemoved + 1 and actual charsAdded + 1
+// respectively), so we need to workaround it in this method.
 // contentsChange(pos: 0, charsRemoved: 6716, charsAdded: 0)
 // contentsChange(pos: 0, charsRemoved: 0, charsAdded: 6715)
 // https://bugreports.qt.io/browse/QTBUG-3495
 int LanguageParser::endOfLine(int pos) {
+  const auto& txt = text();
+
   if (pos < 0) {
     return -1;
   }
 
-  while (pos < m_text.size() && m_text[pos] != '\n') {
+  while (pos < txt.size() && txt[pos] != '\n') {
     pos++;
   }
 
-  if (m_text.size() <= pos) {
-    return m_text.size() - 1;
+  if (txt.size() <= pos) {
+    return txt.size() - 1;
   }
 
   return pos;
 }
 
-LanguageParser::LanguageParser(Language* lang, const QString& str) : m_lang(lang), m_text(str) {}
-
-Node::Node(LanguageParser* p_p, const QString& p_name) : name(p_name), parser(p_p) {
-  Q_ASSERT(p_p);
+bool LanguageParser::isIdle() {
+  return m_state == State::Idle;
 }
 
-Node::Node(const QString& p_name, Region p_region, LanguageParser* p_p)
-    : region(p_region), name(p_name), parser(p_p) {
-  Q_ASSERT(p_p);
+void LanguageParser::setState(LanguageParser::State state) {
+  m_state = state;
 }
 
-void Node::append(std::unique_ptr<Node> child) {
+// Thread safe
+bool LanguageParser::isFullParsing() {
+  return m_state == State::FullParsing;
+}
+
+bool LanguageParser::isParsing() {
+  return m_state == State::FullParsing || m_state == State::PartialParsing;
+}
+
+void LanguageParser::cancel() {
+  setState(State::CancelRequested);
+}
+
+bool LanguageParser::isCancelRequested() {
+  return m_state == State::CancelRequested;
+}
+
+LanguageParser::LanguageParser() : m_state(State::Idle) {}
+
+LanguageParser::LanguageParser(std::unique_ptr<Language> lang, const QString& str)
+    : m_lang(std::move(lang)), m_state(State::Idle) {
+  setText(str);
+}
+
+Node::Node(const QString& p_name) : name(p_name) {}
+
+Node::Node(const QString& p_name, Region p_region) : region(p_region), name(p_name) {}
+
+void Node::append(const Node& child) {
   // skip empty region
-  if (child && !child->region.isEmpty()) {
-    children.push_back(std::move(child));
+  if (!child.region.isEmpty()) {
+    children.push_back(child);
   }
+}
+
+void Node::appendTmp(Node* child) {
+  // skip empty region
+  if (!child->region.isEmpty()) {
+    tmpChildren.push_back(child);
+  }
+}
+
+void Node::moveTmpChildren() {
+  for (auto child : tmpChildren) {
+    child->moveTmpChildren();
+    children.append(*child);
+  }
+  tmpChildren.clear();
 }
 
 Region Node::updateRegion() {
   for (auto& child : children) {
-    Region curr = child.get()->updateRegion();
+    Region curr = child.updateRegion();
     if (curr.begin() < region.begin()) {
       region.setBegin(curr.begin());
     }
@@ -390,37 +481,80 @@ Region Node::updateRegion() {
   return region;
 }
 
-QString Node::toString() const {
-  return format("");
+QString Node::toString(const QString& text) const {
+  return format("", text);
+}
+
+bool Node::isLeaf() const {
+  return children.size() == 0;
 }
 
 void Node::adjust(int pos, int delta) {
   region.adjust(pos, delta);
   for (auto& child : children) {
-    child->adjust(pos, delta);
+    child.adjust(pos, delta);
   }
 }
 
-QString Node::format(QString indent) const {
+// Remove children that intersect region
+void Node::removeChildren(Region region) {
+  for (auto it = children.begin(); it != children.end();) {
+    if ((*it).region.intersects(region)) {
+      it = children.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
+
+// Returns the expanded region that covers children that intersect region
+Region Node::coveringRegion(Region region) {
+  Region coveringRegion(region);
+  for (const auto& child : children) {
+    if (child.region.intersects(region)) {
+      coveringRegion.setBegin(qMin(coveringRegion.begin(), child.region.begin()));
+      coveringRegion.setEnd(qMax(coveringRegion.end(), child.region.end()));
+    }
+  }
+
+  return coveringRegion;
+}
+
+void Node::addChildren(QList<Node> newNodes) {
+  std::for_each(newNodes.begin(), newNodes.end(),
+                [&](const Node& node) { children.push_back(node); });
+}
+
+void Node::sortChildren() {
+  std::sort(children.begin(), children.end(),
+            [](const Node& x, const Node& y) { return x.region.begin() < y.region.begin(); });
+}
+
+QString Node::format(QString indent, const QString& text) const {
   if (isLeaf()) {
     return indent +
            QStringLiteral("%1-%2: \"%3\" - Data: \"%4\"\n")
                .arg(region.begin())
                .arg(region.end())
                .arg(name)
-               .arg(data());
+               .arg(data(text));
   }
   QString ret =
       indent + QStringLiteral("%1-%2: \"%3\"\n").arg(region.begin()).arg(region.end()).arg(name);
   indent += "  ";
+
   for (auto& child : children) {
-    ret = ret + child.get()->format(indent);
+    ret = ret + child.format(indent, text);
   }
   return ret;
 }
 
-QString Node::data() const {
-  return parser->getData(region.begin(), region.end());
+QString Node::data(const QString& text) const {
+  int a = region.begin();
+  int b = region.end();
+  a = clamp(0, text.length(), a);
+  b = clamp(0, text.length(), b);
+  return text.mid(a, b - a);
 }
 
 bool Regex::hasBackReference(const QString& str) {
@@ -466,8 +600,7 @@ Regex* Regex::create(const QString& pattern) {
   }
 }
 
-Pattern::Pattern(Pattern* parent)
-    : lang(nullptr), cachedResultPattern(nullptr), cachedPatterns(nullptr), parent(parent) {}
+Pattern::Pattern(Language* lang, Pattern* parent) : lang(lang), parent(parent) {}
 
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(const QString& str,
                                                                                 int beginPos) {
@@ -479,8 +612,8 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
   // todo: think about better cache not to use this
   QVector<Pattern*> backslashGPatterns;
 
-  while (i < cachedPatterns->length()) {
-    auto pair = (*cachedPatterns)[i]->find(str, beginPos);
+  while (i < cachedPatterns.length()) {
+    auto pair = cachedPatterns[i]->find(str, beginPos);
     Pattern* pattern = pair.first;
     boost::optional<QVector<Region>> regions = pair.second;
     if (regions) {
@@ -498,17 +631,17 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
     } else {
       // If it wasn't found now, it'll never be found, so the pattern can be popped from the cache
       // But don't remove pattern with \G because it may match in the future with another \G
-      if ((*cachedPatterns)[i]->match && (*cachedPatterns)[i]->match->pattern().contains(R"(\G)")) {
-        backslashGPatterns.append((*cachedPatterns)[i]);
-        (*cachedPatterns)[i]->clearCache();
+      if (cachedPatterns[i]->match && cachedPatterns[i]->match->pattern().contains(R"(\G)")) {
+        backslashGPatterns.append(cachedPatterns[i]);
+        cachedPatterns[i]->clearCache();
       }
 
-      cachedPatterns->removeAt(i);
+      cachedPatterns.removeAt(i);
     }
   }
 
   for (auto p : backslashGPatterns) {
-    cachedPatterns->prepend(p);
+    cachedPatterns.prepend(p);
   }
   return std::make_pair(resultPattern, resultRegions);
 }
@@ -523,7 +656,7 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
  */
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QString& str,
                                                                     int beginPos) {
-  //  qDebug("cache. pos: %d. data.size: %d", pos, data.size());
+  //  qDebug(" pos: %d. data.size: %d", pos, data.size());
 
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedResultRegions) {
@@ -531,28 +664,29 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
       return std::make_pair(nullptr, boost::none);
     }
 
-    if ((*cachedResultRegions)[0].begin() >= beginPos && cachedResultPattern->cachedResultRegions) {
+    if ((*cachedResultRegions)[0].begin() >= beginPos &&
+        cachedResultPattern.loadAcquire()->cachedResultRegions) {
       //      qDebug("hits++");
       //      hits++;
-      return std::make_pair(cachedResultPattern, cachedResultRegions);
+      return std::make_pair(cachedResultPattern.loadAcquire(), cachedResultRegions);
     }
   } else {
     //    qDebug("cachedPatterns = nullptr");
-    cachedPatterns.reset(nullptr);
+    cachedPatterns.clear();
   }
 
-  if (!cachedPatterns) {
-    cachedPatterns.reset(new QVector<Pattern*>(patterns ? patterns->size() : 0));
+  if (cachedPatterns.isEmpty()) {
+    cachedPatterns = QVector<Pattern*>(patterns ? patterns->size() : 0);
     //    qDebug("copying patterns to cachedPatterns. cachedPatterns.size: %d",
     //    cachedPatterns->size());
-    for (int i = 0; i < cachedPatterns->size(); i++) {
-      (*cachedPatterns)[i] = (*patterns)[i];
+    for (int i = 0; i < cachedPatterns.size(); i++) {
+      cachedPatterns[i] = (*patterns)[i];
     }
 
     if (patterns) {
-      Q_ASSERT(cachedPatterns->size() == patterns->size());
+      Q_ASSERT(cachedPatterns.size() == patterns->size());
     } else {
-      Q_ASSERT(cachedPatterns->size() == 0);
+      Q_ASSERT(cachedPatterns.size() == 0);
     }
   }
   //  qDebug("misses++");
@@ -586,13 +720,13 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
       // source.c++
     } else if (include == "$base" && lang->baseLanguage) {
       return lang->baseLanguage->rootPattern->find(str, beginPos);
-    } else if (includedLanguage) {
-      return includedLanguage->rootPattern->find(str, beginPos);
+    } else if (cachedIncludedLanguage) {
+      return cachedIncludedLanguage->rootPattern->find(str, beginPos);
       // external syntax definitions e.g. source.c++
-    } else if (Language* includedLang = LanguageProvider::languageFromScope(include)) {
-      includedLanguage.reset(includedLang);
-      includedLanguage->baseLanguage = lang;
-      return includedLanguage->rootPattern->find(str, beginPos);
+    } else if (auto includedLang = LanguageProvider::languageFromScope(include)) {
+      cachedIncludedLanguage.reset(includedLang);
+      cachedIncludedLanguage->baseLanguage = lang;
+      return cachedIncludedLanguage->rootPattern->find(str, beginPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
@@ -604,22 +738,21 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
 
   cachedStr = QStringRef(&str);
   cachedResultRegions = regions;
-  cachedResultPattern = pattern;
+  cachedResultPattern.storeRelease(pattern);
 
   return std::make_pair(pattern, regions);
 }
 
-std::unique_ptr<Node> Pattern::createNode(const QString& str,
-                                          LanguageParser* parser,
-                                          const QVector<Region>& regions) {
+Node* Pattern::createNode(const QString& str,
+                          const QVector<Region>& regions) {
   Q_ASSERT(!regions.isEmpty());
 
   //  qDebug() << "createNode. mo:" << *mo;
 
-  std::unique_ptr<Node> node(new Node(name, regions[0], parser));
+  Node* node = new Node(name, regions[0]);
 
   if (match) {
-    createCaptureNodes(parser, regions, node.get(), captures);
+    createCaptureNodes(regions, node, captures);
   }
 
   if (!begin) {
@@ -628,14 +761,14 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
   }
 
   if (beginCaptures.length() > 0) {
-    createCaptureNodes(parser, regions, node.get(), beginCaptures);
+    createCaptureNodes(regions, node, beginCaptures);
   } else {
-    createCaptureNodes(parser, regions, node.get(), captures);
+    createCaptureNodes(regions, node, captures);
   }
 
   if (!end) {
     node->updateRegion();
-    return std::move(node);
+    return node;
   }
 
   bool found = false;
@@ -675,7 +808,7 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
     bool isEndInSameLine = inSameLine(str, i, (*endMatchedRegions)[0].begin());
 
     // Search patterns between begin and end
-    if (cachedPatterns && cachedPatterns->length() > 0) {
+    if (!cachedPatterns.isEmpty()) {
       std::pair<Pattern*, boost::optional<QVector<Region>>> pair;
       /*
        In the following rule, punctuation.separator.continuation.c exceeds the end pos of end
@@ -707,14 +840,14 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
            ((*regionsBeforeEnd)[0].begin() == (*endMatchedRegions)[0].begin() &&
             node->region.isEmpty()))) {
         found = true;
-        std::unique_ptr<Node> r(patternBeforeEnd->createNode(str, parser, *regionsBeforeEnd));
+        std::unique_ptr<Node> r(patternBeforeEnd->createNode(str, *regionsBeforeEnd));
         i = r->region.end();
 
         // If r->region is empty, it leads infinite loop without i++;
         if (r->region.isEmpty()) {
           i++;
         }
-        node->append(std::move(r));
+        node->append(*r);
 
         /*
          e.g. text for match
@@ -750,15 +883,15 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
 
     // set contentName
     if (!contentName.isEmpty()) {
-      std::unique_ptr<Node> newNode(new Node(
-          contentName, Region(node->region.end(), (*endMatchedRegions)[0].begin()), parser));
-      node->append(std::move(newNode));
+      std::unique_ptr<Node> newNode(
+          new Node(contentName, Region(node->region.end(), (*endMatchedRegions)[0].begin())));
+      node->append(*newNode);
     }
 
     if (endCaptures.length() > 0) {
-      createCaptureNodes(parser, *endMatchedRegions, node.get(), endCaptures);
+      createCaptureNodes( *endMatchedRegions, node, endCaptures);
     } else {
-      createCaptureNodes(parser, *endMatchedRegions, node.get(), captures);
+      createCaptureNodes( *endMatchedRegions, node, captures);
     }
 
     break;
@@ -766,15 +899,17 @@ std::unique_ptr<Node> Pattern::createNode(const QString& str,
 
   node->region.setEnd(endPos);
   node->updateRegion();
-  return std::move(node);
+  return node;
 }
 
-void Pattern::createCaptureNodes(LanguageParser* parser,
-                                 QVector<Region> regions,
-                                 Node* parent,
-                                 Captures captures) {
+void Pattern::createCaptureNodes(QVector<Region> regions, Node* parent, Captures captures) {
   QVector<int> parentIndices(regions.length());
   QVector<Node*> parents(parentIndices.length());
+
+  // This exists to store pointers of children created in this method because we keep track of the
+  // pointer of child in tmpChildren.
+  QList<std::shared_ptr<Node>> newChildren;
+
   for (int i = 0; i < regions.length(); i++) {
     if (i < 2) {
       parents[i] = parent;
@@ -793,11 +928,13 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
     if (i >= parents.length() || regions[i].begin() == -1) {
       continue;
     }
-    std::unique_ptr<Node> child(new Node(v.name, regions[i], parser));
+    std::shared_ptr<Node> child(new Node(v.name, regions[i]));
+    newChildren.append(child);
+
     parents[i] = child.get();
 
     if (i == 0) {
-      parent->append(std::move(child));
+      parent->appendTmp(child.get());
       continue;
     }
 
@@ -806,54 +943,54 @@ void Pattern::createCaptureNodes(LanguageParser* parser,
       i = parentIndices[i];
       p = parents[i];
     }
-    p->append(std::move(child));
+    p->appendTmp(child.get());
   }
-}
 
-void Pattern::tweak(Language* l) {
-  lang = l;
-  name = name.trimmed();
-  if (patterns) {
-    foreach (Pattern* p, *patterns) { p->tweak(l); }
-  }
-  for (auto& pair : repository) {
-    pair.second->tweak(lang);
-  }
+  // Copy the content of shared_ptr from tmpChildren to actual children
+  parent->moveTmpChildren();
 }
 
 void Pattern::clearCache() {
-  cachedResultPattern = nullptr;
-  cachedPatterns.reset(nullptr);
-  includedLanguage.reset(nullptr);
-  cachedResultRegions = boost::none;
   cachedStr.clear();
+  cachedResultPattern.storeRelease(nullptr);
+  cachedPatterns.clear();
+  cachedResultRegions = boost::none;
+  cachedIncludedLanguage.reset(nullptr);
   if (patterns) {
     foreach (Pattern* pat, *patterns) { pat->clearCache(); }
   }
   for (auto& pair : repository) {
+    Q_ASSERT(pair.second);
     pair.second->clearCache();
   }
 }
 
-QVector<QPair<QString, QString>> LanguageProvider::m_scopeAndLangNamePairs(0);
-QMap<QString, QString> LanguageProvider::m_scopeLangFilePathMap;
-QMap<QString, QString> LanguageProvider::m_extensionLangFilePathMap;
+QVector<QPair<QString, QString>> LanguageProvider::s_scopeAndLangNamePairs(0);
+QMap<QString, QString> LanguageProvider::s_scopeLangFilePathMap;
+QMap<QString, QString> LanguageProvider::s_extensionLangFilePathMap;
+QReadWriteLock LanguageProvider::s_lock;
 
 Language* LanguageProvider::defaultLanguage() {
   return languageFromScope(DEFAULT_SCOPE);
 }
 
 Language* LanguageProvider::languageFromScope(const QString& scope) {
-  if (m_scopeLangFilePathMap.contains(scope)) {
-    return loadLanguage(m_scopeLangFilePathMap.value(scope));
+  QReadLocker locker(&s_lock);
+
+  if (s_scopeLangFilePathMap.contains(scope)) {
+    locker.unlock();
+    return loadLanguage(s_scopeLangFilePathMap.value(scope));
   } else {
     return nullptr;
   }
 }
 
 Language* LanguageProvider::languageFromExtension(const QString& ext) {
-  if (m_extensionLangFilePathMap.contains(ext)) {
-    return loadLanguage(m_extensionLangFilePathMap.value(ext));
+  QReadLocker locker(&s_lock);
+
+  if (s_extensionLangFilePathMap.contains(ext)) {
+    locker.unlock();
+    return loadLanguage(s_extensionLangFilePathMap.value(ext));
   } else {
     return nullptr;
   }
@@ -872,52 +1009,24 @@ Language* LanguageProvider::loadLanguage(const QString& path) {
     return nullptr;
   }
 
-  Language* lang = new Language();
   QVariantMap rootMap = root.toMap();
+  Language* lang = new Language(rootMap);
 
-  // fileTypes
-  if (rootMap.contains(FILE_TYPES_KEY)) {
-    QVariant fileTypesVar = rootMap.value(FILE_TYPES_KEY);
-    if (fileTypesVar.canConvert<QVariantList>()) {
-      QSequentialIterable iterable = fileTypesVar.value<QSequentialIterable>();
-      foreach (const QVariant& v, iterable) {
-        if (v.canConvert<QString>()) {
-          QString ext = v.toString();
-          lang->fileTypes.append(ext);
-        }
-      }
-    }
+  QWriteLocker locker(&s_lock);
+
+  if (!s_scopeLangFilePathMap.contains(lang->scopeName)) {
+    foreach (const QString& ext, lang->fileTypes) { s_extensionLangFilePathMap[ext] = path; }
+    s_scopeLangFilePathMap[lang->scopeName] = path;
+    s_scopeAndLangNamePairs.append(QPair<QString, QString>(lang->scopeName, lang->name()));
   }
 
-  // hideFromUser
-  if (rootMap.contains(HIDE_FROM_USER_KEY)) {
-    QVariant var = rootMap.value(HIDE_FROM_USER_KEY);
-    if (var.canConvert<bool>()) {
-      lang->hideFromUser = var.toBool();
-    }
-  }
-
-  // firstLineMatch
-  if (rootMap.contains(FIRST_LINE_MATCH_KEY)) {
-    lang->firstLineMatch = rootMap.value(FIRST_LINE_MATCH_KEY).toString();
-  }
-
-  // scopeName
-  if (rootMap.contains(SCOPE_NAME_KEY)) {
-    lang->scopeName = rootMap.value(SCOPE_NAME_KEY).toString();
-  }
-
-  // patterns
-  lang->rootPattern.reset(toRootPattern(rootMap));
-
-  if (!m_scopeLangFilePathMap.contains(lang->scopeName)) {
-    foreach (const QString& ext, lang->fileTypes) { m_extensionLangFilePathMap[ext] = path; }
-    m_scopeLangFilePathMap[lang->scopeName] = path;
-    m_scopeAndLangNamePairs.append(QPair<QString, QString>(lang->scopeName, lang->name()));
-  }
-
-  lang->tweak();
   return lang;
+}
+
+QVector<QPair<QString, QString>> LanguageProvider::scopeAndLangNamePairs() {
+  QReadLocker locker(&s_lock);
+
+  return s_scopeAndLangNamePairs;
 }
 
 FixedRegex::FixedRegex(const QString& pattern) : Regex(), regex(Regexp::compile(pattern)) {}
@@ -933,8 +1042,42 @@ boost::optional<QVector<Region>> FixedRegex::find(const QString& str,
   return Regex::find(regex.get(), str, beginPos, endPos);
 }
 
-void Language::tweak() {
-  rootPattern->tweak(this);
+Language::Language(QVariantMap rootMap)
+    : rootPattern(nullptr), baseLanguage(this), hideFromUser(false) {
+  // fileTypes
+  if (rootMap.contains(FILE_TYPES_KEY)) {
+    QVariant fileTypesVar = rootMap.value(FILE_TYPES_KEY);
+    if (fileTypesVar.canConvert<QVariantList>()) {
+      QSequentialIterable iterable = fileTypesVar.value<QSequentialIterable>();
+      foreach (const QVariant& v, iterable) {
+        if (v.canConvert<QString>()) {
+          QString ext = v.toString();
+          fileTypes.append(ext);
+        }
+      }
+    }
+  }
+
+  // hideFromUser
+  if (rootMap.contains(HIDE_FROM_USER_KEY)) {
+    QVariant var = rootMap.value(HIDE_FROM_USER_KEY);
+    if (var.canConvert<bool>()) {
+      hideFromUser = var.toBool();
+    }
+  }
+
+  // firstLineMatch
+  if (rootMap.contains(FIRST_LINE_MATCH_KEY)) {
+    firstLineMatch = rootMap.value(FIRST_LINE_MATCH_KEY).toString();
+  }
+
+  // scopeName
+  if (rootMap.contains(SCOPE_NAME_KEY)) {
+    scopeName = rootMap.value(SCOPE_NAME_KEY).toString();
+  }
+
+  // patterns
+  rootPattern.reset(toRootPattern(rootMap, this));
 }
 
 QString Language::name() {
@@ -947,66 +1090,15 @@ void Language::clearCache() {
   }
 }
 
-RootNode::RootNode(LanguageParser* parser, const QString& name) : Node(parser, name) {}
+RootNode::RootNode() : Node() {}
+
+RootNode::RootNode( const QString& name) : Node(name) {}
 
 void RootNode::adjust(int pos, int delta) {
   region.setEnd(region.end() + delta);
   for (auto& child : children) {
-    child->adjust(pos, delta);
+    child.adjust(pos, delta);
   }
-}
-
-Region RootNode::updateChildren(const Region& region, LanguageParser* parser) {
-  qDebug() << "updateChildren. region:" << region.toString();
-  parser->clearCache();
-
-  Region affectedRegion(region);
-  Q_ASSERT(affectedRegion.begin() == region.begin());
-  Q_ASSERT(affectedRegion.end() == region.end());
-
-  for (auto it = children.begin(); it != children.end();) {
-//    qDebug() << "child region:" << (*it)->region.toString();
-    if ((*it)->region.intersects(region)) {
-      //      qDebug() << "affected child:" << (*it)->region;
-      // update affected region
-      affectedRegion.setBegin(qMin(affectedRegion.begin(), (*it)->region.begin()));
-      affectedRegion.setEnd(qMax(affectedRegion.end(), (*it)->region.end()));
-      it = children.erase(it);
-    } else {
-      it++;
-    }
-  }
-
-  std::vector<std::unique_ptr<Node>> newNodes = parser->parse(affectedRegion);
-
-  if (newNodes.size() > 0) {
-    // Extend affectedRegion based on newNodes
-    affectedRegion.setBegin(newNodes[0]->region.begin());
-    affectedRegion.setEnd(newNodes[newNodes.size() - 1]->region.end());
-  }
-
-  // Remove children that intersect affectedRegion
-  for (auto it = children.begin(); it != children.end();) {
-    if ((*it)->region.intersects(affectedRegion)) {
-      it = children.erase(it);
-    } else {
-      it++;
-    }
-  }
-
-  std::for_each(
-      std::make_move_iterator(newNodes.begin()), std::make_move_iterator(newNodes.end()),
-      [&](decltype(newNodes)::value_type&& node) { children.push_back(std::move(node)); });
-
-  std::sort(children.begin(), children.end(),
-            [](const std::unique_ptr<Node>& x, const std::unique_ptr<Node>& y) {
-              return x->region.begin() < y->region.begin();
-            });
-
-  qDebug("new children.size: %d", (int)children.size());
-  //  qDebug().noquote() << *this;
-
-  return affectedRegion;
 }
 
 boost::optional<QVector<Region>> RegexWithBackReference::find(const QString& str,

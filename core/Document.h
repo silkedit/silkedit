@@ -89,6 +89,7 @@ class Document : public QTextDocument {
   void encodingChanged(const Encoding& encoding);
   void lineSeparatorChanged(const QString& lineSeparator);
   void bomChanged(const BOM& bom);
+  void parseFinished();
 
  private:
   friend class DocumentTest;
@@ -108,7 +109,7 @@ class Document : public QTextDocument {
   Document();
 
   void setupLayout();
-  void setupSyntaxHighlighter(Language* lang, const QString& text = "");
+  void setupSyntaxHighlighter(std::unique_ptr<Language> lang, const QString& text = "");
   void init();
   std::unique_ptr<Regexp> createRegexp(const QString& subString, Document::FindFlags options) const;
 };
