@@ -22,7 +22,7 @@
     "language-ruby-on-rails": "silkedit/language-ruby-on-rails#0.1.0",
     "language-clojure": "silkedit/language-clojure#0.1.0",
     "language-sql": "silkedit/language-sql#0.1.0",
-    "language-markdown": "silkedit/language-markdown#0.1.1",
+    "language-markdown": "silkedit/language-markdown#0.1.0",
     "language-make": "silkedit/language-make#0.1.0",
     "language-objective-c": "silkedit/language-objective-c#0.1.0",
     "language-shellscript": "silkedit/language-shellscript#0.1.0",
