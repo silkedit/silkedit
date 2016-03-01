@@ -121,7 +121,7 @@ struct Pattern {
   // When you call find next time, find returns the chached result if beginPos > cached result's
   // begin pos
   std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int beginPos);
-  Node* createNode(const QString& data, const QVector<Region>& regions);
+  Node createNode(const QString& data, const QVector<Region>& regions);
   void createCaptureNodes(QVector<Region> regions,
                           Node* parent,
                           Captures captures);
