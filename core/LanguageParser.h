@@ -185,7 +185,7 @@ class LanguageParser {
   DEFAULT_COPY_AND_MOVE(LanguageParser)
 
   boost::optional<RootNode> parse();
-  boost::optional<QList<Node> > parse(const Region& region);
+  boost::optional<std::tuple<QList<Node>, Region> > parse(QList<Node> children, Region region);
   QString getData(int start, int end);
 
   QString text();
@@ -209,7 +209,7 @@ class LanguageParser {
 
   LanguageParser(std::unique_ptr<Language> lang, const QString& str);
 
-  QList<Node> parse(const QString& text, const Region& region);
+  std::tuple<QList<Node>, Region> parse(const QString& text, QList<Node> children, Region region);
   void clearCache();
 };
 
@@ -237,7 +237,6 @@ struct Node {
   virtual void adjust(int pos, int delta);
 
   void removeChildren(Region region);
-  Region coveringRegion(Region region);
   void addChildren(QList<Node> newNodes);
   void sortChildren();
 

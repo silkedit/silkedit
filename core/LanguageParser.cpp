@@ -1,4 +1,5 @@
 ﻿#include <memory>
+#include <tuple>
 #include <algorithm>
 #include <iterator>
 #include <vector>
@@ -224,6 +225,23 @@ Pattern* findInRepository(Pattern* pattern, const QString& key) {
 bool inSameLine(const QString& text, int begin, int end) {
   return !text.midRef(begin, end - begin).contains('\n');
 }
+
+// Returns the expanded region that covers nodes that intersect region
+boost::optional<std::tuple<int, int>> coveringIndices(QList<Node> nodes, Region region) {
+  int begin = INT_MAX, end = -1;
+  for (int i = 0; i < nodes.size(); i++) {
+    if (nodes[i].region.intersects(region)) {
+      begin = qMin(begin, i);
+      end = qMax(end, i);
+    }
+  }
+
+  if (end == -1) {
+    return boost::none;
+  }
+
+  return std::make_tuple(begin, end);
+}
 }
 
 LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
@@ -234,14 +252,14 @@ LanguageParser* LanguageParser::create(const QString& scopeName, const QString& 
   }
 }
 
-// Thread safe
 boost::optional<RootNode> LanguageParser::parse() {
   Q_ASSERT(isIdle());
   setState(State::FullParsing);
 
   const auto& txt = text();
   RootNode rootNode(m_lang->scopeName);
-  QList<Node> children = parse(txt, Region(0, txt.length()));
+  auto result = parse(txt, QList<Node>(), Region(0, txt.length()));
+  auto children = std::get<0>(result);
 
   if (isCancelRequested()) {
     setState(State::Idle);
@@ -257,12 +275,14 @@ boost::optional<RootNode> LanguageParser::parse() {
   return rootNode;
 }
 
-// Thread safe
 // parse in [begin, end) (doensn't include end)
-boost::optional<QList<Node>> LanguageParser::parse(const Region& region) {
+boost::optional<std::tuple<QList<Node>, Region>> LanguageParser::parse(QList<Node> children,
+                                                                       Region region) {
   Q_ASSERT(isIdle());
   setState(State::PartialParsing);
-  auto nodes = parse(text(), region);
+  auto result = parse(text(), children, region);
+  auto nodes = std::get<0>(result);
+  auto parsedRegion = std::get<1>(result);
 
   if (isCancelRequested()) {
     setState(State::Idle);
@@ -270,14 +290,23 @@ boost::optional<QList<Node>> LanguageParser::parse(const Region& region) {
   }
 
   setState(State::Idle);
-  return nodes;
+  return std::make_tuple(nodes, parsedRegion);
 }
 
-// Thread safe
 // The main thread MUST NOT run this method because this method calls
 // QCoreApplication::processEvents to cancel
-QList<Node> LanguageParser::parse(const QString& text, const Region& region) {
+std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
+                                                      QList<Node> children,
+                                                      Region region) {
   qDebug() << "parse. region:" << region.toString() << "lang:" << m_lang->scopeName;
+  int endChildIndex = -1;
+  if (const auto& indices = coveringIndices(children, region)) {
+    int beginChildIndex = std::get<0>(*indices);
+    endChildIndex = std::get<1>(*indices);
+
+    // expand region to cover affected children
+    region = Region(children[beginChildIndex].region.begin(), children[endChildIndex].region.end());
+  }
 
   QTime t;
   t.start();
@@ -324,6 +353,14 @@ QList<Node> LanguageParser::parse(const QString& text, const Region& region) {
       std::unique_ptr<Node> n(pattern->createNode(text, *regions));
       const auto& newNodeRegion = n->region;
       pos = newNodeRegion.end();
+
+      // Expand region to parse more children
+      if (0 <= endChildIndex && pos > children[endChildIndex].region.end() &&
+          endChildIndex + 1 < children.size()) {
+        endChildIndex++;
+        region.setEnd(children[endChildIndex].region.end());
+      }
+
       if (region.intersects(newNodeRegion)) {
         nodes.push_back(*n);
       }
@@ -340,7 +377,9 @@ QList<Node> LanguageParser::parse(const QString& text, const Region& region) {
   }
 
   qDebug("parse finished. elapsed: %d ms", t.elapsed());
-  return nodes;
+  Region parsedRegion(region.begin(),
+                      endChildIndex >= 0 ? children[endChildIndex].region.end() : region.end());
+  return std::make_tuple(nodes, parsedRegion);
 }
 
 QString LanguageParser::getData(int a, int b) {
@@ -505,19 +544,6 @@ void Node::removeChildren(Region region) {
       it++;
     }
   }
-}
-
-// Returns the expanded region that covers children that intersect region
-Region Node::coveringRegion(Region region) {
-  Region coveringRegion(region);
-  for (const auto& child : children) {
-    if (child.region.intersects(region)) {
-      coveringRegion.setBegin(qMin(coveringRegion.begin(), child.region.begin()));
-      coveringRegion.setEnd(qMax(coveringRegion.end(), child.region.end()));
-    }
-  }
-
-  return coveringRegion;
 }
 
 void Node::addChildren(QList<Node> newNodes) {
@@ -743,8 +769,7 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
   return std::make_pair(pattern, regions);
 }
 
-Node* Pattern::createNode(const QString& str,
-                          const QVector<Region>& regions) {
+Node* Pattern::createNode(const QString& str, const QVector<Region>& regions) {
   Q_ASSERT(!regions.isEmpty());
 
   //  qDebug() << "createNode. mo:" << *mo;
@@ -889,9 +914,9 @@ Node* Pattern::createNode(const QString& str,
     }
 
     if (endCaptures.length() > 0) {
-      createCaptureNodes( *endMatchedRegions, node, endCaptures);
+      createCaptureNodes(*endMatchedRegions, node, endCaptures);
     } else {
-      createCaptureNodes( *endMatchedRegions, node, captures);
+      createCaptureNodes(*endMatchedRegions, node, captures);
     }
 
     break;
@@ -1092,7 +1117,7 @@ void Language::clearCache() {
 
 RootNode::RootNode() : Node() {}
 
-RootNode::RootNode( const QString& name) : Node(name) {}
+RootNode::RootNode(const QString& name) : Node(name) {}
 
 void RootNode::adjust(int pos, int delta) {
   region.setEnd(region.end() + delta);
