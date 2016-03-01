@@ -81,7 +81,7 @@ Document::Document(const QString& path,
   }
 
   Q_ASSERT(lang);
-  setupSyntaxHighlighter(lang, toPlainText());
+  setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(lang)), toPlainText());
 }
 
 void Document::init() {
@@ -97,7 +97,7 @@ Document::Document()
       m_bom(BOM::defaultBOM()),
       m_syntaxHighlighter(nullptr) {
   init();
-  setupSyntaxHighlighter(LanguageProvider::defaultLanguage());
+  setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(LanguageProvider::defaultLanguage())));
 }
 
 void Document::setupLayout() {
@@ -105,11 +105,13 @@ void Document::setupLayout() {
   setDocumentLayout(layout);
 }
 
-void Document::setupSyntaxHighlighter(Language* lang, const QString& text) {
-  m_lang.reset(lang);
+void Document::setupSyntaxHighlighter(std::unique_ptr<Language> lang, const QString& text) {
+  m_lang = std::move(lang);
   if (m_lang) {
     std::unique_ptr<LanguageParser> parser(LanguageParser::create(m_lang->scopeName, text));
-    m_syntaxHighlighter = new SyntaxHighlighter(this, std::move(parser), Config::singleton().theme(), Config::singleton().font());
+    m_syntaxHighlighter = new SyntaxHighlighter(
+        this, std::move(parser), Config::singleton().theme(), Config::singleton().font());
+    connect(m_syntaxHighlighter, &SyntaxHighlighter::parseFinished, this, &Document::parseFinished);
   } else {
     qDebug("lang is null");
   }
@@ -150,10 +152,8 @@ void Document::setLanguage(const QString& scopeName) {
 
   m_lang.reset(newLang);
   if (m_lang && m_syntaxHighlighter) {
-    LanguageParser* parser = LanguageParser::create(m_lang->scopeName, toPlainText());
-    m_syntaxHighlighter->setParser(parser);
-    if (m_syntaxHighlighter) {
-      m_syntaxHighlighter->rehighlight();
+    if (LanguageParser* parser = LanguageParser::create(m_lang->scopeName, toPlainText())) {
+      m_syntaxHighlighter->setParser(*parser);
     }
   }
   emit languageChanged(scopeName);

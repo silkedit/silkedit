@@ -6,26 +6,16 @@
 #include "PListParser.h"
 #include "Util.h"
 #include "Config.h"
-#include "LanguageParser.h"
 #include "Theme.h"
 
 namespace core {
 
-// fixme: memory leak of new QObject();
-// Note: QSyntaxHighlighter(QTextDocument* doc) connects contentsChange signal inside it, so pass
-// dammy QObject first then call setDocument(doc) later to control the order of slot calls for
-// contentsChange signal.
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
                                      std::unique_ptr<LanguageParser> parser,
                                      Theme* theme,
                                      QFont font)
-    : QSyntaxHighlighter(new QObject()),
-      m_rootNode(parser->parse()),
-      m_lastScopeNode(nullptr),
-      m_parser(std::move(parser)),
-      m_theme(theme),
-      m_font(font) {
-  setDocument(doc);
+    : QSyntaxHighlighter(doc), m_parser(*parser), m_theme(theme) {
+  Q_ASSERT(parser);
 
   /*
    setDocument creates connection below which calls highlightBlock in _q_reformatBlocks by
@@ -36,29 +26,26 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
   disconnect(doc, SIGNAL(contentsChange(int, int, int)), this,
              SLOT(_q_reformatBlocks(int, int, int)));
 
-  setParent(doc);
-
-  // this connect causes crash when opening a file and editing it then closing it without save.
-  //  auto conn = connect(doc, &QTextDocument::contentsChange, this,
-  // &SyntaxHighlighter::updateNode);
-  connect(doc, SIGNAL(contentsChange(int, int, int)), this, SLOT(updateNode(int, int, int)));
+  connect(doc, &QTextDocument::contentsChange, this, &SyntaxHighlighter::updateNode);
   connect(&Config::singleton(), &Config::themeChanged, this, &SyntaxHighlighter::changeTheme);
   connect(&Config::singleton(), &Config::fontChanged, this, &SyntaxHighlighter::changeFont);
 
-  rehighlight();
+  if (m_theme) {
+    m_theme->setFont(font);
+  }
+
+  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser));
 }
 
 SyntaxHighlighter::~SyntaxHighlighter() {
   qDebug("~SyntaxHighlighter");
 }
 
-void SyntaxHighlighter::setParser(LanguageParser* parser) {
-  if (!parser)
-    return;
-
-  m_parser.reset(parser);
-  m_rootNode = std::move(parser->parse());
-  m_lastScopeNode = nullptr;
+void SyntaxHighlighter::setParser(LanguageParser parser) {
+  m_parser = parser;
+  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser));
 }
 
 Region SyntaxHighlighter::scopeExtent(int point) {
@@ -74,8 +61,8 @@ QString SyntaxHighlighter::scopeName(int point) {
   return m_lastScopeName;
 }
 
-QString SyntaxHighlighter::scopeTree() const {
-  return m_rootNode ? m_rootNode->toString() : "";
+QString SyntaxHighlighter::scopeTree() {
+  return m_rootNode ? m_rootNode->toString(document()->toPlainText()) : "";
 }
 
 void SyntaxHighlighter::adjust(int pos, int delta) {
@@ -115,7 +102,7 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     beginPos = pos;
     endPos = pos + delta;
 
-    // When text is added, we need to get begin and end pos based on current document.
+    // When a text is added, we need to get begin and end pos based on the current document.
     m_parser->setText(document()->toPlainText());
     beginPos = m_parser->beginOfLine(beginPos);
     endPos = m_parser->endOfLine(endPos);
@@ -124,7 +111,7 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     beginPos = pos + delta;
     endPos = pos;
 
-    // When text is removed, we need to get begin and end pos based on the text before removal
+    // When a text is removed, we need to get begin and end pos based on the text before removal
     beginPos = m_parser->beginOfLine(beginPos);
     endPos = m_parser->endOfLine(endPos);
     m_parser->setText(document()->toPlainText());
@@ -135,19 +122,10 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     return;
   }
 
-  const auto& affectedRegion = m_rootNode->updateChildren(Region(beginPos, endPos), m_parser.get());
-
-  //  qDebug().noquote() << "affectedRegion:" << affectedRegion;
-
-  QTextBlock affectedBlock = document()->findBlock(affectedRegion.begin());
-  while (affectedBlock.isValid() && affectedBlock.position() < affectedRegion.end()) {
-    rehighlightBlock(affectedBlock);
-    affectedBlock = affectedBlock.next();
-  }
-
-  m_lastScopeNode = nullptr;
-  m_lastScopeBuf.clear();
-  m_lastScopeName = "";
+  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser),
+                            Q_ARG(QList<Node>, m_rootNode->children),
+                            Q_ARG(Region, Region(beginPos, endPos)));
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
@@ -168,6 +146,43 @@ void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdde
   }
 }
 
+void SyntaxHighlighter::fullParseFinished(RootNode node) {
+  m_rootNode = node;
+  m_lastScopeNode = boost::none;
+  rehighlight();
+  emit parseFinished();
+}
+
+void SyntaxHighlighter::partialParseFinished(QList<Node> newNodes, Region region) {
+  Region affectedRegion(region);
+  if (newNodes.size() > 0) {
+    // Extend affectedRegion based on newNodes
+    qDebug() << "affectedRegion:" << affectedRegion;
+    affectedRegion.setBegin(newNodes[0].region.begin());
+    affectedRegion.setEnd(newNodes[newNodes.size() - 1].region.end());
+  }
+
+  m_rootNode->removeChildren(affectedRegion);
+  m_rootNode->addChildren(newNodes);
+  m_rootNode->sortChildren();
+
+  qDebug("new children.size: %d", (int)m_rootNode->children.size());
+  //  qDebug().noquote() << *this;
+
+  //  qDebug().noquote() << "affectedRegion:" << affectedRegion;
+
+  QTextBlock affectedBlock = document()->findBlock(affectedRegion.begin());
+  while (affectedBlock.isValid() && affectedBlock.position() < affectedRegion.end()) {
+    rehighlightBlock(affectedBlock);
+    affectedBlock = affectedBlock.next();
+  }
+
+  m_lastScopeNode = boost::none;
+  m_lastScopeBuf.clear();
+  m_lastScopeName = "";
+  emit parseFinished();
+}
+
 void SyntaxHighlighter::highlightBlock(const QString& text) {
   if (!m_theme) {
     //    qDebug("theme is null");
@@ -180,14 +195,12 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
   for (int posInText = 0; posInText < text.length();) {
     updateScope(posInDoc + posInText);
     if (!m_lastScopeNode) {
-      qDebug("lastScopeNode is null. after updateScope(%d)", posInDoc + posInText);
+      //      qDebug("lastScopeNode is null. after updateScope(%d)", posInDoc + posInText);
       return;
     }
 
-    std::shared_ptr<QTextCharFormat> format = m_theme->getFormat(m_lastScopeName);
+    QTextCharFormat* format = m_theme->getFormat(m_lastScopeName);
     if (format) {
-      // This font must match the Document default font
-      format->setFont(m_font);
       if (m_lastScopeNode->isLeaf()) {
         Region region = m_lastScopeNode->region;
         int length = region.end() - (posInDoc + posInText);
@@ -208,61 +221,59 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
       }
     } else {
       qDebug("format not found for %s", qPrintable(m_lastScopeName));
+      posInText++;
     }
   }
 }
 
-Node* SyntaxHighlighter::findScope(const Region& search, Node* node) {
-  if (!node)
-    return nullptr;
-
-  size_t idx = Util::binarySearch(node->children.size(), [search, node](size_t i) {
-    return node->children[i]->region.begin() >= search.begin() ||
-           node->children[i]->region.fullyCovers(search);
+boost::optional<Node> SyntaxHighlighter::findScope(const Region& search, const Node& node) {
+  size_t idx = Util::binarySearch(node.children.size(), [search, node](size_t i) {
+    return node.children[i].region.begin() >= search.begin() ||
+           node.children[i].region.fullyCovers(search);
   });
 
-  while (idx < node->children.size()) {
-    Node* child = node->children[idx].get();
-    if (child->region.begin() > search.end()) {
+  while (static_cast<int>(idx) < node.children.size()) {
+    auto child = node.children[idx];
+    if (child.region.begin() > search.end()) {
       break;
     }
-    if (child->region.fullyCovers(search)) {
-      if (!node->name.isEmpty() && node != m_lastScopeNode) {
+    if (child.region.fullyCovers(search)) {
+      if (!node.name.isEmpty() && node != m_lastScopeNode) {
         if (m_lastScopeBuf.length() > 0) {
           m_lastScopeBuf.append(' ');
         }
-        m_lastScopeBuf.append(node->name);
+        m_lastScopeBuf.append(node.name);
       }
-      return findScope(search, node->children[idx].get());
+      return findScope(search, node.children[idx]);
     }
     idx++;
   }
 
-  if (node != m_lastScopeNode && node->region.fullyCovers(search)) {
-    if (!node->name.isEmpty()) {
+  if (node != m_lastScopeNode && node.region.fullyCovers(search)) {
+    if (!node.name.isEmpty()) {
       if (m_lastScopeBuf.length() > 0) {
         m_lastScopeBuf.append(' ');
       }
-      m_lastScopeBuf.append(node->name);
+      m_lastScopeBuf.append(node.name);
     }
     return node;
   }
 
-  return nullptr;
+  return boost::none;
 }
 
 void SyntaxHighlighter::updateScope(int point) {
   //  qDebug("updateScope(point: %d)", point);
 
   if (!m_rootNode) {
-    qDebug("root node is null");
+    //    qDebug("root node is null");
     return;
   }
 
   Region search(point, point + 1);
   if (m_lastScopeNode && m_lastScopeNode->region.fullyCovers(search)) {
     if (m_lastScopeNode->children.size() != 0) {
-      Node* no = findScope(search, m_lastScopeNode);
+      auto no = findScope(search, *m_lastScopeNode);
       if (no && no != m_lastScopeNode) {
         m_lastScopeNode = no;
         m_lastScopeName = QString(m_lastScopeBuf);
@@ -271,20 +282,27 @@ void SyntaxHighlighter::updateScope(int point) {
     return;
   }
 
-  m_lastScopeNode = nullptr;
+  m_lastScopeNode = boost::none;
   m_lastScopeBuf.clear();
-  m_lastScopeNode = findScope(search, m_rootNode.get());
+  if (m_rootNode) {
+    m_lastScopeNode = findScope(search, *m_rootNode);
+  }
   m_lastScopeName = QString(m_lastScopeBuf);
 }
 
 void SyntaxHighlighter::changeTheme(Theme* theme) {
+  if (m_theme && m_theme->font()) {
+    theme->setFont(*m_theme->font());
+  }
   m_theme = theme;
   rehighlight();
 }
 
 void SyntaxHighlighter::changeFont(const QFont& font) {
-  m_font = font;
-  rehighlight();
+  if (m_theme) {
+    m_theme->setFont(font);
+    rehighlight();
+  }
 }
 
 QString SyntaxHighlighter::asHtml() {
@@ -335,6 +353,85 @@ QString SyntaxHighlighter::asHtml() {
 
   // Finally retreive the syntax higlighted and formatted html.
   return tempCursor.selection().toHtml();
+}
+
+void SyntaxHighlighterThread::quit() {
+  if (m_activeParser && m_activeParser->isParsing()) {
+    m_activeParser->cancel();
+    m_thread->wait(300);
+  }
+  m_thread->quit();
+}
+
+void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter, LanguageParser parser) {
+  if (highlighter) {
+    if (m_activeParser && m_activeParser->isParsing()) {
+      qDebug() << "Start full parsing with a new text";
+      m_activeParser->cancel();
+      // Start full parsing with a new text
+      QCoreApplication::removePostedEvents(this, QEvent::MetaCall);
+      QTimer::singleShot(0, this, [=] { parse(highlighter, parser); });
+      return;
+    }
+
+    m_activeParser = parser;
+    auto rootNode = parser.parse();
+    if (rootNode) {
+      qDebug() << "full parse finished";
+      QMetaObject::invokeMethod(highlighter, "fullParseFinished", Qt::QueuedConnection,
+                                Q_ARG(RootNode, *rootNode));
+    } else {
+      qDebug() << "full parse canceled";
+    }
+  } else {
+    qWarning() << "highlighter or parser is null";
+  }
+}
+
+void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter,
+                                    LanguageParser parser,
+                                    QList<Node> children,
+                                    Region region) {
+  if (highlighter) {
+    if (m_activeParser) {
+      if (m_activeParser->isFullParsing()) {
+        qDebug() << "Start full parsing with a new text";
+        m_activeParser->cancel();
+        // Start full parsing with a new text
+        QCoreApplication::removePostedEvents(this, QEvent::MetaCall);
+        QTimer::singleShot(0, this, [=] { parse(highlighter, parser); });
+        return;
+      } else if (m_activeParser->isParsing()) {
+        qDebug() << "cancel partial parsing";
+        region = m_parsingRegion ? m_parsingRegion->sum(region) : region;
+        m_activeParser->cancel();
+        // Start partial parsing with a new text and region
+        QTimer::singleShot(0, this, [&] { parse(highlighter, parser, children, region); });
+        return;
+      }
+    }
+
+    m_activeParser = parser;
+    m_parsingRegion = region;
+    auto result = parser.parse(children, region);
+    m_parsingRegion = boost::none;
+
+    if (result) {
+      qDebug() << "partial parse finished";
+      QMetaObject::invokeMethod(highlighter, "partialParseFinished", Qt::QueuedConnection,
+                                Q_ARG(QList<Node>, std::get<0>(*result)),
+                                Q_ARG(Region, std::get<1>(*result)));
+    } else {
+      qDebug() << "partial parse canceled";
+    }
+  } else {
+    qWarning() << "highlighter or parser is null";
+  }
+}
+
+SyntaxHighlighterThread::SyntaxHighlighterThread() : m_thread(new QThread(this)) {
+  moveToThread(m_thread);
+  m_thread->start();
 }
 
 }  // namespace core

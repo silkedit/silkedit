@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <oniguruma.h>
 #include <memory>
 #include <boost/optional.hpp>
 #include <QVector>
@@ -30,11 +31,6 @@ class Regexp {
                                        int end = -1,
                                        bool backward = false,
                                        bool findNotEmpty = false) const;
-  QVector<int> findStringSubmatchIndex(const QStringRef& text,
-                                       int begin = 0,
-                                       int end = -1,
-                                       bool backward = false,
-                                       bool findNotEmpty = false) const;
   bool matches(const QString& text, bool findNotEmpty = false);
 
   QVector<QVector<int>> findAllStringSubmatchIndex(const QString& text,
@@ -43,14 +39,16 @@ class Regexp {
                                                    bool findNotEmpty = false) const;
 
  private:
+  static QMutex s_mutex;
+
   regex_t* m_reg;
   QString m_pattern;
 
   Regexp(regex_t* reg, const QString& pattern);
-  QVector<int> onigSearch(unsigned char* str,
-                          unsigned char* endOfStr,
-                          unsigned char* start,
-                          unsigned char* range,
+  QVector<int> onigSearch(const OnigUChar *str,
+                          const OnigUChar *endOfStr,
+                          const OnigUChar *start,
+                          const OnigUChar *range,
                           bool findNotEmpty) const;
 };
 

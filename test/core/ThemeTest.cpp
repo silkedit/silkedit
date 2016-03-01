@@ -53,6 +53,7 @@ class ThemeTest : public QObject {
     QVERIFY(setting->isUnderline);
 
     auto format = theme->getFormat("entity.other.inherited-class");
+    QVERIFY(format);
     QCOMPARE(format->fontWeight(), (int)QFont::Bold);
     QCOMPARE(format->fontItalic(), true);
     QCOMPARE(format->fontUnderline(), true);
@@ -61,6 +62,7 @@ class ThemeTest : public QObject {
   void getFormat() {
     Theme* theme = Theme::loadTheme("testdata/Monokai.tmTheme");
     auto format = theme->getFormat("entity.name.tag.localname.xml");
+    QVERIFY(format);
     QCOMPARE(format->foreground().color(), QColor("#F92672"));
 
     // scope has more than 1 selectors (13.4 Grouping).
@@ -77,8 +79,10 @@ class ThemeTest : public QObject {
     //          </dict>
     //  </dict>
     format = theme->getFormat("constant.character.entity.xml");
+    QVERIFY(format);
     QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
     format = theme->getFormat("constant.other.entity.xml");
+    QVERIFY(format);
     QCOMPARE(format->foreground().color(), QColor("#AE81FF"));
   }
 
@@ -108,6 +112,7 @@ class ThemeTest : public QObject {
     Theme* theme = Theme::loadTheme("testdata/Solarized (Dark).tmTheme");
     auto format =
         theme->getFormat("source.c++ meta.preprocessor.macro.c variable.parameter.preprocessor.c");
+    QVERIFY(format);
     QCOMPARE(format->foreground().color(), QColor("#BB3700"));
   }
 

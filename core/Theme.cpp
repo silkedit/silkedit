@@ -264,6 +264,11 @@ bool Theme::isDarkTheme() const {
   return ret;
 }
 
+boost::optional<QFont> Theme::font()
+{
+  return m_font;
+}
+
 ColorSettings Theme::createTextEditViewSettingsColors(const Theme* theme) {
   ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::gray);
@@ -464,10 +469,11 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
     }
   }
 
-  qSort(settingsWithRank.begin(), settingsWithRank.end(),
-        [](std::tuple<Rank, ScopeSetting*>& s1, std::tuple<Rank, ScopeSetting*>& s2) {
-          return std::get<0>(s1) > std::get<0>(s2);
-        });
+  std::sort(
+      settingsWithRank.begin(), settingsWithRank.end(),
+      [](const std::tuple<Rank, ScopeSetting*>& s1, const std::tuple<Rank, ScopeSetting*>& s2) {
+        return std::get<0>(s1) > std::get<0>(s2);
+      });
 
   QVector<ScopeSetting*> matchedSettings;
   for (std::tuple<Rank, ScopeSetting*>& setting : settingsWithRank) {
@@ -477,22 +483,36 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
   return matchedSettings;
 }
 
-std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
+void Theme::setFont(const QFont& font) {
+  m_font = font;
+
+  // Update cache
+  for (const auto& pair : m_cachedFormats) {
+    pair.second->setFont(font);
+  }
+}
+
+QTextCharFormat* Theme::getFormat(const QString& scope) {
   if (scopeSettings.isEmpty())
     return nullptr;
 
   // check cache
-  if (m_cachedFormats.contains(scope)) {
-    return m_cachedFormats.value(scope);
+  if (m_cachedFormats.count(scope) != 0) {
+    return m_cachedFormats.at(scope).get();
   }
 
-  QTextCharFormat* format = new QTextCharFormat();
+  std::unique_ptr<QTextCharFormat> format(new QTextCharFormat());
+
+  if (m_font) {
+    format->setFont(*m_font);
+  }
+
   QVector<ScopeSetting*> matchedSettings = getMatchedSettings(scope);
   if (!matchedSettings.isEmpty()) {
     // foreground
     foreach (ScopeSetting* setting, matchedSettings) {
       if (setting->colorSettings->contains(foregroundStr)) {
-        QColor fg = setting->colorSettings->value(foregroundStr);
+        const QColor& fg = setting->colorSettings->value(foregroundStr);
         Q_ASSERT(fg.isValid());
         format->setForeground(fg);
         break;
@@ -502,7 +522,7 @@ std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
     // background
     foreach (ScopeSetting* setting, matchedSettings) {
       if (setting->colorSettings->contains(backgroundStr)) {
-        QColor bg = setting->colorSettings->value(backgroundStr);
+        const QColor& bg = setting->colorSettings->value(backgroundStr);
         Q_ASSERT(bg.isValid());
         format->setBackground(bg);
         break;
@@ -520,9 +540,9 @@ std::shared_ptr<QTextCharFormat> Theme::getFormat(const QString& scope) {
     }
   }
 
-  auto formatPtr = std::shared_ptr<QTextCharFormat>(format);
-  m_cachedFormats.insert(scope, formatPtr);
-  return formatPtr;
+  auto result = format.get();
+  m_cachedFormats.insert(std::make_pair(scope, std::move(format)));
+  return result;
 }
 
 Rank::Rank(const QString& scopeSelector, const QString& scope) {
@@ -567,7 +587,7 @@ Rank::Rank(const QString& scopeSelector, const QString& scope) {
   }
 }
 
-bool Rank::operator>(Rank& r2) {
+bool Rank::operator>(const Rank& r2) const {
   if (this->isInvalid() || r2.isInvalid()) {
     return false;
   }
@@ -598,7 +618,7 @@ bool Rank::operator>(Rank& r2) {
   return false;
 }
 
-bool Rank::operator<(Rank& r2) {
+bool Rank::operator<(const Rank& r2) const {
   if (this->isInvalid() || r2.isInvalid()) {
     return false;
   }

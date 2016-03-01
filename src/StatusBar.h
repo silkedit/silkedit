@@ -46,7 +46,7 @@ class StatusBar : public QStatusBar{
   BOMComboBox* m_bomComboBox;
 
   void setTheme(const core::Theme* theme);
-  void setCurrentLanguage(core::Language* lang);
+  void setCurrentLanguage(const QString &langName);
 };
 
 Q_DECLARE_METATYPE(StatusBar*)
