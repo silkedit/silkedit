@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <memory>
+#include <unordered_map>
 #include <QMap>
 #include <QString>
 #include <QColor>
@@ -9,6 +10,7 @@
 
 #include "macros.h"
 #include "LanguageParser.h"
+#include "stlSpecialization.h"
 
 namespace core {
 
@@ -48,7 +50,7 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   static int rank(const QString& scope, const QString& scope2);
 
-  std::shared_ptr<QTextCharFormat> getFormat(const QString& scope);
+  QTextCharFormat *getFormat(const QString& scope);
 
   std::unique_ptr<ColorSettings> textEditViewSettings;
   std::unique_ptr<ColorSettings> gutterSettings;
@@ -66,12 +68,14 @@ class Theme {
   bool isGutterUnderline;
   QString name;
   QVector<ScopeSetting*> scopeSettings;
+
   bool isDarkTheme() const;
 
- private:
+  boost::optional<QFont> font();
+  void setFont(const QFont &font);
+
+private:
   static ScopeSetting* matchedSetting(const QString& scope);
-  QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
-  QMap<QString, std::shared_ptr<QTextCharFormat>> m_cachedFormats;
 
   static ColorSettings createTextEditViewSettingsColors(const Theme* theme);
   static ColorSettings createGutterSettingsColors(const Theme* theme);
@@ -82,7 +86,17 @@ class Theme {
   static ColorSettings createWindowSettingsColors(const Theme* theme);
   static ColorSettings createPackageToolBarSettingsColors(const Theme* theme);
   static ColorSettings createFindReplaceViewSettingsColors(const Theme* theme);
-  static ColorSettings createConsleSettingsColors(const Theme *theme);
+  static ColorSettings createConsleSettingsColors(const Theme* theme);
+
+  std::unordered_map<QString, std::unique_ptr<QTextCharFormat>> m_cachedFormats;
+
+  // tmTheme file doesn't have a font setting.
+  // Ideally, SyntaxHighlighter should have a font setting, but calling setFont in highlightBlock
+  // method is VERY SLOW.
+  // As a workaround, Theme keeps a font setting and apply it when creating QTextCharFormat.
+  boost::optional<QFont> m_font;
+
+  QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
 };
 
 class Rank {
@@ -92,16 +106,15 @@ class Rank {
   Rank(const QString& scopeSelector, const QString& scope);
   ~Rank() = default;
 
-  bool isValid() { return m_state == State::Valid || m_state == State::Empty; }
-  bool isInvalid() { return m_state == State::Invalid; }
-  bool isEmpty() { return m_state == State::Empty; }
+  bool isValid() const { return m_state == State::Valid || m_state == State::Empty; }
+  bool isInvalid() const { return m_state == State::Invalid; }
+  bool isEmpty() const { return m_state == State::Empty; }
 
-  bool operator>(Rank& r);
-  bool operator<(Rank& r);
-  bool operator==(Rank& r);
-  bool operator>=(Rank&) { throw std::runtime_error("operator >= not implemented"); }
-  bool operator<=(Rank&) { throw std::runtime_error("operator <= not implemented"); }
-  bool operator!=(Rank&) { throw std::runtime_error("operator != not implemented"); }
+  bool operator>(const Rank& r) const;
+  bool operator<(const Rank& r) const;
+  bool operator>=(const Rank&) { throw std::runtime_error("operator >= not implemented"); }
+  bool operator<=(const Rank&) { throw std::runtime_error("operator <= not implemented"); }
+  bool operator!=(const Rank&) { throw std::runtime_error("operator != not implemented"); }
 
  private:
   static int calcRank(const QStringRef& scopeSelector, const QStringRef& singleScope);

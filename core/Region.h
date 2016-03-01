@@ -19,11 +19,12 @@ class Region {
   // Returns whether the region fully covers the other region
   bool fullyCovers(const Region& other) const;
   bool contains(int point) const;
-  bool isEmpty() { return m_begin == m_end; }
+  bool isEmpty() const { return m_begin == m_end; }
   // Adjusts the region in place for the given position and delta
   void adjust(int pos, int delta);
   bool intersects(const Region& other) const;
   Region intersection(const Region& other) const;
+  Region sum(const Region& other) const;
 
   int begin() const { return m_begin; }
   void setBegin(int p);
@@ -48,3 +49,5 @@ class Region {
 };
 
 }  // namespace core
+
+Q_DECLARE_METATYPE(core::Region)

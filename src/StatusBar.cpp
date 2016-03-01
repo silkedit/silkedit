@@ -65,7 +65,9 @@ StatusBar::StatusBar(QMainWindow* window)
 
   // Set default values
   setTheme(Config::singleton().theme());
-  setCurrentLanguage(LanguageProvider::defaultLanguage());
+  if (auto lang = LanguageProvider::defaultLanguage()) {
+    setCurrentLanguage(lang->name());
+  }
   setEncoding(Encoding::defaultEncoding());
   setLineSeparator(LineSeparator::defaultLineSeparator().separatorStr());
   setBOM(BOM::defaultBOM());
@@ -75,7 +77,9 @@ void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
   //  qDebug("onActiveViewChanged");
   TextEditView* textEdit = qobject_cast<TextEditView*>(newView);
   if (textEdit) {
-    setCurrentLanguage(textEdit->language());
+    if (textEdit->language()) {
+      setCurrentLanguage(textEdit->language()->name());
+    }
     if (auto enc = textEdit->encoding()) {
       setEncoding(*enc);
     }
@@ -213,17 +217,18 @@ void StatusBar::setTheme(const Theme* theme) {
 
 void StatusBar::setLanguage(const QString& scope) {
   qDebug("setLanguage inStatusBar. scope: %s", qPrintable(scope));
-  Language* lang = LanguageProvider::languageFromScope(scope);
-  setCurrentLanguage(lang);
+  if (auto lang = LanguageProvider::languageFromScope(scope)) {
+    setCurrentLanguage(lang->name());
+  }
 }
 
-void StatusBar::setCurrentLanguage(Language* lang) {
-  if (lang) {
-    int idx = m_langComboBox->findText(lang->name());
+void StatusBar::setCurrentLanguage(const QString& langName) {
+  if (!langName.isEmpty()) {
+    int idx = m_langComboBox->findText(langName);
     if (idx >= 0) {
       m_langComboBox->setCurrentIndex(idx);
     } else {
-      qDebug("lang: %s is not registered.", qPrintable(lang->name()));
+      qDebug() << "lang:" << langName << "is not registered.";
     }
   }
 }

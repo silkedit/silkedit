@@ -1,5 +1,4 @@
-﻿#include <oniguruma.h>
-#include <memory>
+﻿#include <memory>
 #include <QString>
 #include <QDebug>
 
@@ -7,6 +6,13 @@
 #include "scoped_guard.h"
 
 namespace {
+
+#if Q_BYTE_ORDER == Q_BIG_ENDIAN
+static const auto encoding = ONIG_ENCODING_UTF16_BE;
+#else
+static const auto encoding = ONIG_ENCODING_UTF16_LE;
+#endif
+
 bool isMetaChar(const QChar& ch) {
   return ch == '[' || ch == ']' || ch == '{' || ch == '}' || ch == '(' || ch == ')' || ch == '|' ||
          ch == '-' || ch == '*' || ch == '.' || ch == '\\' || ch == '?' || ch == '+' || ch == '^' ||
@@ -17,9 +23,12 @@ bool isMetaChar(const QChar& ch) {
 
 namespace core {
 
+QMutex Regexp::s_mutex;
+
 Regexp::~Regexp() {
+  QMutexLocker locker(&s_mutex);
+
   onig_free(m_reg);
-  //  onig_end();
 }
 
 QString Regexp::escape(const QString& expr) {
@@ -46,17 +55,20 @@ std::unique_ptr<Regexp> Regexp::compile(const QString& expr) {
   regex_t* reg = nullptr;
   OnigErrorInfo einfo;
 
-  QByteArray ba = expr.toUtf8();
-  unsigned char* pattern = (unsigned char*)ba.constData();
+  const OnigUChar* pattern = reinterpret_cast<const OnigUChar*>(expr.utf16());
   Q_ASSERT(pattern);
 
-  // todo: check encoding!
-  int r = onig_new(&reg, pattern, pattern + strlen((char*)pattern), ONIG_OPTION_CAPTURE_GROUP,
-                   ONIG_ENCODING_UTF8, ONIG_SYNTAX_DEFAULT, &einfo);
+  // The plural threads should not do simultaneously that making new regexp objects or re-compiling
+  // objects or freeing objects, even if these objects are differ.
+  // https://github.com/k-takata/Onigmo/blob/master/doc/FAQ
+  QMutexLocker locker(&s_mutex);
+
+  int r = onig_new(&reg, pattern, pattern + expr.size() * 2, ONIG_OPTION_CAPTURE_GROUP, encoding,
+                   ONIG_SYNTAX_DEFAULT, &einfo);
   if (r != ONIG_NORMAL) {
-    unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
+    OnigUChar s[ONIG_MAX_ERROR_MESSAGE_LEN];
     onig_error_code_to_str(s, r, &einfo);
-    qWarning() << "Onigmo warning:" << QString::fromUtf8((const char*)s) << "expr:" << expr;
+    qWarning() << "Onigmo warning:" << QString::fromLatin1((const char*)s) << "expr:" << expr;
     return nullptr;
   }
 
@@ -71,14 +83,12 @@ QVector<QVector<int>> Regexp::findAllStringSubmatchIndex(const QString& text,
                                                          bool findNotEmpty) const {
   Q_ASSERT(m_reg);
 
-  unsigned char *start, *range, *endOfStr;
+  const OnigUChar *start, *range, *endOfStr;
 
-  // todo: do we need to convert to UTF-8? Why not just use UTF-16 encoding used in Qt internally?
-  QByteArray ba = text.toUtf8();
-  unsigned char* str = (unsigned char*)ba.constData();
-  endOfStr = str + ba.size();
-  start = str + text.leftRef(begin).toUtf8().size();
-  range = str + text.leftRef(end).toUtf8().size();
+  const OnigUChar* str = reinterpret_cast<const OnigUChar*>(text.utf16());
+  endOfStr = str + text.size() * 2;
+  start = str + text.leftRef(begin).size() * 2;
+  range = str + text.leftRef(end).size() * 2;
 
   QVector<QVector<int>> allIndices;
 
@@ -98,14 +108,9 @@ QVector<QVector<int>> Regexp::findAllStringSubmatchIndex(const QString& text,
 
       for (int i = 0; i < region->num_regs; i++) {
         // Convert from byte offset to char offset in utf-8 string
-        int begCharPos = region->beg[i] < 0
-                             ? region->beg[i]
-                             : onigenc_strlen(ONIG_ENCODING_UTF8, str, (str + region->beg[i]));
+        int begCharPos = region->beg[i] < 0 ? region->beg[i] : region->beg[i] / 2;
         indices[i * 2] = begCharPos;
-        int endCharPos = region->end[i] < 0
-                             ? region->end[i]
-                             : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i],
-                                                           str + region->end[i]);
+        int endCharPos = region->end[i] < 0 ? region->end[i] : region->end[i] / 2;
         indices[i * 2 + 1] = endCharPos;
       }
 
@@ -117,14 +122,14 @@ QVector<QVector<int>> Regexp::findAllStringSubmatchIndex(const QString& text,
       start = str + region->end[0];
 
       if (indices.at(0) == indices.at(1)) {
-        start += onig_enc_len(ONIG_ENCODING_UTF8, start, nullptr);
+        start += onig_enc_len(encoding, start, nullptr);
       }
     } else if (r == ONIG_MISMATCH) {
       break;
     } else { /* error */
-      unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
+      OnigUChar s[ONIG_MAX_ERROR_MESSAGE_LEN];
       onig_error_code_to_str(s, r);
-      qWarning() << QString::fromUtf8((const char*)s);
+      qWarning() << QString::fromLatin1((const char*)s);
       break;
     }
   }
@@ -132,15 +137,15 @@ QVector<QVector<int>> Regexp::findAllStringSubmatchIndex(const QString& text,
   return allIndices;
 }
 
-QVector<int> Regexp::onigSearch(unsigned char* str,
-                                unsigned char* endOfStr,
-                                unsigned char* start,
-                                unsigned char* range,
+QVector<int> Regexp::onigSearch(const OnigUChar* str,
+                                const OnigUChar* endOfStr,
+                                const OnigUChar* start,
+                                const OnigUChar* range,
                                 bool findNotEmpty) const {
   OnigRegion* region = onig_region_new();
   scoped_guard guard([=] { onig_region_free(region, 1 /* 1:free self, 0:free contents only */); });
 
-  unsigned char* gpos = start ? start : str;
+  const OnigUChar* gpos = start ? start : str;
   int r = onig_search_gpos(m_reg, str, endOfStr, gpos, start, range, region, ONIG_OPTION_NONE);
 
   // ONIG_OPTION_FIND_NOT_EMPTY doesn't work...
@@ -152,14 +157,10 @@ QVector<int> Regexp::onigSearch(unsigned char* str,
     QVector<int> indices(region->num_regs * 2);
 
     for (int i = 0; i < region->num_regs; i++) {
-      // Convert from byte offset to char offset in utf-8 string
-      int begCharPos = region->beg[i] < 0 ? region->beg[i] : onigenc_strlen(ONIG_ENCODING_UTF8, str,
-                                                                            (str + region->beg[i]));
+      // Convert from byte offset to char offset in utf-16 string
+      int begCharPos = region->beg[i] < 0 ? region->beg[i] : region->beg[i] / 2;
       indices[i * 2] = begCharPos;
-      int endCharPos = region->end[i] < 0
-                           ? region->end[i]
-                           : begCharPos + onigenc_strlen(ONIG_ENCODING_UTF8, str + region->beg[i],
-                                                         str + region->end[i]);
+      int endCharPos = region->end[i] < 0 ? region->end[i] : region->end[i] / 2;
       indices[i * 2 + 1] = endCharPos;
     }
 
@@ -167,9 +168,9 @@ QVector<int> Regexp::onigSearch(unsigned char* str,
   } else if (r == ONIG_MISMATCH) {
     //    qDebug("search fail");
   } else { /* error */
-    unsigned char s[ONIG_MAX_ERROR_MESSAGE_LEN];
+    OnigUChar s[ONIG_MAX_ERROR_MESSAGE_LEN];
     onig_error_code_to_str(s, r);
-    qWarning() << QString::fromUtf8((const char*)s);
+    qWarning() << QString::fromLatin1((const char*)s);
   }
 
   return QVector<int>();
@@ -180,25 +181,14 @@ QVector<int> Regexp::findStringSubmatchIndex(const QString& text,
                                              int end,
                                              bool backward,
                                              bool findNotEmpty) const {
-  return findStringSubmatchIndex(QStringRef(&text), begin, end, backward, findNotEmpty);
-}
-
-// https://golang.org/pkg/regexp/#Regexp.FindStringSubmatchIndex
-QVector<int> Regexp::findStringSubmatchIndex(const QStringRef& text,
-                                             int begin,
-                                             int end,
-                                             bool backward,
-                                             bool findNotEmpty) const {
   Q_ASSERT(m_reg);
 
-  unsigned char *start, *range, *endOfStr;
+  const OnigUChar *start, *range, *endOfStr;
 
-  QByteArray ba = text.toUtf8();
-  unsigned char* str = (unsigned char*)ba.constData();
-  endOfStr = str + ba.size();
-
-  int bytesOfStrForBegin = text.left(begin).toUtf8().size();
-  int bytesOfStrForEnd = text.left(end).toUtf8().size();
+  const OnigUChar* str = reinterpret_cast<const OnigUChar*>(text.utf16());
+  endOfStr = str + text.size() * 2;
+  int bytesOfStrForBegin = text.leftRef(begin).size() * 2;
+  int bytesOfStrForEnd = text.leftRef(end).size() * 2;
 
   if (backward) {
     start = str + bytesOfStrForEnd;
