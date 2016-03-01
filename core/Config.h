@@ -36,7 +36,7 @@ class Config : public QObject, public Singleton<Config> {
   ~Config() = default;
 
   Theme* theme() { return m_theme; }
-  void setTheme(Theme* theme);
+  void setTheme(Theme* theme, bool noSave = false);
 
   QFont font() { return m_font; }
   void setFont(const QFont& font);

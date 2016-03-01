@@ -291,6 +291,9 @@ void SyntaxHighlighter::updateScope(int point) {
 }
 
 void SyntaxHighlighter::changeTheme(Theme* theme) {
+  if (m_theme && m_theme->font()) {
+    theme->setFont(*m_theme->font());
+  }
   m_theme = theme;
   rehighlight();
 }

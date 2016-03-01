@@ -27,7 +27,7 @@ class SyntaxHighlighterTest : public QObject {
   Q_OBJECT
  private:
   Theme* theme = Theme::loadTheme("testdata/Solarized (Dark).tmTheme");
-  QFont font = QFont("Helvetica");
+  QFont font = QFont("Helvetica", 12);
 
  private slots:
 
@@ -240,6 +240,33 @@ StatusBar QComboBox::down-arrow {
     //    qDebug().noquote() << highlighter.asHtml();
 
     QFile output("testdata/highlighter_test/updateNodeWithPasteResult.html");
+    QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
+    QTextStream resInOutput(&output);
+    QCOMPARE(highlighter.asHtml(), resInOutput.readAll());
+  }
+
+  void changeThemeTest() {
+    const QVector<QString> files({"testdata/grammers/CSS.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+    QString text = QString(R"(
+StatusBar QComboBox::down-arrow {
+    /*image: url(noimg);*/
+    border-width: 0px;
+}
+)").trimmed();
+    QTextDocument doc(text);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.css", doc.toPlainText()));
+    SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    Theme* monokai = Theme::loadTheme("testdata/Monokai.tmTheme");
+    QVERIFY(monokai);
+    Config::singleton().setTheme(monokai, true);
+    qDebug().noquote() << highlighter.asHtml();
+
+    QFile output("testdata/highlighter_test/changeThemeTestResult.html");
     QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
     QTextStream resInOutput(&output);
     QCOMPARE(highlighter.asHtml(), resInOutput.readAll());
