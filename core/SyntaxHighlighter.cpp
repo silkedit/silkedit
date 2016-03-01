@@ -35,8 +35,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
   }
 
   QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
-                            Q_ARG(SyntaxHighlighter*, this),
-                            Q_ARG(LanguageParser, *m_parser));
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser));
 }
 
 SyntaxHighlighter::~SyntaxHighlighter() {
@@ -126,10 +125,10 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     return;
   }
 
-  auto coveringRegion = m_rootNode->coveringRegion(Region(beginPos, endPos));
   QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
                             Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser),
-                            Q_ARG(Region, coveringRegion));
+                            Q_ARG(QList<Node>, m_rootNode->children),
+                            Q_ARG(Region, Region(beginPos, endPos)));
 }
 
 void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
@@ -156,7 +155,7 @@ void SyntaxHighlighter::fullParseFinished(RootNode node) {
   emit parseFinished();
 }
 
-void SyntaxHighlighter::partialParseFinished(const Region& region, QList<Node> newNodes) {
+void SyntaxHighlighter::partialParseFinished(QList<Node> newNodes, Region region) {
   Region affectedRegion(region);
   if (newNodes.size() > 0) {
     // Extend affectedRegion based on newNodes
@@ -364,7 +363,7 @@ void SyntaxHighlighterThread::quit() {
 }
 
 void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter, LanguageParser parser) {
-  if (highlighter ) {
+  if (highlighter) {
     if (m_activeParser && m_activeParser->isParsing()) {
       qDebug() << "Start full parsing with a new text";
       m_activeParser->cancel();
@@ -390,6 +389,7 @@ void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter, LanguagePars
 
 void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter,
                                     LanguageParser parser,
+                                    QList<Node> children,
                                     Region region) {
   if (highlighter) {
     if (m_activeParser) {
@@ -405,20 +405,21 @@ void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter,
         region = m_parsingRegion ? m_parsingRegion->sum(region) : region;
         m_activeParser->cancel();
         // Start partial parsing with a new text and region
-        QTimer::singleShot(0, this, [&] { parse(highlighter, parser, region); });
+        QTimer::singleShot(0, this, [&] { parse(highlighter, parser, children, region); });
         return;
       }
     }
 
     m_activeParser = parser;
     m_parsingRegion = region;
-    auto nodes = parser.parse(region);
+    auto result = parser.parse(children, region);
     m_parsingRegion = boost::none;
 
-    if (nodes) {
+    if (result) {
       qDebug() << "partial parse finished";
       QMetaObject::invokeMethod(highlighter, "partialParseFinished", Qt::QueuedConnection,
-                                Q_ARG(Region, region), Q_ARG(QList<Node>, *nodes));
+                                Q_ARG(QList<Node>, std::get<0>(*result)),
+                                Q_ARG(Region, std::get<1>(*result)));
     } else {
       qDebug() << "partial parse canceled";
     }
@@ -427,8 +428,7 @@ void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter,
   }
 }
 
-SyntaxHighlighterThread::SyntaxHighlighterThread()
-    : m_thread(new QThread(this)) {
+SyntaxHighlighterThread::SyntaxHighlighterThread() : m_thread(new QThread(this)) {
   moveToThread(m_thread);
   m_thread->start();
 }

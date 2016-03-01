@@ -244,6 +244,49 @@ StatusBar QComboBox::down-arrow {
     QTextStream resInOutput(&output);
     QCOMPARE(highlighter.asHtml(), resInOutput.readAll());
   }
+
+  void cppHighlightTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+    QFile file("testdata/highlighter_test/cppHighlightTestInput.cpp");
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+    const auto& text = in.readAll();
+    QTextDocument doc(text);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.c++", doc.toPlainText()));
+    SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    QFile output("testdata/highlighter_test/cppHighlightTestInput.res");
+    QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
+    QTextStream resInOutput(&output);
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resInOutput.readAll());
+
+    QTextCursor cursor(&doc);
+    cursor.deleteChar();
+    highlighter.updateNode(0, 1, 0);
+    QVERIFY(spy.wait());
+
+    QString result = QString(R"r(
+0-30: "source.c++"
+  0-15: "meta.preprocessor.c.include"
+    2-9: "keyword.control.import.include.c" - Data: "include"
+    10-15: "string.quoted.double.include.c"
+      10-11: "punctuation.definition.string.begin.c" - Data: """
+      14-15: "punctuation.definition.string.end.c" - Data: """
+  16-30: "meta.preprocessor.c.include"
+    17-24: "keyword.control.import.include.c" - Data: "include"
+    25-30: "string.quoted.double.include.c"
+      25-26: "punctuation.definition.string.begin.c" - Data: """
+      29-30: "punctuation.definition.string.end.c" - Data: """
+
+)r").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+  }
 };
 
 }  // namespace core
