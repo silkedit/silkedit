@@ -324,7 +324,7 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
     // this parse
     QCoreApplication::processEvents();
     if (isCancelRequested()) {
-      return QList<Node>();
+      return std::make_tuple(QList<Node>(), region);
     }
 
     prevPos = pos;
