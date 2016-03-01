@@ -86,6 +86,23 @@ ccc)";
     // Then
     QCOMPARE(makefile.language()->scopeName, QStringLiteral("source.makefile"));
   }
+
+  void setLanguage() {
+    const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage", "testdata/grammers/Rails/HTML (Rails).plist",
+                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage", "testdata/grammers/Makefile.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    // When
+    Document jsErbDoc("hoge.old.js.erb", "", Encoding::defaultEncoding(), "", BOM::defaultBOM());
+    QSignalSpy spy(&jsErbDoc, &Document::parseFinished);
+    QVERIFY(spy.wait());
+
+    // Then
+    jsErbDoc.setLanguage("text.html.ruby");
+    QVERIFY(spy.wait());
+    QCOMPARE(jsErbDoc.language()->scopeName, QStringLiteral("text.html.ruby"));
+  }
 };
 
 }  // namespace core

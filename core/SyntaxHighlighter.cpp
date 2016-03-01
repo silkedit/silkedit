@@ -42,13 +42,10 @@ SyntaxHighlighter::~SyntaxHighlighter() {
   qDebug("~SyntaxHighlighter");
 }
 
-void SyntaxHighlighter::setParser(LanguageParser* parser) {
-  if (!parser)
-    return;
-
-  m_parser = *parser;
-  m_rootNode = parser->parse();
-  m_lastScopeNode = boost::none;
+void SyntaxHighlighter::setParser(LanguageParser parser) {
+  m_parser = parser;
+  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser));
 }
 
 Region SyntaxHighlighter::scopeExtent(int point) {
@@ -151,6 +148,7 @@ void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdde
 
 void SyntaxHighlighter::fullParseFinished(RootNode node) {
   m_rootNode = node;
+  m_lastScopeNode = boost::none;
   rehighlight();
   emit parseFinished();
 }
