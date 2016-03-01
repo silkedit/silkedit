@@ -71,6 +71,7 @@ class Theme {
 
   bool isDarkTheme() const;
 
+  boost::optional<QFont> font();
   void setFont(const QFont &font);
 
 private:
@@ -93,7 +94,7 @@ private:
   // Ideally, SyntaxHighlighter should have a font setting, but calling setFont in highlightBlock
   // method is VERY SLOW.
   // As a workaround, Theme keeps a font setting and apply it when creating QTextCharFormat.
-  QFont m_font;
+  boost::optional<QFont> m_font;
 
   QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
 };

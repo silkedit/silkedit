@@ -74,11 +74,13 @@ void Config::Init(v8::Local<v8::Object> exports) {
   }
 }
 
-void Config::setTheme(Theme* theme) {
+void Config::setTheme(Theme* theme, bool noSave) {
   if (m_theme != theme) {
     m_theme = theme;
     m_scalarConfigs[THEME_KEY] = QVariant(theme->name);
-    save(THEME_KEY, theme->name);
+    if (!noSave) {
+      save(THEME_KEY, theme->name);
+    }
     emit themeChanged(theme);
   }
 }

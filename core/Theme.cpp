@@ -264,6 +264,11 @@ bool Theme::isDarkTheme() const {
   return ret;
 }
 
+boost::optional<QFont> Theme::font()
+{
+  return m_font;
+}
+
 ColorSettings Theme::createTextEditViewSettingsColors(const Theme* theme) {
   ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::gray);
@@ -464,10 +469,11 @@ QVector<ScopeSetting*> Theme::getMatchedSettings(const QString& scope) {
     }
   }
 
-  std::sort(settingsWithRank.begin(), settingsWithRank.end(),
-        [](const std::tuple<Rank, ScopeSetting*>& s1, const std::tuple<Rank, ScopeSetting*>& s2) {
-          return std::get<0>(s1) > std::get<0>(s2);
-        });
+  std::sort(
+      settingsWithRank.begin(), settingsWithRank.end(),
+      [](const std::tuple<Rank, ScopeSetting*>& s1, const std::tuple<Rank, ScopeSetting*>& s2) {
+        return std::get<0>(s1) > std::get<0>(s2);
+      });
 
   QVector<ScopeSetting*> matchedSettings;
   for (std::tuple<Rank, ScopeSetting*>& setting : settingsWithRank) {
@@ -497,7 +503,9 @@ QTextCharFormat* Theme::getFormat(const QString& scope) {
 
   std::unique_ptr<QTextCharFormat> format(new QTextCharFormat());
 
-  format->setFont(m_font);
+  if (m_font) {
+    format->setFont(*m_font);
+  }
 
   QVector<ScopeSetting*> matchedSettings = getMatchedSettings(scope);
   if (!matchedSettings.isEmpty()) {
