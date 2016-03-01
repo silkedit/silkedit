@@ -350,8 +350,8 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
       }
     } else {
       Q_ASSERT(regions);
-      std::unique_ptr<Node> n(pattern->createNode(text, *regions));
-      const auto& newNodeRegion = n->region;
+      Node node = pattern->createNode(text, *regions);
+      const auto& newNodeRegion = node.region;
       pos = newNodeRegion.end();
 
       // Expand region to parse more children
@@ -362,7 +362,7 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
       }
 
       if (region.intersects(newNodeRegion)) {
-        nodes.push_back(*n);
+        nodes.push_back(node);
       }
     }
 
@@ -769,30 +769,30 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
   return std::make_pair(pattern, regions);
 }
 
-Node* Pattern::createNode(const QString& str, const QVector<Region>& regions) {
+Node Pattern::createNode(const QString& str, const QVector<Region>& regions) {
   Q_ASSERT(!regions.isEmpty());
 
   //  qDebug() << "createNode. mo:" << *mo;
 
-  Node* node = new Node(name, regions[0]);
+  Node node(name, regions[0]);
 
   if (match) {
-    createCaptureNodes(regions, node, captures);
+    createCaptureNodes(regions, &node, captures);
   }
 
   if (!begin) {
-    node->updateRegion();
-    return std::move(node);
+    node.updateRegion();
+    return node;
   }
 
   if (beginCaptures.length() > 0) {
-    createCaptureNodes(regions, node, beginCaptures);
+    createCaptureNodes(regions, &node, beginCaptures);
   } else {
-    createCaptureNodes(regions, node, captures);
+    createCaptureNodes(regions, &node, captures);
   }
 
   if (!end) {
-    node->updateRegion();
+    node.updateRegion();
     return node;
   }
 
@@ -805,7 +805,7 @@ Node* Pattern::createNode(const QString& str, const QVector<Region>& regions) {
   // Don't cache cachedPatterns. It's supposed to be overwritten in searchInPatterns.
   auto tmpCachedRegions = cachedResultRegions;
 
-  for (i = node->region.end(), endPos = str.length(); i < str.length();) {
+  for (i = node.region.end(), endPos = str.length(); i < str.length();) {
     // end region can include an empty region [0,0]
     boost::optional<QVector<Region>> endMatchedRegions;
     if (tmpCachedRegions) {
@@ -863,16 +863,16 @@ Node* Pattern::createNode(const QString& str, const QVector<Region>& regions) {
           (!isEndInSameLine || (*regionsBeforeEnd)[0].begin() < (*endMatchedRegions)[0].begin()) &&
           ((*regionsBeforeEnd)[0].begin() < (*endMatchedRegions)[0].begin() ||
            ((*regionsBeforeEnd)[0].begin() == (*endMatchedRegions)[0].begin() &&
-            node->region.isEmpty()))) {
+            node.region.isEmpty()))) {
         found = true;
-        std::unique_ptr<Node> r(patternBeforeEnd->createNode(str, *regionsBeforeEnd));
-        i = r->region.end();
+        Node r = patternBeforeEnd->createNode(str, *regionsBeforeEnd);
+        i = r.region.end();
 
         // If r->region is empty, it leads infinite loop without i++;
-        if (r->region.isEmpty()) {
+        if (r.region.isEmpty()) {
           i++;
         }
-        node->append(*r);
+        node.append(r);
 
         /*
          e.g. text for match
@@ -908,22 +908,21 @@ Node* Pattern::createNode(const QString& str, const QVector<Region>& regions) {
 
     // set contentName
     if (!contentName.isEmpty()) {
-      std::unique_ptr<Node> newNode(
-          new Node(contentName, Region(node->region.end(), (*endMatchedRegions)[0].begin())));
-      node->append(*newNode);
+      Node newNode(contentName, Region(node.region.end(), (*endMatchedRegions)[0].begin()));
+      node.append(newNode);
     }
 
     if (endCaptures.length() > 0) {
-      createCaptureNodes(*endMatchedRegions, node, endCaptures);
+      createCaptureNodes(*endMatchedRegions, &node, endCaptures);
     } else {
-      createCaptureNodes(*endMatchedRegions, node, captures);
+      createCaptureNodes(*endMatchedRegions, &node, captures);
     }
 
     break;
   }
 
-  node->region.setEnd(endPos);
-  node->updateRegion();
+  node.region.setEnd(endPos);
+  node.updateRegion();
   return node;
 }
 
