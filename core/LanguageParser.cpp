@@ -594,6 +594,7 @@ bool Regex::hasBackReference(const QString& str) {
   return false;
 }
 
+// find within [beginPos, endPos)
 boost::optional<QVector<Region>> Regex::find(Regexp* regex,
                                              const QString& str,
                                              int beginPos,
@@ -629,7 +630,8 @@ Regex* Regex::create(const QString& pattern) {
 Pattern::Pattern(Language* lang, Pattern* parent) : lang(lang), parent(parent) {}
 
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(const QString& str,
-                                                                                int beginPos) {
+                                                                                int beginPos,
+                                                                                int endPos) {
   //  qDebug("firstMatch. pos: %d", pos);
   int startIdx = -1;
   Pattern* resultPattern = nullptr;
@@ -639,9 +641,47 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
   QVector<Pattern*> backslashGPatterns;
 
   while (i < cachedPatterns.length()) {
-    auto pair = cachedPatterns[i]->find(str, beginPos);
+    auto pair = cachedPatterns[i]->find(str, beginPos, endPos);
     Pattern* pattern = pair.first;
     boost::optional<QVector<Region>> regions = pair.second;
+
+    if (regions && regions->size() > 0) {
+      // todo: consider the case when the pattern matches more than two lines
+      auto multilineMatchedRegion = (*regions)[0];
+      int newlineIndex =
+          str.midRef(multilineMatchedRegion.begin(), multilineMatchedRegion.end() - multilineMatchedRegion.begin())
+              .indexOf('\n');
+      if (0 <= newlineIndex && multilineMatchedRegion.begin() + newlineIndex < multilineMatchedRegion.end() - 1) {
+//        qDebug() << "Regex matches multi line";
+        // Regex matches multi line. Force to match it against single line.
+        int newlinePos = multilineMatchedRegion.begin() + newlineIndex;
+
+        // find within [multilineMatchedRegion.begin(), newlinePos]
+        for (int beginPosInLine = multilineMatchedRegion.begin(); beginPosInLine < newlinePos; beginPosInLine++) {
+          cachedPatterns[i]->clearCache();
+          pair = cachedPatterns[i]->find(str, beginPosInLine, newlinePos + 1);
+          pattern = pair.first;
+          regions = pair.second;
+          if (regions) {
+            break;
+          }
+        }
+
+        // If it's not found in previous line, find in next line [newlinePos + 1, multilineMatchedRegion.end())
+        if (!regions) {
+          for (int beginPosInLine = newlinePos + 1; beginPosInLine < multilineMatchedRegion.end(); beginPosInLine++) {
+            cachedPatterns[i]->clearCache();
+            pair = cachedPatterns[i]->find(str, beginPosInLine, multilineMatchedRegion.end());
+            pattern = pair.first;
+            regions = pair.second;
+            if (regions) {
+              break;
+            }
+          }
+        }
+      }
+    }
+
     if (regions) {
       if (startIdx < 0 || startIdx > (*regions)[0].begin()) {
         startIdx = (*regions)[0].begin();
@@ -681,8 +721,10 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
  * @return A pair of pattern and regions found in str. The regions may include an empty region [0,0]
  */
 std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QString& str,
-                                                                    int beginPos) {
+                                                                    int beginPos,
+                                                                    int endPos) {
   //  qDebug(" pos: %d. data.size: %d", pos, data.size());
+  int actualEndPos = endPos == -1 ? str.length() : endPos;
 
   if (!cachedStr.isEmpty() && cachedStr == str) {
     if (!cachedResultRegions) {
@@ -691,6 +733,7 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
     }
 
     if ((*cachedResultRegions)[0].begin() >= beginPos &&
+        (*cachedResultRegions)[0].end() <= actualEndPos &&
         cachedResultPattern.loadAcquire()->cachedResultRegions) {
       //      qDebug("hits++");
       //      hits++;
@@ -722,17 +765,17 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
   boost::optional<QVector<Region>> regions;
   if (match) {
     pattern = this;
-    regions = match->find(str, beginPos);
+    regions = match->find(str, beginPos, endPos);
   } else if (begin) {
     pattern = this;
-    regions = begin->find(str, beginPos);
+    regions = begin->find(str, beginPos, endPos);
   } else if (!include.isEmpty()) {
     // # means an item name in the repository
     if (include.startsWith('#')) {
       QString key = include.mid(1);
       if (auto p2 = findInRepository(this, key)) {
         //        qDebug("include %s", qPrintable(include));
-        auto pair = p2->find(str, beginPos);
+        auto pair = p2->find(str, beginPos, endPos);
         pattern = pair.first;
         regions = pair.second;
       } else {
@@ -740,24 +783,24 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
       }
       // $self means the current syntax definition
     } else if (include == "$self") {
-      return lang->rootPattern->find(str, beginPos);
+      return lang->rootPattern->find(str, beginPos, endPos);
       // $base equals $self if it doesn't have a parent. When it does, $base means parent syntax
       // e.g. When source.c++ includes source.c, "include $base" in source.c means including
       // source.c++
     } else if (include == "$base" && lang->baseLanguage) {
-      return lang->baseLanguage->rootPattern->find(str, beginPos);
+      return lang->baseLanguage->rootPattern->find(str, beginPos, endPos);
     } else if (cachedIncludedLanguage) {
-      return cachedIncludedLanguage->rootPattern->find(str, beginPos);
+      return cachedIncludedLanguage->rootPattern->find(str, beginPos, endPos);
       // external syntax definitions e.g. source.c++
     } else if (auto includedLang = LanguageProvider::languageFromScope(include)) {
       cachedIncludedLanguage.reset(includedLang);
       cachedIncludedLanguage->baseLanguage = lang;
-      return cachedIncludedLanguage->rootPattern->find(str, beginPos);
+      return cachedIncludedLanguage->rootPattern->find(str, beginPos, endPos);
     } else {
       qWarning() << "Include directive " + include + " failed";
     }
   } else {
-    auto pair = searchInPatterns(str, beginPos);
+    auto pair = searchInPatterns(str, beginPos, endPos);
     pattern = pair.first;
     regions = pair.second;
   }

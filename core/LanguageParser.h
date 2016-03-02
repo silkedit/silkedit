@@ -115,12 +115,12 @@ struct Pattern {
   virtual ~Pattern() = default;
 
   std::pair<Pattern*, boost::optional<QVector<Region>>> searchInPatterns(const QString& data,
-                                                                         int pos);
+                                                                         int pos, int endPos = -1);
 
   // Note: Don't add endPos because Pattern caches the result matched in [beginPos, end of data)
   // When you call find next time, find returns the chached result if beginPos > cached result's
   // begin pos
-  std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int beginPos);
+  std::pair<Pattern*, boost::optional<QVector<Region>>> find(const QString& data, int beginPos, int endPos = -1);
   Node createNode(const QString& data, const QVector<Region>& regions);
   void createCaptureNodes(QVector<Region> regions,
                           Node* parent,
