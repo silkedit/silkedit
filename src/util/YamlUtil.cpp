@@ -243,8 +243,13 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       if (checkableNode.IsDefined() && checkableNode.IsScalar() && checkableNode.as<bool>()) {
         Q_ASSERT(action);
         action->setCheckable(true);
-        if (Config::singleton().get(id, false)) {
-          action->setChecked(true);
+        if (Config::singleton().contains(id)) {
+          action->setChecked(Config::singleton().get(id, false));
+        } else {
+          auto defaultValue = Config::singleton().defaultValue(id);
+          if (defaultValue.canConvert<bool>()) {
+            action->setChecked(Config::singleton().defaultValue(id).toBool());
+          }
         }
       }
 

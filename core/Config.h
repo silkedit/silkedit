@@ -63,6 +63,7 @@ class Config : public QObject, public Singleton<Config> {
   void setShowInvisibles(bool newValue);
 
   bool showTabsAndSpaces();
+  bool wordWrap();
 
   void init();
   bool contains(const QString& key);
@@ -96,6 +97,8 @@ class Config : public QObject, public Singleton<Config> {
     return false;
   }
 
+  QVariant defaultValue(const QString& key);
+
  signals:
   void themeChanged(Theme* newTheme);
   void fontChanged(QFont font);
@@ -103,6 +106,7 @@ class Config : public QObject, public Singleton<Config> {
   void indentUsingSpacesChanged(bool indentUsingSpaces);
   void showInvisiblesChanged(bool);
   void showTabsAndSpacesChanged(bool);
+  void wordWrapChanged(bool);
   void endOfLineStrChanged(const QString& str);
 
  private:

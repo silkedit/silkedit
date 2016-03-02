@@ -36,6 +36,7 @@ const QString TAB_WIDTH_KEY = QStringLiteral("tab_width");
 const QString LOCALE_KEY = QStringLiteral("locale");
 const QString SHOW_INVISIBLES_KEY = QStringLiteral("show_invisibles");
 const QString SHOW_TABS_AND_SPACES_KEY = QStringLiteral("show_tabs_and_spaces");
+const QString WORD_WRAP_KEY = QStringLiteral("word_wrap");
 
 QHash<QString, QVariant::Type> keyTypeHashForBuiltinConfigs;
 
@@ -50,6 +51,7 @@ void initKeyTypeHash() {
   keyTypeHashForBuiltinConfigs[LOCALE_KEY] = QVariant::String;
   keyTypeHashForBuiltinConfigs[SHOW_INVISIBLES_KEY] = QVariant::Bool;
   keyTypeHashForBuiltinConfigs[SHOW_TABS_AND_SPACES_KEY] = QVariant::Bool;
+  keyTypeHashForBuiltinConfigs[WORD_WRAP_KEY] = QVariant::Bool;
 }
 }
 
@@ -156,6 +158,8 @@ void Config::addPackageConfigDefinition(const ConfigDefinition& def) {
 void Config::emitConfigChange(const QString& key, QVariant value) {
   if (key == SHOW_TABS_AND_SPACES_KEY && value.canConvert<bool>()) {
     emit showTabsAndSpacesChanged(value.toBool());
+  } else if (key == WORD_WRAP_KEY && value.canConvert<bool>()) {
+    emit wordWrapChanged(value.toBool());
   }
 }
 
@@ -316,7 +320,11 @@ void Config::setShowInvisibles(bool newValue) {
 }
 
 bool Config::showTabsAndSpaces() {
-  return get(SHOW_TABS_AND_SPACES_KEY, false);
+  return get(SHOW_TABS_AND_SPACES_KEY, defaultValue(SHOW_TABS_AND_SPACES_KEY).toBool());
+}
+
+bool Config::wordWrap() {
+  return get(WORD_WRAP_KEY, defaultValue(WORD_WRAP_KEY).toBool());
 }
 
 Config::Config() : m_theme(nullptr) {}
@@ -403,6 +411,16 @@ QString Config::fontFamily() {
 
 int Config::fontSize() {
   return get(FONT_SIZE_KEY, Constants::singleton().defaultFontSize);
+}
+
+QVariant Config::defaultValue(const QString& key) {
+  if (key == SHOW_TABS_AND_SPACES_KEY) {
+    return QVariant::fromValue(false);
+  } else if (key == WORD_WRAP_KEY) {
+    return QVariant::fromValue(true);
+  } else {
+    return QVariant();
+  }
 }
 
 }  // namespace core
