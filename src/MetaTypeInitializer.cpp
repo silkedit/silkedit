@@ -17,6 +17,7 @@
 #include "core/LanguageParser.h"
 #include "core/Region.h"
 #include "core/SyntaxHighlighter.h"
+#include "core/TextOption.h"
 
 void MetaTypeInitializer::init()
 {
@@ -56,5 +57,10 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::Region>("core::Region");
   qRegisterMetaType<core::SyntaxHighlighter*>("SyntaxHighlighter*");
   qRegisterMetaType<core::SyntaxHighlighter*>("core::SyntaxHighlighter*");
+  qRegisterMetaType<core::TextOption*>("TextOption*");
+  qRegisterMetaType<core::TextOption*>("core::TextOption*");
+  qRegisterMetaType<core::TextOption::Flag>("Flag");
+  qRegisterMetaType<core::Document*>("Document*");
+  qRegisterMetaType<core::Document*>("core::Document*");
 }
 

@@ -21,7 +21,17 @@ void CommandAction::init(const QString& id) {
 
   updateVisibilityAndShortcut();
 
-  connect(this, &QAction::triggered, [this] { CommandManager::singleton().runCommand(m_cmdName); });
+  connect(this, &QAction::triggered, [this](bool checked) {
+    if (isCheckable()) {
+      Config::singleton().setValue(objectName(), checked);
+    }
+    // empty command is allowed
+    // e.g. checkable but empty command action
+    if (!m_cmdName.isEmpty()) {
+      CommandArgument args({{"checked", QVariant(checked)}});
+      CommandManager::singleton().runCommand(m_cmdName, args);
+    }
+  });
   connect(&KeymapManager::singleton(), &KeymapManager::shortcutUpdated, this,
           [=](const QString& cmdName, const QKeySequence& key) {
             if (cmdName == m_cmdName) {

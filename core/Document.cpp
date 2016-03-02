@@ -84,11 +84,27 @@ Document::Document(const QString& path,
   setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(lang)), toPlainText());
 }
 
+void Document::setShowTabsAndSpaces(bool showTabsAndSpaces) {
+  auto option = defaultTextOption();
+  QTextOption::Flags flags;
+  if (showTabsAndSpaces) {
+    flags = option.flags() | QTextOption::ShowTabsAndSpaces;
+  } else {
+    flags = option.flags() & ~QTextOption::ShowTabsAndSpaces;
+  }
+  option.setFlags(flags);
+  setDefaultTextOption(option);
+}
+
 void Document::init() {
   // This font is used for an empty line because SyntaxHilighter can't set font in am empty line
   setDefaultFont(Config::singleton().font());
   setupLayout();
+  setShowTabsAndSpaces(Config::singleton().showTabsAndSpaces());
+
   connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
+  connect(&Config::singleton(), &Config::showTabsAndSpacesChanged, this,
+          &Document::setShowTabsAndSpaces);
 }
 
 Document::Document()
@@ -298,6 +314,14 @@ void Document::reload(const Encoding& encoding) {
     setModified(false);
     emit modificationChanged(false);
   }
+}
+
+QTextOption Document::defaultTextOption() const {
+  return QTextDocument::defaultTextOption();
+}
+
+void Document::setDefaultTextOption(const QTextOption& option) {
+  QTextDocument::setDefaultTextOption(option);
 }
 
 }  // namespace core
