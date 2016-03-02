@@ -176,6 +176,7 @@ QVector<int> Regexp::onigSearch(const OnigUChar* str,
   return QVector<int>();
 }
 
+// find within [begin, end)
 QVector<int> Regexp::findStringSubmatchIndex(const QString& text,
                                              int begin,
                                              int end,

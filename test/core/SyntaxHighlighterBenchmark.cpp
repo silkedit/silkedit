@@ -48,7 +48,7 @@ class SyntaxHighliterBenchmark : public QObject {
 
     int passed = startTime.msecsTo(QTime::currentTime());
     qDebug() << passed << "[ms]";
-    QVERIFY(passed < 350);
+    QVERIFY(passed < 400);
   }
 
   void largeSyntaxHighlightTest() {
@@ -70,7 +70,7 @@ class SyntaxHighliterBenchmark : public QObject {
 
     int passed = startTime.msecsTo(QTime::currentTime());
     qDebug() << passed << "[ms]";
-    QVERIFY(passed < 3500);
+    QVERIFY(passed < 4000);
   }
 };
 

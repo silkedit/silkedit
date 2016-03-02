@@ -199,6 +199,38 @@ class LanguageParserTest : public QObject {
     TestUtil::compareLineByLine(root->toString(text), result);
   }
 
+  void cppMultipleIncludesTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = QStringLiteral(R"(
+#include <QDebug>
+
+#include "App.h")"
+).trimmed();
+
+    LanguageParser* parser = LanguageParser::create("source.c++", text);
+    auto root = parser->parse();
+
+    QString result = QStringLiteral(R"r(
+0-35: "source.c++"
+  0-17: "meta.preprocessor.c.include"
+    1-8: "keyword.control.import.include.c" - Data: "include"
+    9-17: "string.quoted.other.lt-gt.include.c"
+      9-10: "punctuation.definition.string.begin.c" - Data: "<"
+      16-17: "punctuation.definition.string.end.c" - Data: ">"
+  19-35: "meta.preprocessor.c.include"
+    20-27: "keyword.control.import.include.c" - Data: "include"
+    28-35: "string.quoted.double.include.c"
+      28-29: "punctuation.definition.string.begin.c" - Data: """
+      34-35: "punctuation.definition.string.end.c" - Data: """)r"
+).trimmed();
+
+    TestUtil::compareLineByLine(root->toString(text), result);
+  }
+
   void cppRangeTest() {
     const QVector<QString> files(
         {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
@@ -442,6 +474,44 @@ WHERE email = <%= quote @email %>)";
     44-47: "entity.name.tag.yaml"
       46-47: "punctuation.separator.key-value.yaml" - Data: ":"
     48-54: "string.unquoted.yaml" - Data: "onMac ")r";
+
+    TestUtil::compareLineByLine(root->toString(text), result);
+  }
+
+  void patternThatMatchesMultiLineTest() {
+    const QVector<QString> files({"testdata/grammers/YAML.plist"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+
+    QString text = R"(menu:
+- label: File)";
+
+    /*
+      This pattern matches the whole text because \s* matches a newline.
+      In this case, force this pattern to match a single line
+
+      <key>match</key>
+      <string>(?:(?:(-\s*)?(\w+\s*(:)))|(-))\s*(?:((")[^"]*("))|((')[^']*('))|([^,{}&amp;#\[\]]+))\s*</string>
+      <key>name</key>
+      <string>string.unquoted.yaml</string>
+     */
+
+    LanguageParser* parser = LanguageParser::create("source.yaml", text);
+    auto root = parser->parse();
+
+    QString result = QString(R"r(
+0-19: "source.yaml"
+  0-6: "string.unquoted.yaml"
+    0-5: "entity.name.tag.yaml"
+      4-5: "punctuation.separator.key-value.yaml" - Data: ":"
+    5-6: "string.unquoted.yaml" - Data: "
+"
+  6-19: "string.unquoted.yaml"
+    6-8: "punctuation.definition.entry.yaml" - Data: "- "
+    8-14: "entity.name.tag.yaml"
+      13-14: "punctuation.separator.key-value.yaml" - Data: ":"
+    15-19: "string.unquoted.yaml" - Data: "File"
+)r").trimmed();
 
     TestUtil::compareLineByLine(root->toString(text), result);
   }
