@@ -11,6 +11,7 @@
 
 using v8::Function;
 using v8::FunctionCallbackInfo;
+using v8::PropertyCallbackInfo;
 using v8::FunctionTemplate;
 using v8::Isolate;
 using v8::Local;
@@ -25,15 +26,16 @@ using v8::ObjectTemplate;
 using v8::Maybe;
 
 namespace {
-const QString END_OF_LINE_STR_KEY = "end_of_line_str";
-const QString END_OF_FILE_STR_KEY = "end_of_file_str";
-const QString THEME_KEY = "theme";
-const QString FONT_FAMILY_KEY = "font_family";
-const QString FONT_SIZE_KEY = "font_size";
-const QString INDENT_USING_SPACES_KEY = "indent_using_spaces";
-const QString TAB_WIDTH_KEY = "tab_width";
-const QString LOCALE_KEY = "locale";
-const QString SHOW_INVISIBLES_KEY = "show_invisibles";
+const QString END_OF_LINE_STR_KEY = QStringLiteral("end_of_line_str");
+const QString END_OF_FILE_STR_KEY = QStringLiteral("end_of_file_str");
+const QString THEME_KEY = QStringLiteral("theme");
+const QString FONT_FAMILY_KEY = QStringLiteral("font_family");
+const QString FONT_SIZE_KEY = QStringLiteral("font_size");
+const QString INDENT_USING_SPACES_KEY = QStringLiteral("indent_using_spaces");
+const QString TAB_WIDTH_KEY = QStringLiteral("tab_width");
+const QString LOCALE_KEY = QStringLiteral("locale");
+const QString SHOW_INVISIBLES_KEY = QStringLiteral("show_invisibles");
+const QString SHOW_TABS_AND_SPACES_KEY = QStringLiteral("show_tabs_and_spaces");
 
 QHash<QString, QVariant::Type> keyTypeHashForBuiltinConfigs;
 
@@ -47,6 +49,7 @@ void initKeyTypeHash() {
   keyTypeHashForBuiltinConfigs[TAB_WIDTH_KEY] = QVariant::Int;
   keyTypeHashForBuiltinConfigs[LOCALE_KEY] = QVariant::String;
   keyTypeHashForBuiltinConfigs[SHOW_INVISIBLES_KEY] = QVariant::Bool;
+  keyTypeHashForBuiltinConfigs[SHOW_TABS_AND_SPACES_KEY] = QVariant::Bool;
 }
 }
 
@@ -65,6 +68,7 @@ void Config::Init(v8::Local<v8::Object> exports) {
   obj->SetAlignedPointerInInternalField(0, &Config::singleton());
 
   NODE_SET_METHOD(obj, "get", get);
+  NODE_SET_METHOD(obj, "set", set);
   NODE_SET_METHOD(obj, "setFont", setFont);
 
   Maybe<bool> result =
@@ -149,6 +153,12 @@ void Config::addPackageConfigDefinition(const ConfigDefinition& def) {
   m_packageConfigDefinitions[def.key] = def;
 }
 
+void Config::emitConfigChange(const QString& key, QVariant value) {
+  if (key == SHOW_TABS_AND_SPACES_KEY && value.canConvert<bool>()) {
+    emit showTabsAndSpacesChanged(value.toBool());
+  }
+}
+
 QVariant convert(QVariant var, QVariant::Type type) {
   Q_ASSERT(var.type() == QVariant::Type::ByteArray);
 
@@ -199,6 +209,21 @@ QVariant Config::get(const QString& key) {
   return QVariant();
 }
 
+void Config::set(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  Isolate* isolate = args.GetIsolate();
+
+  if (args.Length() != 2 || !args[0]->IsString()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return;
+  }
+
+  const auto& key =
+      V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  auto newValue = V8Util::toVariant(isolate, args[1]);
+
+  Config::singleton().setValue(key, newValue);
+}
+
 void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
   Isolate* isolate = args.GetIsolate();
 
@@ -209,24 +234,15 @@ void Config::get(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
   const auto& key =
       V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
-  QVariant result = Config::singleton().get(key);
-
-  switch (result.type()) {
-    case QVariant::Bool:
-      args.GetReturnValue().Set(v8::Boolean::New(isolate, result.toBool()));
-      return;
-    case QVariant::Int:
-      args.GetReturnValue().Set(v8::Int32::New(isolate, result.toInt()));
-      return;
-    case QVariant::Double:
-      args.GetReturnValue().Set(v8::Number::New(isolate, result.toDouble()));
-      return;
-    case QVariant::String:
-      args.GetReturnValue().Set(V8Util::toV8String(isolate, result.toString()));
-      return;
-    default:
-      args.GetReturnValue().Set(v8::Null(isolate));
+  QVariant value = Config::singleton().get(key);
+  if (!value.isValid()) {
+    std::stringstream ss;
+    ss << "config: " << key.toUtf8().constData() << " not found";
+    V8Util::throwError(isolate, ss.str());
+    return;
   }
+
+  args.GetReturnValue().Set(V8Util::toV8Value(isolate, value));
 }
 
 void Config::setFont(const v8::FunctionCallbackInfo<v8::Value>& args) {
@@ -297,6 +313,10 @@ void Config::setShowInvisibles(bool newValue) {
   if (setValue(SHOW_INVISIBLES_KEY, newValue)) {
     emit showInvisiblesChanged(newValue);
   }
+}
+
+bool Config::showTabsAndSpaces() {
+  return get(SHOW_TABS_AND_SPACES_KEY, false);
 }
 
 Config::Config() : m_theme(nullptr) {}

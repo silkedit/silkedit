@@ -261,6 +261,14 @@ bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
   return metaObj->classInfo(infoIndex).value() == typeName;
 }
 
+QVariant core::Util::toVariant(const char* str) {
+  return toVariant(QString::fromUtf8(str));
+}
+
+QVariant core::Util::toVariant(const std::string &str) {
+  return toVariant(QString::fromUtf8(str.c_str()));
+}
+
 // http://www.yaml.org/spec/1.2/spec.html#id2805071
 QVariant core::Util::toVariant(const QString& str) {
   static QRegularExpression nullPattern("null|Null|NULL|~");

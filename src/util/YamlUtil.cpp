@@ -18,6 +18,7 @@
 #include "core/Regexp.h"
 #include "core/JSValue.h"
 #include "core/Util.h"
+#include "core/Config.h"
 
 using core::Condition;
 using core::PackageMenu;
@@ -29,6 +30,7 @@ using core::AndConditionExpression;
 using core::Regexp;
 using core::JSNull;
 using core::Util;
+using core::Config;
 
 namespace {
 
@@ -210,8 +212,11 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       }
 
       QAction* action = nullptr;
-      if (commandNode.IsDefined() && !label.isEmpty()) {
-        const QString& command = QString::fromUtf8(commandNode.as<std::string>().c_str());
+      if (!label.isEmpty()) {
+        QString command;
+        if (commandNode.IsDefined()) {
+          command = QString::fromUtf8(commandNode.as<std::string>().c_str());
+        }
         action = new CommandAction(id, label, command, nullptr, condition, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
@@ -231,6 +236,16 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       if (!id.isEmpty() && findAction(parent->actions(), id)) {
         qWarning("%s already exists", qPrintable(id));
         continue;
+      }
+
+      // check checkable
+      YAML::Node checkableNode = node["checkable"];
+      if (checkableNode.IsDefined() && checkableNode.IsScalar() && checkableNode.as<bool>()) {
+        Q_ASSERT(action);
+        action->setCheckable(true);
+        if (Config::singleton().get(id, false)) {
+          action->setChecked(true);
+        }
       }
 
       if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {

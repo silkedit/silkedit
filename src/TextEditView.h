@@ -35,7 +35,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
 
-  core::Document* document();
   void setDocument(std::shared_ptr<core::Document> document);
   core::Language* language();
   void setLanguage(const QString& scopeName);
@@ -90,6 +89,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   QString path();
   void setTextCursor(const QTextCursor &cursor);
   QTextCursor textCursor() const;
+  core::Document* document();
 
  signals:
   void pathUpdated(const QString& path);

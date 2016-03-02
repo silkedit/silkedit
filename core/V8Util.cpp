@@ -12,6 +12,7 @@
 #include "JSValue.h"
 #include "TextCursor.h"
 #include "TextBlock.h"
+#include "TextOption.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -105,6 +106,8 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
     return toV8ObjectFrom(isolate, new TextBlock(var.value<QTextBlock>()));
   } else if (var.canConvert<QTextCursor>()) {
     return toV8ObjectFrom(isolate, new TextCursor(var.value<QTextCursor>()));
+  } else if (var.canConvert<QTextOption>()) {
+    return toV8ObjectFrom(isolate, new TextOption(var.value<QTextOption>()));
   } else if (var.canConvert<CommandArgument>()) {
     return toV8Object(isolate, var.value<CommandArgument>());
   } else if (var.canConvert<std::string>()) {
@@ -160,7 +163,7 @@ v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgu
   Local<Object> argsObj = Object::New(isolate);
   for (const auto& pair : args) {
     argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
-                 String::NewFromUtf8(isolate, pair.second.c_str()));
+                 toV8Value(isolate, pair.second));
   }
   return argsObj;
 }
@@ -240,10 +243,6 @@ QVariantMap V8Util::toVariantMap(v8::Isolate* isolate, v8::Local<v8::Object> obj
     }
 
     Local<Value> value = maybeValue.ToLocalChecked();
-    if (!key->IsString()) {
-      qWarning() << "value is not string";
-      continue;
-    }
     map.insert(toQString(key->ToString()), toVariant(isolate, value));
   }
   return map;
