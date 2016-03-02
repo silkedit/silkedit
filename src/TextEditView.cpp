@@ -260,6 +260,15 @@ void TextEditViewPrivate::setTabStopWidthFromSession() {
   }
 }
 
+void TextEditViewPrivate::setWordWrap(bool wordWrap)
+{
+   if (wordWrap) {
+    q_ptr->setWordWrapMode(QTextOption::WordWrap);
+  } else {
+    q_ptr->setWordWrapMode(QTextOption::NoWrap);
+  }
+}
+
 void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
   Q_Q(TextEditView);
 
@@ -411,6 +420,7 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
 TextEditView::TextEditView(QWidget* parent)
     : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)) {
   d_ptr->m_lineNumberArea = new LineNumberArea(this);
+  d_ptr->setWordWrap(Config::singleton().wordWrap());
 
   Q_D(TextEditView);
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
@@ -432,6 +442,8 @@ TextEditView::TextEditView(QWidget* parent)
           SLOT(setTabStopWidthFromSession()));
   connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
           SLOT(setTabStopWidthFromSession()));
+  connect(&Config::singleton(), SIGNAL(wordWrapChanged(bool)), this,
+          SLOT(setWordWrap(bool)));
 
   // Set default values
   d->updateLineNumberAreaWidth(0);

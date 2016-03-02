@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <QTextDocument>
+#include <QTextOption>
 
 #include "macros.h"
 #include "Encoding.h"
@@ -51,16 +52,16 @@ class Document : public QTextDocument {
   void setBOM(const BOM& bom);
 
   boost::optional<Region> find(const QString& subString,
-                   int from = 0,
-                   int begin = 0,
-                   int end = -1,
-                   FindFlags options = 0) const;
+                               int from = 0,
+                               int begin = 0,
+                               int end = -1,
+                               FindFlags options = 0) const;
 
   boost::optional<Region> find(const Regexp* expr,
-                   int from = 0,
-                   int begin = 0,
-                   int end = -1,
-                   FindFlags options = 0) const;
+                               int from = 0,
+                               int begin = 0,
+                               int end = -1,
+                               FindFlags options = 0) const;
 
   QVector<core::Region> findAll(const QString& text,
                                 int begin,
@@ -91,6 +92,10 @@ class Document : public QTextDocument {
   void bomChanged(const BOM& bom);
   void parseFinished();
 
+ public slots:
+  QTextOption defaultTextOption() const;
+  void setDefaultTextOption(const QTextOption& option);
+
  private:
   friend class DocumentTest;
 
@@ -112,6 +117,9 @@ class Document : public QTextDocument {
   void setupSyntaxHighlighter(std::unique_ptr<Language> lang, const QString& text = "");
   void init();
   std::unique_ptr<Regexp> createRegexp(const QString& subString, Document::FindFlags options) const;
+  void setShowTabsAndSpaces(bool showTabsAndSpaces);
 };
 
 }  // namespace core
+
+Q_DECLARE_METATYPE(core::Document*)

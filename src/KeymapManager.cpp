@@ -82,7 +82,7 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
   CommandArgument args;
   for (auto argsIter = argsNode.begin(); argsIter != argsNode.end(); argsIter++) {
     const std::string& arg = argsIter->first.as<std::string>();
-    const std::string& value = argsIter->second.as<std::string>();
+    QVariant value = Util::toVariant(argsIter->second.as<std::string>());
     args.insert(std::make_pair(arg, value));
   }
 

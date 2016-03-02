@@ -35,8 +35,7 @@ CommandArgument toCommandArgument(QVariantMap map) {
   CommandArgument arg;
 
   for (const auto& key : map.keys()) {
-    arg.insert(
-        std::make_pair(key.toUtf8().constData(), map.value(key).toString().toUtf8().constData()));
+    arg.insert(std::make_pair(key.toUtf8().constData(), map.value(key)));
   }
 
   return arg;

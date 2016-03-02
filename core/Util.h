@@ -53,7 +53,9 @@ class Util {
   //  free(argv);
   static char** toArgv(const QStringList& argsStrings);
 
-  static QVariant toVariant(const QString& str);
+  static QVariant toVariant(const char* str);
+  static QVariant toVariant(const std::string &str);
+  static QVariant toVariant(const QString &str);
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {

@@ -164,10 +164,8 @@ operatorは"==", "!="をサポートしています。
 
 ```
   const modeCond = {
-    isSatisfied: (operator, operand) => {
-      return isEnabled && silkedit.Condition.check(toModeText(mode), operator, operand);
-    }
-  }
+	  keyValue: () => toModeText(mode)
+	}
 
   silkedit.Condition.add("vim.mode", modeCond);
 ```
@@ -195,17 +193,42 @@ menu:
       command: hello.hello
       if: on_mac
       before: save
+      checkable: false
 ```
 
-|       |                                      |
-|-------|                                      |
-|label  |メニューに表示される文字列                  |
-|id     |メニューのid。ローカライズやbeforeで指定されます|
-|command|実行するコマンド                          |
-|if     |表示する条件                             |
-|before |指定したidのメニューの上に表示するようにします   |
+|          |                                      |
+|----------|                                      |
+|label     |メニューに表示される文字列                  |
+|id        |メニューのid。ローカライズやbeforeで指定されます|
+|command   |実行するコマンド                          |
+|if        |表示する条件                             |
+|before    |指定したidのメニューの上に表示するようにします   |
+|checkable |trueを指定するとチェック付きのメニューになります |
 
 上記のhelloメニューはMacでのみファイルメニューの中の保存メニューの上に表示されます。クリックすると"hello.hello"コマンドが実行されます。
+
+```checkable: true```を指定した場合、コマンド引数の'checked'というプロパティでチェック状態を取得することができます。
+
+```
+- label: Show Tabs and Spaces
+  id: show_tabs_and_spaces
+  command: toggle_show_tabs_and_spaces
+  checkable: true
+```
+
+```
+"toggle_show_tabs_and_spaces": (args) => {
+  const checked = 'checked' in args ? args['checked'] : false;
+  silkedit.Config.set('show_tabs_and_spaces', checked);
+}
+```
+
+また、上記のように```silkedit.Config.set('show_tabs_and_spaces', checked);```を呼ばなくても、checkableなメニューはidをキーにして自動でチェック状態がConfigに保存され、再起動した時に前回のチェック状態が復元されます。
+
+~/.silk/config.yml
+```
+show_tabs_and_spaces: true
+```
 
 ## ツールバー
 
