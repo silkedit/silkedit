@@ -62,6 +62,9 @@ class Config : public QObject, public Singleton<Config> {
   bool showInvisibles();
   void setShowInvisibles(bool newValue);
 
+  bool showTabsAndSpaces();
+  bool wordWrap();
+
   void init();
   bool contains(const QString& key);
   void addPackageConfigDefinition(const core::ConfigDefinition& def);
@@ -80,16 +83,21 @@ class Config : public QObject, public Singleton<Config> {
     return get<QString>(key, defaultValue);
   }
 
+  void emitConfigChange(const QString& key, QVariant value);
+
   template <typename T>
   bool setValue(const QString& key, T value) {
     if (m_scalarConfigs.count(key) == 0 || m_scalarConfigs[key] != value) {
-      m_scalarConfigs[key] = QVariant(value);
+      QVariant newValue(value);
+      m_scalarConfigs[key] = newValue;
       save(key, value);
+      emitConfigChange(key, newValue);
       return true;
     }
     return false;
   }
 
+  QVariant defaultValue(const QString& key);
 
  signals:
   void themeChanged(Theme* newTheme);
@@ -97,11 +105,14 @@ class Config : public QObject, public Singleton<Config> {
   void tabWidthChanged(int tabWidth);
   void indentUsingSpacesChanged(bool indentUsingSpaces);
   void showInvisiblesChanged(bool);
+  void showTabsAndSpacesChanged(bool);
+  void wordWrapChanged(bool);
   void endOfLineStrChanged(const QString& str);
 
  private:
   // public API accessible from JS
   static void get(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void set(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void setFont(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   Theme* m_theme;
@@ -120,6 +131,20 @@ class Config : public QObject, public Singleton<Config> {
   QString fontFamily();
   int fontSize();
   QVariant get(const QString& key);
+
+  void save(const QString& key, QVariant newValue) {
+    if (newValue.canConvert<bool>()) {
+      save(key, newValue.toBool());
+    } else if (newValue.canConvert<int>()) {
+      save(key, newValue.toInt());
+    } else if (newValue.canConvert<double>()) {
+      save(key, newValue.toDouble());
+    } else if (newValue.canConvert<QString>()) {
+      save(key, newValue.toString());
+    } else {
+      qWarning() << "invalid type:" << newValue.typeName();
+    }
+  }
 
   void save(const QString& key, const QString& newValue) {
     save(key, newValue.toUtf8().constData());

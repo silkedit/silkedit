@@ -48,6 +48,7 @@ class TextEditViewPrivate {
   void emitLineSeparatorChanged(const QString& lineSeparator);
   void emitBOMChanged(const core::BOM& bom);
   void setTabStopWidthFromSession();
+  void setWordWrap(bool wordWrap);
   void setupConnections(std::shared_ptr<core::Document> document);
   boost::optional<core::Region> find(const QString& text,
                           int from,

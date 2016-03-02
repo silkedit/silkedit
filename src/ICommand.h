@@ -13,7 +13,7 @@ namespace {
 std::string toString(const CommandArgument& arg) {
   std::stringstream ss;
   for (const auto& pair : arg) {
-    ss << pair.first.c_str() << ": " << pair.second.c_str() << std::endl;
+    ss << pair.first.c_str() << ": " << pair.second.toString().toUtf8().constData() << std::endl;
   }
 
   return ss.str();
