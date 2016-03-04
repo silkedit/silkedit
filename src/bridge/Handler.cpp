@@ -39,7 +39,7 @@
 #include "core/QVariantArgument.h"
 #include "core/Condition.h"
 #include "core/ObjectStore.h"
-#include "core/QKeyEventWrap.h"
+#include "core/KeyEvent.h"
 #include "core/Event.h"
 #include "core/Url.h"
 #include "core/TextCursor.h"
@@ -47,6 +47,11 @@
 #include "core/MessageHandler.h"
 #include "core/PackageManager.h"
 #include "core/TextOption.h"
+#include "core/Completer.h"
+#include "core/StringListModel.h"
+#include "core/Rect.h"
+#include "core/ItemSelectionModel.h"
+#include "core/QtEnums.h"
 #include "atom/node_includes.h"
 
 using core::Config;
@@ -57,13 +62,18 @@ using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
 using core::ObjectStore;
-using core::QKeyEventWrap;
+using core::KeyEvent;
 using core::Event;
 using core::Url;
 using core::TextCursor;
 using core::TextBlock;
 using core::PackageManager;
 using core::TextOption;
+using core::Completer;
+using core::StringListModel;
+using core::Rect;
+using core::ItemSelectionModel;
+using core::QtEnums;
 
 #ifdef Q_OS_WIN
 // MessageBox is defined in winuser.h
@@ -198,6 +208,7 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "error", error);
 
   // register enums in Qt namespace
+  registerQtEnum<Qt::CaseSensitivity>(context, exports, isolate, "Qt::CaseSensitivity");
   registerQtEnum<Qt::Orientation>(context, exports, isolate, "Qt::Orientation");
   registerQtEnum<Qt::Key>(context, exports, isolate, "Qt::Key");
 }
@@ -230,6 +241,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   Config::Init(exports);
 
   // init classes for QObject subclasses
+  registerClass<Completer>(exports);
   registerClass<ConfigDialog>(exports);
   registerClass<Console>(exports);
   registerClass<Dialog>(exports);
@@ -239,6 +251,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
   registerClass<view::MessageBox>(exports);
+  registerClass<StringListModel>(exports);
   registerClass<TextEditView>(exports);
   registerClass<VBoxLayout>(exports);
 #ifdef Q_OS_MAC
@@ -248,11 +261,16 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
   // Wrappers
   registerClass<Font>(exports);
-  registerClass<QKeyEventWrap>(exports);
+  registerClass<KeyEvent>(exports);
+  registerClass<ItemSelectionModel>(exports);
+  registerClass<Rect>(exports);
   registerClass<TextBlock>(exports);
   registerClass<TextCursor>(exports);
   registerClass<TextOption>(exports);
   registerClass<Url>(exports);
+
+  // Qt Enums
+  registerClass<QtEnums>(exports);
 
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)

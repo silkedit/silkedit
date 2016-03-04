@@ -69,8 +69,9 @@ class V8Util {
                              int numArgs,
                              std::function<bool()> validateFn);
 
-  static QString getErrorMessage(v8::Isolate *isolate, const v8::TryCatch &trycatch);
-private:
+  static QString getErrorMessage(v8::Isolate* isolate, const v8::TryCatch& trycatch);
+
+ private:
   friend class V8UtilTest;
 
   static v8::Persistent<v8::String> s_hiddenQObjectKey;
@@ -80,6 +81,7 @@ private:
   static v8::MaybeLocal<v8::Object> newInstance(v8::Isolate* isolate,
                                                 v8::Local<v8::Function> constructor,
                                                 void* sourceObj);
+  static bool isEnum(QVariant var);
 };
 
 }  // namespace core

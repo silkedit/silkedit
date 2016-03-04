@@ -13,6 +13,12 @@
 #include "TextCursor.h"
 #include "TextBlock.h"
 #include "TextOption.h"
+#include "Rect.h"
+#include "QAbstractItemViewWrap.h"
+#include "ModelIndex.h"
+#include "QSizeWrap.h"
+#include "QScrollBarWrap.h"
+#include "ItemSelectionModel.h"
 
 using v8::UniquePersistent;
 using v8::ObjectTemplate;
@@ -99,9 +105,34 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
   }
 }
 
+bool V8Util::isEnum(QVariant var) {
+  if (!var.canConvert<int>()) {
+    return false;
+  }
+
+  int typeId = QMetaType::type(var.typeName());
+  if (typeId != QMetaType::UnknownType) {
+    return QMetaType::typeFlags(typeId).testFlag(QMetaType::IsEnumeration);
+  }
+
+  return false;
+}
+
 v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var) {
-  if (var.canConvert<QObject*>()) {
+  if (var.canConvert<QAbstractItemView*>()) {
+    return toV8ObjectFrom(isolate, new QAbstractItemViewWrap(var.value<QAbstractItemView*>()));
+  } else if (var.canConvert<QItemSelectionModel*>()) {
+    return toV8ObjectFrom(isolate, new ItemSelectionModel(var.value<QItemSelectionModel*>()));
+  } else if (var.canConvert<QScrollBar*>()) {
+    return toV8ObjectFrom(isolate, new QScrollBarWrap(var.value<QScrollBar*>()));
+  } else if (var.canConvert<QObject*>()) {
     return toV8ObjectFrom(isolate, var.value<QObject*>());
+  } else if (var.canConvert<QModelIndex>()) {
+    return toV8ObjectFrom(isolate, new ModelIndex(var.value<QModelIndex>()));
+  } else if (var.canConvert<QRect>()) {
+    return toV8ObjectFrom(isolate, new Rect(var.value<QRect>()));
+  } else if (var.canConvert<QSize>()) {
+    return toV8ObjectFrom(isolate, new QSizeWrap(var.value<QSize>()));
   } else if (var.canConvert<QTextBlock>()) {
     return toV8ObjectFrom(isolate, new TextBlock(var.value<QTextBlock>()));
   } else if (var.canConvert<QTextCursor>()) {
@@ -122,6 +153,8 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
     return array;
   } else if (var.canConvert<JSNull>()) {
     return v8::Null(isolate);
+  } else if (isEnum(var)) {
+    return v8::Int32::New(isolate, var.toInt());
   }
 
   switch (var.type()) {
@@ -162,8 +195,7 @@ v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var
 v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgument args) {
   Local<Object> argsObj = Object::New(isolate);
   for (const auto& pair : args) {
-    argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()),
-                 toV8Value(isolate, pair.second));
+    argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()), toV8Value(isolate, pair.second));
   }
   return argsObj;
 }
@@ -208,8 +240,7 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
     return *maybeExistingObj;
   } else {
     const QMetaObject* metaObj = sourceObj->metaObject();
-    Local<Function> ctor =
-        ConstructorStore::singleton().findOrCreateConstructor(metaObj, isolate);
+    Local<Function> ctor = ConstructorStore::singleton().findOrCreateConstructor(metaObj, isolate);
 
     MaybeLocal<Object> maybeObj = newInstance(isolate, ctor, sourceObj);
     if (maybeObj.IsEmpty()) {
