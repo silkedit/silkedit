@@ -56,10 +56,9 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::TextCursor::SelectionType>("SelectionType");
   qRegisterMetaType<core::TextBlock*>("core::TextBlock*");
   qRegisterMetaType<QList<core::Node>>("QList<Node>");
-  qRegisterMetaType<QList<core::Node>>("QList<core::Node>");
   qRegisterMetaType<core::RootNode>("RootNode");
   qRegisterMetaType<core::LanguageParser>("LanguageParser");
-  qRegisterMetaType<core::Region>("core::Region");
+  qRegisterMetaType<core::Region>("Region");
   qRegisterMetaType<core::SyntaxHighlighter*>("SyntaxHighlighter*");
   qRegisterMetaType<core::TextOption*>("core::TextOption*");
   qRegisterMetaType<core::TextOption::Flag>("Flag");
