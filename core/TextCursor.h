@@ -61,6 +61,10 @@ class TextCursor : public Wrapper {
   bool movePosition(MoveOperation operation, MoveMode mode = MoveAnchor, int n = 1);
   int position() const;
   void setPosition(int pos, MoveMode m = MoveAnchor);
+  QString selectedText() const;
+  void insertText(const QString& text);
+  void removeSelectedText();
+  void clearSelection();
 };
 
 }  // namespace core

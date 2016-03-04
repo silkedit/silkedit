@@ -20,7 +20,7 @@
 #include "core/Package.h"
 #include "core/modifiers.h"
 #include "core/V8Util.h"
-#include "core/QKeyEventWrap.h"
+#include "core/KeyEvent.h"
 #include "util/YamlUtil.h"
 #include "core/FunctionInfo.h"
 #include "atom/node_includes.h"
@@ -31,7 +31,7 @@ using core::AndConditionExpression;
 using core::PackageManager;
 using core::Package;
 using core::V8Util;
-using core::QKeyEventWrap;
+using core::KeyEvent;
 using core::FunctionInfo;
 
 using v8::UniquePersistent;
@@ -302,7 +302,7 @@ bool KeymapManager::runJSKeyEventFilter(QKeyEvent* event) {
 
   const int argc = 1;
   v8::Local<Value> argv[argc];
-  argv[0] = V8Util::toV8ObjectFrom(isolate, new QKeyEventWrap(event));
+  argv[0] = V8Util::toV8ObjectFrom(isolate, new KeyEvent(event));
 
   QVariant handled = V8Util::callJSFunc(isolate, m_jsKeyEventFilter.Get(isolate),
                                         v8::Undefined(isolate), argc, argv);

@@ -3,6 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const domain = require('domain');
+const assert = require('assert');
 
 // add builtin node_modules path to NODE_PATH to load silkedit module globally
 if (process.env.NODE_PATH) {
@@ -22,6 +23,7 @@ if (process.argv.length < 2) {
 const silkedit = require('silkedit');
 
 // call init.js
+assert(silkedit.Constants.silkHomePath.length > 0, silkedit.Constants.silkHomePath);
 const initPath = path.join(silkedit.Constants.silkHomePath, 'init.js');
 fs.open(initPath, 'r', (err, fd) => {
   fd && fs.close(fd, (err) => {

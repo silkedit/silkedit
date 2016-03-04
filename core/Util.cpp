@@ -240,11 +240,14 @@ char** core::Util::toArgv(const QStringList& argsStrings) {
 bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
   // canConvert doesn't work for QObject constructed by QMetaObject::newInstance
   //  if (var.canConvert<QObject*>()) {
-  if (static_cast<QMetaType::Type>(var.type()) != QMetaType::QObjectStar) {
+  if (static_cast<QMetaType::Type>(var.type()) != QMetaType::QObjectStar &&
+      !var.canConvert<QObject*>()) {
     return false;
   }
 
-  QByteArray pointerType = var.value<QObject*>()->metaObject()->className();
+  auto wrapperQObject = var.value<QObject*>();
+  Q_ASSERT(wrapperQObject);
+  QByteArray pointerType = wrapperQObject->metaObject()->className();
   pointerType.append('*');
   int typeId = QMetaType::type(pointerType);
 
@@ -258,14 +261,34 @@ bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
     return false;
   }
 
-  return metaObj->classInfo(infoIndex).value() == typeName;
+  if (metaObj->classInfo(infoIndex).value() == typeName) {
+    return true;
+  } else {
+    // Check INHERITS class info
+    int inheritsIndex = metaObj->indexOfClassInfo(INHERITS);
+    if (inheritsIndex >= 0 &&
+        metaObj->classInfo(inheritsIndex).value() == typeName.left(typeName.size() - 1)) {
+      return true;
+    }
+
+    // check wrapped QObject* inheritance
+    Q_ASSERT(wrapperQObject->inherits(Wrapper::staticMetaObject.className()));
+    auto wrapper = qobject_cast<Wrapper*>(wrapperQObject);
+    Q_ASSERT(wrapper);
+    QVariant wrapped = wrapper->getWrapped();
+    if (wrapped.canConvert<QObject*>()) {
+      return wrapped.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
+    }
+  }
+
+  return false;
 }
 
 QVariant core::Util::toVariant(const char* str) {
   return toVariant(QString::fromUtf8(str));
 }
 
-QVariant core::Util::toVariant(const std::string &str) {
+QVariant core::Util::toVariant(const std::string& str) {
   return toVariant(QString::fromUtf8(str.c_str()));
 }
 
