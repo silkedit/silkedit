@@ -243,10 +243,19 @@ QVector<Region> Document::findAll(const QString& text,
     return QVector<Region>();
   }
 
-  return findAll(createRegexp(text, flags).get(), begin, end);
+  if (auto regexp = createRegexp(text, flags)) {
+    return findAll(regexp.get(), begin, end);
+  }
+
+  return QVector<Region>();
 }
 
 QVector<Region> Document::findAll(const Regexp* expr, int begin, int end) const {
+  if (!expr) {
+    qWarning() << "expr is null";
+    return QVector<Region>();
+  }
+
   qDebug("findAll: %s, begin: %d, end: %d", qPrintable(expr->pattern()), begin, end);
   auto indicesList = expr->findAllStringSubmatchIndex(toPlainText(), begin, end);
   QVector<Region> regions(indicesList.size());
