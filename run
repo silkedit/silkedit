@@ -83,7 +83,7 @@ clean() {
 resolve() {
     # Clean node modules
     git clean -dfx jslib packages
-    
+
     # Update submodules
     git submodule sync
     git submodule update --init
@@ -93,7 +93,7 @@ resolve() {
 
     # install os specific built-in packages
     if [ ${OS} == 'Mac' ]; then
-      npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.1
+      npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.2
     fi
 
     # Source Han Code JP font
@@ -259,10 +259,10 @@ resolve() {
 			cd ..
 		fi
     fi
-    
+
     # npm install for minifying JS
     npm install
-    
+
     # npm install for bundled packages
     cd packages
     npm install --production
