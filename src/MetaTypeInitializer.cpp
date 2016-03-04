@@ -45,37 +45,24 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QEvent*>();
   qRegisterMetaType<QEvent::Type>("QEvent::Type");
   qRegisterMetaType<core::Condition::Operator>();
-  qRegisterMetaType<core::FunctionInfo>("FunctionInfo");
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
-  qRegisterMetaType<core::Url*>("Url*");
   qRegisterMetaType<core::Url*>("core::Url*");
   qRegisterMetaType<core::Url::ParsingMode>("ParsingMode");
-  qRegisterMetaType<core::Font*>("Font*");
   qRegisterMetaType<core::Font*>("core::Font*");
-  qRegisterMetaType<core::QKeyEventWrap*>("QKeyEventWrap*");
-  qRegisterMetaType<core::QKeyEventWrap*>("core::QKeyEventWrap*");
-  qRegisterMetaType<core::TextCursor*>("TextCursor*");
   qRegisterMetaType<core::KeyEvent*>("core::KeyEvent*");
   qRegisterMetaType<core::TextCursor*>("core::TextCursor*");
   qRegisterMetaType<core::TextCursor::MoveMode>("MoveMode");
   qRegisterMetaType<core::TextCursor::MoveOperation>("MoveOperation");
   qRegisterMetaType<core::TextCursor::SelectionType>("SelectionType");
-  qRegisterMetaType<core::TextBlock*>("TextBlock*");
   qRegisterMetaType<core::TextBlock*>("core::TextBlock*");
   qRegisterMetaType<QList<core::Node>>("QList<Node>");
   qRegisterMetaType<QList<core::Node>>("QList<core::Node>");
   qRegisterMetaType<core::RootNode>("RootNode");
-  qRegisterMetaType<core::RootNode>("core::RootNode");
   qRegisterMetaType<core::LanguageParser>("LanguageParser");
-  qRegisterMetaType<core::LanguageParser>("core::LanguageParser");
-  qRegisterMetaType<core::Region>("Region");
   qRegisterMetaType<core::Region>("core::Region");
   qRegisterMetaType<core::SyntaxHighlighter*>("SyntaxHighlighter*");
-  qRegisterMetaType<core::SyntaxHighlighter*>("core::SyntaxHighlighter*");
-  qRegisterMetaType<core::TextOption*>("TextOption*");
   qRegisterMetaType<core::TextOption*>("core::TextOption*");
   qRegisterMetaType<core::TextOption::Flag>("Flag");
-  qRegisterMetaType<core::Document*>("Document*");
   qRegisterMetaType<core::Document*>("core::Document*");
   qRegisterMetaType<core::Completer::CompletionMode>("CompletionMode");
   qRegisterMetaType<core::Completer::ModelSorting>("ModelSorting");
@@ -88,4 +75,3 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::ItemSelectionModel::SelectionFlag>("SelectionFlag");
   qRegisterMetaType<core::QtEnums::KeyboardModifier>("KeyboardModifier");
 }
-
