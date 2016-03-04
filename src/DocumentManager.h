@@ -23,8 +23,8 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
 
   ~DocumentManager() = default;
 
-  bool save(core::Document* doc);
-  QString saveAs(core::Document* doc);
+  bool save(core::Document* doc, bool beforeClose);
+  QString saveAs(core::Document* doc, bool beforeClose);
   std::shared_ptr<core::Document> create(const QString& path);
 
 public slots:

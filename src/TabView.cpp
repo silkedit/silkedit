@@ -307,7 +307,7 @@ bool TabView::closeTab(QWidget* w) {
     int ret = msgBox.exec();
     switch (ret) {
       case QMessageBox::Save:
-        editView->save();
+        editView->save(true);
         break;
       case QMessageBox::Discard:
         break;

@@ -767,13 +767,11 @@ TextEditView* TextEditView::clone() {
 }
 
 void TextEditView::save() {
-  if (DocumentManager::singleton().save(d_ptr->m_document.get())) {
-    emit saved();
-  }
+  save(false);
 }
 
 void TextEditView::saveAs() {
-  QString newFilePath = DocumentManager::singleton().saveAs(d_ptr->m_document.get());
+  QString newFilePath = DocumentManager::singleton().saveAs(d_ptr->m_document.get(), false);
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
     emit saved();
@@ -866,6 +864,12 @@ void TextEditView::clearSelection() {
   if (cursor.hasSelection()) {
     cursor.clearSelection();
     setTextCursor(cursor);
+  }
+}
+
+void TextEditView::save(bool beforeClose) {
+  if (DocumentManager::singleton().save(d_ptr->m_document.get(), beforeClose)) {
+    emit saved();
   }
 }
 
