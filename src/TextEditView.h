@@ -50,10 +50,10 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   TextEditView* clone() override;
   void setPath(const QString& path);
   boost::optional<core::Region> find(const QString& text,
-                    int from,
-                    int begin = 0,
-                    int end = -1,
-                    core::Document::FindFlags flags = 0);
+                                     int from,
+                                     int begin = 0,
+                                     int end = -1,
+                                     core::Document::FindFlags flags = 0);
   void highlightSearchMatches(const QString& text,
                               int begin,
                               int end,
@@ -79,8 +79,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void selectAll();
   void indent();
   void outdent();
-  QString toText();
-  void setText(const QString& text);
   void insertNewLine();
   void save();
   void saveAs();
@@ -88,11 +86,11 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   bool isThinCursor();
   void setThinCursor(bool on);
   QString path();
-  void setTextCursor(const QTextCursor &cursor);
+  void setTextCursor(const QTextCursor& cursor);
   QTextCursor textCursor() const;
   core::Document* document();
   QRect cursorRect() const;
-  QRect cursorRect(const QTextCursor &cursor) const;
+  QRect cursorRect(const QTextCursor& cursor) const;
 
  signals:
   void pathUpdated(const QString& path);
@@ -120,8 +118,10 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
 
   std::unique_ptr<TextEditViewPrivate> d_ptr;
 
+  QString toText();
+  void setText(const QString& text);
   void setViewportMargins(int left, int top, int right, int bottom);
-  void setTheme(core::Theme *theme);
+  void setTheme(core::Theme* theme);
 
   inline TextEditViewPrivate* d_func() { return d_ptr.get(); }
   inline const TextEditViewPrivate* d_func() const { return d_ptr.get(); }

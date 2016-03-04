@@ -20,6 +20,9 @@ class QtEnums : public QObject {
     KeyboardModifierMask = 0xfe000000
   };
   Q_ENUM(KeyboardModifier)
+
+  enum EventPriority { HighEventPriority = 1, NormalEventPriority = 0, LowEventPriority = -1 };
+  Q_ENUM(EventPriority)
 };
 
 }  // namespace core
