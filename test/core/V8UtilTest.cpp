@@ -1,6 +1,7 @@
 ﻿#include <libplatform/libplatform.h>
 #include <vendor/node/src/node.h>
 #include <QtTest/QtTest>
+#include <QCompleter>
 
 #include "V8Util.h"
 
@@ -63,6 +64,15 @@ class V8UtilTest : public QObject {
     V8::Dispose();
     V8::ShutdownPlatform();
     delete platform;
+  }
+
+  void isEnum() {
+    qRegisterMetaType<QCompleter::CompletionMode>("CompletionMode");
+    QCompleter completer;
+    int index = completer.metaObject()->indexOfProperty("completionMode");
+    QVERIFY(index >= 0);
+    auto var = completer.metaObject()->property(index).read(&completer);
+    QVERIFY(V8Util::isEnum(var));
   }
 };
 }  // namespace core

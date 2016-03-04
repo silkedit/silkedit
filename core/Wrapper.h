@@ -4,6 +4,7 @@
 #include <QVariant>
 
 #define WRAPPED "wrapped"
+#define INHERITS "inherits"
 #define WRAPPED_METHOD_SIGNATURE "getWrapped()"
 
 namespace core {
@@ -11,7 +12,7 @@ namespace core {
 class Wrapper : public QObject {
   Q_OBJECT
 
-public slots:
+ public slots:
   QVariant getWrapped() { return m_wrapped; }
 
  protected:

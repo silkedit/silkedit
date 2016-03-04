@@ -31,6 +31,7 @@ class BOM;
 
 class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView> {
   Q_OBJECT
+  Q_PROPERTY(QString text READ toText WRITE setText USER true)
  public:
   explicit TextEditView(QWidget* parent);
   virtual ~TextEditView();
@@ -78,8 +79,8 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void selectAll();
   void indent();
   void outdent();
-  QString text();
-  void performCompletion();
+  QString toText();
+  void setText(const QString& text);
   void insertNewLine();
   void save();
   void saveAs();
@@ -90,6 +91,8 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void setTextCursor(const QTextCursor &cursor);
   QTextCursor textCursor() const;
   core::Document* document();
+  QRect cursorRect() const;
+  QRect cursorRect(const QTextCursor &cursor) const;
 
  signals:
   void pathUpdated(const QString& path);
@@ -124,8 +127,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   inline const TextEditViewPrivate* d_func() const { return d_ptr.get(); }
 
   Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
-  Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion))
-  Q_PRIVATE_SLOT(d_func(), void insertCompletion(const QString& completion, bool singleWord))
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberAreaWidth(int newBlockCount))
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberArea(const QRect&, int))
   Q_PRIVATE_SLOT(d_func(), void highlightCurrentLine())

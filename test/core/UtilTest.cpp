@@ -1,9 +1,14 @@
 ﻿#include <QtTest/QtTest>
 #include <QStringList>
+#include <QCompleter>
+#include <QAbstractItemView>
+
 #include "Util.h"
 #include "Url.h"
 #include "QObjectUtil.h"
 #include "JSValue.h"
+#include "KeyEvent.h"
+#include "QScrollBarWrap.h"
 
 namespace core {
 
@@ -15,6 +20,13 @@ class UtilTest : public QObject {
     qRegisterMetaType<QUrl>();
     qRegisterMetaType<core::Url*>("Url*");
     qRegisterMetaType<core::Url*>("core::Url*");
+    qRegisterMetaType<QKeyEvent*>();
+    qRegisterMetaType<core::KeyEvent*>("KeyEvent*");
+    qRegisterMetaType<core::KeyEvent*>("core::KeyEvent*");
+    qRegisterMetaType<QEvent::Type>("QEvent::Type");
+    qRegisterMetaType<core::QScrollBarWrap*>("QScrollBarWrap*");
+    qRegisterMetaType<core::QScrollBarWrap*>("core::QScrollBarWrap*");
+    qRegisterMetaType<QWidget*>();
   }
 
  private slots:
@@ -72,6 +84,33 @@ class UtilTest : public QObject {
 
     // Then returns false
     QVERIFY(!result);
+  }
+
+  void wrappedTypeCheckForInheritance() {
+    // Given KeyEvent
+    // KeyEvent class has the following class info
+    // Q_CLASSINFO(INHERITS, "QEvent")
+    QObject* keyEvent = QObjectUtil::newInstanceFromJS(
+        KeyEvent::staticMetaObject,
+        QVariantList{QVariant::fromValue(QEvent::KeyPress),
+                     QVariant::fromValue(static_cast<int>(Qt::Key_0)),
+                     QVariant::fromValue(static_cast<int>(Qt::NoModifier))});
+    Q_ASSERT(keyEvent);
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(keyEvent), "QEvent*");
+
+    // Then returns true
+    QVERIFY(result);
+  }
+
+  void wrappedTypeCheckForQObject() {
+    // Given QScrollBarWrap
+    QCompleter completer;
+    std::unique_ptr<QScrollBarWrap> wrap(
+        new QScrollBarWrap(completer.popup()->verticalScrollBar()));
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(wrap.get()), "QWidget*");
+
+    // Then returns true
+    QVERIFY(result);
   }
 
   void convertArgs() {
