@@ -91,11 +91,6 @@ resolve() {
     # jsdoc
     npm install -g jsdoc@latest
 
-    # install os specific built-in packages
-    if [ ${OS} == 'Mac' ]; then
-      npm install --prefix packages --production https://github.com/silkedit/markdown_preview/tarball/0.1.3
-    fi
-
     # Source Han Code JP font
     if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
         wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Regular.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
