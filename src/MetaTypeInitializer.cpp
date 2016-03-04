@@ -73,4 +73,5 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<core::ItemSelectionModel*>("ItemSelectionModel*");
   qRegisterMetaType<core::ItemSelectionModel::SelectionFlag>("SelectionFlag");
   qRegisterMetaType<core::QtEnums::KeyboardModifier>("KeyboardModifier");
+  qRegisterMetaType<core::QtEnums::EventPriority>("EventPriority");
 }
