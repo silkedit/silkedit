@@ -24,17 +24,19 @@ class App : public QApplication {
 
   void setupTranslator(const QString& locale);
 
-public slots:
+ public slots:
   TextEditView* activeTextEditView();
   TabView* activeTabView();
   TabViewGroup* activeTabViewGroup();
   Window* activeWindow();
   void setActiveWindow(QWidget* act);
   QWidget* focusWidget();
+  QWidget* activePopupWidget();
+  void postEvent(QObject* receiver, QEvent* event, int priority = Qt::NormalEventPriority);
 
-protected:
+ protected:
   bool event(QEvent*) override;
-  bool notify(QObject * receiver, QEvent * event) override;
+  bool notify(QObject* receiver, QEvent* event) override;
 
  private:
   static App* s_app;

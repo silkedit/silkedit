@@ -230,6 +230,14 @@ QWidget* App::focusWidget() {
   return QApplication::focusWidget();
 }
 
+QWidget* App::activePopupWidget() {
+  return QApplication::activePopupWidget();
+}
+
+void App::postEvent(QObject* receiver, QEvent *event, int priority) {
+  QApplication::postEvent(receiver, event, priority);
+}
+
 void App::restart() {
   if (s_app) {
     QProcess::startDetached(QApplication::applicationFilePath());

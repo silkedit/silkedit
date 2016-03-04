@@ -23,16 +23,8 @@ class TextEditViewPrivate {
   LineNumberArea* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;
-  QStringListModel* m_model;
-  QCompleter* m_completer;
-  bool m_completedAndSelected;
 
   void clearHighlightingCurrentLine();
-  void performCompletion(const QString& completionPrefix);
-  void insertCompletion(const QString& completion);
-  void insertCompletion(const QString& completion, bool singleWord);
-  void populateModel(const QString& completionPrefix);
-  bool handledCompletedAndSelected(QKeyEvent* event);
   QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentOneLevel(QTextCursor& currentVisibleCursor);
