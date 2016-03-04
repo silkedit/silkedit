@@ -17,7 +17,6 @@ namespace core {
 
 namespace {
 
-const int MAX_ITER_COUNT = 10000;
 const QString DEFAULT_SCOPE = QStringLiteral("text.plain");
 const QString HIDE_FROM_USER_KEY = QStringLiteral("hideFromUser");
 const QString FILE_TYPES_KEY = QStringLiteral("fileTypes");
@@ -313,13 +312,12 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
 
   clearCache();
 
-  int iter = MAX_ITER_COUNT;
   QList<Node> nodes;
   int prevPos;
   const QLatin1Char lf('\n');
   const QLatin1Char cr('\r');
 
-  for (int pos = region.begin(); pos < region.end() && iter > 0; iter--) {
+  for (int pos = region.begin(); pos < region.end();) {
     // check if an another parse request comes before finishing this parse. In that case, cancel
     // this parse
     QCoreApplication::processEvents();
@@ -370,10 +368,6 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
     if (prevPos == pos) {
       pos++;
     }
-  }
-
-  if (iter == 0) {
-    throw std::runtime_error("reached maximum number of iterations");
   }
 
   qDebug("parse finished. elapsed: %d ms", t.elapsed());
@@ -648,16 +642,18 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
     if (regions && regions->size() > 0) {
       // todo: consider the case when the pattern matches more than two lines
       auto multilineMatchedRegion = (*regions)[0];
-      int newlineIndex =
-          str.midRef(multilineMatchedRegion.begin(), multilineMatchedRegion.end() - multilineMatchedRegion.begin())
-              .indexOf('\n');
-      if (0 <= newlineIndex && multilineMatchedRegion.begin() + newlineIndex < multilineMatchedRegion.end() - 1) {
-//        qDebug() << "Regex matches multi line";
+      int newlineIndex = str.midRef(multilineMatchedRegion.begin(),
+                                    multilineMatchedRegion.end() - multilineMatchedRegion.begin())
+                             .indexOf('\n');
+      if (0 <= newlineIndex &&
+          multilineMatchedRegion.begin() + newlineIndex < multilineMatchedRegion.end() - 1) {
+        //        qDebug() << "Regex matches multi line";
         // Regex matches multi line. Force to match it against single line.
         int newlinePos = multilineMatchedRegion.begin() + newlineIndex;
 
         // find within [multilineMatchedRegion.begin(), newlinePos]
-        for (int beginPosInLine = multilineMatchedRegion.begin(); beginPosInLine < newlinePos; beginPosInLine++) {
+        for (int beginPosInLine = multilineMatchedRegion.begin(); beginPosInLine < newlinePos;
+             beginPosInLine++) {
           cachedPatterns[i]->clearCache();
           pair = cachedPatterns[i]->find(str, beginPosInLine, newlinePos + 1);
           pattern = pair.first;
@@ -667,9 +663,11 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::searchInPatterns(
           }
         }
 
-        // If it's not found in previous line, find in next line [newlinePos + 1, multilineMatchedRegion.end())
+        // If it's not found in previous line, find in next line [newlinePos + 1,
+        // multilineMatchedRegion.end())
         if (!regions) {
-          for (int beginPosInLine = newlinePos + 1; beginPosInLine < multilineMatchedRegion.end(); beginPosInLine++) {
+          for (int beginPosInLine = newlinePos + 1; beginPosInLine < multilineMatchedRegion.end();
+               beginPosInLine++) {
             cachedPatterns[i]->clearCache();
             pair = cachedPatterns[i]->find(str, beginPosInLine, multilineMatchedRegion.end());
             pattern = pair.first;
