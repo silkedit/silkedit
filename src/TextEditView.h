@@ -67,6 +67,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
                            core::Document::FindFlags flags = 0,
                            bool preserveCase = false);
   void clearSelection();
+  void save(bool beforeClose);
 
  public slots:
   QString scopeName();

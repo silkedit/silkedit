@@ -55,7 +55,7 @@ DocumentManager::DocumentManager() : m_watcher(new QFileSystemWatcher(this)) {
   });
 }
 
-bool DocumentManager::save(Document* doc) {
+bool DocumentManager::save(Document* doc, bool beforeClose) {
   if (!doc) {
     qWarning("doc is null");
     return false;
@@ -66,7 +66,7 @@ bool DocumentManager::save(Document* doc) {
   }
 
   if (doc->path().isEmpty()) {
-    QString newFilePath = saveAs(doc);
+    QString newFilePath = saveAs(doc, beforeClose);
     return !newFilePath.isEmpty();
   }
 
@@ -87,10 +87,14 @@ bool DocumentManager::save(Document* doc) {
       }
     }
 
-    // calling addPath immediately still fires fileChanged signal on Windows.
-    QTimer::singleShot(0, this, [=] {
-      m_watcher->addPath(doc->path());
-    });
+    if (!beforeClose) {
+      // calling addPath immediately still fires fileChanged signal on Windows.
+      QTimer::singleShot(0, this, [=] {
+        if (doc) {
+          m_watcher->addPath(doc->path());
+        }
+      });
+    }
 
     return true;
   }
@@ -98,12 +102,12 @@ bool DocumentManager::save(Document* doc) {
   return false;
 }
 
-QString DocumentManager::saveAs(Document* doc) {
+QString DocumentManager::saveAs(Document* doc, bool beforeClose) {
   QString filePath =
       QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path(), QString());
   if (!filePath.isEmpty()) {
     doc->setPath(filePath);
-    save(doc);
+    save(doc, beforeClose);
   }
 
   return filePath;
