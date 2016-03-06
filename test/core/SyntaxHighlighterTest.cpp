@@ -315,7 +315,7 @@ StatusBar QComboBox::down-arrow {
     TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
   }
 
-  void cppPasteTest() {
+  void pasteTest() {
     const QVector<QString> files(
         {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
 
@@ -374,6 +374,139 @@ StatusBar QComboBox::down-arrow {
       62-63: "punctuation.definition.string.end.c" - Data: """
 )r").trimmed();
     TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+  }
+
+  void replaceAllTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+    QString text = QString(R"(
+#pragma once
+#include <QDebug>
+
+#include "App.h"
+)").trimmed();
+    QTextDocument doc(text);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.c++", doc.toPlainText()));
+    SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    QFile output("testdata/highlighter_test/cppHighlightTestInput.res");
+    QString result = QString(R"(
+0-48: "source.c++"
+  0-12: "meta.preprocessor.c"
+    1-7: "keyword.control.import.c" - Data: "pragma"
+  13-30: "meta.preprocessor.c.include"
+    14-21: "keyword.control.import.include.c" - Data: "include"
+    22-30: "string.quoted.other.lt-gt.include.c"
+      22-23: "punctuation.definition.string.begin.c" - Data: "<"
+      29-30: "punctuation.definition.string.end.c" - Data: ">"
+  32-48: "meta.preprocessor.c.include"
+    33-40: "keyword.control.import.include.c" - Data: "include"
+    41-48: "string.quoted.double.include.c"
+      41-42: "punctuation.definition.string.begin.c" - Data: """
+      47-48: "punctuation.definition.string.end.c" - Data: """
+)").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+
+    QTextCursor cursor(&doc);
+    cursor.beginEditBlock();
+
+    // replace first #include with hoge
+    cursor.setPosition(13, QTextCursor::MoveAnchor);
+    cursor.setPosition(21, QTextCursor::KeepAnchor);
+    cursor.insertText("hoge");
+
+    // replace second #include with hoge
+    cursor.setPosition(28, QTextCursor::MoveAnchor);
+    cursor.setPosition(36, QTextCursor::KeepAnchor);
+    cursor.insertText("hoge");
+    cursor.endEditBlock();
+
+    highlighter.updateNode(13, 27, 19);
+    QVERIFY(spy.wait());
+
+    result = QString(R"r(
+0-40: "source.c++"
+  0-12: "meta.preprocessor.c"
+    1-7: "keyword.control.import.c" - Data: "pragma"
+  33-40: "string.quoted.double.c"
+    33-34: "punctuation.definition.string.begin.c" - Data: """
+    39-40: "punctuation.definition.string.end.c" - Data: """
+)r").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+  }
+
+  void undoReplaceAllTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+    QString text = QString(R"(
+#pragma once
+#include <QDebug>
+
+#include "App.h"
+)").trimmed();
+    QTextDocument doc(text);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.c++", doc.toPlainText()));
+    SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    QFile output("testdata/highlighter_test/cppHighlightTestInput.res");
+    QString resultBeforeReplace = QString(R"(
+0-48: "source.c++"
+  0-12: "meta.preprocessor.c"
+    1-7: "keyword.control.import.c" - Data: "pragma"
+  13-30: "meta.preprocessor.c.include"
+    14-21: "keyword.control.import.include.c" - Data: "include"
+    22-30: "string.quoted.other.lt-gt.include.c"
+      22-23: "punctuation.definition.string.begin.c" - Data: "<"
+      29-30: "punctuation.definition.string.end.c" - Data: ">"
+  32-48: "meta.preprocessor.c.include"
+    33-40: "keyword.control.import.include.c" - Data: "include"
+    41-48: "string.quoted.double.include.c"
+      41-42: "punctuation.definition.string.begin.c" - Data: """
+      47-48: "punctuation.definition.string.end.c" - Data: """
+)").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultBeforeReplace);
+
+    QTextCursor cursor(&doc);
+    cursor.beginEditBlock();
+
+    // replace first #include with hoge
+    cursor.setPosition(13, QTextCursor::MoveAnchor);
+    cursor.setPosition(21, QTextCursor::KeepAnchor);
+    cursor.insertText("hoge");
+
+    // replace second #include with hoge
+    cursor.setPosition(28, QTextCursor::MoveAnchor);
+    cursor.setPosition(36, QTextCursor::KeepAnchor);
+    cursor.insertText("hoge");
+    cursor.endEditBlock();
+
+    highlighter.updateNode(13, 27, 19);
+    QVERIFY(spy.wait());
+
+    QString resultAfterReplace = QString(R"r(
+0-40: "source.c++"
+  0-12: "meta.preprocessor.c"
+    1-7: "keyword.control.import.c" - Data: "pragma"
+  33-40: "string.quoted.double.c"
+    33-34: "punctuation.definition.string.begin.c" - Data: """
+    39-40: "punctuation.definition.string.end.c" - Data: """
+)r").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultAfterReplace);
+
+    // When
+    doc.undo();
+    highlighter.updateNode(13, 19, 27);
+    QVERIFY(spy.wait());
+
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultBeforeReplace);
   }
 };
 
