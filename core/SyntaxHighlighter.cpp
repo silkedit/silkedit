@@ -156,10 +156,10 @@ void SyntaxHighlighter::fullParseFinished(RootNode node) {
 void SyntaxHighlighter::partialParseFinished(QList<Node> newNodes, Region region) {
   Region affectedRegion(region);
   if (newNodes.size() > 0) {
-    // Extend affectedRegion based on newNodes
+    // Extend affectedRegion by considering newNodes
     qDebug() << "affectedRegion:" << affectedRegion;
-    affectedRegion.setBegin(newNodes[0].region.begin());
-    affectedRegion.setEnd(newNodes[newNodes.size() - 1].region.end());
+    affectedRegion.setBegin(qMin(affectedRegion.begin(), newNodes[0].region.begin()));
+    affectedRegion.setEnd(qMax(affectedRegion.end(), newNodes[newNodes.size() - 1].region.end()));
   }
 
   m_rootNode->removeChildren(affectedRegion);

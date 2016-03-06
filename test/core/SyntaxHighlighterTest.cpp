@@ -264,7 +264,7 @@ StatusBar QComboBox::down-arrow {
     Theme* monokai = Theme::loadTheme("testdata/Monokai.tmTheme");
     QVERIFY(monokai);
     Config::singleton().setTheme(monokai, true);
-    qDebug().noquote() << highlighter.asHtml();
+//    qDebug().noquote() << highlighter.asHtml();
 
     QFile output("testdata/highlighter_test/changeThemeTestResult.html");
     QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -311,6 +311,67 @@ StatusBar QComboBox::down-arrow {
       25-26: "punctuation.definition.string.begin.c" - Data: """
       29-30: "punctuation.definition.string.end.c" - Data: """
 
+)r").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+  }
+
+  void cppPasteTest() {
+    const QVector<QString> files(
+        {"testdata/grammers/C.tmLanguage", "testdata/grammers/C++.tmLanguage"});
+
+    foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
+    QString text = QString(R"(
+#include <QWidget>
+#include <QApplication>
+#include "core/macros.h"
+)").trimmed();
+    QTextDocument doc(text);
+    std::unique_ptr<LanguageParser> parser(LanguageParser::create("source.c++", doc.toPlainText()));
+    SyntaxHighlighter highlighter(&doc, std::move(parser), theme, font);
+    QSignalSpy spy(&highlighter, &SyntaxHighlighter::parseFinished);
+    QVERIFY(spy.wait());
+
+    QFile output("testdata/highlighter_test/cppHighlightTestInput.res");
+    QString result = QString(R"(
+0-67: "source.c++"
+  0-18: "meta.preprocessor.c.include"
+    1-8: "keyword.control.import.include.c" - Data: "include"
+    9-18: "string.quoted.other.lt-gt.include.c"
+      9-10: "punctuation.definition.string.begin.c" - Data: "<"
+      17-18: "punctuation.definition.string.end.c" - Data: ">"
+  19-42: "meta.preprocessor.c.include"
+    20-27: "keyword.control.import.include.c" - Data: "include"
+    28-42: "string.quoted.other.lt-gt.include.c"
+      28-29: "punctuation.definition.string.begin.c" - Data: "<"
+      41-42: "punctuation.definition.string.end.c" - Data: ">"
+  43-67: "meta.preprocessor.c.include"
+    44-51: "keyword.control.import.include.c" - Data: "include"
+    52-67: "string.quoted.double.include.c"
+      52-53: "punctuation.definition.string.begin.c" - Data: """
+      66-67: "punctuation.definition.string.end.c" - Data: """
+)").trimmed();
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
+
+    QTextCursor cursor(&doc);
+    cursor.setPosition(19, QTextCursor::MoveAnchor);
+    cursor.setPosition(27, QTextCursor::KeepAnchor);
+    // replace second #include with hoge
+    cursor.insertText("hoge");
+    highlighter.updateNode(19, 8, 4);
+    QVERIFY(spy.wait());
+
+    result = QString(R"r(
+0-63: "source.c++"
+  0-18: "meta.preprocessor.c.include"
+    1-8: "keyword.control.import.include.c" - Data: "include"
+    9-18: "string.quoted.other.lt-gt.include.c"
+      9-10: "punctuation.definition.string.begin.c" - Data: "<"
+      17-18: "punctuation.definition.string.end.c" - Data: ">"
+  39-63: "meta.preprocessor.c.include"
+    40-47: "keyword.control.import.include.c" - Data: "include"
+    48-63: "string.quoted.double.include.c"
+      48-49: "punctuation.definition.string.begin.c" - Data: """
+      62-63: "punctuation.definition.string.end.c" - Data: """
 )r").trimmed();
     TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), result);
   }
