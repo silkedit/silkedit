@@ -346,102 +346,112 @@ has been removed on disk. Do you want to close its tab?</source>
         <translation>ファイル</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="37"/>
+        <location filename="../src/MenuBar.cpp" line="36"/>
+        <source>&amp;Exit</source>
+        <translation>終了(&amp;E)</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="36"/>
+        <source>Exit</source>
+        <translation>終了</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="43"/>
         <source>&amp;Text</source>
         <translation>編集(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="37"/>
+        <location filename="../src/MenuBar.cpp" line="43"/>
         <source>Text</source>
         <translation>編集</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="43"/>
+        <location filename="../src/MenuBar.cpp" line="49"/>
         <source>&amp;Undo</source>
         <translation>元に戻す(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="43"/>
+        <location filename="../src/MenuBar.cpp" line="49"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="47"/>
+        <location filename="../src/MenuBar.cpp" line="53"/>
         <source>&amp;View</source>
         <translation>表示(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="47"/>
+        <location filename="../src/MenuBar.cpp" line="53"/>
         <source>View</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="51"/>
+        <location filename="../src/MenuBar.cpp" line="57"/>
         <source>&amp;Theme</source>
         <translation>テーマ(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="51"/>
+        <location filename="../src/MenuBar.cpp" line="57"/>
         <source>Theme</source>
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="66"/>
+        <location filename="../src/MenuBar.cpp" line="72"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="66"/>
+        <location filename="../src/MenuBar.cpp" line="72"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="70"/>
+        <location filename="../src/MenuBar.cpp" line="76"/>
         <source>Package Development</source>
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="73"/>
+        <location filename="../src/MenuBar.cpp" line="79"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="78"/>
+        <location filename="../src/MenuBar.cpp" line="84"/>
         <source>&amp;Settings</source>
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="78"/>
+        <location filename="../src/MenuBar.cpp" line="84"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="97"/>
+        <location filename="../src/MenuBar.cpp" line="103"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="97"/>
+        <location filename="../src/MenuBar.cpp" line="103"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="101"/>
+        <location filename="../src/MenuBar.cpp" line="107"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="101"/>
+        <location filename="../src/MenuBar.cpp" line="107"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="115"/>
+        <location filename="../src/MenuBar.cpp" line="121"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="117"/>
+        <location filename="../src/MenuBar.cpp" line="123"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>
@@ -510,7 +520,7 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../src/DocumentManager.cpp" line="103"/>
+        <location filename="../src/DocumentManager.cpp" line="107"/>
         <source>Save As</source>
         <translation>名前を付けて保存</translation>
     </message>
@@ -789,12 +799,12 @@ Convert: convert current text in %1</source>
 <context>
     <name>TabView</name>
     <message>
-        <location filename="../src/TabView.cpp" line="301"/>
+        <location filename="../src/TabView.cpp" line="303"/>
         <source>Do you want to save the changes made to the document %1?</source>
         <translation>%1は変更されています。保存しますか？</translation>
     </message>
     <message>
-        <location filename="../src/TabView.cpp" line="303"/>
+        <location filename="../src/TabView.cpp" line="305"/>
         <source>Your changes will be lost if you don’t save them.</source>
         <translation>保存しないと変更した内容は破棄されます。</translation>
     </message>
