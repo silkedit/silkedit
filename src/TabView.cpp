@@ -110,13 +110,15 @@ int TabView::open(const QString& path) {
 
   TextEditView* view = new TextEditView(this);
   view->setDocument(newDoc);
-  auto result = addTab(view, getFileNameFrom(path));
+  auto newIndex = addTab(view, getFileNameFrom(path));
+
+  setTabToolTip(newIndex, path);
 
   // restore modification state for an existing modified document
   if (newDoc->isModified()) {
     emit view->modificationChanged(true);
   }
-  return result;
+  return newIndex;
 }
 
 QList<QWidget*> TabView::widgets() const {
