@@ -65,14 +65,40 @@ QString SyntaxHighlighter::scopeTree() {
   return m_rootNode ? m_rootNode->toString(document()->toPlainText()) : "";
 }
 
-void SyntaxHighlighter::adjust(int pos, int delta) {
-  qDebug() << "adjust(pos:" << pos << ", delta:" << delta << ")";
-  if (m_rootNode) {
-    m_rootNode->adjust(pos, delta);
+void SyntaxHighlighter::highlight(const Region& region) {
+  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
+                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser),
+                            Q_ARG(QList<Node>, m_rootNode->children), Q_ARG(Region, region));
+}
+
+void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
+  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
+         charsAdded);
+
+  if (!document()) {
+    qWarning() << "document is null";
+    return;
   }
 
-  //   We need to extend affectedRegion to the region from the beginning of the line at beginPos to
-  //   the end of the line at endPos to support look ahead and behind regex.
+  // position is the position after removal happeened, so we need +charsRemoved
+  //
+  // NOTE: When pasting a text in an empty document, charsRemoved becomes 1 and charsAdded is the
+  // actual charsAdded + 1 because of this bug.
+  // We need to decrement them by 1.
+  // https://bugreports.qt.io/browse/QTBUG-3495
+  if (m_rootNode && m_rootNode->region.isEmpty() && charsRemoved == 1) {
+    charsRemoved--;
+    charsAdded--;
+  }
+
+  int delta = charsAdded - charsRemoved;
+
+  if (m_rootNode) {
+    m_rootNode->adjust(position + charsRemoved, delta);
+  }
+
+  //   We need to extend affectedRegion to the region from the beginning of the line at beginPos
+  //   to the end of the line at endPos to support look ahead and behind regex.
   //   e.g.
 
   //   text:
@@ -94,23 +120,20 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
   //   In this case, [0-32) is not updated without expansion because [0-32) doesn't intersect
   //   [32-33).
   //   But we need to update [0-32) because its end pattern has /(?=/ and end pattern should match
-  //   with
-  //   '/' at pos 36
+  //   with '/' at pos 36
 
   int beginPos, endPos;
-  if (delta > 0) {
-    beginPos = pos;
-    endPos = pos + delta;
 
+  beginPos = position;
+  endPos = position + qMax(charsRemoved, charsAdded);
+
+  if (delta > 0) {
     // When a text is added, we need to get begin and end pos based on the current document.
     m_parser->setText(document()->toPlainText());
     beginPos = m_parser->beginOfLine(beginPos);
     endPos = m_parser->endOfLine(endPos);
 
   } else {
-    beginPos = pos + delta;
-    endPos = pos;
-
     // When a text is removed, we need to get begin and end pos based on the text before removal
     beginPos = m_parser->beginOfLine(beginPos);
     endPos = m_parser->endOfLine(endPos);
@@ -122,28 +145,7 @@ void SyntaxHighlighter::adjust(int pos, int delta) {
     return;
   }
 
-  QMetaObject::invokeMethod(&SyntaxHighlighterThread::singleton(), "parse", Qt::QueuedConnection,
-                            Q_ARG(SyntaxHighlighter*, this), Q_ARG(LanguageParser, *m_parser),
-                            Q_ARG(QList<Node>, m_rootNode->children),
-                            Q_ARG(Region, Region(beginPos, endPos)));
-}
-
-void SyntaxHighlighter::updateNode(int position, int charsRemoved, int charsAdded) {
-  qDebug("contentsChange(pos: %d, charsRemoved: %d, charsAdded: %d)", position, charsRemoved,
-         charsAdded);
-  if (document()) {
-    // position is the position after removal happeened, so we need +charsRemoved
-    //
-    // NOTE: When pasting a text in an empty document, charsRemoved becomes 1 and charsAdded is the
-    // actual charsAdded + 1 because of this bug.
-    // We need to decrement them by 1.
-    // https://bugreports.qt.io/browse/QTBUG-3495
-    if (m_rootNode && m_rootNode->region.isEmpty() && charsRemoved == 1) {
-      charsRemoved--;
-      charsAdded--;
-    }
-    adjust(position + charsRemoved, charsAdded - charsRemoved);
-  }
+  highlight(Region(beginPos, endPos));
 }
 
 void SyntaxHighlighter::fullParseFinished(RootNode node) {

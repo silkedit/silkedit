@@ -62,16 +62,11 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   QString scopeTree();
 
-  /**
-   * @brief adjust
-   * @param pos position before modification happened
-   * @param delta
-   */
-  void adjust(int pos, int delta);
-
   QString asHtml();
 
- signals:
+  void highlight(const Region &region);
+
+signals:
   void parseFinished();
 
  public slots:

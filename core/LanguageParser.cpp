@@ -304,7 +304,8 @@ std::tuple<QList<Node>, Region> LanguageParser::parse(const QString& text,
     endChildIndex = std::get<1>(*indices);
 
     // expand region to cover affected children
-    region = Region(children[beginChildIndex].region.begin(), children[endChildIndex].region.end());
+    region = Region(qMin(region.begin(), children[beginChildIndex].region.begin()),
+                    qMax(region.end(), children[endChildIndex].region.end()));
   }
 
   QTime t;
