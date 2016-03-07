@@ -9,7 +9,7 @@ CMakeLists.txt.user
 /build/
 /include/
 /jsdoc_out/
-/jslib/node_modules/silkedit/node_modules/
+/jslib/node_modules/silkedit/node_modules/*
 !/jslib/node_modules/silkedit/node_modules/default
 /lib/
 /libnode/
