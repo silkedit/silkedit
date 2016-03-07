@@ -377,81 +377,96 @@ has been removed on disk. Do you want to close its tab?</source>
     </message>
     <message>
         <location filename="../src/MenuBar.cpp" line="53"/>
+        <source>F&amp;ind</source>
+        <translation>検索(&amp;I)</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="53"/>
+        <source>Find</source>
+        <translation>検索</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="57"/>
+        <source>Find/Replace</source>
+        <translation>検索/置換</translation>
+    </message>
+    <message>
+        <location filename="../src/MenuBar.cpp" line="61"/>
         <source>&amp;View</source>
         <translation>表示(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="53"/>
+        <location filename="../src/MenuBar.cpp" line="61"/>
         <source>View</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="57"/>
+        <location filename="../src/MenuBar.cpp" line="65"/>
         <source>&amp;Theme</source>
         <translation>テーマ(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="57"/>
+        <location filename="../src/MenuBar.cpp" line="65"/>
         <source>Theme</source>
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="72"/>
+        <location filename="../src/MenuBar.cpp" line="80"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="72"/>
+        <location filename="../src/MenuBar.cpp" line="80"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="76"/>
+        <location filename="../src/MenuBar.cpp" line="84"/>
         <source>Package Development</source>
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="79"/>
+        <location filename="../src/MenuBar.cpp" line="87"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="84"/>
+        <location filename="../src/MenuBar.cpp" line="92"/>
         <source>&amp;Settings</source>
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="84"/>
+        <location filename="../src/MenuBar.cpp" line="92"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="103"/>
+        <location filename="../src/MenuBar.cpp" line="111"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="103"/>
+        <location filename="../src/MenuBar.cpp" line="111"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="107"/>
+        <location filename="../src/MenuBar.cpp" line="115"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="107"/>
+        <location filename="../src/MenuBar.cpp" line="115"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="121"/>
+        <location filename="../src/MenuBar.cpp" line="129"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../src/MenuBar.cpp" line="123"/>
+        <location filename="../src/MenuBar.cpp" line="131"/>
         <source>build</source>
         <translation>ビルド</translation>
     </message>

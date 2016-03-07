@@ -17,10 +17,10 @@ class AndConditionExpression {
   QString toString();
 
   /**
-   * @brief check if condition is static (e.g., os == mac)
+   * @brief check if conditions has any static condition (e.g., os == mac)
    * @return
    */
-  bool isStatic() const;
+  bool hasStatic() const;
   int size();
   bool operator==(const AndConditionExpression& other) const;
 

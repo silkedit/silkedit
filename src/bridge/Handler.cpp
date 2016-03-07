@@ -29,6 +29,7 @@
 #include "WebView.h"
 #endif
 #include "Console.h"
+#include "FindReplaceView.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -248,6 +249,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<DialogButtonBox>(exports);
   registerClass<Event>(exports);
   registerClass<FileDialog>(exports);
+  registerClass<FindReplaceView>(exports);
   registerClass<Label>(exports);
   registerClass<LineEdit>(exports);
   registerClass<view::MessageBox>(exports);
