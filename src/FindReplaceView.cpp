@@ -60,7 +60,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   ui->lineEditForReplace->setCompleter(replaceCompleter);
 
   connect(ui->lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
-  connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrev);
+  connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrevious);
   connect(ui->lineEditForFind, &LineEdit::textChanged, this, [=](const QString&) {
     highlightMatches();
     selectFirstMatch();
@@ -71,7 +71,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   });
   connect(ui->replaceButton, &QPushButton::pressed, this, &FindReplaceView::replace);
   connect(ui->replaceAllButton, &QPushButton::pressed, this, &FindReplaceView::replaceAll);
-  connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrev);
+  connect(ui->prevButton, &QPushButton::pressed, this, &FindReplaceView::findPrevious);
   connect(ui->nextButton, &QPushButton::pressed, this, &FindReplaceView::findNext);
   connect(ui->regexChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
   connect(ui->matchCaseChk, &CheckBox::stateChanged, this, &FindReplaceView::highlightMatches);
@@ -195,7 +195,7 @@ void FindReplaceView::findNext() {
   }
 }
 
-void FindReplaceView::findPrev() {
+void FindReplaceView::findPrevious() {
   Q_ASSERT(ui->lineEditForFind);
 
   Document::FindFlags flags = getFindFlags();

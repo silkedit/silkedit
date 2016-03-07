@@ -49,6 +49,14 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   const QString& undoMenuStr = Config::singleton().enableMnemonic() ? tr("&Undo") : tr("Undo");
   editMenu->addAction(new CommandAction("undo", undoMenuStr, "undo"));
 
+  // Find Menu
+  const QString& findMenuStr = Config::singleton().enableMnemonic() ? tr("F&ind") : tr("Find");
+  auto findMenu = new PackageMenu(findMenuStr);
+  addMenu(findMenu);
+  findMenu->setObjectName("find");
+  const QString& findAndReplaceStr = tr("Find/Replace");
+  findMenu->addAction(new CommandAction("find_and_replace", findAndReplaceStr, "find_and_replace"));
+
   // View menu
   const QString& viewMenuStr = Config::singleton().enableMnemonic() ? tr("&View") : tr("View");
   auto viewMenu = new PackageMenu(viewMenuStr);

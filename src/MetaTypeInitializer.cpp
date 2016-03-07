@@ -8,6 +8,7 @@
 #include "StatusBar.h"
 #include "Console.h"
 #include "TextEditView.h"
+#include "FindReplaceView.h"
 #include "core/Condition.h"
 #include "core/FunctionInfo.h"
 #include "core/Url.h"
@@ -44,6 +45,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QItemSelectionModel*>();
   qRegisterMetaType<QEvent*>();
   qRegisterMetaType<QEvent::Type>("QEvent::Type");
+  qRegisterMetaType<FindReplaceView*>();
   qRegisterMetaType<core::Condition::Operator>();
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Url*>("core::Url*");

@@ -74,7 +74,7 @@ class Window : public QMainWindow {
  public slots:
   StatusBar* statusBar();
   Console* console() { return m_console; }
-  void openFindAndReplacePanel();
+  FindReplaceView* findReplaceView() { return m_findReplaceView; }
 
  signals:
   void activeViewChanged(QWidget* oldView, QWidget* newView);
