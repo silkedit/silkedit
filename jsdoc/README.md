@@ -207,7 +207,7 @@ menu:
 
 上記のhelloメニューはMacでのみファイルメニューの中の保存メニューの上に表示されます。クリックすると"hello.hello"コマンドが実行されます。
 
-```checkable: true```を指定した場合、コマンド引数の'checked'というプロパティでチェック状態を取得することができます。
+```checkable: true```を指定した場合、コマンド引数の'menu_checked'というプロパティでチェック状態を取得することができます。
 
 ```
 - label: Show Tabs and Spaces
@@ -218,7 +218,7 @@ menu:
 
 ```
 "toggle_show_tabs_and_spaces": (args) => {
-  const checked = 'checked' in args ? args['checked'] : false;
+  const checked = 'menu_checked' in args ? args['menu_checked'] : false;
   silkedit.Config.set('show_tabs_and_spaces', checked);
 }
 ```
