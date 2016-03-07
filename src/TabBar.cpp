@@ -1,12 +1,14 @@
 ﻿#include <QDebug>
 #include <QMouseEvent>
 #include <QApplication>
+#include <QMenu>
 
 #include "TabBar.h"
 #include "TabView.h"
 #include "FakeWindow.h"
 #include "Window.h"
 #include "App.h"
+#include "CommandAction.h"
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Util.h"
@@ -45,8 +47,8 @@ void TabBar::setTheme(const Theme* theme) {
                 "background-color: %1;"
                 "color: %2;"
                 "}")
-        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("background")))
-        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")));
+                .arg(Util::qcolorForStyleSheet(tabBarSettings->value("background")))
+                .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")));
 
     style += QString(
                  "TabBar::tab:selected {"
@@ -55,9 +57,9 @@ void TabBar::setTheme(const Theme* theme) {
                  "border-left: 2px solid;"
                  "border-color: %3;"
                  "}")
-        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selected")))
-        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")))
-        .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selectedBorder")));
+                 .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selected")))
+                 .arg(Util::qcolorForStyleSheet(tabBarSettings->value("foreground")))
+                 .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selectedBorder")));
 
     this->setStyleSheet(style);
   }
@@ -205,6 +207,25 @@ void TabBar::tabInserted(int index) {
 
 void TabBar::tabRemoved(int) {
   showCloseButtonOnActiveTab(mapFromGlobal(QCursor::pos()));
+}
+
+void TabBar::contextMenuEvent(QContextMenuEvent* event) {
+  auto index = tabAt(event->pos());
+
+  // context menu on tab bar
+  if (index == -1) {
+    return;
+  }
+
+  // context menu on an each tab
+  QMenu menu;
+  menu.addAction(new CommandAction("close_tab", tr("Close"), "close_tab",
+                                   &menu, CommandArgument{{"index", QVariant(index)}}));
+  menu.addAction(new CommandAction("close_other_tabs", tr("Close Other Tabs"), "close_other_tabs",
+                                   &menu, CommandArgument{{"index", QVariant(index)}}));
+  menu.addAction(new CommandAction("close_tabs_to_the_right", tr("Close Tabs to the Right"), "close_tabs_to_the_right",
+                                   &menu, CommandArgument{{"index", QVariant(index)}}));
+  menu.exec(event->globalPos());
 }
 
 void TabBar::finishDrag() {

@@ -217,7 +217,7 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
         if (commandNode.IsDefined()) {
           command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         }
-        action = new CommandAction(id, title, command, nullptr, condition, pkgName);
+        action = new CommandAction(id, title, command, nullptr, CommandArgument(), condition, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
@@ -359,7 +359,7 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
           QString iconPath =
               getAbsolutePath(ymlPath, QString::fromUtf8(iconNode.as<std::string>().c_str()));
           if (QFileInfo::exists(iconPath)) {
-            action = new CommandAction(id, command, QIcon(iconPath), nullptr, condition, pkgName);
+            action = new CommandAction(id, command, QIcon(iconPath), nullptr, CommandArgument(), condition, pkgName);
           } else {
             qWarning() << iconPath << "doesn't exist";
           }
@@ -376,7 +376,7 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
               qWarning() << iconPath << "doesn't exist";
             }
           }
-          action = new CommandAction(id, command, icons, nullptr, condition, pkgName);
+          action = new CommandAction(id, command, icons, nullptr, CommandArgument(), condition, pkgName);
         }
         if (action && tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());

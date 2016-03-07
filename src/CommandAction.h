@@ -4,6 +4,7 @@
 
 #include "core/macros.h"
 #include "core/PackageAction.h"
+#include "core/CommandArgument.h"
 
 namespace core {
 class Theme;
@@ -16,6 +17,7 @@ class CommandAction : public core::PackageAction {
                 const QString& text,
                 const QString& cmdName,
                 QObject* parent = nullptr,
+                const CommandArgument& args = CommandArgument(),
                 boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
 
@@ -23,6 +25,7 @@ class CommandAction : public core::PackageAction {
                 const QString& cmdName,
                 const QIcon& icon,
                 QObject* parent = nullptr,
+                const CommandArgument& args = CommandArgument(),
                 boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
 
@@ -30,6 +33,7 @@ class CommandAction : public core::PackageAction {
                 const QString& cmdName,
                 const QMap<QString, QString>& icons,
                 QObject* parent = nullptr,
+                const CommandArgument& args = CommandArgument(),
                 boost::optional<core::AndConditionExpression> cond = boost::none,
                 const QString& pkgName = "");
 
@@ -41,6 +45,7 @@ class CommandAction : public core::PackageAction {
  private:
   QMap<QString, QString> m_icons;
   QString m_cmdName;
+  CommandArgument m_args;
 
   void init(const QString& id);
   void updateShortcut();

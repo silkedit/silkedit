@@ -121,6 +121,11 @@ int TabView::open(const QString& path) {
   return newIndex;
 }
 
+bool TabView::closeTab(int index)
+{
+  return closeTab(widget(index));
+}
+
 QList<QWidget*> TabView::widgets() const {
   QList<QWidget*> widgets;
   for (int i = 0; i < count(); i++) {
@@ -137,7 +142,7 @@ QList<QWidget*> TabView::widgets() const {
   return widgets;
 }
 
-void TabView::addNew() {
+void TabView::addNewTab() {
   TextEditView* view = new TextEditView(this);
   std::shared_ptr<Document> newDoc(Document::createBlank());
   view->setDocument(std::move(newDoc));
@@ -146,10 +151,6 @@ void TabView::addNew() {
 
 QWidget* TabView::widget(int index) const {
   return QTabWidget::widget(index);
-}
-
-bool TabView::closeActiveTab() {
-  return closeTab(currentWidget());
 }
 
 bool TabView::closeAllTabs() {
@@ -167,23 +168,6 @@ bool TabView::closeAllTabs() {
       if (!isSuccess)
         return false;
     }
-  }
-
-  return true;
-}
-
-bool TabView::closeOtherTabs() {
-  std::list<QWidget*> widgets;
-  for (int i = 0; i < count(); i++) {
-    if (i != currentIndex()) {
-      widgets.push_back(widget(i));
-    }
-  }
-
-  for (auto w : widgets) {
-    bool isSuccess = closeTab(w);
-    if (!isSuccess)
-      return false;
   }
 
   return true;
@@ -296,8 +280,8 @@ void TabView::removeTabAndWidget(int index) {
   removeTab(index);
 }
 
-bool TabView::closeTab(QWidget* w) {
-  TextEditView* editView = qobject_cast<TextEditView*>(w);
+bool TabView::closeTab(QWidget* widget) {
+  TextEditView* editView = qobject_cast<TextEditView*>(widget);
   if (editView && editView->document()->isModified()) {
     QMessageBox msgBox;
     msgBox.setText(tr("Do you want to save the changes made to the document %1?")
@@ -321,7 +305,7 @@ bool TabView::closeTab(QWidget* w) {
         return false;
     }
   }
-  removeTabAndWidget(indexOf(w));
+  removeTabAndWidget(indexOf(widget));
 
   // Focus to the current widget after closing a tab
   if (QWidget* w = currentWidget()) {
@@ -439,7 +423,7 @@ bool TabView::createWithSavedTabs() {
     const QVariant& value = tabViewHistoryTable.value(PATH_KEY);
     // if value is empty,creat new window.
     if (value.toString().isEmpty()) {
-      addNew();
+      addNewTab();
     }
     // if value convert to QString, open file.
     if (value.canConvert<QString>()) {

@@ -28,7 +28,9 @@ void CommandAction::init(const QString& id) {
     // empty command is allowed
     // e.g. checkable but empty command action
     if (!m_cmdName.isEmpty()) {
-      CommandArgument args({{"checked", QVariant(checked)}});
+      CommandArgument args({{"menu_checked", QVariant(checked)}});
+      // Copy command arguments
+      args.insert(m_args.begin(), m_args.end());
       CommandManager::singleton().runCommand(m_cmdName, args);
     }
   });
@@ -44,20 +46,20 @@ void CommandAction::init(const QString& id) {
 CommandAction::CommandAction(const QString& id,
                              const QString& text,
                              const QString& cmdName,
-                             QObject* parent,
+                             QObject* parent, const CommandArgument &args,
                              boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(text, pkgName, parent, cond), m_cmdName(cmdName) {
+    : PackageAction(text, pkgName, parent, cond), m_cmdName(cmdName), m_args(args) {
   init(id);
 }
 
 CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QIcon& icon,
-                             QObject* parent,
+                             QObject* parent, const CommandArgument &args,
                              boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(icon, id, pkgName, parent, cond), m_cmdName(cmdName) {
+    : PackageAction(icon, id, pkgName, parent, cond), m_cmdName(cmdName), m_args(args) {
   init(id);
 }
 
@@ -76,10 +78,10 @@ void CommandAction::updateVisibilityAndShortcut() {
 CommandAction::CommandAction(const QString& id,
                              const QString& cmdName,
                              const QMap<QString, QString>& icons,
-                             QObject* parent,
+                             QObject* parent, const CommandArgument &args,
                              boost::optional<core::AndConditionExpression> cond,
                              const QString& pkgName)
-    : PackageAction(id, pkgName, parent, cond), m_icons(icons), m_cmdName(cmdName) {
+    : PackageAction(id, pkgName, parent, cond), m_icons(icons), m_cmdName(cmdName), m_args(args) {
   init(id);
   setTheme(Config::singleton().theme());
   connect(&Config::singleton(), &Config::themeChanged, this, &CommandAction::setTheme);

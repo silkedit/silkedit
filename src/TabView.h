@@ -35,12 +35,12 @@ class TabView : public QTabWidget {
   bool insertTabInformation(const int index);
   bool createWithSavedTabs();
   int open(const QString& path);
+  bool closeAllTabs();
 
  public slots:
-  bool closeActiveTab();
-  bool closeAllTabs();
-  bool closeOtherTabs();
-  void addNew();
+  bool closeTab(int index);
+  bool closeTab(QWidget* widget);
+  void addNewTab();
   QWidget* widget(int index) const;
 
  signals:
@@ -59,7 +59,6 @@ class TabView : public QTabWidget {
 
   void setActiveView(QWidget* activeView);
   void removeTabAndWidget(int index);
-  bool closeTab(QWidget* w);
   void focusTabContent(int index);
   void updateTabTextBasedOn(bool changed);
   void changeActiveView(int index);
