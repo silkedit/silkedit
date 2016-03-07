@@ -115,12 +115,12 @@ boost::optional<ConditionExpression> YamlUtil::parseValueCondition(const QString
  * 'before' decides where the menu item is inserted. In the following case, 'New File' is inserted
  above 'Open...', 'Open...' is inserted above 'Open Recent', 'Save' is inserted below 'Open Recent'
  *
- *  - label: 'New File'
+ *  - title: 'New File'
       command: new_file
-    - label: 'Open...'
+    - title: 'Open...'
       command: open
       before: 'Open Recent'
-    - label: 'Save'
+    - title: 'Save'
       command: save
 
  * @param parent
@@ -149,26 +149,26 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       continue;
     }
 
-    YAML::Node labelNode = node["label"];
+    YAML::Node titleNode = node["title"];
     YAML::Node idNode = node["id"];
     YAML::Node typeNode = node["type"];
     YAML::Node beforeNode = node["before"];
     QString beforeId = beforeNode.IsDefined() && beforeNode.IsScalar()
                            ? QString::fromUtf8(beforeNode.as<std::string>().c_str())
                            : prevId;
-    QString defaultLabel = labelNode.IsDefined() && labelNode.IsScalar()
-                               ? QString::fromUtf8(labelNode.as<std::string>().c_str())
+    QString defaultTitle = titleNode.IsDefined() && titleNode.IsScalar()
+                               ? QString::fromUtf8(titleNode.as<std::string>().c_str())
                                : "";
     QString id = idNode.IsDefined() && idNode.IsScalar()
                      ? QString::fromUtf8(idNode.as<std::string>().c_str())
                      : "";
-    QString label = defaultLabel;
+    QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = Helper::singleton().translate(
-          QString("%1:menu.%2.label")
+      title = Helper::singleton().translate(
+          QString("%1:menu.%2.title")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          defaultLabel);
+          defaultTitle);
     }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["menu"];
@@ -176,8 +176,8 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       QMenu* currentMenu = nullptr;
       if (QAction* action = findAction(parent->actions(), id)) {
         currentMenu = action->menu();
-      } else if (!label.isEmpty()) {
-        currentMenu = new PackageMenu(label, pkgName, parent);
+      } else if (!title.isEmpty()) {
+        currentMenu = new PackageMenu(title, pkgName, parent);
         if (QMenuBar* menuBar = qobject_cast<QMenuBar*>(parent)) {
           QAction* beforeAction =
               beforeId.isEmpty() ? nullptr : findAction(menuBar->actions(), beforeId);
@@ -196,7 +196,7 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
           }
         }
       } else {
-        qWarning() << "id is invalid and label is empty";
+        qWarning() << "id is invalid and title is empty";
         continue;
       }
 
@@ -212,12 +212,12 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       }
 
       QAction* action = nullptr;
-      if (!label.isEmpty()) {
+      if (!title.isEmpty()) {
         QString command;
         if (commandNode.IsDefined()) {
           command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         }
-        action = new CommandAction(id, label, command, nullptr, condition, pkgName);
+        action = new CommandAction(id, title, command, nullptr, condition, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
@@ -302,7 +302,7 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
     }
 
     YAML::Node iconNode = node["icon"];
-    YAML::Node labelNode = node["label"];
+    YAML::Node titleNode = node["title"];
     YAML::Node commandNode = node["command"];
     YAML::Node tooltipNode = node["tooltip"];
     YAML::Node idNode = node["id"];
@@ -311,29 +311,29 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
     QString beforeId = beforeNode.IsDefined() && beforeNode.IsScalar()
                            ? QString::fromUtf8(beforeNode.as<std::string>().c_str())
                            : prevId;
-    QString defaultLabel = labelNode.IsDefined() && labelNode.IsScalar()
-                               ? QString::fromUtf8(labelNode.as<std::string>().c_str())
+    QString defaultTitle = titleNode.IsDefined() && titleNode.IsScalar()
+                               ? QString::fromUtf8(titleNode.as<std::string>().c_str())
                                : "";
     QString id = idNode.IsDefined() && idNode.IsScalar()
                      ? QString::fromUtf8(idNode.as<std::string>().c_str())
                      : "";
-    QString label = defaultLabel;
+    QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      label = Helper::singleton().translate(
-          QString("%1:toolbar.%2.label")
+      title = Helper::singleton().translate(
+          QString("%1:toolbar.%2.title")
               .arg(pkgName)
               .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          defaultLabel);
+          defaultTitle);
     }
     YAML::Node itemsNode = node["items"];
     Window* window = qobject_cast<Window*>(parent);
     // if items is defined, parent must be Window
-    if (itemsNode.IsDefined() && !label.isEmpty() && !id.isEmpty() && window) {
+    if (itemsNode.IsDefined() && !title.isEmpty() && !id.isEmpty() && window) {
       QToolBar* currentToolbar = nullptr;
       if (auto toolbar = window->findToolbar(id)) {
         currentToolbar = toolbar;
       } else {
-        currentToolbar = new PackageToolBar(id, label, parent, pkgName);
+        currentToolbar = new PackageToolBar(id, title, parent, pkgName);
         auto beforeToolbar = beforeId.isEmpty() ? nullptr : window->findToolbar(beforeId);
         if (beforeToolbar) {
           window->insertToolBar(beforeToolbar, currentToolbar);

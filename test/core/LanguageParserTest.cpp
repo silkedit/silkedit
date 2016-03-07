@@ -484,7 +484,7 @@ WHERE email = <%= quote @email %>)";
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
     QString text = R"(menu:
-- label: File)";
+- title: File)";
 
     /*
       This pattern matches the whole text because \s* matches a newline.
