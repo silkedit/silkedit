@@ -22,8 +22,8 @@ QString core::AndConditionExpression::toString() {
   return strs.join(" && ").trimmed();
 }
 
-bool core::AndConditionExpression::isStatic() const {
-  return std::all_of(m_condSet.constBegin(), m_condSet.constEnd(),
+bool core::AndConditionExpression::hasStatic() const {
+  return std::any_of(m_condSet.constBegin(), m_condSet.constEnd(),
                      [=](const ConditionExpression& cond) { return cond.isStatic(); });
 }
 

@@ -29,10 +29,14 @@ class FindReplaceView : public QWidget {
   ~FindReplaceView();
   DEFAULT_MOVE(FindReplaceView)
 
-  void show();
-  void hide();
   void highlightMatches();
   void setActiveView(QWidget* view);
+
+public slots:
+  void show();
+  void hide();
+  void findNext();
+  void findPrevious();
 
  protected:
   void showEvent(QShowEvent* event) override;
@@ -56,8 +60,6 @@ class FindReplaceView : public QWidget {
   QWidget* m_activeView;
   QMetaObject::Connection m_connection;
 
-  void findNext();
-  void findPrev();
   void findFromActiveCursor();
   void findText(const QString& text, int searchStartPos, core::Document::FindFlags flags = 0);
   void findText(const QString& text, core::Document::FindFlags flags);
@@ -71,3 +73,5 @@ class FindReplaceView : public QWidget {
 
   void setTheme(core::Theme* theme);
 };
+
+Q_DECLARE_METATYPE(FindReplaceView*)

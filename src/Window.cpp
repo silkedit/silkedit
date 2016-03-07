@@ -320,10 +320,6 @@ bool Window::openDir(const QString& dirPath) {
   }
 }
 
-void Window::openFindAndReplacePanel() {
-  m_findReplaceView->show();
-}
-
 void Window::paintEvent(QPaintEvent* event) {
   QMainWindow::paintEvent(event);
   if (!m_firstPaintEventFired) {

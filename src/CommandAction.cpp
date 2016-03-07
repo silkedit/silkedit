@@ -34,7 +34,8 @@ void CommandAction::init(const QString& id) {
   });
   connect(&KeymapManager::singleton(), &KeymapManager::shortcutUpdated, this,
           [=](const QString& cmdName, const QKeySequence& key) {
-            if (cmdName == m_cmdName) {
+            if (cmdName == m_cmdName && !key.isEmpty()) {
+              qDebug() << "setShortcut key:" << key << "cmd:" << cmdName;
               setShortcut(key);
             }
           });
@@ -62,7 +63,9 @@ CommandAction::CommandAction(const QString& id,
 
 void CommandAction::updateShortcut() {
   QKeySequence key = KeymapManager::singleton().findShortcut(m_cmdName);
-  setShortcut(key);
+  if (!key.isEmpty()) {
+    setShortcut(key);
+  }
 }
 
 void CommandAction::updateVisibilityAndShortcut() {
