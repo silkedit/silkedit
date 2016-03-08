@@ -1,5 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file alias="root_package.json">root_package.json</file>
+    <file alias="LICENSE">LICENSE</file>
 </qresource>
 </RCC>
