@@ -193,8 +193,7 @@ TextEditView* App::activeTextEditView() {
   if (tabView) {
     return qobject_cast<TextEditView*>(tabView->activeView());
   } else {
-    qDebug("active tab view is null");
-    return nullptr;
+    return qobject_cast<TextEditView*>(focusWidget());
   }
 }
 
