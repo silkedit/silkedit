@@ -402,7 +402,7 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return get(THEME_KEY, "Solarized (dark)");
+  return get(THEME_KEY, "Solarized (light)");
 }
 
 QString Config::fontFamily() {
