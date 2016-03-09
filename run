@@ -273,6 +273,9 @@ resolve() {
 build() {
     echo "Minifying JS files"
     npm run minify
+    
+    echo "Generating resources/LICENSE.md"
+    npm run generate-license
 
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."

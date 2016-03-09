@@ -49,8 +49,8 @@
      </item>
      <item>
       <widget class="QPlainTextEdit" name="licenseTextEdit">
-       <property name="plainText">
-        <string/>
+       <property name="readOnly">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

@@ -17,3 +17,4 @@ CMakeLists.txt.user
 /node_modules/
 /yaml-cpp-*
 /packages/node_modules/*
+/resources/LICENSE.md
