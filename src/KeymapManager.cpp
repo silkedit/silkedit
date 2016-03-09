@@ -324,10 +324,8 @@ void KeymapManager::add(const QKeySequence& key, CommandEvent cmdEvent) {
   // If cmdEvent has static condition, evaluate it immediately
   // e.g. filter out keymaps for different os
   auto condition = cmdEvent.condition();
-  if (condition && condition->hasStatic()) {
-    if (!condition->isSatisfied()) {
-      return;
-    }
+  if (condition && !condition->isStaticSatisfied()) {
+    return;
   }
 
   // Empty command keymap is for disabling default keymap

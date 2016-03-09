@@ -14,13 +14,11 @@ class AndConditionExpression {
   DEFAULT_COPY_AND_MOVE(AndConditionExpression)
 
   bool isSatisfied();
+
+  // check only static conditions
+  bool isStaticSatisfied();
   QString toString();
 
-  /**
-   * @brief check if conditions has any static condition (e.g., os == mac)
-   * @return
-   */
-  bool hasStatic() const;
   int size();
   bool operator==(const AndConditionExpression& other) const;
 
