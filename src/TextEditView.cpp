@@ -382,7 +382,9 @@ TextEditView::TextEditView(QWidget* parent)
 }
 
 TextEditView::~TextEditView() {
-  emit destroying(d_ptr->m_document->path(), QPrivateSignal());
+  if (d_ptr->m_document) {
+    emit destroying(d_ptr->m_document->path(), QPrivateSignal());
+  }
   qDebug("~TextEditView");
 }
 
