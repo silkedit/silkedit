@@ -29,6 +29,7 @@ class Condition : public QObject {
   static void init();
   static bool isStatic(const QString& keyValue);
   static bool isSatisfied(const QString& keyValue, core::Condition::Operator op, const QVariant& value);
+  static void add(const QString& keyValue, std::unique_ptr<Condition> condition);
 
   virtual ~Condition() = default;
 
@@ -46,7 +47,6 @@ class Condition : public QObject {
  private:
   static std::unordered_map<QString, std::unique_ptr<Condition>> s_conditions;
 
-  static void add(const QString& keyValue, std::unique_ptr<Condition> condition);
   static void remove(const QString& keyValue);
   static bool check(const QVariant &keyValue, Operator op, const QVariant &operand);
   static void Add(const v8::FunctionCallbackInfo<v8::Value>& args);

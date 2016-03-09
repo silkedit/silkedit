@@ -13,6 +13,14 @@ bool core::AndConditionExpression::isSatisfied() {
                      [=](const ConditionExpression& cond) { return cond.isSatisfied(); });
 }
 
+bool core::AndConditionExpression::isStaticSatisfied()
+{
+  return std::all_of(m_condSet.constBegin(), m_condSet.constEnd(),
+                     [=](const ConditionExpression& cond) {
+    return cond.isStatic() ? cond.isSatisfied() : true;
+  });
+}
+
 QString core::AndConditionExpression::toString() {
   QStringList strs;
   for (const auto& cond : m_condSet) {
@@ -20,11 +28,6 @@ QString core::AndConditionExpression::toString() {
   }
 
   return strs.join(" && ").trimmed();
-}
-
-bool core::AndConditionExpression::hasStatic() const {
-  return std::any_of(m_condSet.constBegin(), m_condSet.constEnd(),
-                     [=](const ConditionExpression& cond) { return cond.isStatic(); });
 }
 
 int core::AndConditionExpression::size() {
