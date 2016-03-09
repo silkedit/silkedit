@@ -21,7 +21,7 @@ struct Package {
   QString description;
   QString repositoryUrl;
 
-  explicit Package(const QJsonValue& jsonValue, const QString &locale);
+  explicit Package(const QJsonValue& jsonValue, const QString &locale = "");
   ~Package() = default;
 
   QStringList validate();
