@@ -109,21 +109,21 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
     return;
   }
 
-  if (theme->textEditViewSettings != nullptr) {
-    QString style;
-    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
-
-    style = QString(
-                "QPlainTextEdit {"
-                "color: %1;"
-                "background-color: %2;"
-                "selection-color:%3;"
-                "selection-background-color: %4;"
-                "}")
-                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("foreground")))
-                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("background")))
-                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionForeground")))
-                .arg(Util::qcolorForStyleSheet(textEditViewSettings->value("selectionBackground")));
+  if (theme->textEditViewSettings) {
+    const QString& style =
+        QStringLiteral(
+            "QPlainTextEdit {"
+            "color: %1;"
+            "background-color: %2;"
+            "selection-color:%3;"
+            "selection-background-color: %4;"
+            "}")
+            .arg(Util::qcolorForStyleSheet(theme->textEditViewSettings->value("foreground")))
+            .arg(Util::qcolorForStyleSheet(theme->textEditViewSettings->value("background")))
+            .arg(Util::qcolorForStyleSheet(
+                theme->textEditViewSettings->value("selectionForeground")))
+            .arg(Util::qcolorForStyleSheet(
+                theme->textEditViewSettings->value("selectionBackground")));
 
     q_ptr->setStyleSheet(style);
   }
