@@ -32,8 +32,9 @@ class BOM;
 class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView> {
   Q_OBJECT
   Q_PROPERTY(QString text READ toText WRITE setText USER true)
+  Q_PROPERTY(bool showLineNumber MEMBER m_showLineNumber USER true NOTIFY showLineNumberChanged)
  public:
-  explicit TextEditView(QWidget* parent);
+  Q_INVOKABLE explicit TextEditView(QWidget* parent = nullptr);
   virtual ~TextEditView();
 
   void setDocument(std::shared_ptr<core::Document> document);
@@ -101,6 +102,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void encodingChanged(const core::Encoding& encoding);
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
+  void showLineNumberChanged(bool visible);
 
   // private signals
   void destroying(const QString& path, QPrivateSignal);
@@ -118,6 +120,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   friend class TextEditViewPrivate;
 
   std::unique_ptr<TextEditViewPrivate> d_ptr;
+  bool m_showLineNumber;
 
   QString toText();
   void setText(const QString& text);

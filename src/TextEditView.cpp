@@ -346,7 +346,7 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
 }
 
 TextEditView::TextEditView(QWidget* parent)
-    : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)) {
+    : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)), m_showLineNumber(true) {
   d_ptr->m_lineNumberArea = new LineNumberArea(this);
   d_ptr->setWordWrap(Config::singleton().wordWrap());
 
@@ -355,13 +355,15 @@ TextEditView::TextEditView(QWidget* parent)
   connect(this, SIGNAL(updateRequest(const QRect&, int)), this,
           SLOT(updateLineNumberArea(const QRect&, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+  connect(this, SIGNAL(showLineNumberChanged(bool)), this, SLOT(update()));
   connect(this, &TextEditView::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
   // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider
   // namespace).
   // Config::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
   connect(&Config::singleton(), &Config::themeChanged, this, &TextEditView::setTheme);
-  connect(&Config::singleton(), &Config::showInvisiblesChanged, this, [=](bool) { update(); });
+  connect(&Config::singleton(), &Config::showInvisiblesChanged, this,
+          static_cast<void (QWidget::*)()>(&QWidget::update));
   connect(&Config::singleton(), &Config::endOfLineStrChanged, this,
           [=](const QString&) { update(); });
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
@@ -545,6 +547,10 @@ boost::optional<Region> TextEditView::find(const QString& text,
 }
 
 int TextEditView::lineNumberAreaWidth() {
+  if (!m_showLineNumber) {
+    return 0;
+  }
+
   int digits = 3;
   int max = qMax(1, blockCount());
   while (max >= 1000) {
@@ -566,6 +572,10 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
 }
 
 void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
+  if (!m_showLineNumber) {
+    return;
+  }
+
   QPainter painter(d_ptr->m_lineNumberArea);
   painter.fillRect(event->rect(), d_ptr->m_lineNumberArea->backgroundColor());
 
