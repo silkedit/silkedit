@@ -8,6 +8,7 @@
 #include "CommandManager.h"
 #include "version.h"
 #include "ConfigDialog.h"
+#include "AboutDialog.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/PackageCommand.h"
 #include "core/ThemeManager.h"
@@ -126,9 +127,8 @@ void MenuBar::themeActionTriggered(QAction* action) {
 }
 
 void MenuBar::showAboutDialog() {
-  QMessageBox::about(this, App::applicationName(), tr("version") + " " +
-                                                           App::applicationVersion() + " (" +
-                                                           tr("build") + ": " + BUILD + ")");
+  AboutDialog dialog;
+  dialog.exec();
 }
 
 ThemeAction::ThemeAction(const QString& text, QObject* parent) : QAction(text, parent) {

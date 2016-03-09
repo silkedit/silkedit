@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = function (grunt) {
     grunt.initConfig({
 
@@ -15,6 +17,8 @@ module.exports = function (grunt) {
 
 // load plugins
 grunt.loadNpmTasks('grunt-contrib-uglify');
+
+grunt.task.loadTasks("tasks");
 
 // register at least this one task
 grunt.registerTask('default', [ 'uglify' ]);
