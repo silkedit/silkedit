@@ -14,14 +14,14 @@ struct Package {
   DEFAULT_COPY_AND_MOVE(Package)
 
   static const int ITEM_COUNT = 4;
-  static Package fromJson(const QJsonValue& value) { return std::move(Package(value)); }
+  static Package fromJson(const QJsonValue& value, const QString& locale) { return std::move(Package(value, locale)); }
 
   QString name;
   QString version;
   QString description;
   QString repositoryUrl;
 
-  explicit Package(const QJsonValue& jsonValue);
+  explicit Package(const QJsonValue& jsonValue, const QString &locale);
   ~Package() = default;
 
   QStringList validate();
