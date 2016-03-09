@@ -37,7 +37,7 @@ QStringList helperArgs() {
   // stop Node in debug mode
   // args << "--debug-brk";
   // expose global.gc()
-  //  args << "--expose-gc";
+  args << "--expose-gc";
   args << "--harmony";
   args << "--harmony_default_parameters";
   args << "--harmony_proxies";
