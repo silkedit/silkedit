@@ -17,6 +17,7 @@
 #include "Helper.h"
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
+#include "GrammerCondition.h"
 #include "core/Condition.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
@@ -60,6 +61,7 @@ int main(int argc, char** argv) {
   MetaTypeInitializer::init();
 
   Condition::init();
+  Condition::add(GrammerCondition::name, std::move(std::unique_ptr<Condition>(new GrammerCondition())));
 
   PackageManager::loadFiles();
 
