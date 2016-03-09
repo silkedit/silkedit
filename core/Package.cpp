@@ -1,19 +1,50 @@
+#include <boost/optional.hpp>
 #include <QJsonObject>
 #include <QStringList>
 #include <QRegularExpression>
 
 #include "Package.h"
 
-core::Package::Package(const QJsonValue& jsonValue) {
+namespace {
+const QString descriptionKey = QStringLiteral("description");
+
+boost::optional<QJsonObject> findLocaleObj(const QJsonObject& jsonObj, const QString& locale) {
+  if (!locale.isEmpty()) {
+    auto objValue = jsonObj[QStringLiteral("locales")];
+    if (objValue.isObject()) {
+      auto obj = objValue.toObject();
+      auto localeObjValue = obj[locale];
+      if (localeObjValue.isObject()) {
+        return localeObjValue.toObject();
+      } else {
+        int index = locale.indexOf('_');
+        if (index >= 0) {
+          auto localeObjValue = obj[locale.left(index)];
+          if (localeObjValue.isObject()) {
+            return localeObjValue.toObject();
+          }
+        }
+      }
+    }
+  }
+
+  return boost::none;
+}
+}
+
+core::Package::Package(const QJsonValue& jsonValue, const QString& locale) {
   QJsonObject jsonObj = jsonValue.toObject();
-  name = jsonObj["name"].toString();
-  version = jsonObj["version"].toString();
-  description = jsonObj["description"].toString();
-  QJsonValue repoValue = jsonObj["repository"];
+  auto maybeLocaleObj = findLocaleObj(jsonObj, locale);
+  name = jsonObj[QStringLiteral("name")].toString();
+  version = jsonObj[QStringLiteral("version")].toString();
+  description = maybeLocaleObj && (*maybeLocaleObj).contains(descriptionKey)
+                    ? (*maybeLocaleObj)[descriptionKey].toString()
+                    : jsonObj[QStringLiteral("description")].toString();
+  QJsonValue repoValue = jsonObj[QStringLiteral("repository")];
   if (repoValue.isObject()) {
     QJsonObject repoObj = repoValue.toObject();
     // e.g., https://github.com/silkedit/hello.git
-    repositoryUrl = repoObj["url"].toString();
+    repositoryUrl = repoObj[QStringLiteral("url")].toString();
   } else {
     // e.g., silkedit/hello (Github shortcut url)
     repositoryUrl = repoValue.toString();

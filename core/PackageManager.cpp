@@ -10,6 +10,7 @@
 #include "Metadata.h"
 #include "Constants.h"
 #include "Package.h"
+#include "Config.h"
 
 using core::LanguageProvider;
 using core::Metadata;
@@ -78,7 +79,7 @@ boost::optional<QList<Package>> PackageManager::loadPackagesJson(const QByteArra
   const QJsonArray& jsonPackages = doc.array();
   QList<Package> packages;
   for (const QJsonValue& value : jsonPackages) {
-    packages.append(Package::fromJson(value));
+    packages.append(Package::fromJson(value, Config::singleton().locale()));
   }
   return packages;
 }
@@ -145,7 +146,7 @@ boost::optional<QList<Package>> PackageManager::loadRootPackageJson(const QStrin
         continue;
       }
 
-      packages.append(Package::fromJson(pkgDoc.object()));
+      packages.append(Package::fromJson(pkgDoc.object(), Config::singleton().locale()));
     }
   }
 
