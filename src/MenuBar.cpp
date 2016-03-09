@@ -9,6 +9,7 @@
 #include "version.h"
 #include "ConfigDialog.h"
 #include "AboutDialog.h"
+#include "Window.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "commands/PackageCommand.h"
 #include "core/ThemeManager.h"
@@ -37,7 +38,13 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   const QString& exitMenuStr = Config::singleton().enableMnemonic() ? tr("&Exit") : tr("Exit");
   QAction* exitAction = new QAction(exitMenuStr, fileMenu);
   exitAction->setMenuRole(QAction::QuitRole);
-  connect(exitAction, &QAction::triggered, []{QApplication::quit();});
+  connect(exitAction, &QAction::triggered, [] {
+    for (auto window : Window::windows()) {
+      if (!window->close()) {
+        return;
+      }
+    }
+  });
   fileMenu->addAction(exitAction);
 
   // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)
@@ -84,8 +91,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   packagesMenu->setObjectName("packages");
   auto packageDevMenu = new PackageMenu(tr("Package Development"));
   packagesMenu->addMenu(packageDevMenu);
-  packageDevMenu->addAction(
-      new CommandAction("new_package", tr("&New Package"), "new_package"));
+  packageDevMenu->addAction(new CommandAction("new_package", tr("&New Package"), "new_package"));
   packageDevMenu->setObjectName("package_development");
 
   // Settings menu
