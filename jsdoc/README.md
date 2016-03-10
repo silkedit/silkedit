@@ -350,6 +350,11 @@ package.jsonのサンプル
   "license": "MIT",
   "dependencies": {
     "js-yaml": "3.x"
+  },
+  "locales": {
+    "ja": {
+      "description": "YAMLバリデーション"
+    }
   }
 }
 ```
@@ -357,6 +362,8 @@ package.jsonのサンプル
 repositoryは現在Githubのみ対応しています。Githubのurlを記入して下さい。以下の様なGithubの短縮URLも使用可能です。
 
 ```"repository": "silkedit/hello"```
+
+localesではdescriptionのローカライズを行います。ロケールには```ja```のように言語コードのみ指定するか、```ja_JP```のように```<言語コード>_<国コード>```の形式で指定して下さい。package.jsonは必ずUTF-8で保存して下さい。
 
 #### タグを付けてパッケージのリポジトリをGithubにプッシュする
 
