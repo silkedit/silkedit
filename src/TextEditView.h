@@ -136,7 +136,6 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   Q_PRIVATE_SLOT(d_func(), void highlightCurrentLine())
   Q_PRIVATE_SLOT(d_func(), void clearDirtyMarker())
   Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
-  Q_PRIVATE_SLOT(d_func(), void setTabStopWidthFromSession())
   Q_PRIVATE_SLOT(d_func(), void setWordWrap(bool))
 };
 

@@ -80,6 +80,17 @@ void Config::Init(v8::Local<v8::Object> exports) {
   }
 }
 
+QString Config::tabWidthKey(const QString& scopeName) {
+  if (!scopeName.isEmpty()) {
+    QString key = scopeName + "." + TAB_WIDTH_KEY;
+    if (contains(key)) {
+      return key;
+    }
+  }
+
+  return TAB_WIDTH_KEY;
+}
+
 void Config::setTheme(Theme* theme, bool noSave) {
   if (m_theme != theme) {
     m_theme = theme;
@@ -106,8 +117,12 @@ void Config::setFont(const QFont& font) {
   }
 }
 
-int Config::tabWidth() {
-  return get(TAB_WIDTH_KEY, 4);
+int Config::tabWidth(const QString& scopeName) {
+  const QString& key = scopeName.isEmpty() ? TAB_WIDTH_KEY : scopeName + "." + TAB_WIDTH_KEY;
+  if (contains(key)) {
+    return get(key, 2);
+  }
+  return get(TAB_WIDTH_KEY, 2);
 }
 
 void Config::setTabWidth(int tabWidth) {
@@ -117,7 +132,7 @@ void Config::setTabWidth(int tabWidth) {
 }
 
 bool Config::indentUsingSpaces() {
-  return get(INDENT_USING_SPACES_KEY, false);
+  return get(INDENT_USING_SPACES_KEY, true);
 }
 
 void Config::setIndentUsingSpaces(bool value) {
@@ -155,11 +170,12 @@ void Config::addPackageConfigDefinition(const ConfigDefinition& def) {
   m_packageConfigDefinitions[def.key] = def;
 }
 
-void Config::emitConfigChange(const QString& key, QVariant value) {
-  if (key == SHOW_TABS_AND_SPACES_KEY && value.canConvert<bool>()) {
-    emit showTabsAndSpacesChanged(value.toBool());
-  } else if (key == WORD_WRAP_KEY && value.canConvert<bool>()) {
-    emit wordWrapChanged(value.toBool());
+void Config::emitConfigChange(const QString& key, QVariant oldValue, QVariant newValue) {
+  emit configChanged(key, oldValue, newValue);
+  if (key == SHOW_TABS_AND_SPACES_KEY && newValue.canConvert<bool>()) {
+    emit showTabsAndSpacesChanged(newValue.toBool());
+  } else if (key == WORD_WRAP_KEY && newValue.canConvert<bool>()) {
+    emit wordWrapChanged(newValue.toBool());
   }
 }
 

@@ -82,6 +82,24 @@ Document::Document(const QString& path,
 
   Q_ASSERT(lang);
   setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(lang)), toPlainText());
+  setTabWidth();
+}
+
+int Document::tabWidth(Language* lang) {
+  return lang ? Config::singleton().tabWidth(lang->scopeName) : Config::singleton().tabWidth();
+}
+
+void Document::setTabWidth() {
+  QString scopeName = m_lang ? m_lang->scopeName : "";
+  m_tabWidthKey = Config::singleton().tabWidthKey(scopeName);
+  setTabWidth(tabWidth(m_lang.get()));
+}
+
+void Document::setTabWidth(int tabWidth) {
+  qreal width = QFontMetricsF(Config::singleton().font()).width(QLatin1Char(' '));
+  QTextOption option = defaultTextOption();
+  option.setTabStop(width * tabWidth);
+  setDefaultTextOption(option);
 }
 
 void Document::setShowTabsAndSpaces(bool showTabsAndSpaces) {
@@ -102,9 +120,18 @@ void Document::init() {
   setupLayout();
   setShowTabsAndSpaces(Config::singleton().showTabsAndSpaces());
 
-  connect(&Config::singleton(), &Config::fontChanged, this, &QTextDocument::setDefaultFont);
+  connect(&Config::singleton(), &Config::fontChanged, this, [=](QFont font) {
+    setDefaultFont(font);
+    setTabWidth();
+  });
   connect(&Config::singleton(), &Config::showTabsAndSpacesChanged, this,
           &Document::setShowTabsAndSpaces);
+  connect(&Config::singleton(), &Config::configChanged, this,
+          [=](const QString& key, QVariant, QVariant newValue) {
+            if (key == m_tabWidthKey && newValue.canConvert<int>()) {
+              setTabWidth(newValue.value<int>());
+            }
+          });
 }
 
 Document::Document()
@@ -172,6 +199,7 @@ void Document::setLanguage(const QString& scopeName) {
       m_syntaxHighlighter->setParser(*parser);
     }
   }
+  setTabWidth();
   emit languageChanged(scopeName);
 }
 
