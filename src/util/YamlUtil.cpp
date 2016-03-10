@@ -165,10 +165,8 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
     QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
       title = Helper::singleton().translate(
-          QString("%1:menu.%2.title")
-              .arg(pkgName)
-              .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          defaultTitle);
+          QStringLiteral("menu.%2.title").arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+          pkgName, defaultTitle);
     }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["menu"];
@@ -217,7 +215,8 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
         if (commandNode.IsDefined()) {
           command = QString::fromUtf8(commandNode.as<std::string>().c_str());
         }
-        action = new CommandAction(id, title, command, nullptr, CommandArgument(), condition, pkgName);
+        action =
+            new CommandAction(id, title, command, nullptr, CommandArgument(), condition, pkgName);
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
         const QString& type = QString::fromUtf8(typeNode.as<std::string>().c_str());
         if (type == "separator") {
@@ -320,10 +319,8 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
     QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
       title = Helper::singleton().translate(
-          QString("%1:toolbar.%2.title")
-              .arg(pkgName)
-              .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          defaultTitle);
+          QString("toolbar.%2.title").arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+          pkgName, defaultTitle);
     }
     YAML::Node itemsNode = node["items"];
     Window* window = qobject_cast<Window*>(parent);
@@ -359,7 +356,8 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
           QString iconPath =
               getAbsolutePath(ymlPath, QString::fromUtf8(iconNode.as<std::string>().c_str()));
           if (QFileInfo::exists(iconPath)) {
-            action = new CommandAction(id, command, QIcon(iconPath), nullptr, CommandArgument(), condition, pkgName);
+            action = new CommandAction(id, command, QIcon(iconPath), nullptr, CommandArgument(),
+                                       condition, pkgName);
           } else {
             qWarning() << iconPath << "doesn't exist";
           }
@@ -376,15 +374,15 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
               qWarning() << iconPath << "doesn't exist";
             }
           }
-          action = new CommandAction(id, command, icons, nullptr, CommandArgument(), condition, pkgName);
+          action =
+              new CommandAction(id, command, icons, nullptr, CommandArgument(), condition, pkgName);
         }
         if (action && tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
           tooltip = Helper::singleton().translate(
-              QString("%1:toolbar.%2.tooltip")
-                  .arg(pkgName)
+              QString("toolbar.%2.tooltip")
                   .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-              tooltip);
+              pkgName, tooltip);
           action->setToolTip(tooltip);
         }
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
@@ -445,14 +443,14 @@ QList<ConfigDefinition> YamlUtil::parseConfig(const QString& pkgName, const QStr
         }
 
         QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
-        title = Helper::singleton().translate(
-            QString("%1:config.%2.title").arg(pkgName).arg(configName), title);
+        title = Helper::singleton().translate(QString("config.%2.title").arg(configName), pkgName,
+                                              title);
         QString description;
         // description is optional
         if (defNode["description"].IsScalar()) {
           description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
           description = Helper::singleton().translate(
-              QString("%1:config.%2.description").arg(pkgName).arg(configName), description);
+              QString("config.%2.description").arg(configName), pkgName, description);
         }
         QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());
         QVariant defaultValue;

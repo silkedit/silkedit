@@ -121,9 +121,9 @@ void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
   d->callFunc("runCommand", args);
 }
 
-QString Helper::translate(const QString& key, const QString& defaultValue) {
-  const QVariantList& args =
-      QVariantList{QVariant::fromValue(key), QVariant::fromValue(defaultValue)};
+QString Helper::translate(const QString& key, const QString& package, const QString& defaultValue) {
+  const QVariantList& args = QVariantList{QVariant::fromValue(key), QVariant::fromValue(package),
+                                          QVariant::fromValue(defaultValue)};
   return d->callFunc<QString>("translate", args, defaultValue);
 }
 
@@ -186,8 +186,7 @@ void Helper::quitApplication() {
   App::instance()->quit();
 }
 
-void Helper::eval(const QString &code)
-{
+void Helper::eval(const QString& code) {
   const QVariantList& args = QVariantList{QVariant::fromValue(code)};
   d->callFunc("eval", args);
 }
@@ -210,8 +209,7 @@ void Helper::emitSignal(const QString& str) {
   emitSignalInternal(args);
 }
 
-void Helper::emitSignal(int n)
-{
+void Helper::emitSignal(int n) {
   qDebug() << "emitSignal(int)";
   QVariantList args{QVariant::fromValue(n)};
   emitSignalInternal(args);
