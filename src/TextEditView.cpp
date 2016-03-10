@@ -184,15 +184,6 @@ void TextEditViewPrivate::emitBOMChanged(const core::BOM& bom) {
   emit q_ptr->bomChanged(bom);
 }
 
-void TextEditViewPrivate::setTabStopWidthFromSession() {
-  qreal width = QFontMetricsF(Config::singleton().font()).width(QLatin1Char(' '));
-  if (q_ptr->document()) {
-    QTextOption option = q_ptr->document()->defaultTextOption();
-    option.setTabStop(width * Config::singleton().tabWidth());
-    q_ptr->document()->setDefaultTextOption(option);
-  }
-}
-
 void TextEditViewPrivate::setWordWrap(bool wordWrap) {
   if (wordWrap) {
     q_ptr->setWordWrapMode(QTextOption::WordWrap);
@@ -310,12 +301,15 @@ void TextEditViewPrivate::highlightCurrentLine() {
  */
 void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
   TextEditViewLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
-                                    Config::singleton().tabWidth());
+                                    tabWidth());
+}
+
+int TextEditViewPrivate::tabWidth() {
+  return m_document ? m_document->tabWidth(m_document->language()) : Config::singleton().tabWidth();
 }
 
 void TextEditViewPrivate::outdentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
-                             Config::singleton().tabWidth());
+  TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
 }
 
 /**
@@ -339,9 +333,8 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   const QString& prevLineString = prevLineText();
   if (TextEditViewLogic::isOutdentNecessary(
           metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
-          prevLineString, currentVisibleCursor.atBlockEnd(), Config::singleton().tabWidth())) {
-    TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor,
-                               Config::singleton().tabWidth());
+          prevLineString, currentVisibleCursor.atBlockEnd(), tabWidth())) {
+    TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
   }
 }
 
@@ -368,10 +361,6 @@ TextEditView::TextEditView(QWidget* parent)
           [=](const QString&) { update(); });
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
   connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(toggleHighlightingCurrentLine(bool)));
-  connect(&Config::singleton(), SIGNAL(fontChanged(QFont)), this,
-          SLOT(setTabStopWidthFromSession()));
-  connect(&Config::singleton(), SIGNAL(tabWidthChanged(int)), this,
-          SLOT(setTabStopWidthFromSession()));
   connect(&Config::singleton(), SIGNAL(wordWrapChanged(bool)), this, SLOT(setWordWrap(bool)));
 
   // Set default values
@@ -478,7 +467,6 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   d->setupConnections(document);
   d->updateLineNumberAreaWidth(blockCount());
-  d->setTabStopWidthFromSession();
 
   // Special handling for user keymap.yml
   if (document->path() == Constants::singleton().userKeymapPath()) {
@@ -766,10 +754,9 @@ void TextEditView::insertNewLine() {
     prevPrevLineText = boost::none;
   }
   bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
-  int tabWidth = Config::singleton().tabWidth();
   auto cursor = textCursor();
   TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
-                                       prevPrevLineText, metadata, indentUsingSpaces, tabWidth);
+                                       prevPrevLineText, metadata, indentUsingSpaces, d_ptr->tabWidth());
 }
 
 TextEditView* TextEditView::clone() {

@@ -43,7 +43,7 @@ class Config : public QObject, public Singleton<Config> {
 
   QFontMetrics fontMetrics() { return QFontMetrics(m_font); }
 
-  int tabWidth();
+  int tabWidth(const QString &scopeName = "");
   void setTabWidth(int tabWidth);
 
   bool indentUsingSpaces();
@@ -68,6 +68,7 @@ class Config : public QObject, public Singleton<Config> {
   void init();
   bool contains(const QString& key);
   void addPackageConfigDefinition(const core::ConfigDefinition& def);
+  QString tabWidthKey(const QString &scopeName = "");
 
   template <typename T>
   T get(const QString& key, const T& defaultValue) {
@@ -83,15 +84,20 @@ class Config : public QObject, public Singleton<Config> {
     return get<QString>(key, defaultValue);
   }
 
-  void emitConfigChange(const QString& key, QVariant value);
+  void emitConfigChange(const QString& key, QVariant oldValue, QVariant newValue);
 
   template <typename T>
   bool setValue(const QString& key, T value) {
     if (m_scalarConfigs.count(key) == 0 || m_scalarConfigs[key] != value) {
       QVariant newValue(value);
+      QVariant oldValue;
+      if (m_scalarConfigs.count(key) != 0) {
+        oldValue = m_scalarConfigs[key];
+      }
+
       m_scalarConfigs[key] = newValue;
       save(key, value);
-      emitConfigChange(key, newValue);
+      emitConfigChange(key, oldValue, newValue);
       return true;
     }
     return false;
@@ -108,6 +114,7 @@ class Config : public QObject, public Singleton<Config> {
   void showTabsAndSpacesChanged(bool);
   void wordWrapChanged(bool);
   void endOfLineStrChanged(const QString& str);
+  void configChanged(const QString& key, QVariant oldValue, QVariant newValue);
 
  private:
   // public API accessible from JS

@@ -83,6 +83,7 @@ class Document : public QTextDocument {
    * @param encoding
    */
   void reload(const Encoding& encoding);
+  int tabWidth(Language *lang);
 
  signals:
   void pathUpdated(const QString& path);
@@ -105,6 +106,7 @@ class Document : public QTextDocument {
   QString m_lineSeparator;
   BOM m_bom;
   SyntaxHighlighter* m_syntaxHighlighter;
+  QString m_tabWidthKey;
 
   Document(const QString& path,
            const QString& text,
@@ -118,6 +120,8 @@ class Document : public QTextDocument {
   void init();
   std::unique_ptr<Regexp> createRegexp(const QString& subString, Document::FindFlags options) const;
   void setShowTabsAndSpaces(bool showTabsAndSpaces);
+  void setTabWidth(int tabWidth);
+  void setTabWidth();
 };
 
 }  // namespace core
