@@ -18,7 +18,7 @@ module.exports = {
 
   commands: {
     "hello": () => {
-      silkedit.alert(silkedit.tr("hello:hello", "Hello!"));
+      silkedit.alert(silkedit.tr("hello", "hello", "Hello!"));
     }
   }
 }
@@ -28,7 +28,7 @@ index.jsはNodeモジュールとなっており、activate, deactivate, command
 
 activateはパッケージがロードされた時に呼び出されます。deactivateはパッケージが削除される時に呼び出されます。
 
-commandsプロパティにはパッケージが提供するコマンドを登録します。上の例では"hello"がコマンド名となり、コマンドが実行された時には```silkedit.alert(silkedit.tr("hello:hello", "Hello!"));```が実行されます。
+commandsプロパティにはパッケージが提供するコマンドを登録します。上の例では"hello"がコマンド名となり、コマンドが実行された時には```silkedit.alert(silkedit.tr("hello", "hello", "Hello!"));```が実行されます。
 
 [silkedit.alert]{@link module:silkedit.alert}はアラートを表示する関数です。
 
@@ -42,7 +42,7 @@ menu:
 hello: こんにちは！
 ```
 
-```silkedit.tr("hello:hello", "Hello!")```は、helloパッケージのlocales/ja/translation.ymlに定義されているhelloキーの文字列を探します。translation.ymlでは```hello: こんにちは！```が定義されているので、"こんにちは！"という文字列を取得できます。キーが見つからなかった場合"Hello!"という文字列が使用されます。
+```silkedit.tr("hello", "hello", "Hello!")```は、helloパッケージのlocales/ja/translation.ymlに定義されているhelloキーの文字列を探します。translation.ymlでは```hello: こんにちは！```が定義されているので、"こんにちは！"という文字列を取得できます。キーが見つからなかった場合"Hello!"という文字列が使用されます。
 
 
 menu.ymlは以下のようになっています。

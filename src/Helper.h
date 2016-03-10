@@ -70,7 +70,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void init();
   void cleanup();
   void runCommand(const QString& cmd, const CommandArgument& cmdArgs);
-  QString translate(const QString& key, const QString& defaultValue);
+  QString translate(const QString& key, const QString &package, const QString& defaultValue);
   void loadPackage(const QString& pkgName);
   bool removePackage(const QString& pkgName);
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);

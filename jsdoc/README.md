@@ -73,7 +73,7 @@ module.exports = {
 
   commands: {
     "hello": () => {
-      silkedit.alert(silkedit.tr("hello:hello", "Hello!"));
+      silkedit.alert(silkedit.tr("hello", "hello", "Hello!"));
     }
   }
 }
@@ -83,7 +83,7 @@ index.jsはNodeモジュールとなっており、activate, deactivate, command
 
 activateはパッケージがロードされた時に呼び出されます。deactivateはパッケージが削除される時に呼び出されます。
 
-commandsプロパティにはパッケージが提供するコマンドを登録します。上の例では"hello"がコマンド名となり、コマンドが実行された時には```silkedit.alert(silkedit.tr("hello:hello", "Hello!"));```が実行されます。
+commandsプロパティにはパッケージが提供するコマンドを登録します。上の例では"hello"がコマンド名となり、コマンドが実行された時には```silkedit.alert(silkedit.tr("hello", "hello", "Hello!"));```が実行されます。
 
 コマンド名はパッケージ名が自動的に修飾され、keymap.ymlやmenu.ymlでコマンド名を指定する時は<パッケージ名>.<コマンド名>のように指定する必要があります。上記のhelloコマンドは"hello.hello"というコマンドになります。
 
@@ -317,7 +317,7 @@ keyの形式は```<package>:<key>```です。
 以下の呼び出しはword_countパッケージの対応するロケールのtranslation.ymlのword_countキーの文字列を使用します。見つからなければ"word count"の文字列が使用されます。
 
 ```
-silkedit.tr("word_count:word_count", "word count")
+silkedit.tr("word_count", "word_count", "word count")
 ```
 
 ## パッケージの公開

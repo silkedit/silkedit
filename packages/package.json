@@ -31,7 +31,7 @@
     "language-batch": "silkedit/language-batch#0.1.0"
   },
   "optionalDependencies": {
-    "markdown_preview": "silkedit/markdown_preview#0.1.5"
+    "markdown_preview": "silkedit/markdown_preview#0.1.6"
   },
   "license":"UNLICENSED",
   "repository":""
