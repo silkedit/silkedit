@@ -43,7 +43,19 @@ void loadPreferences(const QString& path) {
 namespace core {
 const QString PackageManager::DEPENDENCIES = QStringLiteral("dependencies");
 
+void PackageManager::loadPackageContents(const QString& pkgPath, const QString& pkg) {
+  loadGrammers(pkgPath + QStringLiteral("/grammers"));
+  loadPreferences(pkgPath + QStringLiteral("/preferences"));
+  const auto& toolbarYmlPath = pkgPath + QStringLiteral("/toolbar.yml");
+  if (QFileInfo::exists(toolbarYmlPath)) {
+    m_toolbarsDefinitions.insert(pkg, toolbarYmlPath);
+  }
+}
+
 void PackageManager::loadFiles() {
+  // load default package first
+  loadPackageContents(Constants::singleton().defaultPackagePath(), "default");
+
   for (const QString& path : Constants::singleton().packagesPaths()) {
     QFile rootPackageJson(path + "/package.json");
     if (!rootPackageJson.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -62,8 +74,7 @@ void PackageManager::loadFiles() {
 
     Q_ASSERT(rootObj[DEPENDENCIES].isObject());
     for (const auto& pkg : rootObj[DEPENDENCIES].toObject().keys()) {
-      loadGrammers(path + "/node_modules/" + pkg + "/grammers");
-      loadPreferences(path + "/node_modules/" + pkg + "/preferences");
+      loadPackageContents(path + QStringLiteral("/node_modules/") + pkg, pkg);
     }
   }
 }
@@ -84,8 +95,7 @@ boost::optional<QList<Package>> PackageManager::loadPackagesJson(const QByteArra
   return packages;
 }
 
-bool PackageManager::_ensureRootPackageJson()
-{
+bool PackageManager::_ensureRootPackageJson() {
   // ensure that user packgaes directory exists
   if (!QFileInfo::exists(Constants::singleton().userPackagesRootDirPath())) {
     QDir dir(Constants::singleton().silkHomePath());
@@ -137,7 +147,8 @@ boost::optional<QList<Package>> PackageManager::loadRootPackageJson(const QStrin
   QList<Package> packages;
   if (!rootObj.isEmpty() && rootObj.contains(DEPENDENCIES) && rootObj[DEPENDENCIES].isObject()) {
     for (const auto& name : rootObj[DEPENDENCIES].toObject().keys()) {
-      QFile pkgJsonPath(QFileInfo(path).dir().absolutePath() + "/node_modules/" + name + "/package.json");
+      QFile pkgJsonPath(QFileInfo(path).dir().absolutePath() + "/node_modules/" + name +
+                        "/package.json");
       if (!pkgJsonPath.open(QIODevice::ReadOnly | QIODevice::Text)) {
         continue;
       }

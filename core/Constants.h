@@ -46,8 +46,9 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QStringList packagesPaths();
   QString userRootPackageJsonPath() const;
   QString userPackagesNodeModulesPath() const;
+  QString defaultPackagePath();
 
- private:
+private:
   friend class core::Singleton<Constants>;
   Constants() = default;
 

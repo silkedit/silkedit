@@ -3,6 +3,7 @@
 #include <boost/optional.hpp>
 #include <QObject>
 #include <QString>
+#include <QMap>
 
 #include "macros.h"
 #include "Singleton.h"
@@ -17,7 +18,6 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
 
  public:
   static const QString DEPENDENCIES;
-  static void loadFiles();
 
   // for installed packages
   static boost::optional<QList<Package>> loadRootPackageJson(const QString& path);
@@ -26,6 +26,10 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
   static boost::optional<QList<Package>> loadPackagesJson(const QByteArray& json);
 
   ~PackageManager() = default;
+
+  void loadFiles();
+
+  QMap<QString, QString> toolbarDefinitions() { return m_toolbarsDefinitions; }
 
 public slots:
   // This is called from JS internally
@@ -37,6 +41,9 @@ public slots:
  private:
   friend class Singleton<PackageManager>;
   PackageManager();
+
+  QMap<QString, QString> m_toolbarsDefinitions;
+  void loadFilesInternal(const QString &pkgPath, const QString &pkg);
 };
 
 }  // namespace core
