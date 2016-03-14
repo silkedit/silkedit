@@ -26,21 +26,21 @@
         </font>
        </property>
        <property name="text">
-        <string>SilkEdit</string>
+        <string notr="true">SilkEdit</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="buildLabel">
        <property name="text">
-        <string>Version 1.0 (Build 50)</string>
+        <string notr="true">Version 1.0 (Build 50)</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Copyright 2014-2016 SilkEdit team</string>
+        <string notr="true">Copyright © 2014-2016 SilkEdit team</string>
        </property>
       </widget>
      </item>
