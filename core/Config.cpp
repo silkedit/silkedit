@@ -37,6 +37,7 @@ const QString LOCALE_KEY = QStringLiteral("locale");
 const QString SHOW_INVISIBLES_KEY = QStringLiteral("show_invisibles");
 const QString SHOW_TABS_AND_SPACES_KEY = QStringLiteral("show_tabs_and_spaces");
 const QString WORD_WRAP_KEY = QStringLiteral("word_wrap");
+const QString& SHOW_TOOLBAR_KEY = QStringLiteral("show_toolbar");
 
 QHash<QString, QVariant::Type> keyTypeHashForBuiltinConfigs;
 
@@ -52,10 +53,14 @@ void initKeyTypeHash() {
   keyTypeHashForBuiltinConfigs[SHOW_INVISIBLES_KEY] = QVariant::Bool;
   keyTypeHashForBuiltinConfigs[SHOW_TABS_AND_SPACES_KEY] = QVariant::Bool;
   keyTypeHashForBuiltinConfigs[WORD_WRAP_KEY] = QVariant::Bool;
+  keyTypeHashForBuiltinConfigs[SHOW_TOOLBAR_KEY] = QVariant::Bool;
 }
 }
 
 namespace core {
+
+QMap<QString, QVariant> Config::s_defaultValueMap =
+    QMap<QString, QVariant>{{SHOW_TABS_AND_SPACES_KEY, false}, {WORD_WRAP_KEY, true}, {SHOW_TOOLBAR_KEY, true}};
 
 void Config::Init(v8::Local<v8::Object> exports) {
   Isolate* isolate = exports->GetIsolate();
@@ -176,6 +181,8 @@ void Config::emitConfigChange(const QString& key, QVariant oldValue, QVariant ne
     emit showTabsAndSpacesChanged(newValue.toBool());
   } else if (key == WORD_WRAP_KEY && newValue.canConvert<bool>()) {
     emit wordWrapChanged(newValue.toBool());
+  } else if (key == SHOW_TOOLBAR_KEY && newValue.canConvert<bool>()) {
+    emit showToolBarChanged(newValue.toBool());
   }
 }
 
@@ -343,6 +350,10 @@ bool Config::wordWrap() {
   return get(WORD_WRAP_KEY, defaultValue(WORD_WRAP_KEY).toBool());
 }
 
+bool Config::showToolbar() {
+  return get(SHOW_TOOLBAR_KEY, defaultValue(SHOW_TOOLBAR_KEY).toBool());
+}
+
 Config::Config() : m_theme(nullptr) {}
 
 void Config::load() {
@@ -430,10 +441,8 @@ int Config::fontSize() {
 }
 
 QVariant Config::defaultValue(const QString& key) {
-  if (key == SHOW_TABS_AND_SPACES_KEY) {
-    return QVariant::fromValue(false);
-  } else if (key == WORD_WRAP_KEY) {
-    return QVariant::fromValue(true);
+  if (s_defaultValueMap.contains(key)) {
+    return s_defaultValueMap.value(key);
   } else {
     return QVariant();
   }

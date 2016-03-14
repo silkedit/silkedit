@@ -61,6 +61,12 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
     loadToolbar(this, pkgName, PackageManager::singleton().toolbarDefinitions().value(pkgName));
   }
 
+  if (!Config::singleton().showToolbar()) {
+    for (auto toolbar : toolBars()) {
+      toolbar->setVisible(false);
+    }
+  }
+
   ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
   ui->rootSplitter->setChildrenCollapsible(false);
 
@@ -96,6 +102,12 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
   connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
+  connect(&Config::singleton(), &Config::showToolBarChanged, this, [=](bool visible){
+    for (auto toolbar : toolBars()) {
+      Q_ASSERT(toolbar);
+      toolbar->setVisible(visible);
+    }
+  });
 }
 
 void Window::setTheme(const core::Theme* theme) {
@@ -334,4 +346,8 @@ void Window::hideFindReplacePanel() {
 
 QToolBar* Window::findToolbar(const QString& id) {
   return findChild<QToolBar*>(id);
+}
+
+QList<QToolBar*> Window::toolBars() {
+  return findChildren<QToolBar*>();
 }
