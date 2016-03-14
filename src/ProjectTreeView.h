@@ -75,8 +75,8 @@ class FilterModel : public QSortFilterProxyModel {
  public:
   FilterModel(QObject* parent, const QString& targetDir)
       : QSortFilterProxyModel(parent), dir(targetDir) {
-    if (!dir.endsWith("/")) {
-      dir += "/";
+    if (!dir.endsWith(QStringLiteral("/"))) {
+      dir += QStringLiteral("/");
     }
   }
 
