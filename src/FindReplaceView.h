@@ -58,7 +58,8 @@ public slots:
   core::HistoryModel m_searchHistoryModel;
   core::HistoryModel m_replaceHistoryModel;
   QWidget* m_activeView;
-  QMetaObject::Connection m_connection;
+  QMetaObject::Connection m_connectionForContentsChanged;
+  QMetaObject::Connection m_connectionForCursorPositionChanged;
 
   void findFromActiveCursor();
   void findText(const QString& text, int searchStartPos, core::Document::FindFlags flags = 0);
