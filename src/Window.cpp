@@ -25,13 +25,13 @@
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Util.h"
+#include "core/PackageManager.h"
 
 using core::Config;
 using core::Theme;
 using core::Util;
 using core::ColorSettings;
-
-QMap<QString, QString> Window::s_toolbarsDefinitions;
+using core::PackageManager;
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -57,8 +57,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 #endif
 
   // Setup toolbars for this window from toolbars definitions
-  for (const auto& pkgName : s_toolbarsDefinitions.keys()) {
-    loadToolbar(this, pkgName, s_toolbarsDefinitions.value(pkgName));
+  for (const auto& pkgName : PackageManager::singleton().toolbarDefinitions().keys()) {
+    loadToolbar(this, pkgName, PackageManager::singleton().toolbarDefinitions().value(pkgName));
   }
 
   ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
@@ -221,8 +221,6 @@ void Window::loadToolbar(Window* win, const QString& pkgName, const QString& yml
       qWarning("root node must be a map");
       return;
     }
-
-    s_toolbarsDefinitions.insert(pkgName, ymlPath);
 
     YAML::Node toolbarsNode = rootNode["toolbar"];
     YamlUtil::parseToolbarNode(pkgName, ymlPath, win, toolbarsNode);

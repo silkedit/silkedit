@@ -86,12 +86,6 @@ class Window : public QMainWindow {
  private:
   static QList<Window*> s_windows;
 
-  /**
-   * @brief toolbars definitions
-   * A new window can load toolbars using this toolbars definition map
-   */
-  static QMap<QString, QString> s_toolbarsDefinitions;
-
   explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
   std::unique_ptr<Ui::Window> ui;

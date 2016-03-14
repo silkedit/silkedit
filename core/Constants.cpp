@@ -89,6 +89,10 @@ QString Constants::jsLibDir() {
   return QApplication::applicationDirPath() + "/jslib";
 }
 
+QString Constants::defaultPackagePath() {
+  return jsLibDir() + "/node_modules/silkedit/node_modules/default";
+}
+
 QString Constants::silkHomePath() const {
   return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
 }

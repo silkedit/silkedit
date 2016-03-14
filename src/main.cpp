@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
   Condition::init();
   Condition::add(GrammerCondition::name, std::move(std::unique_ptr<Condition>(new GrammerCondition())));
 
-  PackageManager::loadFiles();
+  PackageManager::singleton().loadFiles();
 
   ThemeManager::load();
 
