@@ -59,8 +59,7 @@ void initKeyTypeHash() {
 
 namespace core {
 
-QMap<QString, QVariant> Config::s_defaultValueMap =
-    QMap<QString, QVariant>{{SHOW_TABS_AND_SPACES_KEY, false}, {WORD_WRAP_KEY, true}, {SHOW_TOOLBAR_KEY, true}};
+QMap<QString, QVariant> Config::s_defaultValueMap;
 
 void Config::Init(v8::Local<v8::Object> exports) {
   Isolate* isolate = exports->GetIsolate();
@@ -151,6 +150,9 @@ void Config::init() {
   m_scalarConfigs.clear();
 
   initKeyTypeHash();
+  s_defaultValueMap.insert(SHOW_TABS_AND_SPACES_KEY, false);
+  s_defaultValueMap.insert(WORD_WRAP_KEY, true);
+  s_defaultValueMap.insert(SHOW_TOOLBAR_KEY, true);
 
   load();
 
