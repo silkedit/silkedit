@@ -96,8 +96,7 @@ bool App::event(QEvent* event) {
   switch (event->type()) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
-      DocumentManager::singleton().open(static_cast<QFileOpenEvent*>(event)->file());
-      return true;
+      return DocumentManager::singleton().open(static_cast<QFileOpenEvent*>(event)->file()) != -1;
     default:
       return QApplication::event(event);
   }
@@ -218,7 +217,15 @@ TabViewGroup* App::activeTabViewGroup() {
 }
 
 Window* App::activeWindow() {
-  return qobject_cast<Window*>(QApplication::activeWindow());
+  // Try to find the window that has the input focus
+  Window* window = qobject_cast<Window*>(QApplication::activeWindow());
+
+  // If we can't find it, try to find the top level window
+  if (!window && !QApplication::topLevelWidgets().isEmpty()) {
+    window = qobject_cast<Window*>(QApplication::topLevelWidgets().first());
+  }
+
+  return window;
 }
 
 void App::setActiveWindow(QWidget* act) {
@@ -233,7 +240,7 @@ QWidget* App::activePopupWidget() {
   return QApplication::activePopupWidget();
 }
 
-void App::postEvent(QObject* receiver, QEvent *event, int priority) {
+void App::postEvent(QObject* receiver, QEvent* event, int priority) {
   QApplication::postEvent(receiver, event, priority);
 }
 
