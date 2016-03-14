@@ -661,6 +661,14 @@ void TextEditView::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
+void TextEditView::dropEvent(QDropEvent* e) {
+  if (e->mimeData()->hasUrls()) {
+    for (const QUrl& url : e->mimeData()->urls()) {
+      emit fileDropped(url.toLocalFile());
+    }
+  }
+}
+
 void TextEditView::setViewportMargins(int left, int top, int right, int bottom) {
   QPlainTextEdit::setViewportMargins(left, top, right, bottom);
 }
@@ -756,7 +764,8 @@ void TextEditView::insertNewLine() {
   bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
   auto cursor = textCursor();
   TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
-                                       prevPrevLineText, metadata, indentUsingSpaces, d_ptr->tabWidth());
+                                       prevPrevLineText, metadata, indentUsingSpaces,
+                                       d_ptr->tabWidth());
 }
 
 TextEditView* TextEditView::clone() {

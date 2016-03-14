@@ -73,6 +73,7 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
     connect(textEdit, &TextEditView::pathUpdated, this,
             [=](const QString& path) { setTabText(indexOf(textEdit), getFileNameFrom(path)); });
     connect(textEdit, &TextEditView::modificationChanged, this, &TabView::updateTabTextBasedOn);
+    connect(textEdit, &TextEditView::fileDropped, this, &TabView::open);
   }
   int result = QTabWidget::insertTab(index, widget, label);
 
@@ -121,8 +122,7 @@ int TabView::open(const QString& path) {
   return newIndex;
 }
 
-bool TabView::closeTab(int index)
-{
+bool TabView::closeTab(int index) {
   return closeTab(widget(index));
 }
 

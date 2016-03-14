@@ -103,6 +103,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
   void showLineNumberChanged(bool visible);
+  void fileDropped(const QString& path);
 
   // private signals
   void destroying(const QString& path, QPrivateSignal);
@@ -115,6 +116,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void mousePressEvent(QMouseEvent* e) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
+  void dropEvent(QDropEvent* e) override;
 
  private:
   friend class TextEditViewPrivate;
