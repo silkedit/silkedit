@@ -105,12 +105,9 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
     return;
   }
 
-  if (theme->projectTreeViewSettings != nullptr) {
-    QString style;
-    ColorSettings* projectTreeViewSettings = theme->projectTreeViewSettings.get();
-
-    style =
-        QString(
+  if (theme->projectTreeViewSettings) {
+    const QString& style =
+        QStringLiteral(
             "ProjectTreeView {"
             "background-color: %1;"
             "color: %2;"
@@ -120,10 +117,14 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
             "background-color: %3;"
             "color:%4;"
             "}")
-            .arg(Util::qcolorForStyleSheet(projectTreeViewSettings->value("background")),
-                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("foreground")),
-                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("selectionBackground")),
-                 Util::qcolorForStyleSheet(projectTreeViewSettings->value("selectionForeground")));
+            .arg(Util::qcolorForStyleSheet(
+                     theme->projectTreeViewSettings->value(QStringLiteral("background"))),
+                 Util::qcolorForStyleSheet(
+                     theme->projectTreeViewSettings->value(QStringLiteral("foreground"))),
+                 Util::qcolorForStyleSheet(
+                     theme->projectTreeViewSettings->value(QStringLiteral("selectionBackground"))),
+                 Util::qcolorForStyleSheet(
+                     theme->projectTreeViewSettings->value(QStringLiteral("selectionForeground"))));
 
     this->setStyleSheet(style);
   }
@@ -164,7 +165,7 @@ void ProjectTreeView::keyPressEvent(QKeyEvent* event) {
   }
 }
 
-void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent* ) {
+void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent*) {
   emit activated(currentIndex());
 }
 
@@ -263,7 +264,7 @@ void ProjectTreeView::focusRootDirectory(const QString& path) {
 
 void ProjectTreeView::createNewFile(const QDir& dir) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
-  QFile newFile(getUniqueFileName(dir.absoluteFilePath("untitled")));
+  QFile newFile(getUniqueFileName(dir.absoluteFilePath(QStringLiteral("untitled"))));
   if (!newFile.open(QIODevice::WriteOnly))
     return;
   newFile.close();
@@ -274,7 +275,7 @@ void ProjectTreeView::createNewFile(const QDir& dir) {
 
 void ProjectTreeView::createNewDir(const QDir& dir) {
   FilterModel* filter = qobject_cast<FilterModel*>(model());
-  QDir newDir(getUniqueDirName(dir.absoluteFilePath("untitled folder")));
+  QDir newDir(getUniqueDirName(dir.absoluteFilePath(QStringLiteral("untitled folder"))));
   if (dir.mkdir(newDir.dirName())) {
     expand(currentIndex());
     QModelIndex index = filter->mapFromSource(m_model->index(newDir.absolutePath()));
@@ -307,6 +308,7 @@ ProjectTreeView::~ProjectTreeView() {
 bool FilterModel::filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const {
   QModelIndex pathIndex = sourceModel()->index(sourceRow, 0, sourceParent);
   // Without trailing /, can't distinguish hoge from hoge2
-  QString path = sourceModel()->data(pathIndex, QFileSystemModel::FilePathRole).toString() + "/";
+  QString path = sourceModel()->data(pathIndex, QFileSystemModel::FilePathRole).toString() +
+                 QStringLiteral("/");
   return dir.startsWith(path, Qt::CaseInsensitive) || path.startsWith(dir, Qt::CaseInsensitive);
 }
