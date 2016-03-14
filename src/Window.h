@@ -75,8 +75,9 @@ class Window : public QMainWindow {
   StatusBar* statusBar();
   Console* console() { return m_console; }
   FindReplaceView* findReplaceView() { return m_findReplaceView; }
+  QList<QToolBar *> toolBars();
 
- signals:
+signals:
   void activeViewChanged(QWidget* oldView, QWidget* newView);
   void firstPaintEventFired();
 

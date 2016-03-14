@@ -65,6 +65,8 @@ class Config : public QObject, public Singleton<Config> {
   bool showTabsAndSpaces();
   bool wordWrap();
 
+  bool showToolbar();
+
   void init();
   bool contains(const QString& key);
   void addPackageConfigDefinition(const core::ConfigDefinition& def);
@@ -115,12 +117,14 @@ class Config : public QObject, public Singleton<Config> {
   void wordWrapChanged(bool);
   void endOfLineStrChanged(const QString& str);
   void configChanged(const QString& key, QVariant oldValue, QVariant newValue);
+  void showToolBarChanged(bool visible);
 
  private:
   // public API accessible from JS
   static void get(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void set(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void setFont(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static QMap<QString, QVariant> s_defaultValueMap;
 
   Theme* m_theme;
   QFont m_font;
