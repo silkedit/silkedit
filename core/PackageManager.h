@@ -43,7 +43,7 @@ public slots:
   PackageManager();
 
   QMap<QString, QString> m_toolbarsDefinitions;
-  void loadFilesInternal(const QString &pkgPath, const QString &pkg);
+  void loadPackageContents(const QString &pkgPath, const QString &pkg);
 };
 
 }  // namespace core
