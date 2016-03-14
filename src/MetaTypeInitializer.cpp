@@ -46,6 +46,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QEvent*>();
   qRegisterMetaType<QEvent::Type>("QEvent::Type");
   qRegisterMetaType<FindReplaceView*>();
+  qRegisterMetaType<QtMsgType>();
   qRegisterMetaType<core::Condition::Operator>();
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Url*>("core::Url*");
