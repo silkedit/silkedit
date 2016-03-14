@@ -100,7 +100,7 @@ int TabView::open(const QString& path) {
 
   if (count() == 1) {
     TextEditView* editView = qobject_cast<TextEditView*>(currentWidget());
-    if (editView && !editView->document()->isModified() && editView->document()->isEmpty()) {
+    if (editView && !editView->document()->isModified() && editView->document()->path().isEmpty()) {
       qDebug() << "trying to replace an empty doc with a new one";
       editView->setDocument(newDoc);
       editView->setPath(path);
