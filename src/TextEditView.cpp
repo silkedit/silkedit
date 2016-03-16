@@ -722,9 +722,8 @@ void TextEditView::replaceAllSelection(const QString& findText,
     for (const auto& region : doc->findAll(findText, begin, end, flags)) {
       QTextCursor cursor(doc->docHandle(), region.begin() + delta);
       cursor.setPosition(region.end() + delta, QTextCursor::KeepAnchor);
-      Q_ASSERT(cursor.hasSelection());
+      delta += (replaceText.size() - cursor.selectedText().size());
       insertText(cursor, replaceText, preserveCase);
-      delta += (replaceText.size() - findText.size());
     }
 
     currentCursor.endEditBlock();
