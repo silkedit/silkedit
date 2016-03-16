@@ -22,6 +22,7 @@ class ProjectTreeView : public QTreeView {
 
   bool openDirOrExpand(const QString& dirName);
   void edit(const QModelIndex& index);
+  QString dirPath() const;
 
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
@@ -79,6 +80,8 @@ class FilterModel : public QSortFilterProxyModel {
       dir += QStringLiteral("/");
     }
   }
+
+  QString dirPath() { return dir; }
 
  protected:
   virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
