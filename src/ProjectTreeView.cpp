@@ -99,6 +99,15 @@ void ProjectTreeView::edit(const QModelIndex& index) {
   QTreeView::edit(index);
 }
 
+QString ProjectTreeView::dirPath() const
+{
+  if (auto filterModel = qobject_cast<FilterModel*>(model())) {
+    return filterModel->dirPath();
+  }
+
+  return QString();
+}
+
 void ProjectTreeView::setTheme(const core::Theme* theme) {
   qDebug("ProjectTreeView theme is changed");
   if (!theme) {

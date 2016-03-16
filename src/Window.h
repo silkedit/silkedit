@@ -70,8 +70,9 @@ class Window : public QMainWindow {
   bool openDir(const QString& dirPath);
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
+  void updateTitle();
 
- public slots:
+public slots:
   StatusBar* statusBar();
   Console* console() { return m_console; }
   FindReplaceView* findReplaceView() { return m_findReplaceView; }

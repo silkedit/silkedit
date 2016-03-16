@@ -91,6 +91,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   ui->rootSplitter->addWidget(contentSplitter);
   setTheme(Config::singleton().theme());
+  updateTitle();
 
   connect(m_tabViewGroup, &TabViewGroup::activeTabViewChanged, this,
           static_cast<void (Window::*)(TabView*, TabView*)>(&Window::updateConnection));
@@ -102,7 +103,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
 
   updateConnection(nullptr, m_tabViewGroup->activeTab());
   connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
-  connect(&Config::singleton(), &Config::showToolBarChanged, this, [=](bool visible){
+  connect(&Config::singleton(), &Config::showToolBarChanged, this, [=](bool visible) {
     for (auto toolbar : toolBars()) {
       Q_ASSERT(toolbar);
       toolbar->setVisible(visible);
@@ -310,6 +311,23 @@ void Window::closeEvent(QCloseEvent* event) {
     qDebug("closeEvent is ignored");
     event->ignore();
   }
+}
+
+void Window::updateTitle() {
+  QString title;
+  if (m_tabViewGroup && m_tabViewGroup->activeTab()) {
+    auto tab = m_tabViewGroup->activeTab();
+    title = tab->tabText(tab->currentIndex());
+  }
+
+  if (m_projectView) {
+    if (!title.isEmpty()) {
+      title += QStringLiteral(" — ");
+    }
+    title += m_projectView->dirPath();
+  }
+
+  setWindowTitle(title);
 }
 
 bool Window::openDir(const QString& dirPath) {

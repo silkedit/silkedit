@@ -86,6 +86,10 @@ App::App(int& argc, char** argv)
         tabViewGroup->setActiveTab(tabView);
       }
     }
+
+    if (auto window = activeWindow()) {
+      window->updateTitle();
+    }
   });
 
   connect(this, &App::aboutToQuit, &SyntaxHighlighterThread::singleton(),
