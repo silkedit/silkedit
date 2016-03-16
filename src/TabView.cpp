@@ -50,7 +50,7 @@ TabView::TabView(QWidget* parent)
   connect(m_tabBar, &TabBar::onDetachTabFinished, this, &TabView::detachTabFinished);
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
-  connect(this, &QTabWidget::tabCloseRequested, this, &TabView::removeTabAndWidget);
+  connect(this, &QTabWidget::tabCloseRequested, this, static_cast<bool (TabView::*)(int)>(&TabView::closeTab));
   connect(&Config::singleton(), &Config::themeChanged, this, &TabView::setTheme);
 }
 
