@@ -126,6 +126,9 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
                 theme->textEditViewSettings->value("selectionBackground")));
 
     q_ptr->setStyleSheet(style);
+
+    q_ptr->verticalScrollBar()->setStyleSheet(theme->textEditVerticalScrollBarStyle());
+    q_ptr->horizontalScrollBar()->setStyleSheet(theme->textEditHorizontalScrollBarStyle());
   }
 
   highlightCurrentLine();
