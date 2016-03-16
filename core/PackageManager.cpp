@@ -46,7 +46,7 @@ const QString PackageManager::DEPENDENCIES = QStringLiteral("dependencies");
 void PackageManager::loadPackageContents(const QString& pkgPath, const QString& pkg) {
   loadGrammers(pkgPath + QStringLiteral("/grammers"));
   loadPreferences(pkgPath + QStringLiteral("/preferences"));
-  const auto& toolbarYmlPath = pkgPath + QStringLiteral("/toolbar.yml");
+  const QString& toolbarYmlPath = pkgPath + QStringLiteral("/toolbar.yml");
   if (QFileInfo::exists(toolbarYmlPath)) {
     m_toolbarsDefinitions.insert(pkg, toolbarYmlPath);
   }
