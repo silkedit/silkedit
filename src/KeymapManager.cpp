@@ -13,6 +13,9 @@
 #include "CommandEvent.h"
 #include "CommandManager.h"
 #include "Helper.h"
+#include "App.h"
+#include "Window.h"
+#include "StatusBar.h"
 #include "core/Constants.h"
 #include "core/Util.h"
 #include "core/AndConditionExpression.h"
@@ -165,6 +168,9 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
 
   // check exact match
   if (m_keymaps.find(key) != m_keymaps.end()) {
+    if (!m_partiallyMatchedKeyString.isEmpty()) {
+      App::instance()->activeWindow()->statusBar()->clearMessage();
+    }
     m_partiallyMatchedKeyString.clear();
     auto range = m_keymaps.equal_range(key);
     for (auto it = range.first; it != range.second; it++) {
@@ -185,10 +191,20 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");
     m_partiallyMatchedKeyString = key.toString();
+    App::instance()->activeWindow()->statusBar()->showMessage(Util::toString(key));
     return true;
   }
 
   // no match
+  // When partially matched key exists, cancel dispatch
+  if (!m_partiallyMatchedKeyString.isEmpty()) {
+    qDebug("cancel partial match");
+    App::instance()->activeWindow()->statusBar()->clearMessage();
+    m_partiallyMatchedKeyString.clear();
+    return true;
+  }
+
+  m_partiallyMatchedKeyString.clear();
   return false;
 }
 
