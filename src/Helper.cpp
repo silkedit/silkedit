@@ -225,7 +225,7 @@ template <typename T>
 T HelperPrivate::callFunc(const QString& funcName, QVariantList args, T defaultValue) {
   node::Environment* env = q->m_nodeBindings->uv_env();
   if (!env) {
-    qDebug() << "NodeBinding is not yet initialized";
+    qWarning() << "NodeBinding is not yet initialized." << "funcName" << funcName;
     return defaultValue;
   }
   v8::Locker locker(env->isolate());
