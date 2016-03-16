@@ -1,6 +1,7 @@
 ﻿#include <QDebug>
 #include "Theme.h"
 #include "PListParser.h"
+#include "Util.h"
 
 namespace core {
 
@@ -14,6 +15,53 @@ const QString backgroundStr = "background";
 const int brightnessThresholdWhite = 180;
 const int brightnessThresholdGray = 125;
 const int brightnessThresholdBlack = 60;
+const QString& verticalScrollBarBaseStyle = QStringLiteral(R"r(
+QScrollBar:vertical {
+  border-left: 0px;
+  background: %1;
+  width: 8px;
+  margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:vertical {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0  %2, stop: 0.5 %2,  stop:1 %2);
+  min-height: 0px;
+  border-radius: 4px;
+}
+
+QScrollBar::add-line:vertical {
+  height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+  height: 0px;
+}
+)r");
+
+const QString& horizontalScrollBarBaseStyle = QStringLiteral(R"r(
+QScrollBar:horizontal {
+  border-left: 0px;
+  background: %1;
+  height: 8px;
+  margin: 0px 0px 0px 0px;
+}
+
+QScrollBar::handle:horizontal {
+  background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0  %2, stop: 0.5 %2,  stop:1 %2);
+  min-width: 0px;
+  border-radius: 4px;
+}
+
+QScrollBar::add-line:horizontal {
+  width: 0px;
+}
+
+QScrollBar::sub-line:horizontal {
+  width: 0px;
+}
+)r");
+
+const QString& scrollBarColor = QStringLiteral("#C1C1C1");
 
 // Change RGBA color code to ARGB color code
 //   thTheme in package defines color ilke below.
@@ -264,8 +312,7 @@ bool Theme::isDarkTheme() const {
   return ret;
 }
 
-boost::optional<QFont> Theme::font()
-{
+boost::optional<QFont> Theme::font() {
   return m_font;
 }
 
@@ -490,6 +537,30 @@ void Theme::setFont(const QFont& font) {
   for (const auto& pair : m_cachedFormats) {
     pair.second->setFont(font);
   }
+}
+
+QString Theme::textEditVerticalScrollBarStyle() const {
+  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditViewSettings->value(
+                                            QStringLiteral("background"))))
+      .arg(scrollBarColor);
+}
+
+QString Theme::projectTreeViewVerticalScrollBarStyle() const {
+  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(projectTreeViewSettings->value(
+                                            QStringLiteral("background"))))
+      .arg(scrollBarColor);
+}
+
+QString Theme::textEditHorizontalScrollBarStyle() const {
+  return horizontalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditViewSettings->value(
+                                              QStringLiteral("background"))))
+      .arg(scrollBarColor);
+}
+
+QString Theme::projectTreeViewHorizontalScrollBarStyle() const {
+  return horizontalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(projectTreeViewSettings->value(
+                                              QStringLiteral("background"))))
+      .arg(scrollBarColor);
 }
 
 QTextCharFormat* Theme::getFormat(const QString& scope) {

@@ -74,6 +74,11 @@ class Theme {
   boost::optional<QFont> font();
   void setFont(const QFont &font);
 
+  QString textEditVerticalScrollBarStyle() const;
+  QString projectTreeViewVerticalScrollBarStyle() const;
+  QString textEditHorizontalScrollBarStyle() const;
+  QString projectTreeViewHorizontalScrollBarStyle() const;
+
 private:
   static ScopeSetting* matchedSetting(const QString& scope);
 

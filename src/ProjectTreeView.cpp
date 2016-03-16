@@ -4,6 +4,7 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QDir>
+#include <QScrollBar>
 
 #include "ProjectTreeView.h"
 #include "DocumentManager.h"
@@ -127,6 +128,9 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
                      theme->projectTreeViewSettings->value(QStringLiteral("selectionForeground"))));
 
     this->setStyleSheet(style);
+
+    verticalScrollBar()->setStyleSheet(theme->projectTreeViewVerticalScrollBarStyle());
+    horizontalScrollBar()->setStyleSheet(theme->projectTreeViewHorizontalScrollBarStyle());
   }
 }
 
