@@ -8,10 +8,9 @@
 #include <QRegularExpression>
 
 #include "YamlUtil.h"
-#include "core/ConditionExpression.h"
 #include "CommandAction.h"
-#include "Helper.h"
 #include "Window.h"
+#include "core/ConditionExpression.h"
 #include "core/PackageToolBar.h"
 #include "core/PackageMenu.h"
 #include "core/PackageAction.h"
@@ -19,6 +18,7 @@
 #include "core/JSValue.h"
 #include "core/Util.h"
 #include "core/Config.h"
+#include "core/V8Util.h"
 
 using core::Condition;
 using core::PackageMenu;
@@ -31,6 +31,7 @@ using core::Regexp;
 using core::JSNull;
 using core::Util;
 using core::Config;
+using core::V8Util;
 
 namespace {
 
@@ -126,7 +127,10 @@ boost::optional<ConditionExpression> YamlUtil::parseValueCondition(const QString
  * @param parent
  * @param menuNode
  */
-void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML::Node& menuNode) {
+void YamlUtil::parseMenuNode(const QString& pkgName,
+                             const QString& pkgPath,
+                             QWidget* parent,
+                             const YAML::Node& menuNode) {
   if (!menuNode.IsSequence()) {
     qWarning("menuNode must be a sequence.");
     return;
@@ -164,9 +168,9 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
                      : "";
     QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      title = Helper::singleton().translate(
-          QStringLiteral("menu.%2.title").arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          pkgName, defaultTitle);
+      title = translate(pkgPath, QStringLiteral("menu.%2.title")
+                                     .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+                        defaultTitle);
     }
     YAML::Node commandNode = node["command"];
     YAML::Node submenuNode = node["menu"];
@@ -199,7 +203,7 @@ void YamlUtil::parseMenuNode(const QString& pkgName, QWidget* parent, const YAML
       }
 
       Q_ASSERT(currentMenu);
-      parseMenuNode(pkgName, currentMenu, submenuNode);
+      parseMenuNode(pkgName, pkgPath, currentMenu, submenuNode);
       prevId = id;
     } else {
       // Check if condition
@@ -282,7 +286,7 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
     qWarning("toolbarNode must be a sequence.");
     return;
   }
-
+  const auto& pkgPath = ymlPath.left(ymlPath.lastIndexOf('/'));
   // Reverse node order to handle 'before' correctly.
   // If before is omitted, before becomes the previous menu item's id automatically
   std::stack<YAML::Node> nodes;
@@ -318,9 +322,9 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
                      : "";
     QString title = defaultTitle;
     if (idNode.IsDefined() && idNode.IsScalar()) {
-      title = Helper::singleton().translate(
-          QString("toolbar.%2.title").arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-          pkgName, defaultTitle);
+      title = translate(pkgPath, QString("toolbar.%2.title")
+                                     .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+                        defaultTitle);
     }
     YAML::Node itemsNode = node["items"];
     Window* window = qobject_cast<Window*>(parent);
@@ -379,10 +383,10 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
         }
         if (action && tooltipNode.IsDefined()) {
           QString tooltip = QString::fromUtf8(tooltipNode.as<std::string>().c_str());
-          tooltip = Helper::singleton().translate(
-              QString("toolbar.%2.tooltip")
-                  .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
-              pkgName, tooltip);
+          tooltip =
+              translate(pkgPath, QString("toolbar.%2.tooltip")
+                                     .arg(QString::fromUtf8(idNode.as<std::string>().c_str())),
+                        tooltip);
           action->setToolTip(tooltip);
         }
       } else if (typeNode.IsDefined() && typeNode.IsScalar()) {
@@ -420,6 +424,9 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
 
 QList<ConfigDefinition> YamlUtil::parseConfig(const QString& pkgName, const QString& ymlPath) {
   QList<ConfigDefinition> defs;
+
+  const QString& pkgPath = ymlPath.left(ymlPath.lastIndexOf('/'));
+
   try {
     YAML::Node rootNode = YAML::LoadFile(ymlPath.toUtf8().constData());
     if (!rootNode.IsMap()) {
@@ -443,14 +450,13 @@ QList<ConfigDefinition> YamlUtil::parseConfig(const QString& pkgName, const QStr
         }
 
         QString title = QString::fromUtf8(defNode["title"].as<std::string>().c_str());
-        title = Helper::singleton().translate(QString("config.%2.title").arg(configName), pkgName,
-                                              title);
+        title = translate(pkgPath, QString("config.%2.title").arg(configName), title);
         QString description;
         // description is optional
         if (defNode["description"].IsScalar()) {
           description = QString::fromUtf8(defNode["description"].as<std::string>().c_str());
-          description = Helper::singleton().translate(
-              QString("config.%2.description").arg(configName), pkgName, description);
+          description =
+              translate(pkgPath, QString("config.%2.description").arg(configName), description);
         }
         QString type = QString::fromUtf8(defNode["type"].as<std::string>().c_str());
         QVariant defaultValue;
@@ -494,4 +500,84 @@ QList<ConfigDefinition> YamlUtil::parseConfig(const QString& pkgName, const QStr
   }
 
   return defs;
+}
+
+void YamlUtil::translate(const v8::FunctionCallbackInfo<v8::Value>& args) {
+  v8::Isolate* isolate = args.GetIsolate();
+  v8::HandleScope scope(isolate);
+
+  if (args.Length() != 3 || !args[0]->IsString() || !args[1]->IsString() || !args[2]->IsString()) {
+    V8Util::throwError(isolate, "invalid argument");
+    return;
+  }
+
+  const auto& pkgPath =
+      V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const auto& key =
+      V8Util::toQString(args[1]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+  const auto& defaultValue =
+      V8Util::toQString(args[2]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
+
+  args.GetReturnValue().Set(
+      V8Util::toV8Value(isolate, QVariant(translate(pkgPath, key, defaultValue))));
+}
+
+QString YamlUtil::translate(const QString& pkgPath,
+                            const QString& key,
+                            const QString& defaultValue) {
+  return translate(pkgPath, Config::singleton().locale(), key, defaultValue);
+}
+
+QString YamlUtil::translate(const QString& pkgPath,
+                            const QString& locale,
+                            const QString& key,
+                            const QString& defaultValue) {
+  QStringList translationPaths;
+  const QString& path =
+      pkgPath + QStringLiteral("/locales/") + locale + QStringLiteral("/translation.yml");
+  if (QFileInfo::exists(path)) {
+    translationPaths.append(path);
+  }
+
+  auto indexOf_ = locale.indexOf('_');
+  if (indexOf_ > 0) {
+    const QString& path = pkgPath + QStringLiteral("/locales/") + locale.left(indexOf_) +
+                          QStringLiteral("/translation.yml");
+    if (QFileInfo::exists(path)) {
+      translationPaths.append(path);
+    }
+  }
+
+  const QStringList subKeys = key.split('.');
+  boost::optional<YAML::Node> currentNode;
+
+  for (const auto& translationPath : translationPaths) {
+    try {
+      YAML::Node rootNode = YAML::LoadFile(translationPath.toUtf8().constData());
+      if (!rootNode.IsMap()) {
+        qWarning() << "root node must be a map";
+        return defaultValue;
+      }
+      currentNode = rootNode;
+
+      for (int i = 0; i < subKeys.size(); i++) {
+        Q_ASSERT(currentNode);
+        YAML::Node subNode = (*currentNode)[subKeys[i].toUtf8().constData()];
+        if (subNode.IsDefined()) {
+          currentNode = subNode;
+        } else {
+          currentNode = boost::none;
+          break;
+        }
+      }
+
+      if (currentNode) {
+        return QString::fromUtf8(currentNode->as<std::string>().c_str());
+      }
+    } catch (const std::runtime_error& ex) {
+      qWarning() << "Unable to load" << translationPath << "Cause:" << ex.what();
+    }
+  }
+
+  return defaultValue;
 }
