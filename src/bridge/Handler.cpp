@@ -30,6 +30,7 @@
 #endif
 #include "Console.h"
 #include "FindReplaceView.h"
+#include "util/YamlUtil.h"
 #include "core/Font.h"
 #include "core/JSHandler.h"
 #include "core/V8Util.h"
@@ -207,6 +208,7 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "info", info);
   NODE_SET_METHOD(exports, "warn", warn);
   NODE_SET_METHOD(exports, "error", error);
+  NODE_SET_METHOD(exports, "translate", YamlUtil::translate);
 
   // register enums in Qt namespace
   registerQtEnum<Qt::CaseSensitivity>(context, exports, isolate, "Qt::CaseSensitivity");

@@ -121,12 +121,6 @@ void Helper::runCommand(const QString& cmd, const CommandArgument& cmdArgs) {
   d->callFunc("runCommand", args);
 }
 
-QString Helper::translate(const QString& key, const QString& package, const QString& defaultValue) {
-  const QVariantList& args = QVariantList{QVariant::fromValue(key), QVariant::fromValue(package),
-                                          QVariant::fromValue(defaultValue)};
-  return d->callFunc<QString>("translate", args, defaultValue);
-}
-
 void Helper::emitSignalInternal(const QVariantList& args) {
   QObject* obj = QObject::sender();
   if (!obj) {
