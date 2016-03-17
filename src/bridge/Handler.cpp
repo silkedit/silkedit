@@ -1,4 +1,4 @@
-#include <algorithm>
+﻿#include <algorithm>
 #include <memory>
 #include <QDebug>
 #include <QVariant>
@@ -23,7 +23,7 @@
 #include "DocumentManager.h"
 #include "ProjectManager.h"
 #include "FileDialog.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "JSStaticObject.h"
 #ifdef Q_OS_MAC
 #include "WebView.h"
@@ -256,7 +256,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<LineEdit>(exports);
   registerClass<view::MessageBox>(exports);
   registerClass<StringListModel>(exports);
-  registerClass<TextEditView>(exports);
+  registerClass<TextEdit>(exports);
   registerClass<VBoxLayout>(exports);
 #ifdef Q_OS_MAC
   registerClass<WebView>(exports);

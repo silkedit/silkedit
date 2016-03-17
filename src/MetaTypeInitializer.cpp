@@ -7,7 +7,7 @@
 #include "Window.h"
 #include "StatusBar.h"
 #include "Console.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "FindReplaceView.h"
 #include "core/Condition.h"
 #include "core/FunctionInfo.h"
@@ -32,7 +32,7 @@ void MetaTypeInitializer::init()
 {
   qRegisterMetaType<TabView*>();
   qRegisterMetaType<QLinkedList<TabView*>>();
-  qRegisterMetaType<TextEditView*>();
+  qRegisterMetaType<TextEdit*>();
   qRegisterMetaType<TabViewGroup*>();
   qRegisterMetaType<Window*>();
   qRegisterMetaType<StatusBar*>();

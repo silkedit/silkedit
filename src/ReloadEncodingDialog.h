@@ -4,7 +4,7 @@
 
 #include "core/macros.h"
 
-class TextEditView;
+class TextEdit;
 namespace core {
 class Encoding;
 }
@@ -13,7 +13,7 @@ class ReloadEncodingDialog : public QDialog {
   Q_OBJECT
 
  public:
-  explicit ReloadEncodingDialog(TextEditView* editView,
+  explicit ReloadEncodingDialog(TextEdit* textEdit,
                                 const core::Encoding& fromEncoding,
                                 const core::Encoding& toEncoding,
                                 QWidget* parent = 0);
@@ -23,7 +23,7 @@ class ReloadEncodingDialog : public QDialog {
  private:
   const core::Encoding& m_fromEncoding;
   const core::Encoding& m_toEncoding;
-  TextEditView* m_editView;
+  TextEdit* m_textEdit;
 
   void reload();
   void convert();

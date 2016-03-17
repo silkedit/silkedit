@@ -4,7 +4,7 @@
 
 #include "core/macros.h"
 
-class TextEditView;
+class TextEdit;
 class LanguageComboBox;
 class EncodingComboBox;
 class LineSeparatorComboBox;
@@ -31,10 +31,10 @@ class StatusBar : public QStatusBar{
   void setEncoding(const core::Encoding& encoding);
   void setLineSeparator(const QString& separator);
   void setBOM(const core::BOM& bom);
-  void setActiveTextEditViewLanguage();
-  void setActiveTextEditViewEncoding();
-  void setActiveTextEditViewLineSeparator();
-  void setActiveTextEditViewBOM();
+  void setActiveTextEditLanguage();
+  void setActiveTextEditEncoding();
+  void setActiveTextEditLineSeparator();
+  void setActiveTextEditBOM();
 
  signals:
   void languageChanged(const QString& scopeName);

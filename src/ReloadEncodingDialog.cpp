@@ -6,18 +6,18 @@
 
 #include "ReloadEncodingDialog.h"
 #include "core/Encoding.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 
 using core::Encoding;
 
-ReloadEncodingDialog::ReloadEncodingDialog(TextEditView* editView,
+ReloadEncodingDialog::ReloadEncodingDialog(TextEdit* textEdit,
                                            const Encoding& fromEncoding,
                                            const Encoding& toEncoding,
                                            QWidget* parent)
     : QDialog(parent),
       m_fromEncoding(fromEncoding),
       m_toEncoding(toEncoding),
-      m_editView(editView) {
+      m_textEdit(textEdit) {
   QPushButton* cancelBtn = new QPushButton(tr("&Cancel"));
   QPushButton* reloadBtn = new QPushButton(tr("&Reload"));
   QPushButton* convertBtn = new QPushButton(tr("&Convert"));
@@ -43,12 +43,12 @@ ReloadEncodingDialog::ReloadEncodingDialog(TextEditView* editView,
 }
 
 void ReloadEncodingDialog::reload() {
-  if (!m_editView || !m_editView->document()) {
+  if (!m_textEdit || !m_textEdit->document()) {
     reject();
     return;
   }
 
-  if (m_editView->document()->isModified()) {
+  if (m_textEdit->document()->isModified()) {
     int ret = QMessageBox::question(this, "", tr("Current document is changed. This change will be "
                                                  "lost after reloading. Do you want to continue?"));
     if (ret == QMessageBox::No) {
@@ -57,13 +57,13 @@ void ReloadEncodingDialog::reload() {
     }
   }
 
-  m_editView->document()->reload(m_toEncoding);
+  m_textEdit->document()->reload(m_toEncoding);
   accept();
 }
 
 void ReloadEncodingDialog::convert() {
-  if (m_editView && m_editView->document()) {
-    m_editView->document()->setEncoding(m_toEncoding);
+  if (m_textEdit && m_textEdit->document()) {
+    m_textEdit->document()->setEncoding(m_toEncoding);
     accept();
   } else {
     reject();

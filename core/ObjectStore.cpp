@@ -1,4 +1,4 @@
-#include <QVariant>
+﻿#include <QVariant>
 #include <QDebug>
 #include <QMetaMethod>
 #include <QThread>
@@ -24,7 +24,7 @@ std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> ObjectStore::s_ob
 QObject* ObjectStore::unwrap(v8::Local<v8::Object> obj) {
   Q_ASSERT(!obj.IsEmpty());
   // This is the case when QObject method is called without QObject.
-  // e.g.  new silkedit.App.activeTextEditView()
+  // e.g.  new silkedit.App.activeTextEdit()
   if (obj->InternalFieldCount() == 0) {
     return nullptr;
   }

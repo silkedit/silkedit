@@ -5,7 +5,7 @@
 #include <QStylePainter>
 
 #include "TabView.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "KeymapManager.h"
 #include "TabBar.h"
 #include "Window.h"
@@ -68,12 +68,12 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   }
 
   widget->setParent(this);
-  TextEditView* textEdit = qobject_cast<TextEditView*>(widget);
+  TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
   if (textEdit) {
-    connect(textEdit, &TextEditView::pathUpdated, this,
+    connect(textEdit, &TextEdit::pathUpdated, this,
             [=](const QString& path) { setTabText(indexOf(textEdit), getFileNameFrom(path)); });
-    connect(textEdit, &TextEditView::modificationChanged, this, &TabView::updateTabTextBasedOn);
-    connect(textEdit, &TextEditView::fileDropped, this, &TabView::open);
+    connect(textEdit, &TextEdit::modificationChanged, this, &TabView::updateTabTextBasedOn);
+    connect(textEdit, &TextEdit::fileDropped, this, &TabView::open);
   }
   int result = QTabWidget::insertTab(index, widget, label);
 
@@ -100,16 +100,16 @@ int TabView::open(const QString& path) {
   }
 
   if (count() == 1) {
-    TextEditView* editView = qobject_cast<TextEditView*>(currentWidget());
-    if (editView && !editView->document()->isModified() && editView->document()->path().isEmpty()) {
+    TextEdit* textEdit = qobject_cast<TextEdit*>(currentWidget());
+    if (textEdit && !textEdit->document()->isModified() && textEdit->document()->path().isEmpty()) {
       qDebug() << "trying to replace an empty doc with a new one";
-      editView->setDocument(newDoc);
-      editView->setPath(path);
+      textEdit->setDocument(newDoc);
+      textEdit->setPath(path);
       return currentIndex();
     }
   }
 
-  TextEditView* view = new TextEditView(this);
+  TextEdit* view = new TextEdit(this);
   view->setDocument(newDoc);
   auto newIndex = addTab(view, getFileNameFrom(path));
 
@@ -143,7 +143,7 @@ QList<QWidget*> TabView::widgets() const {
 }
 
 void TabView::addNewTab() {
-  TextEditView* view = new TextEditView(this);
+  TextEdit* view = new TextEdit(this);
   std::shared_ptr<Document> newDoc(Document::createBlank());
   view->setDocument(std::move(newDoc));
   addTab(view, DocumentManager::DEFAULT_FILE_NAME);
@@ -176,7 +176,7 @@ bool TabView::closeAllTabs() {
 int TabView::indexOfPath(const QString& path) {
   //  qDebug("TabView::indexOfPath(%s)", qPrintable(path));
   for (int i = 0; i < count(); i++) {
-    TextEditView* v = qobject_cast<TextEditView*>(widget(i));
+    TextEdit* v = qobject_cast<TextEdit*>(widget(i));
     if (!v) {
       continue;
     }
@@ -247,9 +247,9 @@ void TabView::changeActiveView(int index) {
 
 void TabView::setActiveView(QWidget* activeView) {
   if (m_activeView != activeView) {
-    QWidget* oldEditView = m_activeView;
+    QWidget* oldView = m_activeView;
     m_activeView = activeView;
-    emit activeViewChanged(oldEditView, activeView);
+    emit activeViewChanged(oldView, activeView);
   }
 }
 
@@ -281,11 +281,11 @@ void TabView::removeTabAndWidget(int index) {
 }
 
 bool TabView::closeTab(QWidget* widget) {
-  TextEditView* editView = qobject_cast<TextEditView*>(widget);
-  if (editView && editView->document()->isModified()) {
+  TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
+  if (textEdit && textEdit->document()->isModified()) {
     QMessageBox msgBox;
     msgBox.setText(tr("Do you want to save the changes made to the document %1?")
-                       .arg(getFileNameFrom(editView->path())));
+                       .arg(getFileNameFrom(textEdit->path())));
     msgBox.setInformativeText(tr("Your changes will be lost if you don’t save them."));
     msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     msgBox.setDefaultButton(QMessageBox::Save);
@@ -293,7 +293,7 @@ bool TabView::closeTab(QWidget* widget) {
     int ret = msgBox.exec();
     switch (ret) {
       case QMessageBox::Save:
-        editView->save(true);
+        textEdit->save(true);
         break;
       case QMessageBox::Discard:
         break;
@@ -318,7 +318,7 @@ TabView::CloseTabIncludingDocResult TabView::closeTabIncludingDoc(core::Document
   auto widgetList = widgets();
   auto iter = widgetList.begin();
   while (iter != widgetList.end()) {
-    if (TextEditView* textEdit = qobject_cast<TextEditView*>(*iter)) {
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(*iter)) {
       if (textEdit && textEdit->document() == doc) {
         int count = this->count();
         bool removed = closeTab(textEdit);
@@ -349,7 +349,7 @@ void TabView::focusTabContent(int index) {
 
 void TabView::updateTabTextBasedOn(bool changed) {
   qDebug() << "updateTabTextBasedOn. changed:" << changed;
-  if (TextEditView* textEdit = qobject_cast<TextEditView*>(QObject::sender())) {
+  if (TextEdit* textEdit = qobject_cast<TextEdit*>(QObject::sender())) {
     int index = indexOf(textEdit);
     QString text = tabText(index);
     if (changed) {
@@ -359,7 +359,7 @@ void TabView::updateTabTextBasedOn(bool changed) {
       setTabText(index, text);
     }
   } else {
-    qDebug("sender is null or not TextEditView");
+    qDebug("sender is null or not TextEdit");
   }
 }
 
@@ -385,7 +385,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
 }
 
 bool TabView::insertTabInformation(const int index) {
-  TextEditView* v = qobject_cast<TextEditView*>(widget(index));
+  TextEdit* v = qobject_cast<TextEdit*>(widget(index));
   if (!v) {
     return false;
   }

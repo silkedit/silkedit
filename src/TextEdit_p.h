@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "core/Region.h"
 
 namespace core {
@@ -11,15 +11,15 @@ class Theme;
 class Document;
 }
 
-class TextEditView;
+class TextEdit;
 class LineNumberArea;
 
-class TextEditViewPrivate {
-  Q_DECLARE_PUBLIC(TextEditView)
+class TextEditPrivate {
+  Q_DECLARE_PUBLIC(TextEdit)
  public:
-  explicit TextEditViewPrivate(TextEditView* editView);
+  explicit TextEditPrivate(TextEdit* textEdit);
 
-  TextEditView* q_ptr;
+  TextEdit* q_ptr;
   LineNumberArea* m_lineNumberArea;
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;

@@ -3,7 +3,7 @@
 #include "core/macros.h"
 #include "ComboBox.h"
 
-class TextEditView;
+class TextEdit;
 
 class LineSeparatorComboBox : public ComboBox {
   DISABLE_COPY(LineSeparatorComboBox)

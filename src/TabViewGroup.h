@@ -55,7 +55,7 @@ public slots:
                   const QString& label,
                   Qt::Orientation activeLayoutDirection,
                   Qt::Orientation newDirection);
-  void splitTextEditView(std::function<void(QWidget*, const QString&)> func);
+  void splitTextEdit(std::function<void(QWidget*, const QString&)> func);
   void emitCurrentChanged(int index);
 };
 

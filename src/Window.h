@@ -13,7 +13,7 @@ class StatusBar;
 class ProjectTreeView;
 class TabViewGroup;
 class FindReplaceView;
-class TextEditView;
+class TextEdit;
 class Toolbar;
 class Console;
 

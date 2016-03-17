@@ -8,7 +8,7 @@
 #include "core/macros.h"
 #include "core/set_unique_ptr.h"
 
-class TextEditView;
+class TextEdit;
 class TabBar;
 namespace core {
 class Theme;

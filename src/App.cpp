@@ -7,7 +7,7 @@
 #include "App.h"
 #include "TabViewGroup.h"
 #include "DocumentManager.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "TabView.h"
 #include "Window.h"
 #include "version.h"
@@ -191,12 +191,12 @@ void App::setupTranslator(const QString& locale) {
 #endif
 }
 
-TextEditView* App::activeTextEditView() {
+TextEdit* App::activeTextEdit() {
   TabView* tabView = activeTabView();
   if (tabView) {
-    return qobject_cast<TextEditView*>(tabView->activeView());
+    return qobject_cast<TextEdit*>(tabView->activeView());
   } else {
-    return qobject_cast<TextEditView*>(focusWidget());
+    return qobject_cast<TextEdit*>(focusWidget());
   }
 }
 

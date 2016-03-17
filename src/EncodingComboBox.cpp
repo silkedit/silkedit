@@ -1,6 +1,6 @@
 ﻿#include "EncodingComboBox.h"
 #include "core/Encoding.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 
 using core::Encoding;
 

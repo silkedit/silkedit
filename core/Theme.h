@@ -35,7 +35,7 @@ class Theme {
 
  public:
   Theme()
-      : textEditViewSettings(nullptr),
+      : textEditSettings(nullptr),
         gutterSettings(nullptr),
         statusBarSettings(nullptr),
         tabBarSettings(nullptr),
@@ -52,7 +52,7 @@ class Theme {
 
   QTextCharFormat *getFormat(const QString& scope);
 
-  std::unique_ptr<ColorSettings> textEditViewSettings;
+  std::unique_ptr<ColorSettings> textEditSettings;
   std::unique_ptr<ColorSettings> gutterSettings;
   std::unique_ptr<ColorSettings> statusBarSettings;
   std::unique_ptr<ColorSettings> tabBarSettings;
@@ -82,7 +82,7 @@ class Theme {
 private:
   static ScopeSetting* matchedSetting(const QString& scope);
 
-  static ColorSettings createTextEditViewSettingsColors(const Theme* theme);
+  static ColorSettings createTextEditSettingsColors(const Theme* theme);
   static ColorSettings createGutterSettingsColors(const Theme* theme);
   static ColorSettings createStatusBarSettingsColors(const Theme* theme);
   static ColorSettings createTabBarSettingsColors(const Theme* theme);

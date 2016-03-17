@@ -2,7 +2,7 @@
 
 #include <QWidget>
 
-class TextEditView;
+class TextEdit;
 namespace core {
 class Theme;
 }
@@ -10,7 +10,7 @@ class Theme;
 class LineNumberArea : public QWidget {
  public:
   static const int PADDING_RIGHT = 5;
-  explicit LineNumberArea(TextEditView* editor);
+  explicit LineNumberArea(TextEdit* editor);
   QSize sizeHint() const override;
 
   QColor lineNumberColor() const;
@@ -23,7 +23,7 @@ class LineNumberArea : public QWidget {
 
  private:
   void setTheme(core::Theme* theme);
-  TextEditView* m_codeEditor;
+  TextEdit* m_codeEditor;
   QColor m_lineNumberColor;
   QColor m_backgroundColor;
 };

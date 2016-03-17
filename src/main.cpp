@@ -12,7 +12,7 @@
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "DocumentManager.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "PlatformUtil.h"
 #include "Helper.h"
 #include "MenuBar.h"

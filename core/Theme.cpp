@@ -240,9 +240,9 @@ Theme* Theme::loadTheme(const QString& filename) {
     }
   }
 
-  // text edit view settings (TextEditView)
-  theme->textEditViewSettings.reset(new ColorSettings());
-  parseSettings(theme->textEditViewSettings.get(), createTextEditViewSettingsColors(theme));
+  // text edit settings (TextEdit)
+  theme->textEditSettings.reset(new ColorSettings());
+  parseSettings(theme->textEditSettings.get(), createTextEditSettingsColors(theme));
 
   // gutter settings (LineNumberArea)
   const QString gutterSettingsStr = "gutterSettings";
@@ -316,7 +316,7 @@ boost::optional<QFont> Theme::font() {
   return m_font;
 }
 
-ColorSettings Theme::createTextEditViewSettingsColors(const Theme* theme) {
+ColorSettings Theme::createTextEditSettingsColors(const Theme* theme) {
   ColorSettings defaultColors;
   QColor backgroundColor = QColor(Qt::gray);
   QColor foregroundColor = QColor(Qt::black);
@@ -441,7 +441,7 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
 }
 
 ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
-  ColorSettings textEditViewSettingsColors = createTextEditViewSettingsColors(theme);
+  ColorSettings textEditViewSettingsColors = createTextEditSettingsColors(theme);
   ColorSettings defaultColors = createStatusBarSettingsColors(theme);
   defaultColors["lineHighlight"] = textEditViewSettingsColors.value("lineHighlight");
   defaultColors["selectionBackground"] = textEditViewSettingsColors.value("selectionBackground");
@@ -540,7 +540,7 @@ void Theme::setFont(const QFont& font) {
 }
 
 QString Theme::textEditVerticalScrollBarStyle() const {
-  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditViewSettings->value(
+  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditSettings->value(
                                             QStringLiteral("background"))))
       .arg(scrollBarColor);
 }
@@ -552,7 +552,7 @@ QString Theme::projectTreeViewVerticalScrollBarStyle() const {
 }
 
 QString Theme::textEditHorizontalScrollBarStyle() const {
-  return horizontalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditViewSettings->value(
+  return horizontalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditSettings->value(
                                               QStringLiteral("background"))))
       .arg(scrollBarColor);
 }
