@@ -533,16 +533,17 @@ QString YamlUtil::translate(const QString& pkgPath,
                             const QString& key,
                             const QString& defaultValue) {
   QStringList translationPaths;
-  const QString& path =
-      pkgPath + QStringLiteral("/locales/") + locale + QStringLiteral("/translation.yml");
+  const QString& path = QDir::cleanPath(pkgPath + QStringLiteral("/locales/") + locale +
+                                        QStringLiteral("/translation.yml"));
   if (QFileInfo::exists(path)) {
     translationPaths.append(path);
   }
 
   auto indexOf_ = locale.indexOf('_');
   if (indexOf_ > 0) {
-    const QString& path = pkgPath + QStringLiteral("/locales/") + locale.left(indexOf_) +
-                          QStringLiteral("/translation.yml");
+    const QString& path =
+        QDir::cleanPath(pkgPath + QStringLiteral("/locales/") + locale.left(indexOf_) +
+                        QStringLiteral("/translation.yml"));
     if (QFileInfo::exists(path)) {
       translationPaths.append(path);
     }

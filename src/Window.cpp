@@ -213,7 +213,7 @@ void Window::loadMenu(const QString& pkgName, const QString& ymlPath) {
       return;
     }
 
-    const QString& pkgPath = ymlPath.left(ymlPath.lastIndexOf('/'));
+    const QString& pkgPath = ymlPath.left(ymlPath.lastIndexOf(QDir::separator()));
     YAML::Node menuNode = rootNode["menu"];
 #ifdef Q_OS_MAC
     // There's only 1 global menu bar on Mac.
