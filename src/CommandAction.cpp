@@ -16,7 +16,7 @@ void CommandAction::init(const QString& id) {
   setObjectName(id);
 
   // WidgetShortcut makes QAction's shortcut disabled but visible in a menu
-  // Shortcut is handled by TextEditViewKeyHandler.
+  // Shortcut is handled by KeymapManager.
   setShortcutContext(Qt::WidgetShortcut);
 
   updateVisibilityAndShortcut();

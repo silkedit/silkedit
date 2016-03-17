@@ -2,13 +2,13 @@
 #include <QString>
 #include <QtTest/QtTest>
 
-#include "TextEditViewLogic.h"
+#include "TextEditLogic.h"
 #include "Regexp.h"
 #include "Metadata.h"
 
 namespace core {
 
-class TextEditViewLogicTest : public QObject {
+class TextEditLogicTest : public QObject {
   Q_OBJECT
  private slots:
   void isOutdentNecessary() {
@@ -26,7 +26,7 @@ class TextEditViewLogicTest : public QObject {
 
     // When
     bool result =
-        TextEditViewLogic::isOutdentNecessary(increaseIndentPattern.get(), decreaseIndentPattern.get(),
+        TextEditLogic::isOutdentNecessary(increaseIndentPattern.get(), decreaseIndentPattern.get(),
                                               currentLineText, prevLineText, atBlockEnd, tabWidth);
     // Then
     QVERIFY(result);
@@ -43,7 +43,7 @@ class TextEditViewLogicTest : public QObject {
     int tabWidth = 2;
 
     // When
-    TextEditViewLogic::outdent(&doc, cursor, tabWidth);
+    TextEditLogic::outdent(&doc, cursor, tabWidth);
 
     // Then
     const QString expectedText = R"(
@@ -66,7 +66,7 @@ class TextEditViewLogicTest : public QObject {
     int tabWidth = 2;
 
     // When
-    TextEditViewLogic::outdent(&doc, cursor, tabWidth);
+    TextEditLogic::outdent(&doc, cursor, tabWidth);
 
     // Then
     const QString expectedText =
@@ -87,7 +87,7 @@ class TextEditViewLogicTest : public QObject {
     int tabWidth = 2;
 
     // When
-    TextEditViewLogic::outdent(&doc, cursor, tabWidth);
+    TextEditLogic::outdent(&doc, cursor, tabWidth);
 
     // Then
     const QString expectedText =
@@ -112,7 +112,7 @@ class TextEditViewLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
                                          false, tabWidth);
 
     // Then
@@ -141,7 +141,7 @@ class TextEditViewLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
                                          false, tabWidth);
 
     // Then
@@ -171,7 +171,7 @@ class TextEditViewLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
                                          false, tabWidth);
 
     // Then
@@ -198,7 +198,7 @@ class TextEditViewLogicTest : public QObject {
     Metadata* metadata = nullptr;
 
     // When
-    TextEditViewLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
                                          false, tabWidth);
 
     // Then
@@ -212,5 +212,5 @@ class TextEditViewLogicTest : public QObject {
 
 }  // namespace core
 
-QTEST_MAIN(core::TextEditViewLogicTest)
-#include "TextEditViewLogicTest.moc"
+QTEST_MAIN(core::TextEditLogicTest)
+#include "TextEditLogicTest.moc"

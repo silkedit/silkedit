@@ -5,7 +5,7 @@
 #include "core/macros.h"
 
 class TabBar;
-class TextEditView;
+class TextEdit;
 class Window;
 class TabView;
 class TabViewGroup;
@@ -25,7 +25,7 @@ class App : public QApplication {
   void setupTranslator(const QString& locale);
 
  public slots:
-  TextEditView* activeTextEditView();
+  TextEdit* activeTextEdit();
   TabView* activeTabView();
   TabViewGroup* activeTabViewGroup();
   Window* activeWindow();

@@ -13,11 +13,11 @@ class Regexp;
 class Metadata;
 
 /**
- * @brief This class has business logics for TextEditView
+ * @brief This class has business logics for TextEdit
  * Created mainly for unit testing
  */
-class TextEditViewLogic {
-  DISABLE_COPY_AND_MOVE(TextEditViewLogic)
+class TextEditLogic {
+  DISABLE_COPY_AND_MOVE(TextEditLogic)
  public:
   static void outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth);
   static bool isOutdentNecessary(Regexp* increaseIndentPattern,
@@ -38,8 +38,8 @@ class TextEditViewLogic {
                                 int tabWidth);
 
  private:
-  TextEditViewLogic() = delete;
-  ~TextEditViewLogic() = delete;
+  TextEditLogic() = delete;
+  ~TextEditLogic() = delete;
 };
 
 }  // namespace core

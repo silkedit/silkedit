@@ -2,14 +2,14 @@
 
 #include "GrammerCondition.h"
 #include "App.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "core/LanguageParser.h"
 
 const QString GrammerCondition::name = "grammer";
 
 QVariant GrammerCondition::keyValue() {
-  if (App::instance()->activeTextEditView()) {
-    auto view = App::instance()->activeTextEditView();
+  if (App::instance()->activeTextEdit()) {
+    auto view = App::instance()->activeTextEdit();
     if (view->language()) {
       return QVariant::fromValue(view->language()->scopeName);
     }

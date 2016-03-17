@@ -7,7 +7,7 @@
 #include "BOMComboBox.h"
 #include "Window.h"
 #include "TabView.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "ReloadEncodingDialog.h"
 #include "core/Config.h"
 #include "core/Theme.h"
@@ -54,14 +54,14 @@ StatusBar::StatusBar(QMainWindow* window)
 
   connect(&Config::singleton(), &Config::themeChanged, this, &StatusBar::setTheme);
   connect(m_langComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, &StatusBar::setActiveTextEditViewLanguage);
+          this, &StatusBar::setActiveTextEditLanguage);
   connect(m_encComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, &StatusBar::setActiveTextEditViewEncoding);
+          this, &StatusBar::setActiveTextEditEncoding);
   connect(m_separatorComboBox,
           static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
-          &StatusBar::setActiveTextEditViewLineSeparator);
+          &StatusBar::setActiveTextEditLineSeparator);
   connect(m_bomComboBox, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
-          this, &StatusBar::setActiveTextEditViewBOM);
+          this, &StatusBar::setActiveTextEditBOM);
 
   // Set default values
   setTheme(Config::singleton().theme());
@@ -75,7 +75,7 @@ StatusBar::StatusBar(QMainWindow* window)
 
 void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
   //  qDebug("onActiveViewChanged");
-  TextEditView* textEdit = qobject_cast<TextEditView*>(newView);
+  TextEdit* textEdit = qobject_cast<TextEdit*>(newView);
   if (textEdit) {
     if (textEdit->language()) {
       setCurrentLanguage(textEdit->language()->name());
@@ -94,36 +94,36 @@ void StatusBar::onActiveViewChanged(QWidget*, QWidget* newView) {
   }
 }
 
-void StatusBar::setActiveTextEditViewLanguage() {
+void StatusBar::setActiveTextEditLanguage() {
   qDebug() << "currentIndexChanged in langComboBox." << m_langComboBox->currentIndex();
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
-      qDebug() << "active editView's lang:" << editView->language()->scopeName;
-      editView->setLanguage(m_langComboBox->currentData().toString());
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(tabView->activeView())) {
+      qDebug() << "active textEdit's lang:" << textEdit->language()->scopeName;
+      textEdit->setLanguage(m_langComboBox->currentData().toString());
     } else {
-      qDebug() << "active TextEditView is null";
+      qDebug() << "active TextEdit is null";
     }
   } else {
     qDebug() << "active tab widget is null";
   }
 }
 
-void StatusBar::setActiveTextEditViewEncoding() {
+void StatusBar::setActiveTextEditEncoding() {
   qDebug("currentIndexChanged in encComboBox. %d", m_encComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
-      if (boost::optional<Encoding> oldEncoding = editView->encoding()) {
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(tabView->activeView())) {
+      if (boost::optional<Encoding> oldEncoding = textEdit->encoding()) {
         QString fromEncodingName = oldEncoding->name();
-        qDebug("active editView's encoding: %s", qPrintable(fromEncodingName));
+        qDebug("active textEdit's encoding: %s", qPrintable(fromEncodingName));
         if (m_encComboBox->isAutoDetectSelected()) {
-          if (editView->path().isEmpty()) {
+          if (textEdit->path().isEmpty()) {
             m_encComboBox->setCurrentEncoding(*oldEncoding);
             return;
           }
 
-          if (editView->document()->isModified()) {
+          if (textEdit->document()->isModified()) {
             int ret = QMessageBox::question(this, "",
                                             tr("Current document is changed. This change will be "
                                                "lost after reloading. Do you want to continue?"));
@@ -132,20 +132,20 @@ void StatusBar::setActiveTextEditViewEncoding() {
               return;
             }
           }
-          editView->document()->reload();
-          m_encComboBox->setCurrentEncoding(editView->document()->encoding());
+          textEdit->document()->reload();
+          m_encComboBox->setCurrentEncoding(textEdit->document()->encoding());
         } else {
           auto newEncoding = m_encComboBox->currentEncoding();
           if (newEncoding != *oldEncoding) {
             // If the document is empty or has no file path, just change current document's
             // encoding
-            bool isEmptyDoc = editView->document() && editView->document()->isEmpty();
-            bool hasNoPath = editView->document() && editView->document()->path().isEmpty();
+            bool isEmptyDoc = textEdit->document() && textEdit->document()->isEmpty();
+            bool hasNoPath = textEdit->document() && textEdit->document()->path().isEmpty();
             if (isEmptyDoc || hasNoPath) {
-              editView->document()->setEncoding(newEncoding);
+              textEdit->document()->setEncoding(newEncoding);
             } else {
               // Show the dialog to choose Reload or Convert
-              ReloadEncodingDialog dialog(editView, *oldEncoding, newEncoding);
+              ReloadEncodingDialog dialog(textEdit, *oldEncoding, newEncoding);
               int ret = dialog.exec();
               if (ret == QDialog::Rejected) {
                 m_encComboBox->setCurrentEncoding(*oldEncoding);
@@ -155,41 +155,41 @@ void StatusBar::setActiveTextEditViewEncoding() {
         }
       }
     } else {
-      qDebug("active TextEditView is null");
+      qDebug("active TextEdit is null");
     }
   } else {
     qDebug("active tab widget is null");
   }
 }
 
-void StatusBar::setActiveTextEditViewLineSeparator() {
+void StatusBar::setActiveTextEditLineSeparator() {
   qDebug("currentIndexChanged in separatorComboBox. %d", m_separatorComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
-      if (auto separator = editView->lineSeparator()) {
-        qDebug("active editView's line separator: %s", qPrintable(*separator));
-        editView->setLineSeparator(m_separatorComboBox->currentLineSeparator());
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(tabView->activeView())) {
+      if (auto separator = textEdit->lineSeparator()) {
+        qDebug("active textEdit's line separator: %s", qPrintable(*separator));
+        textEdit->setLineSeparator(m_separatorComboBox->currentLineSeparator());
       }
     } else {
-      qDebug("active TextEditView is null");
+      qDebug("active TextEdit is null");
     }
   } else {
     qDebug("active tab widget is null");
   }
 }
 
-void StatusBar::setActiveTextEditViewBOM() {
+void StatusBar::setActiveTextEditBOM() {
   qDebug("currentIndexChanged in bomComboBox. %d", m_bomComboBox->currentIndex());
   TabView* tabView = static_cast<Window*>(window())->activeTabView();
   if (tabView) {
-    if (TextEditView* editView = qobject_cast<TextEditView*>(tabView->activeView())) {
-      if (auto bom = editView->BOM()) {
-        qDebug("active editView's BOM: %s", qPrintable(bom->name()));
-        editView->setBOM(m_bomComboBox->currentBOM());
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(tabView->activeView())) {
+      if (auto bom = textEdit->BOM()) {
+        qDebug("active textEdit's BOM: %s", qPrintable(bom->name()));
+        textEdit->setBOM(m_bomComboBox->currentBOM());
       }
     } else {
-      qDebug("active TextEditView is null");
+      qDebug("active TextEdit is null");
     }
   } else {
     qDebug("active tab widget is null");

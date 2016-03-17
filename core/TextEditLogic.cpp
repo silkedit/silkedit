@@ -1,7 +1,7 @@
 ﻿#include <memory>
 #include <QVector>
 
-#include "TextEditViewLogic.h"
+#include "TextEditLogic.h"
 #include "Regexp.h"
 #include "Metadata.h"
 
@@ -29,7 +29,7 @@ int indentLength(const QString& str, int tabWidth) {
 }
 }
 
-void TextEditViewLogic::outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth) {
+void TextEditLogic::outdent(QTextDocument* doc, QTextCursor& cursor, int tabWidth) {
   // Move cursor to the beginning of current line
   bool moved = cursor.movePosition(QTextCursor::StartOfLine);
   if (!moved)
@@ -57,7 +57,7 @@ void TextEditViewLogic::outdent(QTextDocument* doc, QTextCursor& cursor, int tab
   }
 }
 
-bool TextEditViewLogic::isOutdentNecessary(Regexp* increaseIndentPattern,
+bool TextEditLogic::isOutdentNecessary(Regexp* increaseIndentPattern,
                                            Regexp* decreaseIndentPattern,
                                            const QString& currentLineText,
                                            const QString& prevLineText,
@@ -100,7 +100,7 @@ bool TextEditViewLogic::isOutdentNecessary(Regexp* increaseIndentPattern,
  * @brief Indent one level
  * @param currentVisibleCursor
  */
-void TextEditViewLogic::indentOneLevel(QTextCursor& currentVisibleCursor,
+void TextEditLogic::indentOneLevel(QTextCursor& currentVisibleCursor,
                                        bool indentUsingSpaces,
                                        int tabWidth) {
   QString indentStr = "\t";
@@ -110,7 +110,7 @@ void TextEditViewLogic::indentOneLevel(QTextCursor& currentVisibleCursor,
   currentVisibleCursor.insertText(indentStr);
 }
 
-void TextEditViewLogic::indentCurrentLine(QTextDocument* doc,
+void TextEditLogic::indentCurrentLine(QTextDocument* doc,
                                           QTextCursor& cursor,
                                           const QString& prevLineText,
                                           const boost::optional<QString>& prevPrevLineText,
@@ -135,9 +135,9 @@ void TextEditViewLogic::indentCurrentLine(QTextDocument* doc,
                             (!metadata->increaseIndentPattern() ||
                              !metadata->increaseIndentPattern()->matches(*prevPrevLineText)));
     if (indentNextLine) {
-      TextEditViewLogic::indentOneLevel(cursor, indentUsingSpaces, tabWidth);
+      TextEditLogic::indentOneLevel(cursor, indentUsingSpaces, tabWidth);
     } else if (outdentNextLine) {
-      TextEditViewLogic::outdent(doc, cursor, tabWidth);
+      TextEditLogic::outdent(doc, cursor, tabWidth);
     }
   }
 }

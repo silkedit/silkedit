@@ -21,7 +21,7 @@ class QSize;
 class QWidget;
 class QElapsedTimer;
 class LineNumberArea;
-class TextEditViewPrivate;
+class TextEditPrivate;
 namespace core {
 struct Language;
 class Encoding;
@@ -29,13 +29,13 @@ class Theme;
 class BOM;
 }
 
-class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView> {
+class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   Q_OBJECT
   Q_PROPERTY(QString text READ toText WRITE setText USER true)
   Q_PROPERTY(bool showLineNumber MEMBER m_showLineNumber USER true NOTIFY showLineNumberChanged)
  public:
-  Q_INVOKABLE explicit TextEditView(QWidget* parent = nullptr);
-  virtual ~TextEditView();
+  Q_INVOKABLE explicit TextEdit(QWidget* parent = nullptr);
+  virtual ~TextEdit();
 
   void setDocument(std::shared_ptr<core::Document> document);
   core::Language* language();
@@ -48,7 +48,7 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
 
   void lineNumberAreaPaintEvent(QPaintEvent* event);
   int lineNumberAreaWidth();
-  TextEditView* clone() override;
+  TextEdit* clone() override;
   void setPath(const QString& path);
   boost::optional<core::Region> find(const QString& text,
                                      int from,
@@ -119,9 +119,9 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void dropEvent(QDropEvent* e) override;
 
  private:
-  friend class TextEditViewPrivate;
+  friend class TextEditPrivate;
 
-  std::unique_ptr<TextEditViewPrivate> d_ptr;
+  std::unique_ptr<TextEditPrivate> d_ptr;
   bool m_showLineNumber;
 
   QString toText();
@@ -129,8 +129,8 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   void setViewportMargins(int left, int top, int right, int bottom);
   void setTheme(core::Theme* theme);
 
-  inline TextEditViewPrivate* d_func() { return d_ptr.get(); }
-  inline const TextEditViewPrivate* d_func() const { return d_ptr.get(); }
+  inline TextEditPrivate* d_func() { return d_ptr.get(); }
+  inline const TextEditPrivate* d_func() const { return d_ptr.get(); }
 
   Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberAreaWidth(int newBlockCount))
@@ -141,4 +141,4 @@ class TextEditView : public QPlainTextEdit, public core::ICloneable<TextEditView
   Q_PRIVATE_SLOT(d_func(), void setWordWrap(bool))
 };
 
-Q_DECLARE_METATYPE(TextEditView*)
+Q_DECLARE_METATYPE(TextEdit*)

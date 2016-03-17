@@ -3,9 +3,9 @@
 #include <algorithm>
 #include <QtWidgets>
 
-#include "TextEditView_p.h"
+#include "TextEdit_p.h"
 #include "LineNumberArea.h"
-#include "core/TextEditViewLogic.h"
+#include "core/TextEditLogic.h"
 #include "KeymapManager.h"
 #include "CommandManager.h"
 #include "OpenRecentItemManager.h"
@@ -28,7 +28,7 @@ using core::Language;
 using core::Region;
 using core::Metadata;
 using core::Config;
-using core::TextEditViewLogic;
+using core::TextEditLogic;
 using core::Theme;
 using core::ColorSettings;
 using core::Regexp;
@@ -86,12 +86,12 @@ QColor adjustForEOL(QColor const color, int threshold = 125) {
 }
 }
 
-void TextEditViewPrivate::updateLineNumberAreaWidth(int /* newBlockCount */) {
+void TextEditPrivate::updateLineNumberAreaWidth(int /* newBlockCount */) {
   //  qDebug("updateLineNumberAreaWidth");
   q_ptr->setViewportMargins(q_ptr->lineNumberAreaWidth(), 0, 0, 0);
 }
 
-void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
+void TextEditPrivate::updateLineNumberArea(const QRect& rect, int dy) {
   //  qDebug("updateLineNumberArea");
   if (dy)
     m_lineNumberArea->scroll(0, dy);
@@ -102,14 +102,14 @@ void TextEditViewPrivate::updateLineNumberArea(const QRect& rect, int dy) {
     updateLineNumberAreaWidth(0);
 }
 
-void TextEditViewPrivate::setTheme(Theme* theme) {
-  qDebug("TextEditView theme is changed");
+void TextEditPrivate::setTheme(Theme* theme) {
+  qDebug("TextEdit theme is changed");
   if (!theme) {
     qWarning("theme is null");
     return;
   }
 
-  if (theme->textEditViewSettings) {
+  if (theme->textEditSettings) {
     const QString& style =
         QStringLiteral(
             "QPlainTextEdit {"
@@ -118,12 +118,12 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
             "selection-color:%3;"
             "selection-background-color: %4;"
             "}")
-            .arg(Util::qcolorForStyleSheet(theme->textEditViewSettings->value("foreground")))
-            .arg(Util::qcolorForStyleSheet(theme->textEditViewSettings->value("background")))
+            .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("foreground")))
+            .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("background")))
             .arg(Util::qcolorForStyleSheet(
-                theme->textEditViewSettings->value("selectionForeground")))
+                theme->textEditSettings->value("selectionForeground")))
             .arg(Util::qcolorForStyleSheet(
-                theme->textEditViewSettings->value("selectionBackground")));
+                theme->textEditSettings->value("selectionBackground")));
 
     q_ptr->setStyleSheet(style);
 
@@ -134,11 +134,11 @@ void TextEditViewPrivate::setTheme(Theme* theme) {
   highlightCurrentLine();
 }
 
-void TextEditViewPrivate::clearDirtyMarker() {
+void TextEditPrivate::clearDirtyMarker() {
   q_ptr->document()->setModified(false);
 }
 
-void TextEditViewPrivate::clearHighlightingCurrentLine() {
+void TextEditPrivate::clearHighlightingCurrentLine() {
   q_ptr->setExtraSelections(QList<QTextEdit::ExtraSelection>());
 }
 
@@ -148,7 +148,7 @@ void TextEditViewPrivate::clearHighlightingCurrentLine() {
  * @param pattern
  * @return
  */
-QString TextEditViewPrivate::prevLineText(int prevCount, Regexp* ignorePattern) {
+QString TextEditPrivate::prevLineText(int prevCount, Regexp* ignorePattern) {
   auto cursor = q_ptr->textCursor();
   for (int i = 0; i < prevCount; i++) {
     bool moved = false;
@@ -163,7 +163,7 @@ QString TextEditViewPrivate::prevLineText(int prevCount, Regexp* ignorePattern) 
   return cursor.selectedText();
 }
 
-void TextEditViewPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
+void TextEditPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
   if (hasSelection) {
     clearHighlightingCurrentLine();
   } else {
@@ -171,23 +171,23 @@ void TextEditViewPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
   }
 }
 
-void TextEditViewPrivate::emitLanguageChanged(const QString& scope) {
+void TextEditPrivate::emitLanguageChanged(const QString& scope) {
   emit q_ptr->languageChanged(scope);
 }
 
-void TextEditViewPrivate::emitEncodingChanged(const Encoding& enc) {
+void TextEditPrivate::emitEncodingChanged(const Encoding& enc) {
   emit q_ptr->encodingChanged(enc);
 }
 
-void TextEditViewPrivate::emitLineSeparatorChanged(const QString& lineSeparator) {
+void TextEditPrivate::emitLineSeparatorChanged(const QString& lineSeparator) {
   emit q_ptr->lineSeparatorChanged(lineSeparator);
 }
 
-void TextEditViewPrivate::emitBOMChanged(const core::BOM& bom) {
+void TextEditPrivate::emitBOMChanged(const core::BOM& bom) {
   emit q_ptr->bomChanged(bom);
 }
 
-void TextEditViewPrivate::setWordWrap(bool wordWrap) {
+void TextEditPrivate::setWordWrap(bool wordWrap) {
   if (wordWrap) {
     q_ptr->setWordWrapMode(QTextOption::WordWrap);
   } else {
@@ -195,35 +195,35 @@ void TextEditViewPrivate::setWordWrap(bool wordWrap) {
   }
 }
 
-void TextEditViewPrivate::setupConnections(std::shared_ptr<core::Document> document) {
-  Q_Q(TextEditView);
+void TextEditPrivate::setupConnections(std::shared_ptr<core::Document> document) {
+  Q_Q(TextEdit);
 
   if (m_document) {
     // QObject::disconnect from old document
-    QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
+    QObject::disconnect(m_document.get(), &Document::pathUpdated, q, &TextEdit::pathUpdated);
     QObject::disconnect(m_document.get(), &Document::languageChanged, q,
-                        &TextEditView::languageChanged);
+                        &TextEdit::languageChanged);
     QObject::disconnect(m_document.get(), &Document::encodingChanged, q,
-                        &TextEditView::encodingChanged);
+                        &TextEdit::encodingChanged);
     QObject::disconnect(m_document.get(), &Document::lineSeparatorChanged, q,
-                        &TextEditView::lineSeparatorChanged);
-    QObject::disconnect(m_document.get(), &Document::bomChanged, q, &TextEditView::bomChanged);
+                        &TextEdit::lineSeparatorChanged);
+    QObject::disconnect(m_document.get(), &Document::bomChanged, q, &TextEdit::bomChanged);
     QObject::disconnect(m_document.get(), SIGNAL(contentsChanged()), q,
                         SLOT(outdentCurrentLineIfNecessary()));
   }
 
   m_document = document;
-  QObject::connect(m_document.get(), &Document::pathUpdated, q, &TextEditView::pathUpdated);
-  QObject::connect(m_document.get(), &Document::languageChanged, q, &TextEditView::languageChanged);
-  QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEditView::encodingChanged);
+  QObject::connect(m_document.get(), &Document::pathUpdated, q, &TextEdit::pathUpdated);
+  QObject::connect(m_document.get(), &Document::languageChanged, q, &TextEdit::languageChanged);
+  QObject::connect(m_document.get(), &Document::encodingChanged, q, &TextEdit::encodingChanged);
   QObject::connect(m_document.get(), &Document::lineSeparatorChanged, q,
-                   &TextEditView::lineSeparatorChanged);
-  QObject::connect(m_document.get(), &Document::bomChanged, q, &TextEditView::bomChanged);
+                   &TextEdit::lineSeparatorChanged);
+  QObject::connect(m_document.get(), &Document::bomChanged, q, &TextEdit::bomChanged);
   QObject::connect(m_document.get(), SIGNAL(contentsChanged()), q,
                    SLOT(outdentCurrentLineIfNecessary()));
 }
 
-boost::optional<Region> TextEditViewPrivate::find(const QString& text,
+boost::optional<Region> TextEditPrivate::find(const QString& text,
                                                   int from,
                                                   int begin,
                                                   int end,
@@ -276,18 +276,18 @@ boost::optional<Region> TextEditViewPrivate::find(const QString& text,
   return boost::none;
 }
 
-void TextEditViewPrivate::highlightCurrentLine() {
+void TextEditPrivate::highlightCurrentLine() {
   if (q_ptr->textCursor().hasSelection()) {
     return;
   }
   Theme* theme = Config::singleton().theme();
-  if (theme->textEditViewSettings != nullptr) {
-    ColorSettings* textEditViewSettings = theme->textEditViewSettings.get();
+  if (theme->textEditSettings != nullptr) {
+    ColorSettings* textEditSettings = theme->textEditSettings.get();
 
     QList<QTextEdit::ExtraSelection> extraSelections;
     if (!q_ptr->isReadOnly()) {
       QTextEdit::ExtraSelection selection;
-      QColor lineColor = QColor(textEditViewSettings->value("lineHighlight"));
+      QColor lineColor = QColor(textEditSettings->value("lineHighlight"));
       selection.format.setBackground(lineColor);
       selection.format.setProperty(QTextFormat::FullWidthSelection, true);
       selection.cursor = q_ptr->textCursor();
@@ -302,27 +302,27 @@ void TextEditViewPrivate::highlightCurrentLine() {
  * @brief Indent one level
  * @param currentVisibleCursor
  */
-void TextEditViewPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
+void TextEditPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
+  TextEditLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
                                     tabWidth());
 }
 
-int TextEditViewPrivate::tabWidth() {
+int TextEditPrivate::tabWidth() {
   return m_document ? m_document->tabWidth(m_document->language()) : Config::singleton().tabWidth();
 }
 
-void TextEditViewPrivate::outdentOneLevel(QTextCursor& currentVisibleCursor) {
-  TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
+void TextEditPrivate::outdentOneLevel(QTextCursor& currentVisibleCursor) {
+  TextEditLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
 }
 
 /**
  * @brief Outdent one level
  * @param currentVisibleCursor
  */
-TextEditViewPrivate::TextEditViewPrivate(TextEditView* editView)
-    : q_ptr(editView), m_document(nullptr) {}
+TextEditPrivate::TextEditPrivate(TextEdit* textEdit)
+    : q_ptr(textEdit), m_document(nullptr) {}
 
-void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
+void TextEditPrivate::outdentCurrentLineIfNecessary() {
   if (!m_document || !m_document->language()) {
     return;
   }
@@ -334,30 +334,30 @@ void TextEditViewPrivate::outdentCurrentLineIfNecessary() {
   auto currentVisibleCursor = q_ptr->textCursor();
   const QString& currentLineText = m_document->findBlock(currentVisibleCursor.position()).text();
   const QString& prevLineString = prevLineText();
-  if (TextEditViewLogic::isOutdentNecessary(
+  if (TextEditLogic::isOutdentNecessary(
           metadata->increaseIndentPattern(), metadata->decreaseIndentPattern(), currentLineText,
           prevLineString, currentVisibleCursor.atBlockEnd(), tabWidth())) {
-    TextEditViewLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
+    TextEditLogic::outdent(m_document.get(), currentVisibleCursor, tabWidth());
   }
 }
 
-TextEditView::TextEditView(QWidget* parent)
-    : QPlainTextEdit(parent), d_ptr(new TextEditViewPrivate(this)), m_showLineNumber(true) {
+TextEdit::TextEdit(QWidget* parent)
+    : QPlainTextEdit(parent), d_ptr(new TextEditPrivate(this)), m_showLineNumber(true) {
   d_ptr->m_lineNumberArea = new LineNumberArea(this);
   d_ptr->setWordWrap(Config::singleton().wordWrap());
 
-  Q_D(TextEditView);
+  Q_D(TextEdit);
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(const QRect&, int)), this,
           SLOT(updateLineNumberArea(const QRect&, int)));
   connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
   connect(this, SIGNAL(showLineNumberChanged(bool)), this, SLOT(update()));
-  connect(this, &TextEditView::destroying, &OpenRecentItemManager::singleton(),
+  connect(this, &TextEdit::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
   // can't use SIGNAL/SLOT syntax because method signature is different (doesn't consider
   // namespace).
-  // Config::themeChanged(Theme*) but TextEditView::setTheme(core::Theme*)
-  connect(&Config::singleton(), &Config::themeChanged, this, &TextEditView::setTheme);
+  // Config::themeChanged(Theme*) but TextEdit::setTheme(core::Theme*)
+  connect(&Config::singleton(), &Config::themeChanged, this, &TextEdit::setTheme);
   connect(&Config::singleton(), &Config::showInvisiblesChanged, this,
           static_cast<void (QWidget::*)()>(&QWidget::update));
   connect(&Config::singleton(), &Config::endOfLineStrChanged, this,
@@ -373,45 +373,45 @@ TextEditView::TextEditView(QWidget* parent)
   setLanguage(DEFAULT_SCOPE);
 }
 
-TextEditView::~TextEditView() {
+TextEdit::~TextEdit() {
   if (d_ptr->m_document) {
     emit destroying(d_ptr->m_document->path(), QPrivateSignal());
   }
-  qDebug("~TextEditView");
+  qDebug("~TextEdit");
 }
 
-QString TextEditView::path() {
+QString TextEdit::path() {
   return d_ptr->m_document ? d_ptr->m_document->path() : "";
 }
 
-void TextEditView::setTextCursor(const QTextCursor& cursor) {
+void TextEdit::setTextCursor(const QTextCursor& cursor) {
   QPlainTextEdit::setTextCursor(cursor);
 }
 
-QTextCursor TextEditView::textCursor() const {
+QTextCursor TextEdit::textCursor() const {
   return QPlainTextEdit::textCursor();
 }
 
-Document* TextEditView::document() {
+Document* TextEdit::document() {
   return d_ptr->m_document ? d_ptr->m_document.get() : nullptr;
 }
 
-QRect TextEditView::cursorRect() const {
+QRect TextEdit::cursorRect() const {
   return QPlainTextEdit::cursorRect();
 }
 
-QRect TextEditView::cursorRect(const QTextCursor& cursor) const {
+QRect TextEdit::cursorRect(const QTextCursor& cursor) const {
   return QPlainTextEdit::cursorRect(cursor);
 }
 
-void TextEditView::setDocument(std::shared_ptr<Document> document) {
+void TextEdit::setDocument(std::shared_ptr<Document> document) {
   QPlainTextEdit::setDocument(document.get());
 
   // clear undo stack
   document->setUndoRedoEnabled(false);
   document->setUndoRedoEnabled(true);
 
-  Q_D(TextEditView);
+  Q_D(TextEdit);
 
   // Compare previous and current languages
   Language* prevLang = nullptr;
@@ -473,65 +473,65 @@ void TextEditView::setDocument(std::shared_ptr<Document> document) {
 
   // Special handling for user keymap.yml
   if (document->path() == Constants::singleton().userKeymapPath()) {
-    connect(this, &TextEditView::saved, &KeymapManager::singleton(),
+    connect(this, &TextEdit::saved, &KeymapManager::singleton(),
             &KeymapManager::loadUserKeymap);
   }
 }
 
-Language* TextEditView::language() {
+Language* TextEdit::language() {
   if (d_ptr->m_document) {
     return d_ptr->m_document->language();
   }
   return nullptr;
 }
 
-boost::optional<Encoding> TextEditView::encoding() {
+boost::optional<Encoding> TextEdit::encoding() {
   if (d_ptr->m_document) {
     return d_ptr->m_document->encoding();
   }
   return boost::none;
 }
 
-boost::optional<QString> TextEditView::lineSeparator() {
+boost::optional<QString> TextEdit::lineSeparator() {
   if (d_ptr->m_document) {
     return d_ptr->m_document->lineSeparator();
   }
   return boost::none;
 }
 
-void TextEditView::setLineSeparator(const QString& lineSeparator) {
+void TextEdit::setLineSeparator(const QString& lineSeparator) {
   if (d_ptr->m_document) {
     d_ptr->m_document->setLineSeparator(lineSeparator);
   }
 }
 
-void TextEditView::setLanguage(const QString& scopeName) {
+void TextEdit::setLanguage(const QString& scopeName) {
   if (d_ptr->m_document) {
     d_ptr->m_document->setLanguage(scopeName);
   }
 }
 
-boost::optional<core::BOM> TextEditView::BOM() {
+boost::optional<core::BOM> TextEdit::BOM() {
   if (d_ptr->m_document) {
     return d_ptr->m_document->bom();
   }
   return boost::none;
 }
 
-void TextEditView::setBOM(const core::BOM& bom) {
+void TextEdit::setBOM(const core::BOM& bom) {
   if (d_ptr->m_document) {
     d_ptr->m_document->setBOM(bom);
   }
 }
 
-void TextEditView::setPath(const QString& path) {
+void TextEdit::setPath(const QString& path) {
   if (path.isEmpty())
     return;
 
   d_ptr->m_document->setPath(path);
 }
 
-boost::optional<Region> TextEditView::find(const QString& text,
+boost::optional<Region> TextEdit::find(const QString& text,
                                            int from,
                                            int begin,
                                            int end,
@@ -539,7 +539,7 @@ boost::optional<Region> TextEditView::find(const QString& text,
   return d_ptr->find(text, from, begin, end, flags);
 }
 
-int TextEditView::lineNumberAreaWidth() {
+int TextEdit::lineNumberAreaWidth() {
   if (!m_showLineNumber) {
     return 0;
   }
@@ -556,7 +556,7 @@ int TextEditView::lineNumberAreaWidth() {
   return space;
 }
 
-void TextEditView::resizeEvent(QResizeEvent* e) {
+void TextEdit::resizeEvent(QResizeEvent* e) {
   QPlainTextEdit::resizeEvent(e);
 
   QRect cr = contentsRect();
@@ -564,7 +564,7 @@ void TextEditView::resizeEvent(QResizeEvent* e) {
       QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
 }
 
-void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
+void TextEdit::lineNumberAreaPaintEvent(QPaintEvent* event) {
   if (!m_showLineNumber) {
     return;
   }
@@ -594,7 +594,7 @@ void TextEditView::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 }
 
-void TextEditView::paintEvent(QPaintEvent* e) {
+void TextEdit::paintEvent(QPaintEvent* e) {
   QPlainTextEdit::paintEvent(e);
 
   QPainter painter(viewport());
@@ -649,13 +649,13 @@ void TextEditView::paintEvent(QPaintEvent* e) {
   }
 }
 
-void TextEditView::setFontPointSize(int sz) {
+void TextEdit::setFontPointSize(int sz) {
   QFont ft = font();
   ft.setPointSize(sz);
   setFont(ft);
 }
 
-void TextEditView::makeFontBigger(bool bigger) {
+void TextEdit::makeFontBigger(bool bigger) {
   int sz = font().pointSize();
   if (bigger) {
     ++sz;
@@ -664,7 +664,7 @@ void TextEditView::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
-void TextEditView::dropEvent(QDropEvent* e) {
+void TextEdit::dropEvent(QDropEvent* e) {
   if (e->mimeData()->hasUrls()) {
     for (const QUrl& url : e->mimeData()->urls()) {
       emit fileDropped(url.toLocalFile());
@@ -672,16 +672,16 @@ void TextEditView::dropEvent(QDropEvent* e) {
   }
 }
 
-void TextEditView::setViewportMargins(int left, int top, int right, int bottom) {
+void TextEdit::setViewportMargins(int left, int top, int right, int bottom) {
   QPlainTextEdit::setViewportMargins(left, top, right, bottom);
 }
 
-void TextEditView::setTheme(core::Theme* theme) {
-  Q_D(TextEditView);
+void TextEdit::setTheme(core::Theme* theme) {
+  Q_D(TextEdit);
   d->setTheme(theme);
 }
 
-void TextEditView::highlightSearchMatches(const QString& text,
+void TextEdit::highlightSearchMatches(const QString& text,
                                           int begin,
                                           int end,
                                           Document::FindFlags flags) {
@@ -694,12 +694,12 @@ void TextEditView::highlightSearchMatches(const QString& text,
   update();
 }
 
-void TextEditView::clearSearchHighlight() {
+void TextEdit::clearSearchHighlight() {
   d_ptr->m_searchMatchedRegions.clear();
   update();
 }
 
-void TextEditView::replaceSelection(const QString& text, bool preserveCase) {
+void TextEdit::replaceSelection(const QString& text, bool preserveCase) {
   QTextCursor cursor = textCursor();
   if (cursor.hasSelection()) {
     cursor.beginEditBlock();
@@ -708,7 +708,7 @@ void TextEditView::replaceSelection(const QString& text, bool preserveCase) {
   }
 }
 
-void TextEditView::replaceAllSelection(const QString& findText,
+void TextEdit::replaceAllSelection(const QString& findText,
                                        const QString& replaceText,
                                        int begin,
                                        int end,
@@ -732,7 +732,7 @@ void TextEditView::replaceAllSelection(const QString& findText,
   }
 }
 
-void TextEditView::insertNewLine() {
+void TextEdit::insertNewLine() {
   // textCursor()->insertBlock() doesn't work because QPlainTextEdit does more things
   // than just inserting a new block such as ensuring a cursor visible.
   // Instead, we send return key press event directly to QPlainTextEdit.
@@ -765,22 +765,22 @@ void TextEditView::insertNewLine() {
   }
   bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
   auto cursor = textCursor();
-  TextEditViewLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
+  TextEditLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
                                        prevPrevLineText, metadata, indentUsingSpaces,
                                        d_ptr->tabWidth());
 }
 
-TextEditView* TextEditView::clone() {
-  TextEditView* editView = new TextEditView(this);
-  editView->setDocument(d_ptr->m_document);
-  return editView;
+TextEdit* TextEdit::clone() {
+  TextEdit* textEdit = new TextEdit(this);
+  textEdit->setDocument(d_ptr->m_document);
+  return textEdit;
 }
 
-void TextEditView::save() {
+void TextEdit::save() {
   save(false);
 }
 
-void TextEditView::saveAs() {
+void TextEdit::saveAs() {
   QString newFilePath = DocumentManager::singleton().saveAs(d_ptr->m_document.get(), false);
   if (!newFilePath.isEmpty()) {
     setPath(newFilePath);
@@ -788,7 +788,7 @@ void TextEditView::saveAs() {
   }
 }
 
-void TextEditView::deleteChar(int repeat) {
+void TextEdit::deleteChar(int repeat) {
   QTextCursor cur = textCursor();
   if (!cur.hasSelection()) {
     const int pos = cur.position();
@@ -813,16 +813,16 @@ void TextEditView::deleteChar(int repeat) {
   cur.deleteChar();
 }
 
-bool TextEditView::isThinCursor() {
+bool TextEdit::isThinCursor() {
   return !overwriteMode();
 }
 
-void TextEditView::setThinCursor(bool on) {
+void TextEdit::setThinCursor(bool on) {
   setOverwriteMode(!on);
   update();
 }
 
-void TextEditView::wheelEvent(QWheelEvent* e) {
+void TextEdit::wheelEvent(QWheelEvent* e) {
   Qt::KeyboardModifiers mod = e->modifiers();
   if ((mod & Qt::ControlModifier) != 0) {
     makeFontBigger(e->delta() > 0);
@@ -831,7 +831,7 @@ void TextEditView::wheelEvent(QWheelEvent* e) {
   }
 }
 
-void TextEditView::keyPressEvent(QKeyEvent* event) {
+void TextEdit::keyPressEvent(QKeyEvent* event) {
   if (QApplication::activePopupWidget()) {
     switch (event->key()) {
       case Qt::Key_Up:
@@ -865,11 +865,11 @@ void TextEditView::keyPressEvent(QKeyEvent* event) {
   QPlainTextEdit::keyPressEvent(event);
 }
 
-void TextEditView::mousePressEvent(QMouseEvent* event) {
+void TextEdit::mousePressEvent(QMouseEvent* event) {
   QPlainTextEdit::mousePressEvent(event);
 }
 
-void TextEditView::clearSelection() {
+void TextEdit::clearSelection() {
   QTextCursor cursor = textCursor();
   if (cursor.hasSelection()) {
     cursor.clearSelection();
@@ -877,65 +877,65 @@ void TextEditView::clearSelection() {
   }
 }
 
-void TextEditView::save(bool beforeClose) {
+void TextEdit::save(bool beforeClose) {
   if (DocumentManager::singleton().save(d_ptr->m_document.get(), beforeClose)) {
     emit saved();
   }
 }
 
-QString TextEditView::scopeName() {
-  Q_D(TextEditView);
+QString TextEdit::scopeName() {
+  Q_D(TextEdit);
   return d->m_document->scopeName(textCursor().position());
 }
 
-QString TextEditView::scopeTree() {
-  Q_D(TextEditView);
+QString TextEdit::scopeTree() {
+  Q_D(TextEdit);
   return d->m_document->scopeTree();
 }
 
-void TextEditView::undo() {
+void TextEdit::undo() {
   QPlainTextEdit::undo();
 }
 
-void TextEditView::redo() {
+void TextEdit::redo() {
   QPlainTextEdit::redo();
 }
 
-void TextEditView::cut() {
+void TextEdit::cut() {
   QPlainTextEdit::cut();
 }
 
-void TextEditView::copy() {
+void TextEdit::copy() {
   QPlainTextEdit::copy();
 }
 
-void TextEditView::paste() {
+void TextEdit::paste() {
   QPlainTextEdit::paste();
 }
 
-void TextEditView::selectAll() {
+void TextEdit::selectAll() {
   QPlainTextEdit::selectAll();
 }
 
-void TextEditView::indent() {
-  Q_D(TextEditView);
+void TextEdit::indent() {
+  Q_D(TextEdit);
   auto cursor = textCursor();
   d->indentOneLevel(cursor);
 }
 
-void TextEditView::outdent() {
-  Q_D(TextEditView);
+void TextEdit::outdent() {
+  Q_D(TextEdit);
   auto cursor = textCursor();
   d->outdentOneLevel(cursor);
 }
 
-QString TextEditView::toText() {
+QString TextEdit::toText() {
   return QPlainTextEdit::toPlainText();
 }
 
-void TextEditView::setText(const QString& text) {
+void TextEdit::setText(const QString& text) {
   QPlainTextEdit::setPlainText(text);
 }
 
 // Necessary for Q_PRIVATE_SLOT
-#include "moc_TextEditView.cpp"
+#include "moc_TextEdit.cpp"

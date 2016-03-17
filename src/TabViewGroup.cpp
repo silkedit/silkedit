@@ -5,7 +5,7 @@
 #include "TabViewGroup.h"
 #include "TabView.h"
 #include "Splitter.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "TabBar.h"
 #include "Window.h"
 
@@ -80,14 +80,14 @@ bool TabViewGroup::closeAllTabs() {
 }
 
 void TabViewGroup::splitHorizontally() {
-  splitTextEditView(
+  splitTextEdit(
       std::bind(static_cast<void (TabViewGroup::*)(QWidget* initialWidget, const QString& label)>(
                     &TabViewGroup::splitHorizontally),
                 this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void TabViewGroup::splitVertically() {
-  splitTextEditView(
+  splitTextEdit(
       std::bind(static_cast<void (TabViewGroup::*)(QWidget* initialWidget, const QString& label)>(
                     &TabViewGroup::splitVertically),
                 this, std::placeholders::_1, std::placeholders::_2));
@@ -175,11 +175,11 @@ void TabViewGroup::addTabView(QWidget* widget,
   }
 }
 
-void TabViewGroup::splitTextEditView(std::function<void(QWidget*, const QString&)> func) {
+void TabViewGroup::splitTextEdit(std::function<void(QWidget*, const QString&)> func) {
   if (m_activeTabView) {
-    TextEditView* activeEditView = qobject_cast<TextEditView*>(m_activeTabView->activeView());
-    if (activeEditView) {
-      TextEditView* anotherEditView = activeEditView->clone();
+    TextEdit* activeTextEdit = qobject_cast<TextEdit*>(m_activeTabView->activeView());
+    if (activeTextEdit) {
+      TextEdit* anotherEditView = activeTextEdit->clone();
       QString label = m_activeTabView->tabText(m_activeTabView->currentIndex());
       func(anotherEditView, label);
     }

@@ -8,7 +8,7 @@
 #include "Window.h"
 #include "ui_Window.h"
 #include "TabViewGroup.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "StatusBar.h"
 #include "ProjectTreeView.h"
 #include "Splitter.h"
@@ -158,24 +158,22 @@ void Window::updateConnection(TabView* oldTabView, TabView* newTabView) {
 }
 
 void Window::updateConnection(QWidget* oldView, QWidget* newView) {
-  //  qDebug("updateConnection for new active TextEditView");
-
-  TextEditView* oldEditView = qobject_cast<TextEditView*>(oldView);
+  TextEdit* oldEditView = qobject_cast<TextEdit*>(oldView);
   if (oldEditView && ui->statusBar) {
-    disconnect(oldEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
-    disconnect(oldEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
-    disconnect(oldEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
+    disconnect(oldEditView, &TextEdit::languageChanged, ui->statusBar, &StatusBar::setLanguage);
+    disconnect(oldEditView, &TextEdit::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
+    disconnect(oldEditView, &TextEdit::lineSeparatorChanged, ui->statusBar,
                &StatusBar::setLineSeparator);
-    disconnect(oldEditView, &TextEditView::bomChanged, ui->statusBar, &StatusBar::setBOM);
+    disconnect(oldEditView, &TextEdit::bomChanged, ui->statusBar, &StatusBar::setBOM);
   }
 
-  TextEditView* newEditView = qobject_cast<TextEditView*>(newView);
+  TextEdit* newEditView = qobject_cast<TextEdit*>(newView);
   if (newEditView && ui->statusBar) {
-    connect(newEditView, &TextEditView::languageChanged, ui->statusBar, &StatusBar::setLanguage);
-    connect(newEditView, &TextEditView::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
-    connect(newEditView, &TextEditView::lineSeparatorChanged, ui->statusBar,
+    connect(newEditView, &TextEdit::languageChanged, ui->statusBar, &StatusBar::setLanguage);
+    connect(newEditView, &TextEdit::encodingChanged, ui->statusBar, &StatusBar::setEncoding);
+    connect(newEditView, &TextEdit::lineSeparatorChanged, ui->statusBar,
             &StatusBar::setLineSeparator);
-    connect(newEditView, &TextEditView::bomChanged, ui->statusBar, &StatusBar::setBOM);
+    connect(newEditView, &TextEdit::bomChanged, ui->statusBar, &StatusBar::setBOM);
   }
 }
 

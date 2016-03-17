@@ -1,5 +1,5 @@
 #include "LineNumberArea.h"
-#include "TextEditView.h"
+#include "TextEdit.h"
 #include "core/Theme.h"
 #include "core/Config.h"
 
@@ -7,7 +7,7 @@ using core::ColorSettings;
 using core::Theme;
 using core::Config;
 
-LineNumberArea::LineNumberArea(TextEditView* editor) : QWidget(editor), m_codeEditor(editor) {
+LineNumberArea::LineNumberArea(TextEdit* editor) : QWidget(editor), m_codeEditor(editor) {
   connect(&Config::singleton(), &Config::themeChanged, this, &LineNumberArea::setTheme);
   // Set default values
   setTheme(Config::singleton().theme());

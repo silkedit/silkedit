@@ -11,7 +11,7 @@
 #include "core/Region.h"
 
 class LineEdit;
-class TextEditView;
+class TextEdit;
 
 namespace Ui {
 class FindReplaceView;
