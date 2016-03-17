@@ -3,21 +3,19 @@
 #include "Config.h"
 #include "Theme.h"
 
-using core::Config;
-using core::Theme;
-using core::ColorSettings;
+namespace core {
 
-core::PackageToolBar::PackageToolBar(const QString& objectName,
-                                     const QString& title,
-                                     QWidget* parent,
-                                     const QString& pkgName)
+PackageToolBar::PackageToolBar(const QString& objectName,
+                               const QString& title,
+                               QWidget* parent,
+                               const QString& pkgName)
     : QToolBar(title, parent), m_pkgParent(new PackageParent(pkgName, this)) {
   setObjectName(objectName);
   setTheme(Config::singleton().theme());
-  connect(&Config::singleton(), &Config::themeChanged, this, &core::PackageToolBar::setTheme);
+  connect(&Config::singleton(), &Config::themeChanged, this, &PackageToolBar::setTheme);
 }
 
-void core::PackageToolBar::setTheme(const core::Theme* theme) {
+void PackageToolBar::setTheme(const Theme* theme) {
   qDebug("PackageToolBar theme is changed");
   if (!theme) {
     qWarning("theme is null");
@@ -39,3 +37,5 @@ void core::PackageToolBar::setTheme(const core::Theme* theme) {
     this->setStyleSheet(style);
   }
 }
+
+}  // namespace core
