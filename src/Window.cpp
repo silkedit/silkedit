@@ -323,7 +323,7 @@ void Window::updateTitle() {
 
   if (m_projectView) {
     if (!title.isEmpty()) {
-      title += QStringLiteral(" — ");
+      title += u8" - ";
     }
     title += m_projectView->dirPath();
   }
