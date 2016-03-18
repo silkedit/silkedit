@@ -7,6 +7,8 @@ VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
 
 if [ "$(uname)" == 'Darwin' ]; then
   OS='Mac'
+  SDK_PATH=`xcrun --show-sdk-path`
+  export MACOSX_DEPLOYMENT_TARGET=10.8
 elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
   OS='Linux'
 elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
@@ -99,20 +101,10 @@ resolve() {
     fi
 
     if [ $OS == 'Mac' ]; then
-      brew list yaml-cpp || brew install yaml-cpp --c++11 --with-static-lib
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
-      brew list uchardet || brew install uchardet
       brew list boost || brew install boost --c++11
-
-      # Onigmo
-      if [ "$1" != '--skip-build' ]; then
-        echo 'Building Onigmo...'
-        cd Onigmo
-        ./configure && make && make install
-        cd ..
-			fi
 
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
@@ -132,17 +124,40 @@ resolve() {
       rm Breakpad.framework.zip
       cd ..
 
-			# build libnode.dylib
       if [ "$1" != '--skip-build' ]; then
-			  cd vendor/node
-			  # Build Release version
-			  ./configure --enable-shared
-			  make -j8
+        #Onigmo
+        echo 'Building Onigmo...'
+        cd vendor/Onigmo
+        ./configure && make && make install
+        cd ../..
+        
+        # yaml-cpp
+        echo 'Building yaml-cpp...'
+        cd vendor/yaml-cpp
+        rm -rf build && mkdir build && cd build
+        # needs to link with libc++
+        # https://github.com/jbeder/yaml-cpp/issues/211
+        cmake -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" ..
+        ninja && ninja install
+        cd ../../..
+        
+        # uchardet
+        echo 'Building uchardet...'
+        cd vendor/uchardet
+        cmake -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" .
+        make && make install
+        cd ../..
+
+        # build libnode.dylib
+        cd vendor/node
+        # Build Release version
+        ./configure --enable-shared
+        make -j8
         # Build Debug version
-			  ./configure --debug --enable-shared
-			  make -j8
-			  mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
-			  cd ../..
+        ./configure --debug --enable-shared
+        make -j8
+        mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
+        cd ../..
       fi
 
     else
@@ -273,7 +288,7 @@ resolve() {
 build() {
     echo "Minifying JS files"
     npm run minify
-    
+
     echo "Generating resources/LICENSE.md"
     npm run generate-license
 
@@ -287,9 +302,9 @@ build() {
 
     if [ $OS == 'Mac' ]; then
         if [ "$1" = '-edge' ]; then
-            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
         else
-            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release
+            cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
         fi
 
         ninja
