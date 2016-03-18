@@ -5,6 +5,7 @@
 #include <boost/optional.hpp>
 #include <QVector>
 #include <QStringRef>
+#include <QMutex>
 
 #include "macros.h"
 
