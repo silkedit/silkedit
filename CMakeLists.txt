@@ -44,9 +44,9 @@ endif ()
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
 if (APPLE)
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.5.1)
+  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.6.0)
 else (MSVC)
-  set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.5.1")
+  set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.6.0")
 endif ()
 
 find_package(Qt5Widgets REQUIRED)
