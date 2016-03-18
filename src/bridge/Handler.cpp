@@ -25,9 +25,7 @@
 #include "FileDialog.h"
 #include "TextEdit.h"
 #include "JSStaticObject.h"
-#ifdef Q_OS_MAC
 #include "WebView.h"
-#endif
 #include "Console.h"
 #include "FindReplaceView.h"
 #include "util/YamlUtil.h"
@@ -258,9 +256,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<StringListModel>(exports);
   registerClass<TextEdit>(exports);
   registerClass<VBoxLayout>(exports);
-#ifdef Q_OS_MAC
   registerClass<WebView>(exports);
-#endif
   registerClass<Window>(exports);
 
   // Wrappers

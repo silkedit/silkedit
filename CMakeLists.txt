@@ -54,9 +54,9 @@ find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 find_package(Qt5Svg REQUIRED)
+find_package(Qt5WebEngineWidgets REQUIRED)
 
 if (APPLE)
-  find_package(Qt5WebEngineWidgets REQUIRED)
   if (USE_DEBUG_NODE)
     find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
   else ()
@@ -165,13 +165,13 @@ if(APPLE)
     "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
     "-framework Breakpad")
 elseif (MSVC)
-  # Don't include WebEngineWidgets on Windows because it needs MSVC 2013
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_core
                         Qt5::Widgets
                         Qt5::Network
                         Qt5::Xml
                         Qt5::Svg
+                        Qt5::WebEngineWidgets
                         ${YAML_CPP_LIBRARY}
                         NODE_LIBRARY
   )
