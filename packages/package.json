@@ -28,10 +28,8 @@
     "language-shellscript": "silkedit/language-shellscript#0.1.0",
     "language-scala": "silkedit/language-scala#0.1.0",
     "language-perl": "silkedit/language-perl#0.1.0",
-    "language-batch": "silkedit/language-batch#0.1.0"
-  },
-  "optionalDependencies": {
-    "markdown_preview": "silkedit/markdown_preview#0.1.7"
+    "language-batch": "silkedit/language-batch#0.1.0",
+    "markdown_preview": "silkedit/markdown_preview#0.1.8"
   },
   "license":"UNLICENSED",
   "repository":""
