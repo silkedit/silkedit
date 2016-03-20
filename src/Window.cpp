@@ -37,6 +37,9 @@ using core::PackageManager;
 namespace {
 constexpr const char* WINDOWS_PREFIX = "windows";
 constexpr const char* DIR_PATH_KEY = "dir_path";
+constexpr const char* POS_KEY = "pos";
+constexpr const char* SIZE_KEY = "size";
+constexpr const char* FULL_SCREEN_KEY = "fullScreen";
 }
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
@@ -359,6 +362,9 @@ void Window::updateTitle() {
 
 void Window::saveState(QSettings& settings) {
   settings.beginGroup(Window::staticMetaObject.className());
+  settings.setValue(POS_KEY, pos());
+  settings.setValue(SIZE_KEY, size());
+  settings.setValue(FULL_SCREEN_KEY, isFullScreen());
   if (m_projectView) {
     settings.setValue(DIR_PATH_KEY, m_projectView->dirPath());
   }
@@ -370,6 +376,27 @@ void Window::saveState(QSettings& settings) {
 
 void Window::loadState(QSettings& settings) {
   settings.beginGroup(Window::staticMetaObject.className());
+  if (settings.contains(POS_KEY)) {
+    auto posVar = settings.value(POS_KEY);
+    if (posVar.canConvert<QPoint>()) {
+      move(posVar.toPoint());
+    }
+  }
+
+  if (settings.contains(SIZE_KEY)) {
+    auto sizeVar = settings.value(SIZE_KEY);
+    if (sizeVar.canConvert<QSize>()) {
+      resize(sizeVar.toSize());
+    }
+  }
+
+  if (settings.contains(FULL_SCREEN_KEY)) {
+    auto fullScreenVar = settings.value(FULL_SCREEN_KEY);
+    if (fullScreenVar.canConvert<bool>() && fullScreenVar.toBool()) {
+      setWindowState(windowState() ^ Qt::WindowFullScreen);
+    }
+  }
+
   if (settings.contains(DIR_PATH_KEY)) {
     auto dirPathVar = settings.value(DIR_PATH_KEY);
     if (dirPathVar.canConvert<QString>()) {
