@@ -25,7 +25,12 @@ class SyntaxHighlighterThread : public QObject, public Singleton<SyntaxHighlight
   void parse(SyntaxHighlighter* highlighter, LanguageParser parser);
   void parse(SyntaxHighlighter* highlighter,
              LanguageParser parser,
-             QList<Node> children, Region region);
+             QList<Node> children,
+             Region region);
+
+ signals:
+  void fullParseFinished(SyntaxHighlighter* highlighter, RootNode node);
+  void partialParseFinished(SyntaxHighlighter* highlighter, QList<Node> newNodes, Region region);
 
  private:
   QThread* m_thread;
@@ -64,9 +69,9 @@ class SyntaxHighlighter : public QSyntaxHighlighter {
 
   QString asHtml();
 
-  void highlight(const Region &region);
+  void highlight(const Region& region);
 
-signals:
+ signals:
   void parseFinished();
 
  public slots:
