@@ -1,4 +1,4 @@
-#include <vendor/node/src/node_buffer.h>
+﻿#include <vendor/node/src/node_buffer.h>
 #include <sstream>
 #include <QDebug>
 #include <QLoggingCategory>
@@ -119,11 +119,15 @@ bool V8Util::isEnum(QVariant var) {
 }
 
 v8::Local<v8::Value> V8Util::toV8Value(v8::Isolate* isolate, const QVariant& var) {
-  if (var.canConvert<QAbstractItemView*>()) {
+  auto typeId = QMetaType::type(var.typeName());
+  // don't use QVariant::canConvert for Wrapper type
+  // When var is Window*, canConvert<QAbstractItemView*>() returns true.
+  // if (var.canConvert<QAbstractItemView*>()) {
+  if (typeId == qMetaTypeId<QAbstractItemView*>()) {
     return toV8ObjectFrom(isolate, new QAbstractItemViewWrap(var.value<QAbstractItemView*>()));
-  } else if (var.canConvert<QItemSelectionModel*>()) {
+  } else if (typeId == qMetaTypeId<QItemSelectionModel*>()) {
     return toV8ObjectFrom(isolate, new ItemSelectionModel(var.value<QItemSelectionModel*>()));
-  } else if (var.canConvert<QScrollBar*>()) {
+  } else if (typeId == qMetaTypeId<QScrollBar*>()) {
     return toV8ObjectFrom(isolate, new QScrollBarWrap(var.value<QScrollBar*>()));
   } else if (var.canConvert<QObject*>()) {
     return toV8ObjectFrom(isolate, var.value<QObject*>());
