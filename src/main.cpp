@@ -61,7 +61,8 @@ int main(int argc, char** argv) {
   MetaTypeInitializer::init();
 
   Condition::init();
-  Condition::add(GrammerCondition::name, std::move(std::unique_ptr<Condition>(new GrammerCondition())));
+  Condition::add(GrammerCondition::name,
+                 std::move(std::unique_ptr<Condition>(new GrammerCondition())));
 
   PackageManager::singleton().loadFiles();
 
@@ -78,7 +79,16 @@ int main(int argc, char** argv) {
   // Create default menu bar before creating any new window
   MenuBar::init();
 
-  Window* window = Window::createWithNewFile();
+  App::loadState();
+
+  Window* window;
+  if (Window::windows().isEmpty()) {
+    window = Window::createWithNewFile();
+  } else {
+    window = Window::windows().first();
+  }
+  Q_ASSERT(window);
+
   QObject::connect(window, &Window::firstPaintEventFired, [&] {
     qDebug() << "firstPaintEventFired";
     // Start Node.js event loop after showing the first window
@@ -86,7 +96,14 @@ int main(int argc, char** argv) {
     // the window system's event queue have been processed
     QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
   });
+  for (auto win : Window::windows()) {
+    win->setVisible(true);
+  }
+
+  // Show active window in front
   window->show();
+  window->raise();
+  window->activateWindow();
 
   //   Set focus to active view
   if (auto v = window->activeTabView()->activeView()) {

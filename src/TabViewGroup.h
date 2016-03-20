@@ -4,6 +4,7 @@
 #include <functional>
 #include <QWidget>
 #include <QLinkedList>
+#include <QSettings>
 
 #include "core/macros.h"
 
@@ -28,7 +29,8 @@ class TabViewGroup : public QWidget {
   bool closeAllTabs();
   TabBar* tabBarAt(int screenX, int screenY);
   QLinkedList<TabView*> tabViews() { return m_tabViews; }
-
+  void saveState(QSettings &settings);
+  void loadState(QSettings &settings);
 
 public slots:
   void splitHorizontally();

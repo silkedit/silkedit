@@ -39,11 +39,15 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   QAction* exitAction = new QAction(exitMenuStr, fileMenu);
   exitAction->setMenuRole(QAction::QuitRole);
   connect(exitAction, &QAction::triggered, [] {
+    App::saveState();
+
     for (auto window : Window::windows()) {
       if (!window->close()) {
         return;
       }
     }
+
+    App::quit();
   });
   fileMenu->addAction(exitAction);
 
