@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <QApplication>
+#include <QSettings>
 
 #include "core/macros.h"
 
@@ -18,6 +19,8 @@ class App : public QApplication {
   static App* instance() { return s_app; }
   static TabBar* tabBarAt(int x, int y);
   static void restart();
+  static void saveState();
+  static void loadState();
 
   App(int& argc, char** argv);
   ~App() = default;

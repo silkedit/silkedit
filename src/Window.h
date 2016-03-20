@@ -5,6 +5,7 @@
 #include <memory>
 #include <list>
 #include <QMainWindow>
+#include <QSettings>
 
 #include "core/macros.h"
 
@@ -56,6 +57,8 @@ class Window : public QMainWindow {
   static void showFirst();
 
   static void closeTabIncludingDoc(core::Document* doc);
+  static void saveWindowsState(Window* activeWindow, QSettings &settings);
+  static void loadWindowsState(QSettings &settings);
 
   ~Window();
   DEFAULT_MOVE(Window)
@@ -71,6 +74,8 @@ class Window : public QMainWindow {
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
   void updateTitle();
+  void saveState(QSettings &settings);
+  void loadState(QSettings &settings);
 
 public slots:
   StatusBar* statusBar();

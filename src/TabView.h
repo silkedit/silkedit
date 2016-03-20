@@ -32,12 +32,12 @@ class TabView : public QTabWidget {
   QWidget* activeView() { return m_activeView; }
   bool tabDragging() { return m_tabDragging; }
   int indexOfPath(const QString& path);
-  bool insertTabInformation(const int index);
-  bool createWithSavedTabs();
   int open(const QString& path);
   bool closeAllTabs();
+  void saveState(QSettings &settings);
+  void loadState(QSettings &settings);
 
- public slots:
+public slots:
   bool closeTab(int index);
   bool closeTab(QWidget* widget);
   void addNewTab();

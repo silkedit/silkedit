@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QToolBar>
+#include <QTimer>
 
 #include "Window.h"
 #include "ui_Window.h"
@@ -32,6 +33,11 @@ using core::Theme;
 using core::Util;
 using core::ColorSettings;
 using core::PackageManager;
+
+namespace {
+constexpr const char* WINDOWS_PREFIX = "windows";
+constexpr const char* DIR_PATH_KEY = "dir_path";
+}
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags),
@@ -193,8 +199,6 @@ Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   Window* w = create(parent, flags);
   bool result = false;
 
-  result = w->activeTabView()->createWithSavedTabs();
-
   if (!result) {
     w->activeTabView()->addNewTab();
   }
@@ -218,7 +222,9 @@ void Window::loadMenu(const QString& pkgName, const QString& ymlPath) {
     YamlUtil::parseMenuNode(pkgName, pkgPath, MenuBar::globalMenuBar(), menuNode);
 #elif defined Q_OS_WIN
     // Menu bar belongs to each window.
-    foreach (Window* win, s_windows) { YamlUtil::parseMenuNode(pkgName, pkgPath, win->menuBar(), menuNode); }
+    foreach (Window* win, s_windows) {
+      YamlUtil::parseMenuNode(pkgName, pkgPath, win->menuBar(), menuNode);
+    }
 #endif
   } catch (const YAML::ParserException& ex) {
     qWarning("Unable to load %s. Cause: %s", qPrintable(ymlPath), ex.what());
@@ -277,6 +283,32 @@ void Window::closeTabIncludingDoc(core::Document* doc) {
   } while (needsRetry);
 }
 
+void Window::saveWindowsState(Window* activeWindow, QSettings& settings) {
+  // Bring active window first
+  if (activeWindow && s_windows.contains(activeWindow)) {
+    s_windows.removeOne(activeWindow);
+    s_windows.prepend(activeWindow);
+  }
+
+  settings.beginWriteArray(WINDOWS_PREFIX);
+  for (int i = 0; i < s_windows.size(); i++) {
+    settings.setArrayIndex(i);
+    s_windows[i]->saveState(settings);
+  }
+  settings.endArray();
+}
+
+void Window::loadWindowsState(QSettings& settings) {
+  int size = settings.beginReadArray(WINDOWS_PREFIX);
+  for (int i = 0; i < size; i++) {
+    auto win = create();
+    Q_ASSERT(win);
+    settings.setArrayIndex(i);
+    win->loadState(settings);
+  }
+  settings.endArray();
+}
+
 Window::~Window() {
   qDebug("~Window");
   s_windows.removeOne(this);
@@ -329,11 +361,38 @@ void Window::updateTitle() {
   setWindowTitle(title);
 }
 
+void Window::saveState(QSettings& settings) {
+  settings.beginGroup(Window::staticMetaObject.className());
+  if (m_projectView) {
+    settings.setValue(DIR_PATH_KEY, m_projectView->dirPath());
+  }
+  if (m_tabViewGroup) {
+    m_tabViewGroup->saveState(settings);
+  }
+  settings.endGroup();
+}
+
+void Window::loadState(QSettings& settings) {
+  settings.beginGroup(Window::staticMetaObject.className());
+  if (settings.contains(DIR_PATH_KEY)) {
+    auto dirPathVar = settings.value(DIR_PATH_KEY);
+    if (dirPathVar.canConvert<QString>()) {
+      // calling openDir immediately causes this error
+      // FSEventStreamStart: register_with_server: ERROR: f2d_register_rpc
+      QTimer::singleShot(0, this, [=] { openDir(dirPathVar.toString()); });
+    }
+  }
+  Q_ASSERT(m_tabViewGroup);
+  m_tabViewGroup->loadState(settings);
+  settings.endGroup();
+}
+
 bool Window::openDir(const QString& dirPath) {
   if (!m_projectView) {
     m_projectView = new ProjectTreeView(this);
   }
 
+  Q_ASSERT(m_projectView);
   if (m_projectView->openDirOrExpand(dirPath)) {
     // root splitter becomes the owner of a project view.
     ui->rootSplitter->insertWidget(0, m_projectView);

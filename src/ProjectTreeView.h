@@ -3,12 +3,13 @@
 #include <QTreeView>
 #include <QFileSystemModel>
 #include <QSortFilterProxyModel>
+#include <QSettings>
 
 #include "core/macros.h"
 
 class MyFileSystemModel;
 namespace core {
-    class Theme;
+class Theme;
 }
 
 class ProjectTreeView : public QTreeView {
@@ -27,8 +28,8 @@ class ProjectTreeView : public QTreeView {
  protected:
   void contextMenuEvent(QContextMenuEvent* event) override;
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
-  void keyPressEvent(QKeyEvent * event) override;
-  void mouseDoubleClickEvent(QMouseEvent *) override;
+  void keyPressEvent(QKeyEvent* event) override;
+  void mouseDoubleClickEvent(QMouseEvent*) override;
 
  private:
   MyFileSystemModel* m_model;
@@ -43,7 +44,7 @@ class ProjectTreeView : public QTreeView {
   void openOrExpand(QModelIndex index);
   void focusRootDirectory(const QString& path);
 
-private slots:
+ private slots:
   void rename();
   void remove();
   void showInFinder();

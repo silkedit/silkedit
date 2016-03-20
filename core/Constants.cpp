@@ -101,8 +101,8 @@ QString Constants::recentOpenHistoryPath() {
   return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/recentOpenHistory.ini";
 }
 	
-QString Constants::tabViewInformationPath() {
-  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/tabViewInformation.ini";
+QString Constants::appStatePath() {
+  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/appState.ini";
 }
 
 QStringList Constants::themePaths() {
