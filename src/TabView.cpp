@@ -366,7 +366,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
            << "newWindowPos:" << newWindowPos << "isFloating:" << isFloating;
 
   if (isFloating) {
-    Window* newWindow = Window::create();
+    Window* newWindow = new Window();
     newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {

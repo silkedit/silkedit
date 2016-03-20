@@ -115,6 +115,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       toolbar->setVisible(visible);
     }
   });
+
+  s_windows.append(this);
 }
 
 void Window::setTheme(const core::Theme* theme) {
@@ -189,14 +191,8 @@ void Window::emitActiveViewChanged(TabView* oldTabView, TabView* newTabView) {
   emit activeViewChanged(oldView, newView);
 }
 
-Window* Window::create(QWidget* parent, Qt::WindowFlags flags) {
-  Window* window = new Window(parent, flags);
-  s_windows.append(window);
-  return window;
-}
-
 Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
-  Window* w = create(parent, flags);
+  Window* w = new Window(parent, flags);
   bool result = false;
 
   if (!result) {
@@ -301,7 +297,7 @@ void Window::saveWindowsState(Window* activeWindow, QSettings& settings) {
 void Window::loadWindowsState(QSettings& settings) {
   int size = settings.beginReadArray(WINDOWS_PREFIX);
   for (int i = 0; i < size; i++) {
-    auto win = create();
+    auto win = new Window();
     Q_ASSERT(win);
     settings.setArrayIndex(i);
     win->loadState(settings);

@@ -34,7 +34,6 @@ class Window : public QMainWindow {
   DISABLE_COPY(Window)
 
  public:
-  static Window* create(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static Window* createWithNewFile(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   static QList<Window*> windows() { return s_windows; }
   static void loadMenu(const QString& pkgName, const QString& ymlPath);
@@ -60,12 +59,12 @@ class Window : public QMainWindow {
   static void saveWindowsState(Window* activeWindow, QSettings &settings);
   static void loadWindowsState(QSettings &settings);
 
+  Q_INVOKABLE Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~Window();
   DEFAULT_MOVE(Window)
 
   // accessor
   TabViewGroup* tabViewGroup() { return m_tabViewGroup; }
-  TabView* activeTabView();
   bool isProjectOpend() { return m_projectView != nullptr; }
 
   void show();
@@ -81,7 +80,7 @@ public slots:
   StatusBar* statusBar();
   Console* console() { return m_console; }
   FindReplaceView* findReplaceView() { return m_findReplaceView; }
-  QList<QToolBar *> toolBars();
+  TabView* activeTabView();
 
 signals:
   void activeViewChanged(QWidget* oldView, QWidget* newView);
@@ -93,7 +92,6 @@ signals:
  private:
   static QList<Window*> s_windows;
 
-  explicit Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
 
   std::unique_ptr<Ui::Window> ui;
   TabViewGroup* m_tabViewGroup;
@@ -105,6 +103,7 @@ signals:
   static bool closeTabIncludingDocInternal(core::Document* doc);
 
   void setTheme(const core::Theme* theme);
+  QList<QToolBar *> toolBars();
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);
