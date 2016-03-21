@@ -11,16 +11,20 @@ const char* Constants::RUN_AS_NODE = "--run-as-node";
 
 #ifdef Q_OS_MAC
 const QString Constants::defaultFontFamily = "Source Han Code JP";
+const QString Constants::defaultUIFontFamily = "Menlo Regular";
 #endif
 
 #ifdef Q_OS_WIN
 const QString Constants::defaultFontFamily = "Consolas";
+const QString Constants::defaultUIFontFamily = "Consolas";
 #endif
 
 #ifdef Q_OS_MAC
 const int Constants::defaultFontSize = 13;
+const int Constants::defaultUIFontSize = 11;
 #else
 const int Constants::defaultFontSize = 12;
+const int Constants::defaultUIFontSize = 10;
 #endif
 
 QStringList Constants::configPaths() {

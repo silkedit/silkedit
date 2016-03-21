@@ -12,11 +12,13 @@
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Util.h"
+#include "core/Constants.h"
 
 using core::Util;
 using core::Config;
 using core::Theme;
 using core::ColorSettings;
+using core::Constants;
 
 namespace {
 
@@ -43,7 +45,7 @@ QString getUniqueDirName(const QString& baseNewDirPath) {
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(nullptr) {
   setTheme(Config::singleton().theme());
-  setFont(Config::singleton().font());
+  setFont();
 
   setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -143,11 +145,9 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
   }
 }
 
-void ProjectTreeView::setFont(const QFont& font) {
-  int decreaseFontSize = 2;
-  QFont projectTreeFont = font;
-
-  projectTreeFont.setPointSize(font.pointSize() - decreaseFontSize);
+void ProjectTreeView::setFont() {
+  QFont projectTreeFont = Constants::defaultUIFontFamily;
+  projectTreeFont.setPointSize(Constants::defaultUIFontSize);
   QTreeView::setFont(projectTreeFont);
 }
 
