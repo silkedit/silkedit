@@ -6,7 +6,7 @@ ProjectTreeView {
 
 
 /* Splitter
- * Below css applyed to show splitter off.
+ * Below css hides a splitter.
  * Even if setHandleWidth equauls 0 in cpp, 1px line is displayed.
  */
 QSplitter::handle {
