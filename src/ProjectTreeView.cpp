@@ -146,7 +146,7 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
 }
 
 void ProjectTreeView::setFont() {
-  QFont projectTreeFont = Constants::defaultUIFontFamily;
+  QFont projectTreeFont(Constants::defaultUIFontFamily);
   projectTreeFont.setPointSize(Constants::defaultUIFontSize);
   QTreeView::setFont(projectTreeFont);
 }
