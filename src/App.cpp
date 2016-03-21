@@ -61,6 +61,9 @@ App::App(int& argc, char** argv)
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);
+#ifdef Q_OS_MAC
+  setQuitOnLastWindowClosed(false);
+#endif
   s_app = this;
 
 #ifdef Q_OS_WIN
@@ -253,4 +256,15 @@ void App::restart() {
     QProcess::startDetached(QApplication::applicationFilePath());
     s_app->exit();
   }
+}
+
+void App::saveState() {
+  QSettings settings(Constants::singleton().appStatePath(), QSettings::IniFormat);
+  settings.clear();
+  Window::saveWindowsState(s_app->activeWindow(), settings);
+}
+
+void App::loadState() {
+  QSettings settings(Constants::singleton().appStatePath(), QSettings::IniFormat);
+  Window::loadWindowsState(settings);
 }
