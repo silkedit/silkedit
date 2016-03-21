@@ -61,7 +61,9 @@ App::App(int& argc, char** argv)
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);
+#ifdef Q_OS_MAC
   setQuitOnLastWindowClosed(false);
+#endif
   s_app = this;
 
 #ifdef Q_OS_WIN
