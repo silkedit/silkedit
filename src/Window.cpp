@@ -36,7 +36,7 @@ using core::PackageManager;
 
 namespace {
 constexpr const char* WINDOWS_PREFIX = "windows";
-constexpr const char* DIR_PATH_KEY = "dir_path";
+constexpr const char* DIR_PATH_KEY = "dirPath";
 constexpr const char* POS_KEY = "pos";
 constexpr const char* SIZE_KEY = "size";
 constexpr const char* FULL_SCREEN_KEY = "fullScreen";
@@ -283,7 +283,7 @@ void Window::closeTabIncludingDoc(core::Document* doc) {
 }
 
 void Window::saveWindowsState(Window* activeWindow, QSettings& settings) {
-  // Bring active window first
+  // Bring the active window first
   if (activeWindow && s_windows.contains(activeWindow)) {
     s_windows.removeOne(activeWindow);
     s_windows.prepend(activeWindow);
