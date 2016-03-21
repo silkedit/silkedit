@@ -37,6 +37,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
 
   const QString& exitMenuStr = Config::singleton().enableMnemonic() ? tr("&Exit") : tr("Exit");
   QAction* exitAction = new QAction(exitMenuStr, fileMenu);
+  exitAction->setObjectName(QStringLiteral("exit"));
   exitAction->setMenuRole(QAction::QuitRole);
   connect(exitAction, &QAction::triggered, [] {
     App::saveState();
