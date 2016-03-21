@@ -277,7 +277,9 @@ bool Util::wrappedTypeCheck(QVariant var, const QByteArray& typeName) {
     Q_ASSERT(wrapper);
     QVariant wrapped = wrapper->getWrapped();
     if (wrapped.canConvert<QObject*>()) {
-      return wrapped.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
+      auto qobj = wrapped.value<QObject*>();
+      Q_ASSERT(qobj);
+      return qobj->inherits(typeName.left(typeName.size() - 1));
     }
   }
 

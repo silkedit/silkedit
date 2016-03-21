@@ -203,27 +203,27 @@ resolve() {
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
             echo 'Building uchardet ...'
-            cd uchardet
+            cd vendor/uchardet
             cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=..
             msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
             msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
-            mkdir -p ../lib/uchardet
-            cp -r src/Release ../lib/uchardet
-            cp -r src/Debug ../lib/uchardet
-            mkdir -p ../include/uchardet
-            cp src/uchardet.h ../include/uchardet
-            cd ..
+            mkdir -p ../../lib/uchardet
+            cp -r src/Release ../../lib/uchardet
+            cp -r src/Debug ../../lib/uchardet
+            mkdir -p ../../include/uchardet
+            cp src/uchardet.h ../../include/uchardet
+            cd ../..
         fi
 
         # Onigmo
         if [ "$1" != '--skip-build' ]; then
           echo 'Building Onigmo...'
-          cd Onigmo
+          cd vendor/Onigmo
           cp win32/Makefile .
           cp win32/config.h .
           echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
-          cp onig.lib onig.dll ../lib
-          cd ..
+          cp onig.lib onig.dll ../../lib
+          cd ../..
 				fi
 
 		#breakpad

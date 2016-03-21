@@ -18,6 +18,12 @@ using core::Document;
 const QString DocumentManager::DEFAULT_FILE_NAME = "untitled";
 
 int DocumentManager::open(const QString& filename) {
+  if (Window::windows().isEmpty()) {
+    if (auto win = Window::createWithNewFile()) {
+      win->show();
+    }
+  }
+
   if (TabView* tabView = App::instance()->activeTabView()) {
     return tabView->open(filename) >= 0;
   } else {

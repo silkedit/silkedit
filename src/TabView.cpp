@@ -15,7 +15,6 @@
 #include "Helper.h"
 #include "core/Config.h"
 #include "core/Theme.h"
-#include "core/Constants.h"
 #include "core/Util.h"
 
 using core::Document;
@@ -23,11 +22,10 @@ using core::Config;
 using core::Theme;
 using core::Util;
 using core::ColorSettings;
-using core::Constants;
 
 namespace {
-constexpr const char* PREFIX = "tabInformation";
-constexpr const char* PATH_KEY = "tab";
+constexpr const char* PATHS_PREFIX = "paths";
+constexpr const char* PATH_KEY = "path";
 
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
@@ -50,7 +48,8 @@ TabView::TabView(QWidget* parent)
   connect(m_tabBar, &TabBar::onDetachTabFinished, this, &TabView::detachTabFinished);
   connect(this, &QTabWidget::tabBarClicked, this, &TabView::focusTabContent);
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
-  connect(this, &QTabWidget::tabCloseRequested, this, static_cast<bool (TabView::*)(int)>(&TabView::closeTab));
+  connect(this, &QTabWidget::tabCloseRequested, this,
+          static_cast<bool (TabView::*)(int)>(&TabView::closeTab));
   connect(&Config::singleton(), &Config::themeChanged, this, &TabView::setTheme);
 }
 
@@ -160,7 +159,6 @@ bool TabView::closeAllTabs() {
     std::list<QWidget*> widgets;
     for (int i = 0; i < count(); i++) {
       widgets.push_back(widget(i));
-      insertTabInformation(i);
     }
 
     for (auto w : widgets) {
@@ -368,7 +366,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
            << "newWindowPos:" << newWindowPos << "isFloating:" << isFloating;
 
   if (isFloating) {
-    Window* newWindow = Window::create();
+    Window* newWindow = new Window();
     newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {
@@ -384,54 +382,39 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
   tabRemoved(-1);
 }
 
-bool TabView::insertTabInformation(const int index) {
-  TextEdit* v = qobject_cast<TextEdit*>(widget(index));
-  if (!v) {
-    return false;
+void TabView::saveState(QSettings& settings) {
+  settings.beginGroup(TabView::staticMetaObject.className());
+  settings.beginWriteArray(PATHS_PREFIX);
+  for (int i = 0; i < count(); i++) {
+    TextEdit* v = qobject_cast<TextEdit*>(widget(i));
+    if (!v) {
+      continue;
+    }
+    QString path = v->path();
+
+    // set tab information to array.
+    settings.setArrayIndex(i);
+    settings.setValue(PATH_KEY, path.toStdString().c_str());
   }
-  QString path = v->path();
-
-  // Declaration variables to insert tab information.
-  QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
-                                QSettings::IniFormat);
-
-  // set tab information to array.
-  tabViewHistoryTable.beginWriteArray(PREFIX);
-  tabViewHistoryTable.setArrayIndex(index);
-  tabViewHistoryTable.setValue(PATH_KEY, path.toStdString().c_str());
-  tabViewHistoryTable.endArray();
-
-  return true;
+  settings.endArray();
+  settings.endGroup();
 }
 
-bool TabView::createWithSavedTabs() {
-  // declaration variables to insert tab information.
-  QSettings tabViewHistoryTable(Constants::singleton().tabViewInformationPath(),
-                                QSettings::IniFormat);
-
+void TabView::loadState(QSettings& settings) {
+  settings.beginGroup(TabView::staticMetaObject.className());
   // get array size.
-  int size = tabViewHistoryTable.beginReadArray(PREFIX);
-
-  // if array size is 0, return false
-  if (!size) {
-    return false;
-  }
+  int size = settings.beginReadArray(PATHS_PREFIX);
 
   // restore tab information.
   for (int i = 0; i < size; i++) {
-    tabViewHistoryTable.setArrayIndex(i);
-    const QVariant& value = tabViewHistoryTable.value(PATH_KEY);
-    // if value is empty,creat new window.
-    if (value.toString().isEmpty()) {
-      addNewTab();
-    }
+    settings.setArrayIndex(i);
+    const QVariant& value = settings.value(PATH_KEY);
     // if value convert to QString, open file.
     if (value.canConvert<QString>()) {
       open(value.toString());
     }
   }
 
-  tabViewHistoryTable.endArray();
-
-  return true;
+  settings.endArray();
+  settings.endGroup();
 }

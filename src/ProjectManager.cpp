@@ -9,7 +9,7 @@ bool ProjectManager::open(const QString& dirName) {
     return false;
   }
 
-  Window* window = Window::create();
+  Window* window = new Window();
   if (window) {
     window->show();
     return window->openDir(dirName);

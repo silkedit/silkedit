@@ -29,6 +29,19 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* doc,
   connect(doc, &QTextDocument::contentsChange, this, &SyntaxHighlighter::updateNode);
   connect(&Config::singleton(), &Config::themeChanged, this, &SyntaxHighlighter::changeTheme);
   connect(&Config::singleton(), &Config::fontChanged, this, &SyntaxHighlighter::changeFont);
+  connect(&SyntaxHighlighterThread::singleton(), &SyntaxHighlighterThread::fullParseFinished, this,
+          [&](SyntaxHighlighter* highlighter, RootNode node) {
+            if (highlighter == this) {
+              fullParseFinished(node);
+            }
+          });
+
+  connect(&SyntaxHighlighterThread::singleton(), &SyntaxHighlighterThread::partialParseFinished,
+          this, [&](SyntaxHighlighter* highlighter, QList<Node> newNodes, Region region) {
+            if (highlighter == this) {
+              partialParseFinished(newNodes, region);
+            }
+          });
 
   if (m_theme) {
     m_theme->setFont(font);
@@ -380,8 +393,7 @@ void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter, LanguagePars
     auto rootNode = parser.parse();
     if (rootNode) {
       qDebug() << "full parse finished";
-      QMetaObject::invokeMethod(highlighter, "fullParseFinished", Qt::QueuedConnection,
-                                Q_ARG(RootNode, *rootNode));
+      emit fullParseFinished(highlighter, *rootNode);
     } else {
       qDebug() << "full parse canceled";
     }
@@ -420,9 +432,7 @@ void SyntaxHighlighterThread::parse(SyntaxHighlighter* highlighter,
 
     if (result) {
       qDebug() << "partial parse finished";
-      QMetaObject::invokeMethod(highlighter, "partialParseFinished", Qt::QueuedConnection,
-                                Q_ARG(QList<Node>, std::get<0>(*result)),
-                                Q_ARG(Region, std::get<1>(*result)));
+      emit partialParseFinished(highlighter, std::get<0>(*result), std::get<1>(*result));
     } else {
       qDebug() << "partial parse canceled";
     }

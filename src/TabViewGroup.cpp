@@ -104,6 +104,23 @@ TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
   return nullptr;
 }
 
+void TabViewGroup::saveState(QSettings& settings) {
+  settings.beginGroup(TabViewGroup::staticMetaObject.className());
+  for (auto tab : m_tabViews) {
+    Q_ASSERT(tab);
+    tab->saveState(settings);
+  }
+  settings.endGroup();
+}
+
+void TabViewGroup::loadState(QSettings& settings) {
+  settings.beginGroup(TabViewGroup::staticMetaObject.className());
+  if (activeTab()) {
+    activeTab()->loadState(settings);
+  }
+  settings.endGroup();
+}
+
 TabView* TabViewGroup::createTabView() {
   auto tabView = new TabView();
   QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView]() {
