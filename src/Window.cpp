@@ -20,7 +20,7 @@
 #include "util/YamlUtil.h"
 #include "Helper.h"
 #include "PlatformUtil.h"
-
+#include "App.h"
 #include "Console.h"
 #include "core/Document.h"
 #include "core/Config.h"
@@ -334,6 +334,11 @@ QList<Window*> Window::s_windows;
 
 void Window::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
+#ifdef Q_OS_WIN
+  if (s_windows.size() == 1) {
+      App::saveState();
+  }
+#endif
   bool isSuccess = m_tabViewGroup->closeAllTabs();
   if (isSuccess) {
     event->accept();
