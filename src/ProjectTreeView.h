@@ -36,7 +36,7 @@ class ProjectTreeView : public QTreeView {
   QMetaObject::Connection m_connection;
 
   void setTheme(const core::Theme* theme);
-  void setFont(const QFont& font);
+  void setFont();
   void createNewFile(const QDir& dir);
   void createNewDir(const QDir& dir);
 
