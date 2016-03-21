@@ -4,6 +4,15 @@ ProjectTreeView {
     border: none;
 }
 
+
+/* Splitter
+ * Below css applyed to show splitter off.
+ * Even if setHandleWidth equauls 0 in cpp, 1px line is displayed.
+ */
+QSplitter::handle {
+  background-color: transparent;
+}
+
 /* Tabbar */
 QPlainTextEdit {
   border: none;
