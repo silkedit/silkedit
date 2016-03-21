@@ -19,15 +19,12 @@ class Constants : public QObject, public core::Singleton<Constants> {
  public:
   ~Constants() = default;
 
-#ifdef Q_OS_MAC
   static const QString defaultFontFamily;
-#endif
-
-#ifdef Q_OS_WIN
-  static const QString defaultFontFamily;
-#endif
+  static const QString defaultUIFontFamily;
 
   static const int defaultFontSize;
+  static const int defaultUIFontSize;
+
   static const char* RUN_AS_NODE;
 
   QStringList configPaths();
