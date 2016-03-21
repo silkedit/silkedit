@@ -25,7 +25,7 @@ using core::ColorSettings;
 
 namespace {
 constexpr const char* PATHS_PREFIX = "paths";
-constexpr const char* PATH_KEY = "tab";
+constexpr const char* PATH_KEY = "path";
 
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
