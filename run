@@ -329,7 +329,7 @@ make_installer() {
     if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
         ensure_dir dmg
-        cp -Rp SilkEdit.app dmg
+        cp -R SilkEdit.app dmg
         macdeployqt dmg/SilkEdit.app
         codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign "Developer ID Application: Shinichi Katayama"
         ln -s /Applications dmg/Applications
