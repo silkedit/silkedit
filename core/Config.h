@@ -110,7 +110,6 @@ class Config : public QObject, public Singleton<Config> {
  signals:
   void themeChanged(Theme* newTheme);
   void fontChanged(QFont font);
-  void tabWidthChanged(int tabWidth);
   void indentUsingSpacesChanged(bool indentUsingSpaces);
   void showInvisiblesChanged(bool);
   void showTabsAndSpacesChanged(bool);

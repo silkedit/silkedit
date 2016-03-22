@@ -328,9 +328,10 @@ make_installer() {
 
     if [ $OS == 'Mac' ]; then
         echo "Creating dmg..."
-        macdeployqt SilkEdit.app
         ensure_dir dmg
         cp -R SilkEdit.app dmg
+        macdeployqt dmg/SilkEdit.app
+        codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign "Developer ID Application: Shinichi Katayama"
         ln -s /Applications dmg/Applications
 				n=0
 				MAX=3
@@ -350,7 +351,7 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll node.dll jslib packages themes silkedit_ja.qm Release
+        cp -r silkedit.exe onig.dll node.dll silk_resources silkedit_ja.qm Release
         #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
