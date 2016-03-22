@@ -130,7 +130,7 @@ resolve() {
         cd vendor/Onigmo
         ./configure && make && make install
         cd ../..
-        
+
         # yaml-cpp
         echo 'Building yaml-cpp...'
         cd vendor/yaml-cpp
@@ -140,7 +140,7 @@ resolve() {
         cmake -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" ..
         ninja && ninja install
         cd ../../..
-        
+
         # uchardet
         echo 'Building uchardet...'
         cd vendor/uchardet
@@ -331,7 +331,9 @@ make_installer() {
         ensure_dir dmg
         cp -R SilkEdit.app dmg
         macdeployqt dmg/SilkEdit.app
-        codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign "Developer ID Application: Shinichi Katayama"
+				if [ "$1" = '--sign' ]; then
+          codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign "$2"
+				fi
         ln -s /Applications dmg/Applications
 				n=0
 				MAX=3
@@ -542,7 +544,7 @@ case "$1" in
         echo
         ;;
     make_installer)
-        make_installer
+        make_installer $2 $3
         echo
         ;;
     send_symbol)
@@ -562,7 +564,7 @@ clean          clean build dir
 format         format sources
 generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
-make_installer make an installer
+make_installer make an installer (--sign identity: sign the app)
 rebuild        build from scratch (-edge: Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
