@@ -27,6 +27,8 @@ class Constants : public QObject, public core::Singleton<Constants> {
 
   static const char* RUN_AS_NODE;
 
+  static const QString silkHomeDirName;
+
   QStringList configPaths();
   QStringList userKeymapPaths();
   QString userConfigPath();
