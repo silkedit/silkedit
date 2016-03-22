@@ -40,8 +40,9 @@ else ()
 endif ()
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
+set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
 if (APPLE)
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.6.0)
+  set(CMAKE_PREFIX_PATH "/usr/local/Qt-5.6.0")
 else (MSVC)
   set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.6.0")
 endif ()
@@ -52,6 +53,14 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
+
+find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
+if (Breakpad)
+    message(STATUS "Breakpad: ${Breakpad}")
+endif()
+if (NOT Breakpad)
+    message(FATAL_ERROR "Breakpad not found")
+endif()
 
 if (APPLE)
   if (USE_DEBUG_NODE)
@@ -96,10 +105,6 @@ if (APPLE)
     vendor/node/deps/uv/include
     vendor/node/deps/cares/include
     vendor/node/deps/openssl/openssl/include)
-
-  # breakpad framework
-  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
-  link_directories(${BREAKPAD_LIBS})
 
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MSVC)
@@ -156,11 +161,9 @@ if(APPLE)
                         Qt5::Svg
                         Qt5::WebEngineWidgets
                         ${YAML_CPP_LIBRARY}
-                        ${NODE_LIBRARY})
-  # brakpad lib/framework
-  target_link_libraries(${PROJECT_NAME}
-    "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
-    "-framework Breakpad")
+                        ${NODE_LIBRARY}
+                        ${Breakpad}
+)
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_core
@@ -203,7 +206,7 @@ if(APPLE)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
 
   # run install_name_tool to update the path to libnode.dylib
-#  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
 
   # Use special icon for edge build
   if (BUILD_EDGE)
@@ -222,7 +225,7 @@ if(APPLE)
             ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
 
   # breakpad framework
-  file(COPY ${BREAKPAD_LIBS}/breakpad.framework DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
+  file(COPY ${Breakpad} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
 
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
