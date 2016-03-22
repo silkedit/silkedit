@@ -5,6 +5,16 @@
 
 #include "Constants.h"
 
+namespace {
+QString resourcesPath() {
+#ifdef Q_OS_MAC
+  return QCoreApplication::applicationDirPath() + "/../Resources";
+#else
+  return QCoreApplication::applicationDirPath() + "/resources";
+#endif
+}
+}
+
 namespace core {
 
 const char* Constants::RUN_AS_NODE = "--run-as-node";
@@ -72,12 +82,12 @@ QString Constants::nodePath() {
 }
 
 QString Constants::npmCliPath() {
-  return QApplication::applicationDirPath() + "/npm/bin/npm-cli.js";
+  return resourcesPath() + "/npm/bin/npm-cli.js";
 }
 
 QString Constants::translationDirPath() {
 #ifdef Q_OS_MAC
-  return QCoreApplication::applicationDirPath() + "/../Resources/translations";
+  return resourcesPath() + "/translations";
 #elif defined Q_OS_WIN
   return QApplication::applicationDirPath();
 #else
@@ -87,12 +97,12 @@ QString Constants::translationDirPath() {
 
 QStringList Constants::dataDirectoryPaths() {
   QStringList paths(silkHomePath());
-  paths.prepend(QApplication::applicationDirPath());
+  paths.prepend(resourcesPath());
   return paths;
 }
 
 QString Constants::jsLibDir() {
-  return QApplication::applicationDirPath() + "/jslib";
+  return resourcesPath() + "/jslib";
 }
 
 QString Constants::defaultPackagePath() {

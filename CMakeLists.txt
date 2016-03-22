@@ -177,33 +177,33 @@ endif()
 
 if(APPLE)
   # bundle themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${PROJECT_NAME}.app/Contents/Resources)
 
   # bundle builtin packages
-  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/Resources)
 
   # copy npm
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
      DESTINATION
-     ${PROJECT_NAME}.app/Contents/MacOS/npm/bin)
+     ${PROJECT_NAME}.app/Contents/Resources/npm/bin)
 
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/lib
      ${PROJECT_SOURCE_DIR}/npm/node_modules
      ${PROJECT_SOURCE_DIR}/npm/package.json
      DESTINATION
-     ${PROJECT_NAME}.app/Contents/MacOS/npm)
+     ${PROJECT_NAME}.app/Contents/Resources/npm)
 
   # bundle jslib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/jslib)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
 
   # run install_name_tool to update the path to libnode.dylib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
+#  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${PROJECT_NAME}.app/Contents/MacOS/${PROJECT_NAME})
 
   # Use special icon for edge build
   if (BUILD_EDGE)
