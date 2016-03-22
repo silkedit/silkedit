@@ -27,6 +27,8 @@ const int Constants::defaultFontSize = 12;
 const int Constants::defaultUIFontSize = 10;
 #endif
 
+const QString Constants::silkHomeDirName = QStringLiteral(".silk");
+
 QStringList Constants::configPaths() {
   QStringList configPaths;
 
@@ -98,13 +100,14 @@ QString Constants::defaultPackagePath() {
 }
 
 QString Constants::silkHomePath() const {
-  return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/.silk";
+  return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/" + silkHomeDirName;
 }
 
 QString Constants::recentOpenHistoryPath() {
-  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/recentOpenHistory.ini";
+  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] +
+         "/recentOpenHistory.ini";
 }
-	
+
 QString Constants::appStatePath() {
   return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/appState.ini";
 }
