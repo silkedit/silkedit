@@ -95,6 +95,12 @@ int main(int argc, char** argv) {
     // As a special case, a QTimer with a timeout of 0 will time out as soon as all the events in
     // the window system's event queue have been processed
     QTimer::singleShot(0, &Helper::singleton(), &Helper::init);
+
+    QDir dir(Constants::singleton().silkHomePath());
+    if (!dir.exists()) {
+      dir.cdUp();
+      dir.mkdir(Constants::silkHomeDirName);
+    }
   });
   for (auto win : Window::windows()) {
     win->setVisible(true);
