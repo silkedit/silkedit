@@ -130,9 +130,7 @@ int Config::tabWidth(const QString& scopeName) {
 }
 
 void Config::setTabWidth(int tabWidth) {
-  if (setValue(TAB_WIDTH_KEY, tabWidth)) {
-    emit tabWidthChanged(tabWidth);
-  }
+  setValue(TAB_WIDTH_KEY, tabWidth);
 }
 
 bool Config::indentUsingSpaces() {

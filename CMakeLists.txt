@@ -41,7 +41,7 @@ endif ()
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
 if (APPLE)
-  set(CMAKE_PREFIX_PATH /usr/local/Qt-5.6.0)
+  set(CMAKE_PREFIX_PATH "/usr/local/Qt-5.6.0")
 else (MSVC)
   set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.6.0")
 endif ()
@@ -54,6 +54,14 @@ find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
 
 if (APPLE)
+  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
+  find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
+  if (Breakpad)
+    message(STATUS "Breakpad: ${Breakpad}")
+  endif()
+  if (NOT Breakpad)
+    message(FATAL_ERROR "Breakpad not found")
+  endif()
   if (USE_DEBUG_NODE)
     find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
   else ()
@@ -96,10 +104,6 @@ if (APPLE)
     vendor/node/deps/uv/include
     vendor/node/deps/cares/include
     vendor/node/deps/openssl/openssl/include)
-
-  # breakpad framework
-  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
-  link_directories(${BREAKPAD_LIBS})
 
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
 elseif (MSVC)
@@ -156,11 +160,9 @@ if(APPLE)
                         Qt5::Svg
                         Qt5::WebEngineWidgets
                         ${YAML_CPP_LIBRARY}
-                        ${NODE_LIBRARY})
-  # brakpad lib/framework
-  target_link_libraries(${PROJECT_NAME}
-    "-F${PROJECT_SOURCE_DIR}/${BREAKPAD_LIBS}"
-    "-framework Breakpad")
+                        ${NODE_LIBRARY}
+                        ${Breakpad}
+)
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_core
@@ -177,27 +179,27 @@ endif()
 
 if(APPLE)
   # bundle themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${PROJECT_NAME}.app/Contents/Resources)
 
   # bundle builtin packages
-  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/MacOS)
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${PROJECT_NAME}.app/Contents/Resources)
 
   # copy npm
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
      DESTINATION
-     ${PROJECT_NAME}.app/Contents/MacOS/npm/bin)
+     ${PROJECT_NAME}.app/Contents/Resources/npm/bin)
 
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/lib
      ${PROJECT_SOURCE_DIR}/npm/node_modules
      ${PROJECT_SOURCE_DIR}/npm/package.json
      DESTINATION
-     ${PROJECT_NAME}.app/Contents/MacOS/npm)
+     ${PROJECT_NAME}.app/Contents/Resources/npm)
 
   # bundle jslib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/MacOS/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources/jslib)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist)
   set_target_properties( ${PROJECT_NAME} PROPERTIES FRAMEWORK true )
@@ -222,7 +224,7 @@ if(APPLE)
             ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
 
   # breakpad framework
-  file(COPY ${BREAKPAD_LIBS}/breakpad.framework DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
+  file(COPY ${Breakpad} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
 
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
@@ -233,14 +235,14 @@ if(APPLE)
 
 elseif (MSVC)
   # Copy themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION .)
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION silk_resources)
 
   # Copy packages directory to the same directory of exe
-  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION silk_resources)
 
   # bundle jslib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./silk_resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./silk_resources/jslib)
 
   # copy npm
   file(COPY
