@@ -10,7 +10,8 @@ QString resourcesPath() {
 #ifdef Q_OS_MAC
   return QCoreApplication::applicationDirPath() + "/../Resources";
 #else
-  return QCoreApplication::applicationDirPath() + "/resources";
+  // Qt copies qrc files in resources directory, so don't use it.
+  return QCoreApplication::applicationDirPath() + "/silk_resources";
 #endif
 }
 }

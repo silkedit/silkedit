@@ -40,7 +40,6 @@ else ()
 endif ()
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
-set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
 if (APPLE)
   set(CMAKE_PREFIX_PATH "/usr/local/Qt-5.6.0")
 else (MSVC)
@@ -54,15 +53,15 @@ find_package(Qt5LinguistTools REQUIRED)
 find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
 
-find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
-if (Breakpad)
-    message(STATUS "Breakpad: ${Breakpad}")
-endif()
-if (NOT Breakpad)
-    message(FATAL_ERROR "Breakpad not found")
-endif()
-
 if (APPLE)
+  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
+  find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
+  if (Breakpad)
+    message(STATUS "Breakpad: ${Breakpad}")
+  endif()
+  if (NOT Breakpad)
+    message(FATAL_ERROR "Breakpad not found")
+  endif()
   if (USE_DEBUG_NODE)
     find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
   else ()
@@ -236,14 +235,14 @@ if(APPLE)
 
 elseif (MSVC)
   # Copy themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION .)
+  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION silk_resources)
 
   # Copy packages directory to the same directory of exe
-  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION .)
+  file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION silk_resources)
 
   # bundle jslib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./silk_resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./silk_resources/jslib)
 
   # copy npm
   file(COPY
