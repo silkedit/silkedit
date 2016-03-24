@@ -70,8 +70,8 @@ ensure_dir() {
 }
 
 clean() {
-    # Somehow git clean fails to remove these directories, so remove them manually
-    rm -rf build helper/bin
+    # Somehow git clean fails to remove this directory, so remove it manually
+    rm -rf build
 
     # clean submodules
     git submodule foreach git reset --hard HEAD
