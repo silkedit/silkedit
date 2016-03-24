@@ -7,7 +7,7 @@
 
 const QString GrammerCondition::name = "grammer";
 
-QVariant GrammerCondition::keyValue() {
+QVariant GrammerCondition::value() {
   if (App::instance()->activeTextEdit()) {
     auto view = App::instance()->activeTextEdit();
     if (view->language()) {

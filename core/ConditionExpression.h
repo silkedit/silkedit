@@ -9,10 +9,10 @@ namespace core {
 
 struct ConditionExpression {
   QString m_key;
-  Condition::Operator m_op;
-  QVariant m_value;
+  QString m_operator;
+  QVariant m_operand;
 
-  ConditionExpression(const QString& key, Condition::Operator op, const QVariant& value);
+  ConditionExpression(const QString& key, const QString& op, const QVariant& operand);
   bool isSatisfied() const;
   QString toString() const;
 
