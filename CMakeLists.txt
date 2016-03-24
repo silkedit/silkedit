@@ -241,19 +241,19 @@ elseif (MSVC)
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION silk_resources)
 
   # bundle jslib
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ./silk_resources/jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ./silk_resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory silk_resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib silk_resources/jslib)
 
   # copy npm
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
-     DESTINATION npm/bin)
+     DESTINATION silk_resources/npm/bin)
 
   file(COPY
      ${PROJECT_SOURCE_DIR}/npm/lib
      ${PROJECT_SOURCE_DIR}/npm/node_modules
      ${PROJECT_SOURCE_DIR}/npm/package.json
-     DESTINATION npm)
+     DESTINATION silk_resources/npm)
 
   # Copy onig.dll
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
