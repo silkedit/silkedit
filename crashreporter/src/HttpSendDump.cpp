@@ -27,7 +27,11 @@ QString HttpSendDump::sendDump() const {
 
   QHttpPart pPart;
   pPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"prod\""));
+#ifdef BUILD_EDGE
+  pPart.setBody("SilkEdit_Edge");
+#else
   pPart.setBody("SilkEdit");
+#endif
   multiPart->append(pPart);
 
   QHttpPart vPart;

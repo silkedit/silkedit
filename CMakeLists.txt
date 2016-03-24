@@ -11,6 +11,10 @@ set(CMAKE_AUTOUIC ON)
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+if (BUILD_EDGE)
+  ADD_DEFINITIONS(-DBUILD_EDGE)
+endif ()
+
 # Node.js defines HAVE_OPENSSL by default
 ADD_DEFINITIONS(-DHAVE_OPENSSL)
 

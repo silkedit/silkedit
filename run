@@ -5,14 +5,14 @@
 API_DOC_DIR=jsdoc_out
 VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
 
-if [ "$(uname)" == 'Darwin' ]; then
+if [ "$(uname)" = 'Darwin' ]; then
   OS='Mac'
   SDK_PATH=`xcrun --show-sdk-path`
   export MACOSX_DEPLOYMENT_TARGET=10.8
-elif [ "$(expr substr $(uname -s) 1 5)" == 'Linux' ]; then
+elif [ "$(expr substr $(uname -s) 1 5)" = 'Linux' ]; then
   OS='Linux'
-elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
-  if [ "$(uname -m)" == "x86_64" ]; then
+elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
+  if [ "$(uname -m)" = "x86_64" ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
     ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
@@ -33,7 +33,7 @@ elif [ "$(expr substr $(uname -s) 1 4)" == 'MSYS' ]; then
   UCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/$ARCH"
   VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
   VisualStudioVersion=14.0
-elif [ "$(expr substr $(uname -s) 1 5)" == 'MINGW' ]; then
+elif [ "$(expr substr $(uname -s) 1 5)" = 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
 else
@@ -100,7 +100,7 @@ resolve() {
         mv *.otf resources/fonts
     fi
 
-    if [ $OS == 'Mac' ]; then
+    if [ $OS = 'Mac' ]; then
       brew list cmake || brew install cmake
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
@@ -300,7 +300,7 @@ build() {
     cd build
 
 
-    if [ $OS == 'Mac' ]; then
+    if [ $OS = 'Mac' ]; then
         if [ "$1" = '-edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
         else
@@ -326,7 +326,7 @@ make_installer() {
 
     cd build
 
-    if [ $OS == 'Mac' ]; then
+    if [ $OS = 'Mac' ]; then
         echo "Creating dmg..."
         ensure_dir dmg
         cp -R SilkEdit.app dmg
@@ -346,7 +346,7 @@ make_installer() {
 					n=$[$n+1]
 					sleep 3
 				done
-				if [ $n == $MAX ]; then
+				if [ $n = $MAX ]; then
           echo "Failed to create DMG $MAX times"
 					exit 1
 				fi
@@ -372,7 +372,7 @@ make_installer() {
         attrib -r $RELEASE_DIR/vcruntime140.dll
         cd $RELEASE_DIR
 
-        if [ $OS == 'Win32' ]; then
+        if [ $OS = 'Win32' ]; then
             # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
             cat ../../silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ../../silkedit_x86.iss
             iscc ../../silkedit_x86.iss
@@ -392,7 +392,7 @@ rebuild() {
 
 # static analysis
 analyze() {
-    if [ $OS == 'Win32' ]; then
+    if [ $OS = 'Win32' ]; then
         echo "Not implemented yet on Windows"
         exit 1
     fi
@@ -409,7 +409,7 @@ analyze() {
 
 run_tests() {
     cd build
-    if [ $OS == 'Mac' ]; then
+    if [ $OS = 'Mac' ]; then
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
         if [ -f build.ninja ]; then
             ninja unit_test
@@ -455,10 +455,15 @@ localize() {
 send_symbol() {
     build
 
-    APP_NAME="SilkEdit"
+    if [ "$1" = '-edge' ]; then
+      APP_NAME="SilkEdit_Edge"
+    else
+      APP_NAME="SilkEdit"
+    fi
+
     echo "sending symbol with app name:${APP_NAME}, version: ${VERSION}"
 
-    if [ $OS == 'Mac' ]; then
+    if [ $OS = 'Mac' ]; then
       DSYM_DIR="/tmp/SilkEdit.dSYM"
       rm -rf ${DSYM_DIR}
       dsymutil build/SilkEdit.app/Contents/MacOS/SilkEdit -o ${DSYM_DIR}
@@ -548,7 +553,7 @@ case "$1" in
         echo
         ;;
     send_symbol)
-        send_symbol
+        send_symbol $2
         echo
         ;;
     upload_doc)
