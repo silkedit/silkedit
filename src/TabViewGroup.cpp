@@ -127,6 +127,11 @@ TabView* TabViewGroup::createTabView() {
     qDebug() << "allTabRemoved";
     removeTabView(tabView);
 
+    // Set focus to another tabView's active tab
+    if (!m_tabViews.isEmpty() && m_tabViews.first()->currentWidget()) {
+      m_tabViews.first()->currentWidget()->setFocus();
+    }
+
     Window* win = qobject_cast<Window*>(window());
     if (win && m_tabViews.empty() && !win->isProjectOpend()) {
       win->close();
