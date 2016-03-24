@@ -35,7 +35,6 @@
 #include "core/ObjectTemplateStore.h"
 #include "core/macros.h"
 #include "core/Config.h"
-#include "core/Constants.h"
 #include "core/QVariantArgument.h"
 #include "core/ConditionManager.h"
 #include "core/ObjectStore.h"
@@ -55,7 +54,6 @@
 #include "atom/node_includes.h"
 
 using core::Config;
-using core::Constants;
 using core::QVariantArgument;
 using core::ConditionManager;
 using core::Font;
@@ -226,8 +224,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
                   Util::stripNamespace(App::staticMetaObject.className()));
   setSingletonObj(exports, &CommandManager::singleton(),
                   Util::stripNamespace(CommandManager::staticMetaObject.className()));
-  setSingletonObj(exports, &Constants::singleton(),
-                  Util::stripNamespace(Constants::staticMetaObject.className()));
   setSingletonObj(exports, &DocumentManager::singleton(),
                   Util::stripNamespace(DocumentManager::staticMetaObject.className()));
   setSingletonObj(exports, &KeymapManager::singleton(),
