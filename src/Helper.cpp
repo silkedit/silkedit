@@ -45,9 +45,10 @@ QStringList helperArgs() {
   args << Constants::singleton().jsLibDir() + "/main.js";
   // second argument is locale
   args << Config::singleton().locale();
-  // remaining arguments are paths to be loaded in silkedit_helper
-  args << QDir::toNativeSeparators(QApplication::applicationDirPath() + "/packages");
-  args << QDir::toNativeSeparators(Constants::singleton().silkHomePath() + "/packages");
+  // remaining arguments are package paths
+  for (const auto& path : Constants::singleton().packagesPaths()) {
+    args << QDir::toNativeSeparators(path);
+  }
   return args;
 }
 }
@@ -219,7 +220,8 @@ template <typename T>
 T HelperPrivate::callFunc(const QString& funcName, QVariantList args, T defaultValue) {
   node::Environment* env = q->m_nodeBindings->uv_env();
   if (!env) {
-    qWarning() << "NodeBinding is not yet initialized." << "funcName" << funcName;
+    qWarning() << "NodeBinding is not yet initialized."
+               << "funcName" << funcName;
     return defaultValue;
   }
   v8::Locker locker(env->isolate());
