@@ -12,10 +12,6 @@ class Constants : public QObject, public core::Singleton<Constants> {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(Constants)
 
-  Q_PROPERTY(QString userRootPackageJsonPath READ userRootPackageJsonPath CONSTANT)
-  Q_PROPERTY(QString userPackagesNodeModulesPath READ userPackagesNodeModulesPath CONSTANT)
-  Q_PROPERTY(QString silkHomePath READ silkHomePath CONSTANT)
-
  public:
   ~Constants() = default;
 

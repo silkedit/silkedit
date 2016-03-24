@@ -1,5 +1,6 @@
 'use strict'
 
+const os = require('os');
 const path = require('path');
 const fs = require('fs');
 const domain = require('domain');
@@ -23,8 +24,7 @@ if (process.argv.length < 2) {
 const silkedit = require('silkedit');
 
 // call init.js
-assert(silkedit.Constants.silkHomePath.length > 0, silkedit.Constants.silkHomePath);
-const initPath = path.join(silkedit.Constants.silkHomePath, 'init.js');
+const initPath = path.join(os.homedir(), '.silk', 'init.js');
 fs.open(initPath, 'r', (err, fd) => {
   fd && fs.close(fd, (err) => {
     const d = domain.create();
