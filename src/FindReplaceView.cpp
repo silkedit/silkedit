@@ -286,27 +286,25 @@ void FindReplaceView::setActiveView(QWidget* view) {
 
   auto newtextEdit = qobject_cast<TextEdit*>(view);
   if (newtextEdit) {
-    m_connectionForCursorPositionChanged =
-        connect(newtextEdit, &TextEdit::cursorPositionChanged, newtextEdit, [=] {
-          m_selectedRegion = boost::none;
+    qDebug() << "new TextEdit:" << newtextEdit->document()->path();
+
+    int begin = 0, end = -1;
+    if (ui->inSelectionChk->isChecked()) {
+      begin = m_selectionStartPos;
+      end = m_selectionEndPos;
+    }
+    m_connectionForContentsChanged =
+        connect(newtextEdit->document(), &core::Document::contentsChanged, newtextEdit, [=] {
+          newtextEdit->highlightSearchMatches(ui->lineEditForFind->text(), begin, end,
+                                              getFindFlags());
         }, Qt::UniqueConnection);
+
+    m_connectionForCursorPositionChanged =
+        connect(newtextEdit, &TextEdit::cursorPositionChanged, newtextEdit,
+                [=] { m_selectedRegion = boost::none; }, Qt::UniqueConnection);
   }
 
   if (isVisible()) {
-    if (newtextEdit) {
-      qDebug() << "new TextEdit:" << newtextEdit->document()->path();
-      int begin = 0, end = -1;
-      if (ui->inSelectionChk->isChecked()) {
-        begin = m_selectionStartPos;
-        end = m_selectionEndPos;
-      }
-      m_connectionForContentsChanged =
-          connect(newtextEdit->document(), &core::Document::contentsChanged, newtextEdit, [=] {
-            newtextEdit->highlightSearchMatches(ui->lineEditForFind->text(), begin, end,
-                                                getFindFlags());
-          }, Qt::UniqueConnection);
-    }
-
     highlightMatches();
   }
 }
