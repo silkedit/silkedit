@@ -76,6 +76,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void reloadKeymaps();
   void quitApplication();
   void eval(const QString& code);
+  void deactivatePackages();
   node::Environment* uvEnv();
 
 public slots:

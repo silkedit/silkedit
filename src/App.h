@@ -26,6 +26,7 @@ class App : public QApplication {
   ~App() = default;
 
   void setupTranslator(const QString& locale);
+  void quit();
 
  public slots:
   TextEdit* activeTextEdit();

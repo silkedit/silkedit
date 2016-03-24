@@ -186,6 +186,11 @@ void Helper::eval(const QString& code) {
   d->callFunc("eval", args);
 }
 
+void Helper::deactivatePackages()
+{
+  d->callFunc("deactivatePackages");
+}
+
 node::Environment* Helper::uvEnv() {
   return m_nodeBindings->uv_env();
 }
