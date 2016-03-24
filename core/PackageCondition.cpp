@@ -29,7 +29,7 @@ PackageCondition::PackageCondition(v8::Isolate* isolate, v8::Local<v8::Object> o
   m_object.Reset(isolate, object);
 }
 
-bool PackageCondition::isSatisfied(Operator op, const QVariant &operand) {
+bool PackageCondition::isSatisfied(const QString &op, const QVariant &operand) {
   v8::Locker locker(m_isolate);
   v8::HandleScope handleScope(m_isolate);
 
@@ -48,7 +48,7 @@ bool PackageCondition::isSatisfied(Operator op, const QVariant &operand) {
   Local<Function> isSatisfiedFn = Local<Function>::Cast(isSatisfiedValue);
   const int argc = 2;
   Local<Value> argv[argc];
-  argv[0] = v8::Int32::New(m_isolate, static_cast<int>(op));
+  argv[0] = V8Util::toV8Value(m_isolate, op);
   argv[1] = V8Util::toV8Value(m_isolate, operand);
 
   auto result = V8Util::callJSFunc(m_isolate, isSatisfiedFn, object, argc, argv);
@@ -62,24 +62,24 @@ bool PackageCondition::isSatisfied(Operator op, const QVariant &operand) {
   return result.toBool();
 }
 
-QVariant PackageCondition::keyValue() {
+QVariant PackageCondition::value() {
   auto object = Local<Object>::New(m_isolate, m_object);
-  MaybeLocal<Value> maybeKeyValueFn =
-      object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "keyValue"));
-  if (maybeKeyValueFn.IsEmpty()) {
-    throw std::runtime_error("keyValue is empty");
+  MaybeLocal<Value> maybeValueFn =
+      object->Get(m_isolate->GetCurrentContext(), v8::String::NewFromUtf8(m_isolate, "value"));
+  if (maybeValueFn.IsEmpty()) {
+    throw std::runtime_error("value is empty");
   }
 
-  Local<Value> keyValueV8Value = maybeKeyValueFn.ToLocalChecked();
-  if (!keyValueV8Value->IsFunction()) {
-    throw std::runtime_error("keyValue is not function");
+  Local<Value> valueV8Value = maybeValueFn.ToLocalChecked();
+  if (!valueV8Value->IsFunction()) {
+    throw std::runtime_error("value is not function");
   }
 
-  Local<Function> keyValueFn = Local<Function>::Cast(keyValueV8Value);
+  Local<Function> valueFn = Local<Function>::Cast(valueV8Value);
 
   TryCatch trycatch(m_isolate);
   MaybeLocal<Value> maybeResult =
-      keyValueFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), 0, nullptr);
+      valueFn->Call(m_isolate->GetCurrentContext(), v8::Undefined(m_isolate), 0, nullptr);
 
   if (trycatch.HasCaught()) {
     MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(m_isolate->GetCurrentContext());

@@ -143,10 +143,10 @@ keymap.ymlで定義します。
 <key> <operator> <operand>の形式（1つ以上のスペース区切り）。
 ```
 
-例えば```if: lang == cpp```を定義すると、言語モードがC++の時にのみ有効になるショートカットを設定できます。
+例えば```if: grammer == source.c++```を定義すると、言語モードがC++の時にのみ有効になるショートカットを設定できます。
 
 ```
-- { key: ctrl+b, command: move_cursor_left, if: lang == cpp}
+- { key: ctrl+b, command: move_cursor_left, if: grammer == source.c++}
 ```
 
 operatorは"==", "!="をサポートしています。
@@ -158,23 +158,23 @@ operatorは"==", "!="をサポートしています。
 - { key: ctrl+alt+i, command: vim.toggle_vim_emulation, if: on_windows }
 ```
 
-上記のon_mac, on_windowsはSilkEdit組み込みの条件で、例えばon_macはMac上で動かす時にoperandがtrueになります。
+上記のon_mac, on_windowsはSilkEdit組み込みの条件で、例えばon_macはMac上で動かす時にrightがtrueになります。
 
 パッケージ独自の条件を付加することも可能です。以下はvimパッケージの例です。
 
 ```
   const modeCond = {
-	  keyValue: () => toModeText(mode)
+	  value: () => toModeText(mode)
 	}
 
-  silkedit.Condition.add("vim.mode", modeCond);
+  silkedit.ConditionManager.add("vim.mode", modeCond);
 ```
 
-{@link module:silkedit.Condition.add}で条件を追加できます。
+{@link module:silkedit.ConditionManager.add}で条件を追加できます。
 
 vimパッケージをロードするとvim.modeという条件が使用できるようになります。
 
-上記で定義したmodeCondのisSatisfied関数がtrueを返す時のみ以下のキーマップは有効になります。
+上記で定義したmodeCondのvalue関数がtrueを返す時のみ以下のキーマップは有効になります。
 
 ```
 - { key: i, command: vim.insert_mode, if: vim.mode == normal }

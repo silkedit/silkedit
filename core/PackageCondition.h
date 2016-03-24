@@ -14,7 +14,7 @@ class PackageCondition : public Condition {
   PackageCondition(v8::Isolate* isolate, v8::Local<v8::Object> object);
   ~PackageCondition() = default;
 
-  bool isSatisfied(Operator op, const QVariant& operand) override;
+  bool isSatisfied(const QString& op, const QVariant& operand) override;
   bool isStatic() override { return false; }
 
  private:
@@ -23,7 +23,7 @@ class PackageCondition : public Condition {
   v8::UniquePersistent<v8::Object> m_object;
   v8::Isolate* m_isolate;
 
-  QVariant keyValue() override;
+  QVariant value() override;
 };
 
 }  // namespace core

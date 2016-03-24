@@ -1,4 +1,4 @@
-#include <QList>
+﻿#include <QList>
 #include <QEvent>
 
 #include "MetaTypeInitializer.h"
@@ -47,7 +47,6 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QEvent::Type>("QEvent::Type");
   qRegisterMetaType<FindReplaceView*>();
   qRegisterMetaType<QtMsgType>();
-  qRegisterMetaType<core::Condition::Operator>();
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Url*>("core::Url*");
   qRegisterMetaType<core::Url::ParsingMode>("ParsingMode");

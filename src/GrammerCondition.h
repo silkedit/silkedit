@@ -18,5 +18,5 @@ class GrammerCondition : public core::Condition {
   bool isStatic() override { return false; }
 
  private:
-  QVariant keyValue() override;
+  QVariant value() override;
 };

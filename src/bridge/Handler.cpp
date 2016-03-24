@@ -37,7 +37,7 @@
 #include "core/Config.h"
 #include "core/Constants.h"
 #include "core/QVariantArgument.h"
-#include "core/Condition.h"
+#include "core/ConditionManager.h"
 #include "core/ObjectStore.h"
 #include "core/KeyEvent.h"
 #include "core/Event.h"
@@ -57,7 +57,7 @@
 using core::Config;
 using core::Constants;
 using core::QVariantArgument;
-using core::Condition;
+using core::ConditionManager;
 using core::Font;
 using core::ObjectTemplateStore;
 using core::JSHandler;
@@ -274,7 +274,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
 
   // Condition::add accepts JS object as argument, so we can't use setSingletonObj (this
   // converts JS object to QObject* or QVariantMap internally)
-  Condition::Init(exports);
+  ConditionManager::Init(exports);
 }
 
 void bridge::Handler::info(const v8::FunctionCallbackInfo<v8::Value>& args) {

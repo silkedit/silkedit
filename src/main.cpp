@@ -18,6 +18,7 @@
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
 #include "GrammerCondition.h"
+#include "core/ConditionManager.h"
 #include "core/Condition.h"
 #include "core/PackageManager.h"
 #include "core/Config.h"
@@ -30,6 +31,7 @@
 
 using core::PackageManager;
 using core::Config;
+using core::ConditionManager;
 using core::Condition;
 using core::ThemeManager;
 using core::Util;
@@ -60,8 +62,8 @@ int main(int argc, char** argv) {
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
 
-  Condition::init();
-  Condition::add(GrammerCondition::name,
+  ConditionManager::singleton().init();
+  ConditionManager::singleton().add(GrammerCondition::name,
                  std::move(std::unique_ptr<Condition>(new GrammerCondition())));
 
   PackageManager::singleton().loadFiles();

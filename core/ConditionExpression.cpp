@@ -1,30 +1,32 @@
 ﻿#include "ConditionExpression.h"
-#include "OSCondition.h"
-#include "Condition.h"
+#include "ConditionManager.h"
 
-using core::Condition;
+namespace core {
 
-core::ConditionExpression::ConditionExpression(const QString& key,
-                                               Condition::Operator op,
-                                               const QVariant &value)
-    : m_key(key), m_op(op), m_value(value) {}
+ConditionExpression::ConditionExpression(const QString& key,
+                                               const QString &op,
+                                               const QVariant &operand)
+    : m_key(key), m_operator(op), m_operand(operand) {}
 
-bool core::ConditionExpression::isSatisfied() const {
-  return Condition::isSatisfied(m_key, m_op, m_value);
+bool ConditionExpression::isSatisfied() const {
+  return ConditionManager::singleton().isSatisfied(m_key, m_operator, m_operand);
 }
 
-QString core::ConditionExpression::toString() const {
-  if (m_op == Condition::Operator::EQUALS && m_value == "true") {
+QString ConditionExpression::toString() const {
+  if (m_operator == Condition::equalsOperator && m_operand == "true") {
     return QString("%1").arg(m_key);
   } else {
-    return QString("%1 %2 %3").arg(m_key).arg(Condition::operatorString(m_op)).arg(m_value.toString());
+    return QString("%1 %2 %3").arg(m_key).arg(m_operator).arg(m_operand.toString());
   }
 }
 
-bool core::ConditionExpression::isStatic() const {
-  return Condition::isStatic(m_key);
+bool ConditionExpression::isStatic() const {
+  return ConditionManager::singleton().isStatic(m_key);
 }
 
-bool core::ConditionExpression::operator==(const core::ConditionExpression& other) const {
-  return this->m_key == other.m_key && this->m_op == other.m_op && this->m_value == other.m_value;
+bool ConditionExpression::operator==(const ConditionExpression& other) const {
+  return this->m_key == other.m_key && this->m_operator == other.m_operator && this->m_operand == other.m_operand;
 }
+
+}  // namespace core
+

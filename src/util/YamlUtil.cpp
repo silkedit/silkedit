@@ -79,27 +79,15 @@ boost::optional<ConditionExpression> YamlUtil::parseValueCondition(const QString
   QStringList list = str.trimmed().split(" ", QString::SkipEmptyParts);
 
   QString key;
-  Condition::Operator op;
+  QString op;
   QVariant value;
   if (list.size() == 1) {
     key = list[0];
-    op = Condition::Operator::EQUALS;
+    op = Condition::equalsOperator;
     value = QVariant::fromValue(true);
   } else if (list.size() == 3) {
     key = list[0];
-
-    // Parse operator expression
-    QString opStr = list[1];
-    if (opStr == "==") {
-      op = Condition::Operator::EQUALS;
-    } else if (opStr == "!=") {
-      op = Condition::Operator::NOT_EQUALS;
-    } else {
-      qWarning("%s is not supported", qPrintable(opStr));
-      return boost::none;
-    }
-
-    // todo: convert string to QVariant based on YAML definition
+    op = list[1];
     value = Util::toVariant(list[2]);
   } else {
     qWarning() << "condition must be \"key operator operand\". size: " << list.size();
