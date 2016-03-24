@@ -39,17 +39,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   QAction* exitAction = new QAction(exitMenuStr, fileMenu);
   exitAction->setObjectName(QStringLiteral("exit"));
   exitAction->setMenuRole(QAction::QuitRole);
-  connect(exitAction, &QAction::triggered, [] {
-    App::saveState();
-
-    for (auto window : Window::windows()) {
-      if (!window->close()) {
-        return;
-      }
-    }
-
-    App::quit();
-  });
+  connect(exitAction, &QAction::triggered, App::instance(), &App::quit);
   fileMenu->addAction(exitAction);
 
   // Text Menu (Edit menu adds Start Dectation and Special Characters menus automatically in Mac)

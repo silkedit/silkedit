@@ -13,6 +13,7 @@
 #include "version.h"
 #include "SilkStyle.h"
 #include "KeymapManager.h"
+#include "Helper.h"
 #include "core/ObjectStore.h"
 #include "core/Constants.h"
 #include "core/SyntaxHighlighter.h"
@@ -192,6 +193,20 @@ void App::setupTranslator(const QString& locale) {
   }
   installTranslator(m_qtTranslator);
 #endif
+}
+
+void App::quit() {
+  App::saveState();
+
+  Helper::singleton().deactivatePackages();
+
+  for (auto window : Window::windows()) {
+    if (!window->close()) {
+      return;
+    }
+  }
+
+  QApplication::quit();
 }
 
 TextEdit* App::activeTextEdit() {
