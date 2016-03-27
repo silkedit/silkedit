@@ -139,12 +139,10 @@ QColor changeColorBrightness(QColor const color,
 }
 
 QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
-  QColor newColor;
-  newColor = QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
-  return newColor;
+  return QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
 }
 
-QColor getAppropriateGray(QColor const color, bool reverse = false) {
+QColor getAppropriateGray(QColor const color, bool reverse = false, int alpha = 255) {
   QColor newColor;
   int brightness = color.value();
   if (reverse) {
@@ -153,13 +151,13 @@ QColor getAppropriateGray(QColor const color, bool reverse = false) {
   // use material color
   //  - http://www.materialui.co/colors
   if (brightness < brightnessThresholdBlack) {
-    newColor.setRgb(224, 224, 224);  // 300
+    newColor.setRgb(224, 224, 224, alpha);  // 300
   } else if (brightness < brightnessThresholdGray) {
-    newColor.setRgb(158, 158, 158);  // 500
+    newColor.setRgb(158, 158, 158, alpha);  // 500
   } else if (brightness < brightnessThresholdWhite) {
-    newColor.setRgb(97, 97, 97);  // 700
+    newColor.setRgb(97, 97, 97, alpha);  // 700
   } else {
-    newColor.setRgb(33, 33, 33);  // 900
+    newColor.setRgb(33, 33, 33, alpha);  // 900
   }
   return newColor;
 }
@@ -169,6 +167,7 @@ QColor getSelectedTabBorderColor(QColor const color) {
   int brightness = color.value();
   // use material color
   //  - http://www.materialui.co/colors
+
   if (brightness < brightnessThresholdGray) {
     newColor.setRgb(130, 177, 255);  // Blue A100
   } else {
@@ -443,9 +442,8 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
 ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
   ColorSettings textEditViewSettingsColors = createTextEditSettingsColors(theme);
   ColorSettings defaultColors = createStatusBarSettingsColors(theme);
-  defaultColors["lineHighlight"] = textEditViewSettingsColors.value("lineHighlight");
-  defaultColors["selectionBackground"] = textEditViewSettingsColors.value("selectionBackground");
-  defaultColors["selectionForeground"] = textEditViewSettingsColors.value("selectionForeground");
+  defaultColors["selectionForeground"] = getAppropriateGray(defaultColors["background"], true);
+  defaultColors["selectionBackground"] = getAppropriateGray(defaultColors["background"], false, 130);
 
   return defaultColors;
 }
