@@ -139,9 +139,7 @@ QColor changeColorBrightness(QColor const color,
 }
 
 QColor changeColorBrightnessDarker(QColor const color, int value = 10) {
-  QColor newColor;
-  newColor = QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
-  return newColor;
+  return QColor::fromHsv(color.hue(), color.saturation(), qMax(color.value() - value, 0));
 }
 
 QColor getAppropriateGray(QColor const color, bool reverse = false) {
