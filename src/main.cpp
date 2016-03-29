@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
   ConditionManager::singleton().add(GrammerCondition::name,
                  std::move(std::unique_ptr<Condition>(new GrammerCondition())));
 
-  PackageManager::singleton().loadFiles();
+  PackageManager::singleton()._loadAllPackageContents();
 
   ThemeManager::load();
 

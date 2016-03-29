@@ -31,6 +31,7 @@ class KeymapManager : public QObject, public core::Singleton<KeymapManager> {
  public slots:
   bool dispatch(QKeyEvent* ev, int repeat = 1);
   void load(const QString& filename, const QString& source);
+  void unload(const QString& source);
 
   // internal (only used in initialization in JS side)
   void _assignJSKeyEventFilter(core::FunctionInfo info);

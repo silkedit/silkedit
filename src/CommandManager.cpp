@@ -1,10 +1,12 @@
 ﻿#include <QDebug>
+#include <QLoggingCategory>
 
 #include "CommandManager.h"
 #include "Helper.h"
 #include "commands/PackageCommand.h"
 #include "commands/CrashCommand.h"
 #include "core/V8Util.h"
+#include "core/MessageHandler.h"
 #include "atom/node_includes.h"
 
 using core::V8Util;
@@ -39,6 +41,15 @@ CommandArgument toCommandArgument(QVariantMap map) {
   }
 
   return arg;
+}
+
+std::string toString(const CommandArgument& arg) {
+  std::stringstream ss;
+  for (const auto& pair : arg) {
+    ss << pair.first.c_str() << ": " << pair.second.toString().toUtf8().constData() << std::endl;
+  }
+
+  return ss.str();
 }
 }
 
@@ -165,9 +176,13 @@ void CommandManager::runCommand(QString name, CommandArgument args, int repeat) 
   }
 
   if (m_commands.find(name) != m_commands.end()) {
+    qDebug() << "Start command: " << name << "args: " << toString(args).c_str()
+             << "repeat: " << repeat;
     m_commands[name]->run(args, repeat);
+    qDebug() << "End command: " << name;
   } else {
-    qDebug() << "Can't find a command: " << name;
+    QLoggingCategory category(SILKEDIT_CATEGORY);
+    qCWarning(category) << "Can't find a command: " << name;
   }
 }
 

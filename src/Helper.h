@@ -71,7 +71,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void cleanup();
   void runCommand(const QString& cmd, const CommandArgument& cmdArgs);
   void loadPackage(const QString& pkgName);
-  bool removePackage(const QString& pkgName);
+  bool unloadPackage(const QString& pkgName);
   GetRequestResponse* sendGetRequest(const QString& url, int timeoutInMs);
   void reloadKeymaps();
   void quitApplication();

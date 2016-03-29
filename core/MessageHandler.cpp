@@ -1,4 +1,4 @@
-#include <string>
+﻿#include <string>
 #include <QMetaMethod>
 
 #include "MessageHandler.h"
@@ -21,9 +21,11 @@ void MessageHandler::handler(QtMsgType type,
       case QtWarningMsg:
       case QtCriticalMsg:
         MessageHandler::singleton().handleMessage(type, msg);
+        s_defaultMsgHandler(type, context, msg);
         break;
       case QtFatalMsg:
         MessageHandler::singleton().handleMessage(type, msg);
+        s_defaultMsgHandler(type, context, msg);
         abort();
     }
   } else {

@@ -52,7 +52,7 @@ void PackageManager::loadPackageContents(const QString& pkgPath, const QString& 
   }
 }
 
-void PackageManager::loadFiles() {
+void PackageManager::_loadAllPackageContents() {
   // load default package first
   loadPackageContents(Constants::singleton().defaultPackagePath(), "default");
 
