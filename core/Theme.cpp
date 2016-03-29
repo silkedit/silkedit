@@ -443,7 +443,8 @@ ColorSettings Theme::createProjectTreeViewSettingsColors(const Theme* theme) {
   ColorSettings textEditViewSettingsColors = createTextEditSettingsColors(theme);
   ColorSettings defaultColors = createStatusBarSettingsColors(theme);
   defaultColors["selectionForeground"] = getAppropriateGray(defaultColors["background"], true);
-  defaultColors["selectionBackground"] = getAppropriateGray(defaultColors["background"], false, 130);
+  defaultColors["selectionBackground"] =
+      getAppropriateGray(defaultColors["background"], false, 130);
 
   return defaultColors;
 }
@@ -532,14 +533,16 @@ void Theme::setFont(const QFont& font) {
   m_font = font;
 
   // Update cache
-  for (const auto& pair : m_cachedFormats) {
-    pair.second->setFont(font);
+  // Don't set QFont directly, or it overwrites font weight and italics properties.
+  for (auto& pair : m_cachedFormats) {
+    pair.second->setFontFamily(font.family());
+    pair.second->setFontPointSize(font.pointSizeF());
   }
 }
 
 QString Theme::textEditVerticalScrollBarStyle() const {
-  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(textEditSettings->value(
-                                            QStringLiteral("background"))))
+  return verticalScrollBarBaseStyle.arg(Util::qcolorForStyleSheet(
+                                            textEditSettings->value(QStringLiteral("background"))))
       .arg(scrollBarColor);
 }
 
@@ -573,7 +576,8 @@ QTextCharFormat* Theme::getFormat(const QString& scope) {
   std::unique_ptr<QTextCharFormat> format(new QTextCharFormat());
 
   if (m_font) {
-    format->setFont(*m_font);
+    format->setFontFamily((*m_font).family());
+    format->setFontPointSize((*m_font).pointSizeF());
   }
 
   QVector<ScopeSetting*> matchedSettings = getMatchedSettings(scope);
