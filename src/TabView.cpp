@@ -418,3 +418,14 @@ void TabView::loadState(QSettings& settings) {
   settings.endArray();
   settings.endGroup();
 }
+
+QString TabView::tabTextWithoutModificationState(int index) const
+{
+  const auto& text = QTabWidget::tabText(index);
+  int lastIndexOfAsterisk = text.size() - 1;
+  while (lastIndexOfAsterisk >= 0 && text[lastIndexOfAsterisk] == '*') {
+    lastIndexOfAsterisk--;
+  }
+
+  return text.left(lastIndexOfAsterisk + 1);
+}
