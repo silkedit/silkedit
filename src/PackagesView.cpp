@@ -469,7 +469,7 @@ QString InstalledPackagesViewModel::TextAfterProcess() {
 
 void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, const Package& pkg) {
   // Call removePackage in silkedit_helper side first to unregister commands
-  bool success = Helper::singleton().removePackage(pkg.name);
+  bool success = Helper::singleton().unloadPackage(pkg.name);
   if (!success) {
     qWarning("Failed to remove package: %s", qPrintable(pkg.name));
     emit processFailed(index);

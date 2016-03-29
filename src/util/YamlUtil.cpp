@@ -224,9 +224,11 @@ void YamlUtil::parseMenuNode(const QString& pkgName,
         continue;
       }
 
-      if (!id.isEmpty() && findAction(parent->actions(), id)) {
-        qWarning("%s already exists", qPrintable(id));
-        continue;
+      if (!id.isEmpty()) {
+        auto action = findAction(parent->actions(), id);
+        if (action) {
+          parent->removeAction(action);
+        }
       }
 
       // check checkable
@@ -393,9 +395,11 @@ void YamlUtil::parseToolbarNode(const QString& pkgName,
         continue;
       }
 
-      if (!id.isEmpty() && findAction(toolbar->actions(), id)) {
-        qWarning("%s already exists", qPrintable(id));
-        continue;
+      if (!id.isEmpty()) {
+        auto action = findAction(toolbar->actions(), id);
+        if (action) {
+          toolbar->removeAction(action);
+        }
       }
 
       QAction* beforeAction =

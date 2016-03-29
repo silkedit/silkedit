@@ -151,17 +151,10 @@ void Helper::loadPackage(const QString& pkgName) {
   d->callFunc("loadPackage", args);
 }
 
-bool Helper::removePackage(const QString& pkgName) {
-  const QString& pkgDirPath =
-      Constants::singleton().userPackagesNodeModulesPath() + QDir::separator() + pkgName;
-  std::unique_ptr<BoolResponse> response = std::make_unique<BoolResponse>();
-  const QVariantList& args =
-      QVariantList{QVariant::fromValue(pkgDirPath), QVariant::fromValue(response.get())};
-  QEventLoop loop;
-  connect(response.get(), &BoolResponse::finished, &loop, &QEventLoop::quit);
-  d->callFunc("removePackage", args);
-  loop.exec(QEventLoop::ExcludeUserInputEvents);
-  return response->result();
+bool Helper::unloadPackage(const QString& pkgName) {
+  const QVariantList& args = QVariantList{QVariant::fromValue(pkgName)};
+  QVariant result = d->callFunc("unloadPackage", args);
+  return result.canConvert<bool>() ? result.toBool() : false;
 }
 
 GetRequestResponse* Helper::sendGetRequest(const QString& url, int timeoutInMs) {
@@ -186,8 +179,7 @@ void Helper::eval(const QString& code) {
   d->callFunc("eval", args);
 }
 
-void Helper::deactivatePackages()
-{
+void Helper::deactivatePackages() {
   d->callFunc("deactivatePackages");
 }
 

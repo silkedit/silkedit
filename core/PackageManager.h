@@ -27,13 +27,13 @@ class PackageManager : public QObject, public Singleton<PackageManager> {
 
   ~PackageManager() = default;
 
-  void loadFiles();
 
   QMap<QString, QString> toolbarDefinitions() { return m_toolbarsDefinitions; }
 
 public slots:
-  // This is called from JS internally
+  // These are called from JS internally
   bool _ensureRootPackageJson();
+  void _loadAllPackageContents();
 
  signals:
   void packageRemoved(const Package& pkg);
