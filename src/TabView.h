@@ -36,6 +36,7 @@ class TabView : public QTabWidget {
   bool closeAllTabs();
   void saveState(QSettings &settings);
   void loadState(QSettings &settings);
+  QString tabTextWithoutModificationState(int index) const;
 
 public slots:
   bool closeTab(int index);

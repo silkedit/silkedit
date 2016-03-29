@@ -352,7 +352,7 @@ void Window::updateTitle() {
   QString title;
   if (m_tabViewGroup && m_tabViewGroup->activeTab()) {
     auto tab = m_tabViewGroup->activeTab();
-    title = tab->tabText(tab->currentIndex());
+    title = tab->tabTextWithoutModificationState(tab->currentIndex());
   }
 
   if (m_projectView) {
