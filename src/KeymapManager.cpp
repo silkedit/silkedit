@@ -91,6 +91,18 @@ CommandArgument parseArgs(const YAML::Node& argsNode) {
 
   return args;
 }
+
+template <typename T>
+void erase_with_source(T& map, const QString& source) {
+  for (auto it = map.begin(); it != map.end();) {
+    if (it->second.source() == source) {
+      qDebug() << "remove:" << it->second.cmdName();
+      it = map.erase(it);
+    } else {
+      it++;
+    }
+  }
+}
 }
 
 void KeymapManager::load(const QString& filename, const QString& source) {
@@ -154,6 +166,20 @@ void KeymapManager::load(const QString& filename, const QString& source) {
   } catch (...) {
     qWarning() << "can't load yaml file because of an unexpected exception: " << filename;
   }
+}
+
+void KeymapManager::unload(const QString& source) {
+  erase_with_source(m_emptyCmdKeymap, source);
+  erase_with_source(m_keymaps, source);
+
+  for (auto it = m_cmdKeymapHash.begin(); it != m_cmdKeymapHash.end();) {
+    if (it->second.cmd.source() == source) {
+      it = m_cmdKeymapHash.erase(it);
+    } else {
+      it++;
+    }
+  }
+
 }
 
 bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
