@@ -34,7 +34,11 @@ int DocumentManager::open(const QString& filename) {
 
 DocumentManager::DocumentManager() : m_watcher(new QFileSystemWatcher(this)) {
   connect(m_watcher, &QFileSystemWatcher::fileChanged, [=](const QString& path) {
-    Q_ASSERT(m_pathDocHash.contains(path));
+    if (!m_pathDocHash.contains(path)) {
+      qCritical() << path << "is not registered";
+      return;
+    }
+
     auto doc = m_pathDocHash[path].lock();
     Q_ASSERT(doc);
     if (QFileInfo::exists(path)) {
