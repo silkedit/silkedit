@@ -3,6 +3,7 @@
 #include <memory>
 #include <QTextDocument>
 #include <QTextOption>
+#include <QSettings>
 
 #include "macros.h"
 #include "Encoding.h"
@@ -29,12 +30,15 @@ class Document : public QTextDocument {
   };
   Q_DECLARE_FLAGS(FindFlags, FindFlag)
 
-  ~Document();
-  DEFAULT_MOVE(Document)
+  static constexpr const char* SETTINGS_KEY = "Document";
 
   // Don't call this except DocumentManager
   static Document* create(const QString& path = "");
+  static Document* create(QSettings& settings);
   static Document* createBlank();
+
+  ~Document();
+  DEFAULT_MOVE(Document)
 
   QString path() { return m_path; }
   void setPath(const QString& path);
@@ -83,7 +87,9 @@ class Document : public QTextDocument {
    * @param encoding
    */
   void reload(const Encoding& encoding);
-  int tabWidth(Language *lang);
+  int tabWidth(Language* lang);
+
+  void saveState(QSettings& settings);
 
  signals:
   void pathUpdated(const QString& path);
@@ -112,7 +118,8 @@ class Document : public QTextDocument {
            const QString& text,
            const Encoding& encoding,
            const QString& separator,
-           const BOM& bom);
+           const BOM& bom,
+           Language* lang = nullptr);
   Document();
 
   void setupLayout();

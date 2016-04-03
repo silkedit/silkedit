@@ -196,6 +196,8 @@ void App::setupTranslator(const QString& locale) {
 }
 
 void App::quit() {
+  m_isQuitting = true;
+
   App::saveState();
 
   Helper::singleton().deactivatePackages();

@@ -9,6 +9,7 @@
 #include <QMutex>
 #include <QStringListModel>
 #include <QCompleter>
+#include <QSettings>
 
 #include "core/macros.h"
 #include "core/ICloneable.h"
@@ -69,6 +70,9 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
                            bool preserveCase = false);
   void clearSelection();
   void save(bool beforeClose);
+
+  void saveState(QSettings &settings);
+  void loadState(QSettings &settings);
 
  public slots:
   QString scopeName();
