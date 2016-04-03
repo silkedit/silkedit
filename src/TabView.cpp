@@ -16,16 +16,18 @@
 #include "core/Config.h"
 #include "core/Theme.h"
 #include "core/Util.h"
+#include "core/scoped_guard.h"
 
 using core::Document;
 using core::Config;
 using core::Theme;
 using core::Util;
 using core::ColorSettings;
+using core::scoped_guard;
 
 namespace {
 constexpr const char* PATHS_PREFIX = "paths";
-constexpr const char* PATH_KEY = "path";
+constexpr const char* TAB_TEXT_PREFIX = "tab_text";
 
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
@@ -280,7 +282,7 @@ void TabView::removeTabAndWidget(int index) {
 
 bool TabView::closeTab(QWidget* widget) {
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
-  if (textEdit && textEdit->document()->isModified()) {
+  if (textEdit && textEdit->document()->isModified() && !App::instance()->isQuitting()) {
     QMessageBox msgBox;
     msgBox.setText(tr("Do you want to save the changes made to the document %1?")
                        .arg(getFileNameFrom(textEdit->path())));
@@ -346,7 +348,6 @@ void TabView::focusTabContent(int index) {
 }
 
 void TabView::updateTabTextBasedOn(bool changed) {
-  qDebug() << "updateTabTextBasedOn. changed:" << changed;
   if (TextEdit* textEdit = qobject_cast<TextEdit*>(QObject::sender())) {
     int index = indexOf(textEdit);
     QString text = tabText(index);
@@ -385,16 +386,14 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
 void TabView::saveState(QSettings& settings) {
   settings.beginGroup(TabView::staticMetaObject.className());
   settings.beginWriteArray(PATHS_PREFIX);
+  int arrayIndex = 0;
   for (int i = 0; i < count(); i++) {
-    TextEdit* v = qobject_cast<TextEdit*>(widget(i));
-    if (!v) {
-      continue;
+    if (TextEdit* textEdit = qobject_cast<TextEdit*>(widget(i))) {
+      settings.setArrayIndex(arrayIndex);
+      textEdit->saveState(settings);
+      settings.setValue(TAB_TEXT_PREFIX, tabText(i).toStdString().c_str());
+      arrayIndex++;
     }
-    QString path = v->path();
-
-    // set tab information to array.
-    settings.setArrayIndex(i);
-    settings.setValue(PATH_KEY, path.toStdString().c_str());
   }
   settings.endArray();
   settings.endGroup();
@@ -402,25 +401,36 @@ void TabView::saveState(QSettings& settings) {
 
 void TabView::loadState(QSettings& settings) {
   settings.beginGroup(TabView::staticMetaObject.className());
+
   // get array size.
   int size = settings.beginReadArray(PATHS_PREFIX);
+  scoped_guard guard([&] {
+    settings.endArray();
+    settings.endGroup();
+  });
 
   // restore tab information.
   for (int i = 0; i < size; i++) {
     settings.setArrayIndex(i);
-    const QVariant& value = settings.value(PATH_KEY);
-    // if value convert to QString, open file.
-    if (value.canConvert<QString>()) {
-      open(value.toString());
+
+    if (settings.childGroups().contains(TextEdit::staticMetaObject.className())) {
+      auto textEdit = new TextEdit(this);
+      if (textEdit) {
+        textEdit->loadState(settings);
+        auto newIndex = addTab(textEdit, getFileNameFrom(textEdit->path()));
+        setTabToolTip(newIndex, textEdit->path());
+        if (settings.contains(TAB_TEXT_PREFIX)) {
+          auto tabTextVar = settings.value(TAB_TEXT_PREFIX);
+          if (tabTextVar.canConvert<QString>()) {
+            setTabText(i, tabTextVar.toString());
+          }
+        }
+      }
     }
   }
-
-  settings.endArray();
-  settings.endGroup();
 }
 
-QString TabView::tabTextWithoutModificationState(int index) const
-{
+QString TabView::tabTextWithoutModificationState(int index) const {
   const auto& text = QTabWidget::tabText(index);
   int lastIndexOfAsterisk = text.size() - 1;
   while (lastIndexOfAsterisk >= 0 && text[lastIndexOfAsterisk] == '*') {

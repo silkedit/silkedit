@@ -123,31 +123,39 @@ QString DocumentManager::saveAs(Document* doc, bool beforeClose) {
   return filePath;
 }
 
+std::shared_ptr<core::Document> DocumentManager::registerDoc(Document* doc) {
+  if (doc) {
+    const auto& path = doc->path();
+    auto sharedDoc = std::shared_ptr<Document>(doc);
+    if (!path.isEmpty()) {
+      connect(doc, &core::Document::destroyed, [=](QObject*) {
+        qDebug() << "document (" << path << ") is destroyed.";
+        m_pathDocHash.remove(path);
+        m_watcher->removePath(path);
+      });
+      m_pathDocHash[path] = std::weak_ptr<Document>(sharedDoc);
+      m_watcher->addPath(path);
+    }
+    return sharedDoc;
+  } else {
+    return std::shared_ptr<Document>();
+  }
+}
+
 std::shared_ptr<core::Document> DocumentManager::create(const QString& path) {
   Q_ASSERT(m_watcher);
 
   if (m_pathDocHash.contains(path)) {
     auto doc = m_pathDocHash[path].lock();
     Q_ASSERT(doc);
-    doc->setModified(doc->isModified());
     return doc;
   }
 
   auto doc = Document::create(path);
-  if (doc) {
-    connect(doc, &core::Document::destroyed, [=](QObject*) {
-      qDebug() << "document (" << path << ") is destroyed.";
-      m_pathDocHash.remove(path);
-      m_watcher->removePath(path);
-    });
-    auto sharedDoc = std::shared_ptr<Document>(doc);
-    m_pathDocHash[path] = std::weak_ptr<Document>(sharedDoc);
-    m_watcher->addPath(path);
-    // calling setModified(false) on a document and then inserting text causes the signal to get
-    // emitted
-    doc->setModified(false);
-    return sharedDoc;
-  } else {
-    return std::shared_ptr<Document>();
-  }
+  return registerDoc(doc);
+}
+
+std::shared_ptr<core::Document> DocumentManager::create(QSettings& settings) {
+  auto doc = Document::create(settings);
+  return registerDoc(doc);
 }
