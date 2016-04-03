@@ -3,6 +3,7 @@
 #include <QPlainTextDocumentLayout>
 #include <QTextCodec>
 #include <QDir>
+#include <QSettings>
 
 #include "Document.h"
 #include "LineSeparator.h"
@@ -10,10 +11,19 @@
 #include "LanguageParser.h"
 #include "Regexp.h"
 #include "SyntaxHighlighter.h"
+#include "scoped_guard.h"
 
 namespace core {
 
 namespace {
+
+constexpr const char* PATH_KEY = "path";
+constexpr const char* SCOPE_KEY = "scope";
+constexpr const char* ENCODING_KEY = "encoding";
+constexpr const char* LINE_SEPARATOR_KEY = "line_separator";
+constexpr const char* BOM_KEY = "bom";
+constexpr const char* TEXT_KEY = "text";
+constexpr const char* IS_MODIFIED_KEY = "is_modified";
 
 boost::optional<std::tuple<QString, Encoding, QString, BOM>> load(const QString& path) {
   QFile file(path);
@@ -48,7 +58,8 @@ Document::Document(const QString& path,
                    const QString& text,
                    const Encoding& encoding,
                    const QString& separator,
-                   const BOM& bom)
+                   const BOM& bom,
+                   Language* lang)
     : QTextDocument(text),
       m_path(path),
       m_encoding(encoding),
@@ -57,7 +68,6 @@ Document::Document(const QString& path,
       m_syntaxHighlighter(nullptr) {
   init();
 
-  Language* lang = nullptr;
   int from = 0, dotPos = -1;
 
   while (!lang) {
@@ -81,12 +91,32 @@ Document::Document(const QString& path,
   }
 
   Q_ASSERT(lang);
-  setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(lang)), toPlainText());
+  setupSyntaxHighlighter(std::unique_ptr<Language>(lang), toPlainText());
   setTabWidth();
+
+  // QTextDocument(text) sets modified true, so set it false again
+  setModified(false);
 }
 
 int Document::tabWidth(Language* lang) {
   return lang ? Config::singleton().tabWidth(lang->scopeName) : Config::singleton().tabWidth();
+}
+
+void Document::saveState(QSettings& settings) {
+  settings.beginGroup(Document::SETTINGS_KEY);
+  settings.setValue(PATH_KEY, m_path.toStdString().c_str());
+  settings.setValue(ENCODING_KEY, m_encoding.name().toStdString().c_str());
+  settings.setValue(LINE_SEPARATOR_KEY, m_lineSeparator.toStdString().c_str());
+  settings.setValue(BOM_KEY, m_bom.name().toStdString().c_str());
+  settings.setValue(IS_MODIFIED_KEY, isModified());
+  if (m_lang) {
+    settings.setValue(SCOPE_KEY, m_lang->scopeName.toStdString().c_str());
+  }
+  if (isModified()) {
+    settings.setValue(TEXT_KEY, toPlainText().toStdString().c_str());
+  }
+  // todo: save undo stack
+  settings.endGroup();
 }
 
 void Document::setTabWidth() {
@@ -140,7 +170,7 @@ Document::Document()
       m_bom(BOM::defaultBOM()),
       m_syntaxHighlighter(nullptr) {
   init();
-  setupSyntaxHighlighter(std::move(std::unique_ptr<Language>(LanguageProvider::defaultLanguage())));
+  setupSyntaxHighlighter(std::unique_ptr<Language>(LanguageProvider::defaultLanguage()));
 }
 
 void Document::setupLayout() {
@@ -174,6 +204,85 @@ Document* Document::create(const QString& path) {
   } else {
     return nullptr;
   }
+}
+
+Document* Document::create(QSettings& settings) {
+  settings.beginGroup(Document::SETTINGS_KEY);
+  scoped_guard guard([&] { settings.endGroup(); });
+
+  QString path;
+  bool isModified = false;
+
+  if (settings.contains(PATH_KEY)) {
+    auto pathVar = settings.value(PATH_KEY);
+    if (pathVar.canConvert<QString>()) {
+      path = pathVar.toString();
+    }
+  }
+
+  if (settings.contains(IS_MODIFIED_KEY)) {
+    auto isModifiedVar = settings.value(IS_MODIFIED_KEY);
+    if (isModifiedVar.canConvert<bool>()) {
+      isModified = isModifiedVar.toBool();
+    }
+  }
+
+  // if the saved document is not modified, open its path
+
+  if (!path.isEmpty() && !isModified) {
+    return create(path);
+  }
+
+  // restore a document
+
+  Encoding enc = Encoding::defaultEncoding();
+  if (settings.contains(ENCODING_KEY)) {
+    auto encVar = settings.value(ENCODING_KEY);
+    if (encVar.canConvert<QString>()) {
+      if (auto maybeEnc = Encoding::encodingForName(encVar.toString())) {
+        enc = *maybeEnc;
+      }
+    }
+  }
+
+  QString lineSeparator = LineSeparator::defaultLineSeparator().separatorStr();
+  if (settings.contains(LINE_SEPARATOR_KEY)) {
+    auto separatorVar = settings.value(LINE_SEPARATOR_KEY);
+    if (separatorVar.canConvert<QString>()) {
+      lineSeparator = separatorVar.toString();
+    }
+  }
+
+  BOM bom = BOM::defaultBOM();
+  if (settings.contains(BOM_KEY)) {
+    auto bomVar = settings.value(BOM_KEY);
+    if (bomVar.canConvert<QString>()) {
+      if (auto maybeBom = BOM::bomForName(bomVar.toString())) {
+        bom = *maybeBom;
+      }
+    }
+  }
+
+  QString text;
+  if (settings.contains(TEXT_KEY)) {
+    auto textVar = settings.value(TEXT_KEY);
+    if (textVar.canConvert<QString>()) {
+      text = textVar.toString();
+    }
+  }
+
+  Language* lang = nullptr;
+  if (settings.contains(SCOPE_KEY)) {
+    auto scopeVar = settings.value(SCOPE_KEY);
+    if (scopeVar.canConvert<QString>()) {
+      lang = LanguageProvider::languageFromScope(scopeVar.toString());
+    }
+  }
+
+  auto newDoc = new Document(path, text, enc, lineSeparator, bom, lang);
+  newDoc->setModified(isModified);
+
+  return newDoc;
 }
 
 Document* Document::createBlank() {
