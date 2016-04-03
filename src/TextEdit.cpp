@@ -120,10 +120,8 @@ void TextEditPrivate::setTheme(Theme* theme) {
             "}")
             .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("foreground")))
             .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("background")))
-            .arg(Util::qcolorForStyleSheet(
-                theme->textEditSettings->value("selectionForeground")))
-            .arg(Util::qcolorForStyleSheet(
-                theme->textEditSettings->value("selectionBackground")));
+            .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("selectionForeground")))
+            .arg(Util::qcolorForStyleSheet(theme->textEditSettings->value("selectionBackground")));
 
     q_ptr->setStyleSheet(style);
 
@@ -224,10 +222,10 @@ void TextEditPrivate::setupConnections(std::shared_ptr<core::Document> document)
 }
 
 boost::optional<Region> TextEditPrivate::find(const QString& text,
-                                                  int from,
-                                                  int begin,
-                                                  int end,
-                                                  Document::FindFlags flags) {
+                                              int from,
+                                              int begin,
+                                              int end,
+                                              Document::FindFlags flags) {
   if (text.isEmpty())
     return boost::none;
 
@@ -304,7 +302,7 @@ void TextEditPrivate::highlightCurrentLine() {
  */
 void TextEditPrivate::indentOneLevel(QTextCursor& currentVisibleCursor) {
   TextEditLogic::indentOneLevel(currentVisibleCursor, Config::singleton().indentUsingSpaces(),
-                                    tabWidth());
+                                tabWidth());
 }
 
 int TextEditPrivate::tabWidth() {
@@ -319,8 +317,7 @@ void TextEditPrivate::outdentOneLevel(QTextCursor& currentVisibleCursor) {
  * @brief Outdent one level
  * @param currentVisibleCursor
  */
-TextEditPrivate::TextEditPrivate(TextEdit* textEdit)
-    : q_ptr(textEdit), m_document(nullptr) {}
+TextEditPrivate::TextEditPrivate(TextEdit* textEdit) : q_ptr(textEdit), m_document(nullptr) {}
 
 void TextEditPrivate::outdentCurrentLineIfNecessary() {
   if (!m_document || !m_document->language()) {
@@ -381,7 +378,7 @@ TextEdit::~TextEdit() {
 }
 
 QString TextEdit::path() {
-  return d_ptr->m_document ? d_ptr->m_document->path() : "";
+  return d_ptr->m_document ? d_ptr->m_document->path() : QStringLiteral("");
 }
 
 void TextEdit::setTextCursor(const QTextCursor& cursor) {
@@ -473,8 +470,7 @@ void TextEdit::setDocument(std::shared_ptr<Document> document) {
 
   // Special handling for user keymap.yml
   if (document->path() == Constants::singleton().userKeymapPath()) {
-    connect(this, &TextEdit::saved, &KeymapManager::singleton(),
-            &KeymapManager::loadUserKeymap);
+    connect(this, &TextEdit::saved, &KeymapManager::singleton(), &KeymapManager::loadUserKeymap);
   }
 }
 
@@ -532,10 +528,10 @@ void TextEdit::setPath(const QString& path) {
 }
 
 boost::optional<Region> TextEdit::find(const QString& text,
-                                           int from,
-                                           int begin,
-                                           int end,
-                                           Document::FindFlags flags) {
+                                       int from,
+                                       int begin,
+                                       int end,
+                                       Document::FindFlags flags) {
   return d_ptr->find(text, from, begin, end, flags);
 }
 
@@ -682,9 +678,9 @@ void TextEdit::setTheme(core::Theme* theme) {
 }
 
 void TextEdit::highlightSearchMatches(const QString& text,
-                                          int begin,
-                                          int end,
-                                          Document::FindFlags flags) {
+                                      int begin,
+                                      int end,
+                                      Document::FindFlags flags) {
   d_ptr->m_searchMatchedRegions.clear();
 
   auto regions = document()->findAll(text, begin, end, flags);
@@ -709,11 +705,11 @@ void TextEdit::replaceSelection(const QString& text, bool preserveCase) {
 }
 
 void TextEdit::replaceAllSelection(const QString& findText,
-                                       const QString& replaceText,
-                                       int begin,
-                                       int end,
-                                       Document::FindFlags flags,
-                                       bool preserveCase) {
+                                   const QString& replaceText,
+                                   int begin,
+                                   int end,
+                                   Document::FindFlags flags,
+                                   bool preserveCase) {
   if (Document* doc = document()) {
     QTextCursor currentCursor = textCursor();
     currentCursor.beginEditBlock();
@@ -766,8 +762,8 @@ void TextEdit::insertNewLine() {
   bool indentUsingSpaces = Config::singleton().indentUsingSpaces();
   auto cursor = textCursor();
   TextEditLogic::indentCurrentLine(d_ptr->m_document.get(), cursor, prevLineString,
-                                       prevPrevLineText, metadata, indentUsingSpaces,
-                                       d_ptr->tabWidth());
+                                   prevPrevLineText, metadata, indentUsingSpaces,
+                                   d_ptr->tabWidth());
 }
 
 TextEdit* TextEdit::clone() {
@@ -881,6 +877,28 @@ void TextEdit::save(bool beforeClose) {
   if (DocumentManager::singleton().save(d_ptr->m_document.get(), beforeClose)) {
     emit saved();
   }
+}
+
+void TextEdit::saveState(QSettings& settings) {
+  Q_D(TextEdit);
+  settings.beginGroup(TextEdit::staticMetaObject.className());
+  if (d->m_document) {
+    d->m_document->saveState(settings);
+  }
+  settings.endGroup();
+}
+
+void TextEdit::loadState(QSettings& settings) {
+  settings.beginGroup(TextEdit::staticMetaObject.className());
+
+  if (settings.childGroups().contains(Document::SETTINGS_KEY)) {
+    auto doc = DocumentManager::singleton().create(settings);
+    setDocument(doc);
+  } else {
+    setDocument(std::shared_ptr<Document>(Document::createBlank()));
+  }
+
+  settings.endGroup();
 }
 
 QString TextEdit::scopeName() {
