@@ -4,6 +4,7 @@
 #include <QString>
 #include <QObject>
 #include <QFileSystemWatcher>
+#include <QSettings>
 
 #include "core/macros.h"
 #include "core/Singleton.h"
@@ -26,6 +27,7 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
   bool save(core::Document* doc, bool beforeClose);
   QString saveAs(core::Document* doc, bool beforeClose);
   std::shared_ptr<core::Document> create(const QString& path);
+  std::shared_ptr<core::Document> create(QSettings& settings);
 
 public slots:
   int open(const QString& filename);
@@ -36,4 +38,5 @@ public slots:
 
   QFileSystemWatcher* m_watcher;
   QHash<QString, std::weak_ptr<core::Document>> m_pathDocHash;
+  std::shared_ptr<core::Document> registerDoc(core::Document* doc);
 };
