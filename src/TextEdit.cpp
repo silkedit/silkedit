@@ -847,10 +847,33 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     }
   }
 
-  // todo: define this behavior in keymap.yml
-  // https://trello.com/c/S46aBYnu
   switch (event->key()) {
+    // Override QPlainTextEdit default behavior
+    case Qt::Key_Home: {
+      auto cursor = textCursor();
+      auto moveMode = QTextCursor::MoveMode::MoveAnchor;
+      if (event->modifiers()  & Qt::ShiftModifier) {
+        moveMode = QTextCursor::MoveMode::KeepAnchor;
+      }
+      cursor.movePosition(QTextCursor::MoveOperation::StartOfLine, moveMode);
+      setTextCursor(cursor);
+      event->accept();
+      return;
+    }
+    case Qt::Key_End: {
+      auto cursor = textCursor();
+      auto moveMode = QTextCursor::MoveMode::MoveAnchor;
+      if (event->modifiers()  & Qt::ShiftModifier) {
+        moveMode = QTextCursor::MoveMode::KeepAnchor;
+      }
+      cursor.movePosition(QTextCursor::MoveOperation::EndOfLine, moveMode);
+      setTextCursor(cursor);
+      event->accept();
+      return;
+    }
     case Qt::Key_Escape:
+      // todo: define this behavior in keymap.yml
+      // https://trello.com/c/S46aBYnu
       if (Window* window = App::instance()->activeWindow()) {
         window->hideFindReplacePanel();
       }
