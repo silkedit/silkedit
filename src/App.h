@@ -27,6 +27,7 @@ class App : public QApplication {
 
   void setupTranslator(const QString& locale);
   void quit();
+  bool isQuitting() { return m_isQuitting; }
 
  public slots:
   TextEdit* activeTextEdit();
@@ -47,4 +48,5 @@ class App : public QApplication {
 
   QTranslator* m_translator;
   QTranslator* m_qtTranslator;
+  bool m_isQuitting;
 };
