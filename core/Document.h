@@ -32,10 +32,11 @@ class Document : public QTextDocument {
 
   static constexpr const char* SETTINGS_KEY = "Document";
 
-  // Don't call this except DocumentManager
+  static Document* createBlank();
+
+  // Don't call these except DocumentManager
   static Document* create(const QString& path = "");
   static Document* create(QSettings& settings);
-  static Document* createBlank();
 
   ~Document();
   DEFAULT_MOVE(Document)

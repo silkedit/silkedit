@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QStylePainter>
+#include <QTimer>
 
 #include "TabView.h"
 #include "TextEdit.h"
@@ -32,6 +33,16 @@ constexpr const char* TAB_TEXT_PREFIX = "tab_text";
 QString getFileNameFrom(const QString& path) {
   QFileInfo info(path);
   return info.fileName().isEmpty() ? DocumentManager::DEFAULT_FILE_NAME : info.fileName();
+}
+
+bool isUntitledAndNotEmpty(Document* doc) {
+  Q_ASSERT(doc);
+  return doc->path().isEmpty() && !doc->isEmpty();
+}
+
+bool isNotUntitledAndModified(Document* doc) {
+  Q_ASSERT(doc);
+  return !doc->path().isEmpty() && doc->isModified();
 }
 }
 
@@ -144,10 +155,18 @@ QList<QWidget*> TabView::widgets() const {
 }
 
 void TabView::addNewTab() {
-  TextEdit* view = new TextEdit(this);
-  std::shared_ptr<Document> newDoc(Document::createBlank());
-  view->setDocument(std::move(newDoc));
-  addTab(view, DocumentManager::DEFAULT_FILE_NAME);
+  if (auto doc = Document::createBlank()) {
+    TextEdit* view = new TextEdit(this);
+    std::shared_ptr<Document> newDoc(doc);
+    view->setDocument(std::move(newDoc));
+    addTab(view, DocumentManager::DEFAULT_FILE_NAME);
+
+    // calling setModified(true) immediately doesn't emit modificationChanged
+    QTimer::singleShot(0, this, [=] {
+      Q_ASSERT(doc);
+      doc->setModified(true);
+    });
+  }
 }
 
 QWidget* TabView::widget(int index) const {
@@ -282,7 +301,10 @@ void TabView::removeTabAndWidget(int index) {
 
 bool TabView::closeTab(QWidget* widget) {
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
-  if (textEdit && textEdit->document()->isModified() && !App::instance()->isQuitting()) {
+  // close an empty untitled document even if it's modified state because that's default
+  if (textEdit && !App::instance()->isQuitting() &&
+      (isUntitledAndNotEmpty(textEdit->document()) ||
+       isNotUntitledAndModified(textEdit->document()))) {
     QMessageBox msgBox;
     msgBox.setText(tr("Do you want to save the changes made to the document %1?")
                        .arg(getFileNameFrom(textEdit->path())));
