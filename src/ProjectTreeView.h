@@ -30,6 +30,7 @@ class ProjectTreeView : public QTreeView {
   bool edit(const QModelIndex& index, EditTrigger trigger, QEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
   void mouseDoubleClickEvent(QMouseEvent*) override;
+  void resizeEvent(QResizeEvent* event) override;
 
  private:
   MyFileSystemModel* m_model;
