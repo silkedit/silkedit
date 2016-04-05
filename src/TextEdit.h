@@ -74,6 +74,8 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void saveState(QSettings &settings);
   void loadState(QSettings &settings);
 
+  bool isSearchMatchesHighlighted();
+
  public slots:
   QString scopeName();
   QString scopeTree();

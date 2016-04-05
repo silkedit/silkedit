@@ -924,6 +924,11 @@ void TextEdit::loadState(QSettings& settings) {
   settings.endGroup();
 }
 
+bool TextEdit::isSearchMatchesHighlighted()
+{
+  return !d_ptr->m_searchMatchedRegions.isEmpty();
+}
+
 QString TextEdit::scopeName() {
   Q_D(TextEdit);
   return d->m_document->scopeName(textCursor().position());
