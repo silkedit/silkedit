@@ -621,9 +621,17 @@ QTextCharFormat* Theme::getFormat(const QString& scope) {
 Rank::Rank(const QString& scopeSelector, const QString& scope) {
   if (scopeSelector.isEmpty()) {
     m_state = State::Empty;
+  /*
+   * In the scope selector we specify element names as a space separated list to indicate that
+   * each element should be present in the scope (and in the same order). So if we want to target
+   * all strings in PHP, we can use source.php string, or we can use text.html source.php to
+   * target PHP embedded in HTML.
+   */
+  } else if (scopeSelector.contains(' ') && !scope.startsWith(scopeSelector)) {
+    m_state = State::Invalid;
   } else {
-    QVector<QStringRef> selectors = scopeSelector.splitRef(" ");
-    QVector<QStringRef> scopes = scope.splitRef(" ");
+    QVector<QStringRef> selectors = scopeSelector.splitRef(QStringLiteral(" "));
+    QVector<QStringRef> scopes = scope.splitRef(QStringLiteral(" "));
     QVector<int> scores(scopes.size(), 0);
 
     if (selectors.size() > scopes.size()) {
