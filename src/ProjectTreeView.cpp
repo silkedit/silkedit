@@ -5,6 +5,7 @@
 #include <QContextMenuEvent>
 #include <QDir>
 #include <QScrollBar>
+#include <QHeaderView>
 
 #include "ProjectTreeView.h"
 #include "DocumentManager.h"
@@ -47,10 +48,14 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(n
   setTheme(Config::singleton().theme());
   setFont();
 
-  setHeaderHidden(true);
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
   setFocusPolicy(Qt::ClickFocus);
+
+  setHeaderHidden(true);
+  // We let the column adjust to contents, but note the setting of a minimum size in resizeEvent()
+  header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+  header()->setStretchLastSection(false);
 
   connect(this, &ProjectTreeView::activated, this, &ProjectTreeView::openOrExpand);
   connect(&Config::singleton(), &Config::themeChanged, this, &ProjectTreeView::setTheme);
@@ -101,8 +106,7 @@ void ProjectTreeView::edit(const QModelIndex& index) {
   QTreeView::edit(index);
 }
 
-QString ProjectTreeView::dirPath() const
-{
+QString ProjectTreeView::dirPath() const {
   if (auto filterModel = qobject_cast<FilterModel*>(model())) {
     return filterModel->dirPath();
   }
@@ -180,6 +184,11 @@ void ProjectTreeView::keyPressEvent(QKeyEvent* event) {
 
 void ProjectTreeView::mouseDoubleClickEvent(QMouseEvent*) {
   emit activated(currentIndex());
+}
+
+void ProjectTreeView::resizeEvent(QResizeEvent* event) {
+  header()->setMinimumSectionSize(viewport()->width());
+  QTreeView::resizeEvent(event);
 }
 
 void ProjectTreeView::openOrExpand(QModelIndex index) {
