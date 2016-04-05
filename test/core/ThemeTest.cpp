@@ -137,15 +137,11 @@ class ThemeTest : public QObject {
     QVERIFY(rank4 < rank3);
 
     Rank rank10("text source string", "text source string");
-    Rank rank11("source string", "text source string");
-    Rank rank12("text source", "text source string");
-    Rank rank13("text", "text source string");
-    QVERIFY(rank10 > rank11);
-    QVERIFY(rank11 > rank12);
-    QVERIFY(rank10 > rank12);
-    QVERIFY(rank13 < rank12);
-    QVERIFY(rank13 < rank11);
-    QVERIFY(rank13 < rank10);
+    Rank rank11("text source", "text source string");
+    Rank rank12("text", "text source string");
+    QVERIFY(rank11 < rank10);
+    QVERIFY(rank12 < rank11);
+    QVERIFY(rank12 < rank10);
 
     Rank rankInvalid("php", "source.php string.quoted");
     QVERIFY(rankInvalid.isInvalid());
@@ -158,6 +154,9 @@ class ThemeTest : public QObject {
 
     Rank rankInvalid4("string.foo", "source.php string.quoted");
     QVERIFY(rankInvalid4.isInvalid());
+
+    Rank rankInvalid5("source string", "text source string");
+    QVERIFY(rankInvalid5.isInvalid());
 
     // empty selector matches any scope but with the lowest rank
     Rank rankEmpty("", "source.php string.quoted");
