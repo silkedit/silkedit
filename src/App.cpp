@@ -96,8 +96,7 @@ App::App(int& argc, char** argv)
     }
   });
 
-  connect(this, &App::aboutToQuit, &SyntaxHighlighterThread::singleton(),
-          &SyntaxHighlighterThread::quit);
+  connect(this, &App::aboutToQuit, this, &App::cleanup);
 }
 
 bool App::event(QEvent* event) {
@@ -164,6 +163,23 @@ bool App::notify(QObject* receiver, QEvent* event) {
   return QApplication::notify(receiver, event);
 }
 
+void App::cleanup() {
+  qDebug() << "cleanup";
+  m_isQuitting = true;
+
+  App::saveState();
+
+  Helper::singleton().deactivatePackages();
+
+  for (auto window : Window::windows()) {
+    if (!window->close()) {
+      return;
+    }
+  }
+
+  SyntaxHighlighterThread::singleton().quit();
+}
+
 void App::setupTranslator(const QString& locale) {
   if (m_translator) {
     m_translator->deleteLater();
@@ -193,22 +209,6 @@ void App::setupTranslator(const QString& locale) {
   }
   installTranslator(m_qtTranslator);
 #endif
-}
-
-void App::quit() {
-  m_isQuitting = true;
-
-  App::saveState();
-
-  Helper::singleton().deactivatePackages();
-
-  for (auto window : Window::windows()) {
-    if (!window->close()) {
-      return;
-    }
-  }
-
-  QApplication::quit();
 }
 
 TextEdit* App::activeTextEdit() {
