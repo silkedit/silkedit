@@ -621,14 +621,6 @@ QTextCharFormat* Theme::getFormat(const QString& scope) {
 Rank::Rank(const QString& scopeSelector, const QString& scope) {
   if (scopeSelector.isEmpty()) {
     m_state = State::Empty;
-  /*
-   * In the scope selector we specify element names as a space separated list to indicate that
-   * each element should be present in the scope (and in the same order). So if we want to target
-   * all strings in PHP, we can use source.php string, or we can use text.html source.php to
-   * target PHP embedded in HTML.
-   */
-  } else if (scopeSelector.contains(' ') && !scope.startsWith(scopeSelector)) {
-    m_state = State::Invalid;
   } else {
     QVector<QStringRef> selectors = scopeSelector.splitRef(QStringLiteral(" "));
     QVector<QStringRef> scopes = scope.splitRef(QStringLiteral(" "));
@@ -639,18 +631,25 @@ Rank::Rank(const QString& scopeSelector, const QString& scope) {
       return;
     }
 
-    int selectorsIndex = selectors.size() - 1, scopesIndex = scopes.size() - 1;
+    int selectorsIndex = 0, scopesIndex = 0;
     bool lastMatched = false;
-    for (; 0 <= selectorsIndex && 0 <= scopesIndex; scopesIndex--) {
+    for (; selectorsIndex < selectors.size() && scopesIndex < scopes.size(); scopesIndex++) {
       int rank = calcRank(selectors[selectorsIndex], scopes[scopesIndex]);
       if (rank > 0) {
         scores[scopesIndex] = rank;
-        selectorsIndex--;
+        selectorsIndex++;
         lastMatched = true;
       } else if (lastMatched) {
         m_state = State::Invalid;
         return;
       }
+    }
+
+    // if selectorsIndex is less than selectors.size(),
+    // it means not all the selectors matches
+    if (selectorsIndex < selectors.size()) {
+      m_state = State::Invalid;
+      return;
     }
 
     int zeroCount = 0;

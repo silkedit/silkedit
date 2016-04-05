@@ -143,6 +143,11 @@ class ThemeTest : public QObject {
     QVERIFY(rank12 < rank11);
     QVERIFY(rank12 < rank10);
 
+    Rank rank13("meta.property-value.css constant.numeric.css",
+                "source.css meta.property-list.css meta.property-value.css constant.numeric.css "
+                "keyword.other.unit.css");
+    QVERIFY(!rank13.isInvalid());
+
     Rank rankInvalid("php", "source.php string.quoted");
     QVERIFY(rankInvalid.isInvalid());
 
@@ -155,7 +160,16 @@ class ThemeTest : public QObject {
     Rank rankInvalid4("string.foo", "source.php string.quoted");
     QVERIFY(rankInvalid4.isInvalid());
 
-    Rank rankInvalid5("source string", "text source string");
+    /*
+     in Espresso Libre
+     <key>name</key>
+     <string>Embedded source</string>
+     <key>scope</key>
+     <string>text source, string.unquoted</string>
+
+     this shouldn't match with source.c++
+     */
+    Rank rankInvalid5("text source", "source.c++ hoge");
     QVERIFY(rankInvalid5.isInvalid());
 
     // empty selector matches any scope but with the lowest rank
