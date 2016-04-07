@@ -1,4 +1,4 @@
-#include <QCompleter>
+﻿#include <QCompleter>
 #include <QVBoxLayout>
 
 #include "Console.h"
@@ -21,7 +21,7 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
 
   connect(&MessageHandler::singleton(), &MessageHandler::message, this,
           [=](QtMsgType type, QString msg) {
-            const QString& htmlMsg = msg.replace(QLatin1String(R"(\n)"), QLatin1String("<br>"));
+            const QString& htmlMsg = msg.replace(QStringLiteral("\n"), QStringLiteral("<br>"));
             QString text = QStringLiteral("<div style='color:%1;'>%2</div>");
             QString color;
             switch (type) {
