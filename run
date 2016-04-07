@@ -281,6 +281,8 @@ resolve() {
     # npm install for silkedit package
     cd jslib/node_modules/silkedit
     npm install --production
+    # remove syntax-error's test and example codes because they cause SyntaxError when uglifying
+    rm -rf node_modules/syntax-error/test node_modules/syntax-error/example
     cd ../../..
 }
 
