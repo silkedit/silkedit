@@ -44,6 +44,11 @@ bool isNotUntitledAndModified(Document* doc) {
   Q_ASSERT(doc);
   return !doc->path().isEmpty() && doc->isModified();
 }
+
+bool isUntitledAndEmpty(Document* doc) {
+  Q_ASSERT(doc);
+  return doc->path().isEmpty() && doc->isEmpty();
+}
 }
 
 TabView::TabView(QWidget* parent)
@@ -113,7 +118,7 @@ int TabView::open(const QString& path) {
 
   if (count() == 1) {
     TextEdit* textEdit = qobject_cast<TextEdit*>(currentWidget());
-    if (textEdit && !textEdit->document()->isModified() && textEdit->document()->path().isEmpty()) {
+    if (textEdit && isUntitledAndEmpty(textEdit->document())) {
       qDebug() << "trying to replace an empty doc with a new one";
       textEdit->setDocument(newDoc);
       textEdit->setPath(path);
