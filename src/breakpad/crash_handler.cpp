@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <sstream>
 #include "stringconv.h"
+#include "App.h"
 
 #if defined(Q_OS_LINUX)
 #include "client/linux/handler/exception_handler.h"
@@ -63,6 +64,8 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
   Q_UNUSED(exinfo);
 #endif
   qDebug("BreakpadQt crash");
+
+  App::saveState();
 
   /*
   NO STACK USE, NO HEAP USE THERE !!!
