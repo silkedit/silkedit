@@ -252,7 +252,7 @@ v8::Local<v8::Value> V8Util::toV8ObjectFrom(v8::Isolate* isolate, QObject* sourc
     }
 
     auto obj = maybeObj.ToLocalChecked();
-    ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
+    ObjectStore::wrapAndInsert(sourceObj, obj, isolate);
     return obj;
   }
 }
