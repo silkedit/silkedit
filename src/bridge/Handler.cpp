@@ -336,7 +336,7 @@ void bridge::Handler::setSingletonObj(Local<Object>& exports,
   Local<Object> obj = maybeObj.ToLocalChecked();
   // associate QObject with JS object (This association is used when emitting a signal from
   // singleton)
-  ObjectStore::singleton().wrapAndInsert(sourceObj, obj, isolate);
+  ObjectStore::wrapAndInsert(sourceObj, obj, isolate);
 
   // create prototype object
   Local<Object> proto = Object::New(isolate);

@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include <v8.h>
 #include <boost/optional.hpp>
 #include <unordered_map>
+#include <unordered_set>
 #include <QObject>
 
 #include "Singleton.h"
@@ -21,18 +22,25 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
   Q_ENUM(ObjectState)
 
   static QObject* unwrap(v8::Local<v8::Object> obj);
+  static void wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate);
+  static void registerDestroyedConnectedObject(QObject* obj);
+  static boost::optional<v8::Local<v8::Object>> find(QObject* obj, v8::Isolate* isolate);
 
   ~ObjectStore() = default;
-
-  void wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate);
-  boost::optional<v8::Local<v8::Object>> find(QObject* obj, v8::Isolate* isolate);
 
  private:
   static void WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& data);
 
   static std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> s_objects;
 
-  friend class core::Singleton<ObjectStore>;
+  /**
+   * @brief s_destroyedConnectedObjects
+   * Keep track of QObjects connected to destroyed signal in JS side to make sure that when QObject
+   * is destroyed, emitting destroyed signal to JS side first then destroy JS object.
+   */
+  static std::unordered_set<QObject*> s_destroyedConnectedObjects;
+
+  friend class Singleton<ObjectStore>;
   ObjectStore() = default;
 };
 

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <v8.h>
 #include <sstream>
@@ -47,7 +47,7 @@ class JSStaticObject {
           return;
         }
 
-        ObjectStore::singleton().wrapAndInsert(sourceObj, args.This(), isolate);
+        ObjectStore::wrapAndInsert(sourceObj, args.This(), isolate);
         args.GetReturnValue().Set(args.This());
         return;
       }
@@ -80,7 +80,7 @@ class JSStaticObject {
             return;
           }
 
-          ObjectStore::singleton().wrapAndInsert(newObj, args.This(), isolate);
+          ObjectStore::wrapAndInsert(newObj, args.This(), isolate);
           args.GetReturnValue().Set(args.This());
           return;
         }

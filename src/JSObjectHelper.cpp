@@ -1,4 +1,4 @@
-#include <sstream>
+﻿#include <sstream>
 #include <QMetaMethod>
 
 #include "JSObjectHelper.h"
@@ -67,8 +67,8 @@ void JSObjectHelper::connectOrDisconnect(const v8::FunctionCallbackInfo<v8::Valu
   }
 
   const QMetaMethod& method = metaObj->method(index);
-  if (method.name() == "destoryed") {
-    V8Util::throwError(isolate, "add listener to destroyed event is not allowed");
+  if (method.name() == "destroyed") {
+    ObjectStore::registerDestroyedConnectedObject(obj);
     return;
   }
 
@@ -88,6 +88,5 @@ void JSObjectHelper::connectOrDisconnect(const v8::FunctionCallbackInfo<v8::Valu
     std::stringstream ss;
     ss << "parameter signature " << emitSignalSignature.constData() << " not supported";
     V8Util::throwError(isolate, ss.str());
-    return;
   }
 }
