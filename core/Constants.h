@@ -36,7 +36,7 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QString jsLibDir();
   QString silkHomePath() const;
   QString recentOpenHistoryPath();
-  QString appStatePath();
+  QString sessionPath();
   QStringList themePaths();
   QStringList packagesPaths();
   QString userRootPackageJsonPath() const;

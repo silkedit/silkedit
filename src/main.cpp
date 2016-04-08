@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
   // Create default menu bar before creating any new window
   MenuBar::init();
 
-  App::loadState();
+  App::loadSession();
 
   Window* window;
   if (Window::windows().isEmpty()) {

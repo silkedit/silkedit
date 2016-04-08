@@ -65,7 +65,7 @@ bool DumpCallback(const char* _dump_dir, const char* _minidump_id, void* context
 #endif
   qDebug("BreakpadQt crash");
 
-  App::saveState();
+  App::saveSession();
 
   /*
   NO STACK USE, NO HEAP USE THERE !!!

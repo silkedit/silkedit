@@ -119,8 +119,8 @@ QString Constants::recentOpenHistoryPath() {
          "/recentOpenHistory.ini";
 }
 
-QString Constants::appStatePath() {
-  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/appState.ini";
+QString Constants::sessionPath() {
+  return QStandardPaths::standardLocations(QStandardPaths::AppDataLocation)[0] + "/session.ini";
 }
 
 QStringList Constants::themePaths() {
