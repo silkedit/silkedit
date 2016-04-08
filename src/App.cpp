@@ -167,7 +167,7 @@ void App::cleanup() {
   qDebug() << "cleanup";
   m_isQuitting = true;
 
-  App::saveState();
+  App::saveSession();
 
   Helper::singleton().deactivatePackages();
 
@@ -275,13 +275,13 @@ void App::restart() {
   }
 }
 
-void App::saveState() {
-  QSettings settings(Constants::singleton().appStatePath(), QSettings::IniFormat);
+void App::saveSession() {
+  QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
   Window::saveWindowsState(s_app->activeWindow(), settings);
 }
 
-void App::loadState() {
-  QSettings settings(Constants::singleton().appStatePath(), QSettings::IniFormat);
+void App::loadSession() {
+  QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   Window::loadWindowsState(settings);
 }

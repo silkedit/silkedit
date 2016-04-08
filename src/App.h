@@ -19,8 +19,8 @@ class App : public QApplication {
   static App* instance() { return s_app; }
   static TabBar* tabBarAt(int x, int y);
   static void restart();
-  static void saveState();
-  static void loadState();
+  static void saveSession();
+  static void loadSession();
 
   App(int& argc, char** argv);
   ~App() = default;
