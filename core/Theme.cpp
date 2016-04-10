@@ -162,6 +162,17 @@ QColor getAppropriateGray(QColor const color, bool reverse = false, int alpha = 
   return newColor;
 }
 
+QColor getHoverColor(QColor const color, int alpha = 50) {
+  QColor newColor;
+  int brightness = color.value();
+  if (brightness < brightnessThresholdGray) {
+    newColor.setRgb(158, 158, 158, alpha);
+  } else {
+    newColor.setRgb(0, 0, 0, alpha);
+  }
+  return newColor;
+}
+
 QColor getSelectedBorderColor() {
   // use material color
   //  - http://www.materialui.co/colors
@@ -466,6 +477,8 @@ ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
   defaultColors["buttonCheckedBackgroundColor"] =
       getAppropriateGray(defaultColors.value("background"));
   defaultColors["focusColor"] = getSelectedBorderColor();
+  defaultColors["hoverColor"] = getHoverColor(defaultColors.value("background"));
+  defaultColors["pressedColor"] = getHoverColor(defaultColors.value("background"), 150);
 
   return defaultColors;
 }
