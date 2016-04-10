@@ -473,6 +473,7 @@ ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
   ColorSettings defaultColors = createStatusBarSettingsColors(theme);
   defaultColors["buttonCheckedBackgroundColor"] =
       getAppropriateGray(defaultColors.value("background"));
+  defaultColors["focusColor"] = getAppropriateGray(defaultColors.value("background"), false, 130);
 
   return defaultColors;
 }
