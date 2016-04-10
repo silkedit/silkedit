@@ -217,7 +217,7 @@ void TabViewGroup::loadState(QSplitter* splitter, QSettings& settings) {
         splitter->addWidget(tab);
       }
     } else if (settings.childGroups().contains(SPLITTER_PREFIX)) {
-      auto childSplitter = new QSplitter(splitter);
+      auto childSplitter = new Splitter(Qt::Horizontal, splitter);
       if (childSplitter) {
         loadState(childSplitter, settings);
         splitter->addWidget(childSplitter);
