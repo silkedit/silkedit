@@ -40,6 +40,7 @@ FindReplaceView::FindReplaceView(QWidget* parent)
 
   // Make 'Replace' and 'Replace All' fonts 2 points smaller
   QFont font = ui->replaceButton->font();
+
   font.setPointSize(font.pointSize() - 2);
   ui->replaceButton->setFont(font);
   ui->replaceAllButton->setFont(font);
@@ -447,41 +448,27 @@ void FindReplaceView::setTheme(core::Theme* theme) {
             "background-color: %3;"
             "}")
             .arg(this->objectName())
-            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("foreground")))
+            .arg(defaultIconColor)
             .arg(Util::qcolorForStyleSheet(
                 findReplaceViewSettings->value("buttonCheckedBackgroundColor"))) +
-          QStringLiteral(
+        QStringLiteral(
             "#%1 QPushButton:focus, #%1 QLineEdit:focus {"
             "border-color: %2;"
             "}")
-          .arg(this->objectName())
-          .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("focusColor"))) +
+            .arg(this->objectName())
+            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("focusColor"))) +
         QStringLiteral(
-            "#%1 QPushButton:hover {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #919191, stop:1 "
-            "#7E7E7E);"
-            "}"
-            "#%1 QPushButton:pressed {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #6A6A6A, stop:1 "
-            "#595959);"
-            "}"
+            "#%1 QPushButton:hover, "
             "#%1 QCheckBox:unchecked:hover {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
-            "#7E7E7E);"
+            "background:%2;"
             "}"
+            "#%1 QPushButton:pressed, "
             "#%1 QCheckBox:unchecked:pressed {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #575757, stop:1 "
-            "#444444);"
-            "}"
-            "#%1 QCheckBox:checked:hover {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #919191, stop:1 "
-            "#7E7E7E);"
-            "}"
-            "#%1 QCheckBox:checked:pressed {"
-            "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #6A6A6A, stop:1 "
-            "#595959);"
+            "background:%3;"
             "}")
-            .arg(this->objectName());
+            .arg(this->objectName())
+            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("hoverColor")))
+            .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("pressedColor")));
 
     this->setStyleSheet(style);
   }
