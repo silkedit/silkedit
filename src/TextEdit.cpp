@@ -914,7 +914,7 @@ void TextEdit::saveState(QSettings& settings) {
 void TextEdit::loadState(QSettings& settings) {
   settings.beginGroup(TextEdit::staticMetaObject.className());
 
-  if (settings.childGroups().contains(Document::SETTINGS_KEY)) {
+  if (settings.childGroups().contains(Document::SETTINGS_PREFIX)) {
     auto doc = DocumentManager::singleton().create(settings);
     setDocument(doc);
   } else {

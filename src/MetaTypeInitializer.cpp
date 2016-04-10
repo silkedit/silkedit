@@ -31,7 +31,7 @@
 void MetaTypeInitializer::init()
 {
   qRegisterMetaType<TabView*>();
-  qRegisterMetaType<QLinkedList<TabView*>>();
+  qRegisterMetaType<QVector<TabView*>>();
   qRegisterMetaType<TextEdit*>();
   qRegisterMetaType<TabViewGroup*>();
   qRegisterMetaType<Window*>();

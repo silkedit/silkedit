@@ -1,6 +1,8 @@
 ﻿#include <QDebug>
 #include <QVBoxLayout>
 #include <QTabBar>
+#include <QEventLoop>
+#include <QApplication>
 
 #include "TabViewGroup.h"
 #include "TabView.h"
@@ -8,8 +10,17 @@
 #include "TextEdit.h"
 #include "TabBar.h"
 #include "Window.h"
+#include "core/scoped_guard.h"
+
+using core::scoped_guard;
 
 namespace {
+
+const QString& TABS_PREFIX = QStringLiteral("tabs");
+const QString& ORIENTATION_PREFIX = QStringLiteral("orientation");
+const QString& WIDGETS_PREFIX = QStringLiteral("widgets");
+const QString& SPLITTER_PREFIX = QStringLiteral("Splitter");
+
 QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
   for (int i = 0; i < splitter->count(); i++) {
     QSplitter* subSplitter = qobject_cast<QSplitter*>(splitter->widget(i));
@@ -37,7 +48,6 @@ void setSizesOfSplitter(QSplitter* splitter) {
 
 TabViewGroup::TabViewGroup(QWidget* parent)
     : QWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
-  createInitialTabView();
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(m_rootSplitter);
@@ -48,7 +58,7 @@ TabView* TabViewGroup::activeTab() {
   if (m_activeTabView) {
     return m_activeTabView;
   }
-  return createInitialTabView();
+  return nullptr;
 }
 
 void TabViewGroup::emitCurrentChanged(int index) {
@@ -69,11 +79,13 @@ void TabViewGroup::setActiveTab(TabView* newTabView) {
 }
 
 bool TabViewGroup::closeAllTabs() {
-  while (!m_tabViews.empty()) {
-    bool isSuccess = m_tabViews.front()->closeAllTabs();
+  QVector<TabView*> tabs = tabViews();
+  while (!tabs.empty()) {
+    bool isSuccess = tabs.front()->closeAllTabs();
     if (!isSuccess) {
       return false;
     }
+    tabs.removeFirst();
   }
 
   return true;
@@ -94,7 +106,7 @@ void TabViewGroup::splitVertically() {
 }
 
 TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
-  for (TabView* tabView : m_tabViews) {
+  for (TabView* tabView : tabViews()) {
     QRegion region = tabView->tabBar()->visibleRegion();
     if (region.contains(tabView->tabBar()->mapFromGlobal(QPoint(screenX, screenY)))) {
       return qobject_cast<TabBar*>(tabView->tabBar());
@@ -104,66 +116,158 @@ TabBar* TabViewGroup::tabBarAt(int screenX, int screenY) {
   return nullptr;
 }
 
+QVector<TabView*> TabViewGroup::tabViews() {
+  Q_ASSERT(m_rootSplitter);
+  return tabViews(m_rootSplitter);
+}
+
+QVector<TabView*> TabViewGroup::tabViews(QSplitter* splitter) {
+  QVector<TabView*> tabs;
+
+  for (int i = 0; i < splitter->count(); i++) {
+    if (auto tab = qobject_cast<TabView*>(splitter->widget(i))) {
+      if (tab->isVisible()) {
+        tabs.append(tab);
+      }
+    } else if (auto childSplitter = qobject_cast<QSplitter*>(splitter->widget(i))) {
+      tabs.append(tabViews(childSplitter));
+    } else {
+      qWarning() << "widget(" << i << ") is neither TabView nor Splitter";
+    }
+  }
+
+  return tabs;
+}
+
 void TabViewGroup::saveState(QSettings& settings) {
   settings.beginGroup(TabViewGroup::staticMetaObject.className());
-  for (auto tab : m_tabViews) {
-    Q_ASSERT(tab);
-    tab->saveState(settings);
-  }
-  settings.endGroup();
+  scoped_guard guard([&] { settings.endGroup(); });
+
+  Q_ASSERT(m_rootSplitter);
+  saveState(m_rootSplitter, settings);
 }
 
 void TabViewGroup::loadState(QSettings& settings) {
   settings.beginGroup(TabViewGroup::staticMetaObject.className());
-  if (activeTab()) {
-    activeTab()->loadState(settings);
+  scoped_guard guard([&] { settings.endGroup(); });
+
+  Q_ASSERT(m_rootSplitter);
+  loadState(m_rootSplitter, settings);
+
+  // restore active tabView
+  for (int i = 0; i < m_rootSplitter->count(); i++) {
+    if (auto tabView = qobject_cast<TabView*>(m_rootSplitter->widget(i))) {
+      setActiveTab(tabView);
+      break;
+    }
   }
-  settings.endGroup();
+}
+
+void TabViewGroup::saveState(QSplitter* splitter, QSettings& settings) {
+  settings.beginGroup(SPLITTER_PREFIX);
+  scoped_guard guard([&] { settings.endGroup(); });
+
+  settings.setValue(ORIENTATION_PREFIX, splitter->orientation());
+
+  settings.beginWriteArray(WIDGETS_PREFIX);
+  int arrayIndex = 0;
+  for (int i = 0; i < splitter->count(); i++) {
+    if (TabView* tab = qobject_cast<TabView*>(splitter->widget(i))) {
+      if (tab->canSave()) {
+        settings.setArrayIndex(arrayIndex);
+        tab->saveState(settings);
+        arrayIndex++;
+      }
+    } else if (QSplitter* childSplitter = qobject_cast<QSplitter*>(splitter->widget(i))) {
+      settings.setArrayIndex(arrayIndex);
+      saveState(childSplitter, settings);
+      arrayIndex++;
+    } else {
+      qWarning() << "widget(" << i << ") is neither TabView nor Splitter";
+    }
+  }
+  settings.endArray();
+}
+
+void TabViewGroup::loadState(QSplitter* splitter, QSettings& settings) {
+  Q_ASSERT(splitter);
+
+  settings.beginGroup(SPLITTER_PREFIX);
+
+  if (settings.contains(ORIENTATION_PREFIX)) {
+    auto orientationVar = settings.value(ORIENTATION_PREFIX);
+    if (orientationVar.canConvert<int>()) {
+      splitter->setOrientation(static_cast<Qt::Orientation>(orientationVar.toInt()));
+    }
+  }
+
+  int size = settings.beginReadArray(WIDGETS_PREFIX);
+  scoped_guard guard([&] {
+    settings.endArray();
+    settings.endGroup();
+  });
+
+  for (int i = 0; i < size; i++) {
+    settings.setArrayIndex(i);
+
+    if (settings.childGroups().contains(TabView::SETTINGS_PREFIX)) {
+      auto tab = createTabView();
+      if (tab) {
+        tab->loadState(settings);
+        splitter->addWidget(tab);
+      }
+    } else if (settings.childGroups().contains(SPLITTER_PREFIX)) {
+      auto childSplitter = new QSplitter(splitter);
+      if (childSplitter) {
+        loadState(childSplitter, settings);
+        splitter->addWidget(childSplitter);
+      }
+    } else {
+      qWarning() << "widget is neither TabView nor Splitter";
+    }
+  }
 }
 
 TabView* TabViewGroup::createTabView() {
   auto tabView = new TabView();
   QObject::connect(tabView, &TabView::allTabRemoved, [this, tabView]() {
     qDebug() << "allTabRemoved";
-    removeTabView(tabView);
+
+    if (tabView == m_activeTabView) {
+      m_activeTabView = nullptr;
+    }
+
+    auto tabs = tabViews();
+    bool ok = tabs.removeOne(tabView);
+    if (ok) {
+      tabView->hide();
+      tabView->deleteLater();
+      QApplication::processEvents();
+    } else {
+      qWarning() << "tabView is not a child";
+    }
 
     // Set focus to another tabView's active tab
-    if (!m_tabViews.isEmpty() && m_tabViews.first()->currentWidget()) {
-      m_tabViews.first()->currentWidget()->setFocus();
+    if (!tabs.isEmpty() && tabs.first()->currentWidget()) {
+      tabs.first()->currentWidget()->setFocus();
     }
 
     Window* win = qobject_cast<Window*>(window());
-    if (win && m_tabViews.empty() && !win->isProjectOpend()) {
+    if (win && tabs.empty() && !win->isProjectOpend()) {
       win->close();
     }
   });
 
-  m_tabViews.push_back(tabView);
-
   return tabView;
 }
 
-TabView* TabViewGroup::createInitialTabView() {
+TabView* TabViewGroup::addNewTabView() {
   auto tabView = createTabView();
   // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
   // responsibility to delete it.
   m_rootSplitter->addWidget(tabView);
   setActiveTab(tabView);
   return tabView;
-}
-
-void TabViewGroup::removeTabView(TabView* widget) {
-  if (widget == m_activeTabView) {
-    m_activeTabView = nullptr;
-  }
-
-  bool result = m_tabViews.removeOne(widget);
-  if (result) {
-    widget->hide();
-    widget->deleteLater();
-  } else {
-    qWarning() << "widget is not a child";
-  }
 }
 
 void TabViewGroup::splitHorizontally(QWidget* initialWidget, const QString& label) {

@@ -30,7 +30,7 @@ class Document : public QTextDocument {
   };
   Q_DECLARE_FLAGS(FindFlags, FindFlag)
 
-  static constexpr const char* SETTINGS_KEY = "Document";
+  static const QString SETTINGS_PREFIX;
 
   static Document* createBlank();
 
