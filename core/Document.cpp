@@ -54,6 +54,8 @@ boost::optional<std::tuple<QString, QString, BOM>> load(const QString& path,
 }
 }
 
+  const QString Document::SETTINGS_PREFIX = QStringLiteral("Document");
+
 Document::Document(const QString& path,
                    const QString& text,
                    const Encoding& encoding,
@@ -103,7 +105,7 @@ int Document::tabWidth(Language* lang) {
 }
 
 void Document::saveState(QSettings& settings) {
-  settings.beginGroup(Document::SETTINGS_KEY);
+  settings.beginGroup(Document::SETTINGS_PREFIX);
   settings.setValue(PATH_KEY, m_path.toStdString().c_str());
   settings.setValue(ENCODING_KEY, m_encoding.name().toStdString().c_str());
   settings.setValue(LINE_SEPARATOR_KEY, m_lineSeparator.toStdString().c_str());
@@ -207,7 +209,7 @@ Document* Document::create(const QString& path) {
 }
 
 Document* Document::create(QSettings& settings) {
-  settings.beginGroup(Document::SETTINGS_KEY);
+  settings.beginGroup(Document::SETTINGS_PREFIX);
   scoped_guard guard([&] { settings.endGroup(); });
 
   QString path;

@@ -22,6 +22,8 @@ class TabView : public QTabWidget {
  public:
   enum CloseTabIncludingDocResult { UserCanceled, AllTabsRemoved, Finished };
 
+  static const QString SETTINGS_PREFIX;
+
   explicit TabView(QWidget* parent = nullptr);
   ~TabView();
   DEFAULT_MOVE(TabView)
@@ -35,6 +37,7 @@ class TabView : public QTabWidget {
   int open(const QString& path);
   bool closeAllTabs();
   void saveState(QSettings &settings);
+  bool canSave();
   void loadState(QSettings &settings);
   QString tabTextWithoutModificationState(int index) const;
 

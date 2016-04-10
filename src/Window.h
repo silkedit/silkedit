@@ -75,6 +75,7 @@ class Window : public QMainWindow {
   void updateTitle();
   void saveState(QSettings &settings);
   void loadState(QSettings &settings);
+  TabView* getActiveTabViewOrCreate();
 
 public slots:
   StatusBar* statusBar();
