@@ -19,6 +19,8 @@ namespace {
 const QString& TABS_PREFIX = QStringLiteral("tabs");
 const QString& ORIENTATION_PREFIX = QStringLiteral("orientation");
 const QString& WIDGETS_PREFIX = QStringLiteral("widgets");
+const QString& SIZES_PREFIX = QStringLiteral("sizes");
+const QString& SIZE_PREFIX = QStringLiteral("size");
 const QString& SPLITTER_PREFIX = QStringLiteral("Splitter");
 
 QSplitter* findItemFromSplitter(QSplitter* splitter, QWidget* item) {
@@ -187,12 +189,21 @@ void TabViewGroup::saveState(QSplitter* splitter, QSettings& settings) {
     }
   }
   settings.endArray();
+
+  settings.beginWriteArray(SIZES_PREFIX);
+  auto sizes = splitter->sizes();
+  for (int i = 0; i < sizes.size(); i++) {
+    settings.setArrayIndex(i);
+    settings.setValue(SIZE_PREFIX, sizes[i]);
+  }
+  settings.endArray();
 }
 
 void TabViewGroup::loadState(QSplitter* splitter, QSettings& settings) {
   Q_ASSERT(splitter);
 
   settings.beginGroup(SPLITTER_PREFIX);
+  scoped_guard guard([&] { settings.endGroup(); });
 
   if (settings.contains(ORIENTATION_PREFIX)) {
     auto orientationVar = settings.value(ORIENTATION_PREFIX);
@@ -201,30 +212,43 @@ void TabViewGroup::loadState(QSplitter* splitter, QSettings& settings) {
     }
   }
 
-  int size = settings.beginReadArray(WIDGETS_PREFIX);
-  scoped_guard guard([&] {
-    settings.endArray();
-    settings.endGroup();
-  });
+  if (settings.childGroups().contains(WIDGETS_PREFIX)) {
+    int widgetsCount = settings.beginReadArray(WIDGETS_PREFIX);
 
-  for (int i = 0; i < size; i++) {
-    settings.setArrayIndex(i);
+    for (int i = 0; i < widgetsCount; i++) {
+      settings.setArrayIndex(i);
 
-    if (settings.childGroups().contains(TabView::SETTINGS_PREFIX)) {
-      auto tab = createTabView();
-      if (tab) {
-        tab->loadState(settings);
-        splitter->addWidget(tab);
+      if (settings.childGroups().contains(TabView::SETTINGS_PREFIX)) {
+        auto tab = createTabView();
+        if (tab) {
+          tab->loadState(settings);
+          splitter->addWidget(tab);
+        }
+      } else if (settings.childGroups().contains(SPLITTER_PREFIX)) {
+        auto childSplitter = new Splitter(Qt::Horizontal, splitter);
+        if (childSplitter) {
+          loadState(childSplitter, settings);
+          splitter->addWidget(childSplitter);
+        }
+      } else {
+        qWarning() << "widget is neither TabView nor Splitter";
       }
-    } else if (settings.childGroups().contains(SPLITTER_PREFIX)) {
-      auto childSplitter = new Splitter(Qt::Horizontal, splitter);
-      if (childSplitter) {
-        loadState(childSplitter, settings);
-        splitter->addWidget(childSplitter);
-      }
-    } else {
-      qWarning() << "widget is neither TabView nor Splitter";
     }
+    settings.endArray();
+  }
+
+  if (settings.childGroups().contains(SIZES_PREFIX)) {
+    int sizesCount = settings.beginReadArray(SIZES_PREFIX);
+    QList<int> sizes;
+    for (int i = 0; i < sizesCount; i++) {
+      settings.setArrayIndex(i);
+      auto sizeVar = settings.value(SIZE_PREFIX);
+      if (sizeVar.canConvert<int>()) {
+        sizes.append(sizeVar.toInt());
+      }
+    }
+    splitter->setSizes(sizes);
+    settings.endArray();
   }
 }
 
