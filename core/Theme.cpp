@@ -162,18 +162,10 @@ QColor getAppropriateGray(QColor const color, bool reverse = false, int alpha = 
   return newColor;
 }
 
-QColor getSelectedTabBorderColor(QColor const color) {
-  QColor newColor;
-  int brightness = color.value();
+QColor getSelectedBorderColor() {
   // use material color
   //  - http://www.materialui.co/colors
-
-  if (brightness < brightnessThresholdGray) {
-    newColor.setRgb(130, 177, 255);  // Blue A100
-  } else {
-    newColor.setRgb(41, 98, 255);  // Blue A700
-  }
-  return newColor;
+  return QColor::fromRgb(41, 98, 255);  // Blue A700
 }
 
 ScopeSetting* toScopeSetting(QVariant var) {
@@ -424,7 +416,7 @@ ColorSettings Theme::createTabBarSettingsColors(const Theme* theme) {
     if (!baseColorSettings->isEmpty()) {
       if (baseColorSettings->contains("background")) {
         selectedColor = baseColorSettings->value("background");
-        selectedBorderColor = getSelectedTabBorderColor(baseColorSettings->value("background"));
+        selectedBorderColor = getSelectedBorderColor();
         backgroundColor = changeColorBrightness(baseColorSettings->value("background"));
       }
 
@@ -473,7 +465,7 @@ ColorSettings Theme::createFindReplaceViewSettingsColors(const Theme* theme) {
   ColorSettings defaultColors = createStatusBarSettingsColors(theme);
   defaultColors["buttonCheckedBackgroundColor"] =
       getAppropriateGray(defaultColors.value("background"));
-  defaultColors["focusColor"] = getAppropriateGray(defaultColors.value("background"), false, 130);
+  defaultColors["focusColor"] = getSelectedBorderColor();
 
   return defaultColors;
 }

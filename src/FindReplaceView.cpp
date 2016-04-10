@@ -450,6 +450,12 @@ void FindReplaceView::setTheme(core::Theme* theme) {
             .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("foreground")))
             .arg(Util::qcolorForStyleSheet(
                 findReplaceViewSettings->value("buttonCheckedBackgroundColor"))) +
+          QStringLiteral(
+            "#%1 QPushButton:focus, #%1 QLineEdit:focus {"
+            "border-color: %2;"
+            "}")
+          .arg(this->objectName())
+          .arg(Util::qcolorForStyleSheet(findReplaceViewSettings->value("focusColor"))) +
         QStringLiteral(
             "#%1 QPushButton:hover {"
             "background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,stop:0 #919191, stop:1 "

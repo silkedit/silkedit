@@ -54,7 +54,7 @@ void TabBar::setTheme(const Theme* theme) {
                  "TabBar::tab:selected {"
                  "background-color: %1;"
                  "color: %2;"
-                 "border-left: 2px solid;"
+                 "border-bottom: 2px solid;"
                  "border-color: %3;"
                  "}")
                  .arg(Util::qcolorForStyleSheet(tabBarSettings->value("selected")))
