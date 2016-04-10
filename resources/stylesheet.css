@@ -117,7 +117,6 @@ QWidget#FindReplaceView {
 #FindReplaceView QPushButton:focus, #FindReplaceView QLineEdit:focus {
   border-width: 2px;
   border-style: solid;
-  border-color: #2962ff;
 }
 
 #FindReplaceView #prevButton, #FindReplaceView #nextButton {
