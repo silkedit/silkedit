@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 
   ConditionManager::singleton().init();
   ConditionManager::singleton().add(GrammerCondition::name,
-                 std::unique_ptr<Condition>(new GrammerCondition()));
+                                    std::unique_ptr<Condition>(new GrammerCondition()));
 
   PackageManager::singleton()._loadAllPackageContents();
 
@@ -114,8 +114,10 @@ int main(int argc, char** argv) {
   window->activateWindow();
 
   //   Set focus to active view
-  if (auto v = window->activeTabView()->activeView()) {
-    v->setFocus();
+  if (window->activeTabView()) {
+    if (auto v = window->activeTabView()->activeView()) {
+      v->setFocus();
+    }
   }
 
   if (arguments.size() > 1) {

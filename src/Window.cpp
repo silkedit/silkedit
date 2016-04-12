@@ -27,19 +27,21 @@
 #include "core/Theme.h"
 #include "core/Util.h"
 #include "core/PackageManager.h"
+#include "core/scoped_guard.h"
 
 using core::Config;
 using core::Theme;
 using core::Util;
 using core::ColorSettings;
 using core::PackageManager;
+using core::scoped_guard;
 
 namespace {
-constexpr const char* WINDOWS_PREFIX = "windows";
-constexpr const char* DIR_PATH_KEY = "dirPath";
-constexpr const char* POS_KEY = "pos";
-constexpr const char* SIZE_KEY = "size";
-constexpr const char* FULL_SCREEN_KEY = "fullScreen";
+const QString& WINDOWS_PREFIX = QStringLiteral("windows");
+const QString& DIR_PATH_KEY = QStringLiteral("dirPath");
+const QString& POS_KEY = QStringLiteral("pos");
+const QString& SIZE_KEY = QStringLiteral("size");
+const QString& FULL_SCREEN_KEY = QStringLiteral("fullScreen");
 }
 
 Window::Window(QWidget* parent, Qt::WindowFlags flags)
@@ -196,11 +198,9 @@ void Window::emitActiveViewChanged(TabView* oldTabView, TabView* newTabView) {
 
 Window* Window::createWithNewFile(QWidget* parent, Qt::WindowFlags flags) {
   Window* w = new Window(parent, flags);
-  bool result = false;
-
-  if (!result) {
-    w->activeTabView()->addNewTab();
-  }
+  auto tabView = w->getActiveTabViewOrCreate();
+  Q_ASSERT(tabView);
+  tabView->addNewTab();
 
   return w;
 }
@@ -299,13 +299,16 @@ void Window::saveWindowsState(Window* activeWindow, QSettings& settings) {
 
 void Window::loadWindowsState(QSettings& settings) {
   int size = settings.beginReadArray(WINDOWS_PREFIX);
+  scoped_guard guard([&] {
+    settings.endArray();
+  });
+
   for (int i = 0; i < size; i++) {
     auto win = new Window();
     Q_ASSERT(win);
     settings.setArrayIndex(i);
     win->loadState(settings);
   }
-  settings.endArray();
 }
 
 Window::~Window() {
@@ -336,7 +339,7 @@ void Window::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
 #ifdef Q_OS_WIN
   if (s_windows.size() == 1) {
-      App::saveSession();
+    App::saveSession();
   }
 #endif
   bool isSuccess = m_tabViewGroup->closeAllTabs();
@@ -367,6 +370,8 @@ void Window::updateTitle() {
 
 void Window::saveState(QSettings& settings) {
   settings.beginGroup(Window::staticMetaObject.className());
+  scoped_guard guard([&] { settings.endGroup(); });
+
   settings.setValue(POS_KEY, pos());
   settings.setValue(SIZE_KEY, size());
   settings.setValue(FULL_SCREEN_KEY, isFullScreen());
@@ -376,11 +381,12 @@ void Window::saveState(QSettings& settings) {
   if (m_tabViewGroup) {
     m_tabViewGroup->saveState(settings);
   }
-  settings.endGroup();
 }
 
 void Window::loadState(QSettings& settings) {
   settings.beginGroup(Window::staticMetaObject.className());
+  scoped_guard guard([&] { settings.endGroup(); });
+
   if (settings.contains(POS_KEY)) {
     auto posVar = settings.value(POS_KEY);
     if (posVar.canConvert<QPoint>()) {
@@ -412,7 +418,16 @@ void Window::loadState(QSettings& settings) {
   }
   Q_ASSERT(m_tabViewGroup);
   m_tabViewGroup->loadState(settings);
-  settings.endGroup();
+}
+
+TabView* Window::getActiveTabViewOrCreate() {
+  Q_ASSERT(m_tabViewGroup);
+  if (m_tabViewGroup->activeTab()) {
+    return m_tabViewGroup->activeTab();
+  } else {
+    m_tabViewGroup->addNewTabView();
+    return m_tabViewGroup->activeTab();
+  }
 }
 
 bool Window::openDir(const QString& dirPath) {

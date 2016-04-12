@@ -1,4 +1,5 @@
-﻿#include <memory>
+﻿#include <algorithm>
+#include <memory>
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
@@ -51,6 +52,8 @@ bool isUntitledAndEmpty(Document* doc) {
 }
 }
 
+const QString TabView::SETTINGS_PREFIX = QStringLiteral("TabView");
+
 TabView::TabView(QWidget* parent)
     : QTabWidget(parent), m_activeView(nullptr), m_tabBar(new TabBar(this)), m_tabDragging(false) {
   setTabBar(m_tabBar);
@@ -94,6 +97,12 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   }
   int result = QTabWidget::insertTab(index, widget, label);
 
+  // emit modificationChanged signal to reflect modified state
+  // because setModified(true) doesn't emit modificationChanged signal immediately
+  if (textEdit->document() && textEdit->document()->isModified()) {
+    emit textEdit->modificationChanged(true);
+  }
+
   if (count() == 1 && result >= 0) {
     m_activeView = widget;
   }
@@ -122,6 +131,8 @@ int TabView::open(const QString& path) {
       qDebug() << "trying to replace an empty doc with a new one";
       textEdit->setDocument(newDoc);
       textEdit->setPath(path);
+      // emit activeViewChanged to update the status bar
+      emit activeViewChanged(textEdit, textEdit);
       return currentIndex();
     }
   }
@@ -161,16 +172,11 @@ QList<QWidget*> TabView::widgets() const {
 
 void TabView::addNewTab() {
   if (auto doc = Document::createBlank()) {
+    doc->setModified(true);
     TextEdit* view = new TextEdit(this);
     std::shared_ptr<Document> newDoc(doc);
     view->setDocument(std::move(newDoc));
     addTab(view, DocumentManager::DEFAULT_FILE_NAME);
-
-    // calling setModified(true) immediately doesn't emit modificationChanged
-    QTimer::singleShot(0, this, [=] {
-      Q_ASSERT(doc);
-      doc->setModified(true);
-    });
   }
 }
 
@@ -398,7 +404,8 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
     newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {
-      newWindow->activeTabView()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+      newWindow->getActiveTabViewOrCreate()->addTab(DraggingTabInfo::widget(),
+                                                    DraggingTabInfo::tabText());
       DraggingTabInfo::setWidget(nullptr);
     } else {
       qWarning("dragging widget is null");
@@ -424,6 +431,12 @@ void TabView::saveState(QSettings& settings) {
   }
   settings.endArray();
   settings.endGroup();
+}
+
+bool TabView::canSave() {
+  auto widgetList = widgets();
+  return std::any_of(widgetList.constBegin(), widgetList.constEnd(),
+                     [](QWidget* w) { return qobject_cast<TextEdit*>(w); });
 }
 
 void TabView::loadState(QSettings& settings) {

@@ -27,7 +27,8 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
   bool save(core::Document* doc, bool beforeClose);
   QString saveAs(core::Document* doc, bool beforeClose);
   std::shared_ptr<core::Document> create(const QString& path);
-  std::shared_ptr<core::Document> create(QSettings& settings);
+  std::shared_ptr<core::Document> getOrCreate(QSettings& settings);
+  std::shared_ptr<core::Document> find(const QString& objectName);
 
 public slots:
   int open(const QString& filename);
@@ -38,5 +39,6 @@ public slots:
 
   QFileSystemWatcher* m_watcher;
   QHash<QString, std::weak_ptr<core::Document>> m_pathDocHash;
+  QHash<QString, std::weak_ptr<core::Document>> m_objectNameDocHash;
   std::shared_ptr<core::Document> registerDoc(core::Document* doc);
 };
