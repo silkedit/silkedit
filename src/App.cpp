@@ -97,6 +97,8 @@ App::App(int& argc, char** argv)
   });
 
   connect(this, &App::aboutToQuit, this, &App::cleanup);
+  // commitDataRequest is emitted when logout (in this case, all windows are closed before aboutToQuit is emitted)
+  connect(this, &App::commitDataRequest, this, &App::cleanup);
 }
 
 bool App::event(QEvent* event) {
