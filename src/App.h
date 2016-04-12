@@ -45,6 +45,7 @@ class App : public QApplication {
 
  private:
   static App* s_app;
+  static bool m_isSessionSaved;
 
   QTranslator* m_translator;
   QTranslator* m_qtTranslator;
