@@ -99,7 +99,7 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
 
   // emit modificationChanged signal to reflect modified state
   // because setModified(true) doesn't emit modificationChanged signal immediately
-  if (textEdit->document() && textEdit->document()->isModified()) {
+  if (textEdit && textEdit->document() && textEdit->document()->isModified()) {
     emit textEdit->modificationChanged(true);
   }
 
