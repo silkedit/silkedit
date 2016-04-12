@@ -211,6 +211,19 @@ void App::setupTranslator(const QString& locale) {
 #endif
 }
 
+TabView* App::getActiveTabViewOrCreate() {
+  TabViewGroup* tabViewGroup = activeTabViewGroup();
+  if (tabViewGroup) {
+    if (tabViewGroup->activeTab()) {
+      return tabViewGroup->activeTab();
+    } else {
+      return tabViewGroup->addNewTabView();
+    }
+  }
+
+  return nullptr;
+}
+
 TextEdit* App::activeTextEdit() {
   TabView* tabView = activeTabView();
   if (tabView) {
