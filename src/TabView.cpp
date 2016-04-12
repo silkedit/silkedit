@@ -97,6 +97,12 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   }
   int result = QTabWidget::insertTab(index, widget, label);
 
+  // emit modificationChanged signal to reflect modified state
+  // because setModified(true) doesn't emit modificationChanged signal immediately
+  if (textEdit->document() && textEdit->document()->isModified()) {
+    emit textEdit->modificationChanged(true);
+  }
+
   if (count() == 1 && result >= 0) {
     m_activeView = widget;
   }
@@ -166,16 +172,11 @@ QList<QWidget*> TabView::widgets() const {
 
 void TabView::addNewTab() {
   if (auto doc = Document::createBlank()) {
+    doc->setModified(true);
     TextEdit* view = new TextEdit(this);
     std::shared_ptr<Document> newDoc(doc);
     view->setDocument(std::move(newDoc));
     addTab(view, DocumentManager::DEFAULT_FILE_NAME);
-
-    // calling setModified(true) immediately doesn't emit modificationChanged
-    QTimer::singleShot(0, this, [=] {
-      Q_ASSERT(doc);
-      doc->setModified(true);
-    });
   }
 }
 
@@ -403,7 +404,8 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
     newWindow->move(newWindowPos);
     newWindow->show();
     if (DraggingTabInfo::widget()) {
-      newWindow->getActiveTabViewOrCreate()->addTab(DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+      newWindow->getActiveTabViewOrCreate()->addTab(DraggingTabInfo::widget(),
+                                                    DraggingTabInfo::tabText());
       DraggingTabInfo::setWidget(nullptr);
     } else {
       qWarning("dragging widget is null");
