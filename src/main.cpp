@@ -114,9 +114,10 @@ int main(int argc, char** argv) {
   window->activateWindow();
 
   //   Set focus to active view
-  Q_ASSERT(window->activeTabView());
-  if (auto v = window->activeTabView()->activeView()) {
-    v->setFocus();
+  if (window->activeTabView()) {
+    if (auto v = window->activeTabView()->activeView()) {
+      v->setFocus();
+    }
   }
 
   if (arguments.size() > 1) {
