@@ -49,11 +49,12 @@ void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::I
     // emit destroyed signal to JS side
     if (s_destroyedConnectedObjects.count(destroyedObj) != 0) {
       QVariantList args{QVariant::fromValue(destroyedObj)};
-      auto isolate = v8::Isolate::GetCurrent();
-      v8::Locker locker(isolate);
-      v8::HandleScope handle_scope(isolate);
-      JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
-      s_destroyedConnectedObjects.erase(destroyedObj);
+      if (!isolate->IsExecutionTerminating() && !isolate->IsDead()) {
+        v8::Locker locker(isolate);
+        v8::HandleScope handle_scope(isolate);
+        JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
+        s_destroyedConnectedObjects.erase(destroyedObj);
+      }
     }
 
     if (s_objects.count(destroyedObj) != 0) {
@@ -100,4 +101,3 @@ void ObjectStore::WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& 
 }
 
 }  // namespace core
-
