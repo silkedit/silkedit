@@ -23,6 +23,7 @@ using core::ObjectStore;
 using core::SyntaxHighlighterThread;
 
 App* App::s_app = nullptr;
+bool App::m_isSessionSaved = false;
 
 namespace {
 template <typename T>
@@ -58,7 +59,10 @@ TabBar* App::tabBarAt(int x, int y) {
 }
 
 App::App(int& argc, char** argv)
-    : QApplication(argc, argv), m_translator(nullptr), m_qtTranslator(nullptr) {
+    : QApplication(argc, argv),
+      m_translator(nullptr),
+      m_qtTranslator(nullptr),
+      m_isQuitting(false) {
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -97,7 +101,6 @@ App::App(int& argc, char** argv)
   });
 
   connect(this, &App::aboutToQuit, this, &App::cleanup);
-  // commitDataRequest is emitted when logout (in this case, all windows are closed before aboutToQuit is emitted)
   connect(this, &App::commitDataRequest, this, &App::cleanup);
 }
 
@@ -106,9 +109,16 @@ bool App::event(QEvent* event) {
     case QEvent::FileOpen:
       qDebug("FileOpen event");
       return DocumentManager::singleton().open(static_cast<QFileOpenEvent*>(event)->file()) != -1;
+    // QCloseEvent comes when logout (in this case, all windows are closed before aboutToQuit is
+    // emitted)
+    case QEvent::Close:
+      saveSession();
+      break;
     default:
       return QApplication::event(event);
   }
+
+  return QApplication::event(event);
 }
 
 bool App::notify(QObject* receiver, QEvent* event) {
@@ -291,9 +301,14 @@ void App::restart() {
 }
 
 void App::saveSession() {
+  if (m_isSessionSaved) {
+    return;
+  }
+
   QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
   Window::saveWindowsState(s_app->activeWindow(), settings);
+  m_isSessionSaved = true;
 }
 
 void App::loadSession() {
