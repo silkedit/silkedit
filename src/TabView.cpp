@@ -294,7 +294,7 @@ void TabView::setTheme(const Theme* theme) {
     QString style;
     ColorSettings* tabViewSettings = theme->tabViewSettings.get();
 
-    style = QString("background-color: %1;")
+    style = QString("TabView { background-color: %1; }")
                 .arg(Util::qcolorForStyleSheet(tabViewSettings->value("background")));
     this->setStyleSheet(style);
   }
