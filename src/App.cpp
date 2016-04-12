@@ -23,7 +23,7 @@ using core::ObjectStore;
 using core::SyntaxHighlighterThread;
 
 App* App::s_app = nullptr;
-bool App::m_isSessionSaved = false;
+bool App::m_isCleanedUp = false;
 
 namespace {
 template <typename T>
@@ -112,7 +112,7 @@ bool App::event(QEvent* event) {
     // QCloseEvent comes when logout (in this case, all windows are closed before aboutToQuit is
     // emitted)
     case QEvent::Close:
-      saveSession();
+      cleanup();
       break;
     default:
       return QApplication::event(event);
@@ -177,6 +177,11 @@ bool App::notify(QObject* receiver, QEvent* event) {
 
 void App::cleanup() {
   qDebug() << "cleanup";
+
+  if (m_isCleanedUp) {
+    return;
+  }
+
   m_isQuitting = true;
 
   App::saveSession();
@@ -190,6 +195,8 @@ void App::cleanup() {
   }
 
   SyntaxHighlighterThread::singleton().quit();
+
+  m_isCleanedUp = true;
 }
 
 void App::setupTranslator(const QString& locale) {
@@ -301,14 +308,9 @@ void App::restart() {
 }
 
 void App::saveSession() {
-  if (m_isSessionSaved) {
-    return;
-  }
-
   QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
   Window::saveWindowsState(s_app->activeWindow(), settings);
-  m_isSessionSaved = true;
 }
 
 void App::loadSession() {
