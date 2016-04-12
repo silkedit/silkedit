@@ -104,6 +104,10 @@ namespace {
 /*
   Window static methods
 */
+void createWithNewFile(const FunctionCallbackInfo<Value>& args) {
+  auto win = Window::createWithNewFile();
+  args.GetReturnValue().Set(V8Util::toV8ObjectFrom(args.GetIsolate(), win));
+}
 
 void loadMenu(const FunctionCallbackInfo<Value>& args) {
   if (!V8Util::checkArguments(args, 2,
@@ -314,6 +318,7 @@ void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
   if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
     NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
   } else if (metaObj.className() == Window::staticMetaObject.className()) {
+    NODE_SET_METHOD(ctor, "createWithNewFile", createWithNewFile);
     NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
     NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
     NODE_SET_METHOD(ctor, "windows", windows);

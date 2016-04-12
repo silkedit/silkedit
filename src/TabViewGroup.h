@@ -31,9 +31,9 @@ class TabViewGroup : public QWidget {
   QVector<TabView*> tabViews();
   void saveState(QSettings &settings);
   void loadState(QSettings &settings);
-  TabView* addNewTabView();
 
 public slots:
+  TabView* addNewTabView();
   void splitHorizontally();
   void splitVertically();
   void splitHorizontally(QWidget* initialWidget, const QString& label);
