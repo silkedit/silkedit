@@ -24,7 +24,7 @@ int DocumentManager::open(const QString& filename) {
     }
   }
 
-  if (TabView* tabView = App::instance()->activeTabView()) {
+  if (TabView* tabView = App::instance()->getActiveTabViewOrCreate()) {
     return tabView->open(filename) >= 0;
   } else {
     qWarning("active tab view is null");
@@ -127,15 +127,22 @@ std::shared_ptr<core::Document> DocumentManager::registerDoc(Document* doc) {
   if (doc) {
     const auto& path = doc->path();
     auto sharedDoc = std::shared_ptr<Document>(doc);
+
     if (!path.isEmpty()) {
-      connect(doc, &core::Document::destroyed, [=](QObject*) {
-        qDebug() << "document (" << path << ") is destroyed.";
-        m_pathDocHash.remove(path);
-        m_watcher->removePath(path);
-      });
       m_pathDocHash[path] = std::weak_ptr<Document>(sharedDoc);
       m_watcher->addPath(path);
     }
+    if (!doc->objectName().isEmpty()) {
+      m_objectNameDocHash[doc->objectName()] = std::weak_ptr<Document>(sharedDoc);
+    }
+
+    connect(doc, &core::Document::destroyed, [=](QObject* obj) {
+      qDebug() << "document (" << path << ") is destroyed.";
+      m_pathDocHash.remove(path);
+      m_watcher->removePath(path);
+      m_objectNameDocHash.remove(obj->objectName());
+    });
+
     return sharedDoc;
   } else {
     return std::shared_ptr<Document>();
@@ -155,7 +162,12 @@ std::shared_ptr<core::Document> DocumentManager::create(const QString& path) {
   return registerDoc(doc);
 }
 
-std::shared_ptr<core::Document> DocumentManager::create(QSettings& settings) {
+std::shared_ptr<core::Document> DocumentManager::getOrCreate(QSettings& settings) {
   auto doc = Document::create(settings);
+
+  if (!doc->objectName().isEmpty() && m_objectNameDocHash.contains(doc->objectName())) {
+    return m_objectNameDocHash[doc->objectName()].lock();
+  }
+
   return registerDoc(doc);
 }

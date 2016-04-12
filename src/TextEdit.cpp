@@ -915,7 +915,7 @@ void TextEdit::loadState(QSettings& settings) {
   settings.beginGroup(TextEdit::staticMetaObject.className());
 
   if (settings.childGroups().contains(Document::SETTINGS_PREFIX)) {
-    auto doc = DocumentManager::singleton().create(settings);
+    auto doc = DocumentManager::singleton().getOrCreate(settings);
     setDocument(doc);
   } else {
     setDocument(std::shared_ptr<Document>(Document::createBlank()));

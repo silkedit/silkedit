@@ -27,6 +27,7 @@ class App : public QApplication {
 
   void setupTranslator(const QString& locale);
   bool isQuitting() { return m_isQuitting; }
+  TabView* getActiveTabViewOrCreate();
 
  public slots:
   TextEdit* activeTextEdit();

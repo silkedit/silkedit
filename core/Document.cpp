@@ -4,6 +4,7 @@
 #include <QTextCodec>
 #include <QDir>
 #include <QSettings>
+#include <QUuid>
 
 #include "Document.h"
 #include "LineSeparator.h"
@@ -17,13 +18,14 @@ namespace core {
 
 namespace {
 
-constexpr const char* PATH_KEY = "path";
-constexpr const char* SCOPE_KEY = "scope";
-constexpr const char* ENCODING_KEY = "encoding";
-constexpr const char* LINE_SEPARATOR_KEY = "line_separator";
-constexpr const char* BOM_KEY = "bom";
-constexpr const char* TEXT_KEY = "text";
-constexpr const char* IS_MODIFIED_KEY = "is_modified";
+const QString& PATH_KEY = QStringLiteral("path");
+const QString& SCOPE_KEY = QStringLiteral("scope");
+const QString& ENCODING_KEY = QStringLiteral("encoding");
+const QString& LINE_SEPARATOR_KEY = QStringLiteral("line_separator");
+const QString& BOM_KEY = QStringLiteral("bom");
+const QString& TEXT_KEY = QStringLiteral("text");
+const QString& IS_MODIFIED_KEY = QStringLiteral("is_modified");
+const QString& ID_KEY = QStringLiteral("id");
 
 boost::optional<std::tuple<QString, Encoding, QString, BOM>> load(const QString& path) {
   QFile file(path);
@@ -54,7 +56,7 @@ boost::optional<std::tuple<QString, QString, BOM>> load(const QString& path,
 }
 }
 
-  const QString Document::SETTINGS_PREFIX = QStringLiteral("Document");
+const QString Document::SETTINGS_PREFIX = QStringLiteral("Document");
 
 Document::Document(const QString& path,
                    const QString& text,
@@ -106,6 +108,7 @@ int Document::tabWidth(Language* lang) {
 
 void Document::saveState(QSettings& settings) {
   settings.beginGroup(Document::SETTINGS_PREFIX);
+  settings.setValue(ID_KEY, objectName());
   settings.setValue(PATH_KEY, m_path.toStdString().c_str());
   settings.setValue(ENCODING_KEY, m_encoding.name().toStdString().c_str());
   settings.setValue(LINE_SEPARATOR_KEY, m_lineSeparator.toStdString().c_str());
@@ -147,6 +150,9 @@ void Document::setShowTabsAndSpaces(bool showTabsAndSpaces) {
 }
 
 void Document::init() {
+  // assign uuid to share a document when restoring tabs
+  setObjectName(QUuid::createUuid().toString());
+
   // This font is used for an empty line because SyntaxHilighter can't set font in am empty line
   setDefaultFont(Config::singleton().font());
   setupLayout();
@@ -212,8 +218,16 @@ Document* Document::create(QSettings& settings) {
   settings.beginGroup(Document::SETTINGS_PREFIX);
   scoped_guard guard([&] { settings.endGroup(); });
 
+  QString objectName;
   QString path;
   bool isModified = false;
+
+  if (settings.contains(ID_KEY)) {
+    auto idVar = settings.value(ID_KEY);
+    if (idVar.canConvert<QString>()) {
+      objectName = idVar.toString();
+    }
+  }
 
   if (settings.contains(PATH_KEY)) {
     auto pathVar = settings.value(PATH_KEY);
@@ -232,7 +246,9 @@ Document* Document::create(QSettings& settings) {
   // if the saved document is not modified, open its path
 
   if (!path.isEmpty() && !isModified) {
-    return create(path);
+    auto doc = create(path);
+    doc->setObjectName(objectName);
+    return doc;
   }
 
   // restore a document
@@ -282,6 +298,7 @@ Document* Document::create(QSettings& settings) {
   }
 
   auto newDoc = new Document(path, text, enc, lineSeparator, bom, lang);
+  newDoc->setObjectName(objectName);
   newDoc->setModified(isModified);
 
   return newDoc;
