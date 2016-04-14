@@ -10,6 +10,7 @@
 #include <QStringListModel>
 #include <QCompleter>
 #include <QSettings>
+#include <QBasicTimer>
 
 #include "core/macros.h"
 #include "core/ICloneable.h"
@@ -124,12 +125,15 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   void dropEvent(QDropEvent* e) override;
+  void timerEvent(QTimerEvent *event) override;
 
  private:
   friend class TextEditPrivate;
 
   std::unique_ptr<TextEditPrivate> d_ptr;
   bool m_showLineNumber;
+  QBasicTimer trippleClickTimer;
+  QPoint trippleClickPoint;
 
   QString toText();
   void setText(const QString& text);
