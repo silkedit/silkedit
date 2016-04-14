@@ -1,4 +1,4 @@
-set(MODULE_NAME ${PROJECT_NAME}_core)
+﻿set(MODULE_NAME ${PROJECT_NAME}_core)
 
 include_directories(SYSTEM
   ${PROJECT_SOURCE_DIR}
@@ -12,7 +12,19 @@ if (APPLE)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
   find_library(UCHARDET_LIBRARY NAMES libuchardet.a PATHS /usr/local/lib)
   find_library(YAML_CPP_LIBRARY NAMES libyaml-cpp.a PATHS /usr/local/lib)
-  target_link_libraries(${MODULE_NAME} Qt5::Widgets Qt5::Xml ${ONIG_LIBRARY} ${UCHARDET_LIBRARY} ${YAML_CPP_LIBRARY} ${NODE_LIBRARY})
+  find_library(ICUUC_LIBRARY NAMES libicuuc.a PATHS /usr/local/lib)
+  find_library(ICUDATA_LIBRARY NAMES libicudata.a PATHS /usr/local/lib)
+  target_link_libraries(${MODULE_NAME}
+                        Qt5::Widgets
+                        Qt5::Xml
+                        ${ONIG_LIBRARY}
+                        ${UCHARDET_LIBRARY}
+                        ${YAML_CPP_LIBRARY}
+                        ${NODE_LIBRARY}
+                        ${ICUUC_LIBRARY}
+                        ${ICUDATA_LIBRARY}
+
+)
 elseif (MSVC)
   add_library(YAML_CPP_LIBRARY STATIC IMPORTED)
   set_property(TARGET YAML_CPP_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/libyaml-cppmd.lib)

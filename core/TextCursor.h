@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QTextCursor>
 #include <QMetaType>
@@ -55,6 +55,11 @@ class TextCursor : public Wrapper {
   TextCursor(QTextCursor cursor) { m_wrapped = QVariant::fromValue(cursor); }
   Q_INVOKABLE TextCursor() { m_wrapped = QVariant::fromValue(QTextCursor()); }
   ~TextCursor() = default;
+
+  static bool customMovePosition(QTextCursor& cursor,
+                                 QTextCursor::MoveOperation op,
+                                 QTextCursor::MoveMode mode = QTextCursor::MoveAnchor,
+                                 int n = 1);
 
  public slots:
   QTextBlock block() const;

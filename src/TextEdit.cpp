@@ -21,6 +21,7 @@
 #include "core/BOM.h"
 #include "core/Region.h"
 #include "core/Util.h"
+#include "core/TextCursor.h"
 
 using core::Document;
 using core::Encoding;
@@ -36,6 +37,7 @@ using core::Constants;
 using core::BOM;
 using core::Region;
 using core::Util;
+using core::TextCursor;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -847,12 +849,56 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     }
   }
 
+  // Override default word movement shortcuts defined in QWidgetTextControl
+  if (event == QKeySequence::MoveToNextWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::NextWord, QTextCursor::MoveAnchor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+  else if (event == QKeySequence::MoveToPreviousWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::MoveAnchor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+  else if (event == QKeySequence::SelectNextWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::NextWord, QTextCursor::KeepAnchor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+  else if (event == QKeySequence::SelectPreviousWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+  else if (event == QKeySequence::DeleteEndOfWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::NextWord, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    event->accept();
+    return;
+  }
+  else if (event == QKeySequence::DeleteStartOfWord) {
+    auto cursor = textCursor();
+    TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
+    cursor.removeSelectedText();
+    event->accept();
+    return;
+  }
+
   switch (event->key()) {
     // Override QPlainTextEdit default behavior
     case Qt::Key_Home: {
       auto cursor = textCursor();
       auto moveMode = QTextCursor::MoveMode::MoveAnchor;
-      if (event->modifiers()  & Qt::ShiftModifier) {
+      if (event->modifiers() & Qt::ShiftModifier) {
         moveMode = QTextCursor::MoveMode::KeepAnchor;
       }
       cursor.movePosition(QTextCursor::MoveOperation::StartOfLine, moveMode);
@@ -863,7 +909,7 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     case Qt::Key_End: {
       auto cursor = textCursor();
       auto moveMode = QTextCursor::MoveMode::MoveAnchor;
-      if (event->modifiers()  & Qt::ShiftModifier) {
+      if (event->modifiers() & Qt::ShiftModifier) {
         moveMode = QTextCursor::MoveMode::KeepAnchor;
       }
       cursor.movePosition(QTextCursor::MoveOperation::EndOfLine, moveMode);
@@ -924,8 +970,7 @@ void TextEdit::loadState(QSettings& settings) {
   settings.endGroup();
 }
 
-bool TextEdit::isSearchMatchesHighlighted()
-{
+bool TextEdit::isSearchMatchesHighlighted() {
   return !d_ptr->m_searchMatchedRegions.isEmpty();
 }
 
