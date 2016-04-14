@@ -670,6 +670,12 @@ void TextEdit::dropEvent(QDropEvent* e) {
   }
 }
 
+void TextEdit::timerEvent(QTimerEvent* event) {
+  if (event->timerId() == trippleClickTimer.timerId()) {
+    trippleClickTimer.stop();
+  }
+}
+
 void TextEdit::setViewportMargins(int left, int top, int right, int bottom) {
   QPlainTextEdit::setViewportMargins(left, top, right, bottom);
 }
@@ -926,6 +932,19 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
 }
 
 void TextEdit::mousePressEvent(QMouseEvent* event) {
+  if (trippleClickTimer.isActive() &&
+      ((event->pos() - trippleClickPoint).manhattanLength() < QApplication::startDragDistance())) {
+    trippleClickTimer.stop();
+
+    auto cursor = textCursor();
+    cursor.movePosition(QTextCursor::StartOfBlock);
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+
   QPlainTextEdit::mousePressEvent(event);
 }
 
@@ -935,6 +954,10 @@ void TextEdit::mouseDoubleClickEvent(QMouseEvent* event) {
     TextCursor::customSelect(cursor, QTextCursor::WordUnderCursor);
     setTextCursor(cursor);
     event->accept();
+
+    trippleClickPoint = event->pos();
+    trippleClickTimer.start(QApplication::doubleClickInterval(), this);
+
     return;
   }
   QPlainTextEdit::mouseDoubleClickEvent(event);
