@@ -856,36 +856,31 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
     setTextCursor(cursor);
     event->accept();
     return;
-  }
-  else if (event == QKeySequence::MoveToPreviousWord) {
+  } else if (event == QKeySequence::MoveToPreviousWord) {
     auto cursor = textCursor();
     TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::MoveAnchor);
     setTextCursor(cursor);
     event->accept();
     return;
-  }
-  else if (event == QKeySequence::SelectNextWord) {
+  } else if (event == QKeySequence::SelectNextWord) {
     auto cursor = textCursor();
     TextCursor::customMovePosition(cursor, QTextCursor::NextWord, QTextCursor::KeepAnchor);
     setTextCursor(cursor);
     event->accept();
     return;
-  }
-  else if (event == QKeySequence::SelectPreviousWord) {
+  } else if (event == QKeySequence::SelectPreviousWord) {
     auto cursor = textCursor();
     TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
     setTextCursor(cursor);
     event->accept();
     return;
-  }
-  else if (event == QKeySequence::DeleteEndOfWord) {
+  } else if (event == QKeySequence::DeleteEndOfWord) {
     auto cursor = textCursor();
     TextCursor::customMovePosition(cursor, QTextCursor::NextWord, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
     event->accept();
     return;
-  }
-  else if (event == QKeySequence::DeleteStartOfWord) {
+  } else if (event == QKeySequence::DeleteStartOfWord) {
     auto cursor = textCursor();
     TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
     cursor.removeSelectedText();
@@ -932,6 +927,17 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
 
 void TextEdit::mousePressEvent(QMouseEvent* event) {
   QPlainTextEdit::mousePressEvent(event);
+}
+
+void TextEdit::mouseDoubleClickEvent(QMouseEvent* event) {
+  if (event->button() == Qt::LeftButton && textInteractionFlags() & Qt::TextSelectableByMouse) {
+    auto cursor = textCursor();
+    TextCursor::customSelect(cursor, QTextCursor::WordUnderCursor);
+    setTextCursor(cursor);
+    event->accept();
+    return;
+  }
+  QPlainTextEdit::mouseDoubleClickEvent(event);
 }
 
 void TextEdit::clearSelection() {

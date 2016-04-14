@@ -60,6 +60,7 @@ class TextCursor : public Wrapper {
                                  QTextCursor::MoveOperation op,
                                  QTextCursor::MoveMode mode = QTextCursor::MoveAnchor,
                                  int n = 1);
+  static void customSelect(QTextCursor &cursor, QTextCursor::SelectionType selection);
 
  public slots:
   QTextBlock block() const;
