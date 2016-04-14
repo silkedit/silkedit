@@ -71,8 +71,8 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void clearSelection();
   void save(bool beforeClose);
 
-  void saveState(QSettings &settings);
-  void loadState(QSettings &settings);
+  void saveState(QSettings& settings);
+  void loadState(QSettings& settings);
 
   bool isSearchMatchesHighlighted();
 
@@ -120,6 +120,7 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void wheelEvent(QWheelEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
   void mousePressEvent(QMouseEvent* e) override;
+  void mouseDoubleClickEvent(QMouseEvent* event) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   void dropEvent(QDropEvent* e) override;
