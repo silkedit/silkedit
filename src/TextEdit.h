@@ -10,6 +10,7 @@
 #include <QStringListModel>
 #include <QCompleter>
 #include <QSettings>
+#include <QBasicTimer>
 
 #include "core/macros.h"
 #include "core/ICloneable.h"
@@ -71,8 +72,8 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void clearSelection();
   void save(bool beforeClose);
 
-  void saveState(QSettings &settings);
-  void loadState(QSettings &settings);
+  void saveState(QSettings& settings);
+  void loadState(QSettings& settings);
 
   bool isSearchMatchesHighlighted();
 
@@ -120,15 +121,19 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void wheelEvent(QWheelEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
   void mousePressEvent(QMouseEvent* e) override;
+  void mouseDoubleClickEvent(QMouseEvent* event) override;
   void setFontPointSize(int sz);
   void makeFontBigger(bool bigger);
   void dropEvent(QDropEvent* e) override;
+  void timerEvent(QTimerEvent *event) override;
 
  private:
   friend class TextEditPrivate;
 
   std::unique_ptr<TextEditPrivate> d_ptr;
   bool m_showLineNumber;
+  QBasicTimer trippleClickTimer;
+  QPoint trippleClickPoint;
 
   QString toText();
   void setText(const QString& text);

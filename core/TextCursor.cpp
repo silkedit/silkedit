@@ -1,8 +1,153 @@
+﻿#include <unicode/brkiter.h>
+#include <unicode/uchriter.h>
 #include <QTextBlock>
+#include <QDebug>
 
 #include "TextCursor.h"
+#include "IcuUtil.h"
+#include "scoped_guard.h"
+#include "Config.h"
 
 namespace core {
+
+// Move a cursor considering ICU word boundary.
+// Original movePosition skips Japanese text entirely...
+// http://userguide.icu-project.org/boundaryanalysis
+bool TextCursor::customMovePosition(QTextCursor& cursor,
+                                    QTextCursor::MoveOperation op,
+                                    QTextCursor::MoveMode mode,
+                                    int n) {
+  switch (op) {
+    case MoveOperation::NextWord: {
+      QTextCursor newCursor(cursor);
+      newCursor.clearSelection();
+      newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+      const auto& text = newCursor.selectedText();
+      UErrorCode status = U_ZERO_ERROR;
+      auto boundary = BreakIterator::createWordInstance(
+          IcuUtil::icuLocale(Config::singleton().locale()), status);
+      scoped_guard guard([=] { delete boundary; });
+      boundary->setText(IcuUtil::toIcuString(text));
+      int32_t pos = 0;
+
+      boundary->first();
+      for (int i = 0; i < n; i++) {
+        pos = boundary->next();
+        if (pos == BreakIterator::DONE) {
+          pos = 0;
+          break;
+        }
+      }
+      cursor.setPosition(cursor.position() + pos, mode);
+      return true;
+    }
+    case MoveOperation::PreviousWord: {
+      QTextCursor newCursor(cursor);
+      newCursor.clearSelection();
+      newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+      const auto& text = newCursor.selectedText();
+      UErrorCode status = U_ZERO_ERROR;
+      auto boundary = BreakIterator::createWordInstance(
+          IcuUtil::icuLocale(Config::singleton().locale()), status);
+      scoped_guard guard([=] { delete boundary; });
+      boundary->setText(IcuUtil::toIcuString(text));
+      int32_t pos = 0;
+
+      boundary->last();
+      for (int i = 0; i < n; i++) {
+        pos = boundary->previous();
+        if (pos == BreakIterator::DONE) {
+          pos = 0;
+          break;
+        }
+      }
+      cursor.setPosition(newCursor.position() + pos, mode);
+      return true;
+    }
+    case MoveOperation::StartOfWord: {
+      QTextCursor newCursor(cursor);
+      newCursor.clearSelection();
+      newCursor.movePosition(QTextCursor::WordLeft, QTextCursor::KeepAnchor);
+      int lengthFromLeft = newCursor.selectionEnd() - newCursor.selectionStart();
+      newCursor.clearSelection();
+      newCursor.movePosition(QTextCursor::WordRight, QTextCursor::KeepAnchor, 2);
+      const auto& text = newCursor.selectedText();
+      UErrorCode status = U_ZERO_ERROR;
+      auto boundary = BreakIterator::createWordInstance(
+          IcuUtil::icuLocale(Config::singleton().locale()), status);
+      scoped_guard guard([=] { delete boundary; });
+      boundary->setText(IcuUtil::toIcuString(text));
+      int32_t pos = 0;
+
+      // When the cursor is at the end, move it as PreviousWord
+      if (lengthFromLeft == text.size()) {
+        return customMovePosition(cursor, QTextCursor::PreviousWord, mode, n);
+      }
+
+      // isBoundary has a side effect. The current position of the iterator is set
+      // to the first boundary position at or following the specified offset.
+      if (!boundary->isBoundary(lengthFromLeft)) {
+        pos = boundary->previous();
+        if (pos == BreakIterator::DONE) {
+          pos = 0;
+        }
+      } else {
+        return true;
+      }
+      cursor.setPosition(cursor.position() - lengthFromLeft + pos, mode);
+      return true;
+    }
+    case MoveOperation::EndOfWord: {
+      QTextCursor newCursor(cursor);
+      newCursor.clearSelection();
+      newCursor.movePosition(QTextCursor::WordLeft, QTextCursor::KeepAnchor);
+      int lengthFromLeft = newCursor.selectionEnd() - newCursor.selectionStart();
+      newCursor.clearSelection();
+      newCursor.movePosition(QTextCursor::WordRight, QTextCursor::KeepAnchor, 2);
+      const auto& text = newCursor.selectedText();
+      UErrorCode status = U_ZERO_ERROR;
+      auto boundary = BreakIterator::createWordInstance(
+          IcuUtil::icuLocale(Config::singleton().locale()), status);
+      scoped_guard guard([=] { delete boundary; });
+      boundary->setText(IcuUtil::toIcuString(text));
+      int32_t pos = 0;
+
+      // When the cursor is at the start, move it as NextWord
+      if (lengthFromLeft == 0) {
+        return customMovePosition(cursor, QTextCursor::NextWord, mode, n);
+      }
+
+      if (!boundary->isBoundary(lengthFromLeft)) {
+        pos = boundary->current();
+        if (pos == BreakIterator::DONE) {
+          pos = 0;
+        }
+      } else {
+        return true;
+      }
+      cursor.setPosition(cursor.position() + (pos - lengthFromLeft), mode);
+      return true;
+    }
+    default:
+      return cursor.movePosition(op, mode, n);
+  }
+}
+
+void TextCursor::customSelect(QTextCursor& cursor, QTextCursor::SelectionType selection) {
+  switch (selection) {
+    case SelectionType::WordUnderCursor:
+      customMovePosition(cursor, QTextCursor::StartOfWord);
+      // When the text is "単語単位" and the cursor is at position 2, movePositoin with EndOfWord
+      // doesn't move it because that's the end of "単語".
+      // So move the cursor right to select the Japanese word under it.
+      cursor.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor);
+      customMovePosition(cursor, QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
+      break;
+    default:
+      cursor.select(selection);
+      break;
+  }
+}
 
 QTextBlock TextCursor::block() const {
   return m_wrapped.value<QTextCursor>().block();
@@ -14,8 +159,8 @@ bool TextCursor::movePosition(TextCursor::MoveOperation operation,
   // QVariant::value<QTextCursor>() returns a copy of m_wrapped, so we need to reassign it after
   // movePosition
   auto cursor = m_wrapped.value<QTextCursor>();
-  auto result = cursor.movePosition(static_cast<QTextCursor::MoveOperation>(operation),
-                                    static_cast<QTextCursor::MoveMode>(mode), n);
+  auto result = customMovePosition(cursor, static_cast<QTextCursor::MoveOperation>(operation),
+                                   static_cast<QTextCursor::MoveMode>(mode), n);
   m_wrapped = QVariant::fromValue(cursor);
   return result;
 }
