@@ -168,27 +168,27 @@ class TextCursorTest : public QObject {
 
     cursor.setPosition(0);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("単語"));
+    QCOMPARE(cursor.selectedText(), QString(u8"単語"));
 
     cursor.setPosition(2);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("単位"));
+    QCOMPARE(cursor.selectedText(), QString(u8"単位"));
 
     cursor.setPosition(4);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("に"));
+    QCOMPARE(cursor.selectedText(), QString(u8"に"));
 
     cursor.setPosition(6);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("分割"));
+    QCOMPARE(cursor.selectedText(), QString(u8"分割"));
 
     cursor.setPosition(7);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("する"));
+    QCOMPARE(cursor.selectedText(), QString(u8"する"));
 
     cursor.setPosition(9);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("する"));
+    QCOMPARE(cursor.selectedText(), QString(u8"する"));
   }
 
   void selectJapaneseWord2() {
@@ -197,7 +197,7 @@ class TextCursorTest : public QObject {
 
     cursor.setPosition(1);
     TextCursor::customSelect(cursor, QTextCursor::SelectionType::WordUnderCursor);
-    QCOMPARE(cursor.selectedText(), QStringLiteral("を"));
+    QCOMPARE(cursor.selectedText(), QString(u8"を"));
   }
 };
 
