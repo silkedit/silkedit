@@ -30,6 +30,8 @@ if (APPLE)
   ADD_DEFINITIONS(-D__POSIX__)
   list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_win.cpp)
 elseif (MSVC)
+  # ICU requires this when linking with a static one
+  ADD_DEFINITIONS(-DU_STATIC_IMPLEMENTATION)
   list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_mac.cpp)
 endif ()
 

@@ -9,7 +9,7 @@ QString IcuUtil::toQString(const UnicodeString& string) {
 }
 
 UnicodeString IcuUtil::toIcuString(const QString& string) {
-  return icu::UnicodeString(string.utf16(), string.size());
+  return icu::UnicodeString::fromUTF8(string.toUtf8().constData());
 }
 
 Locale IcuUtil::icuLocale(const QString &localeStr) {
