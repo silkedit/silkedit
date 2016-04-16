@@ -105,6 +105,7 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list boost || brew install boost --c++11
+      brew list icu4c || brew install icu4c --c++11
 
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
@@ -225,6 +226,26 @@ resolve() {
           cp onig.lib onig.dll ../../lib
           cd ../..
 				fi
+				
+				# icu
+        if [ "$1" != '--skip-build' ]; then
+          echo 'Downloading ICU...'
+          DIR=icu-57.1-vs2015
+          ARCHIVE=${DIR}.7z
+          wget http://silksmiths.sakura.ne.jp/files/${ARCHIVE}
+          7z x ${ARCHIVE}
+          rm -rf include/unicode
+          mv ${DIR}/include/unicode include
+          mkdir -p lib/icu
+          if [ $OS = 'Win32' ]; then
+            mv ${DIR}/lib/sicuuc*.lib lib/icu
+            mv ${DIR}/lib/sicudt*.lib lib/icu
+          else
+            mv ${DIR}/lib64/sicuuc*.lib lib/icu
+            mv ${DIR}/lib64/sicudt*.lib lib/icu
+          fi
+          rm -rf ${DIR}*
+        fi
 
 		#breakpad
 		if [ ! -f lib/breakpad/Release/common.lib ]; then
