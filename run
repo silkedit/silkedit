@@ -105,7 +105,7 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list boost || brew install boost --c++11
-      brew list icu4c || brew install icu4c --c++11
+      brew list icu4c || brew install icu4c --c++11 && brew link --overwrite icu4c --force
 
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
@@ -226,7 +226,7 @@ resolve() {
           cp onig.lib onig.dll ../../lib
           cd ../..
 				fi
-				
+
 				# icu
         if [ "$1" != '--skip-build' ]; then
           echo 'Downloading ICU...'
