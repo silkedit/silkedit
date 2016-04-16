@@ -105,7 +105,22 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list boost || brew install boost --c++11
-      brew list icu4c || brew install icu4c --c++11 && brew link --overwrite icu4c --force
+      
+      # ICU
+      if [ "$1" != '--skip-build' ]; then
+        ARCHIVE=icu4c-57_1-src.tgz
+        DATA=icudt57l.zip
+        wget http://download.icu-project.org/files/icu4c/57.1/${ARCHIVE}
+        wget silksmiths.sakura.ne.jp/files/${DATA}
+        tar zxvf ${ARCHIVE}
+        unzip ${DATA}
+        mv icudt57l.dat icu/source/data/in/icudt57l.dat
+        cd icu/source
+        ./runConfigureICU MacOSX --enable-static --disable-shared
+        make -j8 && make install
+        cd ../..
+        rm -rf ${ARCHIVE} ${DATA} icu
+      fi
 
       # breakpad
       if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
