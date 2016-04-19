@@ -11,7 +11,6 @@
 class TextEdit;
 class TabBar;
 namespace core {
-class Theme;
 class Document;
 }
 
@@ -66,7 +65,6 @@ public slots:
   void focusTabContent(int index);
   void updateTabTextBasedOn(bool changed);
   void changeActiveView(int index);
-  void setTheme(const core::Theme* theme);
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);

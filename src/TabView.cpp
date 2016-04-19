@@ -16,15 +16,12 @@
 #include "DocumentManager.h"
 #include "Helper.h"
 #include "core/Config.h"
-#include "core/Theme.h"
 #include "core/Util.h"
 #include "core/scoped_guard.h"
 
 using core::Document;
 using core::Config;
-using core::Theme;
 using core::Util;
-using core::ColorSettings;
 using core::scoped_guard;
 
 namespace {
@@ -60,9 +57,12 @@ TabView::TabView(QWidget* parent)
   setMovable(true);
   setDocumentMode(true);
   setTabsClosable(true);
-  setTheme(Config::singleton().theme());
   // Note: setDocumentMode also calls setDrawBase
   tabBar()->setDrawBase(false);
+
+  // Without calling setStyleSheet here, TabBar stylesheet is not applied to the restored tabs on
+  // startup
+  setStyleSheet(QStringLiteral("TabView::tab-bar { left: 0px; }"));
 
   connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
@@ -71,7 +71,6 @@ TabView::TabView(QWidget* parent)
   connect(this, &QTabWidget::currentChanged, this, &TabView::changeActiveView);
   connect(this, &QTabWidget::tabCloseRequested, this,
           static_cast<bool (TabView::*)(int)>(&TabView::closeTab));
-  connect(&Config::singleton(), &Config::themeChanged, this, &TabView::setTheme);
 }
 
 TabView::~TabView() {
@@ -280,23 +279,6 @@ void TabView::setActiveView(QWidget* activeView) {
     QWidget* oldView = m_activeView;
     m_activeView = activeView;
     emit activeViewChanged(oldView, activeView);
-  }
-}
-
-void TabView::setTheme(const Theme* theme) {
-  qDebug("TabView theme is changed");
-  if (!theme) {
-    qWarning("theme is null");
-    return;
-  }
-
-  if (theme->tabViewSettings != nullptr) {
-    QString style;
-    ColorSettings* tabViewSettings = theme->tabViewSettings.get();
-
-    style = QString("TabView { background-color: %1; }")
-                .arg(Util::qcolorForStyleSheet(tabViewSettings->value("background")));
-    this->setStyleSheet(style);
   }
 }
 

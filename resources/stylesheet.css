@@ -18,10 +18,6 @@ QPlainTextEdit {
   border: none;
 }
 
-TabView::tab-bar {
-    left: 0px;
-}
-
 /* Style the tab using the tab sub-control. Note that
     it reads TabBar _not_ TabView */
 TabBar::tab {

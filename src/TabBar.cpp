@@ -43,6 +43,7 @@ void TabBar::setTheme(const Theme* theme) {
     ColorSettings* tabBarSettings = theme->tabBarSettings.get();
 
     style = QString(
+                "TabBar { background-color: %1; }"
                 "TabBar::tab {"
                 "background-color: %1;"
                 "color: %2;"
