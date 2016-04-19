@@ -130,6 +130,7 @@ int TabView::open(const QString& path) {
       qDebug() << "trying to replace an empty doc with a new one";
       textEdit->setDocument(newDoc);
       textEdit->setPath(path);
+      setTabToolTip(currentIndex(), path);
       // emit activeViewChanged to update the status bar
       emit activeViewChanged(textEdit, textEdit);
       return currentIndex();
