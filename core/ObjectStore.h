@@ -25,12 +25,11 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
   static void wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate);
   static void registerDestroyedConnectedObject(QObject* obj);
   static boost::optional<v8::Local<v8::Object>> find(QObject* obj, v8::Isolate* isolate);
+  static void clearDestroyedConnectedObjects();
 
   ~ObjectStore() = default;
 
  private:
-  static void WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& data);
-
   static std::unordered_map<QObject*, v8::UniquePersistent<v8::Object>> s_objects;
 
   /**
@@ -40,8 +39,13 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
    */
   static std::unordered_set<QObject*> s_destroyedConnectedObjects;
 
+  static void removeDestroyedConnectedObject(QObject *destroyedObj);
+
+  static void WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& data);
+
   friend class Singleton<ObjectStore>;
   ObjectStore() = default;
+
 };
 
 }  // namespace core
