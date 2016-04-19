@@ -36,6 +36,20 @@ QObject* ObjectStore::unwrap(v8::Local<v8::Object> obj) {
   return static_cast<QObject*>(ptr);
 }
 
+void ObjectStore::removeDestroyedConnectedObject(QObject* destroyedObj) {
+  // emit destroyed signal to JS side
+  if (s_destroyedConnectedObjects.count(destroyedObj) != 0) {
+    QVariantList args{QVariant::fromValue(destroyedObj)};
+    auto isolate = Isolate::GetCurrent();
+    if (isolate && !isolate->IsExecutionTerminating() && !isolate->IsDead()) {
+      v8::Locker locker(isolate);
+      v8::HandleScope handle_scope(isolate);
+      JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
+      s_destroyedConnectedObjects.erase(destroyedObj);
+    }
+  }
+}
+
 void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate) {
   Q_ASSERT(obj);
   Q_ASSERT(QThread::currentThread() == QCoreApplication::instance()->thread());
@@ -46,10 +60,13 @@ void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::I
       return;
     }
 
+    removeDestroyedConnectedObject(destroyedObj);
+
     // emit destroyed signal to JS side
     if (s_destroyedConnectedObjects.count(destroyedObj) != 0) {
       QVariantList args{QVariant::fromValue(destroyedObj)};
-      if (!isolate->IsExecutionTerminating() && !isolate->IsDead()) {
+      auto isolate = Isolate::GetCurrent();
+      if (isolate && !isolate->IsExecutionTerminating() && !isolate->IsDead()) {
         v8::Locker locker(isolate);
         v8::HandleScope handle_scope(isolate);
         JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
@@ -81,6 +98,12 @@ boost::optional<v8::Local<v8::Object>> ObjectStore::find(QObject* obj, v8::Isola
     return s_objects.at(obj).Get(isolate);
   } else {
     return boost::none;
+  }
+}
+
+void ObjectStore::clearDestroyedConnectedObjects() {
+  for (auto obj : s_destroyedConnectedObjects) {
+    removeDestroyedConnectedObject(obj);
   }
 }
 

@@ -194,6 +194,10 @@ void App::cleanup() {
     }
   }
 
+  // emit destroyed signal to JS side because after cleanup, Node may be destructed before destoryed
+  // is emitted
+  ObjectStore::clearDestroyedConnectedObjects();
+
   SyntaxHighlighterThread::singleton().quit();
 
   m_isCleanedUp = true;
