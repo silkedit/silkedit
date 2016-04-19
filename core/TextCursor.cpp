@@ -1,5 +1,6 @@
 ﻿#include <unicode/brkiter.h>
 #include <unicode/uchriter.h>
+#include <algorithm>
 #include <QTextBlock>
 #include <QDebug>
 
@@ -7,6 +8,12 @@
 #include "IcuUtil.h"
 #include "scoped_guard.h"
 #include "Config.h"
+
+namespace {
+bool isAllWhiteSpaceChar(const QString& str) {
+  return std::all_of(str.constBegin(), str.constEnd(), [](QChar ch) { return ch.isSpace(); });
+}
+}
 
 namespace core {
 
@@ -21,8 +28,13 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
     case MoveOperation::NextWord: {
       QTextCursor newCursor(cursor);
       newCursor.clearSelection();
-      newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
-      const auto& text = newCursor.selectedText();
+      QString text;
+      bool result;
+      do {
+        result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+        text = newCursor.selectedText();
+      } while (result && isAllWhiteSpaceChar(text));
+
       UErrorCode status = U_ZERO_ERROR;
       auto boundary = BreakIterator::createWordInstance(
           IcuUtil::icuLocale(Config::singleton().locale()), status);
@@ -31,21 +43,36 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
       int32_t pos = 0;
 
       boundary->first();
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < n;) {
         pos = boundary->next();
+
         if (pos == BreakIterator::DONE) {
           pos = 0;
           break;
         }
+
+        newCursor.setPosition(cursor.position());
+        newCursor.clearSelection();
+        newCursor.setPosition(cursor.position() + pos, QTextCursor::MoveMode::KeepAnchor);
+
+        if (!isAllWhiteSpaceChar(newCursor.selectedText())) {
+          i++;
+        }
       }
+
       cursor.setPosition(cursor.position() + pos, mode);
       return true;
     }
     case MoveOperation::PreviousWord: {
       QTextCursor newCursor(cursor);
       newCursor.clearSelection();
-      newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
-      const auto& text = newCursor.selectedText();
+      QString text;
+      bool result;
+      do {
+        result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+        text = newCursor.selectedText();
+      } while (result && isAllWhiteSpaceChar(text));
+
       UErrorCode status = U_ZERO_ERROR;
       auto boundary = BreakIterator::createWordInstance(
           IcuUtil::icuLocale(Config::singleton().locale()), status);
@@ -54,14 +81,24 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
       int32_t pos = 0;
 
       boundary->last();
-      for (int i = 0; i < n; i++) {
+      for (int i = 0; i < n;) {
         pos = boundary->previous();
+
         if (pos == BreakIterator::DONE) {
           pos = 0;
           break;
         }
+
+        newCursor.setPosition(cursor.position());
+        newCursor.clearSelection();
+        newCursor.setPosition(cursor.position() - text.size() + pos, QTextCursor::MoveMode::KeepAnchor);
+
+        if (!isAllWhiteSpaceChar(newCursor.selectedText())) {
+          i++;
+        }
       }
-      cursor.setPosition(newCursor.position() + pos, mode);
+
+      cursor.setPosition(cursor.position() - text.size() + pos, mode);
       return true;
     }
     case MoveOperation::StartOfWord: {

@@ -9,6 +9,18 @@ class TextCursorTest : public QObject {
   Q_OBJECT
 
  private slots:
+  void nextEnglishWord() {
+    QTextDocument doc(u8"A brown firefox");
+    QTextCursor cursor(&doc);
+    int i = 0;
+    QList<int> list = {1, 7, 15};
+    while (!cursor.atEnd()) {
+      TextCursor::customMovePosition(cursor, QTextCursor::NextWord);
+      QVERIFY(i < list.size());
+      QCOMPARE(cursor.position(), list[i++]);
+    }
+  }
+
   void nextJapaneseWord() {
     QTextDocument doc(u8"単語単位に分割する");
     QTextCursor cursor(&doc);
@@ -20,6 +32,20 @@ class TextCursorTest : public QObject {
       QCOMPARE(cursor.position(), list[i++]);
     }
   }
+
+  void previousEnglishWord() {
+    QTextDocument doc(u8"A brown firefox");
+    QTextCursor cursor(&doc);
+    cursor.movePosition(QTextCursor::End);
+    int i = 0;
+    QList<int> list = {8, 2, 0};
+    while (!cursor.atStart()) {
+      TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord);
+      QVERIFY(i < list.size());
+      QCOMPARE(cursor.position(), list[i++]);
+    }
+  }
+
   void previousJapaneseWord() {
     QTextDocument doc(u8"単語単位に分割する");
     QTextCursor cursor(&doc);
