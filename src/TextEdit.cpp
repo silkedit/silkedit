@@ -700,7 +700,7 @@ void TextEdit::setTheme(core::Theme* theme) {
   d->setTheme(theme);
 }
 
-void TextEdit::highlightSearchMatches(const QString& text,
+int TextEdit::highlightSearchMatches(const QString& text,
                                       int begin,
                                       int end,
                                       Document::FindFlags flags) {
@@ -711,6 +711,7 @@ void TextEdit::highlightSearchMatches(const QString& text,
     d_ptr->m_searchMatchedRegions.append(region);
   }
   update();
+  return regions.size();
 }
 
 void TextEdit::clearSearchHighlight() {

@@ -63,8 +63,15 @@ FindReplaceView::FindReplaceView(QWidget* parent)
   connect(ui->lineEditForFind, &LineEdit::returnPressed, this, &FindReplaceView::findNext);
   connect(ui->lineEditForFind, &LineEdit::shiftReturnPressed, this, &FindReplaceView::findPrevious);
   connect(ui->lineEditForFind, &LineEdit::textChanged, this, [=](const QString&) {
-    highlightMatches();
+    int result = highlightMatches();
     selectFirstMatch();
+    QPalette palette;
+    if (!ui->lineEditForFind->text().isEmpty() && result == 0) {
+      palette.setColor(QPalette::Text, Qt::red);
+    } else {
+      palette.setColor(QPalette::Text, Qt::black);
+    }
+    ui->lineEditForFind->setPalette(palette);
   });
   connect(ui->lineEditForFind, &LineEdit::focusIn, this, [=] {
     updateActiveCursorPos();
@@ -261,7 +268,9 @@ void FindReplaceView::findText(const QString& text, Document::FindFlags flags) {
   findText(text, -1, flags);
 }
 
-void FindReplaceView::highlightMatches() {
+int FindReplaceView::highlightMatches() {
+  int result = 0;
+
   if (TextEdit* textEdit = qobject_cast<TextEdit*>(m_activeView)) {
     int begin = 0, end = -1;
     if (ui->inSelectionChk->isChecked()) {
@@ -269,8 +278,11 @@ void FindReplaceView::highlightMatches() {
       end = m_selectionEndPos;
     }
 
-    textEdit->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
+    result =
+        textEdit->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
   }
+
+  return result;
 }
 
 void FindReplaceView::setActiveView(QWidget* view) {
