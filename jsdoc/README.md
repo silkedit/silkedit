@@ -293,9 +293,7 @@ word_count
 ja/translation.ymlの例をいかに示します。
 
 ```
-menu:
-  word_count:
-    label: 単語数カウント
+menu.word_count.label: 単語数カウント
     
 word_count: 単語数
 ```
@@ -311,8 +309,6 @@ word_count: 単語数
 #### JavaScriptの文字列の国際化
 
 {@link module:silkedit.tr}を呼びます。
-
-keyの形式は```<package>:<key>```です。
 
 以下の呼び出しはword_countパッケージの対応するロケールのtranslation.ymlのword_countキーの文字列を使用します。見つからなければ"word count"の文字列が使用されます。
 
