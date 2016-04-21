@@ -602,14 +602,28 @@ void TextEdit::paintEvent(QPaintEvent* e) {
     QTextCursor beginCursor(document()->docHandle(), region.begin());
     QTextCursor endCursor(document()->docHandle(), region.end());
     int beginPos = beginCursor.positionInBlock();
-    int endPos = endCursor.positionInBlock();
     QTextBlock block = beginCursor.block();
-    QTextLine textLine = block.layout()->lineForTextPosition(beginPos);
-    QRectF lineRect = textLine.naturalTextRect();
-    lineRect.setLeft(textLine.cursorToX(beginPos));
-    lineRect.setRight(textLine.cursorToX(endPos));
-    lineRect = lineRect.translated(blockBoundingGeometry(block).topLeft() + contentOffset());
-    painter.drawRoundedRect(lineRect, 3.0, 3.0);
+    QTextBlock endBlock = endCursor.block();
+    do {
+      int endPos =
+          block == endBlock ? endCursor.positionInBlock() : block.position() + block.length();
+      QTextLine textLine = block.layout()->lineForTextPosition(beginPos);
+      // textLine is invalid when the character at beginPos is a new line
+      if (textLine.isValid()) {
+        QRectF lineRect = textLine.naturalTextRect();
+        lineRect.setLeft(textLine.cursorToX(beginPos));
+        lineRect.setRight(textLine.cursorToX(endPos));
+        lineRect = lineRect.translated(blockBoundingGeometry(block).topLeft() + contentOffset());
+        painter.drawRoundedRect(lineRect, 3.0, 3.0);
+      }
+
+      if (block != endBlock) {
+        block = block.next();
+        beginPos = 0;
+      } else {
+        break;
+      }
+    } while (true);
   }
 
   if (Config::singleton().showInvisibles()) {
