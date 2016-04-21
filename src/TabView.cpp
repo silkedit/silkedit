@@ -222,11 +222,31 @@ int TabView::indexOfPath(const QString& path) {
   return -1;
 }
 
+bool TabView::isModified(int index) {
+  auto tabData = tabBar()->tabData(index);
+  return tabData.canConvert<bool>() && tabData.toBool();
+}
+
+void TabView::setModified(int index, bool modified) {
+  if (modified) {
+    tabBar()->setTabData(index, modified);
+  } else {
+    tabBar()->setTabData(index, QVariant());
+  }
+}
+
 void TabView::detachTabStarted(int index, const QPoint&) {
   qDebug("DetachTabStarted");
   m_tabDragging = true;
   DraggingTabInfo::setWidget(widget(index));
-  DraggingTabInfo::setTabText(tabText(index));
+
+  // strip rightmost * modified mark if the tab is modified state
+  QString text = tabText(index);
+  if (isModified(index)) {
+    text.chop(1);
+  }
+
+  DraggingTabInfo::setTabText(text);
   removeTab(index);
   Q_ASSERT(DraggingTabInfo::widget());
 }
@@ -252,7 +272,9 @@ void TabView::tabInserted(int index) {
   QTabWidget::tabInserted(index);
 }
 
-void TabView::tabRemoved(int) {
+void TabView::tabRemoved(int index) {
+  setModified(index, false);
+
   if (count() == 0 && !m_tabDragging) {
     emit allTabRemoved();
   }
@@ -370,10 +392,15 @@ void TabView::updateTabTextBasedOn(bool changed) {
     int index = indexOf(textEdit);
     QString text = tabText(index);
     if (changed) {
-      setTabText(index, text + "*");
+      if (!isModified(index)) {
+        setTabText(index, text + "*");
+        // set tabData true not to add additional * mark
+        setModified(index, true);
+      }
     } else if (text.endsWith('*')) {
       text.chop(1);
       setTabText(index, text);
+      setModified(index, false);
     }
   } else {
     qDebug("sender is null or not TextEdit");
