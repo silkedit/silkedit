@@ -89,8 +89,10 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   widget->setParent(this);
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
   if (textEdit) {
-    connect(textEdit, &TextEdit::pathUpdated, this,
-            [=](const QString& path) { setTabText(indexOf(textEdit), getFileNameFrom(path)); });
+    connect(textEdit, &TextEdit::pathUpdated, this, [=](const QString& path) {
+      setTabText(indexOf(textEdit), getFileNameFrom(path));
+      setTabToolTip(currentIndex(), path);
+    });
     connect(textEdit, &TextEdit::modificationChanged, this, &TabView::updateTabTextBasedOn);
     connect(textEdit, &TextEdit::fileDropped, this, &TabView::open);
   }
