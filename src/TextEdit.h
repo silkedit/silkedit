@@ -122,8 +122,6 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void keyPressEvent(QKeyEvent* event) override;
   void mousePressEvent(QMouseEvent* e) override;
   void mouseDoubleClickEvent(QMouseEvent* event) override;
-  void setFontPointSize(int sz);
-  void makeFontBigger(bool bigger);
   void dropEvent(QDropEvent* e) override;
   void timerEvent(QTimerEvent *event) override;
 
@@ -139,6 +137,8 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void setText(const QString& text);
   void setViewportMargins(int left, int top, int right, int bottom);
   void setTheme(core::Theme* theme);
+  void setFontPointSize(int sz);
+  void makeFontBigger(bool bigger);
 
   inline TextEditPrivate* d_func() { return d_ptr.get(); }
   inline const TextEditPrivate* d_func() const { return d_ptr.get(); }
