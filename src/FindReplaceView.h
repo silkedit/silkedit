@@ -29,7 +29,7 @@ class FindReplaceView : public QWidget {
   ~FindReplaceView();
   DEFAULT_MOVE(FindReplaceView)
 
-  void highlightMatches();
+  int highlightMatches();
   void setActiveView(QWidget* view);
 
 public slots:

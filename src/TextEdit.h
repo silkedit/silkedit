@@ -57,7 +57,7 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
                                      int begin = 0,
                                      int end = -1,
                                      core::Document::FindFlags flags = 0);
-  void highlightSearchMatches(const QString& text,
+  int highlightSearchMatches(const QString& text,
                               int begin,
                               int end,
                               core::Document::FindFlags flags = 0);
