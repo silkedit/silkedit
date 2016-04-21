@@ -269,7 +269,6 @@ void FindReplaceView::highlightMatches() {
       end = m_selectionEndPos;
     }
 
-    textEdit->clearSelection();
     textEdit->highlightSearchMatches(ui->lineEditForFind->text(), begin, end, getFindFlags());
   }
 }
