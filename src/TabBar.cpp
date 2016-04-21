@@ -89,6 +89,7 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
     m_dragStartPos = event->pos();
     QPoint offset = m_dragStartPos - tabRect(tabAt(event->pos())).topLeft();
     m_offsetFromWindow = offset + mapToGlobal(tabRect(0).topLeft()) - window()->pos();
+    emit onMousePress(tabAt(event->pos()));
   }
   m_dragInitiated = false;
 
@@ -227,6 +228,16 @@ void TabBar::contextMenuEvent(QContextMenuEvent* event) {
   menu.addAction(new CommandAction("close_tabs_to_the_right", tr("Close Tabs to the Right"), "close_tabs_to_the_right",
                                    &menu, CommandArgument{{"index", QVariant(index)}}));
   menu.exec(event->globalPos());
+}
+
+void TabBar::paintEvent(QPaintEvent* event) {
+  // Without the following condition, moving tab1 from TabView A to TabView B causes crash.
+  // But this makes TabView A looks weird because paintEvent is skipped
+  // TabView A     TabView B
+  // tab1 tab2     tab3
+  if (!(count() == 1 && currentIndex() == -1)) {
+    QTabBar::paintEvent(event);
+  }
 }
 
 void TabBar::finishDrag() {
