@@ -16,6 +16,8 @@ class DraggingTabInfo {
   static QString tabText() { return s_tabText; }
   static void setTabText(const QString& text) { s_tabText = text; }
 
+  static void clear() {s_widget = nullptr; s_tabText = ""; }
+
  private:
   DraggingTabInfo() = default;
   ~DraggingTabInfo() = default;
