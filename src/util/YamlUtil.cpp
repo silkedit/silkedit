@@ -541,9 +541,6 @@ QString YamlUtil::translate(const QString& pkgPath,
     }
   }
 
-  const QStringList subKeys = key.split('.');
-  boost::optional<YAML::Node> currentNode;
-
   for (const auto& translationPath : translationPaths) {
     try {
       YAML::Node rootNode = YAML::LoadFile(translationPath.toUtf8().constData());
@@ -551,21 +548,10 @@ QString YamlUtil::translate(const QString& pkgPath,
         qWarning() << "root node must be a map";
         return defaultValue;
       }
-      currentNode = rootNode;
+      YAML::Node valueNode = rootNode[key.toUtf8().constData()];
 
-      for (int i = 0; i < subKeys.size(); i++) {
-        Q_ASSERT(currentNode);
-        YAML::Node subNode = (*currentNode)[subKeys[i].toUtf8().constData()];
-        if (subNode.IsDefined()) {
-          currentNode = subNode;
-        } else {
-          currentNode = boost::none;
-          break;
-        }
-      }
-
-      if (currentNode) {
-        return QString::fromUtf8(currentNode->as<std::string>().c_str());
+      if (valueNode) {
+        return QString::fromUtf8(valueNode.as<std::string>().c_str());
       }
     } catch (const std::runtime_error& ex) {
       qWarning() << "Unable to load" << translationPath << "Cause:" << ex.what();
