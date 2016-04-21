@@ -334,6 +334,7 @@ void Document::setLanguage(const QString& scopeName) {
 void Document::setEncoding(const Encoding& encoding) {
   if (m_encoding != encoding) {
     m_encoding = encoding;
+    setModified(true);
     emit encodingChanged(encoding);
   }
 }
@@ -341,6 +342,7 @@ void Document::setEncoding(const Encoding& encoding) {
 void Document::setLineSeparator(const QString& lineSeparator) {
   if (m_lineSeparator != lineSeparator) {
     m_lineSeparator = lineSeparator;
+    setModified(true);
     emit lineSeparatorChanged(lineSeparator);
   }
 }
@@ -348,6 +350,7 @@ void Document::setLineSeparator(const QString& lineSeparator) {
 void Document::setBOM(const BOM& bom) {
   if (m_bom != bom) {
     m_bom = bom;
+    setModified(true);
     emit bomChanged(bom);
   }
 }
