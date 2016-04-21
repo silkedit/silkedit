@@ -69,6 +69,8 @@ public slots:
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
   QList<QWidget*> widgets() const;
+  bool isModified(int index);
+  void setModified(int index, bool modified);
 };
 
 Q_DECLARE_METATYPE(TabView*)
