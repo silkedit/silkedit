@@ -688,6 +688,7 @@ void TextEdit::timerEvent(QTimerEvent* event) {
   if (event->timerId() == trippleClickTimer.timerId()) {
     trippleClickTimer.stop();
   }
+  QPlainTextEdit::timerEvent(event);
 }
 
 void TextEdit::setViewportMargins(int left, int top, int right, int bottom) {
