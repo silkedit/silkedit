@@ -71,10 +71,6 @@ bool DocumentManager::save(Document* doc, bool beforeClose) {
     return false;
   }
 
-  if (!doc->isModified()) {
-    return false;
-  }
-
   if (doc->path().isEmpty()) {
     QString newFilePath = saveAs(doc, beforeClose);
     return !newFilePath.isEmpty();
@@ -117,7 +113,10 @@ QString DocumentManager::saveAs(Document* doc, bool beforeClose) {
       QFileDialog::getSaveFileName(nullptr, QObject::tr("Save As"), doc->path(), QString());
   if (!filePath.isEmpty()) {
     doc->setPath(filePath);
-    save(doc, beforeClose);
+    bool result = save(doc, beforeClose);
+    if (!result) {
+      qWarning() << "Failed to save" << doc->path();
+    }
   }
 
   return filePath;
