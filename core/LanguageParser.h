@@ -105,7 +105,8 @@ struct Pattern {
 
   Pattern* parent;
 
-  QStringRef cachedStr;
+  // If we use QStringRef, the app crashes when entering Japanese characters in Kotoeri
+  QString cachedStr;
   QAtomicPointer<Pattern> cachedResultPattern;
   QVector<Pattern*> cachedPatterns;
   boost::optional<QVector<Region>> cachedResultRegions;
