@@ -804,7 +804,7 @@ std::pair<Pattern*, boost::optional<QVector<Region>>> Pattern::find(const QStrin
     regions = pair.second;
   }
 
-  cachedStr = QStringRef(&str);
+  cachedStr = str;
   cachedResultRegions = regions;
   cachedResultPattern.storeRelease(pattern);
 
@@ -851,7 +851,7 @@ Node Pattern::createNode(const QString& str, const QVector<Region>& regions) {
     // end region can include an empty region [0,0]
     boost::optional<QVector<Region>> endMatchedRegions;
     if (tmpCachedRegions) {
-      endMatchedRegions = end->find(str, i, -1, getCaptures(cachedStr, *tmpCachedRegions));
+      endMatchedRegions = end->find(str, i, -1, getCaptures(QStringRef(&cachedStr), *tmpCachedRegions));
     } else {
       endMatchedRegions = end->find(str, i);
     }
