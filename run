@@ -105,7 +105,7 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list boost || brew install boost --c++11
-      
+
       # ICU
       if [ "$1" != '--skip-build' ]; then
         ARCHIVE=icu4c-57_1-src.tgz
@@ -528,12 +528,15 @@ generate_doc() {
 upload_doc() {
   generate_doc
 
+  ssh silksmiths@silksmiths.sakura.ne.jp "mkdir -p ~/www/silkedit/docs/api/"
+
   # upload to FTP
-  scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
+  scp -r ${API_DOC_DIR}/SilkEdit/${VERSION} silksmiths@silksmiths.sakura.ne.jp:~/www/silkedit/docs/api/
 
   # make current version as the latest API document
-  cp -r ${API_DOC_DIR}/SilkEdit/${VERSION} ${API_DOC_DIR}/SilkEdit/latest
-  scp -r ${API_DOC_DIR}/SilkEdit/latest silksmiths@silksmiths.sakura.ne.jp:~/www/docs/api/
+  DIST="~/www/silkedit/docs/api/${VERSION}"
+  LATEST="~/www/silkedit/docs/api/latest"
+  ssh silksmiths@silksmiths.sakura.ne.jp "rm -f ${LATEST} && ln -s ${DIST} ${LATEST}"
 }
 
 # -e: stops if any command returns non zero value
