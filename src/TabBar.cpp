@@ -131,6 +131,27 @@ void TabBar::mouseMoveEvent(QMouseEvent* event) {
       qDebug("dragging tab is over an another tab bar.");
 
       finishDrag();
+
+      // NOTE: dirty Hack!!!
+      //
+      // TabView A  TabView B
+      // tab1 tab2  tab3
+      //
+      // When starting to move a tab1, in QTabBarPrivate d->pressedIndex is 0
+      // When tab1 passes tab2, d->pressedIndex is 1
+      // When tab1 moves to TabView B, this code block is executed and onDetachTabEntered is
+      // emitted
+      // In TabView::detachTabEntered, insertTab is called with tab1
+      // TabView B becomes the parent of tab1 and TabView A removes tab1 becaues it's no longer
+      // parent
+      // In paintEvent of TabView A, it tries to paint d->tabList[d->pressedIndex] but crash occurs
+      // because it's out of range
+      //
+      // In mouseReleaseEvent below, it resets d->pressedIndex to -1 to avoid the situation above
+
+      mouseReleaseEvent(new QMouseEvent(QEvent::MouseButtonRelease, event->screenPos().toPoint(),
+                                        Qt::LeftButton, Qt::LeftButton, Qt::NoModifier));
+
       emit anotherTabBar->onDetachTabEntered(event->screenPos().toPoint());
       anotherTabBar->m_sourceTabBar = this;
       anotherTabBar->grabMouse();
@@ -221,12 +242,13 @@ void TabBar::contextMenuEvent(QContextMenuEvent* event) {
 
   // context menu on an each tab
   QMenu menu;
-  menu.addAction(new CommandAction("close_tab", tr("Close"), "close_tab",
-                                   &menu, CommandArgument{{"index", QVariant(index)}}));
+  menu.addAction(new CommandAction("close_tab", tr("Close"), "close_tab", &menu,
+                                   CommandArgument{{"index", QVariant(index)}}));
   menu.addAction(new CommandAction("close_other_tabs", tr("Close Other Tabs"), "close_other_tabs",
                                    &menu, CommandArgument{{"index", QVariant(index)}}));
-  menu.addAction(new CommandAction("close_tabs_to_the_right", tr("Close Tabs to the Right"), "close_tabs_to_the_right",
-                                   &menu, CommandArgument{{"index", QVariant(index)}}));
+  menu.addAction(new CommandAction("close_tabs_to_the_right", tr("Close Tabs to the Right"),
+                                   "close_tabs_to_the_right", &menu,
+                                   CommandArgument{{"index", QVariant(index)}}));
   menu.exec(event->globalPos());
 }
 
