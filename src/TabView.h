@@ -71,6 +71,7 @@ public slots:
   QList<QWidget*> widgets() const;
   bool isModified(int index);
   void setModified(int index, bool modified);
+  void saveDraggingTabInfo(int index);
 };
 
 Q_DECLARE_METATYPE(TabView*)

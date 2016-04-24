@@ -89,6 +89,7 @@ void TabBar::mousePressEvent(QMouseEvent* event) {
     m_dragStartPos = event->pos();
     QPoint offset = m_dragStartPos - tabRect(tabAt(event->pos())).topLeft();
     m_offsetFromWindow = offset + mapToGlobal(tabRect(0).topLeft()) - window()->pos();
+    emit onMousePress(tabAt(event->pos()));
   }
   m_dragInitiated = false;
 

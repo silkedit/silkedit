@@ -64,6 +64,7 @@ TabView::TabView(QWidget* parent)
   // startup
   setStyleSheet(QStringLiteral("TabView::tab-bar { left: 0px; }"));
 
+  connect(m_tabBar, &TabBar::onMousePress, this, &TabView::saveDraggingTabInfo);
   connect(m_tabBar, &TabBar::onDetachTabStarted, this, &TabView::detachTabStarted);
   connect(m_tabBar, &TabBar::onDetachTabEntered, this, &TabView::detachTabEntered);
   connect(m_tabBar, &TabBar::onDetachTabFinished, this, &TabView::detachTabFinished);
@@ -236,18 +237,8 @@ void TabView::setModified(int index, bool modified) {
 }
 
 void TabView::detachTabStarted(int index, const QPoint&) {
-  qDebug("DetachTabStarted");
+  qDebug() << "DetachTabStarted. index" << index;
   m_tabDragging = true;
-  DraggingTabInfo::setWidget(widget(index));
-
-  // strip rightmost * modified mark if the tab is modified state
-  QString text = tabText(index);
-  if (isModified(index)) {
-    text.chop(1);
-  }
-
-  DraggingTabInfo::setTabText(text);
-  Q_ASSERT(DraggingTabInfo::widget());
 }
 
 void TabView::detachTabEntered(const QPoint& enterPoint) {
@@ -255,15 +246,20 @@ void TabView::detachTabEntered(const QPoint& enterPoint) {
   qDebug() << "tabBar()->mapToGlobal(QPoint(0, 0)):" << tabBar()->mapToGlobal(QPoint(0, 0));
   QPoint relativeEnterPos = enterPoint - tabBar()->mapToGlobal(QPoint(0, 0));
   int index = tabBar()->tabAt(relativeEnterPos);
-  int newIndex = insertTab(index, DraggingTabInfo::widget(), DraggingTabInfo::tabText());
-  DraggingTabInfo::setWidget(nullptr);
-  m_tabDragging = false;
-  tabRemoved(-1);
-  QPoint tabCenterPos = tabBar()->tabRect(newIndex).center();
+//  qDebug() << "dragged tab text" << DraggingTabInfo::tabText();
+  if (DraggingTabInfo::widget()) {
+    int newIndex = insertTab(index, DraggingTabInfo::widget(), DraggingTabInfo::tabText());
+    DraggingTabInfo::clear();
+    m_tabDragging = false;
+    tabRemoved(-1);
+    QPoint tabCenterPos = tabBar()->tabRect(newIndex).center();
 
-  qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint
-           << "relativeEnterPos:" << relativeEnterPos;
-  m_tabBar->startMovingTab(tabCenterPos);
+    qDebug() << "tabCenterPos:" << tabCenterPos << "enterPoint:" << enterPoint
+             << "relativeEnterPos:" << relativeEnterPos;
+    m_tabBar->startMovingTab(tabCenterPos);
+  } else {
+    qWarning() << "dragged tab widget is null";
+  }
 }
 
 void TabView::tabInserted(int index) {
@@ -277,6 +273,21 @@ void TabView::tabRemoved(int index) {
   if (count() == 0 && !m_tabDragging) {
     emit allTabRemoved();
   }
+}
+
+void TabView::saveDraggingTabInfo(int index) {
+//  qDebug() << "saveDraggingTabInfo";
+  DraggingTabInfo::setWidget(widget(index));
+
+  // strip rightmost * modified mark if the tab is modified state
+  QString text = tabText(index);
+  if (isModified(index)) {
+    text.chop(1);
+  }
+
+//  qDebug() << "detached tab's text" << text;
+  DraggingTabInfo::setTabText(text);
+  Q_ASSERT(DraggingTabInfo::widget());
 }
 
 void TabView::mouseReleaseEvent(QMouseEvent* event) {
@@ -417,7 +428,7 @@ void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
     if (DraggingTabInfo::widget()) {
       newWindow->getActiveTabViewOrCreate()->addTab(DraggingTabInfo::widget(),
                                                     DraggingTabInfo::tabText());
-      DraggingTabInfo::setWidget(nullptr);
+      DraggingTabInfo::clear();
     } else {
       qWarning("dragging widget is null");
     }
