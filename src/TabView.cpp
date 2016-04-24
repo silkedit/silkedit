@@ -247,7 +247,6 @@ void TabView::detachTabStarted(int index, const QPoint&) {
   }
 
   DraggingTabInfo::setTabText(text);
-  removeTab(index);
   Q_ASSERT(DraggingTabInfo::widget());
 }
 
