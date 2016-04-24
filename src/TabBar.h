@@ -34,6 +34,7 @@ class TabBar : public QTabBar {
 
 signals:
   // Detach Tab
+  void onMousePress(int index);
   void onDetachTabStarted(int index, const QPoint& startPoint);
   void onDetachTabEntered(const QPoint& enterPoint);
   void onDetachTabFinished(const QPoint& newWindowPos, bool isFloating);
