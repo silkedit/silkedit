@@ -252,16 +252,6 @@ void TabBar::contextMenuEvent(QContextMenuEvent* event) {
   menu.exec(event->globalPos());
 }
 
-void TabBar::paintEvent(QPaintEvent* event) {
-  // Without the following condition, moving tab1 from TabView A to TabView B causes crash.
-  // But this makes TabView A looks weird because paintEvent is skipped
-  // TabView A     TabView B
-  // tab1 tab2     tab3
-  if (!(count() == 1 && currentIndex() == -1)) {
-    QTabBar::paintEvent(event);
-  }
-}
-
 void TabBar::finishDrag() {
   m_dragInitiated = false;
   m_dragStartPos = QPoint();

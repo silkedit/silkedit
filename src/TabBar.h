@@ -31,7 +31,6 @@ class TabBar : public QTabBar {
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
   void contextMenuEvent(QContextMenuEvent * event) override;
-  void paintEvent(QPaintEvent *event) override;
 
 signals:
   // Detach Tab
