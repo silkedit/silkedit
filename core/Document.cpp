@@ -310,6 +310,7 @@ Document* Document::createBlank() {
 
 void Document::setPath(const QString& path) {
   m_path = path;
+  clearUndoRedoStacks();
   emit pathUpdated(path);
 }
 
