@@ -242,7 +242,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 }
 
 boost::optional<Node> SyntaxHighlighter::findScope(const Region& search, const Node& node) {
-  size_t idx = Util::binarySearch(node.children.size(), [search, node](size_t i) {
+  int idx = Util::binarySearch(node.children.size(), [search, node](int i) {
     return node.children[i].region.begin() >= search.begin() ||
            node.children[i].region.fullyCovers(search);
   });
