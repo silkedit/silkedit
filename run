@@ -178,7 +178,7 @@ resolve() {
 
     else
         # yaml-cpp
-        if [ ! -f lib/libyaml-cppmd.lib ]; then
+        if [ "$1" != '--skip-build' ]; then
             echo 'Building yaml-cpp ...'
             wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
             tar zxf yaml-cpp-0.5.1.tar.gz
@@ -201,9 +201,9 @@ resolve() {
             msbuild.exe INSTALL.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
             msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
             msbuild.exe INSTALL.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
+            cp './yaml-cpp.dir/Debug/yaml-cpp static md.pdb' ../../lib
             cd ../..
-            # Don't delete yaml-cpp-0.5.1 dir because libyaml-cppmdd.lib refers to a pdb in there
-            rm yaml-cpp-*.tar.gz
+            rm -rf yaml-cpp-*
         fi
 
   			# build node.dll
@@ -255,9 +255,11 @@ resolve() {
           if [ $OS = 'Win32' ]; then
             mv ${DIR}/lib/sicuuc*.lib lib/icu
             mv ${DIR}/lib/sicudt*.lib lib/icu
+            mv ${DIR}/bin/icuMDd.pdb lib/icu
           else
             mv ${DIR}/lib64/sicuuc*.lib lib/icu
             mv ${DIR}/lib64/sicudt*.lib lib/icu
+            mv ${DIR}/bin64/icuMDd.pdb lib/icu
           fi
           rm -rf ${DIR}*
         fi
