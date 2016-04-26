@@ -40,6 +40,10 @@ class TabView : public QTabWidget {
   void loadState(QSettings &settings);
   QString tabTextWithoutModificationState(int index) const;
 
+  // custom tabText functions which handles * modified mark internally
+  void setTabText(int index, const QString &label);
+  QString tabText(int index) const;
+
 public slots:
   bool closeTab(int index);
   bool closeTab(QWidget* widget);
@@ -69,7 +73,7 @@ public slots:
   void detachTabEntered(const QPoint& enterPoint);
   void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
   QList<QWidget*> widgets() const;
-  bool isModified(int index);
+  bool isModified(int index) const;
   void setModified(int index, bool modified);
   void saveDraggingTabInfo(int index);
 };

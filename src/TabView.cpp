@@ -91,6 +91,7 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
   if (textEdit) {
     connect(textEdit, &TextEdit::pathUpdated, this, [=](const QString& path) {
+      setModified(indexOf(textEdit), false);
       setTabText(indexOf(textEdit), getFileNameFrom(path));
       setTabToolTip(currentIndex(), path);
     });
@@ -223,7 +224,7 @@ int TabView::indexOfPath(const QString& path) {
   return -1;
 }
 
-bool TabView::isModified(int index) {
+bool TabView::isModified(int index) const {
   auto tabData = tabBar()->tabData(index);
   return tabData.canConvert<bool>() && tabData.toBool();
 }
@@ -246,7 +247,7 @@ void TabView::detachTabEntered(const QPoint& enterPoint) {
   qDebug() << "tabBar()->mapToGlobal(QPoint(0, 0)):" << tabBar()->mapToGlobal(QPoint(0, 0));
   QPoint relativeEnterPos = enterPoint - tabBar()->mapToGlobal(QPoint(0, 0));
   int index = tabBar()->tabAt(relativeEnterPos);
-//  qDebug() << "dragged tab text" << DraggingTabInfo::tabText();
+  //  qDebug() << "dragged tab text" << DraggingTabInfo::tabText();
   if (DraggingTabInfo::widget()) {
     int newIndex = insertTab(index, DraggingTabInfo::widget(), DraggingTabInfo::tabText());
     DraggingTabInfo::clear();
@@ -276,17 +277,9 @@ void TabView::tabRemoved(int index) {
 }
 
 void TabView::saveDraggingTabInfo(int index) {
-//  qDebug() << "saveDraggingTabInfo";
+  //  qDebug() << "saveDraggingTabInfo";
   DraggingTabInfo::setWidget(widget(index));
-
-  // strip rightmost * modified mark if the tab is modified state
-  QString text = tabText(index);
-  if (isModified(index)) {
-    text.chop(1);
-  }
-
-//  qDebug() << "detached tab's text" << text;
-  DraggingTabInfo::setTabText(text);
+  DraggingTabInfo::setTabText(tabText(index));
   Q_ASSERT(DraggingTabInfo::widget());
 }
 
@@ -401,17 +394,8 @@ void TabView::updateTabTextBasedOn(bool changed) {
   if (TextEdit* textEdit = qobject_cast<TextEdit*>(QObject::sender())) {
     int index = indexOf(textEdit);
     QString text = tabText(index);
-    if (changed) {
-      if (!isModified(index)) {
-        setTabText(index, text + "*");
-        // set tabData true not to add additional * mark
-        setModified(index, true);
-      }
-    } else if (text.endsWith('*')) {
-      text.chop(1);
-      setTabText(index, text);
-      setModified(index, false);
-    }
+    setModified(index, changed);
+    setTabText(index, text);
   } else {
     qDebug("sender is null or not TextEdit");
   }
@@ -500,4 +484,21 @@ QString TabView::tabTextWithoutModificationState(int index) const {
   }
 
   return text.left(lastIndexOfAsterisk + 1);
+}
+
+void TabView::setTabText(int index, const QString& label) {
+  if (isModified(index)) {
+    QTabWidget::setTabText(index, label + "*");
+  } else {
+    QTabWidget::setTabText(index, label);
+  }
+}
+
+QString TabView::tabText(int index) const {
+  const QString& text = QTabWidget::tabText(index);
+  if (isModified(index)) {
+    return text.left(text.length() - 1);
+  } else {
+    return text;
+  }
 }
