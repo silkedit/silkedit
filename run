@@ -273,7 +273,7 @@ resolve() {
 			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
 			patch -p1 --binary -N < ../crashreporter/patch/common.gypi.patch
 
-			/c/tools/python2/Scripts/gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
+			gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
 
       # //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
             mkdir -p ../lib/breakpad/Debug
