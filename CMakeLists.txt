@@ -46,12 +46,6 @@ else ()
 endif ()
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
-if (APPLE)
-  set(CMAKE_PREFIX_PATH "/usr/local/Qt-5.6.0")
-else (MSVC)
-  set(CMAKE_PREFIX_PATH "C:/Qt/Qt5.6.0")
-endif ()
-
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
 find_package(Qt5Network REQUIRED)
@@ -222,12 +216,14 @@ if(APPLE)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/resources/fonts ${PROJECT_NAME}.app/Contents/Resources)
 
   # Copy qt_<locale>.qm files because macdeployqt doesn't copy them (windeployqt does)
-  file(COPY ${CMAKE_PREFIX_PATH}/translations/qt_ja.qm
-            ${CMAKE_PREFIX_PATH}/translations/qtmultimedia_ja.qm
-            ${CMAKE_PREFIX_PATH}/translations/qtbase_ja.qm
-            ${CMAKE_PREFIX_PATH}/translations/qtquick1_ja.qm
-            ${CMAKE_PREFIX_PATH}/translations/qtscript_ja.qm
-            ${CMAKE_PREFIX_PATH}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
+  set(QT_HOME "/usr/local/Qt-5.6.0")
+
+  file(COPY ${QT_HOME}/translations/qt_ja.qm
+            ${QT_HOME}/translations/qtmultimedia_ja.qm
+            ${QT_HOME}/translations/qtbase_ja.qm
+            ${QT_HOME}/translations/qtquick1_ja.qm
+            ${QT_HOME}/translations/qtscript_ja.qm
+            ${QT_HOME}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_NAME}.app/Contents/Resources/translations)
 
   # breakpad framework
   file(COPY ${Breakpad} DESTINATION ${PROJECT_NAME}.app/Contents/Frameworks)
