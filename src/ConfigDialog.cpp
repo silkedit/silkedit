@@ -1,4 +1,4 @@
-#include <QListWidgetItem>
+﻿#include <QListWidgetItem>
 #include <QStackedWidget>
 #include "ConfigDialog.h"
 #include "ui_ConfigDialog.h"
@@ -6,9 +6,12 @@
 #include "PackageConfigView.h"
 #include "util/YamlUtil.h"
 #include "core/Config.h"
+#include "core/PackageManager.h"
 
 using core::ConfigDefinition;
 using core::Config;
+using core::PackageManager;
+using core::Package;
 
 QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 ConfigDialog* ConfigDialog::s_dialog = nullptr;
@@ -21,6 +24,10 @@ void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configP
 
   for (const auto& def : configList) {
     Config::singleton().addPackageConfigDefinition(def);
+  }
+
+  if (s_dialog->isVisible()) {
+    s_dialog->addPackageConfig(pkgName, configList);
   }
 }
 
@@ -47,6 +54,7 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
   }
 
   ui->listWidget->setCurrentRow(0);
+
   connect(ui->listWidget, &QListWidget::currentItemChanged,
           [&](QListWidgetItem* current, QListWidgetItem* previous) {
             if (!current) {
@@ -55,10 +63,11 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
             int index = ui->listWidget->row(current);
             ui->stackedWidget->setCurrentIndex(index);
           });
-
   connect(ui->filterLine, &QLineEdit::textEdited, this, &ConfigDialog::filterConfigs);
   connect(ui->okButton, &QPushButton::clicked, this, &ConfigDialog::done);
   connect(this, &ConfigDialog::finished, this, [=] { s_dialog = nullptr; });
+  connect(&PackageManager::singleton(), &PackageManager::packageRemoved, this,
+          [=](const Package& pkg) { removePackageConfig(pkg.name); });
 }
 
 ConfigDialog::~ConfigDialog() {
@@ -100,4 +109,22 @@ void ConfigDialog::filterConfigs(const QString& text) {
   if (row < ui->listWidget->count()) {
     ui->listWidget->setCurrentRow(row);
   }
+}
+
+void ConfigDialog::removePackageConfig(const QString& pkgName) {
+  s_packageConfigs.remove(pkgName);
+  auto items = ui->listWidget->findItems(pkgName, Qt::MatchExactly);
+  for (auto item : items) {
+    int row = ui->listWidget->row(item);
+    if (row >= 0) {
+      ui->stackedWidget->removeWidget(ui->stackedWidget->widget(row));
+    }
+    ui->listWidget->item(row)->setHidden(true);
+  }
+}
+
+void ConfigDialog::addPackageConfig(const QString& pkgName,
+                                    QList<core::ConfigDefinition> configList) {
+  ui->listWidget->addItem(pkgName);
+  ui->stackedWidget->addWidget(new PackageConfigView(configList));
 }
