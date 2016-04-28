@@ -100,6 +100,11 @@ Document::Document(const QString& path,
 
   // QTextDocument(text) sets modified true, so set it false again
   setModified(false);
+
+  // Clears undo stack
+  // NOTE: clearUndoRedoStacks doesn't work. (it emits modificationChanged signal when rehighlight)
+  setUndoRedoEnabled(false);
+  setUndoRedoEnabled(true);
 }
 
 int Document::tabWidth(Language* lang) {
@@ -309,9 +314,11 @@ Document* Document::createBlank() {
 }
 
 void Document::setPath(const QString& path) {
-  m_path = path;
-  clearUndoRedoStacks();
-  emit pathUpdated(path);
+  if (m_path != path) {
+    m_path = path;
+    clearUndoRedoStacks();
+    emit pathUpdated(path);
+  }
 }
 
 void Document::setLanguage(const QString& scopeName) {
