@@ -76,6 +76,7 @@ public slots:
   bool isModified(int index) const;
   void setModified(int index, bool modified);
   void saveDraggingTabInfo(int index);
+  void setTabTextAndToolTip(TextEdit *textEdit, const QString &path);
 };
 
 Q_DECLARE_METATYPE(TabView*)
