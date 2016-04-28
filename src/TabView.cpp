@@ -151,6 +151,7 @@ int TabView::open(const QString& path) {
   if (newDoc->isModified()) {
     emit view->modificationChanged(true);
   }
+
   return newIndex;
 }
 
@@ -179,7 +180,7 @@ void TabView::addNewTab() {
     doc->setModified(true);
     TextEdit* view = new TextEdit(this);
     std::shared_ptr<Document> newDoc(doc);
-    view->setDocument(std::move(newDoc));
+    view->setDocument(newDoc);
     addTab(view, DocumentManager::DEFAULT_FILE_NAME);
   }
 }
