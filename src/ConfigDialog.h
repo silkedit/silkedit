@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <string>
 #include <QDialog>
@@ -31,4 +31,6 @@ class ConfigDialog : public QDialog {
   explicit ConfigDialog(QWidget* parent = 0);
   ~ConfigDialog();
   void filterConfigs(const QString& text);
+  void removePackageConfig(const QString& pkgName);
+  void addPackageConfig(const QString& pkgName, QList<core::ConfigDefinition> configList);
 };
