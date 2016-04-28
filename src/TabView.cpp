@@ -82,6 +82,12 @@ int TabView::addTab(QWidget* page, const QString& label) {
   return insertTab(-1, page, label);
 }
 
+void TabView::setTabTextAndToolTip(TextEdit* textEdit, const QString& path) {
+  setModified(indexOf(textEdit), false);
+  setTabText(indexOf(textEdit), getFileNameFrom(path));
+  setTabToolTip(indexOf(textEdit), path);
+}
+
 int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   if (!widget) {
     return -1;
@@ -90,11 +96,8 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   widget->setParent(this);
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
   if (textEdit) {
-    connect(textEdit, &TextEdit::pathUpdated, this, [=](const QString& path) {
-      setModified(indexOf(textEdit), false);
-      setTabText(indexOf(textEdit), getFileNameFrom(path));
-      setTabToolTip(currentIndex(), path);
-    });
+    connect(textEdit, &TextEdit::pathUpdated, this,
+            [=](const QString& path) { setTabTextAndToolTip(textEdit, path); });
     connect(textEdit, &TextEdit::modificationChanged, this, &TabView::updateTabTextBasedOn);
     connect(textEdit, &TextEdit::fileDropped, this, &TabView::open);
   }
@@ -133,23 +136,22 @@ int TabView::open(const QString& path) {
     if (textEdit && isUntitledAndEmpty(textEdit->document())) {
       qDebug() << "trying to replace an empty doc with a new one";
       textEdit->setDocument(newDoc);
-      textEdit->setPath(path);
-      setTabToolTip(currentIndex(), path);
+      setTabTextAndToolTip(textEdit, path);
       // emit activeViewChanged to update the status bar
       emit activeViewChanged(textEdit, textEdit);
       return currentIndex();
     }
   }
 
-  TextEdit* view = new TextEdit(this);
-  view->setDocument(newDoc);
-  auto newIndex = addTab(view, getFileNameFrom(path));
+  TextEdit* textEdit = new TextEdit(this);
+  textEdit->setDocument(newDoc);
+  auto newIndex = addTab(textEdit, getFileNameFrom(path));
 
-  setTabToolTip(newIndex, path);
+  setTabTextAndToolTip(textEdit, path);
 
   // restore modification state for an existing modified document
   if (newDoc->isModified()) {
-    emit view->modificationChanged(true);
+    emit textEdit->modificationChanged(true);
   }
 
   return newIndex;
