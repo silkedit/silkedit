@@ -427,7 +427,7 @@ void TextEdit::setDocument(std::shared_ptr<Document> document) {
   // Compare previous and current encodings
   boost::optional<Encoding> prevEnc = boost::none;
   boost::optional<Encoding> newEnc = boost::none;
-  if (d_ptr->m_document && document) {
+  if (d_ptr->m_document) {
     prevEnc = d_ptr->m_document->encoding();
   }
   if (document) {
@@ -453,7 +453,7 @@ void TextEdit::setDocument(std::shared_ptr<Document> document) {
   // Compare previous and current BOM
   boost::optional<core::BOM> prevBOM = boost::none;
   boost::optional<core::BOM> newBOM = boost::none;
-  if (d_ptr->m_document && document) {
+  if (d_ptr->m_document) {
     prevBOM = d_ptr->m_document->bom();
   }
   if (document) {
@@ -461,6 +461,18 @@ void TextEdit::setDocument(std::shared_ptr<Document> document) {
   }
   if (prevBOM != newBOM && newBOM) {
     emit bomChanged(*newBOM);
+  }
+
+  // Compare previous and current path
+  QString prevPath, newPath;
+  if (d_ptr->m_document) {
+    prevPath = d_ptr->m_document->path();
+  }
+  if (document) {
+    newPath = document->path();
+  }
+  if (prevPath != newPath && !newPath.isEmpty()) {
+    emit pathUpdated(newPath);
   }
 
   d->setupConnections(document);
