@@ -178,6 +178,7 @@ void Window::updateConnection(QWidget* oldView, QWidget* newView) {
     disconnect(oldEditView, &TextEdit::lineSeparatorChanged, ui->statusBar,
                &StatusBar::setLineSeparator);
     disconnect(oldEditView, &TextEdit::bomChanged, ui->statusBar, &StatusBar::setBOM);
+    disconnect(oldEditView, &TextEdit::pathUpdated, this, &Window::updateTitle);
   }
 
   TextEdit* newEditView = qobject_cast<TextEdit*>(newView);
@@ -187,6 +188,7 @@ void Window::updateConnection(QWidget* oldView, QWidget* newView) {
     connect(newEditView, &TextEdit::lineSeparatorChanged, ui->statusBar,
             &StatusBar::setLineSeparator);
     connect(newEditView, &TextEdit::bomChanged, ui->statusBar, &StatusBar::setBOM);
+    connect(newEditView, &TextEdit::pathUpdated, this, &Window::updateTitle);
   }
 }
 
