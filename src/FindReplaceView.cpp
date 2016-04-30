@@ -133,15 +133,6 @@ void FindReplaceView::showEvent(QShowEvent*) {
   ui->lineEditForFind->selectAll();
 }
 
-void FindReplaceView::keyPressEvent(QKeyEvent* event) {
-  switch (event->key()) {
-    case Qt::Key_Escape:
-      hide();
-      break;
-  }
-  QWidget::keyPressEvent(event);
-}
-
 // Override this method to cycle tabs within this view
 bool FindReplaceView::focusNextPrevChild(bool next) {
   if (next && ui->replaceAllButton->hasFocus()) {

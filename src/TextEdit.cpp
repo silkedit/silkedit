@@ -942,14 +942,6 @@ void TextEdit::keyPressEvent(QKeyEvent* event) {
       event->accept();
       return;
     }
-    case Qt::Key_Escape:
-      // todo: define this behavior in keymap.yml
-      // https://trello.com/c/S46aBYnu
-      if (Window* window = App::instance()->activeWindow()) {
-        window->hideFindReplacePanel();
-      }
-      clearSelection();
-      break;
   }
 
   QPlainTextEdit::keyPressEvent(event);
