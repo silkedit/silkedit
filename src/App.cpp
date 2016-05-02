@@ -1,4 +1,5 @@
-﻿#include <QWidget>
+﻿#include <algorithm>
+#include <QWidget>
 #include <QTranslator>
 #include <QChildEvent>
 #include <QProcess>
@@ -282,7 +283,13 @@ Window* App::activeWindow() {
 
   // If we can't find it, try to find the top level window
   if (!window && !QApplication::topLevelWidgets().isEmpty()) {
-    window = qobject_cast<Window*>(QApplication::topLevelWidgets().first());
+    auto widgets = QApplication::topLevelWidgets();
+    auto it = std::find_if(widgets.constBegin(), widgets.constEnd(),
+                           [](QWidget* widget) { return qobject_cast<Window*>(widget); });
+    if (it != widgets.constEnd()) {
+      window = qobject_cast<Window*>(*it);
+      Q_ASSERT(window);
+    }
   }
 
   return window;
