@@ -495,8 +495,6 @@ localize() {
 }
 
 send_symbol() {
-    build
-
     if [ "$1" = '-edge' ]; then
       APP_NAME="SilkEdit_Edge"
     else
