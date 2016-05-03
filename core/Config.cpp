@@ -429,7 +429,7 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return get(THEME_KEY, "Solarized (light)");
+  return get(THEME_KEY, "Tomorrow");
 }
 
 QString Config::fontFamily() {
