@@ -341,7 +341,7 @@ package.jsonのサンプル
     "url": "https://github.com/silkedit/yaml-validator.git"
   },
   "author": {
-    "name": "SilkEdit team"
+    "name": "SilkEdit"
   },
   "license": "MIT",
   "dependencies": {
