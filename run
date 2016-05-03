@@ -123,7 +123,7 @@ resolve() {
       fi
 
       # breakpad
-      if [ ! -d breakpad/src/client/mac/build/Release/Breakpad.framework ]; then
+      if [ "$1" != '--skip-build' ]; then
         echo 'Building Breakpad client ...'
 
         cd breakpad
@@ -133,12 +133,14 @@ resolve() {
       fi
 
       # Download BugSplat breakpad to send a symbol using dump_sdk_symbols (symupload can't be built on Mac)
-      mkdir -p bugsplat
-      cd bugsplat
-      wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
-      unzip -o Breakpad.framework.zip
-      rm Breakpad.framework.zip
-      cd ..
+      if [ ! -f bugsplat/Breakpad.framework/Resources/dump_sdk_symbols ]; then
+        mkdir -p bugsplat
+        cd bugsplat
+        wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
+        unzip -o Breakpad.framework.zip
+        rm Breakpad.framework.zip
+        cd ..
+      fi
 
       if [ "$1" != '--skip-build' ]; then
         #Onigmo
