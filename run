@@ -439,7 +439,6 @@ analyze() {
         exit 1
     fi
 
-    build
     tmpFile=/tmp/clang-check-err
     find src core -name '*.cpp' |xargs clang-check -analyze -p build 2>&1 | tee $tmpFile
     if [ $(cat $tmpFile | grep warning | wc -l) != 0 ]; then
