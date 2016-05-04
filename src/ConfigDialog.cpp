@@ -26,7 +26,7 @@ void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configP
     Config::singleton().addPackageConfigDefinition(def);
   }
 
-  if (s_dialog->isVisible()) {
+  if (s_dialog && s_dialog->isVisible()) {
     s_dialog->addPackageConfig(pkgName, configList);
   }
 }
