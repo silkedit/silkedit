@@ -2,6 +2,7 @@
 
 ProjectTreeView {
     border: none;
+    outline: 0;
 }
 
 

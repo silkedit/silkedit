@@ -16,5 +16,9 @@
         <file>images/nextButton-black.svg</file>
         <file>images/prevButton-white.svg</file>
         <file>images/prevButton-black.svg</file>
+        <file>images/branch-closed-white.svg</file>
+        <file>images/branch-closed-black.svg</file>
+        <file>images/branch-open-white.svg</file>
+        <file>images/branch-open-black.svg</file>
     </qresource>
 </RCC>
