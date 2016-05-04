@@ -130,8 +130,8 @@ ProjectTreeView {
   color: %2;
   selection-background-color: %3
 }
-ProjectTreeView::item:selected,
-ProjectTreeView::branch:selected {
+
+ProjectTreeView::item:selected {
   background-color: %3;
   color:%4;
 }
