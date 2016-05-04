@@ -122,17 +122,20 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
   }
 
   if (theme->projectTreeViewSettings) {
-    const QString& style =
+    QString style =
         QStringLiteral(
-            "ProjectTreeView {"
-            "background-color: %1;"
-            "color: %2;"
-            "selection-background-color: %3"
-            "}"
-            "ProjectTreeView::item:selected {"
-            "background-color: %3;"
-            "color:%4;"
-            "}")
+            R"(
+ProjectTreeView {
+  background-color: %1;
+  color: %2;
+  selection-background-color: %3
+}
+ProjectTreeView::item:selected,
+ProjectTreeView::branch:selected {
+  background-color: %3;
+  color:%4;
+}
+)")
             .arg(Util::qcolorForStyleSheet(
                      theme->projectTreeViewSettings->value(QStringLiteral("background"))),
                  Util::qcolorForStyleSheet(
@@ -141,6 +144,43 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
                      theme->projectTreeViewSettings->value(QStringLiteral("selectionBackground"))),
                  Util::qcolorForStyleSheet(
                      theme->projectTreeViewSettings->value(QStringLiteral("selectionForeground"))));
+
+// The branch indicator icon is hidden in a dark theme on Windows, so we use a custom icon
+#ifdef Q_OS_WIN
+    QString branchClosedImage;
+    QString branchOpenImage;
+    int padding = -1;
+
+    if (theme->isDarkTheme()) {
+      branchClosedImage = ":/images/branch-closed-white.svg";
+      branchOpenImage = ":/images/branch-open-white.svg";
+      padding = 5;
+    } else {
+      branchClosedImage = ":/images/branch-closed-black.svg";
+      branchOpenImage = ":/images/branch-open-black.svg";
+      padding = 6;
+    }
+
+    Q_ASSERT(!branchClosedImage.isEmpty());
+    Q_ASSERT(!branchOpenImage.isEmpty());
+    Q_ASSERT(padding >= 0);
+
+      style += QStringLiteral(R"(
+ProjectTreeView::branch:has-children:!has-siblings:closed,
+ProjectTreeView::branch:closed:has-children:has-siblings {
+  border-image: none;
+  image: url(%1);
+  padding: %2px;
+}
+
+ProjectTreeView::branch:open:has-children:!has-siblings,
+ProjectTreeView::branch:open:has-children:has-siblings  {
+  border-image: none;
+  image: url(%3);
+  padding: %2px;
+}
+                            )").arg(branchClosedImage).arg(padding).arg(branchOpenImage);
+#endif
 
     this->setStyleSheet(style);
 
