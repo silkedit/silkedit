@@ -1,4 +1,4 @@
-﻿
+
 #include "stringconv.h"
 
 namespace string_util {

@@ -1,4 +1,4 @@
-﻿#include <sstream>
+#include <sstream>
 #include <QDebug>
 #include <QLoggingCategory>
 

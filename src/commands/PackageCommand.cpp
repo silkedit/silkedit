@@ -1,4 +1,4 @@
-﻿#include "PackageCommand.h"
+#include "PackageCommand.h"
 #include "Helper.h"
 
 PackageCommand::PackageCommand(const QString& name, const QString& description)

@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <QtTest/QtTest>
 
 #include "Theme.h"

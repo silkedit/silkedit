@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <QtCore/QString>
 
 namespace Breakpad {

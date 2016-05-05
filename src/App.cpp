@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <QWidget>
 #include <QTranslator>
 #include <QChildEvent>

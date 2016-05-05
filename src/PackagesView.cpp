@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QAbstractTableModel>

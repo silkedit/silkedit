@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <QDir>
 
 #include "ThemeManager.h"

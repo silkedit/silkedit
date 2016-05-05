@@ -1,4 +1,4 @@
-﻿#include <QDomElement>
+#include <QDomElement>
 #include <QDomNode>
 #include <QDomDocument>
 

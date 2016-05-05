@@ -1,4 +1,4 @@
-﻿#include "ConditionExpression.h"
+#include "ConditionExpression.h"
 #include "ConditionManager.h"
 
 namespace core {

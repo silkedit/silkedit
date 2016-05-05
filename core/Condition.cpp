@@ -1,4 +1,4 @@
-﻿#include <QString>
+#include <QString>
 #include <QDebug>
 
 #include "Condition.h"

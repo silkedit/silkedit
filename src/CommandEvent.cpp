@@ -1,4 +1,4 @@
-﻿#include "CommandEvent.h"
+#include "CommandEvent.h"
 #include "CommandManager.h"
 
 using core::ConditionExpression;
