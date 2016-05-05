@@ -284,7 +284,7 @@ void Config::setFont(const v8::FunctionCallbackInfo<v8::Value>& args) {
   if (obj->InternalFieldCount() > 0) {
     QObject* fontObj = ObjectStore::unwrap(obj);
     if (!fontObj) {
-      V8Util::throwError(isolate, "QObject is null");
+      V8Util::throwError(isolate, "no associated QObject");
       return;
     }
 

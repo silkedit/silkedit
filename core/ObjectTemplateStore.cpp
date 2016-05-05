@@ -78,7 +78,7 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
   Isolate* isolate = info.GetIsolate();
   QObject* obj = ObjectStore::unwrap(info.Holder());
   if (!obj) {
-    V8Util::throwError(isolate, "QObject is null");
+    V8Util::throwError(isolate, "no associated QObject");
     return;
   }
 
@@ -109,7 +109,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   Isolate* isolate = info.GetIsolate();
   QObject* obj = ObjectStore::unwrap(info.Holder());
   if (!obj) {
-    V8Util::throwError(isolate, "QObject is null");
+    V8Util::throwError(isolate, "no associated QObject");
     return;
   }
 
