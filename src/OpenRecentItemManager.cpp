@@ -5,6 +5,7 @@
 #include "DocumentManager.h"
 #include "App.h"
 #include "TabView.h"
+#include "TabViewGroup.h"
 #include "CommandAction.h"
 #include "commands/ReopenLastClosedFileCommand.h"
 #include "CommandManager.h"
@@ -25,7 +26,14 @@ void OpenRecentItemManager::clear() {
 void OpenRecentItemManager::reopenLastClosedFile() {
   for (auto& path : m_recentItems) {
     auto tabView = App::instance()->activeTabView();
-    if (tabView->indexOfPath(path) < 0) {
+    if (!tabView) {
+      auto tabViewGroup = App::instance()->activeTabViewGroup();
+      if (tabViewGroup) {
+        tabView = tabViewGroup->addNewTabView();
+      }
+    }
+
+    if (tabView && tabView->indexOfPath(path) < 0) {
       tabView->open(path);
       return;
     }
