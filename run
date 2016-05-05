@@ -383,7 +383,7 @@ make_installer() {
 				do
           rm -rf /Volumes/SilkEdit*
           touch dmg/.Trash
-          hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO SilkEdit.dmg && break
+          hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO -imagekey zlib-level=9 SilkEdit.dmg && break
           echo "Failed to create DMG. retrying"
 					n=$[$n+1]
 					sleep 3
