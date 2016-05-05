@@ -1,4 +1,4 @@
-﻿#include "BOM.h"
+#include "BOM.h"
 #include <QDebug>
 #include <QTextCodec>
 

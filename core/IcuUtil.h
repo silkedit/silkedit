@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 // both Onigmo and ICU defines typedef UChar but they are different types.
 // So IcuUtil exists independent Util class.

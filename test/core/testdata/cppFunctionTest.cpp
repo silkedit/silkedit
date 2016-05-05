@@ -1,4 +1,4 @@
-﻿QString preservedCaseText(const QString& oldStr, const QString& newStr) {
+QString preservedCaseText(const QString& oldStr, const QString& newStr) {
   if (oldStr.isEmpty()) {
     return newStr;
   }

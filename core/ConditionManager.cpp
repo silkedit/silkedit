@@ -1,4 +1,4 @@
-﻿#include "ConditionManager.h"
+#include "ConditionManager.h"
 #include "V8Util.h"
 #include "atom/node_includes.h"
 #include "OSCondition.h"

@@ -1,4 +1,4 @@
-﻿#include "crash_handler.h"
+#include "crash_handler.h"
 
 #if defined(Q_OS_WIN32)
 //breakpad itself inherently depends on DbgHelp.h from Windows SDK, because of usage of Microsoft minidump format.

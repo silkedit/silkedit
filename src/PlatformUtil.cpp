@@ -1,4 +1,4 @@
-﻿#include <QProcess>
+#include <QProcess>
 #include <QStringList>
 #include <QDir>
 

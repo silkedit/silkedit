@@ -1,4 +1,4 @@
-﻿#include <algorithm>
+#include <algorithm>
 #include <memory>
 #include <QDebug>
 #include <QVariant>

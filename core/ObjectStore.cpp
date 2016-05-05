@@ -1,4 +1,4 @@
-﻿#include <QVariant>
+#include <QVariant>
 #include <QDebug>
 #include <QMetaMethod>
 #include <QThread>

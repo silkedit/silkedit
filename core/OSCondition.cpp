@@ -1,4 +1,4 @@
-﻿#include <QString>
+#include <QString>
 
 #include "OSCondition.h"
 

@@ -1,4 +1,4 @@
-﻿#include <QAction>
+#include <QAction>
 #include <QMessageBox>
 
 #include "MenuBar.h"

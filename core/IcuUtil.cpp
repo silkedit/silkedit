@@ -1,4 +1,4 @@
-﻿#include "IcuUtil.h"
+#include "IcuUtil.h"
 
 namespace core {
 QString IcuUtil::toQString(const UnicodeString& string) {
