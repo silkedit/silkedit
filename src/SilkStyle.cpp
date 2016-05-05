@@ -1,4 +1,4 @@
-﻿#include <QComboBox>
+#include <QComboBox>
 #include <QAbstractItemView>
 #include "SilkStyle.h"
 

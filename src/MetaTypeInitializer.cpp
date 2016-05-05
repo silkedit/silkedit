@@ -1,4 +1,4 @@
-﻿#include <QList>
+#include <QList>
 #include <QEvent>
 
 #include "MetaTypeInitializer.h"

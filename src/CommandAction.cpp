@@ -1,4 +1,4 @@
-﻿#include "CommandAction.h"
+#include "CommandAction.h"
 #include "CommandManager.h"
 #include "KeymapManager.h"
 #include "core/PackageManager.h"

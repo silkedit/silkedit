@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #define DEFAULT_COPY_AND_MOVE(TypeName)           \
   TypeName(const TypeName&) = default;            \

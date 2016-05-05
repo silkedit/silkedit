@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <boost/optional.hpp>
 #include <QObject>

@@ -1,4 +1,4 @@
-﻿#include "EncodingComboBox.h"
+#include "EncodingComboBox.h"
 #include "core/Encoding.h"
 #include "TextEdit.h"
 

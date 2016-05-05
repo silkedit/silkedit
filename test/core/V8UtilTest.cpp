@@ -1,4 +1,4 @@
-﻿#include <libplatform/libplatform.h>
+#include <libplatform/libplatform.h>
 #include <vendor/node/src/node.h>
 #include <QtTest/QtTest>
 #include <QCompleter>

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <v8.h>
 #include <yaml-cpp/yaml.h>

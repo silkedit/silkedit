@@ -1,4 +1,4 @@
-﻿#include "BOMComboBox.h"
+#include "BOMComboBox.h"
 #include <boost/optional.hpp>
 #include "core/BOM.h"
 

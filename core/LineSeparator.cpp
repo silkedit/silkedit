@@ -1,4 +1,4 @@
-﻿#include <QRegularExpression>
+#include <QRegularExpression>
 
 #include "LineSeparator.h"
 

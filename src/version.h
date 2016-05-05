@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #define VERSION "0.12.2"
 

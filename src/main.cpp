@@ -1,4 +1,4 @@
-﻿#include <oniguruma.h>
+#include <oniguruma.h>
 #include <QStringList>
 #include <QTime>
 #include <QTranslator>
