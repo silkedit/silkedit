@@ -179,7 +179,6 @@ void KeymapManager::unload(const QString& source) {
       it++;
     }
   }
-
 }
 
 bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
@@ -199,11 +198,19 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
     }
     m_partiallyMatchedKeyString.clear();
     auto range = m_keymaps.equal_range(key);
+    QVector<CommandEvent*> events;
     for (auto it = range.first; it != range.second; it++) {
       CommandEvent& ev = it->second;
-      if (ev.execute(repeat)) {
-        return true;
+      if (ev.isSatisfied()) {
+        events.push_back(&ev);
       }
+    }
+
+    if (!events.isEmpty()) {
+      for (auto ev : events) {
+        ev->execute(repeat);
+      }
+      return true;
     }
   }
 

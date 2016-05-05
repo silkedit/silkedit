@@ -39,8 +39,9 @@ class CommandEvent {
   QString source() const { return m_source; }
   int priority() const { return m_priority; }
 
-  bool execute(int repeat = 1);
+  void execute(int repeat = 1);
   bool hasCondition();
+  bool isSatisfied();
 
  private:
   QString m_cmdName;
