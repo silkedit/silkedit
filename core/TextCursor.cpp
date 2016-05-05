@@ -1,4 +1,4 @@
-﻿#include <unicode/brkiter.h>
+#include <unicode/brkiter.h>
 #include <unicode/uchriter.h>
 #include <algorithm>
 #include <QTextBlock>

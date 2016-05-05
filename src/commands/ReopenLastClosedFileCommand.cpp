@@ -1,4 +1,4 @@
-﻿#include <QDebug>
+#include <QDebug>
 
 #include "ReopenLastClosedFileCommand.h"
 #include "OpenRecentItemManager.h"

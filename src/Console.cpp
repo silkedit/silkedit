@@ -1,4 +1,4 @@
-﻿#include <QCompleter>
+#include <QCompleter>
 #include <QVBoxLayout>
 
 #include "Console.h"

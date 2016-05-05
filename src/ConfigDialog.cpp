@@ -1,4 +1,4 @@
-﻿#include <QListWidgetItem>
+#include <QListWidgetItem>
 #include <QStackedWidget>
 #include "ConfigDialog.h"
 #include "ui_ConfigDialog.h"

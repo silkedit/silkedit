@@ -1,4 +1,4 @@
-﻿#include <QTextDocument>
+#include <QTextDocument>
 #include <QTextDocumentFragment>
 #include <QDebug>
 

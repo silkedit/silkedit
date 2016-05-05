@@ -1,4 +1,4 @@
-﻿#include "PackageToolBar.h"
+#include "PackageToolBar.h"
 #include "PackageParent.h"
 #include "Config.h"
 #include "Theme.h"

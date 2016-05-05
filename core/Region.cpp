@@ -1,4 +1,4 @@
-﻿#include "Region.h"
+#include "Region.h"
 
 namespace core {
 

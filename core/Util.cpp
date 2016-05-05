@@ -1,4 +1,4 @@
-﻿#include <cmath>
+#include <cmath>
 #include <QDebug>
 #include <QFileInfo>
 #include <QDir>

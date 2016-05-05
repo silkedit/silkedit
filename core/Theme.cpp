@@ -1,4 +1,4 @@
-﻿#include <QDebug>
+#include <QDebug>
 #include "Theme.h"
 #include "PListParser.h"
 #include "Util.h"

@@ -1,4 +1,4 @@
-﻿#include <string>
+#include <string>
 #include <QDebug>
 #include <QVariant>
 
@@ -302,7 +302,7 @@ void Config::setFont(const v8::FunctionCallbackInfo<v8::Value>& args) {
 }
 
 QString Config::endOfLineStr() {
-  return get(END_OF_LINE_STR_KEY, u8"\u00AC");  // U+00AC is '¬'
+  return get(END_OF_LINE_STR_KEY, u8"\u00AC");  // U+00AC is '測'
 }
 
 void Config::setEndOfLineStr(const QString& newValue) {

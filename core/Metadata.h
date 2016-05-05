@@ -1,4 +1,4 @@
-﻿#include <memory>
+#include <memory>
 #include <unordered_map>
 #include <QString>
 
