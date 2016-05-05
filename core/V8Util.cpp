@@ -93,7 +93,7 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
       if (qObj) {
         return QVariant::fromValue(qObj);
       } else {
-        qWarning() << "object has internal field but it's null";
+        qWarning() << "no associated QObject";
         return QVariant();
       }
     } else {
@@ -299,7 +299,7 @@ void V8Util::invokeQObjectMethod(const v8::FunctionCallbackInfo<v8::Value>& args
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
-    throwError(isolate, "failed to get QObject. maybe caller is not QObject.");
+    throwError(isolate, "no associated QObject");
     return;
   }
 
@@ -335,7 +335,7 @@ void V8Util::emitQObjectSignal(const v8::FunctionCallbackInfo<v8::Value>& args) 
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
-    throwError(isolate, "can't convert to QObject");
+    throwError(isolate, "no associated QObject");
     return;
   }
 

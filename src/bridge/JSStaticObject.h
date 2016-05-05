@@ -43,7 +43,7 @@ class JSStaticObject {
         QObject* sourceObj = ObjectStore::unwrap(
             wrappedObj->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
         if (!sourceObj) {
-          V8Util::throwError(isolate, "internal object is invalid");
+          V8Util::throwError(isolate, "no associated QObject");
           return;
         }
 
