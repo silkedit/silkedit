@@ -396,7 +396,7 @@ QVariant V8Util::callJSFunc(v8::Isolate* isolate,
   MaybeLocal<Value> maybeResult = fn->Call(isolate->GetCurrentContext(), recv, argc, argv);
   if (trycatch.HasCaught()) {
     QLoggingCategory category("silkedit");
-    qCCritical(category) << getErrorMessage(isolate, trycatch);
+    qCCritical(category).noquote() << getErrorMessage(isolate, trycatch);
 
     return QVariant();
   } else if (maybeResult.IsEmpty()) {

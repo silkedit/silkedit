@@ -41,7 +41,7 @@ void JSObjectHelper::connectOrDisconnect(const v8::FunctionCallbackInfo<v8::Valu
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
   if (!obj) {
-    V8Util::throwError(isolate, "can't convert to QObject");
+    V8Util::throwError(isolate, "no associated QObject");
     return;
   }
 
