@@ -98,8 +98,6 @@ QVariant HelperPrivate::callFunc(const QString& funcName, QVariantList args) {
 
 void HelperPrivate::init() {
   startNodeEventLoop();
-  connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, &Helper::singleton(),
-          &Helper::cleanup);
 }
 
 HelperPrivate::HelperPrivate(Helper* q_ptr) : q(q_ptr) {}

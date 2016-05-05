@@ -25,7 +25,7 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
   static void wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::Isolate* isolate);
   static void registerDestroyedConnectedObject(QObject* obj);
   static boost::optional<v8::Local<v8::Object>> find(QObject* obj, v8::Isolate* isolate);
-  static void clearDestroyedConnectedObjects();
+  static void clearAssociatedJSObjects();
 
   ~ObjectStore() = default;
 
@@ -39,7 +39,7 @@ class ObjectStore : public QObject, public Singleton<ObjectStore> {
    */
   static std::unordered_set<QObject*> s_destroyedConnectedObjects;
 
-  static void removeDestroyedConnectedObject(QObject *destroyedObj);
+  static void removeAssociatedJSObject(QObject *destroyedObj);
 
   static void WeakCallback(const v8::WeakCallbackData<v8::Object, QObject>& data);
 

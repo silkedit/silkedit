@@ -5,7 +5,6 @@
 #include <QCoreApplication>
 
 #include "ObjectStore.h"
-#include "V8Util.h"
 #include "JSHandler.h"
 
 using v8::UniquePersistent;
@@ -25,27 +24,42 @@ std::unordered_set<QObject*> ObjectStore::s_destroyedConnectedObjects;
 
 QObject* ObjectStore::unwrap(v8::Local<v8::Object> obj) {
   Q_ASSERT(!obj.IsEmpty());
-  // This is the case when QObject method is called without QObject.
+  // InternalFieldCount becomes 0 in the following cases
+  // 1. When QObject method is called without QObject.
   // e.g.  new silkedit.App.activeTextEdit()
+  //
+  // 2. When trying to call a method of an associated QObject which has been already destoryed
   if (obj->InternalFieldCount() == 0) {
     return nullptr;
   }
+
   // Cast to ObjectWrap before casting to T.  A direct cast from void
   // to T won't work right when T has more than one base class.
   void* ptr = obj->GetAlignedPointerFromInternalField(0);
   return static_cast<QObject*>(ptr);
 }
 
-void ObjectStore::removeDestroyedConnectedObject(QObject* destroyedObj) {
+void ObjectStore::removeAssociatedJSObject(QObject* destroyedObj) {
   // emit destroyed signal to JS side
   if (s_destroyedConnectedObjects.count(destroyedObj) != 0) {
-    QVariantList args{QVariant::fromValue(destroyedObj)};
     auto isolate = Isolate::GetCurrent();
     if (isolate && !isolate->IsExecutionTerminating() && !isolate->IsDead()) {
       v8::Locker locker(isolate);
       v8::HandleScope handle_scope(isolate);
+      QVariantList args{QVariant::fromValue(destroyedObj)};
       JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
       s_destroyedConnectedObjects.erase(destroyedObj);
+    }
+  }
+
+  if (s_objects.count(destroyedObj) != 0) {
+    auto isolate = Isolate::GetCurrent();
+    if (isolate && !isolate->IsExecutionTerminating() && !isolate->IsDead()) {
+      v8::Locker locker(isolate);
+      v8::HandleScope handle_scope(isolate);
+      s_objects.at(destroyedObj).Get(isolate)->SetAlignedPointerInInternalField(0, nullptr);
+      s_objects.at(destroyedObj).Reset();
+      s_objects.erase(destroyedObj);
     }
   }
 }
@@ -60,24 +74,7 @@ void ObjectStore::wrapAndInsert(QObject* obj, v8::Local<v8::Object> jsObj, v8::I
       return;
     }
 
-    removeDestroyedConnectedObject(destroyedObj);
-
-    // emit destroyed signal to JS side
-    if (s_destroyedConnectedObjects.count(destroyedObj) != 0) {
-      QVariantList args{QVariant::fromValue(destroyedObj)};
-      auto isolate = Isolate::GetCurrent();
-      if (isolate && !isolate->IsExecutionTerminating() && !isolate->IsDead()) {
-        v8::Locker locker(isolate);
-        v8::HandleScope handle_scope(isolate);
-        JSHandler::emitSignal(isolate, destroyedObj, QStringLiteral("destroyed"), args);
-        s_destroyedConnectedObjects.erase(destroyedObj);
-      }
-    }
-
-    if (s_objects.count(destroyedObj) != 0) {
-      s_objects.at(destroyedObj).Reset();
-      s_objects.erase(destroyedObj);
-    }
+    removeAssociatedJSObject(destroyedObj);
   });
 
   jsObj->SetAlignedPointerInInternalField(0, obj);
@@ -101,9 +98,14 @@ boost::optional<v8::Local<v8::Object>> ObjectStore::find(QObject* obj, v8::Isola
   }
 }
 
-void ObjectStore::clearDestroyedConnectedObjects() {
-  for (auto obj : s_destroyedConnectedObjects) {
-    removeDestroyedConnectedObject(obj);
+void ObjectStore::clearAssociatedJSObjects() {
+  auto targets = s_destroyedConnectedObjects;
+  for (const auto& kv : s_objects) {
+    targets.insert(kv.first);
+  }
+
+  for (auto obj : targets) {
+    removeAssociatedJSObject(obj);
   }
 }
 

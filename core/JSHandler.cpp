@@ -1,4 +1,5 @@
 #include <sstream>
+#include <QLoggingCategory>
 
 #include "JSHandler.h"
 #include "ObjectStore.h"
@@ -159,19 +160,14 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
         emitFn->Call(isolate->GetCurrentContext(), *jsObj,
                      qMin(args.size() + 1, MAX_ARGS_COUNT_FOR_SIGNAL), argv);
     if (trycatch.HasCaught()) {
-      MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
-      Local<Value> exception = trycatch.Exception();
-      String::Utf8Value exceptionStr(exception);
-      std::stringstream ss;
-      ss << "error: " << *exceptionStr;
-      if (!maybeStackTrace.IsEmpty()) {
-        String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
-        ss << " stack trace: " << *stackTraceStr;
-      }
-      qWarning() << ss.str().c_str();
+      QLoggingCategory category("silkedit");
+      const auto& msg = V8Util::getErrorMessage(isolate, trycatch);
+      qCCritical(category).noquote() << msg;
+
       return;
     } else if (maybeResult.IsEmpty()) {
-      qWarning() << "maybeResult is empty (but exception is not thrown...)";
+      QLoggingCategory category("silkedit");
+      qCCritical(category) << "maybeResult is empty (but exception is not thrown...)";
       return;
     }
   } else {
@@ -180,4 +176,3 @@ void JSHandler::emitSignal(Isolate* isolate, QObject* obj, const QString& signal
 }
 
 }  // namespace core
-
