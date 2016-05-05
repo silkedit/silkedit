@@ -35,15 +35,14 @@ QString CommandEvent::cmdDescription() const {
   return CommandManager::singleton().cmdDescription(m_cmdName);
 }
 
-bool CommandEvent::execute(int repeat) {
-  if (!m_condition || m_condition->isSatisfied()) {
-    CommandManager::singleton().runCommand(m_cmdName, m_args, repeat);
-    return true;
-  }
-
-  return false;
+void CommandEvent::execute(int repeat) {
+  CommandManager::singleton().runCommand(m_cmdName, m_args, repeat);
 }
 
 bool CommandEvent::hasCondition() {
   return m_condition != boost::none;
+}
+
+bool CommandEvent::isSatisfied() {
+  return m_condition && m_condition->isSatisfied();
 }
