@@ -281,7 +281,7 @@ void TextEditPrivate::highlightCurrentLine() {
     return;
   }
   Theme* theme = Config::singleton().theme();
-  if (theme->textEditSettings != nullptr) {
+  if (theme && theme->textEditSettings != nullptr) {
     ColorSettings* textEditSettings = theme->textEditSettings.get();
 
     QList<QTextEdit::ExtraSelection> extraSelections;

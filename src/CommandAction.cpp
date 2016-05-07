@@ -88,7 +88,7 @@ CommandAction::CommandAction(const QString& id,
 }
 
 void CommandAction::setTheme(const Theme* theme) {
-  if (theme->isDarkTheme()) {
+  if (theme && theme->isDarkTheme()) {
     setIcon(QIcon(m_icons.value("light", NULL)));
   } else {
     setIcon(QIcon(m_icons.value("dark", NULL)));
