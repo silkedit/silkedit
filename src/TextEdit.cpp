@@ -604,6 +604,7 @@ void TextEdit::paintEvent(QPaintEvent* e) {
   QPlainTextEdit::paintEvent(e);
 
   QPainter painter(viewport());
+  painter.setRenderHint(QPainter::Antialiasing);
 
   // highlight search matched texts
   foreach (const Region& region, d_ptr->m_searchMatchedRegions) {
@@ -622,7 +623,11 @@ void TextEdit::paintEvent(QPaintEvent* e) {
         lineRect.setLeft(textLine.cursorToX(beginPos));
         lineRect.setRight(textLine.cursorToX(endPos));
         lineRect = lineRect.translated(blockBoundingGeometry(block).topLeft() + contentOffset());
-        painter.drawRoundedRect(lineRect, 3.0, 3.0);
+        // If you draw with antialiasing and use a pen of 1 pixel width then drawing at exact
+        // integer coordinates results in lines of 2 pixel width instead. Only with this 0.5 pixel
+        // offset you'll get lines that are exactly 1 pixel wide.
+        // http://stackoverflow.com/questions/6507511/qt-round-rectangle-why-corners-are-different
+        painter.drawRoundedRect(lineRect.translated(0.5, 0.5), 2.0, 2.0);
       }
 
       if (block != endBlock) {
@@ -709,9 +714,9 @@ void TextEdit::setTheme(core::Theme* theme) {
 }
 
 int TextEdit::highlightSearchMatches(const QString& text,
-                                      int begin,
-                                      int end,
-                                      Document::FindFlags flags) {
+                                     int begin,
+                                     int end,
+                                     Document::FindFlags flags) {
   d_ptr->m_searchMatchedRegions.clear();
 
   auto regions = document()->findAll(text, begin, end, flags);
