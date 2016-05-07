@@ -26,6 +26,7 @@ class MenuBar : public QMenuBar {
 
   void themeActionTriggered(QAction* action);
   void showAboutDialog();
+  QActionGroup* addThemeMenu(QMenu* viewMenu);
 };
 
 class ThemeMenu : public QMenu {
@@ -37,7 +38,7 @@ class ThemeMenu : public QMenu {
   ~ThemeMenu() = default;
   DEFAULT_MOVE(ThemeMenu)
 
- private slots:
+ public slots:
   void themeChanged(core::Theme* theme);
 };
 
