@@ -384,12 +384,6 @@ void FindReplaceView::replaceAll() {
 }
 
 void FindReplaceView::hide() {
-  if (m_connectionForContentsChanged) {
-    QObject::disconnect(m_connectionForContentsChanged);
-  }
-  if (m_connectionForCursorPositionChanged) {
-    QObject::disconnect(m_connectionForCursorPositionChanged);
-  }
   clearSearchHighlight();
   if (m_activeView) {
     m_activeView->setFocus();
