@@ -26,18 +26,20 @@ using v8::ObjectTemplate;
 using v8::Maybe;
 
 namespace {
-const QString END_OF_LINE_STR_KEY = QStringLiteral("end_of_line_str");
-const QString END_OF_FILE_STR_KEY = QStringLiteral("end_of_file_str");
-const QString THEME_KEY = QStringLiteral("theme");
-const QString FONT_FAMILY_KEY = QStringLiteral("font_family");
-const QString FONT_SIZE_KEY = QStringLiteral("font_size");
-const QString INDENT_USING_SPACES_KEY = QStringLiteral("indent_using_spaces");
-const QString TAB_WIDTH_KEY = QStringLiteral("tab_width");
-const QString LOCALE_KEY = QStringLiteral("locale");
-const QString SHOW_INVISIBLES_KEY = QStringLiteral("show_invisibles");
-const QString SHOW_TABS_AND_SPACES_KEY = QStringLiteral("show_tabs_and_spaces");
-const QString WORD_WRAP_KEY = QStringLiteral("word_wrap");
+const QString& END_OF_LINE_STR_KEY = QStringLiteral("end_of_line_str");
+const QString& END_OF_FILE_STR_KEY = QStringLiteral("end_of_file_str");
+const QString& THEME_KEY = QStringLiteral("theme");
+const QString& FONT_FAMILY_KEY = QStringLiteral("font_family");
+const QString& FONT_SIZE_KEY = QStringLiteral("font_size");
+const QString& INDENT_USING_SPACES_KEY = QStringLiteral("indent_using_spaces");
+const QString& TAB_WIDTH_KEY = QStringLiteral("tab_width");
+const QString& LOCALE_KEY = QStringLiteral("locale");
+const QString& SHOW_INVISIBLES_KEY = QStringLiteral("show_invisibles");
+const QString& SHOW_TABS_AND_SPACES_KEY = QStringLiteral("show_tabs_and_spaces");
+const QString& WORD_WRAP_KEY = QStringLiteral("word_wrap");
 const QString& SHOW_TOOLBAR_KEY = QStringLiteral("show_toolbar");
+
+const QString& DEFAULT_THEME_NAME = QStringLiteral("Tomorrow");
 
 QHash<QString, QVariant::Type> keyTypeHashForBuiltinConfigs;
 
@@ -154,7 +156,11 @@ void Config::init() {
 
   load();
 
-  setTheme(ThemeManager::theme(themeName()));
+  auto theme = ThemeManager::theme(themeName());
+  if (!theme) {
+    theme = ThemeManager::theme(DEFAULT_THEME_NAME);
+  }
+  setTheme(theme);
   QFont font(fontFamily(), fontSize());
   setFont(font);
 }
@@ -429,7 +435,7 @@ void Config::load(const QString& filename) {
 }
 
 QString Config::themeName() {
-  return get(THEME_KEY, "Tomorrow");
+  return get(THEME_KEY, DEFAULT_THEME_NAME);
 }
 
 QString Config::fontFamily() {
