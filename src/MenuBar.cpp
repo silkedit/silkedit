@@ -27,6 +27,22 @@ void MenuBar::init() {
   s_globalMenuBar = new MenuBar();
 }
 
+QActionGroup* MenuBar::addThemeMenu(QMenu* viewMenu) {
+  const QString& themeMenuStr = Config::singleton().enableMnemonic() ? tr("&Theme") : tr("Theme");
+  ThemeMenu* themeMenu = new ThemeMenu(themeMenuStr);
+  themeMenu->setObjectName("theme");
+  viewMenu->addMenu(themeMenu);
+  QActionGroup* themeActionGroup = new QActionGroup(themeMenu);
+  for (const QString& name : ThemeManager::sortedThemeNames()) {
+    ThemeAction* themeAction = new ThemeAction(name, themeMenu);
+    themeMenu->addAction(themeAction);
+    themeActionGroup->addAction(themeAction);
+  }
+  themeMenu->themeChanged(Config::singleton().theme());
+
+  return themeActionGroup;
+}
+
 MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   // File Menu
   const QString& fileMenuStr = Config::singleton().enableMnemonic() ? tr("&File") : tr("File");
@@ -65,17 +81,7 @@ MenuBar::MenuBar(QWidget* parent) : QMenuBar(parent) {
   auto viewMenu = new PackageMenu(viewMenuStr);
   addMenu(viewMenu);
   viewMenu->setObjectName("view");
-  const QString& themeMenuStr = Config::singleton().enableMnemonic() ? tr("&Theme") : tr("Theme");
-  ThemeMenu* themeMenu = new ThemeMenu(themeMenuStr);
-  themeMenu->setObjectName("theme");
-  viewMenu->addMenu(themeMenu);
-  QActionGroup* themeActionGroup = new QActionGroup(themeMenu);
-  for (const QString& name : ThemeManager::sortedThemeNames()) {
-    ThemeAction* themeAction = new ThemeAction(name, themeMenu);
-    themeMenu->addAction(themeAction);
-    themeActionGroup->addAction(themeAction);
-  }
-
+  QActionGroup* themeActionGroup = addThemeMenu(viewMenu);
   connect(themeActionGroup, &QActionGroup::triggered, this, &MenuBar::themeActionTriggered);
 
   // Packages menu
