@@ -34,11 +34,12 @@ public slots:
   int open(const QString& filename);
 
  private:
-  friend class core::Singleton<DocumentManager>;
-  DocumentManager();
-
   QFileSystemWatcher* m_watcher;
   QHash<QString, std::weak_ptr<core::Document>> m_pathDocHash;
   QHash<QString, std::weak_ptr<core::Document>> m_objectNameDocHash;
+
+  friend class core::Singleton<DocumentManager>;
+  DocumentManager();
+
   std::shared_ptr<core::Document> registerDoc(core::Document* doc);
 };
