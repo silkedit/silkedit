@@ -341,7 +341,9 @@ void Window::closeEvent(QCloseEvent* event) {
   qDebug("closeEvent");
 #ifdef Q_OS_WIN
   if (s_windows.size() == 1) {
-    App::saveSession();
+    App::quit();
+    event->ignore();
+    return;
   }
 #endif
   bool isSuccess = m_tabViewGroup->closeAllTabs();
