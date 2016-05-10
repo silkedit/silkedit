@@ -58,6 +58,8 @@ QAction* findAction(QList<QAction*> actions, const QString& id) {
 }
 }
 
+QMap<QString, YAML::Node> YamlUtil::nodeCache;
+
 boost::optional<AndConditionExpression> YamlUtil::parseCondition(const YAML::Node& conditionNode) {
   QString conditionStr = QString::fromUtf8(conditionNode.as<std::string>().c_str());
   QStringList strList = conditionStr.trimmed().split("&&", QString::SkipEmptyParts);
@@ -543,11 +545,18 @@ QString YamlUtil::translate(const QString& pkgPath,
 
   for (const auto& translationPath : translationPaths) {
     try {
-      YAML::Node rootNode = YAML::LoadFile(translationPath.toUtf8().constData());
-      if (!rootNode.IsMap()) {
-        qWarning() << "root node must be a map";
-        return defaultValue;
+      YAML::Node rootNode;
+      if (nodeCache.contains(path)) {
+        rootNode = nodeCache[path];
+      } else {
+        rootNode = YAML::LoadFile(translationPath.toUtf8().constData());
+        if (!rootNode.IsMap()) {
+          qWarning() << "root node must be a map";
+          return defaultValue;
+        }
+        nodeCache.insert(path, rootNode);
       }
+
       YAML::Node valueNode = rootNode[key.toUtf8().constData()];
 
       if (valueNode) {
