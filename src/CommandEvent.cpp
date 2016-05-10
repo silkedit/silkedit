@@ -44,5 +44,5 @@ bool CommandEvent::hasCondition() {
 }
 
 bool CommandEvent::isSatisfied() {
-  return m_condition && m_condition->isSatisfied();
+  return !m_condition || (m_condition && m_condition->isSatisfied());
 }
