@@ -43,6 +43,7 @@ void ConfigDialog::showModeless() {
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
+  setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
   ui->contentLayout->setStretchFactor(ui->stackedWidget, 1);
   ui->contentLayout->addStretch();
