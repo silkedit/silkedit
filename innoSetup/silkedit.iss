@@ -3,8 +3,9 @@
 
 #define MyAppName "SilkEdit"
 #define MyAppExeName "silkedit.exe"
-#define MyAppVersion GetStringFileInfo("build\Release\silkedit.exe", PRODUCT_VERSION)
-#define MyAppPublisher "SilkEdit dev team"
+#define ReleaseDir "..\build\Release"
+#define MyAppVersion GetStringFileInfo("{#ReleaseDir}\silkedit.exe", PRODUCT_VERSION)
+#define MyAppPublisher "SilkEdit"
 #define MyAppURL ""
 #define Arch "x64"
 
@@ -24,21 +25,23 @@ DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 OutputBaseFilename=SilkEdit_Setup_{#Arch}
-OutputDir=build\Release
+OutputDir={#ReleaseDir}
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x64
+ShowLanguageDialog=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "japanese"; MessagesFile: "compiler:languages\Japanese.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
 Name: "contextmenu"; Description: "Add ""Open with SilkEdit"" &context menu"; Flags: unchecked
 
 [Files]
-Source: "build\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
+Source: "{#ReleaseDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{userprograms}\{#MyAppName} {#MyAppVersion}"; Filename: "{app}\{#MyAppExeName}"
