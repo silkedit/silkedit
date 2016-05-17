@@ -33,12 +33,18 @@ ArchitecturesAllowed=x64
 ShowLanguageDialog=no
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "japanese"; MessagesFile: "compiler:languages\Japanese.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "ja"; MessagesFile: "compiler:languages\Japanese.isl"
+
+[CustomMessages]
+en.OpenWithSilkEdit=Open with {#MyAppName}
+en.AddContextMenu=Add "Open with {#MyAppName}" &context menu
+ja.OpenWithSilkEdit={#MyAppName}で開く
+ja.AddContextMenu="{#MyAppName}で開く"コンテキストメニューを追加する(&C)
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
-Name: "contextmenu"; Description: "Add ""Open with SilkEdit"" &context menu"; Flags: unchecked
+Name: "contextmenu"; Description: "{cm:AddContextMenu}"; Flags: unchecked
 
 [Files]
 Source: "{#ReleaseDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
@@ -48,5 +54,5 @@ Name: "{userprograms}\{#MyAppName} {#MyAppVersion}"; Filename: "{app}\{#MyAppExe
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Registry]
-Root: HKCR; Subkey: "*\shell\Open with SilkEdit"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCR; Subkey: "*\shell\Open with SilkEdit\command"; ValueType: string; ValueData: "{app}\{#MyAppExeName} ""%1"""; Tasks: contextmenu
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}\command"; ValueType: string; ValueData: "{app}\{#MyAppExeName} ""%1"""; Tasks: contextmenu
