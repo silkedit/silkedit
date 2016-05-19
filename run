@@ -531,9 +531,11 @@ localize() {
 
 send_symbol() {
     if [ "$1" = '-edge' ]; then
-      APP_NAME="SilkEdit_Edge"
+      APP_NAME="SilkEdit Edge"
+      BUGSPLAT_APP_NAME="SilkEdit_Edge"
     else
       APP_NAME="SilkEdit"
+      BUGSPLAT_APP_NAME="SilkEdit"
     fi
 
     echo "sending symbol with app name:${APP_NAME}, version: ${VERSION}"
@@ -541,10 +543,10 @@ send_symbol() {
     if [ $OS = 'Mac' ]; then
       DSYM_DIR="/tmp/SilkEdit.dSYM"
       rm -rf ${DSYM_DIR}
-      dsymutil build/SilkEdit.app/Contents/MacOS/SilkEdit -o ${DSYM_DIR}
-      bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a ${APP_NAME} -v ${VERSION} -s ${DSYM_DIR}
+      dsymutil "build/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" -o ${DSYM_DIR}
+      bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a "${BUGSPLAT_APP_NAME}" -v ${VERSION} -s ${DSYM_DIR}
     else
-      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${APP_NAME}&appVer=${VERSION}"
+      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${BUGSPLAT_APP_NAME}&appVer=${VERSION}"
     fi
 }
 
