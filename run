@@ -3,7 +3,7 @@
 # Constants
 
 API_DOC_DIR=jsdoc_out
-VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+VERSION=$(grep "SilkEdit VERSION" CMakeLists.txt| grep -E -o "[0-9]+\.[0-9]+\.[0-9]+")
 
 if [ "$(uname)" = 'Darwin' ]; then
   OS='Mac'
@@ -362,6 +362,30 @@ build() {
 }
 
 make_installer() {
+    declare -i argc=0
+    declare -a argv=()
+
+    while (( $# > 0 ))
+    do
+        case "$1" in
+            -*)
+                if [[ "$1" =~ 'edge' ]]; then
+                    EDGE=true
+                    echo 'installer for edge build'
+                fi
+                if [[ "$1" =~ 'sign' ]]; then
+                    SIGN=true
+                fi
+                shift
+                ;;
+            *)
+                ((++argc))
+                argv=("${argv[@]}" "$1")
+                shift
+                ;;
+        esac
+    done
+  
     if [ ! -d build ]; then
       build
     fi
@@ -369,13 +393,25 @@ make_installer() {
     cd build
 
     if [ $OS = 'Mac' ]; then
+        if [ "$EDGE" = true ];then
+          BUNDLE_NAME="SilkEdit Edge.app"
+        else
+          BUNDLE_NAME="SilkEdit.app"
+        fi
         echo "Creating dmg..."
         ensure_dir dmg
-        cp -R SilkEdit.app dmg
-        macdeployqt dmg/SilkEdit.app
-				if [ "$1" = '--sign' ]; then
-          codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign "$2"
-				fi
+        cp -R "${BUNDLE_NAME}" dmg
+        macdeployqt "dmg/${BUNDLE_NAME}"
+        
+        if [ "$SIGN" = true ];then
+          if [ ${#argv[@]} = 1 ];then
+            codesign --force --verify --verbose --deep "dmg/${BUNDLE_NAME}" --sign "${argv[0]}"
+          else
+            echo 'error: no key specified'
+            exit 1
+          fi
+        fi
+
         ln -s /Applications dmg/Applications
 				n=0
 				MAX=3
@@ -414,15 +450,24 @@ make_installer() {
         attrib -r $RELEASE_DIR/vcruntime140.dll
         cd $RELEASE_DIR
 
+        ISS_FILE=../../innoSetup/modified_silkedit.iss
+        if [ "$EDGE" = true ];then
+          # set an app icon for edge build and change AppName
+          cat ../../innoSetup/silkedit.iss | sed -e 's/app_icon_39x41.bmp/app_icon_edge_39x41.bmp/' | sed -e 's/#define MyAppName "SilkEdit"/#define MyAppName "SilkEdit Edge"/' > ${ISS_FILE}
+        else
+          cp ../../innoSetup/silkedit.iss ${ISS_FILE}        
+        fi
+
         if [ $OS = 'Win32' ]; then
           X86_ISS=../../innoSetup/silkedit_x86.iss
           # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
-          cat ../../innoSetup/silkedit.iss | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ${X86_ISS}
-          iscc ${X86_ISS}
-          rm ${X86_ISS}
+          cat ${ISS_FILE} | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep -v ArchitecturesAllowed=x64 > ${ISS_FILE}
+          iscc ${ISS_FILE}
         else
-            iscc ../../innoSetup/silkedit.iss
+          iscc ${ISS_FILE}
         fi
+        
+        rm ${ISS_FILE}
     fi
 
     cd ..
@@ -467,13 +512,12 @@ set_version() {
     if [ $# -ne 1 ]; then
         echo 'Specify a version number (e.g., 1.0.0)'
     else
-        sed -i -E "s/<string>[0-9]+\.[0-9]+\.[0-9]+<\/string>/<string>$1<\/string>/" src/SilkEdit-info.plist
+        sed -i -E "s/SilkEdit VERSION [0-9]+\.[0-9]+\.[0-9]+/SilkEdit VERSION $1/" CMakeLists.txt
         commaVersion=$(echo $1 | sed -E 's/\./,/g')
-        sed -i -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc
-        sed -i -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc
-        sed -i -E "s/VERSION \"[0-9]+\.[0-9]+\.[0-9]+\"/VERSION \"$1\"/" src/version.h
+        sed -i -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc resources/silkedit_edge.rc
+        sed -i -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc resources/silkedit_edge.rc
         sed -i -E "s/version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/version\": \"$1\"/" jsdoc/package.json
-        git add src/SilkEdit-info.plist resources/silkedit.rc src/version.h jsdoc/package.json
+        git add CMakeLists.txt resources/silkedit.rc resources/silkedit_edge.rc jsdoc/package.json
         git commit -m "Bump version to $1"
         git tag v$1
     fi
@@ -592,7 +636,8 @@ case "$1" in
         echo
         ;;
     make_installer)
-        make_installer $2 $3
+        shift;
+        make_installer "$@"
         echo
         ;;
     send_symbol)
