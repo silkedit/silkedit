@@ -1,6 +1,9 @@
-﻿cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.0.2)
 
 project(SilkEdit VERSION 0.12.3)
+set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
+
+message(STATUS "BUILD_NUMBER: ${BUILD_NUMBER}")
 
 option (BUILD_EDGE "Build edge version" OFF)
 option (USE_DEBUG_NODE "Use debug build of libnode (it's slow but useful for debugging because it has many debug only assertions)" OFF)

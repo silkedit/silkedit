@@ -523,15 +523,6 @@ set_version() {
     fi
 }
 
-set_build() {
-    if [ $# -ne 1 ]; then
-        echo 'Specify a build number'
-    else
-        sed -i -E "s/CFBundleVersion = \"[0-9]+\";/CFBundleVersion = \"$1\";/" src/SilkEdit-info.plist
-        sed -i -E "s/BUILD \"[0-9]+\"/BUILD \"$1\"/" src/version.h
-    fi
-}
-
 localize() {
     lupdate src core -ts translations/silkedit_ja.ts
     #CrashReporter
@@ -627,10 +618,6 @@ case "$1" in
         set_version $2
         echo
         ;;
-    set_build)
-        set_build $2
-        echo
-        ;;
     localize)
         localize
         echo
@@ -662,7 +649,6 @@ rebuild        build from scratch (-edge: Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
 set_version    set version number
-set_build      set build number
 send_symbol    send application symbol to server
 upload_doc     upload package API document
 EOF
