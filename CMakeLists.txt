@@ -7,6 +7,7 @@ option (USE_DEBUG_NODE "Use debug build of libnode (it's slow but useful for deb
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
 
 # Automatically add the current source- and build directories to the include path.
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -79,7 +80,6 @@ elseif (MSVC)
 endif ()
 find_package(Boost REQUIRED)
 
-qt5_add_resources(UI_RESOURCES ${SILK_RESOURCES})
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
 
 # configure a header file to pass some of the CMake settings to the source code
@@ -122,7 +122,7 @@ if (APPLE)
     vendor/node/deps/cares/include
     vendor/node/deps/openssl/openssl/include)
 
-  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES})
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${SILK_RESOURCES} ${QM_FILES})
 
   # <OUTPUT_NAME>.app will be generated
   set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
@@ -162,7 +162,7 @@ elseif (MSVC)
     set( SILK_ICON resources/silkedit.rc)
   endif ()
 
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${UI_RESOURCES} ${QM_FILES} ${SILK_ICON})
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif ()
 
 INCLUDE(Dart)
