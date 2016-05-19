@@ -5,7 +5,7 @@
 #define MyAppExeName "silkedit.exe"
 #define ReleaseDir "..\build\Release"
 #define ResourcesDir "..\resources"
-#define MyAppVersion GetStringFileInfo("{#ReleaseDir}\silkedit.exe", PRODUCT_VERSION)
+#define MyAppVersion GetStringFileInfo("..\build\Release\silkedit.exe", PRODUCT_VERSION)
 #define MyAppPublisher "SilkEdit"
 #define MyAppURL "http://silkedit.io"
 #define Arch "x64"
