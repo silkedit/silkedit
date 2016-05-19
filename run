@@ -3,7 +3,7 @@
 # Constants
 
 API_DOC_DIR=jsdoc_out
-VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./src/version.h)
+VERSION=$(grep -E -o "[0-9]+\.[0-9]+\.[0-9]+" ./build/src/version.h)
 
 if [ "$(uname)" = 'Darwin' ]; then
   OS='Mac'
@@ -393,14 +393,19 @@ make_installer() {
     cd build
 
     if [ $OS = 'Mac' ]; then
+        if [ "$EDGE" = true ];then
+          BUNDLE_NAME="SilkEdit Edge.app"
+        else
+          BUNDLE_NAME="SilkEdit.app"
+        fi
         echo "Creating dmg..."
         ensure_dir dmg
-        cp -R SilkEdit.app dmg
-        macdeployqt dmg/SilkEdit.app
+        cp -R "${BUNDLE_NAME}" dmg
+        macdeployqt "dmg/${BUNDLE_NAME}"
         
         if [ "$SIGN" = true ];then
           if [ ${#argv[@]} = 1 ];then
-            codesign --force --verify --verbose --deep dmg/SilkEdit.app --sign ${argv[0]}
+            codesign --force --verify --verbose --deep "dmg/${BUNDLE_NAME}" --sign "${argv[0]}"
           else
             echo 'error: no key specified'
             exit 1
@@ -507,13 +512,12 @@ set_version() {
     if [ $# -ne 1 ]; then
         echo 'Specify a version number (e.g., 1.0.0)'
     else
-        sed -i -E "s/<string>[0-9]+\.[0-9]+\.[0-9]+<\/string>/<string>$1<\/string>/" src/SilkEdit-info.plist
+        sed -i -E "s/SilkEdit VERSION [0-9]+\.[0-9]+\.[0-9]+/SilkEdit VERSION $1/" CMakeLists.txt
         commaVersion=$(echo $1 | sed -E 's/\./,/g')
         sed -i -E "s/VER_VERSION             [0-9]+,[0-9]+,[0-9]+/VER_VERSION             $commaVersion/" resources/silkedit.rc resources/silkedit_edge.rc
         sed -i -E "s/VER_VERSION_STR         \"[0-9]+\.[0-9]+\.[0-9]+\\\\0\"/VER_VERSION_STR         \"$1\\\\0\"/" resources/silkedit.rc resources/silkedit_edge.rc
-        sed -i -E "s/VERSION \"[0-9]+\.[0-9]+\.[0-9]+\"/VERSION \"$1\"/" src/version.h
         sed -i -E "s/version\": \"[0-9]+\.[0-9]+\.[0-9]+\"/version\": \"$1\"/" jsdoc/package.json
-        git add src/SilkEdit-info.plist resources/silkedit.rc resources/silkedit_edge.rc src/version.h jsdoc/package.json
+        git add CMakeLists.txt resources/silkedit.rc resources/silkedit_edge.rc jsdoc/package.json
         git commit -m "Bump version to $1"
         git tag v$1
     fi
@@ -632,6 +636,7 @@ case "$1" in
         echo
         ;;
     make_installer)
+        shift;
         make_installer "$@"
         echo
         ;;
