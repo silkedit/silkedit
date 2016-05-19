@@ -4,41 +4,46 @@
 #define MyAppName "SilkEdit"
 #define MyAppExeName "silkedit.exe"
 #define ReleaseDir "..\build\Release"
-#define MyAppVersion GetStringFileInfo("{#ReleaseDir}\silkedit.exe", PRODUCT_VERSION)
+#define ResourcesDir "..\resources"
+#define MyAppVersion GetStringFileInfo("..\build\Release\silkedit.exe", PRODUCT_VERSION)
 #define MyAppPublisher "SilkEdit"
-#define MyAppURL ""
+#define MyAppURL "http://silkedit.io"
 #define Arch "x64"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application.
-; Do not use the same AppId value in installers for other applications.
-; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{8E81584D-09FD-4106-B1BE-E9976CF90AE9}
+AppId=silkedit.io.{#MyAppName}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=SilkEdit_Setup_{#Arch}
+OutputBaseFilename={#MyAppName} Setup {#Arch}
 OutputDir={#ReleaseDir}
 Compression=lzma
 SolidCompression=yes
 ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x64
 ShowLanguageDialog=no
+WizardSmallImageFile={#ResourcesDir}\app_icons\app_icon_39x41.bmp
+UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "japanese"; MessagesFile: "compiler:languages\Japanese.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
+Name: "ja"; MessagesFile: "compiler:languages\Japanese.isl"
+
+[CustomMessages]
+en.OpenWithSilkEdit=Open with {#MyAppName}
+en.AddContextMenu=Add "Open with {#MyAppName}" &context menu
+ja.OpenWithSilkEdit={#MyAppName}で開く
+ja.AddContextMenu="{#MyAppName}で開く"コンテキストメニューを追加する(&C)
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
-Name: "contextmenu"; Description: "Add ""Open with SilkEdit"" &context menu"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"
+Name: "contextmenu"; Description: "{cm:AddContextMenu}"
 
 [Files]
 Source: "{#ReleaseDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
@@ -48,5 +53,5 @@ Name: "{userprograms}\{#MyAppName} {#MyAppVersion}"; Filename: "{app}\{#MyAppExe
 Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Registry]
-Root: HKCR; Subkey: "*\shell\Open with SilkEdit"; Flags: uninsdeletekey; Tasks: contextmenu
-Root: HKCR; Subkey: "*\shell\Open with SilkEdit\command"; ValueType: string; ValueData: "{app}\{#MyAppExeName} ""%1"""; Tasks: contextmenu
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}"; Flags: uninsdeletekey; Tasks: contextmenu
+Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}\command"; ValueType: string; ValueData: "{app}\{#MyAppExeName} ""%1"""; Tasks: contextmenu
