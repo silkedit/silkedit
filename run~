@@ -459,11 +459,15 @@ make_installer() {
         fi
 
         if [ $OS = 'Win32' ]; then
+          X86_ISS=../../innoSetup/silkedit_x86.iss
           # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
-          cat ${ISS_FILE} | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep --text -v ArchitecturesAllowed=x64 > ${ISS_FILE}
+          cat ${ISS_FILE} | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep --text -v ArchitecturesAllowed=x64 > ${X86_ISS}
+          iscc ${X86_ISS}
+          rm ${X86_ISS}
+        else
+          iscc ${ISS_FILE}
         fi
         
-        iscc ${ISS_FILE}
         rm ${ISS_FILE}
     fi
 
