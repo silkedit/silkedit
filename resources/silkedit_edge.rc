@@ -1,1 +1,27 @@
+#define VER_VERSION             0,12,3
+#define VER_VERSION_STR         "0.12.3\0"
+
 IDI_ICON1               ICON    DISCARDABLE     "silkedit_edge.ico"
+
+1 VERSIONINFO
+FILEVERSION VER_VERSION
+PRODUCTVERSION VER_VERSION
+{
+  BLOCK "StringFileInfo"
+	 {
+		 BLOCK "040904E4"
+		 {
+			 VALUE "CompanyName", "SilkEdit"
+			 VALUE "FileVersion", VER_VERSION_STR
+			 VALUE "FileDescription", "SilkEdit Edge"
+			 VALUE "LegalCopyright", "Copyright (C) 2014-2016 SilkEdit"
+			 VALUE "OriginalFilename", "silkedit.exe"
+			 VALUE "ProductName", "SilkEdit Edge"
+			 VALUE "ProductVersion", VER_VERSION_STR
+		 }
+	 }
+  BLOCK "VarFileInfo"
+	 {
+		 VALUE "Translation", 0x0409, 1252 //language codes
+	 }
+}
