@@ -45,13 +45,27 @@ int main(int argc, char** argv) {
   onig_init();
   PlatformUtil::enableMnemonicOnMac();
   MessageHandler::init();
+
   App app(argc, argv);
+
 #ifdef QT_NO_DEBUG
   // crash dumps output location setting.
   Breakpad::CrashHandler::instance()->Init(QDir::tempPath());
 #endif
 
   QStringList arguments = app.arguments();
+
+  const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
+  // If SilkEdit is already running, send an argument and exit.
+  if (app.sendMessage(msg))
+    return 0;
+
+  QObject::connect(&app, &App::messageReceived, &app, [](const QString& msg) {
+    qDebug() << msg << "is passed by another process";
+    if (!msg.isEmpty()) {
+      DocumentManager::singleton().open(msg);
+    }
+  });
 
   // Run SilkEdit as normal Node.js
   if (arguments.contains(Constants::RUN_AS_NODE)) {
