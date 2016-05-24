@@ -22,6 +22,9 @@ endif ()
 # Node.js defines HAVE_OPENSSL by default
 ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
+# qtlockedfile_win.cpp needs UNICODE defined
+ADD_DEFINITIONS(-DUNICODE)
+
 # '+' will automatically be performed as the QStringBuilder '%' everywhere.
 ADD_DEFINITIONS(-DQT_USE_QSTRINGBUILDER)
 
@@ -30,6 +33,12 @@ ADD_DEFINITIONS(-DUSING_V8_SHARED)
 ADD_DEFINITIONS(-DUSING_UV_SHARED)
 
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
+
+# Exclude qtlockedfile files. They are supposed to be #included in qtlocalpeer.h
+list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile.cpp)
+list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile_win.cpp)
+list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile_unix.cpp)
+
 if (APPLE)
   ADD_DEFINITIONS(-D__POSIX__)
   list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_win.cpp)

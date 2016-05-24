@@ -60,7 +60,7 @@ TabBar* App::tabBarAt(int x, int y) {
 }
 
 App::App(int& argc, char** argv)
-    : QApplication(argc, argv),
+    : QtSingleApplication(argc, argv),
       m_translator(nullptr),
       m_qtTranslator(nullptr),
       m_isQuitting(false) {
@@ -96,8 +96,11 @@ App::App(int& argc, char** argv)
       }
     }
 
-    if (auto window = activeWindow()) {
-      window->updateTitle();
+    if (auto window = findActiveWindow()) {
+      if (window != qobject_cast<Window*>(activationWindow())) {
+        window->updateTitle();
+        setActivationWindow(window);
+      }
     }
   });
 
@@ -269,8 +272,7 @@ TabView* App::activeTabView() {
 }
 
 TabViewGroup* App::activeTabViewGroup() {
-  Window* window = activeWindow();
-  if (window) {
+  if (auto window = qobject_cast<Window*>(activationWindow())) {
     return window->tabViewGroup();
   } else {
     qDebug("active window is null");
@@ -278,7 +280,7 @@ TabViewGroup* App::activeTabViewGroup() {
   }
 }
 
-Window* App::activeWindow() {
+Window* App::findActiveWindow() {
   // Try to find the window that has the input focus
   Window* window = qobject_cast<Window*>(QApplication::activeWindow());
 
@@ -322,7 +324,7 @@ void App::restart() {
 void App::saveSession() {
   QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
-  Window::saveWindowsState(s_app->activeWindow(), settings);
+  Window::saveWindowsState(qobject_cast<Window*>(s_app->activationWindow()), settings);
 }
 
 void App::loadSession() {
