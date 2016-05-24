@@ -29,7 +29,6 @@ class App : public QtSingleApplication {
   void setupTranslator(const QString& locale);
   bool isQuitting() { return m_isQuitting; }
   TabView* getActiveTabViewOrCreate();
-  Window* findActiveWindow();
 
  public slots:
   TextEdit* activeTextEdit();
@@ -54,4 +53,5 @@ class App : public QtSingleApplication {
   bool m_isQuitting;
 
   void cleanup();
+  Window* findActiveWindow();
 };

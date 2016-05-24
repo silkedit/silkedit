@@ -326,7 +326,7 @@ void App::restart() {
 void App::saveSession() {
   QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
-  Window::saveWindowsState(qobject_cast<Window*>(s_app->activationWindow()), settings);
+  Window::saveWindowsState(s_app->activeWindow(), settings);
 }
 
 void App::loadSession() {
