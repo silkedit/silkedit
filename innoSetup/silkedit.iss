@@ -5,6 +5,7 @@
 #define MyAppExeName "silkedit.exe"
 #define ReleaseDir "..\build\Release"
 #define ResourcesDir "..\resources"
+#define SilkResourcesDir "silk_resources"
 #define MyAppVersion GetStringFileInfo("..\build\Release\silkedit.exe", PRODUCT_VERSION)
 #define MyAppPublisher "SilkEdit"
 #define MyAppURL "http://silkedit.io"
@@ -55,3 +56,6 @@ Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: 
 [Registry]
 Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}"; Flags: uninsdeletekey; Tasks: contextmenu
 Root: HKCR; Subkey: "*\shell\{cm:OpenWithSilkEdit}\command"; ValueType: string; ValueData: "{app}\{#MyAppExeName} ""%1"""; Tasks: contextmenu
+
+[InstallDelete]
+Type: filesandordirs; Name: "{app}\{#SilkResourcesDir}"
