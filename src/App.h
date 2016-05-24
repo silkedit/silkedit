@@ -4,6 +4,7 @@
 #include <QSettings>
 
 #include "core/macros.h"
+#include "qtsingleapplication/qtsingleapplication.h"
 
 class TabBar;
 class TextEdit;
@@ -11,7 +12,7 @@ class Window;
 class TabView;
 class TabViewGroup;
 
-class App : public QApplication {
+class App : public QtSingleApplication {
   Q_OBJECT
   DISABLE_COPY_AND_MOVE(App)
 
@@ -52,4 +53,5 @@ class App : public QApplication {
   bool m_isQuitting;
 
   void cleanup();
+  Window* findActiveWindow();
 };
