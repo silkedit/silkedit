@@ -22,8 +22,10 @@ endif ()
 # Node.js defines HAVE_OPENSSL by default
 ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
-# qtlockedfile_win.cpp needs UNICODE defined
-ADD_DEFINITIONS(-DUNICODE)
+if (MSVC)
+  # qtlockedfile_win.cpp needs UNICODE defined
+  ADD_DEFINITIONS(-DUNICODE)
+endif ()
 
 # '+' will automatically be performed as the QStringBuilder '%' everywhere.
 ADD_DEFINITIONS(-DQT_USE_QSTRINGBUILDER)

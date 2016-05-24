@@ -97,10 +97,8 @@ App::App(int& argc, char** argv)
     }
 
     if (auto window = findActiveWindow()) {
-      if (window != qobject_cast<Window*>(activationWindow())) {
-        window->updateTitle();
-        setActivationWindow(window);
-      }
+      window->updateTitle();
+      setActivationWindow(window);
     }
   });
 
@@ -272,7 +270,7 @@ TabView* App::activeTabView() {
 }
 
 TabViewGroup* App::activeTabViewGroup() {
-  if (auto window = qobject_cast<Window*>(activationWindow())) {
+  if (auto window = activeWindow()) {
     return window->tabViewGroup();
   } else {
     qDebug("active window is null");
@@ -296,6 +294,10 @@ Window* App::findActiveWindow() {
   }
 
   return window;
+}
+
+Window* App::activeWindow() {
+  return activationWindow() ? qobject_cast<Window*>(activationWindow()) : findActiveWindow();
 }
 
 void App::setActiveWindow(QWidget* act) {
