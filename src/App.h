@@ -29,12 +29,13 @@ class App : public QtSingleApplication {
   void setupTranslator(const QString& locale);
   bool isQuitting() { return m_isQuitting; }
   TabView* getActiveTabViewOrCreate();
+  Window* findActiveWindow();
 
  public slots:
   TextEdit* activeTextEdit();
   TabView* activeTabView();
   TabViewGroup* activeTabViewGroup();
-  Window* findActiveWindow();
+  Window* activeWindow();
   void setActiveWindow(QWidget* act);
   QWidget* focusWidget();
   QWidget* activePopupWidget();

@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
 
   QStringList arguments = app.arguments();
 
+#ifdef Q_OS_WIN
   const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
   // If SilkEdit is already running, send an argument and exit.
   if (app.sendMessage(msg))
@@ -66,6 +67,7 @@ int main(int argc, char** argv) {
       DocumentManager::singleton().open(msg);
     }
   });
+#endif
 
   // Run SilkEdit as normal Node.js
   if (arguments.contains(Constants::RUN_AS_NODE)) {
