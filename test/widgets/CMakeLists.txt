@@ -1,10 +1,8 @@
 ﻿include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}
-  ${CMAKE_SOURCE_DIR}/core
+  ${CMAKE_SOURCE_DIR}/widgets/src
   ${CMAKE_SOURCE_DIR}/test/util
 )
-
-file(COPY "testdata" DESTINATION .)
 
 if (APPLE)
   # copy libnode.dylib
@@ -29,7 +27,7 @@ endif ()
 
 function(add_unittest test_class)
   add_executable(${test_class} EXCLUDE_FROM_ALL ${test_class}.cpp ${PROJECT_SOURCE_DIR}/test/util/TestUtil.cpp)
-  target_link_libraries(${test_class} Qt5::Test SilkEdit_core)
+  target_link_libraries(${test_class} Qt5::Test SilkEdit_widgets)
   add_test( NAME ${test_class} COMMAND ${test_class} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
   add_dependencies(unit_test ${test_class})
 
@@ -39,18 +37,4 @@ if (APPLE)
 endif ()
 endfunction()
 
-add_unittest(LanguageParserTest)
-add_unittest(ThemeTest)
-add_unittest(UtilTest)
-add_unittest(SyntaxHighlighterTest)
-add_unittest(RegexpTest)
-add_unittest(RegionTest)
-add_unittest(TextEditLogicTest)
-add_unittest(LineSeparatorTest)
-add_unittest(PackageTest)
-add_unittest(BOMTest)
-add_unittest(V8UtilTest)
-add_unittest(QObjectUtilTest)
-add_unittest(DocumentTest)
-add_unittest(SyntaxHighlighterBenchmark)
-add_unittest(TextCursorTest)
+add_unittest(YamlUtilTest)
