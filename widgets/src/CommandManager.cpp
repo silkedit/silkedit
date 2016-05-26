@@ -7,7 +7,7 @@
 #include "commands/CrashCommand.h"
 #include "core/V8Util.h"
 #include "core/MessageHandler.h"
-#include "atom/node_includes.h"
+#include "core/atom/node_includes.h"
 
 using core::V8Util;
 using core::FunctionInfo;

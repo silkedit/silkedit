@@ -1,11 +1,22 @@
 ﻿set(MODULE_NAME ${PROJECT_NAME}_core)
 
+if (MSVC)
+  # ICU requires this when linking with a static one
+  ADD_DEFINITIONS(-DU_STATIC_IMPLEMENTATION)
+endif ()
+
 include_directories(SYSTEM
   ${PROJECT_SOURCE_DIR}
 )
 
-file(GLOB SILK_CORE_SOURCES *.cpp)
-file(GLOB SILK_CORE_HEADERS *.h)
+file(GLOB_RECURSE SILK_CORE_SOURCES *.cpp)
+if (APPLE)
+  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_win.cpp)
+elseif (MSVC)
+  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_mac.cpp)
+endif ()
+
+file(GLOB_RECURSE SILK_CORE_HEADERS *.h)
 add_library(${MODULE_NAME} STATIC ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
 
 if (APPLE)

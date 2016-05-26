@@ -51,7 +51,7 @@
 #include "core/Rect.h"
 #include "core/ItemSelectionModel.h"
 #include "core/QtEnums.h"
-#include "atom/node_includes.h"
+#include "core/atom/node_includes.h"
 
 using core::Config;
 using core::QVariantArgument;

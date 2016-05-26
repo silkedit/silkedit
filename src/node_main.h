@@ -1,7 +1,7 @@
 // copied from node_main.cc
 #include <uv.h>
 
-#include "atom/node_includes.h"
+#include "core/atom/node_includes.h"
 
 #ifdef _WIN32
 //int nodeMain(int argc, wchar_t *wargv[]) {
