@@ -26,7 +26,7 @@
 #include "core/KeyEvent.h"
 #include "util/YamlUtil.h"
 #include "core/FunctionInfo.h"
-#include "atom/node_includes.h"
+#include "core/atom/node_includes.h"
 
 using core::Constants;
 using core::Util;
