@@ -22,11 +22,6 @@ endif ()
 # Node.js defines HAVE_OPENSSL by default
 ADD_DEFINITIONS(-DHAVE_OPENSSL)
 
-if (MSVC)
-  # qtlockedfile_win.cpp needs UNICODE defined
-  ADD_DEFINITIONS(-DUNICODE)
-endif ()
-
 # '+' will automatically be performed as the QStringBuilder '%' everywhere.
 ADD_DEFINITIONS(-DQT_USE_QSTRINGBUILDER)
 
@@ -34,21 +29,11 @@ ADD_DEFINITIONS(-DQT_USE_QSTRINGBUILDER)
 ADD_DEFINITIONS(-DUSING_V8_SHARED)
 ADD_DEFINITIONS(-DUSING_UV_SHARED)
 
-file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
-
-# Exclude qtlockedfile files. They are supposed to be #included in qtlocalpeer.h
-list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile.cpp)
-list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile_win.cpp)
-list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile_unix.cpp)
-
 if (APPLE)
   ADD_DEFINITIONS(-D__POSIX__)
-  list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_win.cpp)
-elseif (MSVC)
-  # ICU requires this when linking with a static one
-  ADD_DEFINITIONS(-DU_STATIC_IMPLEMENTATION)
-  list(REMOVE_ITEM SILK_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/atom/node_bindings_mac.cpp)
 endif ()
+
+file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
@@ -129,6 +114,7 @@ if (APPLE)
     ${PROJECT_BINARY_DIR}/src
     /usr/local/include
     src
+    widgets/src
     breakpad/src
     vendor/node/deps/v8
     vendor/node/deps/v8/include
@@ -160,6 +146,7 @@ elseif (MSVC)
     ${PROJECT_BINARY_DIR}/src
     include
     src
+    widgets/src
     ${Boost_INCLUDE_DIRS}
     breakpad/src
     vendor/node/deps/v8
@@ -183,31 +170,18 @@ INCLUDE(Dart)
 # enable_testing should be in the root
 enable_testing()
 add_subdirectory(core)
+add_subdirectory(widgets)
 add_subdirectory(crashreporter)
 add_subdirectory(test)
 
 if(APPLE)
   target_link_libraries(${PROJECT_NAME}
-                        ${PROJECT_NAME}_core
-                        Qt5::Widgets
-                        Qt5::Network
-                        Qt5::Xml
-                        Qt5::Svg
-                        Qt5::WebEngineWidgets
-                        ${YAML_CPP_LIBRARY}
-                        ${NODE_LIBRARY}
+                        ${PROJECT_NAME}_widgets
                         ${Breakpad}
 )
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME}
-                        ${PROJECT_NAME}_core
-                        Qt5::Widgets
-                        Qt5::Network
-                        Qt5::Xml
-                        Qt5::Svg
-                        Qt5::WebEngineWidgets
-                        ${YAML_CPP_LIBRARY}
-                        NODE_LIBRARY
+                        ${PROJECT_NAME}_widgets
   )
   target_link_libraries(${PROJECT_NAME} ${BREAKPAD_LIBS}/common ${BREAKPAD_LIBS}/exception_handler ${BREAKPAD_LIBS}/crash_generation_client)
 endif()
