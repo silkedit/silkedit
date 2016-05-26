@@ -1,6 +1,7 @@
 ﻿include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/core
+  ${CMAKE_SOURCE_DIR}/test/util
 )
 
 file(COPY "testdata" DESTINATION .)
