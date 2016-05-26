@@ -14,7 +14,7 @@ class ProjectManager : public QObject, public core::Singleton<ProjectManager> {
   ~ProjectManager() = default;
 
  public slots:
-  bool open(const QString& directoryName);
+  bool open(const QString& directoryPath);
 
  private:
   friend class core::Singleton<ProjectManager>;
