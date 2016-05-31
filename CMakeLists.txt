@@ -37,7 +37,6 @@ file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
-file(GLOB_RECURSE SILK_UIS src/*.ui)
 set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc resources/files.qrc)
 if (BUILD_EDGE)
   set(SILK_RESOURCES ${SILK_RESOURCES} resources/images_edge.qrc)
@@ -122,7 +121,7 @@ if (APPLE)
     vendor/node/deps/cares/include
     vendor/node/deps/openssl/openssl/include)
 
-  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${SILK_RESOURCES} ${QM_FILES})
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES})
 
   # <OUTPUT_NAME>.app will be generated
   set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
@@ -163,7 +162,7 @@ elseif (MSVC)
     set( SILK_ICON resources/silkedit.rc)
   endif ()
 
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_UIS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_ICON})
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_ICON})
 endif ()
 
 INCLUDE(Dart)
