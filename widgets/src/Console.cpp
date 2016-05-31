@@ -5,10 +5,16 @@
 #include "ui_Console.h"
 #include "Helper.h"
 #include "core/MessageHandler.h"
+#include "core/Theme.h"
+#include "core/Config.h"
+#include "core/Util.h"
 
 using core::MessageHandler;
+using core::Theme;
+using core::Config;
+using core::Util;
 
-Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
+Console::Console(QWidget* parent) : CustomWidget(parent), ui(new Ui::Console) {
   ui->setupUi(this);
   ui->layout->setContentsMargins(0, 0, 0, 0);
   ui->layout->setSpacing(0);
@@ -45,15 +51,45 @@ Console::Console(QWidget* parent) : QWidget(parent), ui(new Ui::Console) {
     m_historyModel.prepend(ui->input->text());
     ui->input->clear();
   });
+
+  connect(&Config::singleton(), &Config::themeChanged, this, &Console::setTheme);
+
+  setTheme(Config::singleton().theme());
 }
 
 Console::~Console() {}
 
-void Console::showEvent(QShowEvent *)
-{
+void Console::showEvent(QShowEvent*) {
   ui->input->setFocus();
 }
 
 void Console::runJSCode(const QString& code) {
   Helper::singleton().eval(code);
+}
+
+void Console::setTheme(core::Theme* theme) {
+  if (theme->consoleSettings != nullptr) {
+    const auto& style = QStringLiteral(R"(
+#%1 {
+  background-color: %2;
+}
+
+#%1 #output {
+  margin: 2px 2px 2px 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+#%1 #input {
+  margin: 0 2px 2px 2px;
+  padding: 0 0 0 2px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+)")
+                            .arg(this->objectName())
+                            .arg(Util::qcolorForStyleSheet(
+                                theme->consoleSettings->value(QStringLiteral("background"))));
+    setStyleSheet(style);
+  }
 }
