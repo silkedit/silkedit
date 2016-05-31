@@ -75,13 +75,13 @@ void Console::setTheme(core::Theme* theme) {
 }
 
 #%1 #output {
-  margin: 2px 2px 2px 2px;
+  margin: 2px 2px 2px 0px;
   border: 1px solid transparent;
   border-radius: 2px;
 }
 
 #%1 #input {
-  margin: 0 2px 2px 2px;
+  margin: 0 2px 2px 0px;
   padding: 0 0 0 2px;
   border: 1px solid transparent;
   border-radius: 2px;
