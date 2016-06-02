@@ -1,11 +1,11 @@
 #pragma once
 
-#include <QWidget>
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
+#include "CustomWidget.h"
 #include "Filtering.h"
 #include "core/macros.h"
 
@@ -13,7 +13,7 @@ namespace core {
 struct ConfigDefinition;
 }
 
-class PackageConfigView : public QWidget, public Filtering {
+class PackageConfigView : public CustomWidget, public Filtering {
   Q_OBJECT
   DISABLE_COPY(PackageConfigView)
 

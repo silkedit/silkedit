@@ -24,7 +24,7 @@ const int TIMEOUT_IN_MS = 10000;  // 10sec
 }
 
 PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
-    : QWidget(parent),
+    : CustomWidget(parent),
       ui(new Ui::PackagesView),
       m_pkgsModel(new PackageTableModel(this)),
       m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),

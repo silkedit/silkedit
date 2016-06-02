@@ -1,13 +1,13 @@
 #pragma once
 
-#include <QWidget>
+#include "CustomWidget.h"
 
 class TextEdit;
 namespace core {
 class Theme;
 }
 
-class LineNumberArea : public QWidget {
+class LineNumberArea : public CustomWidget {
  public:
   static const int PADDING_RIGHT = 5;
   explicit LineNumberArea(TextEdit* editor);
