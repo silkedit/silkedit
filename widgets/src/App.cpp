@@ -4,6 +4,7 @@
 #include <QChildEvent>
 #include <QProcess>
 #include <QDebug>
+#include <QFontDatabase>
 
 #include "App.h"
 #include "TabViewGroup.h"
@@ -248,6 +249,27 @@ TabView* App::getActiveTabViewOrCreate() {
   }
 
   return nullptr;
+}
+
+void App::setDefaultFont(QString locale) {
+#ifdef Q_OS_WIN
+  // change default UI font based on locale
+  QFontDatabase database;
+  if (locale == "ja" || locale == "ja_JP") {
+    QList<std::tuple<QString, int>> fontInfos = {
+        // Yu Gothic UI for Windows 10
+        std::make_tuple(QStringLiteral("Yu Gothic UI"), 10),
+        // Meiryo UI for Windows 7&8
+        std::make_tuple(QStringLiteral("Meiryo UI"), 10)};
+
+    for (const auto& fontInfo : fontInfos) {
+      if (database.hasFamily(std::get<0>(fontInfo))) {
+        setFont(QFont(std::get<0>(fontInfo), std::get<1>(fontInfo)));
+        break;
+      }
+    }
+  }
+#endif
 }
 
 TextEdit* App::activeTextEdit() {

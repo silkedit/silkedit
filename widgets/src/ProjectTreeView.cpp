@@ -46,7 +46,6 @@ QString getUniqueDirName(const QString& baseNewDirPath) {
 
 ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(nullptr) {
   setTheme(Config::singleton().theme());
-  setFont();
 
   setSelectionMode(QAbstractItemView::ExtendedSelection);
   setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -59,7 +58,6 @@ ProjectTreeView::ProjectTreeView(QWidget* parent) : QTreeView(parent), m_model(n
 
   connect(this, &ProjectTreeView::activated, this, &ProjectTreeView::openOrExpand);
   connect(&Config::singleton(), &Config::themeChanged, this, &ProjectTreeView::setTheme);
-  connect(&Config::singleton(), &Config::fontChanged, this, &ProjectTreeView::setFont);
 }
 
 bool ProjectTreeView::openDirOrExpand(const QString& dirPath) {
@@ -187,12 +185,6 @@ ProjectTreeView::branch:open:has-children:has-siblings  {
     verticalScrollBar()->setStyleSheet(theme->projectTreeViewVerticalScrollBarStyle());
     horizontalScrollBar()->setStyleSheet(theme->projectTreeViewHorizontalScrollBarStyle());
   }
-}
-
-void ProjectTreeView::setFont() {
-  QFont projectTreeFont(Constants::defaultUIFontFamily);
-  projectTreeFont.setPointSize(Constants::defaultUIFontSize);
-  QTreeView::setFont(projectTreeFont);
 }
 
 void ProjectTreeView::contextMenuEvent(QContextMenuEvent* event) {
