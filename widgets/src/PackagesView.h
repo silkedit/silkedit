@@ -2,7 +2,6 @@
 
 #include <unordered_map>
 #include <boost/optional.hpp>
-#include <QWidget>
 #include <QObject>
 #include <QAbstractTableModel>
 #include <QStyledItemDelegate>
@@ -11,6 +10,7 @@
 #include <QMovie>
 #include <QSortFilterProxyModel>
 
+#include "CustomWidget.h"
 #include "core/macros.h"
 #include "core/Package.h"
 
@@ -32,7 +32,7 @@ class PackagesViewModel : public QObject {
   virtual QString TextAfterProcess() = 0;
   virtual void processWithPackage(const QModelIndex& index, const core::Package& pkg) = 0;
 
-signals:
+ signals:
   void packagesLoaded(QList<core::Package> packages);
   void processFailed(const QModelIndex& index);
   void processSucceeded(const QModelIndex& index);
@@ -62,7 +62,7 @@ class InstalledPackagesViewModel : public PackagesViewModel {
   void processWithPackage(const QModelIndex& index, const core::Package& pkg) override;
 };
 
-class PackagesView : public QWidget {
+class PackagesView : public CustomWidget {
   Q_OBJECT
 
  public:
@@ -99,7 +99,7 @@ class PackageDelegate : public QStyledItemDelegate {
   void setMovie(int row, std::unique_ptr<QMovie> movie);
   void stopMovie(int row);
 
-signals:
+ signals:
   void needsUpdate(const QModelIndex& index);
   void clicked(const QModelIndex& index);
 
@@ -146,7 +146,7 @@ class PackageTableModel : public QAbstractTableModel {
                       int role = Qt::DisplayRole) const override;
   boost::optional<core::Package> package(int row);
 
-signals:
+ signals:
   void clicked(const core::Package& package);
 
  private:

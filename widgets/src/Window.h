@@ -6,6 +6,7 @@
 #include <list>
 #include <QMainWindow>
 #include <QSettings>
+#include <QSplitter>
 
 #include "core/macros.h"
 
@@ -26,7 +27,7 @@ namespace Ui {
 class Window;
 }
 namespace core {
-  class Theme;
+class Theme;
 }
 
 class Window : public QMainWindow {
@@ -56,8 +57,8 @@ class Window : public QMainWindow {
   static void showFirst();
 
   static void closeTabIncludingDoc(core::Document* doc);
-  static void saveWindowsState(Window* activeWindow, QSettings &settings);
-  static void loadWindowsState(QSettings &settings);
+  static void saveWindowsState(Window* activeWindow, QSettings& settings);
+  static void loadWindowsState(QSettings& settings);
 
   Q_INVOKABLE Window(QWidget* parent = nullptr, Qt::WindowFlags flags = nullptr);
   ~Window();
@@ -73,17 +74,17 @@ class Window : public QMainWindow {
   void hideFindReplacePanel();
   QToolBar* findToolbar(const QString& id);
   void updateTitle();
-  void saveState(QSettings &settings);
-  void loadState(QSettings &settings);
+  void saveState(QSettings& settings);
+  void loadState(QSettings& settings);
   TabView* getActiveTabViewOrCreate();
 
-public slots:
+ public slots:
   StatusBar* statusBar();
   Console* console() { return m_console; }
   FindReplaceView* findReplaceView() { return m_findReplaceView; }
   TabView* activeTabView();
 
-signals:
+ signals:
   void activeViewChanged(QWidget* oldView, QWidget* newView);
   void firstPaintEventFired();
 
@@ -93,6 +94,7 @@ signals:
  private:
   static QList<Window*> s_windows;
 
+  static bool closeTabIncludingDocInternal(core::Document* doc);
 
   std::unique_ptr<Ui::Window> ui;
   TabViewGroup* m_tabViewGroup;
@@ -101,10 +103,11 @@ signals:
   Console* m_console;
   bool m_firstPaintEventFired;
 
-  static bool closeTabIncludingDocInternal(core::Document* doc);
+  // Splitter that splits ProjectView and editorWidget
+  QSplitter* m_horizontalSplitter;
 
   void setTheme(const core::Theme* theme);
-  QList<QToolBar *> toolBars();
+  QList<QToolBar*> toolBars();
 
  private slots:
   void updateConnection(TabView* oldTab, TabView* newTab);

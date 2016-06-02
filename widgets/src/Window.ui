@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string notr="true">SilkEdit</string>
   </property>
-  <widget class="HSplitter" name="rootSplitter"/>
+  <widget class="VSplitter" name="rootSplitter"/>
   <widget class="StatusBar" name="statusBar"/>
  </widget>
  <customwidgets>
@@ -23,7 +23,7 @@
    <header>StatusBar.h</header>
   </customwidget>
   <customwidget>
-   <class>HSplitter</class>
+   <class>VSplitter</class>
    <extends>QWidget</extends>
    <header>Splitter.h</header>
    <container>1</container>

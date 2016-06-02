@@ -7,7 +7,7 @@ using core::ColorSettings;
 using core::Theme;
 using core::Config;
 
-LineNumberArea::LineNumberArea(TextEdit* editor) : QWidget(editor), m_codeEditor(editor) {
+LineNumberArea::LineNumberArea(TextEdit* editor) : CustomWidget(editor), m_codeEditor(editor) {
   connect(&Config::singleton(), &Config::themeChanged, this, &LineNumberArea::setTheme);
   // Set default values
   setTheme(Config::singleton().theme());

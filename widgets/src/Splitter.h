@@ -21,3 +21,11 @@ class HSplitter : public Splitter {
   HSplitter(QWidget* parent) : Splitter(Qt::Orientation::Horizontal, parent) {}
   ~HSplitter() = default;
 };
+
+class VSplitter : public Splitter {
+  Q_OBJECT
+
+ public:
+  VSplitter(QWidget* parent) : Splitter(Qt::Orientation::Vertical, parent) {}
+  ~VSplitter() = default;
+};
