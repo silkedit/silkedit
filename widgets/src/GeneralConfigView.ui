@@ -10,174 +10,173 @@
     <height>627</height>
    </rect>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>60</x>
-     <y>50</y>
-     <width>414</width>
-     <height>347</height>
-    </rect>
+  <layout class="QVBoxLayout" name="rootLayout">
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-   <layout class="QVBoxLayout" name="rootLayout">
-    <property name="sizeConstraint">
-     <enum>QLayout::SetDefaultConstraint</enum>
-    </property>
-    <item>
-     <widget class="QLabel" name="themeLabel">
-      <property name="text">
-       <string>Theme:</string>
-      </property>
-      <property name="buddy">
-       <cstring>themeCombo</cstring>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="themeCombo"/>
-    </item>
-    <item>
-     <widget class="QLabel" name="langLabel">
-      <property name="text">
-       <string>Language:</string>
-      </property>
-      <property name="buddy">
-       <cstring>langCombo</cstring>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QComboBox" name="langCombo"/>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="fontLayout">
-      <item>
-       <widget class="QLabel" name="fontLabel">
-        <property name="text">
-         <string>Font:</string>
-        </property>
-        <property name="buddy">
-         <cstring>fontComboBox</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QFontComboBox" name="fontComboBox"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="fontSizeLabel">
-        <property name="text">
-         <string>Size:</string>
-        </property>
-        <property name="buddy">
-         <cstring>fontSizeSpin</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="fontSizeSpin"/>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <item>
-       <widget class="QLabel" name="tabWidthLabel">
-        <property name="text">
-         <string>Tab Width:</string>
-        </property>
-        <property name="buddy">
-         <cstring>tabWidthSpin</cstring>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="tabWidthSpin"/>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="indentUsingSpacesCheck">
-      <property name="text">
-       <string>Indent using spaces</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QCheckBox" name="showInvisiblesCheck">
-      <property name="text">
-       <string>Show Invisibles</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="eolLabel">
-      <property name="text">
-       <string>End of Line string:</string>
-      </property>
-      <property name="buddy">
-       <cstring>eolEdit</cstring>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLineEdit" name="eolEdit">
-      <property name="text">
-       <string/>
-      </property>
-      <property name="placeholderText">
-       <string>e.g. ¬</string>
-      </property>
-     </widget>
-    </item>
-    <item>
-     <spacer name="verticalSpacer">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
-    <item>
-     <widget class="QPushButton" name="restartButton">
-      <property name="text">
-       <string>Restart to Apply Change</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="themeLabel">
+     <property name="text">
+      <string>Theme:</string>
+     </property>
+     <property name="buddy">
+      <cstring>themeCombo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="themeCombo"/>
+   </item>
+   <item>
+    <widget class="QLabel" name="langLabel">
+     <property name="text">
+      <string>Language:</string>
+     </property>
+     <property name="buddy">
+      <cstring>langCombo</cstring>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="langCombo"/>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="fontLayout">
+     <item>
+      <widget class="QLabel" name="fontLabel">
+       <property name="text">
+        <string>Font:</string>
+       </property>
+       <property name="buddy">
+        <cstring>fontComboBox</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QFontComboBox" name="fontComboBox"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="fontSizeLabel">
+       <property name="text">
+        <string>Size:</string>
+       </property>
+       <property name="buddy">
+        <cstring>fontSizeSpin</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="fontSizeSpin"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="tabWidthLabel">
+       <property name="text">
+        <string>Tab Width:</string>
+       </property>
+       <property name="buddy">
+        <cstring>tabWidthSpin</cstring>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="tabWidthSpin"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="indentUsingSpacesCheck">
+     <property name="text">
+      <string>Indent using spaces</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="showInvisiblesCheck">
+     <property name="text">
+      <string>Show Invisibles</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="eolLabel">
+     <property name="text">
+      <string>End of Line string:</string>
+     </property>
+     <property name="buddy">
+      <cstring>eolEdit</cstring>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLineEdit" name="eolEdit">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="placeholderText">
+      <string>e.g. ¬</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QPushButton" name="restartButton">
+     <property name="text">
+      <string>Restart to Apply Change</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
