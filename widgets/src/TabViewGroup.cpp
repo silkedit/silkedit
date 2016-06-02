@@ -49,7 +49,7 @@ void setSizesOfSplitter(QSplitter* splitter) {
 }
 
 TabViewGroup::TabViewGroup(QWidget* parent)
-    : QWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
+    : CustomWidget(parent), m_activeTabView(nullptr), m_rootSplitter(new HSplitter(this)) {
   QVBoxLayout* layout = new QVBoxLayout(this);
   layout->setContentsMargins(0, 0, 0, 0);
   layout->addWidget(m_rootSplitter);

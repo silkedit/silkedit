@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QWidget>
+#include "CustomWidget.h"
 
 namespace Ui {
 class KeymapConfigView;
 }
 
-class KeymapConfigView : public QWidget {
+class KeymapConfigView : public CustomWidget {
   Q_OBJECT
 
  public:
