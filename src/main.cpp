@@ -89,7 +89,10 @@ int main(int argc, char** argv) {
   Config::singleton().init();
 
   // Setup translator after initializing Config
-  app.setupTranslator(Config::singleton().locale());
+  const auto& locale = Config::singleton().locale();
+  app.setupTranslator(locale);
+
+  app.setDefaultFont(locale);
 
   // Load keymap settings after registering commands
   KeymapManager::singleton().loadUserKeymap();

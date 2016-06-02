@@ -29,6 +29,7 @@ class App : public QtSingleApplication {
   void setupTranslator(const QString& locale);
   bool isQuitting() { return m_isQuitting; }
   TabView* getActiveTabViewOrCreate();
+  void setDefaultFont(QString locale);
 
  public slots:
   TextEdit* activeTextEdit();
