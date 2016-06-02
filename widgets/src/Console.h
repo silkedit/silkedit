@@ -23,6 +23,7 @@ class Console : public CustomWidget {
 
  protected:
   void showEvent(QShowEvent*);
+  void hideEvent(QHideEvent* event);
 
  private:
   std::unique_ptr<Ui::Console> ui;
