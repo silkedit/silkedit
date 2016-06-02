@@ -130,16 +130,10 @@ void TextEditPrivate::setTheme(Theme* theme) {
     q_ptr->verticalScrollBar()->setStyleSheet(theme->textEditVerticalScrollBarStyle());
     q_ptr->horizontalScrollBar()->setStyleSheet(theme->textEditHorizontalScrollBarStyle());
   }
-
-  highlightCurrentLine();
 }
 
 void TextEditPrivate::clearDirtyMarker() {
   q_ptr->document()->setModified(false);
-}
-
-void TextEditPrivate::clearHighlightingCurrentLine() {
-  q_ptr->setExtraSelections(QList<QTextEdit::ExtraSelection>());
 }
 
 /**
@@ -161,14 +155,6 @@ QString TextEditPrivate::prevLineText(int prevCount, Regexp* ignorePattern) {
   }
 
   return cursor.selectedText();
-}
-
-void TextEditPrivate::toggleHighlightingCurrentLine(bool hasSelection) {
-  if (hasSelection) {
-    clearHighlightingCurrentLine();
-  } else {
-    highlightCurrentLine();
-  }
 }
 
 void TextEditPrivate::emitLanguageChanged(const QString& scope) {
@@ -276,28 +262,6 @@ boost::optional<Region> TextEditPrivate::find(const QString& text,
   return boost::none;
 }
 
-void TextEditPrivate::highlightCurrentLine() {
-  if (q_ptr->textCursor().hasSelection()) {
-    return;
-  }
-  Theme* theme = Config::singleton().theme();
-  if (theme && theme->textEditSettings != nullptr) {
-    ColorSettings* textEditSettings = theme->textEditSettings.get();
-
-    QList<QTextEdit::ExtraSelection> extraSelections;
-    if (!q_ptr->isReadOnly()) {
-      QTextEdit::ExtraSelection selection;
-      QColor lineColor = QColor(textEditSettings->value("lineHighlight"));
-      selection.format.setBackground(lineColor);
-      selection.format.setProperty(QTextFormat::FullWidthSelection, true);
-      selection.cursor = q_ptr->textCursor();
-      selection.cursor.clearSelection();
-      extraSelections.append(selection);
-    }
-    q_ptr->setExtraSelections(extraSelections);
-  }
-}
-
 /**
  * @brief Indent one level
  * @param currentVisibleCursor
@@ -349,7 +313,6 @@ TextEdit::TextEdit(QWidget* parent)
   connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
   connect(this, SIGNAL(updateRequest(const QRect&, int)), this,
           SLOT(updateLineNumberArea(const QRect&, int)));
-  connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
   connect(this, SIGNAL(showLineNumberChanged(bool)), this, SLOT(update()));
   connect(this, &TextEdit::destroying, &OpenRecentItemManager::singleton(),
           &OpenRecentItemManager::addOpenRecentItem);
@@ -362,7 +325,6 @@ TextEdit::TextEdit(QWidget* parent)
   connect(&Config::singleton(), &Config::endOfLineStrChanged, this,
           [=](const QString&) { update(); });
   connect(this, SIGNAL(saved()), this, SLOT(clearDirtyMarker()));
-  connect(this, SIGNAL(copyAvailable(bool)), this, SLOT(toggleHighlightingCurrentLine(bool)));
   connect(&Config::singleton(), SIGNAL(wordWrapChanged(bool)), this, SLOT(setWordWrap(bool)));
 
   // Set default values
@@ -576,11 +538,20 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent* event) {
   }
 
   QPainter painter(d_ptr->m_lineNumberArea);
+
+  // fill the entire background
   painter.fillRect(event->rect(), d_ptr->m_lineNumberArea->backgroundColor());
 
+  // change the background color of current line
+  const auto& currentBlock = textCursor().block();
+  auto height = Config::singleton().fontMetrics().height();
+  int top = (int)blockBoundingGeometry(currentBlock).translated(contentOffset()).top();
+  painter.fillRect(QRect(0, top, d_ptr->m_lineNumberArea->width(), height), d_ptr->m_lineNumberArea->currentLineBackgroundColor());
+
+  // draw line numbers
   QTextBlock block = firstVisibleBlock();
   int blockNumber = block.blockNumber();
-  int top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
+  top = (int)blockBoundingGeometry(block).translated(contentOffset()).top();
   int bottom = top + (int)blockBoundingRect(block).height();
 
   while (block.isValid() && top <= event->rect().bottom()) {
@@ -590,7 +561,7 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent* event) {
       painter.setPen(d_ptr->m_lineNumberArea->lineNumberColor());
       painter.drawText(0, top,
                        d_ptr->m_lineNumberArea->width() - d_ptr->m_lineNumberArea->PADDING_RIGHT,
-                       Config::singleton().fontMetrics().height(), Qt::AlignRight, number);
+                       height, Qt::AlignRight, number);
     }
 
     block = block.next();

@@ -146,9 +146,7 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   Q_PRIVATE_SLOT(d_func(), void outdentCurrentLineIfNecessary())
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberAreaWidth(int newBlockCount))
   Q_PRIVATE_SLOT(d_func(), void updateLineNumberArea(const QRect&, int))
-  Q_PRIVATE_SLOT(d_func(), void highlightCurrentLine())
   Q_PRIVATE_SLOT(d_func(), void clearDirtyMarker())
-  Q_PRIVATE_SLOT(d_func(), void toggleHighlightingCurrentLine(bool hasSelection))
   Q_PRIVATE_SLOT(d_func(), void setWordWrap(bool))
 };
 
