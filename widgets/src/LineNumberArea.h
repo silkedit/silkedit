@@ -17,13 +17,17 @@ class LineNumberArea : public CustomWidget {
   void setLineNumberColor(QColor color);
   QColor backgroundColor() const;
   void setBackgroundColor(QColor color);
+  QColor currentLineBackgroundColor() const { return m_currentLineBackgroundColor; }
+  void setCurrentLineBackgroundColor(QColor color) { m_currentLineBackgroundColor = color; }
 
  protected:
   void paintEvent(QPaintEvent* event) override;
 
  private:
-  void setTheme(core::Theme* theme);
   TextEdit* m_codeEditor;
   QColor m_lineNumberColor;
   QColor m_backgroundColor;
+  QColor m_currentLineBackgroundColor;
+
+  void setTheme(core::Theme* theme);
 };
