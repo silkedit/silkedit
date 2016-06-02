@@ -35,7 +35,7 @@ const char* IN_SELECTION_TEXT = QT_TRANSLATE_NOOP("FindReplaceView", "In Selecti
 }
 
 FindReplaceView::FindReplaceView(QWidget* parent)
-    : QWidget(parent), ui(new Ui::FindReplaceView), m_activeView(nullptr) {
+    : CustomWidget(parent), ui(new Ui::FindReplaceView), m_activeView(nullptr) {
   ui->setupUi(this);
 
   // Make 'Replace' and 'Replace All' fonts 2 points smaller

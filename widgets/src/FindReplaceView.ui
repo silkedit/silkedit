@@ -7,145 +7,144 @@
     <x>0</x>
     <y>0</y>
     <width>663</width>
-    <height>110</height>
+    <height>145</height>
    </rect>
   </property>
-  <widget class="QWidget" name="gridLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>621</width>
-     <height>85</height>
-    </rect>
+  <layout class="QGridLayout" name="layout">
+   <property name="leftMargin">
+    <number>0</number>
    </property>
-   <layout class="QGridLayout" name="layout">
-    <property name="topMargin">
-     <number>0</number>
-    </property>
-    <item row="0" column="0">
-     <widget class="LineEdit" name="lineEditForFind">
-      <property name="placeholderText">
-       <string>Find</string>
-      </property>
-     </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="LineEdit" name="lineEditForReplace">
-      <property name="focusPolicy">
-       <enum>Qt::StrongFocus</enum>
-      </property>
-      <property name="placeholderText">
-       <string>Replace</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <layout class="QHBoxLayout" name="checkBoxsLayout">
-      <item>
-       <widget class="QPushButton" name="prevButton">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="nextButton">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>10</width>
-          <height>10</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CheckBox" name="matchCaseChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CheckBox" name="regexChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CheckBox" name="wholeWordChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CheckBox" name="inSelectionChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item row="1" column="1">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="replaceButton">
-        <property name="text">
-         <string>Replace</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="replaceAllButton">
-        <property name="text">
-         <string>Replace All</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="CheckBox" name="preserveCaseChk">
-        <property name="focusPolicy">
-         <enum>Qt::NoFocus</enum>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-   </layout>
-  </widget>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="LineEdit" name="lineEditForFind">
+     <property name="placeholderText">
+      <string>Find</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="LineEdit" name="lineEditForReplace">
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="placeholderText">
+      <string>Replace</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <layout class="QHBoxLayout" name="checkBoxsLayout">
+     <item>
+      <widget class="QPushButton" name="prevButton">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="nextButton">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>10</width>
+         <height>10</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CheckBox" name="matchCaseChk">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CheckBox" name="regexChk">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CheckBox" name="wholeWordChk">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CheckBox" name="inSelectionChk">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="1">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="replaceButton">
+       <property name="text">
+        <string>Replace</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="replaceAllButton">
+       <property name="text">
+        <string>Replace All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="CheckBox" name="preserveCaseChk">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>
