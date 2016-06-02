@@ -439,6 +439,7 @@ void FindReplaceView::setTheme(core::Theme* theme) {
         QStringLiteral(
             "#%1 QPushButton {"
             "color: %2;"
+            "outline: 0;"
             "}"
             "#%1 QCheckBox:checked {"
             "background-color: %3;"
