@@ -330,7 +330,6 @@ TextEdit::TextEdit(QWidget* parent)
   // Set default values
   d->updateLineNumberAreaWidth(0);
   d_ptr->setTheme(Config::singleton().theme());
-  QApplication::setCursorFlashTime(0);
   setLanguage(DEFAULT_SCOPE);
 }
 
