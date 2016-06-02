@@ -57,7 +57,6 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
   connect(m_delegate, &PackageDelegate::needsUpdate,
           [=](const QModelIndex& index) { ui->tableView->update(index); });
   connect(m_delegate, &PackageDelegate::clicked, this, &PackagesView::processWithPackage);
-  setLayout(ui->rootHLayout);
 }
 
 PackagesView::~PackagesView() {

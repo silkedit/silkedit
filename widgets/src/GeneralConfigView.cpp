@@ -80,8 +80,6 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
 
   // Restart button to apply change
   connect(ui->restartButton, &QPushButton::clicked, this, [=] { App::restart(); });
-
-  setLayout(ui->rootLayout);
 }
 
 GeneralConfigView::~GeneralConfigView() {
