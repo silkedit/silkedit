@@ -5,6 +5,7 @@
 #include <QLineEdit>
 #include <QCheckBox>
 
+#include "CustomWidget.h"
 #include "core/macros.h"
 #include "core/Document.h"
 #include "core/HistoryModel.h"
@@ -20,7 +21,7 @@ namespace core {
 class Theme;
 }
 
-class FindReplaceView : public QWidget {
+class FindReplaceView : public CustomWidget {
   Q_OBJECT
   DISABLE_COPY(FindReplaceView)
 
@@ -32,7 +33,7 @@ class FindReplaceView : public QWidget {
   int highlightMatches();
   void setActiveView(QWidget* view);
 
-public slots:
+ public slots:
   void show();
   void hide();
   void findNext();
