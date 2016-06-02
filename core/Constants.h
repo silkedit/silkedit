@@ -16,10 +16,8 @@ class Constants : public QObject, public core::Singleton<Constants> {
   ~Constants() = default;
 
   static const QString defaultFontFamily;
-  static const QString defaultUIFontFamily;
 
   static const int defaultFontSize;
-  static const int defaultUIFontSize;
 
   static const char* RUN_AS_NODE;
 
