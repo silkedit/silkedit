@@ -24,17 +24,14 @@ class TextEditPrivate {
   std::shared_ptr<core::Document> m_document;
   QVector<core::Region> m_searchMatchedRegions;
 
-  void clearHighlightingCurrentLine();
   QString prevLineText(int prevCount = 1, core::Regexp* ignorePattern = nullptr);
   void indentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentOneLevel(QTextCursor& currentVisibleCursor);
   void outdentCurrentLineIfNecessary();
   void updateLineNumberAreaWidth(int newBlockCount);
-  void highlightCurrentLine();
   void updateLineNumberArea(const QRect&, int);
   void setTheme(core::Theme* theme);
   void clearDirtyMarker();
-  void toggleHighlightingCurrentLine(bool hasSelection);
   void emitLanguageChanged(const QString& scope);
   void emitEncodingChanged(const core::Encoding& enc);
   void emitLineSeparatorChanged(const QString& lineSeparator);

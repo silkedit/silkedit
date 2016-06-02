@@ -18,24 +18,33 @@ QSize LineNumberArea::sizeHint() const {
 }
 
 void LineNumberArea::setTheme(Theme* theme) {
-  qDebug("LineNumberArea theme is changed");
   if (!theme) {
     qWarning("theme is null");
     return;
   }
-  if (theme->gutterSettings != nullptr) {
-    ColorSettings* gutterSettings = theme->gutterSettings.get();
-    if (gutterSettings->contains("background")) {
-      setBackgroundColor(gutterSettings->value("background"));
+
+  static const auto& backgroundKey = QStringLiteral("background");
+  static const auto& foregroundKey = QStringLiteral("foreground");
+  static const auto& selectionBackgroundKey = QStringLiteral("selectionBackground");
+
+  if (theme->gutterSettings) {
+    if (theme->gutterSettings->contains(backgroundKey)) {
+      setBackgroundColor(theme->gutterSettings->value(backgroundKey));
     }
 
-    if (gutterSettings->contains("foreground")) {
-      setLineNumberColor(gutterSettings->value("foreground"));
+    if (theme->gutterSettings->contains(foregroundKey)) {
+      setLineNumberColor(theme->gutterSettings->value(foregroundKey));
     }
+  }
+
+  if (theme->textEditSettings && theme->textEditSettings->contains(selectionBackgroundKey)) {
+    setCurrentLineBackgroundColor(
+        theme->textEditSettings->value(selectionBackgroundKey));
   }
 }
 
 void LineNumberArea::paintEvent(QPaintEvent* event) {
+  Q_ASSERT(m_codeEditor);
   m_codeEditor->lineNumberAreaPaintEvent(event);
 }
 
