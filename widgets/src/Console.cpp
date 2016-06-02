@@ -4,6 +4,8 @@
 #include "Console.h"
 #include "ui_Console.h"
 #include "Helper.h"
+#include "App.h"
+#include "TextEdit.h"
 #include "core/MessageHandler.h"
 #include "core/Theme.h"
 #include "core/Config.h"
@@ -61,6 +63,12 @@ Console::~Console() {}
 
 void Console::showEvent(QShowEvent*) {
   ui->input->setFocus();
+}
+
+void Console::hideEvent(QHideEvent*) {
+  if (auto textEdit = App::instance()->activeTextEdit()) {
+    textEdit->setFocus();
+  }
 }
 
 void Console::runJSCode(const QString& code) {
