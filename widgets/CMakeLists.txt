@@ -6,6 +6,7 @@ if (MSVC)
 endif ()
 
 file(GLOB_RECURSE SILK_WIDGETS_SOURCES src/*.cpp)
+file(GLOB_RECURSE SILK_WIDGETS_UIS src/*.ui)
 
 # Exclude qtlockedfile files. They are supposed to be #included in qtlocalpeer.h
 list(REMOVE_ITEM SILK_WIDGETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleapplication/qtlockedfile.cpp)
@@ -14,7 +15,7 @@ list(REMOVE_ITEM SILK_WIDGETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/qtsingleap
 
 file(GLOB_RECURSE SILK_WIDGETS_HEADERS src/*.h)
 
-add_library(${MODULE_NAME} STATIC ${SILK_WIDGETS_SOURCES} ${SILK_WIDGETS_HEADERS})
+add_library(${MODULE_NAME} STATIC ${SILK_WIDGETS_SOURCES} ${SILK_WIDGETS_HEADERS} ${SILK_WIDGETS_UIS} )
 
 target_include_directories(${MODULE_NAME}
   PRIVATE ${PROJECT_SOURCE_DIR}

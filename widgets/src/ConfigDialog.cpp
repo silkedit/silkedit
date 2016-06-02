@@ -47,7 +47,6 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
   ui->stackedWidget->setContentsMargins(5, 5, 5, 5);
   ui->contentLayout->setStretchFactor(ui->stackedWidget, 1);
   ui->contentLayout->addStretch();
-  setLayout(ui->rootLayout);
 
   ui->listWidget->addItems(s_packageConfigs.keys());
   for (const auto& pkgDef : s_packageConfigs.values()) {

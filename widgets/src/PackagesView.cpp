@@ -24,7 +24,7 @@ const int TIMEOUT_IN_MS = 10000;  // 10sec
 }
 
 PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
-    : QWidget(parent),
+    : CustomWidget(parent),
       ui(new Ui::PackagesView),
       m_pkgsModel(new PackageTableModel(this)),
       m_delegate(new PackageDelegate(viewModel->buttonText(), viewModel->TextAfterProcess(), this)),
@@ -57,7 +57,6 @@ PackagesView::PackagesView(PackagesViewModel* viewModel, QWidget* parent)
   connect(m_delegate, &PackageDelegate::needsUpdate,
           [=](const QModelIndex& index) { ui->tableView->update(index); });
   connect(m_delegate, &PackageDelegate::clicked, this, &PackagesView::processWithPackage);
-  setLayout(ui->rootHLayout);
 }
 
 PackagesView::~PackagesView() {

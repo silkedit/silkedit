@@ -10,7 +10,8 @@
 using core::ConfigDefinition;
 using core::Config;
 
-PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs) {
+PackageConfigView::PackageConfigView(const QList<core::ConfigDefinition>& defs)
+    : CustomWidget(), Filtering() {
   QVBoxLayout* rootLayout = new QVBoxLayout;
   for (const ConfigDefinition& def : defs) {
     switch (def.type()) {

@@ -91,7 +91,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QPushButton" name="pushButton_send">
+         <widget class="QPushButton" name="pushButton_exit">
           <property name="minimumSize">
            <size>
             <width>100</width>
@@ -110,12 +110,12 @@
            </font>
           </property>
           <property name="text">
-           <string>Send</string>
+           <string>Exit</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="pushButton_exit">
+         <widget class="QPushButton" name="pushButton_send">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -140,7 +140,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Exit</string>
+           <string>Send</string>
           </property>
          </widget>
         </item>

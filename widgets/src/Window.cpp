@@ -51,8 +51,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_projectView(nullptr),
       m_findReplaceView(new FindReplaceView(this)),
       m_console(new Console(this)),
-      m_firstPaintEventFired(false) {
-  qDebug("creating Window");
+      m_firstPaintEventFired(false),
+      m_horizontalSplitter(new QSplitter(Qt::Horizontal, this)) {
   ui->setupUi(this);
 
   // QWebEngineView doesn't work well with unified toolbar on Mac
@@ -78,9 +78,6 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
     }
   }
 
-  ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
-  ui->rootSplitter->setChildrenCollapsible(false);
-
   QWidget* editorWidget = new QWidget(this);
   QVBoxLayout* layout = new QVBoxLayout(editorWidget);
   layout->setContentsMargins(0, 0, 0, 0);
@@ -92,15 +89,19 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
   m_findReplaceView->hide();
   editorWidget->setLayout(layout);
 
-  auto contentSplitter = new QSplitter(Qt::Vertical);
-  contentSplitter->setHandleWidth(0);
-  contentSplitter->setContentsMargins(0, 0, 0, 0);
-  contentSplitter->addWidget(editorWidget);
-  contentSplitter->addWidget(m_console);
-  m_console->hide();
-  contentSplitter->setSizes(QList<int>{500, 100});
+  m_horizontalSplitter->setHandleWidth(0);
+  m_horizontalSplitter->setContentsMargins(0, 0, 0, 0);
+  m_horizontalSplitter->setChildrenCollapsible(false);
+  m_horizontalSplitter->addWidget(editorWidget);
 
-  ui->rootSplitter->addWidget(contentSplitter);
+  ui->rootSplitter->setHandleWidth(0);
+  ui->rootSplitter->setContentsMargins(0, 0, 0, 0);
+  ui->rootSplitter->addWidget(m_horizontalSplitter);
+  ui->rootSplitter->addWidget(m_console);
+  ui->rootSplitter->setSizes(QList<int>{500, 100});
+
+  m_console->hide();
+
   setTheme(Config::singleton().theme());
   updateTitle();
 
@@ -301,9 +302,7 @@ void Window::saveWindowsState(Window* activeWindow, QSettings& settings) {
 
 void Window::loadWindowsState(QSettings& settings) {
   int size = settings.beginReadArray(WINDOWS_PREFIX);
-  scoped_guard guard([&] {
-    settings.endArray();
-  });
+  scoped_guard guard([&] { settings.endArray(); });
 
   for (int i = 0; i < size; i++) {
     auto win = new Window();
@@ -442,11 +441,11 @@ bool Window::openDir(const QString& dirPath) {
   Q_ASSERT(m_projectView);
   if (m_projectView->openDirOrExpand(dirPath)) {
     // root splitter becomes the owner of a project view.
-    ui->rootSplitter->insertWidget(0, m_projectView);
+    m_horizontalSplitter->insertWidget(0, m_projectView);
     // Set the initial sizes for QSplitter widgets
     QList<int> sizes;
     sizes << 50 << 300;
-    ui->rootSplitter->setSizes(sizes);
+    m_horizontalSplitter->setSizes(sizes);
     return true;
   } else {
     return false;

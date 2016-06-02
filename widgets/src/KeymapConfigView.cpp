@@ -12,7 +12,7 @@
 using core::Constants;
 
 KeymapConfigView::KeymapConfigView(QWidget* parent)
-    : QWidget(parent), ui(new Ui::KeymapConfigView) {
+    : CustomWidget(parent), ui(new Ui::KeymapConfigView) {
   ui->setupUi(this);
 
   connect(ui->filterLine, &QLineEdit::textEdited, ui->keymapTable, &KeymapTableView::setFilterText);
@@ -34,8 +34,6 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
     Window::showFirst();
     DocumentManager::singleton().open(Constants::singleton().userKeymapPath());
   });
-
-  setLayout(ui->rootLayout);
 }
 
 KeymapConfigView::~KeymapConfigView() {

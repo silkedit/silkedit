@@ -80,13 +80,6 @@ QToolButton:pressed {
 
 /* Find and Replace panel */
 
-QWidget#FindReplaceView {
-    background: qlineargradient(x1:0.5, y1:0, x2:0.5, y2:1,
-                 stop:0 #858585, stop:1 #515151);
-}
-
-
-
 #FindReplaceView QLineEdit {
     width: 18px;
     height: 18px;
@@ -203,20 +196,4 @@ StatusBar QComboBox QAbstractItemView {
 PackagesView #reloadButton {
   border: none;
   margin: 0px 5px 0px 5px;
-}
-
-
-/* Console */
-
-#Console #output {
-  margin: 2px 2px 2px 2px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-}
-
-#Console #input {
-  margin: 0 2px 2px 2px;
-  padding: 0 0 0 2px;
-  border: 1px solid transparent;
-  border-radius: 2px;
 }

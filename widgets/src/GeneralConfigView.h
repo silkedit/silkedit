@@ -1,14 +1,13 @@
 #pragma once
 
-#include <QWidget>
-
+#include "CustomWidget.h"
 #include "Filtering.h"
 
 namespace Ui {
 class GeneralConfigView;
 }
 
-class GeneralConfigView : public QWidget, public Filtering {
+class GeneralConfigView : public CustomWidget, public Filtering {
   Q_OBJECT
 
  public:
