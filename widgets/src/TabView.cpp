@@ -5,6 +5,7 @@
 #include <QMessageBox>
 #include <QStylePainter>
 #include <QTimer>
+#include <QDir>
 
 #include "TabView.h"
 #include "TextEdit.h"
@@ -85,7 +86,7 @@ int TabView::addTab(QWidget* page, const QString& label) {
 void TabView::setTabTextAndToolTip(TextEdit* textEdit, const QString& path) {
   setModified(indexOf(textEdit), false);
   setTabText(indexOf(textEdit), getFileNameFrom(path));
-  setTabToolTip(indexOf(textEdit), path);
+  setTabToolTip(indexOf(textEdit), QDir::toNativeSeparators(path));
 }
 
 int TabView::insertTab(int index, QWidget* widget, const QString& label) {
@@ -467,7 +468,7 @@ void TabView::loadState(QSettings& settings) {
       if (textEdit) {
         textEdit->loadState(settings);
         auto newIndex = addTab(textEdit, getFileNameFrom(textEdit->path()));
-        setTabToolTip(newIndex, textEdit->path());
+        setTabToolTip(newIndex, QDir::toNativeSeparators(textEdit->path()));
         if (settings.contains(TAB_TEXT_PREFIX)) {
           auto tabTextVar = settings.value(TAB_TEXT_PREFIX);
           if (tabTextVar.canConvert<QString>()) {
