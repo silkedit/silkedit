@@ -365,7 +365,7 @@ void Window::updateTitle() {
     if (!title.isEmpty()) {
       title += u8" - ";
     }
-    title += m_projectView->dirPath();
+    title += QDir::toNativeSeparators(m_projectView->dirPath());
   }
 
   setWindowTitle(title);
