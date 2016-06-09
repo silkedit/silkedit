@@ -252,15 +252,18 @@ TabView* App::getActiveTabViewOrCreate() {
 }
 
 void App::setDefaultFont(QString locale) {
-#ifdef Q_OS_WIN
   // change default UI font based on locale
   QFontDatabase database;
   if (locale == "ja" || locale == "ja_JP") {
+#ifdef Q_OS_WIN
     QList<std::tuple<QString, int>> fontInfos = {
         // Yu Gothic UI for Windows 10
         std::make_tuple(QStringLiteral("Yu Gothic UI"), 10),
         // Meiryo UI for Windows 7&8
         std::make_tuple(QStringLiteral("Meiryo UI"), 10)};
+#elif defined Q_OS_MAC
+    QList<std::tuple<QString, int>> fontInfos = {};
+#endif
 
     for (const auto& fontInfo : fontInfos) {
       if (database.hasFamily(std::get<0>(fontInfo))) {
@@ -269,7 +272,6 @@ void App::setDefaultFont(QString locale) {
       }
     }
   }
-#endif
 }
 
 TextEdit* App::activeTextEdit() {
