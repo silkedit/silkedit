@@ -275,11 +275,6 @@ TabView* TabViewGroup::createTabView() {
     if (!tabs.isEmpty() && tabs.first()->currentWidget()) {
       tabs.first()->currentWidget()->setFocus();
     }
-
-    Window* win = qobject_cast<Window*>(window());
-    if (win && tabs.empty() && !win->isProjectOpend()) {
-      win->close();
-    }
   });
 
   return tabView;

@@ -100,7 +100,6 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
     connect(textEdit, &TextEdit::pathUpdated, this,
             [=](const QString& path) { setTabTextAndToolTip(textEdit, path); });
     connect(textEdit, &TextEdit::modificationChanged, this, &TabView::updateTabTextBasedOn);
-    connect(textEdit, &TextEdit::fileDropped, this, &TabView::open);
   }
   int result = QTabWidget::insertTab(index, widget, label);
 
