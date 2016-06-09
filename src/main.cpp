@@ -55,6 +55,17 @@ int main(int argc, char** argv) {
 
   QStringList arguments = app.arguments();
 
+  // Run SilkEdit as normal Node.js
+  if (arguments.contains(Constants::RUN_AS_NODE)) {
+#ifdef Q_OS_WIN
+    // Prepare a console on Windows
+    Util::RouteStdioToConsole(true);
+#endif
+
+    arguments.removeOne(Constants::RUN_AS_NODE);
+    return nodeMain(arguments.size(), Util::toArgv(arguments));
+  }
+
 #ifdef Q_OS_WIN
   const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
   // If SilkEdit is already running, send an argument and exit.
@@ -68,12 +79,6 @@ int main(int argc, char** argv) {
     }
   });
 #endif
-
-  // Run SilkEdit as normal Node.js
-  if (arguments.contains(Constants::RUN_AS_NODE)) {
-    arguments.removeOne(Constants::RUN_AS_NODE);
-    return nodeMain(arguments.size(), Util::toArgv(arguments));
-  }
 
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
