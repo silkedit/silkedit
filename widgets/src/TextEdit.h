@@ -58,9 +58,9 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
                                      int end = -1,
                                      core::Document::FindFlags flags = 0);
   int highlightSearchMatches(const QString& text,
-                              int begin,
-                              int end,
-                              core::Document::FindFlags flags = 0);
+                             int begin,
+                             int end,
+                             core::Document::FindFlags flags = 0);
   void clearSearchHighlight();
   void replaceSelection(const QString& text, bool preserveCase = false);
   void replaceAllSelection(const QString& findText,
@@ -110,7 +110,6 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void lineSeparatorChanged(const QString& separator);
   void bomChanged(const core::BOM& bom);
   void showLineNumberChanged(bool visible);
-  void fileDropped(const QString& path);
 
   // private signals
   void destroying(const QString& path, QPrivateSignal);
@@ -122,8 +121,9 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void keyPressEvent(QKeyEvent* event) override;
   void mousePressEvent(QMouseEvent* e) override;
   void mouseDoubleClickEvent(QMouseEvent* event) override;
+  void dragEnterEvent(QDragEnterEvent* event) override;
   void dropEvent(QDropEvent* e) override;
-  void timerEvent(QTimerEvent *event) override;
+  void timerEvent(QTimerEvent* event) override;
 
  private:
   friend class TextEditPrivate;

@@ -90,6 +90,8 @@ class Window : public QMainWindow {
 
  protected:
   void paintEvent(QPaintEvent* event) override;
+  void dragEnterEvent(QDragEnterEvent* event) override;
+  void dropEvent(QDropEvent* e) override;
 
  private:
   static QList<Window*> s_windows;

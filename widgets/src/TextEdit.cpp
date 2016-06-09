@@ -545,7 +545,8 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent* event) {
   const auto& currentBlock = textCursor().block();
   auto height = Config::singleton().fontMetrics().height();
   int top = (int)blockBoundingGeometry(currentBlock).translated(contentOffset()).top();
-  painter.fillRect(QRect(0, top, d_ptr->m_lineNumberArea->width(), height), d_ptr->m_lineNumberArea->currentLineBackgroundColor());
+  painter.fillRect(QRect(0, top, d_ptr->m_lineNumberArea->width(), height),
+                   d_ptr->m_lineNumberArea->currentLineBackgroundColor());
 
   // draw line numbers
   QTextBlock block = firstVisibleBlock();
@@ -659,12 +660,12 @@ void TextEdit::makeFontBigger(bool bigger) {
   setFontPointSize(sz);
 }
 
-void TextEdit::dropEvent(QDropEvent* e) {
-  if (e->mimeData()->hasUrls()) {
-    for (const QUrl& url : e->mimeData()->urls()) {
-      emit fileDropped(url.toLocalFile());
-    }
-  }
+void TextEdit::dragEnterEvent(QDragEnterEvent* event) {
+  event->ignore();
+}
+
+void TextEdit::dropEvent(QDropEvent* event) {
+  event->ignore();
 }
 
 void TextEdit::timerEvent(QTimerEvent* event) {

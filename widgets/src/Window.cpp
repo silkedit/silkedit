@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QTimer>
+#include <QMimeData>
 
 #include "Window.h"
 #include "ui_Window.h"
@@ -54,6 +55,8 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
       m_firstPaintEventFired(false),
       m_horizontalSplitter(new QSplitter(Qt::Horizontal, this)) {
   ui->setupUi(this);
+
+  setAcceptDrops(true);
 
   // QWebEngineView doesn't work well with unified toolbar on Mac
   // https://bugreports.qt.io/browse/QTBUG-41179
@@ -460,6 +463,25 @@ void Window::paintEvent(QPaintEvent* event) {
   }
 }
 
+void Window::dropEvent(QDropEvent* e) {
+  if (e->mimeData()->hasUrls()) {
+    for (const QUrl& url : e->mimeData()->urls()) {
+      const auto& path = url.toLocalFile();
+      if (QDir(path).exists()) {
+        if (!m_projectView) {
+          openDir(path);
+        } else {
+          auto newWindow = new Window();
+          newWindow->openDir(path);
+          newWindow->show();
+        }
+      } else {
+        getActiveTabViewOrCreate()->open(path);
+      }
+    }
+  }
+}
+
 void Window::hideFindReplacePanel() {
   if (m_findReplaceView) {
     m_findReplaceView->hide();
@@ -472,4 +494,10 @@ QToolBar* Window::findToolbar(const QString& id) {
 
 QList<QToolBar*> Window::toolBars() {
   return findChildren<QToolBar*>();
+}
+
+void Window::dragEnterEvent(QDragEnterEvent* event) {
+  if (event->mimeData()->hasText()) {
+    event->acceptProposedAction();
+  }
 }
