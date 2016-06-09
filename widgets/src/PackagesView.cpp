@@ -431,9 +431,10 @@ void AvailablePackagesViewModel::processWithPackage(const QModelIndex& index,
                          "i",
                          "--production",
                          "--save",
-                         "--prefix",
-                         Constants::singleton().userPackagesRootDirPath(),
                          tarballUrl};
+  // NOTE: --save and --prefix doesn't work together on Windows
+  // https://github.com/npm/npm/issues/10448
+  npmProcess->setWorkingDirectory(Constants::singleton().userPackagesRootDirPath());
   npmProcess->start(Constants::singleton().nodePath(), args);
 }
 
@@ -506,16 +507,12 @@ void InstalledPackagesViewModel::processWithPackage(const QModelIndex& index, co
               return;
             }
 
-            qDebug("%s removed successfully", qPrintable(pkg.name));
+            qDebug() << pkg.name << "removed successfully";
             emit processSucceeded(index);
             emit PackageManager::singleton().packageRemoved(pkg);
           });
-  const QStringList args{Constants::RUN_AS_NODE,
-                         Constants::singleton().npmCliPath(),
-                         "r",
-                         "--save",
-                         "--prefix",
-                         Constants::singleton().userPackagesRootDirPath(),
-                         pkg.name};
+  const QStringList args{Constants::RUN_AS_NODE, Constants::singleton().npmCliPath(),
+                         QStringLiteral("uninstall"), QStringLiteral("--save"), pkg.name};
+  npmProcess->setWorkingDirectory(Constants::singleton().userPackagesRootDirPath());
   npmProcess->start(Constants::singleton().nodePath(), args);
 }
