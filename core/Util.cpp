@@ -364,6 +364,7 @@ QVariant core::Util::toVariant(const QString& str) {
   }
 }
 
+#ifdef Q_OS_WIN
 // copied from chromium launch_win.cc and added stdin case
 void Util::RouteStdioToConsole(bool create_console_if_not_found) {
   // Don't change anything if stdout or stderr already point to a
@@ -438,6 +439,7 @@ void Util::RouteStdioToConsole(bool create_console_if_not_found) {
   // Fix all cout, wcout, cin, wcin, cerr, wcerr, clog and wclog.
   std::ios::sync_with_stdio();
 }
+#endif
 
 QString Util::qcolorForStyleSheet(const QColor& color) {
   QString rgbaString;
