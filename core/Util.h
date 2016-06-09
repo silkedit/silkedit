@@ -57,6 +57,8 @@ class Util {
   static QVariant toVariant(const std::string &str);
   static QVariant toVariant(const QString &str);
 
+  static void RouteStdioToConsole(bool create_console_if_not_found);
+
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
     QTime startTime = QTime::currentTime();

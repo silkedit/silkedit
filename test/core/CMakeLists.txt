@@ -1,4 +1,4 @@
-﻿include_directories(SYSTEM
+include_directories(SYSTEM
   ${CMAKE_SOURCE_DIR}
   ${CMAKE_SOURCE_DIR}/core
   ${CMAKE_SOURCE_DIR}/test/util
@@ -14,7 +14,7 @@ elseif (MSVC)
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
 
   # Copy node.dll
-  if (USE_DEBUG_NODE)
+  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll DESTINATION .)
   else ()
     file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll DESTINATION .)
