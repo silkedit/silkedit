@@ -54,10 +54,12 @@ class Util {
   static char** toArgv(const QStringList& argsStrings);
 
   static QVariant toVariant(const char* str);
-  static QVariant toVariant(const std::string &str);
-  static QVariant toVariant(const QString &str);
+  static QVariant toVariant(const std::string& str);
+  static QVariant toVariant(const QString& str);
 
+#ifdef Q_OS_WIN
   static void RouteStdioToConsole(bool create_console_if_not_found);
+#endif
 
   template <typename Func>
   static void stopWatch(Func func, const QString& msg = "time") {
