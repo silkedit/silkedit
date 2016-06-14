@@ -281,17 +281,20 @@ elseif (MSVC)
     file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
   endif()
 
-  # copy CrashReporter
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_ja.qm ${PROJECT_BINARY_DIR})
-
+  # Copy Qt translation files
   set(QT_HOME "C:/Qt/Qt${QT_VERSION}")
 
-  file(COPY ${PROJECT_BINARY_DIR}/silkedit_ja.qm
-            ${QT_HOME}/translations/qt_ja.qm
+  file(COPY ${QT_HOME}/translations/qt_ja.qm
             ${QT_HOME}/translations/qtmultimedia_ja.qm
             ${QT_HOME}/translations/qtbase_ja.qm
             ${QT_HOME}/translations/qtquick1_ja.qm
             ${QT_HOME}/translations/qtscript_ja.qm
             ${QT_HOME}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/translations)
+
+  # copy CrashReporter
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_ja.qm ${PROJECT_BINARY_DIR})
+
+  # Move silkedit_ja.qm to translations directory
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/silkedit_ja.qm ${PROJECT_BINARY_DIR}/translations/silkedit_ja.qm)
 endif()
