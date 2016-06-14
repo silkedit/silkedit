@@ -458,7 +458,8 @@ QString Util::qcolorForStyleSheet(const QColor& color) {
 
 QString Util::readResource(const QString& resource) {
   QFile file(resource);
-  Q_ASSERT(file.open(QFile::ReadOnly));
+  auto result = file.open(QFile::ReadOnly | QIODevice::Text);
+  Q_ASSERT(result);
   return QLatin1String(file.readAll());
 }
 
