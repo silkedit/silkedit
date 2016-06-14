@@ -82,11 +82,9 @@ App::App(int& argc, char** argv)
 //  installFont(":/SourceHanCodeJP-Bold.otf");
 #endif
 
-  QFile file(":/stylesheet.css");
-  if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    setStyleSheet(file.readAll());
-    file.close();
-  }
+  QFile file(":/stylesheets/stylesheet.css");
+  Q_ASSERT(file.open(QIODevice::ReadOnly | QIODevice::Text));
+  setStyleSheet(file.readAll());
 
   // Track active TabView
   connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {

@@ -57,6 +57,8 @@ class Util {
   static QVariant toVariant(const std::string& str);
   static QVariant toVariant(const QString& str);
 
+  static QString readResource(const QString& resource);
+
 #ifdef Q_OS_WIN
   static void RouteStdioToConsole(bool create_console_if_not_found);
 #endif

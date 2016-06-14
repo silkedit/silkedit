@@ -2,5 +2,6 @@
 <qresource>
     <file alias="root_package.json">root_package.json</file>
     <file alias="LICENSE.md">LICENSE.md</file>
+    <file>defaultKeymap.yml</file>
 </qresource>
 </RCC>

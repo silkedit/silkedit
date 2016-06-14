@@ -1,0 +1,2 @@
+# Define your custom keymap
+# - { key: ctrl+b, command: move_cursor_left }

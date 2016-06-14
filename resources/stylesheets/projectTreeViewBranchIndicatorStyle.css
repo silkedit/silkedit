@@ -1,0 +1,13 @@
+ProjectTreeView::branch:has-children:!has-siblings:closed,
+ProjectTreeView::branch:closed:has-children:has-siblings {
+  border-image: none;
+  image: url(%1);
+  padding: %2px;
+}
+
+ProjectTreeView::branch:open:has-children:!has-siblings,
+ProjectTreeView::branch:open:has-children:has-siblings  {
+  border-image: none;
+  image: url(%3);
+  padding: %2px;
+}
