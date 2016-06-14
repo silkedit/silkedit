@@ -456,4 +456,10 @@ QString Util::qcolorForStyleSheet(const QColor& color) {
   return rgbaString;
 }
 
+QString Util::readResource(const QString& resource) {
+  QFile file(resource);
+  Q_ASSERT(file.open(QFile::ReadOnly));
+  return QLatin1String(file.readAll());
+}
+
 }  // namespace core

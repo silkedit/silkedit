@@ -521,7 +521,7 @@ set_version() {
 }
 
 localize() {
-    lupdate src core -ts translations/silkedit_ja.ts
+    lupdate src core widgets -ts translations/silkedit_ja.ts
     #CrashReporter
     lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }

@@ -77,24 +77,7 @@ void Console::runJSCode(const QString& code) {
 
 void Console::setTheme(core::Theme* theme) {
   if (theme->consoleSettings != nullptr) {
-    const auto& style = QStringLiteral(R"(
-#%1 {
-  background-color: %2;
-}
-
-#%1 #output {
-  margin: 2px 2px 2px 0px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-}
-
-#%1 #input {
-  margin: 0 2px 2px 0px;
-  padding: 0 0 0 2px;
-  border: 1px solid transparent;
-  border-radius: 2px;
-}
-)")
+    const auto& style = Util::readResource(":/stylesheets/consoleStyle.css")
                             .arg(this->objectName())
                             .arg(Util::qcolorForStyleSheet(
                                 theme->consoleSettings->value(QStringLiteral("background"))));

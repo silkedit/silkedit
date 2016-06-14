@@ -1,5 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>stylesheet.css</file>
+    <file>stylesheets/stylesheet.css</file>
+    <file>stylesheets/verticalScrollBarBaseStyle.css</file>
+    <file>stylesheets/horizontalScrollBarBaseStyle.css</file>
+    <file>stylesheets/consoleStyle.css</file>
+    <file>stylesheets/projectTreeViewStyle.css</file>
+    <file>stylesheets/projectTreeViewBranchIndicatorStyle.css</file>
 </qresource>
 </RCC>
