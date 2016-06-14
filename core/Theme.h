@@ -50,7 +50,7 @@ class Theme {
   static Theme* loadTheme(const QString& filename);
   static int rank(const QString& scope, const QString& scope2);
 
-  QTextCharFormat *getFormat(const QString& scope);
+  QTextCharFormat* getFormat(const QString& scope);
 
   std::unique_ptr<ColorSettings> textEditSettings;
   std::unique_ptr<ColorSettings> gutterSettings;
@@ -72,14 +72,14 @@ class Theme {
   bool isDarkTheme() const;
 
   boost::optional<QFont> font();
-  void setFont(const QFont &font);
+  void setFont(const QFont& font);
 
   QString textEditVerticalScrollBarStyle() const;
   QString projectTreeViewVerticalScrollBarStyle() const;
   QString textEditHorizontalScrollBarStyle() const;
   QString projectTreeViewHorizontalScrollBarStyle() const;
 
-private:
+ private:
   static ScopeSetting* matchedSetting(const QString& scope);
 
   static ColorSettings createTextEditSettingsColors(const Theme* theme);
@@ -102,6 +102,9 @@ private:
   boost::optional<QFont> m_font;
 
   QVector<ScopeSetting*> getMatchedSettings(const QString& scope);
+
+  QString verticalScrollBarBaseStyle() const;
+  QString horizontalScrollBarBaseStyle() const;
 };
 
 class Rank {

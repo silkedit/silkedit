@@ -8,8 +8,10 @@
 #include "DocumentManager.h"
 #include "Window.h"
 #include "core/Constants.h"
+#include "core/Util.h"
 
 using core::Constants;
+using core::Util;
 
 KeymapConfigView::KeymapConfigView(QWidget* parent)
     : CustomWidget(parent), ui(new Ui::KeymapConfigView) {
@@ -20,10 +22,7 @@ KeymapConfigView::KeymapConfigView(QWidget* parent)
     QFile keymapFile(Constants::singleton().userKeymapPath());
     if (!keymapFile.exists()) {
       if (keymapFile.open(QFile::WriteOnly | QIODevice::Text)) {
-        QString defaultContent(R"(
-# Define your custom keymap
-# - { key: ctrl+b, command: move_cursor_left }
-)");
+        QString defaultContent = Util::readResource(":/defaultKeymap.yml");
 
         QTextStream out(&keymapFile);
         out << defaultContent.trimmed();

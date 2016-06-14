@@ -19,12 +19,12 @@
         <translation>コメント:</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="113"/>
+        <location filename="../src/mainwindow.ui" line="143"/>
         <source>Send</source>
         <translation>送信</translation>
     </message>
     <message>
-        <location filename="../src/mainwindow.ui" line="143"/>
+        <location filename="../src/mainwindow.ui" line="113"/>
         <source>Exit</source>
         <translation>終了</translation>
     </message>

@@ -6,6 +6,7 @@
 #include <QDir>
 #include <QScrollBar>
 #include <QHeaderView>
+#include <QMessageBox>
 
 #include "ProjectTreeView.h"
 #include "DocumentManager.h"
@@ -121,19 +122,7 @@ void ProjectTreeView::setTheme(const core::Theme* theme) {
 
   if (theme->projectTreeViewSettings) {
     QString style =
-        QStringLiteral(
-            R"(
-ProjectTreeView {
-  background-color: %1;
-  color: %2;
-  selection-background-color: %3
-}
-
-ProjectTreeView::item:selected {
-  background-color: %3;
-  color:%4;
-}
-)")
+        Util::readResource(":/stylesheets/projectTreeViewStyle.css")
             .arg(Util::qcolorForStyleSheet(
                      theme->projectTreeViewSettings->value(QStringLiteral("background"))),
                  Util::qcolorForStyleSheet(
@@ -163,21 +152,10 @@ ProjectTreeView::item:selected {
     Q_ASSERT(!branchOpenImage.isEmpty());
     Q_ASSERT(padding >= 0);
 
-      style += QStringLiteral(R"(
-ProjectTreeView::branch:has-children:!has-siblings:closed,
-ProjectTreeView::branch:closed:has-children:has-siblings {
-  border-image: none;
-  image: url(%1);
-  padding: %2px;
-}
-
-ProjectTreeView::branch:open:has-children:!has-siblings,
-ProjectTreeView::branch:open:has-children:has-siblings  {
-  border-image: none;
-  image: url(%3);
-  padding: %2px;
-}
-                            )").arg(branchClosedImage).arg(padding).arg(branchOpenImage);
+    style += Util::readResource(":/stylesheets/projectTreeViewBranchIndicatorStyle.css")
+                 .arg(branchClosedImage)
+                 .arg(padding)
+                 .arg(branchOpenImage);
 #endif
 
     this->setStyleSheet(style);
@@ -252,6 +230,13 @@ void ProjectTreeView::remove() {
       QModelIndex index = filter->mapToSource(filterIndex);
       QString filePath = m_model->filePath(index);
       QFileInfo info(filePath);
+
+      // Ask user
+      auto reply = QMessageBox::question(this, "", tr("Delete '%1' ?").arg(info.fileName()));
+      if (reply == QMessageBox::No) {
+        return;
+      }
+
       if (info.isFile()) {
         if (!m_model->remove(index)) {
           qDebug("failed to remove %s", qPrintable(filePath));
