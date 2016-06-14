@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 
 project(SilkEdit VERSION 0.12.3)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
+set(QT_VERSION 5.6.0)
 
 message(STATUS "BUILD_NUMBER: ${BUILD_NUMBER}")
 
@@ -223,8 +224,7 @@ if(APPLE)
   # bundle fonts
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/resources/fonts ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
 
-  # Copy qt_<locale>.qm files because macdeployqt doesn't copy them (windeployqt does)
-  set(QT_HOME "/usr/local/Qt-5.6.0")
+  set(QT_HOME "/usr/local/Qt-${QT_VERSION}")
 
   file(COPY ${QT_HOME}/translations/qt_ja.qm
             ${QT_HOME}/translations/qtmultimedia_ja.qm
@@ -284,4 +284,14 @@ elseif (MSVC)
   # copy CrashReporter
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_ja.qm ${PROJECT_BINARY_DIR})
+
+  set(QT_HOME "C:/Qt/Qt${QT_VERSION}")
+
+  file(COPY ${PROJECT_BINARY_DIR}/silkedit_ja.qm
+            ${QT_HOME}/translations/qt_ja.qm
+            ${QT_HOME}/translations/qtmultimedia_ja.qm
+            ${QT_HOME}/translations/qtbase_ja.qm
+            ${QT_HOME}/translations/qtquick1_ja.qm
+            ${QT_HOME}/translations/qtscript_ja.qm
+            ${QT_HOME}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/translations)
 endif()

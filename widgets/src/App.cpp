@@ -220,8 +220,7 @@ void App::setupTranslator(const QString& locale) {
   }
   installTranslator(m_translator);
 
-#ifdef Q_OS_MAC
-  // Load qt_<locale>.qm to translate Mac application menu
+  // Load qt_<locale>.qm to translate Qt's builtin messages (dialog messages, context menu, etc.)
   if (m_qtTranslator) {
     m_qtTranslator->deleteLater();
     removeTranslator(m_qtTranslator);
@@ -233,7 +232,6 @@ void App::setupTranslator(const QString& locale) {
     qWarning() << "Failed to load" << qPrintable("qt_");
   }
   installTranslator(m_qtTranslator);
-#endif
 }
 
 TabView* App::getActiveTabViewOrCreate() {
