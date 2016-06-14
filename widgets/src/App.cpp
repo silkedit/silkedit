@@ -19,10 +19,12 @@
 #include "core/ObjectStore.h"
 #include "core/Constants.h"
 #include "core/SyntaxHighlighter.h"
+#include "core/Util.h"
 
 using core::Constants;
 using core::ObjectStore;
 using core::SyntaxHighlighterThread;
+using core::Util;
 
 App* App::s_app = nullptr;
 bool App::m_isCleanedUp = false;
@@ -82,11 +84,7 @@ App::App(int& argc, char** argv)
 //  installFont(":/SourceHanCodeJP-Bold.otf");
 #endif
 
-  QFile file(":/stylesheet.css");
-  if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    setStyleSheet(file.readAll());
-    file.close();
-  }
+  setStyleSheet(Util::readResource(":/stylesheets/stylesheet.css"));
 
   // Track active TabView
   connect(this, &QApplication::focusChanged, [this](QWidget*, QWidget* focusedWidget) {
