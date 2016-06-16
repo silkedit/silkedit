@@ -24,7 +24,7 @@ QPlainTextEdit {
 TabBar::tab {
     border-top-left-radius: 1px;
     border-top-right-radius: 1px;
-    min-width: 18ex;
+    min-width: 142px;
     padding: 8px;
 }
 
