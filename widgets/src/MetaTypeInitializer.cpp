@@ -28,8 +28,7 @@
 #include "core/ItemSelectionModel.h"
 #include "core/QtEnums.h"
 
-void MetaTypeInitializer::init()
-{
+void MetaTypeInitializer::init() {
   qRegisterMetaType<TabView*>();
   qRegisterMetaType<QVector<TabView*>>();
   qRegisterMetaType<TextEdit*>();
@@ -47,6 +46,7 @@ void MetaTypeInitializer::init()
   qRegisterMetaType<QEvent::Type>("QEvent::Type");
   qRegisterMetaType<FindReplaceView*>();
   qRegisterMetaType<QtMsgType>();
+  qRegisterMetaType<const QValidator*>();  // for LineEdit::setValidator(const QValidator*)
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Url*>("core::Url*");
   qRegisterMetaType<core::Url::ParsingMode>("ParsingMode");

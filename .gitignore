@@ -11,6 +11,7 @@ CMakeLists.txt.user
 /jsdoc_out/
 /jslib/node_modules/silkedit/node_modules/*
 !/jslib/node_modules/silkedit/node_modules/default
+/jslib/node_modules/silkedit/node_modules/default/node_modules
 /lib/
 /libnode/
 /minified/

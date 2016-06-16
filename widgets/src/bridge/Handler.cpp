@@ -51,6 +51,7 @@
 #include "core/Rect.h"
 #include "core/ItemSelectionModel.h"
 #include "core/QtEnums.h"
+#include "core/Validator.h"
 #include "core/atom/node_includes.h"
 
 using core::Config;
@@ -72,6 +73,7 @@ using core::StringListModel;
 using core::Rect;
 using core::ItemSelectionModel;
 using core::QtEnums;
+using core::Validator;
 
 #ifdef Q_OS_WIN
 // MessageBox is defined in winuser.h
@@ -258,6 +260,7 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<VBoxLayout>(exports);
   registerClass<WebView>(exports);
   registerClass<Window>(exports);
+  registerClass<Validator>(exports);
 
   // Wrappers
   registerClass<Font>(exports);

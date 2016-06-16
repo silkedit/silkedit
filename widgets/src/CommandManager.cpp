@@ -99,29 +99,9 @@ bool CommandManager::runCommandEventFilter(QString& cmdName, CommandArgument& cm
 
   Local<Function> fn = m_jsCmdEventFilter.Get(isolate);
 
-  v8::TryCatch trycatch(isolate);
-  MaybeLocal<Value> maybeHandled =
-      fn->Call(isolate->GetCurrentContext(), v8::Undefined(isolate), argc, argv);
-  if (trycatch.HasCaught()) {
-    MaybeLocal<Value> maybeStackTrace = trycatch.StackTrace(isolate->GetCurrentContext());
-    Local<Value> exception = trycatch.Exception();
-    String::Utf8Value exceptionStr(exception);
-    std::stringstream ss;
-    ss << "error: " << *exceptionStr;
-    if (!maybeStackTrace.IsEmpty()) {
-      String::Utf8Value stackTraceStr(maybeStackTrace.ToLocalChecked());
-      ss << " stack trace: " << *stackTraceStr;
-    }
-    qWarning() << ss.str().c_str();
-    return false;
-  } else if (maybeHandled.IsEmpty()) {
-    qWarning() << "maybeResult is empty (but exception is not thrown...)";
-    return false;
-  }
+  auto resultVar = V8Util::callJSFunc(isolate, fn, v8::Undefined(isolate), argc, argv);
 
-  Local<Value> handled = maybeHandled.ToLocalChecked();
-  if (!handled->IsBoolean()) {
-    qWarning() << "handled is not boolean";
+  if (!resultVar.canConvert<bool>()) {
     return false;
   }
 
@@ -159,7 +139,7 @@ bool CommandManager::runCommandEventFilter(QString& cmdName, CommandArgument& cm
       isolate, argsValue->ToObject(isolate->GetCurrentContext()).ToLocalChecked());
   cmdArgs = toCommandArgument(varMap);
 
-  return handled->ToBoolean(isolate)->Value();
+  return resultVar.toBool();
 }
 
 void CommandManager::runCommand(QString name, CommandArgument args, int repeat) {
@@ -200,8 +180,6 @@ void CommandManager::remove(const QString& name) {
 }
 
 void CommandManager::_assignJSCommandEventFilter(FunctionInfo info) {
-  Isolate* isolate = info.isolate;
-  UniquePersistent<Function> perFn(isolate, info.fn);
   m_jsCmdEventFilter.Reset(info.isolate, info.fn);
 }
 
