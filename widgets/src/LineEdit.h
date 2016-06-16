@@ -13,6 +13,12 @@ class LineEdit : public QLineEdit {
   ~LineEdit() = default;
   DEFAULT_MOVE(LineEdit)
 
+ public slots:
+  bool hasAcceptableInput() const;
+
+  void setValidator(const QValidator* v);
+  const QValidator* validator() const;
+
  protected:
   void keyPressEvent(QKeyEvent* event) override;
   void focusInEvent(QFocusEvent* ev) override;

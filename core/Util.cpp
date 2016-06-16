@@ -29,8 +29,11 @@ bool qObjectPointerTypeCheck(QVariant var, const QByteArray& typeName) {
   if (var.isNull())
     return true;
 
-  return var.canConvert<QObject*>() &&
-         var.value<QObject*>()->inherits(typeName.left(typeName.size() - 1));
+  // skip "const "
+  auto removeFirstCount = typeName.startsWith("const ") ? 6 : 0;
+  auto classname = typeName.mid(removeFirstCount, typeName.size() - removeFirstCount - 1);
+
+  return var.canConvert<QObject*>() && var.value<QObject*>()->inherits(classname);
 }
 
 bool enumTypeCheck(QVariant var, const QByteArray& typeName) {
