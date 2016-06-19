@@ -44,6 +44,11 @@ TabBar::close-button {
     subcontrol-position: right;
 }
 
+TabBar::tear {
+    width: 0px;
+    border: none;
+}
+
 /* Toolbar */
 
 QToolBar {
