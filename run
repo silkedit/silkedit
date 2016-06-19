@@ -30,7 +30,7 @@ elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
 
   # Add path to MSBuild.exe and jom.exe
   PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
-  UCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/Common7/IDE/Remote Debugger/$ARCH"
+  UCRT_DIR="/c/$PROGRAM_FILES/Windows Kits\10\Redist\ucrt\DLLs/$ARCH"
   VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
   VisualStudioVersion=14.0
 elif [ "$(expr substr $(uname -s) 1 5)" = 'MINGW' ]; then
