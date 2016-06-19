@@ -5,6 +5,11 @@ QScrollBar:vertical {
   margin: 0px 0px 0px 0px;
 }
 
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+  background: none;
+}
+
 QScrollBar::handle:vertical {
   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0  %2, stop: 0.5 %2,  stop:1 %2);
   min-height: 0px;
