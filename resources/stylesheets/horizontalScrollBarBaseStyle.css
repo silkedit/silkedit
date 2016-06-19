@@ -5,6 +5,10 @@ QScrollBar:horizontal {
   margin: 0px 0px 0px 0px;
 }
 
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+  background: none;
+}
+
 QScrollBar::handle:horizontal {
   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop: 0  %2, stop: 0.5 %2,  stop:1 %2);
   min-width: 0px;
