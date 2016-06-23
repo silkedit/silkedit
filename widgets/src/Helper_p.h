@@ -2,12 +2,12 @@
 
 #include "Helper.h"
 
-class HelperPrivate : public QObject{
+class HelperPrivate : public QObject {
   Q_OBJECT
 
-  char ** toCStringList(const QStringList& argsStrings);
+  char** toCStringList(const QStringList& argsStrings);
 
-public:
+ public:
   Helper* q;
 
   explicit HelperPrivate(Helper* q_ptr);
@@ -16,11 +16,7 @@ public:
   void init();
 
   void startNodeEventLoop();
-  void startNodeInstance(void* arg);
-  void quitApplication();
-  void cacheMethods(const QString& className, const QMetaObject* object);
-  void cleanup();
-  void emitSignal(QObject *obj, const QString& signal, QVariantList args);
+  void emitSignal(QObject* obj, const QString& signal, QVariantList args);
   QVariant callFunc(const QString& funcName, QVariantList args = QVariantList());
 
   template <typename T>

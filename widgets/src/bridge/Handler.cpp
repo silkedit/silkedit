@@ -319,12 +319,12 @@ void bridge::Handler::registerClass(v8::Local<v8::Object> exports) {
 void bridge::Handler::registerStaticMethods(const QMetaObject& metaObj,
                                             v8::Local<v8::Function> ctor) {
   if (metaObj.className() == ConfigDialog::staticMetaObject.className()) {
-    NODE_SET_METHOD(ctor, "loadDefinition", loadConfigDefinition);
+    NODE_SET_METHOD(ctor.As<v8::Object>(), "loadDefinition", loadConfigDefinition);
   } else if (metaObj.className() == Window::staticMetaObject.className()) {
-    NODE_SET_METHOD(ctor, "createWithNewFile", createWithNewFile);
-    NODE_SET_METHOD(ctor, "loadMenu", loadMenu);
-    NODE_SET_METHOD(ctor, "loadToolbar", loadToolbar);
-    NODE_SET_METHOD(ctor, "windows", windows);
+    NODE_SET_METHOD(ctor.As<v8::Object>(), "createWithNewFile", createWithNewFile);
+    NODE_SET_METHOD(ctor.As<v8::Object>(), "loadMenu", loadMenu);
+    NODE_SET_METHOD(ctor.As<v8::Object>(), "loadToolbar", loadToolbar);
+    NODE_SET_METHOD(ctor.As<v8::Object>(), "windows", windows);
   }
 }
 
