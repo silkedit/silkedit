@@ -11,7 +11,6 @@
 #include "FindReplaceView.h"
 #include "core/Condition.h"
 #include "core/FunctionInfo.h"
-#include "core/Url.h"
 #include "core/Font.h"
 #include "core/KeyEvent.h"
 #include "core/TextCursor.h"
@@ -48,8 +47,6 @@ void MetaTypeInitializer::init() {
   qRegisterMetaType<QtMsgType>();
   qRegisterMetaType<const QValidator*>();  // for LineEdit::setValidator(const QValidator*)
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
-  qRegisterMetaType<core::Url*>("core::Url*");
-  qRegisterMetaType<core::Url::ParsingMode>("ParsingMode");
   qRegisterMetaType<core::Font*>("core::Font*");
   qRegisterMetaType<core::KeyEvent*>("core::KeyEvent*");
   qRegisterMetaType<core::TextCursor*>("core::TextCursor*");

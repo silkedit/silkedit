@@ -40,7 +40,6 @@
 #include "core/ObjectStore.h"
 #include "core/KeyEvent.h"
 #include "core/Event.h"
-#include "core/Url.h"
 #include "core/TextCursor.h"
 #include "core/TextBlock.h"
 #include "core/MessageHandler.h"
@@ -63,7 +62,6 @@ using core::JSHandler;
 using core::ObjectStore;
 using core::KeyEvent;
 using core::Event;
-using core::Url;
 using core::TextCursor;
 using core::TextBlock;
 using core::PackageManager;
@@ -270,7 +268,6 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<TextBlock>(exports);
   registerClass<TextCursor>(exports);
   registerClass<TextOption>(exports);
-  registerClass<Url>(exports);
 
   // Qt Enums
   registerClass<QtEnums>(exports);

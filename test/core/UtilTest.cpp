@@ -4,7 +4,7 @@
 #include <QAbstractItemView>
 
 #include "Util.h"
-#include "Url.h"
+#include "Font.h"
 #include "QObjectUtil.h"
 #include "JSValue.h"
 #include "KeyEvent.h"
@@ -17,9 +17,9 @@ class UtilTest : public QObject {
 
  public:
   UtilTest() {
-    qRegisterMetaType<QUrl>();
-    qRegisterMetaType<core::Url*>("Url*");
-    qRegisterMetaType<core::Url*>("core::Url*");
+    qRegisterMetaType<QFont>();
+    qRegisterMetaType<core::Font*>("Font*");
+    qRegisterMetaType<core::Font*>("core::Font*");
     qRegisterMetaType<QKeyEvent*>();
     qRegisterMetaType<core::KeyEvent*>("KeyEvent*");
     qRegisterMetaType<core::KeyEvent*>("core::KeyEvent*");
@@ -68,11 +68,11 @@ class UtilTest : public QObject {
 
   void wrappedTypeCheckForWrapper() {
     // Given QObject constructed by QMetaObject::newInstance
-    auto url = QStringLiteral("url");
-    QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
-                                                     QVariantList{QVariant::fromValue(url)});
+    auto family = QStringLiteral("Arial");
+    QObject* newFont = QObjectUtil::newInstanceFromJS(Font::staticMetaObject,
+                                                      QVariantList{QVariant::fromValue(family)});
     // When
-    auto result = Util::wrappedTypeCheck(QVariant::fromValue(newUrl), "QUrl");
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(newFont), "QFont");
 
     // Then true
     QVERIFY(result);
@@ -80,7 +80,7 @@ class UtilTest : public QObject {
 
   void wrappedTypeCheckForInt() {
     // Given int
-    auto result = Util::wrappedTypeCheck(QVariant::fromValue(3), "QUrl");
+    auto result = Util::wrappedTypeCheck(QVariant::fromValue(3), "QFont");
 
     // Then returns false
     QVERIFY(!result);
@@ -114,13 +114,13 @@ class UtilTest : public QObject {
   }
 
   void convertArgs() {
-    auto url = QStringLiteral("url");
-    QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
-                                                     QVariantList{QVariant::fromValue(url)});
-    QVariantList args = QVariantList{QVariant::fromValue(newUrl)};
+    auto family = QStringLiteral("Arial");
+    QObject* newFont = QObjectUtil::newInstanceFromJS(Font::staticMetaObject,
+                                                      QVariantList{QVariant::fromValue(family)});
+    QVariantList args = QVariantList{QVariant::fromValue(newFont)};
     bool result = Util::convertArgs(ParameterTypes(), args);
     QVERIFY(result);
-    QCOMPARE(args[0].typeName(), "QUrl");
+    QCOMPARE(args[0].typeName(), "QFont");
   }
 
   void toVariantNull() {

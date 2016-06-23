@@ -14,10 +14,10 @@ class WebView : public QWebEngineView {
   DEFAULT_MOVE(WebView)
 
  public slots:
-  void load(const QUrl& url) { QWebEngineView::load(url); }
+  void load(const QString& url) { QWebEngineView::load(QUrl(url)); }
 
-  void setHtml(const QString& html, const QUrl& baseUrl = QUrl()) {
-    QWebEngineView::setHtml(html, baseUrl);
+  void setHtml(const QString& html, const QString& baseUrl = "") {
+    QWebEngineView::setHtml(html, QUrl(baseUrl));
   }
 
  private:
