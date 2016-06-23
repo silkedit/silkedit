@@ -4,7 +4,14 @@
 #include "atom/node_includes.h"
 #include "atom/node_bindings.h"
 
+// Suppress MSVC warnings
+#ifdef _WIN32
+#pragma warning(push, 0)
+#endif
 #include <vendor/node/src/node_crypto.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 #include <QtGlobal>
 #include <v8.h>
 #include <libplatform/libplatform.h>
@@ -158,7 +165,8 @@ static void EnableDebug(node::Environment* env) {
   message->Set(FIXED_ONE_BYTE_STRING(env->isolate(), "cmd"),
                FIXED_ONE_BYTE_STRING(env->isolate(), "NODE_DEBUG_ENABLED"));
   Local<Value> argv[] = {FIXED_ONE_BYTE_STRING(env->isolate(), "internalMessage"), message};
-  node::MakeCallback(env, env->process_object(), "emit", node::arraysize(argv), argv);
+  node::MakeCallback(env, env->process_object(), "emit", static_cast<int>(node::arraysize(argv)),
+                     argv);
 
   // Enabled debugger, possibly making it wait on a semaphore
   env->debugger_agent()->Enable();
