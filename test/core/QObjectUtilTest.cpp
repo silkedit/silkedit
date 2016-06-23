@@ -1,6 +1,6 @@
 #include <QtTest/QtTest>
 
-#include "Url.h"
+#include "Font.h"
 #include "QObjectUtil.h"
 
 namespace core {
@@ -10,30 +10,30 @@ class QObjectUtilTest : public QObject {
 
  public:
   QObjectUtilTest() {
-    qRegisterMetaType<QUrl>();
-    qRegisterMetaType<core::Url*>("Url*");
-    qRegisterMetaType<core::Url*>("core::Url*");
+    qRegisterMetaType<QFont>();
+    qRegisterMetaType<core::Font*>("Font*");
+    qRegisterMetaType<core::Font*>("core::Font*");
   }
 
  public slots:
-  QString urlTestFunc(QUrl url) {
-    qDebug() << "urlTestFunc called. url" << url;
-    return url.toString();
+  QString fontTestFunc(QFont font) {
+    qDebug() << "fontTestFunc called. font" << font;
+    return font.family();
   }
 
  private slots:
 
   void invokeQObjectMethodInternalWithWrappedTypeArg() {
-      auto url = QStringLiteral("url");
-      QObject* newUrl = QObjectUtil::newInstanceFromJS(Url::staticMetaObject,
-                                                           QVariantList{QVariant::fromValue(url)});
-      try {
-        QVariant result = QObjectUtil::invokeQObjectMethodInternal(
-            this, "urlTestFunc", QVariantList{QVariant::fromValue(newUrl)});
-        QVERIFY(result.canConvert<QString>() && result.toString() == url);
-      } catch (const std::exception& e) {
-        QFAIL(e.what());
-      }
+    auto family = QStringLiteral("Arial");
+    QObject* newFont = QObjectUtil::newInstanceFromJS(Font::staticMetaObject,
+                                                      QVariantList{QVariant::fromValue(family)});
+    try {
+      QVariant result = QObjectUtil::invokeQObjectMethodInternal(
+          this, "fontTestFunc", QVariantList{QVariant::fromValue(newFont)});
+      QVERIFY(result.canConvert<QString>() && result.toString() == family);
+    } catch (const std::exception& e) {
+      QFAIL(e.what());
+    }
   }
 };
 }  // namespace core
