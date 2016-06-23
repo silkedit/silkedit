@@ -10,10 +10,6 @@
 #include <libplatform/libplatform.h>
 #include <v8-profiler.h>
 
-#ifdef __POSIX__
-#include <unistd.h>
-#endif
-
 #ifdef __APPLE__
 #include "vendor/node/src/atomic-polyfill.h"  // NOLINT(build/include_order)
 namespace node {
@@ -77,16 +73,46 @@ static uv_async_t dispatch_debug_messages_async;
 static node::atomic<Isolate*> node_isolate;
 static v8::Platform* default_platform;
 
-static bool IsDomainActive(const node::Environment* env) {
+static bool DomainHasErrorHandler(const Environment* env, const Local<Object>& domain) {
+  HandleScope scope(env->isolate());
+
+  Local<Value> domain_event_listeners_v = domain->Get(env->events_string());
+  if (!domain_event_listeners_v->IsObject())
+    return false;
+
+  Local<Object> domain_event_listeners_o = domain_event_listeners_v.As<Object>();
+
+  Local<Value> domain_error_listeners_v = domain_event_listeners_o->Get(env->error_string());
+
+  if (domain_error_listeners_v->IsFunction() ||
+      (domain_error_listeners_v->IsArray() && domain_error_listeners_v.As<Array>()->Length() > 0))
+    return true;
+
+  return false;
+}
+
+static bool DomainsStackHasErrorHandler(const Environment* env) {
+  HandleScope scope(env->isolate());
+
   if (!env->using_domains())
     return false;
 
-  Local<Array> domain_array = env->domain_array().As<Array>();
-  if (domain_array->Length() == 0)
+  Local<Array> domains_stack_array = env->domains_stack_array().As<Array>();
+  if (domains_stack_array->Length() == 0)
     return false;
 
-  Local<Value> domain_v = domain_array->Get(0);
-  return !domain_v->IsNull();
+  uint32_t domains_stack_length = domains_stack_array->Length();
+  for (uint32_t i = domains_stack_length; i > 0; --i) {
+    Local<Value> domain_v = domains_stack_array->Get(i - 1);
+    if (!domain_v->IsObject())
+      return false;
+
+    Local<Object> domain = domain_v.As<Object>();
+    if (DomainHasErrorHandler(env, domain))
+      return true;
+  }
+
+  return false;
 }
 
 static bool ShouldAbortOnUncaughtException(Isolate* isolate) {
@@ -98,7 +124,7 @@ static bool ShouldAbortOnUncaughtException(Isolate* isolate) {
   bool isEmittingTopLevelDomainError =
       process_object->Get(emitting_top_level_domain_error_key)->BooleanValue();
 
-  return !IsDomainActive(env) || isEmittingTopLevelDomainError;
+  return isEmittingTopLevelDomainError || !DomainsStackHasErrorHandler(env);
 }
 
 // Called from V8 Debug Agent TCP thread.
@@ -132,14 +158,14 @@ static void EnableDebug(node::Environment* env) {
   message->Set(FIXED_ONE_BYTE_STRING(env->isolate(), "cmd"),
                FIXED_ONE_BYTE_STRING(env->isolate(), "NODE_DEBUG_ENABLED"));
   Local<Value> argv[] = {FIXED_ONE_BYTE_STRING(env->isolate(), "internalMessage"), message};
-  node::MakeCallback(env, env->process_object(), "emit", ARRAY_SIZE(argv), argv);
+  node::MakeCallback(env, env->process_object(), "emit", node::arraysize(argv), argv);
 
   // Enabled debugger, possibly making it wait on a semaphore
   env->debugger_agent()->Enable();
 }
 
 // Called from the main thread.
-static void DispatchDebugMessagesAsyncCallback(uv_async_t* ) {
+static void DispatchDebugMessagesAsyncCallback(uv_async_t*) {
   // Synchronize with signal handler, see TryStartDebugger.
   Isolate* isolate;
   do {
@@ -158,7 +184,7 @@ static void DispatchDebugMessagesAsyncCallback(uv_async_t* ) {
   }
 
   Isolate::Scope isolate_scope(isolate);
-  v8::Debug::ProcessDebugMessages();
+  v8::Debug::ProcessDebugMessages(isolate);
   CHECK_EQ(nullptr, node_isolate.exchange(isolate));
 }
 
@@ -174,7 +200,7 @@ static void TryStartDebugger() {
 }
 
 #ifdef __POSIX__
-static void EnableDebugSignalHandler(int ) {
+static void EnableDebugSignalHandler(int) {
   TryStartDebugger();
 }
 
@@ -212,12 +238,9 @@ DWORD WINAPI EnableDebugThreadProc(void* arg) {
   return 0;
 }
 
-
-static int GetDebugSignalHandlerMappingName(DWORD pid, wchar_t* buf,
-    size_t buf_len) {
+static int GetDebugSignalHandlerMappingName(DWORD pid, wchar_t* buf, size_t buf_len) {
   return _snwprintf(buf, buf_len, L"node-debug-handler-%u", pid);
 }
-
 
 static int RegisterDebugSignalHandler() {
   wchar_t mapping_name[32];
@@ -227,28 +250,18 @@ static int RegisterDebugSignalHandler() {
 
   pid = GetCurrentProcessId();
 
-  if (GetDebugSignalHandlerMappingName(pid,
-                                       mapping_name,
-                                       ARRAY_SIZE(mapping_name)) < 0) {
+  if (GetDebugSignalHandlerMappingName(pid, mapping_name, node::arraysize(mapping_name)) < 0) {
     return -1;
   }
 
-  mapping_handle = CreateFileMappingW(INVALID_HANDLE_VALUE,
-                                      nullptr,
-                                      PAGE_READWRITE,
-                                      0,
-                                      sizeof *handler,
-                                      mapping_name);
+  mapping_handle = CreateFileMappingW(INVALID_HANDLE_VALUE, nullptr, PAGE_READWRITE, 0,
+                                      sizeof *handler, mapping_name);
   if (mapping_handle == nullptr) {
     return -1;
   }
 
   handler = reinterpret_cast<LPTHREAD_START_ROUTINE*>(
-      MapViewOfFile(mapping_handle,
-                    FILE_MAP_ALL_ACCESS,
-                    0,
-                    0,
-                    sizeof *handler));
+      MapViewOfFile(mapping_handle, FILE_MAP_ALL_ACCESS, 0, 0, sizeof *handler));
   if (handler == nullptr) {
     CloseHandle(mapping_handle);
     return -1;
@@ -342,8 +355,10 @@ static void StartNodeInstance(void* arg, atom::NodeBindings* nodeBindings) {
   array_buffer_allocator = new node::ArrayBufferAllocator();
   params.array_buffer_allocator = array_buffer_allocator;
   Isolate* isolate = Isolate::New(params);
+
   // Make isolate default of current thread. (Without this, Isolate::Current() returns NULL)
   isolate->Enter();
+
   if (track_heap_objects) {
     isolate->GetHeapProfiler()->StartTrackingHeapObjects(true);
   }
@@ -358,7 +373,6 @@ static void StartNodeInstance(void* arg, atom::NodeBindings* nodeBindings) {
     Isolate::Scope isolate_scope(isolate);
     HandleScope handle_scope(isolate);
     Local<Context> context = Context::New(isolate);
-
     node::Environment* env = node::CreateEnvironment(
         isolate, instance_data->event_loop(), context, instance_data->argc(), instance_data->argv(),
         instance_data->exec_argc(), instance_data->exec_argv());
@@ -378,7 +392,10 @@ static void StartNodeInstance(void* arg, atom::NodeBindings* nodeBindings) {
     // Give the node loop a run to make sure everything is ready.
     nodeBindings->RunMessageLoop();
 
-    node::LoadEnvironment(env);
+    {
+      Environment::AsyncCallbackScope callback_scope(env);
+      node::LoadEnvironment(env);
+    }
 
     env->set_trace_sync_io(trace_sync_io);
 
@@ -408,18 +425,17 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
 
   // init async debug messages dispatching
   // Main thread uses uv_default_loop
-  uv_async_init(uv_default_loop(),
-                &dispatch_debug_messages_async,
+  uv_async_init(uv_default_loop(), &dispatch_debug_messages_async,
                 DispatchDebugMessagesAsyncCallback);
   uv_unref(reinterpret_cast<uv_handle_t*>(&dispatch_debug_messages_async));
 
   nodeBindings->PrepareMessageLoop();
 
-  #if HAVE_OPENSSL
+#if HAVE_OPENSSL
   // V8 on Windows doesn't have a good source of entropy. Seed it from
   // OpenSSL's pool.
   V8::SetEntropySource(node::crypto::EntropySource);
-  #endif
+#endif
 
   const int thread_pool_size = 4;
   default_platform = node::CreateDefaultPlatform(thread_pool_size);
@@ -433,6 +449,7 @@ void Start(int argc, char** argv, atom::NodeBindings* nodeBindings) {
   StartNodeInstance(&instance_data, nodeBindings);
 }
 
+// copied cleanup code from StartNodeInstance method in node.cc
 void Cleanup(node::Environment* env) {
   Q_ASSERT(env);
   env->set_trace_sync_io(false);
@@ -448,7 +465,7 @@ void Cleanup(node::Environment* env) {
 
     array_buffer_allocator->set_env(nullptr);
     // This causes assertion error on Windows
-//    env->Dispose();
+    //    env->Dispose();
   }
 
   // Synchronize with signal handler, see TryStartDebugger.
@@ -467,11 +484,11 @@ void Cleanup(node::Environment* env) {
   V8::Dispose();
 
   // This sometimes causes SIGSEGV on Mac
-//  delete default_platform;
-//  default_platform = nullptr;
+  //  delete default_platform;
+  //  default_platform = nullptr;
 
-    // This causes assertion error on Windows
-//  delete[] exec_argv;
+  // This causes assertion error on Windows
+  //  delete[] exec_argv;
   //  exec_argv = nullptr;
 }
 
