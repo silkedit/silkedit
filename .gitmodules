@@ -11,9 +11,6 @@
 	path = breakpad
 	url = https://chromium.googlesource.com/breakpad/breakpad
 	ignore = dirty
-[submodule "npm"]
-	path = npm
-	url = git@github.com:npm/npm.git
 [submodule "vendor/node"]
 	path = vendor/node
 	url = git@github.com:silkedit/node.git

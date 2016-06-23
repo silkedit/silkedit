@@ -194,14 +194,14 @@ if(APPLE)
 
   # copy npm
   file(COPY
-     ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/bin/npm-cli.js
      DESTINATION
      ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/npm/bin)
 
   file(COPY
-     ${PROJECT_SOURCE_DIR}/npm/lib
-     ${PROJECT_SOURCE_DIR}/npm/node_modules
-     ${PROJECT_SOURCE_DIR}/npm/package.json
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/lib
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/package.json
      DESTINATION
      ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/npm)
 
@@ -260,13 +260,13 @@ elseif (MSVC)
 
   # copy npm
   file(COPY
-     ${PROJECT_SOURCE_DIR}/npm/bin/npm-cli.js
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/bin/npm-cli.js
      DESTINATION silk_resources/npm/bin)
 
   file(COPY
-     ${PROJECT_SOURCE_DIR}/npm/lib
-     ${PROJECT_SOURCE_DIR}/npm/node_modules
-     ${PROJECT_SOURCE_DIR}/npm/package.json
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/lib
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/package.json
      DESTINATION silk_resources/npm)
 
   # Copy onig.dll
