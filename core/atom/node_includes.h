@@ -24,10 +24,17 @@
 #undef DISALLOW_COPY_AND_ASSIGN
 #undef NO_RETURN
 #undef debug_string  // This is defined in OS X 10.9 SDK in AssertMacros.h.
+// Suppress MSVC warnings
+#ifdef _WIN32
+#pragma warning(push, 0)
+#endif
 #include <vendor/node/src/env.h>
 #include <vendor/node/src/env-inl.h>
 #include <vendor/node/src/node.h>
 #include <vendor/node/src/node_buffer.h>
 #include <vendor/node/src/node_internals.h>
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 
 #endif  // ATOM_COMMON_NODE_INCLUDES_H_
