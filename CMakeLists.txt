@@ -3,6 +3,16 @@ cmake_minimum_required(VERSION 3.0.2)
 project(SilkEdit VERSION 0.12.3)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
 
+if(NOT DEFINED QTDIR AND DEFINED ENV{QTDIR})
+  set(QTDIR $ENV{QTDIR})
+endif()
+
+if(DEFINED QTDIR)
+  message(STATUS "QTDIR: ${QTDIR}")
+else()
+  message( SEND_ERROR "QTDIR is not defined" )
+endif()
+
 message(STATUS "BUILD_NUMBER: ${BUILD_NUMBER}")
 
 option (BUILD_EDGE "Build edge version" OFF)
@@ -227,12 +237,12 @@ if(APPLE)
   # bundle fonts
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -r ${PROJECT_SOURCE_DIR}/resources/fonts ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
 
-  file(COPY $ENV{QT_HOME}/translations/qt_ja.qm
-            $ENV{QT_HOME}/translations/qtmultimedia_ja.qm
-            $ENV{QT_HOME}/translations/qtbase_ja.qm
-            $ENV{QT_HOME}/translations/qtquick1_ja.qm
-            $ENV{QT_HOME}/translations/qtscript_ja.qm
-            $ENV{QT_HOME}/translations/qtxmlpatterns_ja.qm DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/translations)
+  file(COPY ${QTDIR}/translations/qt_ja.qm
+            ${QTDIR}/translations/qtmultimedia_ja.qm
+            ${QTDIR}/translations/qtbase_ja.qm
+            ${QTDIR}/translations/qtquick1_ja.qm
+            ${QTDIR}/translations/qtscript_ja.qm
+            ${QTDIR}/translations/qtxmlpatterns_ja.qm DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/translations)
 
   # breakpad framework
   file(COPY ${Breakpad} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
@@ -283,12 +293,12 @@ elseif (MSVC)
   endif()
 
   # Copy Qt translation files
-  file(COPY $ENV{QT_HOME}/translations/qt_ja.qm
-            $ENV{QT_HOME}/translations/qtmultimedia_ja.qm
-            $ENV{QT_HOME}/translations/qtbase_ja.qm
-            $ENV{QT_HOME}/translations/qtquick1_ja.qm
-            $ENV{QT_HOME}/translations/qtscript_ja.qm
-            $ENV{QT_HOME}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/translations)
+  file(COPY ${QTDIR}/translations/qt_ja.qm
+            ${QTDIR}/translations/qtmultimedia_ja.qm
+            ${QTDIR}/translations/qtbase_ja.qm
+            ${QTDIR}/translations/qtquick1_ja.qm
+            ${QTDIR}/translations/qtscript_ja.qm
+            ${QTDIR}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/translations)
 
   # copy CrashReporter
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
