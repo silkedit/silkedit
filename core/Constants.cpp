@@ -25,7 +25,7 @@ const QString Constants::defaultFontFamily = "Source Han Code JP";
 #endif
 
 #ifdef Q_OS_WIN
-const QString Constants::defaultFontFamily = "Consolas";
+const QString Constants::defaultFontFamily = "Source Han Code JP R";
 #endif
 
 #ifdef Q_OS_MAC

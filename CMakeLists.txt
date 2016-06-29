@@ -47,11 +47,18 @@ file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
 
 set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc resources/files.qrc)
+
 if (BUILD_EDGE)
   set(SILK_RESOURCES ${SILK_RESOURCES} resources/images_edge.qrc)
 else ()
   set(SILK_RESOURCES ${SILK_RESOURCES} resources/images.qrc)
 endif ()
+
+# bundle fonts on Windows
+if (MSVC)
+  set(SILK_RESOURCES ${SILK_RESOURCES}  resources/fonts/fonts.qrc)
+endif()
+
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
 
 find_package(Qt5Widgets REQUIRED)
