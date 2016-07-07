@@ -326,14 +326,16 @@ resolve() {
     cd ../../..
 }
 
-# release build
-build() {
+minify() {
     echo "Minifying JS files"
     npm run minify
 
     echo "Generating resources/LICENSE.md"
     npm run generate-license
+}
 
+# release build
+build() {
     if [ ! -d build ]; then
         echo "build directory doesn't exist. Creating it..."
         ensure_dir build
@@ -626,6 +628,10 @@ case "$1" in
         make_installer "$@"
         echo
         ;;
+    minify)
+        minify
+        echo
+        ;;
     send_symbol)
         send_symbol $2
         echo
@@ -644,6 +650,7 @@ format         format sources
 generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer (--sign identity: sign the app)
+minify         minify JS codes
 rebuild        build from scratch (-edge: Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
