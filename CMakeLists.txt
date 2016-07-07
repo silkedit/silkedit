@@ -56,7 +56,8 @@ endif ()
 
 # bundle fonts on Windows
 if (MSVC)
-  set(SILK_RESOURCES ${SILK_RESOURCES}  resources/fonts/fonts.qrc)
+  file(GLOB_RECURSE FONTS_RESOURCES resources/fonts/*.qrc)
+  set(SILK_RESOURCES ${SILK_RESOURCES} ${FONTS_RESOURCES})
 endif()
 
 file(GLOB SILK_TRANSLATIONS translations/*.ts)
