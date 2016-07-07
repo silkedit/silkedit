@@ -1,5 +1,5 @@
-#define VER_VERSION             0,12,3
-#define VER_VERSION_STR         "0.12.3\0"
+#define VER_VERSION             0,13,0
+#define VER_VERSION_STR         "0.13.0\0"
 
 IDI_ICON1               ICON    DISCARDABLE     "silkedit.ico"
 
