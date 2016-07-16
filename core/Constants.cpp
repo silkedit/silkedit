@@ -31,7 +31,7 @@ const QString Constants::defaultFontFamily = "Source Han Code JP R";
 #ifdef Q_OS_MAC
 const int Constants::defaultFontSize = 13;
 #else
-const int Constants::defaultFontSize = 12;
+const int Constants::defaultFontSize = 10;
 #endif
 
 const QString Constants::silkHomeDirName = QStringLiteral(".silk");
