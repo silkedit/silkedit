@@ -194,14 +194,17 @@ Helper::Helper() : d(new HelperPrivate(this)), m_nodeBindings(NodeBindings::Crea
 }
 
 void Helper::emitSignal(const QString& str) {
-  qDebug() << "emitSignal(QString)";
   QVariantList args{QVariant::fromValue(str)};
   emitSignalInternal(args);
 }
 
 void Helper::emitSignal(int n) {
-  qDebug() << "emitSignal(int)";
   QVariantList args{QVariant::fromValue(n)};
+  emitSignalInternal(args);
+}
+
+void Helper::emitSignal(bool b) {
+  QVariantList args{QVariant::fromValue(b)};
   emitSignalInternal(args);
 }
 

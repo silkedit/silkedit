@@ -26,6 +26,8 @@
 #include "TextEdit.h"
 #include "JSStaticObject.h"
 #include "WebView.h"
+#include "WebPage.h"
+#include "WebChannel.h"
 #include "Console.h"
 #include "FindReplaceView.h"
 #include "util/YamlUtil.h"
@@ -256,6 +258,8 @@ void bridge::Handler::lateInit(const v8::FunctionCallbackInfo<Value>& args) {
   registerClass<StringListModel>(exports);
   registerClass<TextEdit>(exports);
   registerClass<VBoxLayout>(exports);
+  registerClass<WebChannel>(exports);
+  registerClass<WebPage>(exports);
   registerClass<WebView>(exports);
   registerClass<Window>(exports);
   registerClass<Validator>(exports);
