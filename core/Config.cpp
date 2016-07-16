@@ -17,7 +17,6 @@ using v8::Isolate;
 using v8::Local;
 using v8::Number;
 using v8::Object;
-using v8::Persistent;
 using v8::String;
 using v8::Value;
 using v8::Exception;

@@ -64,6 +64,7 @@ v8::Local<v8::String> V8Util::constructorKey(Isolate* isolate) {
 }
 
 QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
+  auto context = isolate->GetCurrentContext();
   if (value->IsBoolean()) {
     return QVariant::fromValue(value->ToBoolean()->Value());
   } else if (value->IsInt32()) {
@@ -86,8 +87,9 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
   } else if (value->IsFunction()) {
     return QVariant::fromValue(FunctionInfo{isolate, Local<Function>::Cast(value)});
   } else if (value->IsObject()) {
-    Local<Object> obj = value->ToObject();
+    Local<Object> obj = value->ToObject(context).ToLocalChecked();
 
+    // if obj has an internal QObject, pass it directly
     if (obj->InternalFieldCount() > 0) {
       QObject* qObj = ObjectStore::unwrap(obj);
       if (qObj) {
@@ -97,7 +99,8 @@ QVariant V8Util::toVariant(v8::Isolate* isolate, v8::Local<v8::Value> value) {
         return QVariant();
       }
     } else {
-      return toVariantMap(isolate, obj);
+      // obj is a pure JS object
+      return QVariant::fromValue(toVariantMap(isolate, obj));
     }
   } else {
     qWarning() << "can't convert to QVariant";
@@ -201,6 +204,7 @@ v8::Local<v8::Object> V8Util::toV8Object(v8::Isolate* isolate, const CommandArgu
   for (const auto& pair : args) {
     argsObj->Set(String::NewFromUtf8(isolate, pair.first.c_str()), toV8Value(isolate, pair.second));
   }
+
   return argsObj;
 }
 
