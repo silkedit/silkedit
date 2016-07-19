@@ -9,6 +9,8 @@
 #include "Console.h"
 #include "TextEdit.h"
 #include "FindReplaceView.h"
+#include "WebPage.h"
+#include "WebChannel.h"
 #include "core/Condition.h"
 #include "core/FunctionInfo.h"
 #include "core/Font.h"
@@ -46,6 +48,8 @@ void MetaTypeInitializer::init() {
   qRegisterMetaType<FindReplaceView*>();
   qRegisterMetaType<QtMsgType>();
   qRegisterMetaType<const QValidator*>();  // for LineEdit::setValidator(const QValidator*)
+  qRegisterMetaType<WebChannel*>();
+  qRegisterMetaType<WebPage*>();
   qRegisterMetaType<core::FunctionInfo>("core::FunctionInfo");
   qRegisterMetaType<core::Font*>("core::Font*");
   qRegisterMetaType<core::KeyEvent*>("core::KeyEvent*");

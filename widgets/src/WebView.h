@@ -1,7 +1,9 @@
 #pragma once
 
+#include <QDebug>
 #include <QWebEngineView>
 
+#include "WebPage.h"
 #include "core/macros.h"
 
 class WebView : public QWebEngineView {
@@ -10,7 +12,7 @@ class WebView : public QWebEngineView {
 
  public:
   Q_INVOKABLE WebView(QWidget* parent = nullptr) : QWebEngineView(parent) {}
-  ~WebView() = default;
+  ~WebView() { qDebug() << "~WebView"; }
   DEFAULT_MOVE(WebView)
 
  public slots:
@@ -20,5 +22,5 @@ class WebView : public QWebEngineView {
     QWebEngineView::setHtml(html, QUrl(baseUrl));
   }
 
- private:
+  void setPage(WebPage* page) { QWebEngineView::setPage(page); }
 };

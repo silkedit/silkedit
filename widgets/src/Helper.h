@@ -21,6 +21,7 @@ class Environment;
 }
 
 class HelperPrivate;
+class WebChannel;
 
 class GetRequestResponse : public QObject {
   Q_OBJECT
@@ -43,7 +44,7 @@ class BoolResponse : public QObject {
  public:
   bool result() { return m_result; }
 
-public slots:
+ public slots:
   void setResult(bool result) {
     m_result = result;
     emit finished();
@@ -79,7 +80,7 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void deactivatePackages();
   node::Environment* uvEnv();
 
-public slots:
+ public slots:
   void uvRunOnce();
 
  private:
@@ -96,5 +97,7 @@ public slots:
   void emitSignal();
   void emitSignal(const QString& arg);
   void emitSignal(int n);
+  void emitSignal(bool b);
   void emitSignal(QWidget* old, QWidget* now);
+  void emitSignal(WebChannel* obj);
 };
