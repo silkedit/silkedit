@@ -10,6 +10,7 @@
 #include "CommandManager.h"
 #include "KeymapManager.h"
 #include "App.h"
+#include "WebChannel.h"
 #include "core/atom/node_includes.h"
 #include "core/atom/node_bindings.h"
 #include "core/silkedit_node/custom_node.h"
@@ -194,20 +195,28 @@ Helper::Helper() : d(new HelperPrivate(this)), m_nodeBindings(NodeBindings::Crea
 }
 
 void Helper::emitSignal(const QString& str) {
-  qDebug() << "emitSignal(QString)";
   QVariantList args{QVariant::fromValue(str)};
   emitSignalInternal(args);
 }
 
 void Helper::emitSignal(int n) {
-  qDebug() << "emitSignal(int)";
   QVariantList args{QVariant::fromValue(n)};
+  emitSignalInternal(args);
+}
+
+void Helper::emitSignal(bool b) {
+  QVariantList args{QVariant::fromValue(b)};
   emitSignalInternal(args);
 }
 
 void Helper::emitSignal(QWidget* old, QWidget* now) {
   qDebug() << "emitSignal(QWidget *old, QWidget *now)";
   QVariantList args{QVariant::fromValue(old), QVariant::fromValue(now)};
+  emitSignalInternal(args);
+}
+
+void Helper::emitSignal(WebChannel* obj) {
+  QVariantList args{QVariant::fromValue(obj)};
   emitSignalInternal(args);
 }
 

@@ -11,7 +11,6 @@ using v8::Isolate;
 using v8::Local;
 using v8::Number;
 using v8::Object;
-using v8::Persistent;
 using v8::String;
 using v8::Value;
 using v8::Exception;
@@ -36,9 +35,8 @@ void ConditionManager::Init(v8::Local<v8::Object> exports) {
   NODE_SET_METHOD(obj, "add", Add);
   NODE_SET_METHOD(obj, "remove", Remove);
 
-  Maybe<bool> result = exports->Set(
-      isolate->GetCurrentContext(),
-      String::NewFromUtf8(isolate, "ConditionManager"), obj);
+  Maybe<bool> result = exports->Set(isolate->GetCurrentContext(),
+                                    String::NewFromUtf8(isolate, "ConditionManager"), obj);
   if (result.IsNothing()) {
     throw std::runtime_error("setting exports failed");
   }
@@ -79,9 +77,7 @@ bool ConditionManager::isStatic(const QString& key) {
   return m_conditions.at(key)->isStatic();
 }
 
-bool ConditionManager::isSatisfied(const QString& key,
-                                   const QString &op,
-                                   const QVariant& operand) {
+bool ConditionManager::isSatisfied(const QString& key, const QString& op, const QVariant& operand) {
   if (m_conditions.find(key) == m_conditions.end()) {
     return false;
   }
