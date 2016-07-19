@@ -46,7 +46,7 @@ class WebChannel : public QWebChannel {
   Q_INVOKABLE void onMessage(const QString& event, core::FunctionInfo fnInfo);
 
  signals:
-  void connection();
+  void connection(WebChannel* channel);
 
  private:
   WebChannelProxyObject* m_proxyObject;

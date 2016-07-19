@@ -40,7 +40,8 @@ void WebChannelProxyObject::initFinished() {
 WebChannel::WebChannel(QObject* parent)
     : QWebChannel(parent), m_proxyObject(new WebChannelProxyObject(this)) {
   registerObject("_silkedit_proxy", m_proxyObject);
-  connect(m_proxyObject, &WebChannelProxyObject::connection, this, &WebChannel::connection);
+  connect(m_proxyObject, &WebChannelProxyObject::connection, this,
+          [this] { emit connection(this); });
   connect(m_proxyObject, &WebChannelProxyObject::onMessage,
           [this](const QString& event, QVariant data) {
             Isolate* isolate = Isolate::GetCurrent();

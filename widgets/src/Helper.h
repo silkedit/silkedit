@@ -21,6 +21,7 @@ class Environment;
 }
 
 class HelperPrivate;
+class WebChannel;
 
 class GetRequestResponse : public QObject {
   Q_OBJECT
@@ -98,4 +99,5 @@ class Helper : public QObject, public core::Singleton<Helper> {
   void emitSignal(int n);
   void emitSignal(bool b);
   void emitSignal(QWidget* old, QWidget* now);
+  void emitSignal(WebChannel* obj);
 };
