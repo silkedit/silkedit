@@ -211,6 +211,7 @@ void bridge::Handler::init(Local<Object> exports,
   NODE_SET_METHOD(exports, "warn", warn);
   NODE_SET_METHOD(exports, "error", error);
   NODE_SET_METHOD(exports, "translate", YamlUtil::translate);
+  NODE_SET_METHOD(exports, "clearTranslationCache", YamlUtil::clearTranslationCache);
 
   // register enums in Qt namespace
   registerQtEnum<Qt::CaseSensitivity>(context, exports, isolate, "Qt::CaseSensitivity");

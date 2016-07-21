@@ -34,8 +34,10 @@ class YamlUtil {
 
   static void translate(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+  static void clearTranslationCache(const v8::FunctionCallbackInfo<v8::Value>&);
+
  private:
-  static QMap<QString, YAML::Node> nodeCache;
+  static QMap<QString, YAML::Node> s_nodeCache;
 
   static QString translate(const QString& pkgPath, const QString& key, const QString& defaultValue);
   static QString translate(const QString& pkgPath,
