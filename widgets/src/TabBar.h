@@ -8,9 +8,8 @@ class QMouseEvent;
 class QWindow;
 class FakeWindow;
 namespace core {
-    class Theme;
+class Theme;
 }
-
 
 class TabBar : public QTabBar {
   Q_OBJECT
@@ -30,14 +29,14 @@ class TabBar : public QTabBar {
   void leaveEvent(QEvent* event) override;
   void tabInserted(int index) override;
   void tabRemoved(int index) override;
-  void contextMenuEvent(QContextMenuEvent * event) override;
+  void contextMenuEvent(QContextMenuEvent* event) override;
 
-signals:
+ signals:
   // Detach Tab
   void onMousePress(int index);
   void onDetachTabStarted(int index, const QPoint& startPoint);
   void onDetachTabEntered(const QPoint& enterPoint);
-  void onDetachTabFinished(const QPoint& newWindowPos, bool isFloating);
+  void onDetachTabFinished(const QPoint& newWindowPos);
 
  private:
   QPoint m_dragStartPos;

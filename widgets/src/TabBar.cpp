@@ -202,7 +202,7 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event) {
   QPoint newWindowPos = event->screenPos().toPoint() - m_offsetFromWindow;
   if (m_sourceTabBar) {
     qDebug("emit onDetachTabFinished from a source TabBar");
-    emit m_sourceTabBar->onDetachTabFinished(newWindowPos, false);
+    emit m_sourceTabBar->onDetachTabFinished(newWindowPos);
     m_sourceTabBar = nullptr;
   } else {
     qDebug("m_sourceTabBar is null");
@@ -214,7 +214,7 @@ void TabBar::mouseReleaseEvent(QMouseEvent* event) {
   }
 
   finishDrag();
-  emit onDetachTabFinished(newWindowPos, true);
+  emit onDetachTabFinished(newWindowPos);
   QTabBar::mouseReleaseEvent(event);
 }
 

@@ -35,16 +35,16 @@ class TabView : public QTabWidget {
   int indexOfPath(const QString& path);
   int open(const QString& path);
   bool closeAllTabs();
-  void saveState(QSettings &settings);
+  void saveState(QSettings& settings);
   bool canSave();
-  void loadState(QSettings &settings);
+  void loadState(QSettings& settings);
   QString tabTextWithoutModificationState(int index) const;
 
   // custom tabText functions which handles * modified mark internally
-  void setTabText(int index, const QString &label);
+  void setTabText(int index, const QString& label);
   QString tabText(int index) const;
 
-public slots:
+ public slots:
   bool closeTab(int index);
   bool closeTab(QWidget* widget);
   void addNewTab();
@@ -71,12 +71,12 @@ public slots:
   void changeActiveView(int index);
   void detachTabStarted(int index, const QPoint&);
   void detachTabEntered(const QPoint& enterPoint);
-  void detachTabFinished(const QPoint& newWindowPos, bool isFloating);
+  void detachTabFinished(const QPoint& newWindowPos);
   QList<QWidget*> widgets() const;
   bool isModified(int index) const;
   void setModified(int index, bool modified);
   void saveDraggingTabInfo(int index);
-  void setTabTextAndToolTip(TextEdit *textEdit, const QString &path);
+  void setTabTextAndToolTip(TextEdit* textEdit, const QString& path);
 };
 
 Q_DECLARE_METATYPE(TabView*)

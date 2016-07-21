@@ -405,22 +405,9 @@ void TabView::updateTabTextBasedOn(bool changed) {
   }
 }
 
-void TabView::detachTabFinished(const QPoint& newWindowPos, bool isFloating) {
+void TabView::detachTabFinished(const QPoint& newWindowPos) {
   qDebug() << "DetachTab."
-           << "newWindowPos:" << newWindowPos << "isFloating:" << isFloating;
-
-  if (isFloating) {
-    Window* newWindow = new Window();
-    newWindow->move(newWindowPos);
-    newWindow->show();
-    if (DraggingTabInfo::widget()) {
-      newWindow->getActiveTabViewOrCreate()->addTab(DraggingTabInfo::widget(),
-                                                    DraggingTabInfo::tabText());
-      DraggingTabInfo::clear();
-    } else {
-      qWarning("dragging widget is null");
-    }
-  }
+           << "newWindowPos:" << newWindowPos;
 
   m_tabDragging = false;
   // call tabRemoved to emit allTabRemoved if this had only one tab before drag (it's empty now)
