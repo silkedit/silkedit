@@ -40,6 +40,12 @@ void JSObjectHelper::connectOrDisconnect(const v8::FunctionCallbackInfo<v8::Valu
   }
 
   QObject* obj = ObjectStore::unwrap(args.Holder());
+
+  // Ignore when disconnecting from QObject that has been already destroyed
+  if (!obj && !connect) {
+    return;
+  }
+
   if (!obj) {
     V8Util::throwError(isolate, "no associated QObject");
     return;
