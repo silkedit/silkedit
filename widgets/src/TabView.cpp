@@ -97,8 +97,9 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
   widget->setParent(this);
   TextEdit* textEdit = qobject_cast<TextEdit*>(widget);
   if (textEdit) {
-    connect(textEdit, &TextEdit::pathUpdated, this,
-            [=](const QString& path) { setTabTextAndToolTip(textEdit, path); });
+    connect(textEdit, &TextEdit::pathUpdated, this, [=](const QString&, const QString& newPath) {
+      setTabTextAndToolTip(textEdit, newPath);
+    });
     connect(textEdit, &TextEdit::modificationChanged, this, &TabView::updateTabTextBasedOn);
   }
   int result = QTabWidget::insertTab(index, widget, label);
@@ -211,7 +212,7 @@ bool TabView::closeAllTabs() {
 }
 
 int TabView::indexOfPath(const QString& path) {
-  //  qDebug("TabView::indexOfPath(%s)", qPrintable(path));
+  //  qDebug() << "indexOfPath" << path;
   for (int i = 0; i < count(); i++) {
     TextEdit* v = qobject_cast<TextEdit*>(widget(i));
     if (!v) {

@@ -34,6 +34,7 @@ int DocumentManager::open(const QString& filename) {
 
 DocumentManager::DocumentManager() : m_watcher(new QFileSystemWatcher(this)) {
   connect(m_watcher, &QFileSystemWatcher::fileChanged, [=](const QString& path) {
+    qDebug() << "fileChanged" << path;
     if (!m_pathDocHash.contains(path)) {
       qCritical() << path << "is not registered";
       return;
@@ -140,6 +141,11 @@ std::shared_ptr<core::Document> DocumentManager::registerDoc(Document* doc) {
       m_pathDocHash.remove(path);
       m_watcher->removePath(path);
       m_objectNameDocHash.remove(obj->objectName());
+    });
+    connect(doc, &Document::pathUpdated, [this](const QString& oldPath, const QString& newPath) {
+      auto weakDoc = m_pathDocHash[newPath];
+      m_pathDocHash.remove(oldPath);
+      m_pathDocHash[newPath] = weakDoc;
     });
 
     return sharedDoc;

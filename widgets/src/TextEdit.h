@@ -102,7 +102,7 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   QRect cursorRect(const QTextCursor& cursor) const;
 
  signals:
-  void pathUpdated(const QString& path);
+  void pathUpdated(const QString& oldPath, const QString& newPath);
   void saved();
   void languageChanged(const QString& scope);
   // emitted when underlying document's encoding is changed.

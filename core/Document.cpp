@@ -315,9 +315,10 @@ Document* Document::createBlank() {
 
 void Document::setPath(const QString& path) {
   if (m_path != path) {
+    auto oldPath = m_path;
     m_path = path;
     clearUndoRedoStacks();
-    emit pathUpdated(path);
+    emit pathUpdated(oldPath, path);
   }
 }
 
