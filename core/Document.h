@@ -93,7 +93,7 @@ class Document : public QTextDocument {
   void saveState(QSettings& settings);
 
  signals:
-  void pathUpdated(const QString& path);
+  void pathUpdated(const QString& oldPath, const QString& newPath);
   void languageChanged(const QString& scopeName);
   void encodingChanged(const Encoding& encoding);
   void lineSeparatorChanged(const QString& lineSeparator);

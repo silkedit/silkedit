@@ -433,7 +433,7 @@ void TextEdit::setDocument(std::shared_ptr<Document> document) {
     newPath = document->path();
   }
   if (prevPath != newPath && !newPath.isEmpty()) {
-    emit pathUpdated(newPath);
+    emit pathUpdated(prevPath, newPath);
   }
 
   d->setupConnections(document);
