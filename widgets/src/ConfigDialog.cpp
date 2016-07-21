@@ -17,6 +17,7 @@ QMap<QString, QList<ConfigDefinition>> ConfigDialog::s_packageConfigs;
 ConfigDialog* ConfigDialog::s_dialog = nullptr;
 
 void ConfigDialog::loadDefinition(const QString& pkgName, const QString& configPath) {
+  //  qDebug() << "loadDefinition" << pkgName;
   auto configList = YamlUtil::parseConfig(pkgName, configPath);
   if (!configList.isEmpty()) {
     s_packageConfigs[pkgName] = configList;
@@ -61,6 +62,7 @@ ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::Config
               current = previous;
             }
             int index = ui->listWidget->row(current);
+            Q_ASSERT(0 <= index && index < ui->stackedWidget->count());
             ui->stackedWidget->setCurrentIndex(index);
           });
   connect(ui->filterLine, &QLineEdit::textEdited, this, &ConfigDialog::filterConfigs);
@@ -119,12 +121,18 @@ void ConfigDialog::removePackageConfig(const QString& pkgName) {
     if (row >= 0) {
       ui->stackedWidget->removeWidget(ui->stackedWidget->widget(row));
     }
-    ui->listWidget->item(row)->setHidden(true);
+    // Deleting QListWidgetItem deletes an entry from QListWidget
+    delete item;
   }
 }
 
 void ConfigDialog::addPackageConfig(const QString& pkgName,
                                     QList<core::ConfigDefinition> configList) {
+//  qDebug() << "addPackageConfig" << pkgName;
+#ifdef QT_DEBUG
+  auto items = ui->listWidget->findItems(pkgName, Qt::MatchExactly);
+  Q_ASSERT(items.empty());
+#endif
   ui->listWidget->addItem(pkgName);
   ui->stackedWidget->addWidget(new PackageConfigView(configList));
 }
