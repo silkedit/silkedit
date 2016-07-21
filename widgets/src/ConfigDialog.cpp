@@ -41,6 +41,12 @@ void ConfigDialog::showModeless() {
   s_dialog->raise();
 }
 
+void ConfigDialog::closeDialog() {
+  if (s_dialog) {
+    s_dialog->accept();
+  }
+}
+
 ConfigDialog::ConfigDialog(QWidget* parent) : QDialog(parent), ui(new Ui::ConfigDialog) {
   ui->setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);

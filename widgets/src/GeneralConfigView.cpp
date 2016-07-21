@@ -1,6 +1,7 @@
 #include "GeneralConfigView.h"
 #include "ui_GeneralConfigView.h"
 #include "App.h"
+#include "ConfigDialog.h"
 #include "core/ThemeManager.h"
 #include "core/Config.h"
 
@@ -79,7 +80,10 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
           [=](const QString& text) { Config::singleton().setEndOfLineStr(text); });
 
   // Restart button to apply change
-  connect(ui->restartButton, &QPushButton::clicked, this, [=] { App::restart(); });
+  connect(ui->restartButton, &QPushButton::clicked, this, [] {
+    ConfigDialog::closeDialog();
+    App::restart();
+  });
 }
 
 GeneralConfigView::~GeneralConfigView() {

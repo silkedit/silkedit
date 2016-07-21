@@ -20,6 +20,7 @@ class ConfigDialog : public QDialog {
   // which is not in core, so core::Config can't use it.
   static void loadDefinition(const QString& pkgName, const QString& configPath);
   static void showModeless();
+  static void closeDialog();
 
  private:
   static QMap<QString, QList<core::ConfigDefinition>> s_packageConfigs;
