@@ -12,7 +12,7 @@ QtMessageHandler MessageHandler::s_defaultMsgHandler = nullptr;
 void MessageHandler::handler(QtMsgType type,
                              const QMessageLogContext& context,
                              const QString& msg) {
-  if (strcmp(context.category, SILKEDIT_CATEGORY) == 0) {
+  if (context.category && strcmp(context.category, SILKEDIT_CATEGORY) == 0) {
     switch (type) {
       case QtDebugMsg:
         s_defaultMsgHandler(type, context, msg);
