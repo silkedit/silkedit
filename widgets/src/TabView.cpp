@@ -79,8 +79,8 @@ TabView::~TabView() {
   qDebug("~TabView");
 }
 
-int TabView::addTab(QWidget* page, const QString& label) {
-  return insertTab(-1, page, label);
+int TabView::addTab(QWidget* widget, const QString& label) {
+  return insertTab(-1, widget, label);
 }
 
 void TabView::setTabTextAndToolTip(TextEdit* textEdit, const QString& path) {

@@ -22,10 +22,6 @@ class TabViewGroup : public CustomWidget {
   ~TabViewGroup() = default;
   DEFAULT_MOVE(TabViewGroup)
 
-  // accessor
-  TabView* activeTab();
-  void setActiveTab(TabView* newTabView);
-
   bool closeAllTabs();
   TabBar* tabBarAt(int screenX, int screenY);
   QVector<TabView*> tabViews();
@@ -33,6 +29,10 @@ class TabViewGroup : public CustomWidget {
   void loadState(QSettings& settings);
 
  public slots:
+  // accessor
+  TabView* activeTabView();
+  void setActiveTabView(TabView* tabView);
+
   TabView* addNewTabView();
   void splitHorizontally();
   void splitVertically();
