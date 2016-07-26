@@ -99,6 +99,10 @@ App::App(int& argc, char** argv)
     }
   });
 
+  connect(this, &QApplication::lastWindowClosed, [this]{
+    setActivationWindow(nullptr);
+  });
+
   connect(this, &App::aboutToQuit, this, &App::cleanup);
   connect(this, &App::commitDataRequest, this, &App::cleanup);
 }
