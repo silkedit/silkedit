@@ -58,7 +58,6 @@ void ObjectStore::removeAssociatedJSObject(QObject* destroyedObj) {
       v8::Locker locker(isolate);
       v8::HandleScope handle_scope(isolate);
       s_objects.at(destroyedObj).Get(isolate)->SetAlignedPointerInInternalField(0, nullptr);
-      s_objects.at(destroyedObj).Reset();
       s_objects.erase(destroyedObj);
     }
   }

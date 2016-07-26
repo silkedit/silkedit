@@ -56,7 +56,7 @@ TabViewGroup::TabViewGroup(QWidget* parent)
   setLayout(layout);
 }
 
-TabView* TabViewGroup::activeTab() {
+TabView* TabViewGroup::activeTabView() {
   if (m_activeTabView) {
     return m_activeTabView;
   }
@@ -67,16 +67,16 @@ void TabViewGroup::emitCurrentChanged(int index) {
   emit currentViewChanged(m_activeTabView->widget(index));
 }
 
-void TabViewGroup::setActiveTab(TabView* newTabView) {
-  if (m_activeTabView != newTabView) {
+void TabViewGroup::setActiveTabView(TabView* tabView) {
+  if (m_activeTabView != tabView) {
     TabView* oldtabView = m_activeTabView;
-    m_activeTabView = newTabView;
+    m_activeTabView = tabView;
     if (oldtabView) {
       disconnect(oldtabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
     }
     connect(m_activeTabView, &TabView::currentChanged, this, &TabViewGroup::emitCurrentChanged);
-    emit activeTabViewChanged(oldtabView, newTabView);
-    emitCurrentChanged(newTabView->currentIndex());
+    emit activeTabViewChanged(oldtabView, tabView);
+    emitCurrentChanged(tabView->currentIndex());
   }
 }
 
@@ -159,7 +159,7 @@ void TabViewGroup::loadState(QSettings& settings) {
   // restore active tabView
   for (int i = 0; i < m_rootSplitter->count(); i++) {
     if (auto tabView = qobject_cast<TabView*>(m_rootSplitter->widget(i))) {
-      setActiveTab(tabView);
+      setActiveTabView(tabView);
       break;
     }
   }
@@ -285,7 +285,7 @@ TabView* TabViewGroup::addNewTabView() {
   // Note: The ownership of tabView is transferred to the splitter, and it's the splitter's
   // responsibility to delete it.
   m_rootSplitter->addWidget(tabView);
-  setActiveTab(tabView);
+  setActiveTabView(tabView);
   return tabView;
 }
 

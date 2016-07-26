@@ -116,7 +116,7 @@ Window::Window(QWidget* parent, Qt::WindowFlags flags)
           &FindReplaceView::setActiveView);
   connect(this, &Window::activeViewChanged, ui->statusBar, &StatusBar::onActiveViewChanged);
 
-  updateConnection(nullptr, m_tabViewGroup->activeTab());
+  updateConnection(nullptr, m_tabViewGroup->activeTabView());
   connect(&Config::singleton(), &Config::themeChanged, this, &Window::setTheme);
   connect(&Config::singleton(), &Config::showToolBarChanged, this, [=](bool visible) {
     for (auto toolbar : toolBars()) {
@@ -322,7 +322,7 @@ Window::~Window() {
 
 TabView* Window::activeTabView() {
   if (m_tabViewGroup) {
-    return m_tabViewGroup->activeTab();
+    return m_tabViewGroup->activeTabView();
   } else {
     return nullptr;
   }
@@ -359,8 +359,8 @@ void Window::closeEvent(QCloseEvent* event) {
 
 void Window::updateTitle() {
   QString title;
-  if (m_tabViewGroup && m_tabViewGroup->activeTab()) {
-    auto tab = m_tabViewGroup->activeTab();
+  if (m_tabViewGroup && m_tabViewGroup->activeTabView()) {
+    auto tab = m_tabViewGroup->activeTabView();
     title = tab->tabTextWithoutModificationState(tab->currentIndex());
   }
 
@@ -428,11 +428,11 @@ void Window::loadState(QSettings& settings) {
 
 TabView* Window::getActiveTabViewOrCreate() {
   Q_ASSERT(m_tabViewGroup);
-  if (m_tabViewGroup->activeTab()) {
-    return m_tabViewGroup->activeTab();
+  if (m_tabViewGroup->activeTabView()) {
+    return m_tabViewGroup->activeTabView();
   } else {
     m_tabViewGroup->addNewTabView();
-    return m_tabViewGroup->activeTab();
+    return m_tabViewGroup->activeTabView();
   }
 }
 

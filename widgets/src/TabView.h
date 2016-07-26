@@ -27,8 +27,6 @@ class TabView : public QTabWidget {
   ~TabView();
   DEFAULT_MOVE(TabView)
 
-  int addTab(QWidget* page, const QString& label);
-  int insertTab(int index, QWidget* widget, const QString& label);
   CloseTabIncludingDocResult closeTabIncludingDoc(core::Document* doc);
   QWidget* activeView() { return m_activeView; }
   bool tabDragging() { return m_tabDragging; }
@@ -45,9 +43,11 @@ class TabView : public QTabWidget {
   QString tabText(int index) const;
 
  public slots:
+  void addNewTab();
+  int addTab(QWidget* widget, const QString& label);
+  int insertTab(int index, QWidget* widget, const QString& label);
   bool closeTab(int index);
   bool closeTab(QWidget* widget);
-  void addNewTab();
   QWidget* widget(int index) const;
 
  signals:

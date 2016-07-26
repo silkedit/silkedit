@@ -76,7 +76,7 @@ App::App(int& argc, char** argv)
   s_app = this;
 
 #ifdef Q_OS_WIN
-// Install Source Han Code JP fonts
+  // Install Source Han Code JP fonts
   installFont(":/SourceHanCodeJP-Normal.otf");
   installFont(":/SourceHanCodeJP-Regular.otf");
   installFont(":/SourceHanCodeJP-Bold.otf");
@@ -89,7 +89,7 @@ App::App(int& argc, char** argv)
     //    qDebug("focusChanged");
     if (TabView* tabView = findParent<TabView*>(focusedWidget)) {
       if (TabViewGroup* tabViewGroup = findParent<TabViewGroup*>(tabView)) {
-        tabViewGroup->setActiveTab(tabView);
+        tabViewGroup->setActiveTabView(tabView);
       }
     }
 
@@ -235,8 +235,8 @@ void App::setupTranslator(const QString& locale) {
 TabView* App::getActiveTabViewOrCreate() {
   TabViewGroup* tabViewGroup = activeTabViewGroup();
   if (tabViewGroup) {
-    if (tabViewGroup->activeTab()) {
-      return tabViewGroup->activeTab();
+    if (tabViewGroup->activeTabView()) {
+      return tabViewGroup->activeTabView();
     } else {
       return tabViewGroup->addNewTabView();
     }
@@ -280,7 +280,7 @@ TextEdit* App::activeTextEdit() {
 TabView* App::activeTabView() {
   TabViewGroup* tabViewGroup = activeTabViewGroup();
   if (tabViewGroup) {
-    return tabViewGroup->activeTab();
+    return tabViewGroup->activeTabView();
   } else {
     qDebug("active tab view group is null");
     return nullptr;
