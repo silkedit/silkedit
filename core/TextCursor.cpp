@@ -29,76 +29,57 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
       QTextCursor newCursor(cursor);
       newCursor.clearSelection();
       QString text;
-      bool result;
-      do {
-        result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
-        text = newCursor.selectedText();
-      } while (result && isAllWhiteSpaceChar(text));
 
-      UErrorCode status = U_ZERO_ERROR;
-      auto boundary = BreakIterator::createWordInstance(
-          IcuUtil::icuLocale(Config::singleton().locale()), status);
-      scoped_guard guard([=] { delete boundary; });
-      boundary->setText(IcuUtil::toIcuString(text));
-      int32_t pos = 0;
-
-      boundary->first();
-      for (int i = 0; i < n;) {
-        pos = boundary->next();
-
-        if (pos == BreakIterator::DONE) {
-          pos = 0;
-          break;
-        }
-
-        newCursor.setPosition(cursor.position());
-        newCursor.clearSelection();
-        newCursor.setPosition(cursor.position() + pos, QTextCursor::MoveMode::KeepAnchor);
-
-        if (!isAllWhiteSpaceChar(newCursor.selectedText())) {
-          i++;
-        }
+      bool result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+      text = newCursor.selectedText();
+      if (!result || text.isEmpty())
+        return false;
+      if (isAllWhiteSpaceChar(text)) {
+        cursor.setPosition(newCursor.position(), mode);
+        return true;
       }
 
-      cursor.setPosition(cursor.position() + pos, mode);
+      // When moving a cursor by word, the text may include a space like "a ". So trim it.
+      text = text.trimmed();
+      Q_ASSERT(!text.isEmpty());
+
+      auto boundaries =
+          IcuUtil::wordBoundaries(text, IcuUtil::icuLocale(Config::singleton().locale()));
+
+      // When the text is split by word, the size of boundaries must be over 2
+      if (boundaries.size() > 2) {
+        cursor.setPosition(cursor.position() + boundaries[1], mode);
+      } else {
+        cursor.setPosition(newCursor.position(), mode);
+      }
       return true;
     }
     case MoveOperation::PreviousWord: {
       QTextCursor newCursor(cursor);
       newCursor.clearSelection();
       QString text;
-      bool result;
-      do {
-        result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
-        text = newCursor.selectedText();
-      } while (result && isAllWhiteSpaceChar(text));
 
-      UErrorCode status = U_ZERO_ERROR;
-      auto boundary = BreakIterator::createWordInstance(
-          IcuUtil::icuLocale(Config::singleton().locale()), status);
-      scoped_guard guard([=] { delete boundary; });
-      boundary->setText(IcuUtil::toIcuString(text));
-      int32_t pos = 0;
-
-      boundary->last();
-      for (int i = 0; i < n;) {
-        pos = boundary->previous();
-
-        if (pos == BreakIterator::DONE) {
-          pos = 0;
-          break;
-        }
-
-        newCursor.setPosition(cursor.position());
-        newCursor.clearSelection();
-        newCursor.setPosition(cursor.position() - text.size() + pos, QTextCursor::MoveMode::KeepAnchor);
-
-        if (!isAllWhiteSpaceChar(newCursor.selectedText())) {
-          i++;
-        }
+      bool result = newCursor.movePosition(op, QTextCursor::MoveMode::KeepAnchor, n);
+      text = newCursor.selectedText();
+      if (!result || text.isEmpty())
+        return false;
+      if (isAllWhiteSpaceChar(text)) {
+        cursor.setPosition(newCursor.position(), mode);
+        return true;
       }
 
-      cursor.setPosition(cursor.position() - text.size() + pos, mode);
+      text = text.trimmed();
+      Q_ASSERT(!text.isEmpty());
+
+      auto boundaries =
+          IcuUtil::wordBoundaries(text, IcuUtil::icuLocale(Config::singleton().locale()));
+
+      if (boundaries.size() > 2) {
+        cursor.setPosition(cursor.position() - text.size() + boundaries[boundaries.size() - 2],
+                           mode);
+      } else {
+        cursor.setPosition(newCursor.position(), mode);
+      }
       return true;
     }
     case MoveOperation::StartOfWord: {

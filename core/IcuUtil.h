@@ -15,6 +15,8 @@ class IcuUtil {
 
   static Locale icuLocale(const QString& localeStr);
 
+  static QVector<int> wordBoundaries(const QString& text, Locale locale = Locale::getJapanese());
+
  private:
   IcuUtil() = delete;
   ~IcuUtil() = delete;

@@ -13,7 +13,7 @@ class TextCursorTest : public QObject {
     QTextDocument doc(u8"A brown firefox");
     QTextCursor cursor(&doc);
     int i = 0;
-    QList<int> list = {1, 7, 15};
+    QList<int> list = {2, 8, 15};
     while (!cursor.atEnd()) {
       TextCursor::customMovePosition(cursor, QTextCursor::NextWord);
       QVERIFY(i < list.size());
@@ -26,6 +26,19 @@ class TextCursorTest : public QObject {
     QTextCursor cursor(&doc);
     int i = 0;
     QList<int> list = {2, 4, 5, 7, 9};
+    while (!cursor.atEnd()) {
+      TextCursor::customMovePosition(cursor, QTextCursor::NextWord);
+      QVERIFY(i < list.size());
+      QCOMPARE(cursor.position(), list[i++]);
+    }
+  }
+
+  void nextWordBeyondNewLine() {
+    QTextDocument doc("{\n  \"completer\"");
+    QTextCursor cursor(&doc);
+
+    int i = 0;
+    QList<int> list = {1, 2, 4, 5, 14, 15};
     while (!cursor.atEnd()) {
       TextCursor::customMovePosition(cursor, QTextCursor::NextWord);
       QVERIFY(i < list.size());
@@ -52,6 +65,19 @@ class TextCursorTest : public QObject {
     cursor.movePosition(QTextCursor::End);
     int i = 0;
     QList<int> list = {7, 5, 4, 2, 0};
+    while (!cursor.atStart()) {
+      TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord);
+      QVERIFY(i < list.size());
+      QCOMPARE(cursor.position(), list[i++]);
+    }
+  }
+
+  void previousWordBeyondNewLine() {
+    QTextDocument doc("{\n  \"completer\"");
+    QTextCursor cursor(&doc);
+    cursor.movePosition(QTextCursor::End);
+    int i = 0;
+    QList<int> list = {14, 5, 4, 2, 1, 0};
     while (!cursor.atStart()) {
       TextCursor::customMovePosition(cursor, QTextCursor::PreviousWord);
       QVERIFY(i < list.size());
