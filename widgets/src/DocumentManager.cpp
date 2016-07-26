@@ -40,8 +40,14 @@ DocumentManager::DocumentManager() : m_watcher(new QFileSystemWatcher(this)) {
       return;
     }
 
+    // doc sometimes becomes nullptr...
     auto doc = m_pathDocHash[path].lock();
+    if (!doc) {
+      qWarning() << "m_pathDocHash contains" << path << "but failed to get a document...";
+      return;
+    }
     Q_ASSERT(doc);
+
     if (QFileInfo::exists(path)) {
       qDebug() << "file is changed";
       auto result = QMessageBox::NoButton;
@@ -136,11 +142,16 @@ std::shared_ptr<core::Document> DocumentManager::registerDoc(Document* doc) {
       m_objectNameDocHash[doc->objectName()] = std::weak_ptr<Document>(sharedDoc);
     }
 
-    connect(doc, &core::Document::destroyed, [=](QObject* obj) {
-      qDebug() << "document (" << path << ") is destroyed.";
-      m_pathDocHash.remove(path);
-      m_watcher->removePath(path);
-      m_objectNameDocHash.remove(obj->objectName());
+    connect(doc, &Document::destroyed, [this, doc](QObject* obj) {
+      if (doc) {
+        auto path = doc->path();
+        qDebug() << "document (" << path << ") is destroyed.";
+        m_pathDocHash.remove(path);
+        m_watcher->removePath(path);
+        m_objectNameDocHash.remove(obj->objectName());
+      } else {
+        qWarning() << "doc is null";
+      }
     });
     connect(doc, &Document::pathUpdated, [this](const QString& oldPath, const QString& newPath) {
       auto weakDoc = m_pathDocHash[newPath];
@@ -159,6 +170,11 @@ std::shared_ptr<core::Document> DocumentManager::create(const QString& path) {
 
   if (m_pathDocHash.contains(path)) {
     auto doc = m_pathDocHash[path].lock();
+    if (!doc) {
+      qWarning() << "m_pathDocHash contains" << path << "but failed to get a document...";
+      return nullptr;
+    }
+
     Q_ASSERT(doc);
     return doc;
   }
