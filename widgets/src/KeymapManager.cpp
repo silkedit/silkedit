@@ -194,7 +194,7 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   // check exact match
   if (m_keymaps.find(key) != m_keymaps.end()) {
     if (!m_partiallyMatchedKeyString.isEmpty()) {
-      if (auto window = App::instance()->activeWindow()) {
+      if (auto window = App::instance()->activeMainWindow()) {
         window->statusBar()->clearMessage();
       }
     }
@@ -226,7 +226,7 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   if (partiallyMatchedKey != m_keymaps.end()) {
     qDebug("partial match");
     m_partiallyMatchedKeyString = key.toString();
-    if (auto window = App::instance()->activeWindow()) {
+    if (auto window = App::instance()->activeMainWindow()) {
       window->statusBar()->showMessage(Util::toString(key));
       return true;
     }
@@ -235,7 +235,7 @@ bool KeymapManager::dispatch(QKeyEvent* event, int repeat) {
   // no match
   // When partially matched key exists, cancel dispatch
   if (!m_partiallyMatchedKeyString.isEmpty()) {
-    if (auto window = App::instance()->activeWindow()) {
+    if (auto window = App::instance()->activeMainWindow()) {
       qDebug("cancel partial match");
       window->statusBar()->clearMessage();
       m_partiallyMatchedKeyString.clear();

@@ -318,6 +318,9 @@ void Window::loadWindowsState(QSettings& settings) {
 Window::~Window() {
   qDebug("~Window");
   s_windows.removeOne(this);
+  if (App::instance()->activationWindow() == this) {
+    App::instance()->setActivationWindow(nullptr);
+  }
 }
 
 TabView* Window::activeTabView() {
@@ -480,6 +483,15 @@ void Window::dropEvent(QDropEvent* e) {
       }
     }
   }
+}
+
+bool Window::event(QEvent* e) {
+  if (e->type() == QEvent::WindowActivate) {
+    updateTitle();
+    App::instance()->setActivationWindow(this);
+  }
+
+  return QMainWindow::event(e);
 }
 
 void Window::hideFindReplacePanel() {

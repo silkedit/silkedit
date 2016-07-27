@@ -92,15 +92,6 @@ App::App(int& argc, char** argv)
         tabViewGroup->setActiveTabView(tabView);
       }
     }
-
-    if (auto window = findActiveWindow()) {
-      window->updateTitle();
-      setActivationWindow(window);
-    }
-  });
-
-  connect(this, &QApplication::lastWindowClosed, [this]{
-    setActivationWindow(nullptr);
   });
 
   connect(this, &App::aboutToQuit, this, &App::cleanup);
@@ -272,6 +263,10 @@ void App::setDefaultFont(QString locale) {
   }
 }
 
+Window* App::activeMainWindow() {
+  return activationWindow() ? qobject_cast<Window*>(activationWindow()) : findActiveWindow();
+}
+
 TextEdit* App::activeTextEdit() {
   TabView* tabView = activeTabView();
   if (tabView) {
@@ -292,7 +287,7 @@ TabView* App::activeTabView() {
 }
 
 TabViewGroup* App::activeTabViewGroup() {
-  if (auto window = activeWindow()) {
+  if (auto window = activeMainWindow()) {
     return window->tabViewGroup();
   } else {
     qDebug("active window is null");
@@ -318,12 +313,12 @@ Window* App::findActiveWindow() {
   return window;
 }
 
-Window* App::activeWindow() {
-  return activationWindow() ? qobject_cast<Window*>(activationWindow()) : findActiveWindow();
+QWidget* App::activeWindow() {
+  return QApplication::activeWindow();
 }
 
-void App::setActiveWindow(QWidget* act) {
-  QApplication::setActiveWindow(act);
+void App::setActiveWindow(QWidget* active) {
+  QApplication::setActiveWindow(active);
 }
 
 QWidget* App::focusWidget() {
@@ -348,7 +343,7 @@ void App::restart() {
 void App::saveSession() {
   QSettings settings(Constants::singleton().sessionPath(), QSettings::IniFormat);
   settings.clear();
-  Window::saveWindowsState(s_app->activeWindow(), settings);
+  Window::saveWindowsState(s_app->activeMainWindow(), settings);
 }
 
 void App::loadSession() {
