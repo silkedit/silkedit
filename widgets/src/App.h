@@ -30,13 +30,14 @@ class App : public QtSingleApplication {
   bool isQuitting() { return m_isQuitting; }
   TabView* getActiveTabViewOrCreate();
   void setDefaultFont(QString locale);
+  Window* activeMainWindow();
 
  public slots:
   TextEdit* activeTextEdit();
   TabView* activeTabView();
   TabViewGroup* activeTabViewGroup();
-  Window* activeWindow();
-  void setActiveWindow(QWidget* act);
+  QWidget *activeWindow();
+  void setActiveWindow(QWidget* active);
   QWidget* focusWidget();
   QWidget* activePopupWidget();
   void postEvent(QObject* receiver, QEvent* event, int priority = Qt::NormalEventPriority);
