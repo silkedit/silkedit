@@ -98,7 +98,14 @@ void TextEditPrivate::updateLineNumberArea(const QRect& rect, int dy) {
   if (dy)
     m_lineNumberArea->scroll(0, dy);
   else
-    m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
+    /*
+     * It would be nice to do
+     * m_lineNumberArea->update(0, rect.y(), m_lineNumberArea->width(), rect.height());
+     * But we can't because it will not remove the bold on the
+     * current line if word wrap is enabled and a new block is selected.
+     * https://john.nachtimwald.com/2009/08/19/better-qplaintextedit-with-line-numbers/
+     */
+    m_lineNumberArea->update();
 
   if (rect.contains(q_ptr->viewport()->rect()))
     updateLineNumberAreaWidth(0);
