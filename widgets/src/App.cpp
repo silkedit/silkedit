@@ -335,7 +335,8 @@ void App::postEvent(QObject* receiver, QEvent* event, int priority) {
 
 void App::restart() {
   if (s_app) {
-    QProcess::startDetached(QApplication::applicationFilePath());
+    // second QStringList() is necessary to escape applicationFilePath
+    QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
     s_app->exit();
   }
 }
