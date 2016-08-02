@@ -46,6 +46,18 @@ class TextCursorTest : public QObject {
     }
   }
 
+  void nextWordBeyondSymbols() {
+    QTextDocument doc("1 && 2");
+    QTextCursor cursor(&doc);
+    int i = 0;
+    QList<int> list = {2, 5, 6};
+    while (!cursor.atEnd()) {
+      TextCursor::customMovePosition(cursor, QTextCursor::NextWord);
+      QVERIFY(i < list.size());
+      QCOMPARE(cursor.position(), list[i++]);
+    }
+  }
+
   void previousEnglishWord() {
     QTextDocument doc(u8"A brown firefox");
     QTextCursor cursor(&doc);
