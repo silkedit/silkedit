@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>645</width>
-    <height>503</height>
+    <height>148</height>
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -43,9 +43,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="licenseTextEdit">
-     <property name="readOnly">
+    <widget class="QLabel" name="licenseUrlLabel">
+     <property name="text">
+      <string>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;License&lt;/a&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="openExternalLinks">
       <bool>true</bool>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::TextBrowserInteraction</set>
      </property>
     </widget>
    </item>
