@@ -5,7 +5,7 @@ CMakeLists.txt.user
 *.otf
 *.node
 
-/bugsplat/
+/vendor/bugsplat/
 /build/
 /include/
 /jsdoc_out/

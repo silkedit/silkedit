@@ -70,7 +70,7 @@ find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
 
 if (APPLE)
-  set( BREAKPAD_LIBS "breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
+  set( BREAKPAD_LIBS "vendor/breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
   find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
   if (Breakpad)
     message(STATUS "Breakpad: ${Breakpad}")
@@ -131,7 +131,7 @@ if (APPLE)
     /usr/local/include
     src
     widgets/src
-    breakpad/src
+    vendor/breakpad/src
     vendor/node/deps/v8
     vendor/node/deps/v8/include
     vendor/node/deps/uv/include
@@ -155,7 +155,7 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS /source-charset:utf-8 /execution-charset:utf-8")
 
   #breakpad libs under 'lib' folder
-  set( BREAKPAD_LIBS "breakpad/${CMAKE_BUILD_TYPE}")
+  set( BREAKPAD_LIBS "vendor/breakpad/${CMAKE_BUILD_TYPE}")
 
   # SYSTEM tells the compiler to skip warning for these header files.
   include_directories(SYSTEM
@@ -164,7 +164,7 @@ elseif (MSVC)
     src
     widgets/src
     ${Boost_INCLUDE_DIRS}
-    breakpad/src
+    vendor/breakpad/src
     vendor/node/deps/v8
     vendor/node/deps/v8/include
     vendor/node/deps/uv/include
