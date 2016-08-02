@@ -271,14 +271,14 @@ resolve() {
 			echo 'Building Breakpad client ...'
 
 			cd vendor/breakpad
-			patch -p1 --binary -N < ../crashreporter/patch/breakpad_googletest_include.h.patch
-			patch -p1 --binary -N < ../crashreporter/patch/symbolic_constants_win.cc.patch
-			patch -p1 --binary -N < ../crashreporter/patch/common.gypi.patch
+			patch -p1 --binary -N < ../../crashreporter/patch/breakpad_googletest_include.h.patch
+			patch -p1 --binary -N < ../../crashreporter/patch/symbolic_constants_win.cc.patch
+			patch -p1 --binary -N < ../../crashreporter/patch/common.gypi.patch
 
 			gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
 
       # //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
-      mkdir -p ../lib/breakpad/Debug
+      mkdir -p ../../lib/breakpad/Debug
 			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
 			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
 			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
@@ -290,9 +290,9 @@ resolve() {
 			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
 			cp ./src/client/windows/sender/Debug/lib/crash_report_sender.lib ./src/client/windows/Debug
 
-      cp ./src/client/windows/Debug/common.lib ./src/client/windows/Debug/exception_handler.lib ./src/client/windows/Debug/crash_generation_client.lib ./src/client/windows/Debug/crash_generation_server.lib ./src/client/windows/Debug/crash_report_sender.lib ../lib/breakpad/Debug/
+      cp ./src/client/windows/Debug/common.lib ./src/client/windows/Debug/exception_handler.lib ./src/client/windows/Debug/crash_generation_client.lib ./src/client/windows/Debug/crash_generation_server.lib ./src/client/windows/Debug/crash_report_sender.lib ../../lib/breakpad/Debug/
 
-      mkdir -p ../lib/breakpad/Release
+      mkdir -p ../../lib/breakpad/Release
 			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
 			cp ./src/client/windows/Release/lib/common.lib ./src/client/windows/Release
 			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
@@ -304,7 +304,7 @@ resolve() {
 			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
 			cp ./src/client/windows/sender/Release/lib/crash_report_sender.lib ./src/client/windows/Release
 
-      cp ./src/client/windows/Release/common.lib ./src/client/windows/Release/exception_handler.lib ./src/client/windows/Release/crash_generation_client.lib ./src/client/windows/Release/crash_generation_server.lib ./src/client/windows/Release/crash_report_sender.lib ../lib/breakpad/Release/
+      cp ./src/client/windows/Release/common.lib ./src/client/windows/Release/exception_handler.lib ./src/client/windows/Release/crash_generation_client.lib ./src/client/windows/Release/crash_generation_server.lib ./src/client/windows/Release/crash_report_sender.lib ../../lib/breakpad/Release/
 
 			cd ../..
 		fi

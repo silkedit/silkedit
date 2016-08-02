@@ -155,7 +155,7 @@ elseif (MSVC)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_SCL_SECURE_NO_WARNINGS /D_CRT_SECURE_NO_WARNINGS /source-charset:utf-8 /execution-charset:utf-8")
 
   #breakpad libs under 'lib' folder
-  set( BREAKPAD_LIBS "vendor/breakpad/${CMAKE_BUILD_TYPE}")
+  set( BREAKPAD_LIBS "breakpad/${CMAKE_BUILD_TYPE}")
 
   # SYSTEM tells the compiler to skip warning for these header files.
   include_directories(SYSTEM
@@ -306,12 +306,12 @@ elseif (MSVC)
             ${QTDIR}/translations/qtbase_ja.qm
             ${QTDIR}/translations/qtquick1_ja.qm
             ${QTDIR}/translations/qtscript_ja.qm
-            ${QTDIR}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/translations)
+            ${QTDIR}/translations/qtxmlpatterns_ja.qm DESTINATION ${PROJECT_BINARY_DIR}/silk_resources/translations)
 
   # copy CrashReporter
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter.exe ${PROJECT_BINARY_DIR})
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_ja.qm ${PROJECT_BINARY_DIR})
 
   # Move silkedit_ja.qm to translations directory
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/silkedit_ja.qm ${PROJECT_BINARY_DIR}/resources/translations/silkedit_ja.qm)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/silkedit_ja.qm ${PROJECT_BINARY_DIR}/silk_resources/translations/silkedit_ja.qm)
 endif()

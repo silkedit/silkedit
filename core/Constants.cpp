@@ -83,13 +83,7 @@ QString Constants::npmCliPath() {
 }
 
 QString Constants::translationDirPath() {
-#ifdef Q_OS_MAC
   return resourcesPath() + "/translations";
-#elif defined Q_OS_WIN
-  return QApplication::applicationDirPath() + "/translations";
-#else
-  return "";
-#endif
 }
 
 QStringList Constants::dataDirectoryPaths() {
