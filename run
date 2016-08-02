@@ -549,7 +549,7 @@ send_symbol() {
 }
 
 generate_doc() {
-  rm -rf ${API_DOC_DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${API_DOC_DIR}
+  rm -rf ${API_DOC_DIR} && jsdoc -r jslib/node_modules/silkedit -c jsdoc/conf.json -t node_modules/ink-docstrap/template --readme jsdoc/README.md --tutorials jsdoc/tutorial --package jsdoc/package.json -d ${API_DOC_DIR}
 
   # change JSDoc hard coded title
   TITLE="SilkEdit APIリファレンス"
