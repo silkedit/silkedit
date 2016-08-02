@@ -10,9 +10,9 @@
 #include "Config.h"
 
 namespace {
-bool isAscii(const QString& str) {
+bool isWhiteSpaceOrAscii(const QString& str) {
   return std::all_of(str.constBegin(), str.constEnd(),
-                     [](QChar ch) { return ch.unicode() <= 127; });
+                     [](QChar ch) { return ch.isSpace() || ch.unicode() <= 127; });
 }
 }
 
@@ -35,7 +35,7 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
       text = newCursor.selectedText();
       if (!result || text.isEmpty())
         return false;
-      if (isAscii(text)) {
+      if (isWhiteSpaceOrAscii(text)) {
         cursor.setPosition(newCursor.position(), mode);
         return true;
       }
@@ -64,7 +64,7 @@ bool TextCursor::customMovePosition(QTextCursor& cursor,
       text = newCursor.selectedText();
       if (!result || text.isEmpty())
         return false;
-      if (isAscii(text)) {
+      if (isWhiteSpaceOrAscii(text)) {
         cursor.setPosition(newCursor.position(), mode);
         return true;
       }
