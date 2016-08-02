@@ -40,7 +40,7 @@ with the following licenses:\n\n
         text += getLicenseText(Object.assign(dependencyLicenses, jslibDependencyLicenses));
       
         if (mode === 'save') {
-          const targetPath = 'resources/LICENSE.md';
+          const targetPath = 'resources/LICENSE';
           fs.writeFileSync(targetPath, text);
         } else {
           console.log(text);
