@@ -303,6 +303,7 @@ void TabViewGroup::addTabView(QWidget* widget,
                               Qt::Orientation newDirection) {
   auto tabView = createTabView();
   tabView->addTab(widget, label);
+  widget->setFocus();
 
   QSplitter* splitterInActiveTabViewGroup = findItemFromSplitter(m_rootSplitter, m_activeTabView);
   if (splitterInActiveTabViewGroup->orientation() == activeSplitterDirection) {

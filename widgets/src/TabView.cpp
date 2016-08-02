@@ -114,8 +114,6 @@ int TabView::insertTab(int index, QWidget* widget, const QString& label) {
     m_activeView = widget;
   }
 
-  widget->setFocus();
-
   return result;
 }
 
@@ -147,6 +145,7 @@ int TabView::open(const QString& path) {
   TextEdit* textEdit = new TextEdit(this);
   textEdit->setDocument(newDoc);
   auto newIndex = addTab(textEdit, getFileNameFrom(path));
+  textEdit->setFocus();
 
   setTabTextAndToolTip(textEdit, path);
 
@@ -185,6 +184,7 @@ void TabView::addNewTab() {
     std::shared_ptr<Document> newDoc(doc);
     view->setDocument(newDoc);
     addTab(view, DocumentManager::DEFAULT_FILE_NAME);
+    view->setFocus();
   }
 }
 
@@ -353,11 +353,6 @@ bool TabView::closeTab(QWidget* widget) {
     }
   }
   removeTabAndWidget(indexOf(widget));
-
-  // Focus to the current widget after closing a tab
-  if (QWidget* w = currentWidget()) {
-    w->setFocus();
-  }
   return true;
 }
 
