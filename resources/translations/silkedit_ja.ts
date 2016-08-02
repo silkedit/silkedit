@@ -4,14 +4,19 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../../widgets/src/AboutDialog.cpp" line="19"/>
+        <location filename="../../widgets/src/AboutDialog.cpp" line="12"/>
         <source>version</source>
         <translation>バージョン</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/AboutDialog.cpp" line="19"/>
+        <location filename="../../widgets/src/AboutDialog.cpp" line="12"/>
         <source>build</source>
         <translation>ビルド</translation>
+    </message>
+    <message>
+        <location filename="../../widgets/src/AboutDialog.ui" line="48"/>
+        <source>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;License&lt;/a&gt;</source>
+        <translation>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;ライセンス&lt;/a&gt;</translation>
     </message>
 </context>
 <context>
