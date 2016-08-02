@@ -433,7 +433,7 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll node.dll silk_resources translations Release
+        cp -r silkedit.exe onig.dll node.dll silk_resources resources/translations Release
         #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
@@ -522,7 +522,7 @@ set_version() {
 }
 
 localize() {
-    lupdate src core widgets -ts translations/silkedit_ja.ts
+    lupdate src core widgets -ts resources/translations/silkedit_ja.ts
     #CrashReporter
     lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }

@@ -60,7 +60,7 @@ if (MSVC)
   set(SILK_RESOURCES ${SILK_RESOURCES} ${FONTS_RESOURCES})
 endif()
 
-file(GLOB SILK_TRANSLATIONS translations/*.ts)
+file(GLOB SILK_TRANSLATIONS resources/translations/*.ts)
 
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5Xml REQUIRED)
@@ -204,7 +204,7 @@ endif()
 
 if(APPLE)
   # bundle themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
+  file(COPY ${PROJECT_SOURCE_DIR}/resources/themes DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
 
   # bundle builtin packages
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
@@ -264,7 +264,7 @@ if(APPLE)
 
 elseif (MSVC)
   # Copy themes
-  file(COPY ${PROJECT_SOURCE_DIR}/themes DESTINATION silk_resources)
+  file(COPY ${PROJECT_SOURCE_DIR}/resources/themes DESTINATION silk_resources)
 
   # Copy packages directory to the same directory of exe
   file(COPY ${PROJECT_SOURCE_DIR}/packages DESTINATION silk_resources)
@@ -313,5 +313,5 @@ elseif (MSVC)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/crashreporter/crashreporter_ja.qm ${PROJECT_BINARY_DIR})
 
   # Move silkedit_ja.qm to translations directory
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/silkedit_ja.qm ${PROJECT_BINARY_DIR}/translations/silkedit_ja.qm)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E rename ${PROJECT_BINARY_DIR}/silkedit_ja.qm ${PROJECT_BINARY_DIR}/resources/translations/silkedit_ja.qm)
 endif()
