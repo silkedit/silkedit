@@ -205,6 +205,7 @@ void Document::setupSyntaxHighlighter(std::unique_ptr<Language> lang, const QStr
 
 Document::~Document() {
   qDebug("~Document");
+  emit destroying(m_path, QPrivateSignal());
 }
 
 Document* Document::create(const QString& path) {

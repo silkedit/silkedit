@@ -100,6 +100,9 @@ class Document : public QTextDocument {
   void bomChanged(const BOM& bom);
   void parseFinished();
 
+  // private signals
+  void destroying(const QString& path, QPrivateSignal);
+
  public slots:
   QTextOption defaultTextOption() const;
   void setDefaultTextOption(const QTextOption& option);

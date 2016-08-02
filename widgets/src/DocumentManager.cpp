@@ -142,15 +142,14 @@ std::shared_ptr<core::Document> DocumentManager::registerDoc(Document* doc) {
       m_objectNameDocHash[doc->objectName()] = std::weak_ptr<Document>(sharedDoc);
     }
 
-    connect(doc, &Document::destroyed, [this, doc](QObject* obj) {
-      if (doc) {
-        auto path = doc->path();
-        qDebug() << "document (" << path << ") is destroyed.";
+    connect(doc, &Document::destroying, [this, doc](const QString& path) {
+      if (!path.isEmpty()) {
+        qDebug() << "document (" << path << ") is destroying.";
         m_pathDocHash.remove(path);
         m_watcher->removePath(path);
-        m_objectNameDocHash.remove(obj->objectName());
-      } else {
-        qWarning() << "doc is null";
+      }
+      if (!doc->objectName().isEmpty()) {
+        m_objectNameDocHash.remove(doc->objectName());
       }
     });
     connect(doc, &Document::pathUpdated, [this](const QString& oldPath, const QString& newPath) {
