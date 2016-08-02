@@ -52,8 +52,9 @@ void ObjectTemplateStore::initInstanceTemplate(Local<ObjectTemplate> objTempl,
   }
 }
 
-void ObjectTemplateStore::addObjectTemplate(Local<ObjectTemplate> objTempl, const QMetaObject* metaObj, v8::Isolate* isolate)
-{
+void ObjectTemplateStore::addObjectTemplate(Local<ObjectTemplate> objTempl,
+                                            const QMetaObject* metaObj,
+                                            v8::Isolate* isolate) {
   UniquePersistent<ObjectTemplate> persistentTempl(isolate, objTempl);
   auto pair = std::make_pair(metaObj, std::move(persistentTempl));
   m_classObjectTemplateHash.insert(std::move(pair));
@@ -84,17 +85,17 @@ void ObjectTemplateStore::getterCallback(Local<String> property,
 
   String::Utf8Value propertyName(property);
   int propertyIndex = obj->metaObject()->indexOfProperty(*propertyName);
+
+  // If obj is already destroyed, propertyIndex becomes -1.
   if (propertyIndex == -1) {
-    std::stringstream ss;
-    ss << "property:" << *propertyName << "not found";
-    V8Util::throwError(isolate, ss.str());
+    info.GetReturnValue().Set(v8::Undefined(isolate));
     return;
   }
 
   QMetaProperty prop = obj->metaObject()->property(propertyIndex);
   if (!prop.isReadable()) {
     std::stringstream ss;
-    ss << "property:" << *propertyName << "is not readable";
+    ss << "property: " << *propertyName << " is not readable";
     V8Util::throwError(isolate, ss.str());
     return;
   }
@@ -117,7 +118,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   int propertyIndex = obj->metaObject()->indexOfProperty(*propertyName);
   if (propertyIndex == -1) {
     std::stringstream ss;
-    ss << "property:" << *propertyName << "not found";
+    ss << "property: " << *propertyName << " not found";
     V8Util::throwError(isolate, ss.str());
     return;
   }
@@ -125,7 +126,7 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
   QMetaProperty prop = obj->metaObject()->property(propertyIndex);
   if (!prop.isWritable()) {
     std::stringstream ss;
-    ss << "property:" << *propertyName << "is not writable";
+    ss << "property: " << *propertyName << " is not writable";
     V8Util::throwError(isolate, ss.str());
     return;
   }
@@ -134,4 +135,3 @@ void ObjectTemplateStore::setterCallback(v8::Local<v8::String> property,
 }
 
 }  // namespace core
-
