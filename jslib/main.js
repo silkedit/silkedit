@@ -8,7 +8,7 @@ const assert = require('assert');
 
 // add builtin node_modules path to NODE_PATH to load silkedit module globally
 if (process.env.NODE_PATH) {
-  process.env.NODE_PATH = path.join(__dirname, 'node_modules') + ':' + process.env.NODE_PATH
+  process.env.NODE_PATH = path.join(__dirname, 'node_modules') + path.delimiter + process.env.NODE_PATH
 } else {
   process.env.NODE_PATH = path.join(__dirname, 'node_modules')
 }
