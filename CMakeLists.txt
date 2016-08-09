@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.2)
 
-project(SilkEdit VERSION 0.13.0)
+project(SilkEdit VERSION 0.13.1)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
 
 if(NOT DEFINED QTDIR AND DEFINED ENV{QTDIR})
