@@ -345,7 +345,7 @@ build() {
 
 
     if [ $OS = 'Mac' ]; then
-        if [ "$1" = '-edge' ]; then
+        if [ "$1" = '--edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
         else
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
@@ -353,7 +353,7 @@ build() {
 
         ninja
     else
-        if [ "$1" = '-edge' ]; then
+        if [ "$1" = '--edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
@@ -370,7 +370,7 @@ make_installer() {
     while (( $# > 0 ))
     do
         case "$1" in
-            -*)
+            --*)
                 if [[ "$1" =~ 'edge' ]]; then
                     EDGE=true
                     echo 'installer for edge build'
@@ -400,36 +400,19 @@ make_installer() {
         else
           BUNDLE_NAME="SilkEdit.app"
         fi
-        echo "Creating dmg..."
-        ensure_dir dmg
-        cp -R "${BUNDLE_NAME}" dmg
-        macdeployqt "dmg/${BUNDLE_NAME}"
+        echo "Creating zip..."
+        macdeployqt "${BUNDLE_NAME}"
         
         if [ "$SIGN" = true ];then
           if [ ${#argv[@]} = 1 ];then
-            codesign --force --verify --verbose --deep "dmg/${BUNDLE_NAME}" --sign "${argv[0]}"
+            codesign --force --verify --verbose --deep "${BUNDLE_NAME}" --sign "${argv[0]}"
           else
             echo 'error: no key specified'
             exit 1
           fi
         fi
 
-        ln -s /Applications dmg/Applications
-				n=0
-				MAX=3
-				until [ $n -ge $MAX ]
-				do
-          rm -rf /Volumes/SilkEdit*
-          touch dmg/.Trash
-          hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO -imagekey zlib-level=9 SilkEdit.dmg && break
-          echo "Failed to create DMG. retrying"
-					n=$[$n+1]
-					sleep 3
-				done
-				if [ $n = $MAX ]; then
-          echo "Failed to create DMG $MAX times"
-					exit 1
-				fi
+        ditto -ck --sequesterRsrc --keepParent "${BUNDLE_NAME}" SilkEdit.zip
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
@@ -528,7 +511,7 @@ localize() {
 }
 
 send_symbol() {
-    if [ "$1" = '-edge' ]; then
+    if [ "$1" = '--edge' ]; then
       APP_NAME="SilkEdit Edge"
       BUGSPLAT_APP_NAME="SilkEdit_Edge"
     else
@@ -643,14 +626,14 @@ case "$1" in
 
         cat << EOF
 analyze        static analysis
-build          build an app and an installer (-edge: Edge build)
+build          build an app and an installer (--edge: Edge build)
 clean          clean build dir
 format         format sources
 generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer (--sign identity: sign the app)
 minify         minify JS codes
-rebuild        build from scratch (-edge: Edge build)
+rebuild        build from scratch (--edge: Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
 set_version    set version number
