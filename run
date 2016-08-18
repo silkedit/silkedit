@@ -345,7 +345,7 @@ build() {
 
 
     if [ $OS = 'Mac' ]; then
-        if [ "$1" = '-edge' ]; then
+        if [ "$1" = '--edge' ]; then
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DBUILD_EDGE=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
         else
             cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_SYSROOT=${SDK_PATH}
@@ -353,7 +353,7 @@ build() {
 
         ninja
     else
-        if [ "$1" = '-edge' ]; then
+        if [ "$1" = '--edge' ]; then
           ../build.bat $VCVARSALL_ARG all edge
         else
           ../build.bat $VCVARSALL_ARG all
@@ -370,7 +370,7 @@ make_installer() {
     while (( $# > 0 ))
     do
         case "$1" in
-            -*)
+            --*)
                 if [[ "$1" =~ 'edge' ]]; then
                     EDGE=true
                     echo 'installer for edge build'
@@ -511,7 +511,7 @@ localize() {
 }
 
 send_symbol() {
-    if [ "$1" = '-edge' ]; then
+    if [ "$1" = '--edge' ]; then
       APP_NAME="SilkEdit Edge"
       BUGSPLAT_APP_NAME="SilkEdit_Edge"
     else
@@ -626,14 +626,14 @@ case "$1" in
 
         cat << EOF
 analyze        static analysis
-build          build an app and an installer (-edge: Edge build)
+build          build an app and an installer (--edge: Edge build)
 clean          clean build dir
 format         format sources
 generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
 make_installer make an installer (--sign identity: sign the app)
 minify         minify JS codes
-rebuild        build from scratch (-edge: Edge build)
+rebuild        build from scratch (--edge: Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
 set_version    set version number
