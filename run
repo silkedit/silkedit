@@ -400,36 +400,19 @@ make_installer() {
         else
           BUNDLE_NAME="SilkEdit.app"
         fi
-        echo "Creating dmg..."
-        ensure_dir dmg
-        cp -R "${BUNDLE_NAME}" dmg
-        macdeployqt "dmg/${BUNDLE_NAME}"
+        echo "Creating zip..."
+        macdeployqt "${BUNDLE_NAME}"
         
         if [ "$SIGN" = true ];then
           if [ ${#argv[@]} = 1 ];then
-            codesign --force --verify --verbose --deep "dmg/${BUNDLE_NAME}" --sign "${argv[0]}"
+            codesign --force --verify --verbose --deep "${BUNDLE_NAME}" --sign "${argv[0]}"
           else
             echo 'error: no key specified'
             exit 1
           fi
         fi
 
-        ln -s /Applications dmg/Applications
-				n=0
-				MAX=3
-				until [ $n -ge $MAX ]
-				do
-          rm -rf /Volumes/SilkEdit*
-          touch dmg/.Trash
-          hdiutil create -volname SilkEdit -srcfolder dmg -ov -format UDZO -imagekey zlib-level=9 SilkEdit.dmg && break
-          echo "Failed to create DMG. retrying"
-					n=$[$n+1]
-					sleep 3
-				done
-				if [ $n = $MAX ]; then
-          echo "Failed to create DMG $MAX times"
-					exit 1
-				fi
+        ditto -ck --sequesterRsrc --keepParent "${BUNDLE_NAME}" SilkEdit.zip
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
