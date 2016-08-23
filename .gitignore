@@ -19,3 +19,5 @@ CMakeLists.txt.user
 /yaml-cpp-*
 /packages/node_modules/*
 /resources/LICENSE
+/Cartfile.resolved
+/Carthage

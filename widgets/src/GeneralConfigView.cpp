@@ -82,7 +82,7 @@ GeneralConfigView::GeneralConfigView(QWidget* parent)
   // Restart button to apply change
   connect(ui->restartButton, &QPushButton::clicked, this, [] {
     ConfigDialog::closeDialog();
-    App::restart();
+    App::instance()->restart();
   });
 }
 

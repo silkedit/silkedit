@@ -18,7 +18,6 @@
 
 class CommandManager : public QObject, public core::Singleton<CommandManager> {
   Q_OBJECT
-  DISABLE_COPY_AND_MOVE(CommandManager)
 
   typedef std::function<std::tuple<bool, std::string, CommandArgument>(const std::string&,
                                                                        const CommandArgument&)>
@@ -28,14 +27,12 @@ class CommandManager : public QObject, public core::Singleton<CommandManager> {
   ~CommandManager() = default;
 
   QString cmdDescription(const QString& name);
-  void runCommand(QString cmdName,
-                  CommandArgument cmdArgs = CommandArgument(),
-                  int repeat = 1);
+  void runCommand(QString cmdName, CommandArgument cmdArgs = CommandArgument(), int repeat = 1);
   void add(std::unique_ptr<ICommand> cmd);
   void addHidden(std::unique_ptr<ICommand> cmd);
   const std::unordered_map<QString, std::unique_ptr<ICommand>>& commands() { return m_commands; }
 
-public slots:
+ public slots:
   void add(const QString& name, const QString& description);
   void remove(const QString& name);
 
@@ -58,5 +55,5 @@ public slots:
 
   v8::UniquePersistent<v8::Function> m_jsCmdEventFilter;
 
-  bool runCommandEventFilter(QString &cmdName, CommandArgument &cmdArg);
+  bool runCommandEventFilter(QString& cmdName, CommandArgument& cmdArg);
 };

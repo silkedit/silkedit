@@ -43,10 +43,10 @@ if (APPLE)
 endif ()
 
 file(GLOB_RECURSE SILK_SOURCES src/*.cpp)
-
 file(GLOB_RECURSE SILK_HEADERS src/*.h)
+file(GLOB_RECURSE SILK_QMLS resources/qmls/*.qml)
 
-set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc resources/files.qrc)
+set(SILK_RESOURCES resources/style.qrc resources/images_common.qrc resources/files.qrc resources/qmls.qrc)
 
 if (BUILD_EDGE)
   set(SILK_RESOURCES ${SILK_RESOURCES} resources/images_edge.qrc)
@@ -68,6 +68,9 @@ find_package(Qt5Network REQUIRED)
 find_package(Qt5LinguistTools REQUIRED)
 find_package(Qt5Svg REQUIRED)
 find_package(Qt5WebEngineWidgets REQUIRED)
+find_package(Qt5Quick REQUIRED)
+find_package(Qt5QuickWidgets REQUIRED)
+find_package(Boost REQUIRED)
 
 if (APPLE)
   set( BREAKPAD_LIBS "vendor/breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
@@ -78,6 +81,33 @@ if (APPLE)
   if (NOT Breakpad)
     message(FATAL_ERROR "Breakpad not found")
   endif()
+
+  set( CARTHAGE_PATH "Carthage/Build/Mac")
+
+  find_library(Squirrel Squirrel PATHS ${CARTHAGE_PATH})
+  if (Squirrel)
+    message(STATUS "Squirrel: ${Squirrel}")
+  endif()
+  if (NOT Squirrel)
+    message(FATAL_ERROR "Squirrel not found")
+  endif()
+
+  find_library(Mantle Mantle PATHS ${CARTHAGE_PATH})
+  if (Mantle)
+    message(STATUS "Mantle: ${Mantle}")
+  endif()
+  if (NOT Mantle)
+    message(FATAL_ERROR "Mantle not found")
+  endif()
+
+  find_library(ReactiveCocoa ReactiveCocoa PATHS ${CARTHAGE_PATH})
+  if (ReactiveCocoa)
+    message(STATUS "ReactiveCocoa: ${ReactiveCocoa}")
+  endif()
+  if (NOT ReactiveCocoa)
+    message(FATAL_ERROR "ReactiveCocoa not found")
+  endif()
+
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
   else ()
@@ -93,7 +123,6 @@ elseif (MSVC)
     set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.lib)
   endif ()
 endif ()
-find_package(Boost REQUIRED)
 
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
 
@@ -138,7 +167,7 @@ if (APPLE)
     vendor/node/deps/cares/include
     vendor/node/deps/openssl/openssl/include)
 
-  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES})
+  add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_QMLS})
 
   # <OUTPUT_NAME>.app will be generated
   set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${MACOSX_BUNDLE_BUNDLE_NAME})
@@ -179,7 +208,7 @@ elseif (MSVC)
     set( SILK_ICON resources/silkedit.rc)
   endif ()
 
-  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_ICON})
+  add_executable(${PROJECT_NAME} WIN32 ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_ICON} ${SILK_QMLS})
 endif ()
 
 INCLUDE(Dart)
@@ -194,6 +223,9 @@ if(APPLE)
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_widgets
                         ${Breakpad}
+                        ${Squirrel}
+                        ${Mantle}
+                        ${ReactiveCocoa}
 )
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME}
@@ -254,6 +286,12 @@ if(APPLE)
 
   # breakpad framework
   file(COPY ${Breakpad} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+  # Squirrel framework
+  file(COPY ${Squirrel} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+  # Mantle framework
+  file(COPY ${Mantle} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+  # ReactiveCocoa framework
+  file(COPY ${ReactiveCocoa} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
 
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)

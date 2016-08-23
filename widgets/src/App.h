@@ -19,7 +19,6 @@ class App : public QtSingleApplication {
  public:
   static App* instance() { return s_app; }
   static TabBar* tabBarAt(int x, int y);
-  static void restart();
   static void saveSession();
   static void loadSession();
 
@@ -36,11 +35,12 @@ class App : public QtSingleApplication {
   TextEdit* activeTextEdit();
   TabView* activeTabView();
   TabViewGroup* activeTabViewGroup();
-  QWidget *activeWindow();
+  QWidget* activeWindow();
   void setActiveWindow(QWidget* active);
   QWidget* focusWidget();
   QWidget* activePopupWidget();
   void postEvent(QObject* receiver, QEvent* event, int priority = Qt::NormalEventPriority);
+  void restart();
 
  protected:
   bool event(QEvent*) override;

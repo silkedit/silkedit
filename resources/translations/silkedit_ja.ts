@@ -863,4 +863,22 @@ Convert: convert current text in %1</source>
         <translation>保存しないと変更した内容は破棄されます。</translation>
     </message>
 </context>
+<context>
+    <name>notification</name>
+    <message>
+        <location filename="../qmls/notification.qml" line="25"/>
+        <source>SilkEdit will be updated after restart.</source>
+        <translation>SilkEditは再起動後に更新されます。</translation>
+    </message>
+    <message>
+        <location filename="../qmls/notification.qml" line="34"/>
+        <source>Update Now</source>
+        <translation>今すぐ更新</translation>
+    </message>
+    <message>
+        <location filename="../qmls/notification.qml" line="39"/>
+        <source>Later</source>
+        <translation>後で</translation>
+    </message>
+</context>
 </TS>
