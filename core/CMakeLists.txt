@@ -6,14 +6,14 @@ if (MSVC)
 endif ()
 
 include_directories(SYSTEM
-  ${PROJECT_SOURCE_DIR}
+  ${PROJECT_SOURCE_DIR} ${Squirrel_INCLUDE_DIRS}
 )
 
-file(GLOB_RECURSE SILK_CORE_SOURCES *.cpp)
+file(GLOB_RECURSE SILK_CORE_SOURCES *.cpp *.mm)
 if (APPLE)
-  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_win.cpp)
+  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_win.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SquirrelAutoUpdater_win.cpp)
 elseif (MSVC)
-  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_mac.cpp)
+  list(REMOVE_ITEM SILK_CORE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/atom/node_bindings_mac.cpp ${CMAKE_CURRENT_SOURCE_DIR}/SquirrelAutoUpdater_mac.mm)
 endif ()
 
 file(GLOB_RECURSE SILK_CORE_HEADERS *.h)
@@ -35,6 +35,10 @@ if (APPLE)
                         ${NODE_LIBRARY}
                         ${ICUUC_LIBRARY}
                         ${ICUDATA_LIBRARY}
+                        ${Squirrel}
+                        ${Mantle}
+                        ${ReactiveCocoa}
+                        "-framework Foundation"
 
   )
 elseif (MSVC)

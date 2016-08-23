@@ -105,6 +105,10 @@ resolve() {
       brew list ninja || brew install ninja
       brew list gnu-sed || brew install gnu-sed --with-default-names
       brew list boost || brew install boost --c++11
+      brew list carthage || brew install carthage
+
+      # Download Squirrel      
+      carthage update
 
       # ICU
       if [ "$1" != '--skip-build' ]; then
@@ -401,7 +405,7 @@ make_installer() {
           BUNDLE_NAME="SilkEdit.app"
         fi
         echo "Creating zip..."
-        macdeployqt "${BUNDLE_NAME}"
+        macdeployqt "${BUNDLE_NAME}" -qmldir=../resources/qmls
         
         if [ "$SIGN" = true ];then
           if [ ${#argv[@]} = 1 ];then
@@ -505,7 +509,7 @@ set_version() {
 }
 
 localize() {
-    lupdate src core widgets -ts resources/translations/silkedit_ja.ts
+    lupdate src core widgets resources/qmls -ts resources/translations/silkedit_ja.ts
     #CrashReporter
     lupdate ./crashreporter/src -ts ./crashreporter/trans/crashreporter_ja.ts
 }
@@ -631,13 +635,13 @@ clean          clean build dir
 format         format sources
 generate_doc   generate SilkEdit package API document
 localize       run lupdate to generate a ts file for localization
-make_installer make an installer (--sign identity: sign the app)
+make_installer make an installer (--sign identity: sign the app, --edge: for Edge build)
 minify         minify JS codes
-rebuild        build from scratch (--edge: Edge build)
+rebuild        build from scratch (--edge: for Edge build)
 resolve        resolve dependency (--skip-build: skip building libraries)
 test           run tests
 set_version    set version number
-send_symbol    send application symbol to server
+send_symbol    send application symbol to server (--edge: for Edge build)
 upload_doc     upload package API document
 EOF
 

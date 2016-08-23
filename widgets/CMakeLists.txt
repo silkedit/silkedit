@@ -21,22 +21,13 @@ target_include_directories(${MODULE_NAME}
   PRIVATE ${PROJECT_SOURCE_DIR}
 )
 
-if (APPLE)
-  target_link_libraries(${MODULE_NAME}
-                        ${PROJECT_NAME}_core
-                        Qt5::Widgets
-                        Qt5::Network
-                        Qt5::Xml
-                        Qt5::Svg
-                        Qt5::WebEngineWidgets
-  )
-elseif (MSVC)
-  target_link_libraries(${MODULE_NAME}
-                        ${PROJECT_NAME}_core
-                        Qt5::Widgets
-                        Qt5::Network
-                        Qt5::Xml
-                        Qt5::Svg
-                        Qt5::WebEngineWidgets
-  )
-endif ()
+target_link_libraries(${MODULE_NAME}
+                      ${PROJECT_NAME}_core
+                      Qt5::Widgets
+                      Qt5::Network
+                      Qt5::Xml
+                      Qt5::Svg
+                      Qt5::WebEngineWidgets
+                      Qt5::Quick
+                      Qt5::QuickWidgets
+)

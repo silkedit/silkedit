@@ -21,7 +21,7 @@ class Completer : public QCompleter {
   ~Completer() = default;
   DEFAULT_MOVE(Completer)
 
- public slots:
+ public Q_SLOTS:
   void setWidget(QWidget* widget);
   QWidget* widget() const;
 

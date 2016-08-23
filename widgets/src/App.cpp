@@ -334,11 +334,9 @@ void App::postEvent(QObject* receiver, QEvent* event, int priority) {
 }
 
 void App::restart() {
-  if (s_app) {
-    // second QStringList() is necessary to escape applicationFilePath
-    QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
-    s_app->exit();
-  }
+  // second QStringList() is necessary to escape applicationFilePath
+  QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
+  exit();
 }
 
 void App::saveSession() {

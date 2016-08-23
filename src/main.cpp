@@ -18,6 +18,7 @@
 #include "MenuBar.h"
 #include "MetaTypeInitializer.h"
 #include "GrammerCondition.h"
+#include "UpdateNotificationView.h"
 #include "core/ConditionManager.h"
 #include "core/Condition.h"
 #include "core/PackageManager.h"
@@ -26,6 +27,7 @@
 #include "core/Util.h"
 #include "core/Constants.h"
 #include "core/MessageHandler.h"
+#include "core/AutoUpdateManager.h"
 #include "breakpad/crash_handler.h"
 #include "node_main.h"
 
@@ -37,6 +39,7 @@ using core::ThemeManager;
 using core::Util;
 using core::Constants;
 using core::MessageHandler;
+using core::AutoUpdateManager;
 
 int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
@@ -150,6 +153,26 @@ int main(int argc, char** argv) {
 
   int passed = startTime.msecsTo(QTime::currentTime());
   QLoggingCategory category(SILKEDIT_CATEGORY);
+
+  QObject::connect(&AutoUpdateManager::singleton(), &AutoUpdateManager::checkingForUpdate,
+                   [] { qDebug() << "checkingForUpdate"; });
+
+  QObject::connect(&AutoUpdateManager::singleton(), &AutoUpdateManager::updateAvailable,
+                   [] { qDebug() << "updateAvailable"; });
+
+  QObject::connect(&AutoUpdateManager::singleton(), &AutoUpdateManager::updateNotAvailable,
+                   [] { qDebug() << "updateNotAvailable"; });
+
+  QObject::connect(
+      &AutoUpdateManager::singleton(), &AutoUpdateManager::updateDownloaded,
+      [](const QString& notes, const QString& name, const QDateTime& date, const QString& url) {
+        qDebug() << "notes" << notes << "name" << name << "date" << date << "url" << url;
+        UpdateNotificationView::show();
+      });
+
+  QTimer::singleShot(0, &AutoUpdateManager::singleton(), &AutoUpdateManager::initialize);
+
   qCInfo(category) << "startup time:" << passed << "[ms]";
+
   return app.exec();
 }
