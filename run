@@ -108,7 +108,11 @@ resolve() {
       brew list carthage || brew install carthage
 
       # Download Squirrel      
-      carthage update
+      # Skip carthage update in Jenkins because it hangs...
+      # https://github.com/Carthage/Carthage/issues/983
+      if [[ -z "$JENKINS_URL" ]]; then
+        carthage update
+      fi
 
       # ICU
       if [ "$1" != '--skip-build' ]; then
