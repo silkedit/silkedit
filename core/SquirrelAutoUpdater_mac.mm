@@ -40,8 +40,6 @@ void SquirrelAutoUpdater::initialize() {
     NSString* platform = @"windows_x86";
 #endif
 
-    qDebug() << "version" << @VERSION << "build" << @BUILD << "channel" << channel << "platform"
-             << platform;
     components.query =
         [[NSString stringWithFormat:@"channel=%1$@&version=%2$@&build=%3$@&platform=%4$@", channel,
                                     @VERSION, @BUILD, platform]
