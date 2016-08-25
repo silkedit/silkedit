@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# -e: stops if any command returns non zero value
+set -e
+
 # Constants
 
 API_DOC_DIR=jsdoc_out
@@ -15,24 +18,26 @@ elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
   if [ "$(uname -m)" = "x86_64" ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
-    ONIG_BUILD_BAT='"C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "C:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    PROGRAM_FILES="$(env | awk -F= '$1=="ProgramFiles(x86)"{print $2}')"
+    ONIG_BUILD_BAT='"%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     VCVARSALL_ARG=amd64
-    PROGRAM_FILES="Program Files (x86)"
     ARCH=x64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
-    ONIG_BUILD_BAT='"C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "C:\\Program Files\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    PROGRAM_FILES="$PROGRAMFILES"
+    ONIG_BUILD_BAT='"%PROGRAMFILES%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "%PROGRAMFILES%\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     VCVARSALL_ARG=x86
     ARCH=x86
-    PROGRAM_FILES="Program Files"
   fi
 
-  # Add path to MSBuild.exe and jom.exe
-  PATH="/c/$PROGRAM_FILES/MSBuild/14.0/Bin":/c/jom:$PATH
-  UCRT_DIR="/c/$PROGRAM_FILES/Windows Kits\10\Redist\ucrt\DLLs/$ARCH"
-  VCRT_DIR="/c/$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
+  UCRT_DIR="$PROGRAM_FILES/Windows Kits\10\Redist\ucrt\DLLs/$ARCH"
+  VCRT_DIR="$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
   VisualStudioVersion=14.0
+  # Add MSBuild.exe path to PATH
+  MSBUILD_PATH="$PROGRAM_FILES/MSBuild/$VisualStudioVersion/Bin"
+  PATH=$MSBUILD_PATH:$PATH
+  command -v MSBuild.exe >/dev/null 2>&1 || ( echo 'MSBuild.exe not found'; exit 1 )
 elif [ "$(expr substr $(uname -s) 1 5)" = 'MINGW' ]; then
   echo "You're running this program on MINGW. Please run it from msys2_shell.bat"
   exit 1
@@ -217,14 +222,14 @@ resolve() {
         fi
 
   			# build node.dll
-            if [ "$1" != '--skip-build' ]; then
-                        cd vendor/node
-        # Build Release version
-        ./vcbuild.bat nosign shared ${ARCH}
-        # Build Debug version
-        ./vcbuild.bat nosign shared debug ${ARCH}
-        cd ../..
-            fi
+        if [ "$1" != '--skip-build' ]; then
+          cd vendor/node
+          # Build Release version
+          ./vcbuild.bat nosign shared ${ARCH}
+          # Build Debug version
+          ./vcbuild.bat nosign shared debug ${ARCH}
+          cd ../..
+        fi
 
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
@@ -566,9 +571,6 @@ upload_doc() {
   LATEST="~/www/silkedit/docs/api/latest"
   ssh silksmiths@silksmiths.sakura.ne.jp "rm -f ${LATEST} && ln -s ${DIST} ${LATEST}"
 }
-
-# -e: stops if any command returns non zero value
-set -e
 
 case "$1" in
     analyze)
