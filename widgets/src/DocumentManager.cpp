@@ -83,6 +83,15 @@ bool DocumentManager::save(Document* doc, bool beforeClose) {
     return !newFilePath.isEmpty();
   }
 
+  // create a directory if it doesn't exist (this happens when a user renames the directory of an
+  // opened document).
+  QDir dir = QFileInfo(doc->path()).absoluteDir();
+  if (!dir.exists()) {
+    if (!QDir::root().mkpath(dir.path())) {
+      qWarning() << "failed to create a directory" << dir;
+    }
+  }
+
   QFile outFile(doc->path());
   if (outFile.open(QIODevice::WriteOnly)) {
     // remove path from QFileSystemWatcher to prevent reloading after save
@@ -110,6 +119,8 @@ bool DocumentManager::save(Document* doc, bool beforeClose) {
     }
 
     return true;
+  } else {
+    qWarning() << "failed to open" << outFile.fileName();
   }
 
   return false;
