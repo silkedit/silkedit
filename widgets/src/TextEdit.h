@@ -73,6 +73,8 @@ class TextEdit : public QPlainTextEdit, public core::ICloneable<TextEdit> {
   void save(bool beforeClose);
 
   void saveState(QSettings& settings);
+
+  // may throw a runtime_error
   void loadState(QSettings& settings);
 
   bool isSearchMatchesHighlighted();

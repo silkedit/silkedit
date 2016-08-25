@@ -184,7 +184,11 @@ std::shared_ptr<core::Document> DocumentManager::create(const QString& path) {
 
 std::shared_ptr<core::Document> DocumentManager::getOrCreate(QSettings& settings) {
   auto doc = Document::create(settings);
+  if (!doc) {
+    return nullptr;
+  }
 
+  Q_ASSERT(doc);
   if (!doc->objectName().isEmpty() && m_objectNameDocHash.contains(doc->objectName())) {
     return m_objectNameDocHash[doc->objectName()].lock();
   }

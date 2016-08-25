@@ -22,6 +22,7 @@
 #include "core/Region.h"
 #include "core/Util.h"
 #include "core/TextCursor.h"
+#include "core/scoped_guard.h"
 
 using core::Document;
 using core::Encoding;
@@ -38,6 +39,7 @@ using core::BOM;
 using core::Region;
 using core::Util;
 using core::TextCursor;
+using core::scoped_guard;
 
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
@@ -987,15 +989,14 @@ void TextEdit::saveState(QSettings& settings) {
 
 void TextEdit::loadState(QSettings& settings) {
   settings.beginGroup(TextEdit::staticMetaObject.className());
+  scoped_guard guard([&settings] { settings.endGroup(); });
 
   if (settings.childGroups().contains(Document::SETTINGS_PREFIX)) {
-    auto doc = DocumentManager::singleton().getOrCreate(settings);
+    const std::shared_ptr<Document>& doc = DocumentManager::singleton().getOrCreate(settings);
     setDocument(doc);
   } else {
     setDocument(std::shared_ptr<Document>(Document::createBlank()));
   }
-
-  settings.endGroup();
 }
 
 bool TextEdit::isSearchMatchesHighlighted() {

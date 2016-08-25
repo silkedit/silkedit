@@ -447,16 +447,19 @@ void TabView::loadState(QSettings& settings) {
 
     if (settings.childGroups().contains(TextEdit::staticMetaObject.className())) {
       auto textEdit = new TextEdit(this);
-      if (textEdit) {
+      try {
         textEdit->loadState(settings);
         auto newIndex = addTab(textEdit, getFileNameFrom(textEdit->path()));
         setTabToolTip(newIndex, QDir::toNativeSeparators(textEdit->path()));
         if (settings.contains(TAB_TEXT_PREFIX)) {
           auto tabTextVar = settings.value(TAB_TEXT_PREFIX);
           if (tabTextVar.canConvert<QString>()) {
-            setTabText(i, tabTextVar.toString());
+            setTabText(newIndex, tabTextVar.toString());
           }
         }
+      } catch (const std::exception& e) {
+        qWarning() << e.what();
+        delete textEdit;
       }
     }
   }

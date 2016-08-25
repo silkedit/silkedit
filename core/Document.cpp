@@ -253,7 +253,12 @@ Document* Document::create(QSettings& settings) {
 
   if (!path.isEmpty() && !isModified) {
     auto doc = create(path);
-    doc->setObjectName(objectName);
+    if (doc) {
+      doc->setObjectName(objectName);
+    } else {
+      QString message = "failed to create Document with " + path;
+      throw std::runtime_error(message.toUtf8().constData());
+    }
     return doc;
   }
 

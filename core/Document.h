@@ -36,6 +36,7 @@ class Document : public QTextDocument {
 
   // Don't call these except DocumentManager
   static Document* create(const QString& path = "");
+  // may throw a runtime_error
   static Document* create(QSettings& settings);
 
   ~Document();

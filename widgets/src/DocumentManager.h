@@ -27,10 +27,11 @@ class DocumentManager : public QObject, public core::Singleton<DocumentManager> 
   bool save(core::Document* doc, bool beforeClose);
   QString saveAs(core::Document* doc, bool beforeClose);
   std::shared_ptr<core::Document> create(const QString& path);
+  // may throw a runtime_error
   std::shared_ptr<core::Document> getOrCreate(QSettings& settings);
   std::shared_ptr<core::Document> find(const QString& objectName);
 
-public slots:
+ public slots:
   int open(const QString& filename);
 
  private:
