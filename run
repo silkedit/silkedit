@@ -162,16 +162,6 @@ resolve() {
         ./configure && make && make install
         cd ../..
 
-        # yaml-cpp
-        echo 'Building yaml-cpp...'
-        cd vendor/yaml-cpp
-        rm -rf build && mkdir build && cd build
-        # needs to link with libc++
-        # https://github.com/jbeder/yaml-cpp/issues/211
-        cmake -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" ..
-        ninja && ninja install
-        cd ../../..
-
         # uchardet
         echo 'Building uchardet...'
         cd vendor/uchardet

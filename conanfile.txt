@@ -1,0 +1,5 @@
+[requires]
+yaml-cpp/0.5.3@moonforged/stable
+
+[generators]
+cmake
