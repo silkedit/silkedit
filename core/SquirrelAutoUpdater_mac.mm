@@ -51,7 +51,7 @@ void SquirrelAutoUpdater::initialize() {
       [request addValue:@"Bearer BymXwSHDJa" forHTTPHeaderField:@"Authorization"];
       d->updater = [[SQRLUpdater alloc] initWithUpdateRequest:request];
     } @catch (NSException* exception) {
-      qWarning() << exception.reason.UTF8String;
+      emit updateError(exception.reason.UTF8String);
       return;
     }
 
@@ -70,7 +70,7 @@ void SquirrelAutoUpdater::initialize() {
 
 void SquirrelAutoUpdater::checkForUpdates() {
   if (!d->updater) {
-    qDebug() << "updater is null";
+    emit updateError("updater is null");
     return;
   }
 
@@ -106,7 +106,7 @@ void SquirrelAutoUpdater::checkForUpdates() {
           [failureString appendString:@" "];
           [failureString appendString:error.localizedRecoverySuggestion];
         }
-        qWarning() << failureString.UTF8String;
+        emit updateError(failureString.UTF8String);
       }];
 }
 

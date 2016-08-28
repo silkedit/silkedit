@@ -24,6 +24,7 @@ class AutoUpdater : public QObject {
                       const QString& name,
                       const QDateTime& date,
                       const QString& url);
+  void updateError(const QString& message);
 };
 
 }  // namespace core

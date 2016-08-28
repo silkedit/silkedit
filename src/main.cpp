@@ -163,6 +163,9 @@ int main(int argc, char** argv) {
   QObject::connect(&AutoUpdateManager::singleton(), &AutoUpdateManager::updateNotAvailable,
                    [] { qDebug() << "updateNotAvailable"; });
 
+  QObject::connect(&AutoUpdateManager::singleton(), &AutoUpdateManager::updateError,
+                   [](const QString& message) { qWarning() << message; });
+
   QObject::connect(
       &AutoUpdateManager::singleton(), &AutoUpdateManager::updateDownloaded,
       [](const QString& notes, const QString& name, const QDateTime& date, const QString& url) {

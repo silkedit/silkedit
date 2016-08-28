@@ -25,6 +25,7 @@ class AutoUpdateManager : public QObject, public Singleton<AutoUpdateManager> {
                         const QString& name,
                         const QDateTime& date,
                         const QString& url);
+  void updateError(const QString& message);
 
  private:
   friend class Singleton<AutoUpdateManager>;

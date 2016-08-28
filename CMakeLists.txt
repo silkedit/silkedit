@@ -255,8 +255,13 @@ if(APPLE)
      ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/npm)
 
   # bundle jslib
+  set(JSLIB_DIR ${PROJECT_SOURCE_DIR}/minified/jslib)
+  if(NOT IS_DIRECTORY ${JSLIB_DIR})
+    message(FATAL_ERROR "${JSLIB_DIR} doesn't exits. Please run 'npm run minify'")
+  endif()
+
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory ${PROJECT_BINARY_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/jslib)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib ${PROJECT_BINARY_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/jslib)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${JSLIB_DIR} ${PROJECT_BINARY_DIR}/${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/jslib)
 
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist.in)
   set_target_properties( ${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_EXECUTABLE_NAME ${PROJECT_SOURCE_DIR}/src/SilkEdit-info.plist.in)

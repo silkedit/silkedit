@@ -18,7 +18,9 @@
 #include <v8-profiler.h>
 
 #ifdef __APPLE__
+#include <unistd.h>
 #include "vendor/node/src/atomic-polyfill.h"  // NOLINT(build/include_order)
+
 namespace node {
 template <typename T>
 using atomic = nonstd::atomic<T>;

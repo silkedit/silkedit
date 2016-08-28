@@ -26,6 +26,9 @@ if (APPLE)
   find_library(ICUUC_LIBRARY NAMES libicuuc.a PATHS /usr/local/lib)
   find_library(ICUDATA_LIBRARY NAMES libicudata.a PATHS /usr/local/lib)
 
+  # ReactiveCocoa uses ARC so we need to set -fobjc-weak
+  set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/SquirrelAutoUpdater_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-weak")
+
   target_link_libraries(${MODULE_NAME}
                         Qt5::Widgets
                         Qt5::Xml
