@@ -73,7 +73,7 @@ std::unique_ptr<Regexp> Regexp::compile(const QString& expr) {
   }
 
   Q_ASSERT(reg);
-  return std::move(std::unique_ptr<Regexp>(new Regexp(reg, expr)));
+  return std::unique_ptr<Regexp>(new Regexp(reg, expr));
 }
 
 // https://golang.org/pkg/regexp/#Regexp.FindAllStringSubmatchIndex

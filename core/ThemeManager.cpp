@@ -22,7 +22,7 @@ QStringList ThemeManager::sortedThemeNames() {
 void ThemeManager::loadTheme(const QString& fileName) {
   Theme* theme = Theme::loadTheme(fileName);
   if (theme) {
-    s_nameThemeMap.insert(std::make_pair(theme->name, std::move(std::unique_ptr<Theme>(theme))));
+    s_nameThemeMap.insert(std::make_pair(theme->name, std::unique_ptr<Theme>(theme)));
   } else {
     qWarning("failed to load %s", qPrintable(fileName));
   }

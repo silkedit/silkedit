@@ -66,8 +66,7 @@ void ConditionManager::Add(const v8::FunctionCallbackInfo<v8::Value>& args) {
   const auto& key =
       V8Util::toQString(args[0]->ToString(isolate->GetCurrentContext()).ToLocalChecked());
   singleton().add(key,
-                  std::move(std::unique_ptr<core::Condition>(new PackageCondition(
-                      isolate, args[1]->ToObject(isolate->GetCurrentContext()).ToLocalChecked()))));
+                  std::unique_ptr<core::Condition>(new PackageCondition(isolate, args[1]->ToObject(isolate->GetCurrentContext()).ToLocalChecked())));
 }
 
 bool ConditionManager::isStatic(const QString& key) {
@@ -88,9 +87,9 @@ bool ConditionManager::isSatisfied(const QString& key, const QString& op, const 
 void ConditionManager::init() {
   m_conditions.clear();
   // register default conditions
-  add(OSCondition::name, std::move(std::unique_ptr<Condition>(new OSCondition())));
-  add(OnMacCondition::name, std::move(std::unique_ptr<Condition>(new OnMacCondition())));
-  add(OnWindowsCondition::name, std::move(std::unique_ptr<Condition>(new OnWindowsCondition())));
+  add(OSCondition::name, std::unique_ptr<Condition>(new OSCondition()));
+  add(OnMacCondition::name, std::unique_ptr<Condition>(new OnMacCondition()));
+  add(OnWindowsCondition::name, std::unique_ptr<Condition>(new OnWindowsCondition()));
 }
 
 void ConditionManager::add(const QString& key, std::unique_ptr<core::Condition> condition) {

@@ -149,7 +149,7 @@ void toPattern(QVariantMap map, Pattern* pat, Language* lang) {
       if (iter.value().canConvert<QVariantMap>()) {
         QVariantMap subMap = iter.value().toMap();
         if (Pattern* pattern = toChildPattern(subMap, pat, lang)) {
-          pat->repository[key] = std::move(std::unique_ptr<Pattern>(pattern));
+          pat->repository[key] = std::unique_ptr<Pattern>(pattern);
         }
       }
     }
@@ -245,7 +245,7 @@ boost::optional<std::tuple<int, int>> coveringIndices(QList<Node> nodes, Region 
 
 LanguageParser* LanguageParser::create(const QString& scopeName, const QString& data) {
   if (auto lang = LanguageProvider::languageFromScope(scopeName)) {
-    return new LanguageParser(std::move(std::unique_ptr<Language>(lang)), data);
+    return new LanguageParser(std::unique_ptr<Language>(lang), data);
   } else {
     return nullptr;
   }

@@ -184,7 +184,7 @@ void CommandManager::_assignJSCommandEventFilter(FunctionInfo info) {
 }
 
 CommandManager::CommandManager() {
-  addHidden(std::move(std::unique_ptr<ICommand>(new CrashCommand())));
+  addHidden(std::unique_ptr<ICommand>(new CrashCommand()));
 }
 
 void CommandManager::add(const QString& name, const QString& description) {

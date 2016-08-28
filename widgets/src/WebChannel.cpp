@@ -87,5 +87,5 @@ void WebChannel::sendMessage(const QString& event, double data) {
 }
 
 void WebChannel::onMessage(const QString& event, core::FunctionInfo fnInfo) {
-  m_eventMap[event] = std::move(UniquePersistent<Function>(fnInfo.isolate, fnInfo.fn));
+  m_eventMap[event] = UniquePersistent<Function>(fnInfo.isolate, fnInfo.fn);
 }

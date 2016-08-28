@@ -24,23 +24,23 @@ Metadata::Metadata(const QString& scope) : m_scope(scope) {
 }
 
 void Metadata::setIncreaseIndentPattern(const QString& pattern) {
-  m_increaseIndentPattern = std::move(Regexp::compile(pattern));
+  m_increaseIndentPattern = Regexp::compile(pattern);
 }
 
 void Metadata::setDecreateIndentPattern(const QString& pattern) {
-  m_decreaseIndentPattern = std::move(Regexp::compile(pattern));
+  m_decreaseIndentPattern = Regexp::compile(pattern);
 }
 
 void Metadata::setBracketIndentNextLinePattern(const QString& pattern) {
-  m_bracketIndentNextLinePattern = std::move(Regexp::compile(pattern));
+  m_bracketIndentNextLinePattern = Regexp::compile(pattern);
 }
 
 void Metadata::setDisableIndentNextLinePattern(const QString& pattern) {
-  m_disableIndentNextLinePattern = std::move(Regexp::compile(pattern));
+  m_disableIndentNextLinePattern = Regexp::compile(pattern);
 }
 
 void Metadata::setUnIndentedLinePattern(const QString& pattern) {
-  m_unIndentedLinePattern = std::move(Regexp::compile(pattern));
+  m_unIndentedLinePattern = Regexp::compile(pattern);
 }
 
 Metadata* Metadata::get(const QString& scope) {
@@ -71,7 +71,7 @@ void Metadata::load(const QString& filename) {
       scope = scope.trimmed();
       if (s_scopeMetadataMap.count(scope) == 0) {
         s_scopeMetadataMap.insert(
-            std::make_pair(scope, std::move(std::unique_ptr<Metadata>(new Metadata(scope)))));
+            std::make_pair(scope, std::unique_ptr<Metadata>(new Metadata(scope))));
       }
       Metadata* metadata = s_scopeMetadataMap[scope].get();
 
