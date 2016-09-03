@@ -1,0 +1,11 @@
+language: cpp
+compiler: clang
+os:
+  - osx
+osx_image: xcode7.3
+node_js: "6.4"
+before_script:
+  - brew install ninja
+script:
+  - ./run resolve
+  - ./run build --edge

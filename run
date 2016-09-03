@@ -88,13 +88,6 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # Clean node modules
-    git clean -dfx jslib packages
-
-    # Update submodules
-    git submodule sync
-    git submodule update --init
-
     # jsdoc
     npm install -g jsdoc@latest
 
@@ -106,12 +99,6 @@ resolve() {
     fi
 
     if [ $OS = 'Mac' ]; then
-      brew list cmake || brew install cmake
-      brew list ninja || brew install ninja
-      brew list gnu-sed || brew install gnu-sed --with-default-names
-      brew list boost || brew install boost --c++11
-      brew list carthage || brew install carthage
-
       # Download Squirrel      
       # Skip carthage update in Jenkins because it hangs...
       # https://github.com/Carthage/Carthage/issues/983
