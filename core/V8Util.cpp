@@ -1,4 +1,4 @@
-#include <vendor/node/src/node_buffer.h>
+#include <node_buffer.h>
 #include <sstream>
 #include <QDebug>
 #include <QLoggingCategory>

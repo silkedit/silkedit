@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.0.2)
 project(SilkEdit VERSION 0.13.1)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
 
+include(${PROJECT_SOURCE_DIR}/conanbuildinfo.cmake)
+
 if(NOT DEFINED QTDIR AND DEFINED ENV{QTDIR})
   set(QTDIR $ENV{QTDIR})
 endif()
@@ -108,11 +110,22 @@ if (APPLE)
     message(FATAL_ERROR "ReactiveCocoa not found")
   endif()
 
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    find_library(NODE_LIBRARY NAMES libnode_debug.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Debug NO_DEFAULT_PATH)
-  else ()
-    find_library(NODE_LIBRARY NAMES libnode.dylib PATHS ${PROJECT_SOURCE_DIR}/vendor/node/out/Release NO_DEFAULT_PATH)
-  endif ()
+  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS ${CONAN_LIB_DIRS_NODE} NO_DEFAULT_PATH)
+  if (NODE_LIBRARY)
+    message(STATUS "NODE_LIBRARY: ${NODE_LIBRARY}")
+  endif()
+  if (NOT NODE_LIBRARY)
+    message(FATAL_ERROR "NODE_LIBRARY not found")
+  endif()
+
+  find_library(YAML_CPP NAMES libyaml-cpp.a PATHS ${CONAN_LIB_DIRS_YAML-CPP})
+  if (YAML_CPP)
+    message(STATUS "YAML_CPP: ${YAML_CPP}")
+  endif()
+  if (NOT YAML_CPP)
+    message(FATAL_ERROR "YAML_CPP not found")
+  endif()
+
 elseif (MSVC)
   add_library(NODE_LIBRARY SHARED IMPORTED)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -161,11 +174,9 @@ if (APPLE)
     src
     widgets/src
     vendor/breakpad/src
-    vendor/node/deps/v8
-    vendor/node/deps/v8/include
-    vendor/node/deps/uv/include
-    vendor/node/deps/cares/include
-    vendor/node/deps/openssl/openssl/include)
+    ${CONAN_INCLUDE_DIRS_NODE}
+    ${CONAN_INCLUDE_DIRS_YAML-CPP}
+    )
 
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_QMLS})
 
@@ -226,7 +237,7 @@ if(APPLE)
                         ${Squirrel}
                         ${Mantle}
                         ${ReactiveCocoa}
-)
+  )
 elseif (MSVC)
   target_link_libraries(${PROJECT_NAME}
                         ${PROJECT_NAME}_widgets
@@ -243,14 +254,14 @@ if(APPLE)
 
   # copy npm
   file(COPY
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/bin/npm-cli.js
+     ${PROJECT_SOURCE_DIR}/vendor/npm/bin/npm-cli.js
      DESTINATION
      ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/npm/bin)
 
   file(COPY
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/lib
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/node_modules
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/package.json
+     ${PROJECT_SOURCE_DIR}/vendor/npm/lib
+     ${PROJECT_SOURCE_DIR}/vendor/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/vendor/npm/package.json
      DESTINATION
      ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources/npm)
 
@@ -318,13 +329,13 @@ elseif (MSVC)
 
   # copy npm
   file(COPY
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/bin/npm-cli.js
+     ${PROJECT_SOURCE_DIR}/vendor/npm/bin/npm-cli.js
      DESTINATION silk_resources/npm/bin)
 
   file(COPY
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/lib
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/node_modules
-     ${PROJECT_SOURCE_DIR}/vendor/node/deps/npm/package.json
+     ${PROJECT_SOURCE_DIR}/vendor/npm/lib
+     ${PROJECT_SOURCE_DIR}/vendor/npm/node_modules
+     ${PROJECT_SOURCE_DIR}/vendor/npm/package.json
      DESTINATION silk_resources/npm)
 
   # Copy onig.dll

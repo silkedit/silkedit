@@ -8,7 +8,7 @@
 #ifdef _WIN32
 #pragma warning(push, 0)
 #endif
-#include <vendor/node/src/node_crypto.h>
+#include <node_crypto.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif
@@ -19,7 +19,7 @@
 
 #ifdef __APPLE__
 #include <unistd.h>
-#include "vendor/node/src/atomic-polyfill.h"  // NOLINT(build/include_order)
+#include "atomic-polyfill.h"  // NOLINT(build/include_order)
 
 namespace node {
 template <typename T>

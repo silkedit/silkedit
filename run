@@ -88,30 +88,25 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # jsdoc
-    npm install -g jsdoc@latest
+    conan install
 
     # Source Han Code JP font
-    if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
-        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Regular.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
-        mkdir -p resources/fonts
-        mv *.otf resources/fonts
-    fi
+    wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/SourceHanCodeJP-Fonts.zip
+    unzip SourceHanCodeJP-Fonts.zip
+    mkdir -p resources/fonts
+    mv SourceHanCodeJP-Fonts/*.otf resources/fonts
+    rm -rf SourceHanCodeJP-Fonts*
 
     if [ $OS = 'Mac' ]; then
-      # Download Squirrel      
-      # Skip carthage update in Jenkins because it hangs...
-      # https://github.com/Carthage/Carthage/issues/983
-      if [[ -z "$JENKINS_URL" ]]; then
-        carthage update
-      fi
+      # Download Squirrel
+      carthage bootstrap --platform Mac
 
       # ICU
       if [ "$1" != '--skip-build' ]; then
         ARCHIVE=icu4c-57_1-src.tgz
         DATA=icudt57l.zip
         wget http://download.icu-project.org/files/icu4c/57.1/${ARCHIVE}
-        wget silksmiths.sakura.ne.jp/files/${DATA}
+        wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/icudt57l.zip
         tar zxvf ${ARCHIVE}
         unzip ${DATA}
         mv icudt57l.dat icu/source/data/in/icudt57l.dat
@@ -136,7 +131,7 @@ resolve() {
       if [ ! -f vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols ]; then
         mkdir -p vendor/bugsplat
         cd vendor/bugsplat
-        wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
+        wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/Breakpad.framework.zip
         unzip -o Breakpad.framework.zip
         rm Breakpad.framework.zip
         cd ../..
@@ -154,17 +149,6 @@ resolve() {
         cd vendor/uchardet
         cmake -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" .
         make && make install
-        cd ../..
-
-        # build libnode.dylib
-        cd vendor/node
-        # Build Release version
-        ./configure --enable-shared
-        make -j8
-        # Build Debug version
-        ./configure --debug --enable-shared
-        make -j8
-        mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
         cd ../..
       fi
 
@@ -239,7 +223,7 @@ resolve() {
           echo 'Downloading ICU...'
           DIR=icu-57.1-vs2015
           ARCHIVE=${DIR}.7z
-          wget http://silksmiths.sakura.ne.jp/files/${ARCHIVE}
+          wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/icu-57.1-vs2015.7z
           7z x ${ARCHIVE}
           rm -rf include/unicode
           mv ${DIR}/include/unicode include
