@@ -8,7 +8,7 @@ class BOMTest : public QObject {
   Q_OBJECT
  private slots:
   void guess() {
-    //BOM 'a' '1'
+    // BOM 'a' '1'
     unsigned char bomon[] = {0xef, 0xbb, 0xbf, 0x61, 0x31};
     QByteArray bytArrBOMOn = QByteArray::fromRawData(reinterpret_cast<char*>(bomon), 5);
     QCOMPARE(BOM::guessBOM(bytArrBOMOn), BOM::getBOM(BOM::BOMSwitch::On));
@@ -25,7 +25,6 @@ class BOMTest : public QObject {
     unsigned char bomUTF16LE[] = {0xff, 0xfe, 0x61, 0x31};
     QByteArray bytArrUTF16LE = QByteArray::fromRawData(reinterpret_cast<char*>(bomUTF16LE), 4);
     QCOMPARE(BOM::guessBOM(bytArrUTF16LE), BOM::getBOM(BOM::BOMSwitch::On));
-
   }
 };
 

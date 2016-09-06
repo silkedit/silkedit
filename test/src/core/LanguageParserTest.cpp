@@ -208,8 +208,7 @@ class LanguageParserTest : public QObject {
     QString text = QStringLiteral(R"(
 #include <QDebug>
 
-#include "App.h")"
-).trimmed();
+#include "App.h")").trimmed();
 
     LanguageParser* parser = LanguageParser::create("source.c++", text);
     auto root = parser->parse();
@@ -225,8 +224,8 @@ class LanguageParserTest : public QObject {
     20-27: "keyword.control.import.include.c" - Data: "include"
     28-35: "string.quoted.double.include.c"
       28-29: "punctuation.definition.string.begin.c" - Data: """
-      34-35: "punctuation.definition.string.end.c" - Data: """)r"
-).trimmed();
+      34-35: "punctuation.definition.string.end.c" - Data: """)r")
+                         .trimmed();
 
     TestUtil::compareLineByLine(root->toString(text), result);
   }
@@ -256,7 +255,8 @@ class LanguageParserTest : public QObject {
         19-20: "punctuation.whitespace.function.leading.c" - Data: " "
         20-23: "entity.name.function.c" - Data: "foo"
         23-25: "meta.parens.c" - Data: "()"
-      27-28: "punctuation.definition.invalid.c++" - Data: "}")r").trimmed();
+      27-28: "punctuation.definition.invalid.c++" - Data: "}")r")
+                         .trimmed();
 
     TestUtil::compareLineByLine(root->toString(text), result);
   }
@@ -456,7 +456,7 @@ WHERE email = <%= quote @email %>)";
 
     LanguageParser* parser = LanguageParser::create("source.yaml", text);
     auto root = parser->parse();
-//    qDebug().noquote() << root->toString();
+    //    qDebug().noquote() << root->toString();
 
     QString result = R"r(0-55: "source.yaml"
   0-2: "string.unquoted.yaml"
@@ -521,7 +521,8 @@ WHERE email = <%= quote @email %>)";
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
-    QString text = u8R"(json = <<EOS # コーテーション無しでもOK
+    QString text =
+        u8R"(json = <<EOS # コーテーション無しでもOK
 {
   "#{lang}": "#{RUBY}"
 }
@@ -660,9 +661,10 @@ a)";
     //    qDebug().noquote() << root->toString();
 
     // If we use raw string, it gives a compilation error...
-    QString result = "0-8: \"source.css\"\n"
-"  0-8: \"comment.block.css\"\n"
-"    0-2: \"punctuation.definition.comment.css\" - Data: \"/*\"";
+    QString result =
+        "0-8: \"source.css\"\n"
+        "  0-8: \"comment.block.css\"\n"
+        "    0-2: \"punctuation.definition.comment.css\" - Data: \"/*\"";
 
     TestUtil::compareLineByLine(root->toString(text), result);
   }

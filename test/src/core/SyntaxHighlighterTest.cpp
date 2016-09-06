@@ -209,7 +209,8 @@ StatusBar QComboBox::down-arrow {
     QVERIFY(resFile.open(QIODevice::ReadOnly | QIODevice::Text));
 
     QTextStream resIn(&resFile);
-    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resIn.readAll());
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()),
+                                resIn.readAll());
 
     cursor.insertText("{");
     highlighter.updateNode(32, 0, 1);
@@ -264,7 +265,7 @@ StatusBar QComboBox::down-arrow {
     Theme* monokai = Theme::loadTheme("testdata/Monokai.tmTheme");
     QVERIFY(monokai);
     Config::singleton().setTheme(monokai, true);
-//    qDebug().noquote() << highlighter.asHtml();
+    //    qDebug().noquote() << highlighter.asHtml();
 
     QFile output("testdata/highlighter_test/changeThemeTestResult.html");
     QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
@@ -291,7 +292,8 @@ StatusBar QComboBox::down-arrow {
     QFile output("testdata/highlighter_test/cppHighlightTestInput.res");
     QVERIFY(output.open(QIODevice::ReadOnly | QIODevice::Text));
     QTextStream resInOutput(&output);
-    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resInOutput.readAll());
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()),
+                                resInOutput.readAll());
 
     QTextCursor cursor(&doc);
     cursor.deleteChar();
@@ -472,7 +474,8 @@ StatusBar QComboBox::down-arrow {
       41-42: "punctuation.definition.string.begin.c" - Data: """
       47-48: "punctuation.definition.string.end.c" - Data: """
 )").trimmed();
-    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultBeforeReplace);
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()),
+                                resultBeforeReplace);
 
     QTextCursor cursor(&doc);
     cursor.beginEditBlock();
@@ -499,14 +502,16 @@ StatusBar QComboBox::down-arrow {
     33-34: "punctuation.definition.string.begin.c" - Data: """
     39-40: "punctuation.definition.string.end.c" - Data: """
 )r").trimmed();
-    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultAfterReplace);
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()),
+                                resultAfterReplace);
 
     // When
     doc.undo();
     highlighter.updateNode(13, 19, 27);
     QVERIFY(spy.wait());
 
-    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()), resultBeforeReplace);
+    TestUtil::compareLineByLine(highlighter.rootNode().toString(doc.toPlainText()),
+                                resultBeforeReplace);
   }
 };
 

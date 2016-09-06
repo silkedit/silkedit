@@ -2,7 +2,7 @@
 
 #include "TestUtil.h"
 
-void TestUtil::compareLineByLine(const QString &str1, const QString &str2) {
+void TestUtil::compareLineByLine(const QString& str1, const QString& str2) {
   QStringList list1 = str1.trimmed().split('\n');
   QStringList list2 = str2.trimmed().split('\n');
   if (str1.trimmed().size() != str2.trimmed().size()) {

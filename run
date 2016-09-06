@@ -450,17 +450,18 @@ analyze() {
     rm -rf $tmpFile
 }
 
-run_tests() {
+run_ctest() {
+    TARGET=$1
     cd build
     if [ $OS = 'Mac' ]; then
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
         if [ -f build.ninja ]; then
-            ninja unit_test
-            ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+            ninja $TARGET
+            ctest --output-on-failure --no-compress-output -L $TARGET
         fi
     else
-        ../build.bat $VCVARSALL_ARG unit_test
-        ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+        ../build.bat $VCVARSALL_ARG $TARGET
+        ctest --output-on-failure --no-compress-output -L $TARGET
     fi
 }
 
@@ -538,6 +539,10 @@ case "$1" in
         analyze
         echo
         ;;
+    benchmark)
+        run_ctest benchmark
+        echo
+        ;;
     build)
         build $2
         echo
@@ -565,7 +570,7 @@ case "$1" in
         echo
         ;;
     test)
-        run_tests
+        run_ctest unit_test
         echo
         ;;
     set_version)
@@ -597,6 +602,7 @@ case "$1" in
 
         cat << EOF
 analyze        static analysis
+benchmark      run benchmarks
 build          build an app and an installer (--edge: Edge build)
 clean          clean build dir
 format         format sources

@@ -46,8 +46,10 @@ ccc)";
   }
 
   void selectGrammerFromExtension() {
-    const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage", "testdata/grammers/Rails/HTML (Rails).plist",
-                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage", "testdata/grammers/Makefile.plist"});
+    const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage",
+                                  "testdata/grammers/Rails/HTML (Rails).plist",
+                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage",
+                                  "testdata/grammers/Makefile.plist"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
@@ -88,8 +90,10 @@ ccc)";
   }
 
   void setLanguage() {
-    const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage", "testdata/grammers/Rails/HTML (Rails).plist",
-                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage", "testdata/grammers/Makefile.plist"});
+    const QVector<QString> files({"testdata/grammers/Plain text.tmLanguage",
+                                  "testdata/grammers/Rails/HTML (Rails).plist",
+                                  "testdata/grammers/Rails/JavaScript (Rails).tmLanguage",
+                                  "testdata/grammers/Makefile.plist"});
 
     foreach (QString fn, files) { QVERIFY(LanguageProvider::loadLanguage(fn)); }
 
