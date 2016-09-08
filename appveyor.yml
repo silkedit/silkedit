@@ -17,10 +17,7 @@ init:
 
 install:
   - appveyor-retry choco install jom InnoSetup
-  - jom -version
-  - iscc /?
   - npm install -g npm
-  - npm --version
   - 'git clone https://chromium.googlesource.com/external/gyp & cd gyp & %PYTHON%/python setup.py install & cd ..'
   - 'pip install conan'
   - '%MSYS2_ROOT%\usr\bin\bash -lc "pacman -S unzip --noconfirm && cd \"$OLDPWD\" && ./run resolve && npm run minify"'
