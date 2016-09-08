@@ -1,0 +1,32 @@
+platform:
+  - x64
+
+environment:
+  global:
+    MSYS2_ROOT: C:\msys64
+    BOOST_ROOT: C:\Libraries\boost_1_60_0
+    PYTHON: C:\Python27-x64
+    PATH: '%PYTHON%\Scripts;%QTDIR%\bin;%PROGRAMFILES(x86)%\Inno Setup 5;/C/ProgramData/chocolatey/lib/jom/tools;%PATH%'
+  matrix:
+    -
+      QTDIR: C:\Qt\5.6\msvc2015_64
+
+init:
+  - 'echo System architecture: %PLATFORM%'
+  - 'set PATH=%PYTHON%\Scripts;%PATH%'
+
+install:
+  - appveyor-retry choco install jom InnoSetup
+  - jom -version
+  - iscc /?
+  - npm install -g npm
+  - npm --version
+  - 'git clone https://chromium.googlesource.com/external/gyp & cd gyp & %PYTHON%/python setup.py install & cd ..'
+  - 'pip install conan'
+  - '%MSYS2_ROOT%\usr\bin\bash -lc "pacman -S unzip --noconfirm && cd \"$OLDPWD\" && ./run resolve && npm run minify"'
+
+build_script:
+  - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run build --edge && ./run make_installer --edge"'
+
+test_script:
+  - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run test"'

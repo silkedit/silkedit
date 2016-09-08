@@ -74,6 +74,22 @@ find_package(Qt5Quick REQUIRED)
 find_package(Qt5QuickWidgets REQUIRED)
 find_package(Boost REQUIRED)
 
+  find_library(NODE_LIBRARY NAMES ${CONAN_LIBS_NODE} PATHS ${CONAN_LIB_DIRS_NODE} NO_DEFAULT_PATH)
+  if (NODE_LIBRARY)
+    message(STATUS "NODE_LIBRARY: ${NODE_LIBRARY}")
+  endif()
+  if (NOT NODE_LIBRARY)
+    message(FATAL_ERROR "NODE_LIBRARY not found")
+  endif()
+
+  find_library(YAML_CPP NAMES ${CONAN_LIBS_YAML-CPP} PATHS ${CONAN_LIB_DIRS_YAML-CPP})
+  if (YAML_CPP)
+    message(STATUS "YAML_CPP: ${YAML_CPP}")
+  endif()
+  if (NOT YAML_CPP)
+    message(FATAL_ERROR "YAML_CPP not found")
+  endif()
+
 if (APPLE)
   set( BREAKPAD_LIBS "vendor/breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
   find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
@@ -110,31 +126,6 @@ if (APPLE)
     message(FATAL_ERROR "ReactiveCocoa not found")
   endif()
 
-  find_library(NODE_LIBRARY NAMES libnode.dylib PATHS ${CONAN_LIB_DIRS_NODE} NO_DEFAULT_PATH)
-  if (NODE_LIBRARY)
-    message(STATUS "NODE_LIBRARY: ${NODE_LIBRARY}")
-  endif()
-  if (NOT NODE_LIBRARY)
-    message(FATAL_ERROR "NODE_LIBRARY not found")
-  endif()
-
-  find_library(YAML_CPP NAMES libyaml-cpp.a PATHS ${CONAN_LIB_DIRS_YAML-CPP})
-  if (YAML_CPP)
-    message(STATUS "YAML_CPP: ${YAML_CPP}")
-  endif()
-  if (NOT YAML_CPP)
-    message(FATAL_ERROR "YAML_CPP not found")
-  endif()
-
-elseif (MSVC)
-  add_library(NODE_LIBRARY SHARED IMPORTED)
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll)
-    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.lib)
-  else ()
-    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll)
-    set_property(TARGET NODE_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.lib)
-  endif ()
 endif ()
 
 qt5_add_translation(QM_FILES ${SILK_TRANSLATIONS})
@@ -205,11 +196,8 @@ elseif (MSVC)
     widgets/src
     ${Boost_INCLUDE_DIRS}
     vendor/breakpad/src
-    vendor/node/deps/v8
-    vendor/node/deps/v8/include
-    vendor/node/deps/uv/include
-    vendor/node/deps/cares/include
-    vendor/node/deps/openssl/openssl/include
+    ${CONAN_INCLUDE_DIRS_NODE}
+    ${CONAN_INCLUDE_DIRS_YAML-CPP}
   )
   link_directories(${PROJECT_SOURCE_DIR}/lib)
 
@@ -345,12 +333,12 @@ elseif (MSVC)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll DESTINATION .)
   else ()
-    file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Release/node.dll DESTINATION .)
+    file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
   endif ()
 
   # Copy pdb
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    file(COPY "${PROJECT_SOURCE_DIR}/lib/yaml-cpp static md.pdb" DESTINATION .)
+#    file(COPY "${PROJECT_SOURCE_DIR}/lib/yaml-cpp static md.pdb" DESTINATION .)
     file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
   endif()
 

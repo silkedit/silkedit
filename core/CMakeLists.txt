@@ -1,4 +1,4 @@
-﻿set(MODULE_NAME ${PROJECT_NAME}_core)
+set(MODULE_NAME ${PROJECT_NAME}_core)
 
 if (MSVC)
   # ICU requires this when linking with a static one
@@ -44,10 +44,6 @@ if (APPLE)
 
   )
 elseif (MSVC)
-  add_library(YAML_CPP_LIBRARY STATIC IMPORTED)
-  set_property(TARGET YAML_CPP_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/libyaml-cppmd.lib)
-  set_property(TARGET YAML_CPP_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/libyaml-cppmdd.lib)
-
   add_library(UCHARDET_LIBRARY STATIC IMPORTED)
   set_property(TARGET UCHARDET_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/uchardet/Release/uchardet.lib)
   set_property(TARGET UCHARDET_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/uchardet/Debug/uchardet.lib)
@@ -70,8 +66,8 @@ elseif (MSVC)
                         Qt5::Xml
                         ONIG_LIBRARY
                         UCHARDET_LIBRARY
-                        YAML_CPP
-                        NODE_LIBRARY
+                        ${YAML_CPP}
+                        ${NODE_LIBRARY}
                         ICUUC_LIBRARY
                         ICUDATA_LIBRARY
   )
