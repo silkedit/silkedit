@@ -37,7 +37,6 @@ using core::BOM;
 using core::Region;
 using core::Util;
 
-
 namespace {
 const QString DEFAULT_SCOPE = "text.plain";
 
@@ -460,13 +459,11 @@ QString TextEditView::path() {
   return d_ptr->m_document ? d_ptr->m_document->path() : "";
 }
 
-void TextEditView::setTextCursor(const QTextCursor &cursor)
-{
+void TextEditView::setTextCursor(const QTextCursor& cursor) {
   QPlainTextEdit::setTextCursor(cursor);
 }
 
-QTextCursor TextEditView::textCursor() const
-{
+QTextCursor TextEditView::textCursor() const {
   return QPlainTextEdit::textCursor();
 }
 

@@ -88,43 +88,43 @@ clean() {
 
 # resolve dependency
 resolve() {
-    # Clean node modules
-    git clean -dfx jslib packages
-
-    # Update submodules
-    git submodule sync
     git submodule update --init
 
-    # jsdoc
-    npm install -g jsdoc@latest
+    conan install
 
     # Source Han Code JP font
-    if [ ! -f resources/fonts/SourceHanCodeJP-Normal.otf ]; then
-        wget silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Normal.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Regular.otf silksmiths.sakura.ne.jp/files/SourceHanCodeJP-Bold.otf
-        mkdir -p resources/fonts
-        mv *.otf resources/fonts
-    fi
+    ARCHIVE=SourceHanCodeJP-Fonts.zip
+    curl -fsSL -o ${ARCHIVE} https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ARCHIVE}
+    unzip SourceHanCodeJP-Fonts.zip
+    mkdir -p resources/fonts
+    mv SourceHanCodeJP-Fonts/*.otf resources/fonts
+    rm -rf SourceHanCodeJP-Fonts*
+    
+    # npm install for minifying JS
+    npm install --force
+
+    # npm install for bundled packages
+    cd packages
+    npm install --production
+    cd ..
+
+    # npm install for silkedit package
+    cd jslib/node_modules/silkedit
+    npm install --production
+    # remove syntax-error's test and example codes because they cause SyntaxError when uglifying
+    rm -rf node_modules/syntax-error/test node_modules/syntax-error/example
+    cd ../../..
 
     if [ $OS = 'Mac' ]; then
-      brew list cmake || brew install cmake
-      brew list ninja || brew install ninja
-      brew list gnu-sed || brew install gnu-sed --with-default-names
-      brew list boost || brew install boost --c++11
-      brew list carthage || brew install carthage
-
-      # Download Squirrel      
-      # Skip carthage update in Jenkins because it hangs...
-      # https://github.com/Carthage/Carthage/issues/983
-      if [[ -z "$JENKINS_URL" ]]; then
-        carthage update
-      fi
+      # Download Squirrel
+      carthage bootstrap --platform Mac
 
       # ICU
       if [ "$1" != '--skip-build' ]; then
         ARCHIVE=icu4c-57_1-src.tgz
         DATA=icudt57l.zip
         wget http://download.icu-project.org/files/icu4c/57.1/${ARCHIVE}
-        wget silksmiths.sakura.ne.jp/files/${DATA}
+        wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/icudt57l.zip
         tar zxvf ${ARCHIVE}
         unzip ${DATA}
         mv icudt57l.dat icu/source/data/in/icudt57l.dat
@@ -149,7 +149,7 @@ resolve() {
       if [ ! -f vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols ]; then
         mkdir -p vendor/bugsplat
         cd vendor/bugsplat
-        wget http://silksmiths.sakura.ne.jp/files/Breakpad.framework.zip
+        wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/Breakpad.framework.zip
         unzip -o Breakpad.framework.zip
         rm Breakpad.framework.zip
         cd ../..
@@ -162,75 +162,15 @@ resolve() {
         ./configure && make && make install
         cd ../..
 
-        # yaml-cpp
-        echo 'Building yaml-cpp...'
-        cd vendor/yaml-cpp
-        rm -rf build && mkdir build && cd build
-        # needs to link with libc++
-        # https://github.com/jbeder/yaml-cpp/issues/211
-        cmake -G Ninja -DBUILD_SHARED_LIBS=OFF -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" ..
-        ninja && ninja install
-        cd ../../..
-
         # uchardet
         echo 'Building uchardet...'
         cd vendor/uchardet
         cmake -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" .
         make && make install
         cd ../..
-
-        # build libnode.dylib
-        cd vendor/node
-        # Build Release version
-        ./configure --enable-shared
-        make -j8
-        # Build Debug version
-        ./configure --debug --enable-shared
-        make -j8
-        mv out/Debug/libnode.dylib out/Debug/libnode_debug.dylib
-        cd ../..
       fi
 
     else
-        # yaml-cpp
-        if [ "$1" != '--skip-build' ]; then
-            echo 'Building yaml-cpp ...'
-            wget https://yaml-cpp.googlecode.com/files/yaml-cpp-0.5.1.tar.gz --no-check-certificate
-            tar zxf yaml-cpp-0.5.1.tar.gz
-            cd yaml-cpp-0.5.1
-
-            # apply a patch to fix an issue of CMakeLists.txt
-            wget http://silksmiths.sakura.ne.jp/files/yaml-cpp/CMakeLists.txt.patch
-            patch < CMakeLists.txt.patch
-
-            # apply a patch to fix a compile error https://code.google.com/p/yaml-cpp/issues/detail?id=276&colspec=ID%20Type%20Status%20Priority%20Milestone%20Component%20Owner%20Summary
-            cd src
-            wget http://silksmiths.sakura.ne.jp/files/yaml-cpp/ostream_wrapper.patch
-            patch < ostream_wrapper.patch
-            cd ..
-
-            ensure_dir build
-            cd build
-            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=../.. ..
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
-            msbuild.exe INSTALL.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
-            msbuild.exe INSTALL.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
-            cp './yaml-cpp.dir/Debug/yaml-cpp static md.pdb' ../../lib
-            cd ../..
-            rm -rf yaml-cpp-*
-        fi
-
-  			# build node.dll
-        if [ "$1" != '--skip-build' ]; then
-          cd vendor/node
-          # Build Release version
-          ./vcbuild.bat nosign shared ${ARCH}
-          # Build Debug version
-          ./vcbuild.bat nosign shared debug ${ARCH}
-          cd ../..
-        fi
-
         # uchardet
         if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
             echo 'Building uchardet ...'
@@ -262,7 +202,7 @@ resolve() {
           echo 'Downloading ICU...'
           DIR=icu-57.1-vs2015
           ARCHIVE=${DIR}.7z
-          wget http://silksmiths.sakura.ne.jp/files/${ARCHIVE}
+          curl -fsSL -o ${ARCHIVE} https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ARCHIVE}
           7z x ${ARCHIVE}
           rm -rf include/unicode
           mv ${DIR}/include/unicode include
@@ -322,21 +262,6 @@ resolve() {
 			cd ../..
 		fi
     fi
-
-    # npm install for minifying JS
-    npm install
-
-    # npm install for bundled packages
-    cd packages
-    npm install --production
-    cd ..
-
-    # npm install for silkedit package
-    cd jslib/node_modules/silkedit
-    npm install --production
-    # remove syntax-error's test and example codes because they cause SyntaxError when uglifying
-    rm -rf node_modules/syntax-error/test node_modules/syntax-error/example
-    cd ../../..
 }
 
 minify() {
@@ -489,17 +414,18 @@ analyze() {
     rm -rf $tmpFile
 }
 
-run_tests() {
+run_ctest() {
+    TARGET=$1
     cd build
     if [ $OS = 'Mac' ]; then
         cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -G Ninja .. -DCMAKE_BUILD_TYPE=Debug
         if [ -f build.ninja ]; then
-            ninja unit_test
-            ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+            ninja $TARGET
+            ctest --output-on-failure --no-compress-output -L $TARGET
         fi
     else
-        ../build.bat $VCVARSALL_ARG unit_test
-        ctest --output-on-failure --no-compress-output -T Test || /usr/bin/true
+        ../build.bat $VCVARSALL_ARG $TARGET
+        ctest --output-on-failure --no-compress-output -L $TARGET
     fi
 }
 
@@ -577,6 +503,10 @@ case "$1" in
         analyze
         echo
         ;;
+    benchmark)
+        run_ctest benchmark
+        echo
+        ;;
     build)
         build $2
         echo
@@ -604,7 +534,7 @@ case "$1" in
         echo
         ;;
     test)
-        run_tests
+        run_ctest unit_test
         echo
         ;;
     set_version)
@@ -636,6 +566,7 @@ case "$1" in
 
         cat << EOF
 analyze        static analysis
+benchmark      run benchmarks
 build          build an app and an installer (--edge: Edge build)
 clean          clean build dir
 format         format sources

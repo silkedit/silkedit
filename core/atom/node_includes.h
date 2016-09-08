@@ -28,11 +28,11 @@
 #ifdef _WIN32
 #pragma warning(push, 0)
 #endif
-#include <vendor/node/src/env.h>
-#include <vendor/node/src/env-inl.h>
-#include <vendor/node/src/node.h>
-#include <vendor/node/src/node_buffer.h>
-#include <vendor/node/src/node_internals.h>
+#include <env.h>
+#include <env-inl.h>
+#include <node.h>
+#include <node_buffer.h>
+#include <node_internals.h>
 #ifdef _WIN32
 #pragma warning(pop)
 #endif

@@ -7,7 +7,7 @@
 #include <windows.h>
 
 extern "C" {
-#include "vendor/node/deps/uv/src/win/internal.h"
+#include "../src/win/internal.h"
 }
 
 namespace atom {

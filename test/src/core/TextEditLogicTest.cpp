@@ -27,7 +27,7 @@ class TextEditLogicTest : public QObject {
     // When
     bool result =
         TextEditLogic::isOutdentNecessary(increaseIndentPattern.get(), decreaseIndentPattern.get(),
-                                              currentLineText, prevLineText, atBlockEnd, tabWidth);
+                                          currentLineText, prevLineText, atBlockEnd, tabWidth);
     // Then
     QVERIFY(result);
   }
@@ -112,8 +112,8 @@ class TextEditLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
-                                         false, tabWidth);
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata, false,
+                                     tabWidth);
 
     // Then
     // Current line should be indented.
@@ -141,8 +141,8 @@ class TextEditLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
-                                         false, tabWidth);
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata, false,
+                                     tabWidth);
 
     // Then
     // Current line should NOT be indented.
@@ -171,8 +171,8 @@ class TextEditLogicTest : public QObject {
     Metadata* metadata = Metadata::get("source.c++");
 
     // When
-    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
-                                         false, tabWidth);
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata, false,
+                                     tabWidth);
 
     // Then
     // Current line should be indented.
@@ -198,8 +198,8 @@ class TextEditLogicTest : public QObject {
     Metadata* metadata = nullptr;
 
     // When
-    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata,
-                                         false, tabWidth);
+    TextEditLogic::indentCurrentLine(&doc, cursor, prevLineText, prevPrevLineText, metadata, false,
+                                     tabWidth);
 
     // Then
     // Current line should be aligned with the previous line.

@@ -11,7 +11,7 @@ class RegexpTest : public QObject {
   void compile() {
     std::unique_ptr<Regexp> reg;
     for (int i = 0; i < 100; i++) {
-      reg = std::move(Regexp::compile(R"((?x)
+      reg = Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -22,12 +22,12 @@ class RegexpTest : public QObject {
                                             (?:\.\.\.)?          # varargs ellipsis?
                                         )
                                     (\))                         # a close parenthesis
-                                )?)"));
+                                )?)");
       QVERIFY(reg.get());
     }
 
     // This includes invalid \? pattern
-    reg = std::move(Regexp::compile(R"((?x)
+    reg = Regexp::compile(R"((?x)
                                 ^\s*\#\s*(define)\s+             # define
                                 ((\?<id>[a-zA-Z_][a-zA-Z0-9_]*))  # macro name
                                 (?:                              # and optionally:
@@ -38,7 +38,7 @@ class RegexpTest : public QObject {
                                             (?:\.\.\.)?          # varargs ellipsis?
                                         )
                                     (\))                         # a close parenthesis
-                                )?)"));
+                                )?)");
     QVERIFY(!reg.get());
   }
 
@@ -135,7 +135,7 @@ axb-)";
   }
 
   void findStringSubmatchIndexInSurrogatePairString() {
-    auto reg = Regexp::compile(u8R"(𩸽う)"); // 𩸽 U+29E3D
+    auto reg = Regexp::compile(u8R"(𩸽う)");  // 𩸽 U+29E3D
     QString str = u8R"(あい𩸽うえお)";
     auto indices = reg->findStringSubmatchIndex(str);
     QVERIFY(!indices.isEmpty());
@@ -172,7 +172,8 @@ axb-)";
 
   void findAllStringSubmatchIndexForBOL() {
     auto reg = Regexp::compile(R"(^)");
-    QString str = u8R"(あああ
+    QString str =
+        u8R"(あああ
 いいい
 ううう)";
     auto indices = reg->findAllStringSubmatchIndex(str);
@@ -185,7 +186,8 @@ axb-)";
 
   void findAllStringSubmatchIndexForBOLInRegion() {
     auto reg = Regexp::compile(R"(^)");
-    QString str = u8R"(あああ
+    QString str =
+        u8R"(あああ
 いいい
 ううう)";
     auto indices = reg->findAllStringSubmatchIndex(str, 1, 6);

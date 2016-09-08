@@ -1,0 +1,6 @@
+[requires]
+yaml-cpp/0.5.3@moonforged/stable
+node/6.1.0@silkedit/stable
+
+[generators]
+cmake
