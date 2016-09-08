@@ -1,17 +1,4 @@
-### ポインタ
+# SilkEdit
 
-C++11のunique_ptr<T> shared_ptr<T> weak_ptr<T>を適切に使う。
-
-http://qiita.com/hmito/items/db3b14917120b285112f
-
-### Build ###
-
-```sh
-./run build
-```
-
-### Clean ###
-
-```sh
-./run clean
-```
+[![Build Status](https://travis-ci.org/silkedit/silkedit.svg?branch=travis)](https://travis-ci.org/silkedit/silkedit)
+[![Build status](https://ci.appveyor.com/api/projects/status/2not2atlf4v17r2s?svg=true)](https://ci.appveyor.com/project/shinichy/silkedit)
