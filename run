@@ -163,31 +163,9 @@ resolve() {
         cd vendor/Onigmo
         ./configure && make && make install
         cd ../..
-
-        # uchardet
-        echo 'Building uchardet...'
-        cd vendor/uchardet
-        cmake -DCMAKE_OSX_SYSROOT=${SDK_PATH} -DCMAKE_CXX_FLAGS="-stdlib=libc++" .
-        make && make install
-        cd ../..
       fi
 
     else
-        # uchardet
-        if [ ! -f lib/uchardet/Release/uchardet.lib ]; then
-            echo 'Building uchardet ...'
-            cd vendor/uchardet
-            cmake -G "$MSVC" -DCMAKE_INSTALL_PREFIX=..
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Release //p:VisualStudioVersion=$VisualStudioVersion
-            msbuild.exe ALL_BUILD.vcxproj //p:Configuration=Debug //p:VisualStudioVersion=$VisualStudioVersion
-            mkdir -p ../../lib/uchardet
-            cp -r src/Release ../../lib/uchardet
-            cp -r src/Debug ../../lib/uchardet
-            mkdir -p ../../include/uchardet
-            cp src/uchardet.h ../../include/uchardet
-            cd ../..
-        fi
-
         # Onigmo
         if [ "$1" != '--skip-build' ]; then
           echo 'Building Onigmo...'
