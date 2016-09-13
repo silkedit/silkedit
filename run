@@ -12,25 +12,27 @@ if [ "$(uname)" = 'Darwin' ]; then
   OS='Mac'
   SDK_PATH=`xcrun --show-sdk-path`
   export MACOSX_DEPLOYMENT_TARGET=10.8
+  CONAN_ARCH=x86_64
 elif [ "$(expr substr $(uname -s) 1 5)" = 'Linux' ]; then
   OS='Linux'
 elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
-  if [ "$(uname -m)" = "x86_64" ]; then
+  if [ "$Platform" = "x64" ]; then
     OS='Win64'
     MSVC="Visual Studio 14 2015 Win64"
-    PROGRAM_FILES="$(env | awk -F= '$1=="ProgramFiles(x86)"{print $2}')"
     ONIG_BUILD_BAT='"%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
     VCVARSALL_ARG=amd64
     ARCH=x64
+    CONAN_ARCH=x86_64
   else
     OS='Win32'
     MSVC="Visual Studio 14 2015"
-    PROGRAM_FILES="$PROGRAMFILES"
-    ONIG_BUILD_BAT='"%PROGRAMFILES%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "%PROGRAMFILES%\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    ONIG_BUILD_BAT='"%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
     VCVARSALL_ARG=x86
     ARCH=x86
+    CONAN_ARCH=x86
   fi
 
+  PROGRAM_FILES="$(env | awk -F= '$1=="ProgramFiles(x86)"{print $2}')"
   UCRT_DIR="$PROGRAM_FILES/Windows Kits\10\Redist\ucrt\DLLs/$ARCH"
   VCRT_DIR="$PROGRAM_FILES/Microsoft Visual Studio 14.0/VC/redist/$ARCH/Microsoft.VC140.CRT"
   VisualStudioVersion=14.0
@@ -90,7 +92,7 @@ clean() {
 resolve() {
     git submodule update --init
 
-    conan install
+    conan install -s arch=$CONAN_ARCH
 
     # Source Han Code JP font
     ARCHIVE=SourceHanCodeJP-Fonts.zip
