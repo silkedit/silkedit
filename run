@@ -166,6 +166,8 @@ resolve() {
       fi
 
     else
+        mkdir -p lib include
+
         # Onigmo
         if [ "$1" != '--skip-build' ]; then
           echo 'Building Onigmo...'

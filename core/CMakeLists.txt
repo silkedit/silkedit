@@ -64,7 +64,7 @@ elseif (MSVC)
                         Qt5::Widgets
                         Qt5::Xml
                         ONIG_LIBRARY
-                        {UCHARDET}
+                        ${UCHARDET}
                         ${YAML_CPP}
                         ${NODE_LIBRARY}
                         ICUUC_LIBRARY
