@@ -90,6 +90,14 @@ find_package(Boost REQUIRED)
     message(FATAL_ERROR "YAML_CPP not found")
   endif()
 
+  find_library(UCHARDET NAMES ${CONAN_LIBS_UCHARDET} PATHS ${CONAN_LIB_DIRS_UCHARDET})
+  if (UCHARDET)
+    message(STATUS "UCHARDET: ${UCHARDET}")
+  endif()
+  if (NOT UCHARDET)
+    message(FATAL_ERROR "UCHARDET not found")
+  endif()
+
 if (APPLE)
   set( BREAKPAD_LIBS "vendor/breakpad/src/client/mac/build/${CMAKE_BUILD_TYPE}")
   find_library(Breakpad Breakpad PATHS ${BREAKPAD_LIBS})
@@ -167,6 +175,7 @@ if (APPLE)
     vendor/breakpad/src
     ${CONAN_INCLUDE_DIRS_NODE}
     ${CONAN_INCLUDE_DIRS_YAML-CPP}
+    ${CONAN_INCLUDE_DIRS_UCHARDET}
     )
 
   add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${SILK_SOURCES} ${SILK_HEADERS} ${SILK_RESOURCES} ${QM_FILES} ${SILK_QMLS})
@@ -198,6 +207,7 @@ elseif (MSVC)
     vendor/breakpad/src
     ${CONAN_INCLUDE_DIRS_NODE}
     ${CONAN_INCLUDE_DIRS_YAML-CPP}
+    ${CONAN_INCLUDE_DIRS_UCHARDET}
   )
   link_directories(${PROJECT_SOURCE_DIR}/lib)
 

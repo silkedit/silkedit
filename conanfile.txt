@@ -1,6 +1,7 @@
 [requires]
 yaml-cpp/0.5.3@moonforged/stable
 node/6.1.0@silkedit/stable
+uchardet/0.0.6@silkedit/stable
 
 [generators]
 cmake
