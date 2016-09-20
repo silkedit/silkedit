@@ -4,8 +4,12 @@ CMakeLists.txt.user
 .idea/
 *.otf
 *.node
-conanbuildinfo.cmake
-conaninfo.txt
+/conanbuildinfo.cmake
+/conaninfo.txt
+/activate.sh
+/activate.bat
+/deactivate.sh
+/deactivate.bat
 
 /vendor/bugsplat/
 /build/
