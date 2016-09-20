@@ -101,7 +101,7 @@ resolve() {
     mkdir -p resources/fonts
     mv SourceHanCodeJP-Fonts/*.otf resources/fonts
     rm -rf SourceHanCodeJP-Fonts*
-    
+
     # npm install for minifying JS
     npm install --force
 
@@ -135,16 +135,6 @@ resolve() {
         make -j8 && make install
         cd ../..
         rm -rf ${ARCHIVE} ${DATA} icu
-      fi
-
-      # breakpad
-      if [ "$1" != '--skip-build' ]; then
-        echo 'Building Breakpad client ...'
-
-        cd vendor/breakpad
-        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Debug
-        xcodebuild -project ./src/client/mac/Breakpad.xcodeproj -sdk macosx -target Breakpad ARCHS=x86_64 GCC_VERSION=com.apple.compilers.llvm.clang.1_0 OTHER_CFLAGS=-stdlib=libc++ OTHER_LDFLAGS=-stdlib=libc++ ONLY_ACTIVE_ARCH=YES -configuration Release
-        cd ../..
       fi
 
       # Download BugSplat breakpad to send a symbol using dump_sdk_symbols (symupload can't be built on Mac)
@@ -201,48 +191,6 @@ resolve() {
           rm -rf ${DIR}*
         fi
 
-		#breakpad
-		if [ ! -f lib/breakpad/Release/common.lib ]; then
-			echo 'Building Breakpad client ...'
-
-			cd vendor/breakpad
-			patch -p1 --binary -N < ../../crashreporter/patch/breakpad_googletest_include.h.patch
-			patch -p1 --binary -N < ../../crashreporter/patch/symbolic_constants_win.cc.patch
-			patch -p1 --binary -N < ../../crashreporter/patch/common.gypi.patch
-
-			gyp --no-circular-check -G msvs_version=2015 -D win_release_RuntimeLibrary=2 -D win_debug_RuntimeLibrary=3 ./src/client/windows/breakpad_client.gyp
-
-      # //p:TreatWarningAsError=false //p:DisableSpecificWarnings=4091 //p:RuntimeLibrary=MultiThreadedDebugDLL
-      mkdir -p ../../lib/breakpad/Debug
-			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
-			cp ./src/client/windows/Debug/lib/common.lib ./src/client/windows/Debug
-			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
-			cp ./src/client/windows/handler/Debug/lib/exception_handler.lib ./src/client/windows/Debug
-			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
-			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_client.lib ./src/client/windows/Debug
-			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
-			cp ./src/client/windows/crash_generation/Debug/lib/crash_generation_server.lib ./src/client/windows/Debug
-			MSBuild.exe //p:Configuration="Debug" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
-			cp ./src/client/windows/sender/Debug/lib/crash_report_sender.lib ./src/client/windows/Debug
-
-      cp ./src/client/windows/Debug/common.lib ./src/client/windows/Debug/exception_handler.lib ./src/client/windows/Debug/crash_generation_client.lib ./src/client/windows/Debug/crash_generation_server.lib ./src/client/windows/Debug/crash_report_sender.lib ../../lib/breakpad/Debug/
-
-      mkdir -p ../../lib/breakpad/Release
-			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/common.vcxproj
-			cp ./src/client/windows/Release/lib/common.lib ./src/client/windows/Release
-			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/handler/exception_handler.vcxproj
-			cp ./src/client/windows/handler/Release/lib/exception_handler.lib ./src/client/windows/Release
-			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_client.vcxproj
-			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_client.lib ./src/client/windows/Release
-			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/crash_generation/crash_generation_server.vcxproj
-			cp ./src/client/windows/crash_generation/Release/lib/crash_generation_server.lib ./src/client/windows/Release
-			MSBuild.exe //p:Configuration="Release" //p:VisualStudioVersion=$VisualStudioVersion //p:Platform=$ARCH ./src/client/windows/sender/crash_report_sender.vcxproj
-			cp ./src/client/windows/sender/Release/lib/crash_report_sender.lib ./src/client/windows/Release
-
-      cp ./src/client/windows/Release/common.lib ./src/client/windows/Release/exception_handler.lib ./src/client/windows/Release/crash_generation_client.lib ./src/client/windows/Release/crash_generation_server.lib ./src/client/windows/Release/crash_report_sender.lib ../../lib/breakpad/Release/
-
-			cd ../..
-		fi
     fi
 }
 
@@ -307,7 +255,7 @@ make_installer() {
                 ;;
         esac
     done
-  
+
     if [ ! -d build ]; then
       build
     fi
@@ -322,7 +270,7 @@ make_installer() {
         fi
         echo "Creating zip..."
         macdeployqt "${BUNDLE_NAME}" -qmldir=../resources/qmls
-        
+
         if [ "$SIGN" = true ];then
           if [ ${#argv[@]} = 1 ];then
             codesign --force --verify --verbose --deep "${BUNDLE_NAME}" --sign "${argv[0]}"
@@ -360,14 +308,14 @@ make_installer() {
           # set an app icon for edge build and change AppName
           cat ../../innoSetup/silkedit.iss | sed -e 's/app_icon_39x41.bmp/app_icon_edge_39x41.bmp/' | sed -e 's/#define MyAppName "SilkEdit"/#define MyAppName "SilkEdit Edge"/' > ${ISS_FILE}
         else
-          cp ../../innoSetup/silkedit.iss ${ISS_FILE}        
+          cp ../../innoSetup/silkedit.iss ${ISS_FILE}
         fi
 
         if [ $OS = 'Win32' ]; then
           # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
           cat ${ISS_FILE} | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep --text -v ArchitecturesAllowed=x64 > ${ISS_FILE}
         fi
-        
+
         iscc ${ISS_FILE}
         rm ${ISS_FILE}
     fi
@@ -448,7 +396,12 @@ send_symbol() {
       dsymutil "build/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" -o ${DSYM_DIR}
       vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a "${BUGSPLAT_APP_NAME}" -v ${VERSION} -s ${DSYM_DIR}
     else
-      vendor/breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${BUGSPLAT_APP_NAME}&appVer=${VERSION}"
+      TMP_BAT=tmp.bat
+      cp activate.bat $TMP_BAT
+      ARG="http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${BUGSPLAT_APP_NAME}&appVer=${VERSION}"
+      echo " & symupload.exe ./build/SilkEdit.exe $ARG" >> $TMP_BAT
+      ./$TMP_BAT
+      rm $TMP_BAT
     fi
 }
 
