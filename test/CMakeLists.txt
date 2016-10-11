@@ -49,20 +49,16 @@ if (APPLE)
   execute_process(COMMAND install_name_tool -change libicudata.57.dylib @executable_path/libicudata.dylib ${CMAKE_CURRENT_BINARY_DIR}/libicuuc.dylib)
 
 elseif (MSVC)
-  # Copy onig.dll
+  # Copy dlls
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
-
-  # Copy node.dll
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll DESTINATION .)
-  else ()
-    file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
-  endif ()
+  file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
+  file(COPY ${CONAN_BIN_DIRS_ICU}/icuuc57.dll DESTINATION .)
+  file(COPY ${CONAN_BIN_DIRS_ICU}/icudt57.dll DESTINATION .)
 
   # Copy pdb
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 #    file(COPY "${PROJECT_SOURCE_DIR}/lib/yaml-cpp static md.pdb" DESTINATION .)
-    file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
+#    file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
   endif()
 endif ()
 

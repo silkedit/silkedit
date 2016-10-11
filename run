@@ -116,17 +116,17 @@ resolve() {
     # remove syntax-error's test and example codes because they cause SyntaxError when uglifying
     rm -rf node_modules/syntax-error/test node_modules/syntax-error/example
     cd ../../..
+    
+    # Download custom ICU data file
+    ICU_DATA_FILE=icudt57l.zip
+    wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ICU_DATA_FILE}
+    unzip ${ICU_DATA_FILE}
+    mv icudt57l.dat resources
+    rm -rf ${ICU_DATA_FILE}
 
     if [ $OS = 'Mac' ]; then
       # Download Squirrel
       carthage bootstrap --platform Mac
-
-      # Download custom ICU data file
-      ICU_DATA_FILE=icudt57l.zip
-      wget https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ICU_DATA_FILE}
-      unzip ${ICU_DATA_FILE}
-      mv icudt57l.dat resources
-      rm -rf ${ICU_DATA_FILE}
 
       # Download BugSplat breakpad to send a symbol using dump_sdk_symbols (symupload can't be built on Mac)
       if [ ! -f vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols ]; then
@@ -159,29 +159,6 @@ resolve() {
           cp onig.lib onig.dll ../../lib
           cd ../..
 				fi
-
-				# icu
-        if [ "$1" != '--skip-build' ]; then
-          echo 'Downloading ICU...'
-          DIR=icu-57.1-vs2015
-          ARCHIVE=${DIR}.7z
-          curl -fsSL -o ${ARCHIVE} https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ARCHIVE}
-          7z x ${ARCHIVE}
-          rm -rf include/unicode
-          mv ${DIR}/include/unicode include
-          mkdir -p lib/icu
-          if [ $OS = 'Win32' ]; then
-            mv ${DIR}/lib/sicuuc*.lib lib/icu
-            mv ${DIR}/lib/sicudt*.lib lib/icu
-            mv ${DIR}/bin/icuMDd.pdb lib/icu
-          else
-            mv ${DIR}/lib64/sicuuc*.lib lib/icu
-            mv ${DIR}/lib64/sicudt*.lib lib/icu
-            mv ${DIR}/bin64/icuMDd.pdb lib/icu
-          fi
-          rm -rf ${DIR}*
-        fi
-
     fi
 }
 

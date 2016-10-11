@@ -41,18 +41,6 @@ if (APPLE)
 
   )
 elseif (MSVC)
-  add_library(UCHARDET_LIBRARY STATIC IMPORTED)
-  set_property(TARGET UCHARDET_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/uchardet/Release/uchardet.lib)
-  set_property(TARGET UCHARDET_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/uchardet/Debug/uchardet.lib)
-
-  add_library(ICUUC_LIBRARY STATIC IMPORTED)
-  set_property(TARGET ICUUC_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/icu/sicuuc.lib)
-  set_property(TARGET ICUUC_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/icu/sicuucd.lib)
-
-  add_library(ICUDATA_LIBRARY STATIC IMPORTED)
-  set_property(TARGET ICUDATA_LIBRARY PROPERTY IMPORTED_LOCATION_RELEASE ${PROJECT_SOURCE_DIR}/lib/icu/sicudt.lib)
-  set_property(TARGET ICUDATA_LIBRARY PROPERTY IMPORTED_LOCATION_DEBUG ${PROJECT_SOURCE_DIR}/lib/icu/sicudtd.lib)
-
   add_library(ONIG_LIBRARY SHARED IMPORTED)
   set_target_properties(ONIG_LIBRARY PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/vendor/Onigmo)
   set_property(TARGET ONIG_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/onig.dll)
@@ -65,8 +53,8 @@ elseif (MSVC)
                         ${UCHARDET}
                         ${YAML_CPP}
                         ${NODE_LIBRARY}
-                        ICUUC_LIBRARY
-                        ICUDATA_LIBRARY
+                        ${ICU_UC}
+                        ${ICU_DATA}
   )
 endif ()
 

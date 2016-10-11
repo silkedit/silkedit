@@ -82,6 +82,9 @@ if (MSVC)
   if(NOT BREAKPAD_FOUND)
     message(FATAL_ERROR "Breakpad not found")
   endif ()
+
+  find_library(ICU_UC NAMES icuuc PATHS ${CONAN_LIB_DIRS_ICU})
+  find_library(ICU_DATA NAMES icudt PATHS ${CONAN_LIB_DIRS_ICU})
 endif ()
 
 find_library(NODE_LIBRARY NAMES ${CONAN_LIBS_NODE})
@@ -312,6 +315,9 @@ elseif (MSVC)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E remove_directory silk_resources/jslib)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/minified/jslib silk_resources/jslib)
 
+  # Copy custom ICU data file
+  file(COPY ${PROJECT_SOURCE_DIR}/resources/icudt57l.dat DESTINATION silk_resources)
+
   # copy npm
   file(COPY
       ${PROJECT_SOURCE_DIR}/vendor/npm/bin/npm-cli.js
@@ -323,15 +329,11 @@ elseif (MSVC)
       ${PROJECT_SOURCE_DIR}/vendor/npm/package.json
       DESTINATION silk_resources/npm)
 
-  # Copy onig.dll
+  # Copy dlls
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
-
-  # Copy node.dll
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    file(COPY ${PROJECT_SOURCE_DIR}/vendor/node/Debug/node.dll DESTINATION .)
-  else ()
-    file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
-  endif ()
+  file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
+  file(COPY ${CONAN_BIN_DIRS_ICU}/icuuc57.dll DESTINATION .)
+  file(COPY ${CONAN_BIN_DIRS_ICU}/icudt57.dll DESTINATION .)
 
   # Copy pdb
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
