@@ -4,6 +4,7 @@ node/6.1.0@silkedit/stable
 uchardet/0.0.6@silkedit/stable
 breakpad/1.0.0@silkedit/stable
 icu/57.1@shinichy/stable
+Onigmo/5.15.0@shinichy/stable
 
 [generators]
 cmake

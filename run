@@ -137,28 +137,6 @@ resolve() {
         rm Breakpad.framework.zip
         cd ../..
       fi
-
-      if [ "$1" != '--skip-build' ]; then
-        #Onigmo
-        echo 'Building Onigmo...'
-        cd vendor/Onigmo
-        ./configure && make && make install
-        cd ../..
-      fi
-
-    else
-        mkdir -p lib include
-
-        # Onigmo
-        if [ "$1" != '--skip-build' ]; then
-          echo 'Building Onigmo...'
-          cd vendor/Onigmo
-          cp win32/Makefile .
-          cp win32/config.h .
-          echo $ONIG_BUILD_BAT > /tmp/build_onigmo.bat && /tmp/build_onigmo.bat
-          cp onig.lib onig.dll ../../lib
-          cd ../..
-				fi
     fi
 }
 

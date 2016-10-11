@@ -50,7 +50,7 @@ if (APPLE)
 
 elseif (MSVC)
   # Copy dlls
-  file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
+  file(COPY ${CONAN_BIN_DIRS_ONIGMO}/onig.dll DESTINATION .)
   file(COPY ${CONAN_BIN_DIRS_NODE}/node.dll DESTINATION .)
   file(COPY ${CONAN_BIN_DIRS_ICU}/icuuc57.dll DESTINATION .)
   file(COPY ${CONAN_BIN_DIRS_ICU}/icudt57.dll DESTINATION .)
