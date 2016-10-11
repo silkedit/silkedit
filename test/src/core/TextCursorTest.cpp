@@ -1,5 +1,6 @@
 #include <QtTest/QtTest>
 #include <QTextDocument>
+#include <unicode/putil.h>
 
 #include "TextCursor.h"
 
@@ -9,6 +10,10 @@ class TextCursorTest : public QObject {
   Q_OBJECT
 
  private slots:
+  void initTestCase() {
+    u_setDataDirectory(QCoreApplication::applicationDirPath().toUtf8().constData());
+  }
+
   void nextEnglishWord() {
     QTextDocument doc(u8"A brown firefox");
     QTextCursor cursor(&doc);

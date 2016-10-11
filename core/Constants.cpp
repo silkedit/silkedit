@@ -100,6 +100,10 @@ QString Constants::defaultPackagePath() {
   return jsLibDir() + "/node_modules/silkedit/node_modules/default";
 }
 
+const char* Constants::icuDataDirectory() {
+  return resourcesPath().toUtf8().constData();
+}
+
 QString Constants::silkHomePath() const {
   return QStandardPaths::standardLocations(QStandardPaths::HomeLocation)[0] + "/" + silkHomeDirName;
 }

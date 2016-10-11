@@ -13,6 +13,9 @@ function(add_unittest dir test_class)
 if (APPLE)
   # run install_name_tool to update the path to libnode.dylib
   add_custom_command(TARGET ${test_class} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/libnode.dylib ${test_class})
+  add_custom_command(TARGET ${test_class} POST_BUILD COMMAND install_name_tool -change libicuuc.57.dylib @executable_path/libicuuc.dylib ${test_class})
+  add_custom_command(TARGET ${test_class} POST_BUILD COMMAND install_name_tool -change libicudata.57.dylib @executable_path/libicudata.dylib ${test_class})
+
 endif ()
 endfunction()
 
@@ -39,6 +42,12 @@ include_directories(SYSTEM
 if (APPLE)
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION .)
+
+  # copy icu libraries
+  file(COPY ${ICU_UC} DESTINATION .)
+  file(COPY ${ICU_DATA} DESTINATION .)
+  execute_process(COMMAND install_name_tool -change libicudata.57.dylib @executable_path/libicudata.dylib ${CMAKE_CURRENT_BINARY_DIR}/libicuuc.dylib)
+
 elseif (MSVC)
   # Copy onig.dll
   file(COPY ${PROJECT_SOURCE_DIR}/lib/onig.dll DESTINATION .)
@@ -58,6 +67,7 @@ elseif (MSVC)
 endif ()
 
 file(COPY "testdata" DESTINATION .)
+file(COPY ${PROJECT_SOURCE_DIR}/resources/icudt57l.dat DESTINATION .)
 
 # core tests
 add_unittest(core LanguageParserTest)

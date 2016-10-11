@@ -105,6 +105,9 @@ if (APPLE)
     message(FATAL_ERROR "BREAKPAD not found")
   endif ()
 
+  find_library(ICU_UC NAMES icuuc PATHS ${CONAN_LIB_DIRS_ICU})
+  find_library(ICU_DATA NAMES icudata PATHS ${CONAN_LIB_DIRS_ICU})
+
   set(CARTHAGE_PATH "Carthage/Build/Mac")
 
   find_library(Squirrel Squirrel PATHS ${CARTHAGE_PATH})
@@ -257,11 +260,9 @@ if (APPLE)
   set_target_properties(${PROJECT_NAME} PROPERTIES FRAMEWORK true)
 
   # run install_name_tool to update the path to libnode.dylib
-  if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode_debug.dylib ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/MacOS/${MACOSX_BUNDLE_BUNDLE_NAME})
-  else ()
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/MacOS/${MACOSX_BUNDLE_BUNDLE_NAME})
-  endif ()
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change /usr/local/lib/libnode.dylib @executable_path/../Frameworks/libnode.dylib $<TARGET_FILE:${PROJECT_NAME}>)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change libicuuc.57.dylib @executable_path/../Frameworks/libicuuc.dylib $<TARGET_FILE:${PROJECT_NAME}>)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND install_name_tool -change libicudata.57.dylib @executable_path/../Frameworks/libicudata.dylib $<TARGET_FILE:${PROJECT_NAME}>)
 
   # Use special icon for edge build
   if (BUILD_EDGE)
@@ -289,6 +290,12 @@ if (APPLE)
 
   # copy libnode.dylib
   file(COPY ${NODE_LIBRARY} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+
+  # copy icu libraries and custom data file
+  file(COPY ${ICU_UC} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+  file(COPY ${ICU_DATA} DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks)
+  file(COPY ${PROJECT_SOURCE_DIR}/resources/icudt57l.dat DESTINATION ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Resources)
+  execute_process(COMMAND install_name_tool -change libicudata.57.dylib @executable_path/../Frameworks/libicudata.dylib ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/Frameworks/libicuuc.dylib)
 
   # copy CrashReporter
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND cp -R ${PROJECT_BINARY_DIR}/crashreporter/CrashReporter.app/Contents/MacOS/CrashReporter ${MACOSX_BUNDLE_BUNDLE_NAME}.app/Contents/MacOS)
@@ -329,7 +336,7 @@ elseif (MSVC)
   # Copy pdb
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     #    file(COPY "${PROJECT_SOURCE_DIR}/lib/yaml-cpp static md.pdb" DESTINATION .)
-    file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
+    #    file(COPY ${PROJECT_SOURCE_DIR}/lib/icu/icuMDd.pdb DESTINATION .)
   endif ()
 
   # Copy Qt translation files
