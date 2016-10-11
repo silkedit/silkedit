@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <unicode/putil.h>
 #include <QWidget>
 #include <QTranslator>
 #include <QChildEvent>
@@ -67,6 +68,8 @@ App::App(int& argc, char** argv)
       m_translator(nullptr),
       m_qtTranslator(nullptr),
       m_isQuitting(false) {
+  u_setDataDirectory(Constants::singleton().icuDataDirectory());
+
   setApplicationVersion(VERSION);
   setStyle(new SilkStyle());
   setAttribute(Qt::AA_UseHighDpiPixmaps);

@@ -40,8 +40,9 @@ class Constants : public QObject, public core::Singleton<Constants> {
   QString userRootPackageJsonPath() const;
   QString userPackagesNodeModulesPath() const;
   QString defaultPackagePath();
+  const char* icuDataDirectory();
 
-private:
+ private:
   friend class core::Singleton<Constants>;
   Constants() = default;
 

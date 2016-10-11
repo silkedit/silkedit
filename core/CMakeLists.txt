@@ -21,8 +21,6 @@ add_library(${MODULE_NAME} STATIC ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
 
 if (APPLE)
   find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
-  find_library(ICUUC_LIBRARY NAMES libicuuc.a PATHS /usr/local/lib)
-  find_library(ICUDATA_LIBRARY NAMES libicudata.a PATHS /usr/local/lib)
 
   # ReactiveCocoa uses ARC so we need to set -fobjc-weak
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/SquirrelAutoUpdater_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-weak")
@@ -34,8 +32,8 @@ if (APPLE)
                         ${UCHARDET}
                         ${YAML_CPP}
                         ${NODE_LIBRARY}
-                        ${ICUUC_LIBRARY}
-                        ${ICUDATA_LIBRARY}
+                        ${ICU_UC}
+                        ${ICU_DATA}
                         ${Squirrel}
                         ${Mantle}
                         ${ReactiveCocoa}
