@@ -1,7 +1,3 @@
-[submodule "vendor/Onigmo"]
-	path = vendor/Onigmo
-	url = https://github.com/k-takata/Onigmo.git
-	ignore = dirty
 [submodule "vendor/npm"]
 	path = vendor/npm
 	url = https://github.com/npm/npm.git

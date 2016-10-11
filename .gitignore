@@ -14,16 +14,12 @@ CMakeLists.txt.user
 
 /vendor/bugsplat/
 /build/
-/include/
 /jsdoc_out/
 /jslib/node_modules/silkedit/node_modules/*
 !/jslib/node_modules/silkedit/node_modules/default
 /jslib/node_modules/silkedit/node_modules/default/node_modules
-/lib/
-/libnode/
 /minified/
 /node_modules/
-/yaml-cpp-*
 /packages/node_modules/*
 /resources/LICENSE
 /Cartfile.resolved

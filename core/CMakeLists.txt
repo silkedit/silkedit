@@ -18,43 +18,14 @@ endif ()
 
 file(GLOB_RECURSE SILK_CORE_HEADERS *.h)
 add_library(${MODULE_NAME} STATIC ${SILK_CORE_SOURCES} ${SILK_CORE_HEADERS})
+set(LIBRARIES Qt5::Widgets Qt5::Xml ${ONIGMO} ${UCHARDET} ${YAML_CPP} ${NODE_LIBRARY} ${ICU_UC} ${ICU_DATA})
 
 if (APPLE)
-  find_library(ONIG_LIBRARY NAMES libonig.a PATHS /usr/local/lib)
+  set(LIBRARIES ${LIBRARIES} ${Squirrel} ${Mantle} ${ReactiveCocoa} "-framework Foundation")
 
   # ReactiveCocoa uses ARC so we need to set -fobjc-weak
   set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/SquirrelAutoUpdater_mac.mm PROPERTIES COMPILE_FLAGS "-fobjc-weak")
-
-  target_link_libraries(${MODULE_NAME}
-                        Qt5::Widgets
-                        Qt5::Xml
-                        ${ONIG_LIBRARY}
-                        ${UCHARDET}
-                        ${YAML_CPP}
-                        ${NODE_LIBRARY}
-                        ${ICU_UC}
-                        ${ICU_DATA}
-                        ${Squirrel}
-                        ${Mantle}
-                        ${ReactiveCocoa}
-                        "-framework Foundation"
-
-  )
-elseif (MSVC)
-  add_library(ONIG_LIBRARY SHARED IMPORTED)
-  set_target_properties(ONIG_LIBRARY PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/vendor/Onigmo)
-  set_property(TARGET ONIG_LIBRARY PROPERTY IMPORTED_LOCATION ${PROJECT_SOURCE_DIR}/lib/onig.dll)
-  set_property(TARGET ONIG_LIBRARY PROPERTY IMPORTED_IMPLIB ${PROJECT_SOURCE_DIR}/lib/onig.lib)
-
-  target_link_libraries(${MODULE_NAME}
-                        Qt5::Widgets
-                        Qt5::Xml
-                        ONIG_LIBRARY
-                        ${UCHARDET}
-                        ${YAML_CPP}
-                        ${NODE_LIBRARY}
-                        ${ICU_UC}
-                        ${ICU_DATA}
-  )
 endif ()
+
+target_link_libraries(${MODULE_NAME} ${LIBRARIES})
 
