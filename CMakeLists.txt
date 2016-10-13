@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(SilkEdit VERSION 0.13.1)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
 
-include(${PROJECT_SOURCE_DIR}/conanbuildinfo.cmake)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_set_find_paths()
 
 set(CMAKE_LIBRARY_PATH ${CONAN_LIB_DIRS} ${CMAKE_LIBRARY_PATH})

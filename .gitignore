@@ -4,8 +4,6 @@ CMakeLists.txt.user
 .idea/
 *.otf
 *.node
-/conanbuildinfo.cmake
-/conaninfo.txt
 /activate.sh
 /activate.bat
 /deactivate.sh

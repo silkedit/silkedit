@@ -92,8 +92,6 @@ clean() {
 resolve() {
     git submodule update --init
 
-    conan install -s arch=$CONAN_ARCH
-
     # Source Han Code JP font
     ARCHIVE=SourceHanCodeJP-Fonts.zip
     curl -fsSL -o ${ARCHIVE} https://github.com/silkedit/silkedit-assets/releases/download/0.1.0/${ARCHIVE}
@@ -156,7 +154,7 @@ build() {
     fi
 
     cd build
-
+    conan install .. -s arch=$CONAN_ARCH
 
     if [ $OS = 'Mac' ]; then
         if [ "$1" = '--edge' ]; then
