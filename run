@@ -18,15 +18,13 @@ elif [ "$(expr substr $(uname -s) 1 5)" = 'Linux' ]; then
 elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
   if [ "$Platform" = "x64" ]; then
     OS='Win64'
-    MSVC="Visual Studio 14 2015 Win64"
-    ONIG_BUILD_BAT='"%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" amd64 & "%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\bin\\amd64\\nmake"'
+    GENERATOR="Visual Studio 14 2015 Win64"
     VCVARSALL_ARG=amd64
     ARCH=x64
     CONAN_ARCH=x86_64
   else
     OS='Win32'
-    MSVC="Visual Studio 14 2015"
-    ONIG_BUILD_BAT='"%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\vcvarsall.bat" x86 & "%PROGRAMFILES(x86)%\\Microsoft Visual Studio 14.0\\VC\\bin\\nmake"'
+    GENERATOR="Visual Studio 14 2015"
     VCVARSALL_ARG=x86
     ARCH=x86
     CONAN_ARCH=x86
@@ -166,9 +164,9 @@ build() {
         ninja
     else
         if [ "$1" = '--edge' ]; then
-          ../build.bat $VCVARSALL_ARG all edge
+          ../build.bat $VCVARSALL_ARG "$GENERATOR" all_build edge
         else
-          ../build.bat $VCVARSALL_ARG all
+          ../build.bat $VCVARSALL_ARG "$GENERATOR" all_build
         fi
     fi
 
@@ -228,7 +226,7 @@ make_installer() {
     else
         mkdir -p Release
         # Can't use mv because mv fails when Release/packages already exists
-        cp -r silkedit.exe onig.dll node.dll silk_resources Release
+        cp -r silkedit.exe onig.dll node.dll icuuc57.dll icudt57.dll silk_resources Release
         #crashreporter
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
@@ -298,8 +296,8 @@ run_ctest() {
             ctest --output-on-failure --no-compress-output -L $TARGET
         fi
     else
-        ../build.bat $VCVARSALL_ARG $TARGET
-        ctest --output-on-failure --no-compress-output -L $TARGET
+        ../build.bat $VCVARSALL_ARG "$GENERATOR" $TARGET
+        ctest --output-on-failure --no-compress-output -C Release -L $TARGET
     fi
 }
 
