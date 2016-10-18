@@ -28,6 +28,7 @@ AutoUpdateManager::AutoUpdateManager() : m_updater(nullptr) {
   connect(m_updater, &AutoUpdater::updateNotAvailable, this,
           &AutoUpdateManager::updateNotAvailable);
   connect(m_updater, &AutoUpdater::updateDownloaded, this, &AutoUpdateManager::updateDownloaded);
+  connect(m_updater, &AutoUpdater::updateError, this, &AutoUpdateManager::updateError);
 }
 
 }  // namespace core
