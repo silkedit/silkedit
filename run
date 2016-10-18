@@ -152,7 +152,9 @@ build() {
     fi
 
     cd build
-    conan install .. -s arch=$CONAN_ARCH
+
+    # --build=missing is required because there's no breakpad MacOS binary in conan.io
+    conan install .. -s arch=$CONAN_ARCH --build=missing
 
     if [ $OS = 'Mac' ]; then
         if [ "$1" = '--edge' ]; then
