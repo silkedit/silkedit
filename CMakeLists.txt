@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.1.0)
 
 project(SilkEdit VERSION 0.13.1)
 set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
@@ -22,6 +22,8 @@ message(STATUS "BUILD_NUMBER: ${BUILD_NUMBER}")
 
 option(BUILD_EDGE "Build edge version" OFF)
 
+set(CMAKE_CXX_STANDARD 14)
+set(CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)

@@ -26,14 +26,8 @@ void SquirrelAutoUpdater::initialize() {
     components.host = @"silkedit-release-server.herokuapp.com";
     components.path = @"/update";
 
-#ifdef BUILD_EDGE
-    NSString* channel = @"edge";
-#else
-    NSString* channel = @"stable";
-#endif
-
 #if defined Q_OS_MAC
-    NSString* platform = @"mac";
+    NSString* platform = @"osx";
 #elif defined Q_OS_WIN64
     NSString* platform = @"windows_x64";
 #else
@@ -41,14 +35,12 @@ void SquirrelAutoUpdater::initialize() {
 #endif
 
     components.query =
-        [[NSString stringWithFormat:@"channel=%1$@&version=%2$@&build=%3$@&platform=%4$@", channel,
-                                    @VERSION, @BUILD, platform]
+        [[NSString stringWithFormat:@"version=%1$@&platform=%2$@", @VERSION, platform]
             stringByAddingPercentEncodingWithAllowedCharacters:NSCharacterSet
                                                                    .URLQueryAllowedCharacterSet];
 
     @try {
       NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:components.URL];
-      [request addValue:@"Bearer BymXwSHDJa" forHTTPHeaderField:@"Authorization"];
       d->updater = [[SQRLUpdater alloc] initWithUpdateRequest:request];
     } @catch (NSException* exception) {
       emit updateError(exception.reason.UTF8String);
