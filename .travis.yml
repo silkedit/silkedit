@@ -1,19 +1,26 @@
 language: cpp
 compiler: clang
 os:
-  - osx
+- osx
 osx_image: xcode7.3
-node_js: "6.4"
+node_js: '6.4'
 env:
   global:
-    - QTDIR=/usr/local/opt/qt5
-    - PATH=$QTDIR/bin:$PATH
+  - QTDIR=/usr/local/opt/qt5
+  - PATH=$QTDIR/bin:$PATH
+before_install:
+- openssl aes-256-cbc -K $encrypted_ea3534b93422_key -iv $encrypted_ea3534b93422_iv
+  -in .travis/secrets.tar.enc -out .travis/secrets.tar -d
+- tar xvf .travis/secrets.tar -C ./.travis
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then sudo security import ./.travis/travis.p12
+  -k /Library/Keychains/System.keychain -P ${KEY_PASSWORD} -T /usr/bin/codesign; fi
 install:
-  - pip install conan
-  - brew install ninja qt5
+- pip install conan
+- brew install ninja qt5
 script:
-  - ./run resolve
-  - npm run minify
-  - ./run build --edge
-  - ./run make_installer --edge
-  - ./run test
+- "./run resolve"
+- npm run minify
+- "./run build"
+- if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then ./run make_installer --sign ${CODE_SIGN_IDENTITY};
+  else ./run make_installer; fi
+- "./run test"
