@@ -8,7 +8,6 @@ environment:
     MSYS2_PATH_TYPE: inherit
     BOOST_ROOT: C:\Libraries\boost_1_60_0
     PYTHON: C:\Python27-x64
-    PATH: '%QTDIR%\bin;%PROGRAMFILES(x86)%\Inno Setup 5;%PATH%'
     PFX_PASSWORD:
       secure: kN3ZXrBRGom0BBeli4F9TQ==
     my_secret:
@@ -19,7 +18,7 @@ init:
 
 install:
   - 'set PATH=%PYTHON%\Scripts;%PATH%'
-  - appveyor-retry choco install InnoSetup
+  - appveyor-retry choco install -y InnoSetup
   - npm install -g npm
   - 'git clone https://chromium.googlesource.com/external/gyp & cd gyp & %PYTHON%/python setup.py install & cd ..'
   - 'pip install conan'
@@ -29,7 +28,7 @@ install:
 before_build:
   - if %PLATFORM%==x64 set QTDIR=C:\Qt\5.6\msvc2015_64
   - if %PLATFORM%==x86 set QTDIR=C:\Qt\5.6\msvc2015
-  - 'set PATH=%QTDIR%\bin;%PATH%'
+  - 'set PATH=%QTDIR%\bin;%PROGRAMFILES(x86)%\Inno Setup 5;%PATH%'
 
 build_script:
   - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run build && ./run make_installer"'
