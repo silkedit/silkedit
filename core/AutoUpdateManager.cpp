@@ -10,6 +10,12 @@ const int INTERVAL = 60 * 60 * 1000;  // 1h
 
 namespace core {
 
+void AutoUpdateManager::quitAndInstall() {
+  if (m_updater) {
+    m_updater->quitAndInstall();
+  }
+}
+
 void AutoUpdateManager::initialize() {
   if (m_updater) {
     m_updater->initialize();

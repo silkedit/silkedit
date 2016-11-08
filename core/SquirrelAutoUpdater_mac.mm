@@ -2,6 +2,8 @@
 #define QT_NO_SIGNALS_SLOTS_KEYWORDS
 #include <QDebug>
 #include <QDateTime>
+#include <QApplication>
+#include <QProcess>
 #undef QT_NO_SIGNALS_SLOTS_KEYWORDS
 #include "version.h"
 
@@ -100,6 +102,13 @@ void SquirrelAutoUpdater::checkForUpdates() {
         }
         emit updateError(failureString.UTF8String);
       }];
+}
+
+
+void SquirrelAutoUpdater::quitAndInstall() {
+  // restart
+  QProcess::startDetached(QApplication::applicationFilePath(), QStringList());
+  QCoreApplication::exit();
 }
 
 }  // namespace core

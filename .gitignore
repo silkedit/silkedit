@@ -9,6 +9,7 @@ CMakeLists.txt.user
 /deactivate.sh
 /deactivate.bat
 /resources/icudt*.dat
+/project.lock.json
 
 /vendor/bugsplat/
 /build/
@@ -22,3 +23,4 @@ CMakeLists.txt.user
 /resources/LICENSE
 /Cartfile.resolved
 /Carthage
+/nuget_packages
