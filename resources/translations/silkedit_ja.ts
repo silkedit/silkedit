@@ -556,7 +556,7 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../widgets/src/DocumentManager.cpp" line="120"/>
+        <location filename="../../widgets/src/DocumentManager.cpp" line="131"/>
         <source>Save As</source>
         <translation>名前を付けて保存</translation>
     </message>
@@ -780,6 +780,11 @@ has been removed on disk. Do you want to close its tab?</source>
         <source>No BOM</source>
         <translation>BOM無</translation>
     </message>
+    <message>
+        <location filename="../../core/SquirrelHandler_win.cpp" line="36"/>
+        <source>Open with %1</source>
+        <translation>%1 で開く</translation>
+    </message>
 </context>
 <context>
     <name>ReloadEncodingDialog</name>
@@ -864,19 +869,26 @@ Convert: convert current text in %1</source>
     </message>
 </context>
 <context>
+    <name>core::SquirrelHandler</name>
+    <message>
+        <source>Open with %1</source>
+        <translation type="vanished">%1 で開く</translation>
+    </message>
+</context>
+<context>
     <name>notification</name>
     <message>
-        <location filename="../qmls/notification.qml" line="25"/>
+        <location filename="../qmls/notification.qml" line="23"/>
         <source>SilkEdit will be updated after restart.</source>
         <translation>SilkEditは再起動後に更新されます。</translation>
     </message>
     <message>
-        <location filename="../qmls/notification.qml" line="34"/>
+        <location filename="../qmls/notification.qml" line="33"/>
         <source>Update Now</source>
         <translation>今すぐ更新</translation>
     </message>
     <message>
-        <location filename="../qmls/notification.qml" line="39"/>
+        <location filename="../qmls/notification.qml" line="38"/>
         <source>Later</source>
         <translation>後で</translation>
     </message>

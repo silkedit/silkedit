@@ -31,6 +31,10 @@
 #include "breakpad/crash_handler.h"
 #include "node_main.h"
 #include "core/UpdateProcess.h"
+#ifdef Q_OS_WIN
+#include "core/SquirrelHandler_win.h"
+using core::SquirrelHandler;
+#endif
 
 using core::PackageManager;
 using core::Config;
@@ -71,50 +75,6 @@ int main(int argc, char** argv) {
     return nodeMain(arguments.size(), Util::toArgv(arguments));
   }
 
-#ifdef Q_OS_WIN
-  const QString exeName = QFileInfo(QApplication::applicationFilePath()).fileName();
-
-  // handle arguments sent from squirrel
-  // https://github.com/Squirrel/Squirrel.Windows/blob/master/docs/using/custom-squirrel-events-non-cs.md
-  if (arguments.contains("--squirrel-install")) {
-    // create a shortcut in desktop and start menu
-    auto updateProcess = new UpdateProcess();
-    QObject::connect(updateProcess, &UpdateProcess::errorOccured,
-                     [](const QString& msg) { qCritical() << msg; });
-    updateProcess->start(QStringList{"--createShortcut", exeName});
-    updateProcess->waitForFinished();
-    exit(0);
-  } else if (arguments.contains("--squirrel-firstrun")) {
-    qDebug() << "--squirrel-firstrun";
-    arguments.removeOne("--squirrel-firstrun");
-  } else if (arguments.contains("--squirrel-updated")) {
-    return 0;
-  } else if (arguments.contains("--squirrel-obsolete")) {
-    return 0;
-  } else if (arguments.contains("--squirrel-uninstall")) {
-    // remove shortcuts created by squirrel
-    auto updateProcess = new UpdateProcess();
-    QObject::connect(updateProcess, &UpdateProcess::errorOccured,
-                     [](const QString& msg) { qCritical() << msg; });
-
-    updateProcess->start(QStringList{"--removeShortcut", exeName});
-    updateProcess->waitForFinished();
-    exit(0);
-  }
-
-  const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
-  // If SilkEdit is already running, send an argument and exit.
-  if (app.sendMessage(msg))
-    return 0;
-
-  QObject::connect(&app, &App::messageReceived, &app, [](const QString& msg) {
-    qDebug() << msg << "is passed by another process";
-    if (!msg.isEmpty()) {
-      DocumentManager::singleton().open(msg);
-    }
-  });
-#endif
-
   // call a bunch of qRegisterMetaType calls
   MetaTypeInitializer::init();
 
@@ -131,6 +91,23 @@ int main(int argc, char** argv) {
   // Setup translator after initializing Config
   const auto& locale = Config::singleton().locale();
   app.setupTranslator(locale);
+
+#ifdef Q_OS_WIN
+  // call this after installing translator
+  arguments = SquirrelHandler::handleArguments(arguments);
+
+  const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
+  // If SilkEdit is already running, send an argument and exit.
+  if (app.sendMessage(msg))
+    return 0;
+
+  QObject::connect(&app, &App::messageReceived, &app, [](const QString& msg) {
+    qDebug() << msg << "is passed by another process";
+    if (!msg.isEmpty()) {
+      DocumentManager::singleton().open(msg);
+    }
+  });
+#endif
 
   app.setDefaultFont(locale);
 
