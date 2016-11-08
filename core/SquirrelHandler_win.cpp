@@ -44,7 +44,7 @@ void uninstallContextMenu() {
   removeRegistry(regPath);
 }
 
-void createShortcut(const QString exeName) {
+void createShortcut(const QString& exeName) {
   UpdateProcess updateProcess;
   QObject::connect(&updateProcess, &UpdateProcess::errorOccured,
                    [](const QString& msg) { qCritical() << msg; });
@@ -52,7 +52,7 @@ void createShortcut(const QString exeName) {
   updateProcess.waitForFinished();
 }
 
-void removeShortcut(const QString exeName) {
+void removeShortcut(const QString& exeName) {
   UpdateProcess updateProcess;
   QObject::connect(&updateProcess, &UpdateProcess::errorOccured,
                    [](const QString& msg) { qCritical() << msg; });
@@ -77,7 +77,7 @@ QStringList SquirrelHandler::handleArguments(QStringList arguments) {
     qDebug() << "--squirrel-firstrun";
     arguments.removeOne("--squirrel-firstrun");
   } else if (arguments.contains("--squirrel-updated")) {
-    // update shortcut and regiestry
+    // update shortcut and registry
     createShortcut(exeName);
     installContextMenu();
     exit(0);

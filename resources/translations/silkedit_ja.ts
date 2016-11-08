@@ -869,13 +869,6 @@ Convert: convert current text in %1</source>
     </message>
 </context>
 <context>
-    <name>core::SquirrelHandler</name>
-    <message>
-        <source>Open with %1</source>
-        <translation type="vanished">%1 で開く</translation>
-    </message>
-</context>
-<context>
     <name>notification</name>
     <message>
         <location filename="../qmls/notification.qml" line="23"/>
