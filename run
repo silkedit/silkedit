@@ -265,7 +265,7 @@ make_installer() {
         nuget pack ../../SilkEdit.nuspec -Version ${VERSION} -properties "id=${NUGET_ID};title=${NUGET_TITLE};icon_url=${NUGET_ICON_URL}"
         NUPKG="${NUGET_ID}.${VERSION}.nupkg"
         set +e  # Squirrel returns 127 even if it succeeds.
-        ../../nuget_packages/squirrel.windows/1.4.4/tools/Squirrel --releasify ${NUPKG}
+        ../../nuget_packages/squirrel.windows/1.4.4/tools/Squirrel --releasify ${NUPKG} -g ../../resources/images/indicator.gif
         set -e
 
         mv Releases/Setup.exe "Releases/${NUGET_ID}-Setup.exe"

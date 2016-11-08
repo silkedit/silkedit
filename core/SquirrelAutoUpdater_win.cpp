@@ -35,7 +35,7 @@ void SquirrelAutoUpdater::quitAndInstall() {
   auto updateProcess = new UpdateProcess();
   const QString command = "--processStartAndWait";
   const QString exeName = QFileInfo(QApplication::applicationFilePath()).fileName();
-  updateProcess->start(QStringList { command, exeName }, true);
+  updateProcess->startDetached(QStringList { command, exeName });
   App::exit();
 }
 
@@ -94,10 +94,10 @@ void SquirrelAutoUpdater::checkForUpdates() {
       emit updateDownloaded(releaseNotes, version, QDateTime(), url);
     });
 
-    updateProcess->start(QStringList { "--update", url }, false);
+    updateProcess->start(QStringList { "--update", url });
   });
 
-  downloadProcess->start(QStringList { "--download", url }, false);
+  downloadProcess->start(QStringList { "--download", url });
 }
 
 }  // namespace core
