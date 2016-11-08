@@ -26,15 +26,15 @@ install:
   - if not defined APPVEYOR_PULL_REQUEST_NUMBER nuget install secure-file -ExcludeVersion & secure-file\tools\secure-file -decrypt .appveyor\comodo.pfx.enc -secret %my_secret%
 
 before_build:
-  - if %PLATFORM%==x64 set QTDIR=C:\Qt\5.6\msvc2015_64
-  - if %PLATFORM%==x86 set QTDIR=C:\Qt\5.6\msvc2015
+  - if %PLATFORM%==x64 (set "QTDIR=C:\Qt\5.6\msvc2015_64" & set NUGET_ARCH=x64)
+  - if %PLATFORM%==x86 (set "QTDIR=C:\Qt\5.6\msvc2015" & set NUGET_ARCH=ia32)
   - 'set PATH=%QTDIR%\bin;%PROGRAMFILES(x86)%\Inno Setup 5;%PATH%'
 
 build_script:
   - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run build && ./run make_installer"'
 
 after_build:
-  - if not defined APPVEYOR_PULL_REQUEST_NUMBER "%PROGRAMFILES(x86)%\Microsoft SDKs\Windows\v7.1A\Bin\signtool" sign /f .appveyor\comodo.pfx /p %PFX_PASSWORD% /d "SilkEdit" /t http://timestamp.comodoca.com/authenticode "build\Release\SilkEdit Setup %PLATFORM%.exe"
+  - if not defined APPVEYOR_PULL_REQUEST_NUMBER "%PROGRAMFILES(x86)%\Microsoft SDKs\Windows\v7.1A\Bin\signtool" sign /f .appveyor\comodo.pfx /p %PFX_PASSWORD% /d "SilkEdit" /t http://timestamp.comodoca.com/authenticode "build\Release\Releases\SilkEdit-%NUGET_ARCH%-Setup.exe"
 
 test_script:
   - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run test"'

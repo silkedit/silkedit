@@ -22,12 +22,14 @@ elif [ "$(expr substr $(uname -s) 1 4)" = 'MSYS' ]; then
     VCVARSALL_ARG=amd64
     ARCH=x64
     CONAN_ARCH=x86_64
+    NUGET_ARCH=x64
   else
     OS='Win32'
     GENERATOR="Visual Studio 14 2015"
     VCVARSALL_ARG=x86
     ARCH=x86
     CONAN_ARCH=x86
+    NUGET_ARCH=ia32
   fi
 
   PROGRAM_FILES="$(env | awk -F= '$1=="ProgramFiles(x86)"{print $2}')"
@@ -133,6 +135,8 @@ resolve() {
         rm Breakpad.framework.zip
         cd ../..
       fi
+    else
+      nuget restore -PackagesDirectory nuget_packages
     fi
 }
 
@@ -233,7 +237,7 @@ make_installer() {
         cp -r crashreporter/crashreporter.exe crashreporter/crashreporter_*.qm Release
         cd Release
 
-        windeployqt --release --no-compiler-runtime silkedit.exe
+        windeployqt --release --no-compiler-runtime --qmldir ../../resources/qmls silkedit.exe
 
         # Copy URCT
         RELEASE_DIR=`pwd`
@@ -247,21 +251,27 @@ make_installer() {
         attrib -r $RELEASE_DIR/vcruntime140.dll
         cd $RELEASE_DIR
 
-        ISS_FILE=../../innoSetup/modified_silkedit.iss
         if [ "$EDGE" = true ];then
           # set an app icon for edge build and change AppName
-          cat ../../innoSetup/silkedit.iss | sed -e 's/app_icon_39x41.bmp/app_icon_edge_39x41.bmp/' | sed -e 's/#define MyAppName "SilkEdit"/#define MyAppName "SilkEdit Edge"/' > ${ISS_FILE}
+          NUGET_ID="SilkEdit_Edge-${NUGET_ARCH}"
+          NUGET_TITLE="SilkEdit_Edge"
+          NUGET_ICON_URL="https://raw.githubusercontent.com/silkedit/silkedit/master/resources/silkedit_edge.ico"
         else
-          cp ../../innoSetup/silkedit.iss ${ISS_FILE}
+          NUGET_ID="SilkEdit-${NUGET_ARCH}"
+          NUGET_TITLE="SilkEdit"
+          NUGET_ICON_URL="https://raw.githubusercontent.com/silkedit/silkedit/master/resources/silkedit.ico"
         fi
 
-        if [ $OS = 'Win32' ]; then
-          # Change Arch to x86 and remove ArchitecturesAllowed=x64 for x86 installer
-          cat ${ISS_FILE} | sed -e 's/#define Arch "x64"/#define Arch "x86"/' | grep --text -v ArchitecturesAllowed=x64 > ${ISS_FILE}
-        fi
+        nuget pack ../../SilkEdit.nuspec -Version ${VERSION} -properties "id=${NUGET_ID};title=${NUGET_TITLE};icon_url=${NUGET_ICON_URL}"
+        NUPKG="${NUGET_ID}.${VERSION}.nupkg"
+        set +e  # Squirrel returns 127 even if it succeeds.
+        ../../nuget_packages/squirrel.windows/1.4.4/tools/Squirrel --releasify ${NUPKG}
+        set -e
 
-        iscc ${ISS_FILE}
-        rm ${ISS_FILE}
+        mv Releases/Setup.exe "Releases/${NUGET_ID}-Setup.exe"
+        if [ "$ARCH" = "x64" ]; then
+          mv Releases/RELEASES Releases/RELEASES-x64
+        fi
     fi
 
     cd ..

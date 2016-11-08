@@ -5,6 +5,9 @@
 #include "UpdateNotificationView.h"
 #include "App.h"
 #include "Window.h"
+#include "core/AutoUpdateManager.h"
+
+using core::AutoUpdateManager;
 
 void UpdateNotificationView::show() {
   auto widget = new QQuickWidget;
@@ -32,7 +35,7 @@ void UpdateNotificationView::show() {
 
   auto updateButton = rootObj->findChild<QObject*>("updateButton");
   Q_ASSERT(updateButton);
-  connect(updateButton, SIGNAL(clicked()), App::instance(), SLOT(restart()));
+  connect(updateButton, SIGNAL(clicked()), &AutoUpdateManager::singleton(), SLOT(quitAndInstall()));
 
   widget->show();
 }

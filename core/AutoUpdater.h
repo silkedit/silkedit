@@ -1,3 +1,5 @@
+#pragma once
+
 #include <memory>
 #define QT_NO_SIGNALS_SLOTS_KEYWORDS
 #include <QObject>
@@ -12,6 +14,7 @@ class AutoUpdater : public QObject {
   AutoUpdater() = default;
   virtual ~AutoUpdater() = default;
 
+  virtual void quitAndInstall () = 0;
   virtual void initialize() = 0;
   virtual void checkForUpdates() = 0;
 

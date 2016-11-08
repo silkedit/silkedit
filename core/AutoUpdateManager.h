@@ -27,6 +27,9 @@ class AutoUpdateManager : public QObject, public Singleton<AutoUpdateManager> {
                         const QString& url);
   void updateError(const QString& message);
 
+ public slots:
+  void quitAndInstall();
+
  private:
   friend class Singleton<AutoUpdateManager>;
 

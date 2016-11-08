@@ -8,6 +8,7 @@ class SquirrelAutoUpdater : public AutoUpdater {
  public:
   SquirrelAutoUpdater();
   ~SquirrelAutoUpdater() = default;
+  void quitAndInstall() override;
   void initialize() override;
   void checkForUpdates() override;
 

@@ -30,6 +30,7 @@
 #include "core/AutoUpdateManager.h"
 #include "breakpad/crash_handler.h"
 #include "node_main.h"
+#include "core/UpdateProcess.h"
 
 using core::PackageManager;
 using core::Config;
@@ -40,6 +41,7 @@ using core::Util;
 using core::Constants;
 using core::MessageHandler;
 using core::AutoUpdateManager;
+using core::UpdateProcess;
 
 int main(int argc, char** argv) {
   QTime startTime = QTime::currentTime();
@@ -67,6 +69,17 @@ int main(int argc, char** argv) {
 
     arguments.removeOne(Constants::RUN_AS_NODE);
     return nodeMain(arguments.size(), Util::toArgv(arguments));
+  } else if (arguments.contains("--squirrel-install")) {
+    return 0;
+  } else if (arguments.contains("--squirrel-firstrun")) {
+    qDebug() << "--squirrel-firstrun";
+    arguments.removeOne("--squirrel-firstrun");
+  } else if (arguments.contains("--squirrel-updated")) {
+    return 0;
+  } else if (arguments.contains("--squirrel-obsolete")) {
+    return 0;
+  } else if (arguments.contains("--squirrel-uninstall")) {
+    return 0;
   }
 
 #ifdef Q_OS_WIN
