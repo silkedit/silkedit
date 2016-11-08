@@ -69,8 +69,21 @@ int main(int argc, char** argv) {
 
     arguments.removeOne(Constants::RUN_AS_NODE);
     return nodeMain(arguments.size(), Util::toArgv(arguments));
-  } else if (arguments.contains("--squirrel-install")) {
-    return 0;
+  }
+
+#ifdef Q_OS_WIN
+  const QString exeName = QFileInfo(QApplication::applicationFilePath()).fileName();
+
+  // handle arguments sent from squirrel
+  // https://github.com/Squirrel/Squirrel.Windows/blob/master/docs/using/custom-squirrel-events-non-cs.md
+  if (arguments.contains("--squirrel-install")) {
+    // create a shortcut in desktop and start menu
+    auto updateProcess = new UpdateProcess();
+    QObject::connect(updateProcess, &UpdateProcess::errorOccured,
+                     [](const QString& msg) { qCritical() << msg; });
+    updateProcess->start(QStringList{"--createShortcut", exeName});
+    updateProcess->waitForFinished();
+    exit(0);
   } else if (arguments.contains("--squirrel-firstrun")) {
     qDebug() << "--squirrel-firstrun";
     arguments.removeOne("--squirrel-firstrun");
@@ -79,10 +92,16 @@ int main(int argc, char** argv) {
   } else if (arguments.contains("--squirrel-obsolete")) {
     return 0;
   } else if (arguments.contains("--squirrel-uninstall")) {
-    return 0;
+    // remove shortcuts created by squirrel
+    auto updateProcess = new UpdateProcess();
+    QObject::connect(updateProcess, &UpdateProcess::errorOccured,
+                     [](const QString& msg) { qCritical() << msg; });
+
+    updateProcess->start(QStringList{"--removeShortcut", exeName});
+    updateProcess->waitForFinished();
+    exit(0);
   }
 
-#ifdef Q_OS_WIN
   const QString& msg = arguments.size() > 1 ? arguments[1] : QStringLiteral("");
   // If SilkEdit is already running, send an argument and exit.
   if (app.sendMessage(msg))

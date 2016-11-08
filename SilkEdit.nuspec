@@ -10,7 +10,7 @@
         <projectUrl>https://silkedit.io</projectUrl>
         <iconUrl>$icon_url$</iconUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Cross platform text editor</description>
+        <description>SilkEdit</description>
         <copyright>Copyright (c) 2016 Shinichi Katayama &amp; Mizuki Yamamoto</copyright>
     </metadata>
     <files>

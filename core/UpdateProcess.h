@@ -8,7 +8,9 @@ namespace core {
 class UpdateProcess : public QObject {
   Q_OBJECT
  public:
-  void start(QStringList arguments, bool detached);
+  void start(QStringList arguments);
+  void startDetached(QStringList arguments);
+  void waitForFinished();
 
  signals:
   void finished(const QString& data);
@@ -18,6 +20,8 @@ class UpdateProcess : public QObject {
   QString stdoutLog;
   QString stderrLog;
   QProcess* updater;
+
+  QProcess* create(QStringList arguments);
 };
 
-} // namespace core
+}  // namespace core
