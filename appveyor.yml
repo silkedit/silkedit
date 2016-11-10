@@ -43,3 +43,18 @@ after_build:
 
 test_script:
   - '%MSYS2_ROOT%\usr\bin\bash -lc "cd \"$OLDPWD\" && ./run test"'
+
+artifacts:
+  - path: 'build/Release/Releases/*'
+
+deploy:
+  description: ''
+  provider: GitHub
+  auth_token:
+    secure: Kh53wSQy/gm9WoQAGwu/Fx27DPj203tFv3NQzqOIwTIG1Oi256auEB+WDzmspdPl
+  artifact: build/Release/Releases/*
+  draft: false
+  prerelease: false
+  on:
+    branch: master
+    appveyor_repo_tag: true
