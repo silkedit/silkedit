@@ -12,7 +12,7 @@ PRODUCTVERSION VER_VERSION
 			 VALUE "CompanyName", "SilkEdit dev team"
 			 VALUE "FileVersion", VER_VERSION_STR
 			 VALUE "FileDescription", "CrashReporter"
-			 VALUE "LegalCopyright", "Copyright (C) 2014-2016 SilkEdit"
+			 VALUE "LegalCopyright", "Copyright (C) 2016 Shinichi Katayama & Mizuki Yamamoto"
 			 VALUE "OriginalFilename", "crashreporter.exe"
 			 VALUE "ProductName", "SilkEdit"
 			 VALUE "ProductVersion", VER_VERSION_STR

@@ -7,21 +7,22 @@ IDI_ICON1               ICON    DISCARDABLE     "silkedit_edge.ico"
 FILEVERSION VER_VERSION
 PRODUCTVERSION VER_VERSION
 {
-  BLOCK "StringFileInfo"
-	 {
-		 BLOCK "040904E4"
-		 {
-			 VALUE "CompanyName", "SilkEdit"
-			 VALUE "FileVersion", VER_VERSION_STR
-			 VALUE "FileDescription", "SilkEdit Edge"
-			 VALUE "LegalCopyright", "Copyright (C) 2014-2016 SilkEdit"
-			 VALUE "OriginalFilename", "silkedit.exe"
-			 VALUE "ProductName", "SilkEdit Edge"
-			 VALUE "ProductVersion", VER_VERSION_STR
-		 }
-	 }
-  BLOCK "VarFileInfo"
-	 {
-		 VALUE "Translation", 0x0409, 1252 //language codes
-	 }
+    BLOCK "StringFileInfo"
+    {
+        BLOCK "040904B0" // Lang=English US 0x0409, CharSet=Unicode (0x04B0, decimal 1200)
+        {
+            VALUE "CompanyName", "SilkEdit"
+            VALUE "FileVersion", VER_VERSION_STR
+            VALUE "FileDescription", "SilkEdit Edge"
+            VALUE "LegalCopyright", "Copyright (C) 2016 Shinichi Katayama & Mizuki Yamamoto"
+            VALUE "OriginalFilename", "silkedit.exe"
+            VALUE "ProductName", "SilkEdit Edge"
+            VALUE "ProductVersion", VER_VERSION_STR
+            VALUE "SquirrelAwareVersion", "1"
+        }
+    }
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x0409, 1252 //language codes
+    }
 }
