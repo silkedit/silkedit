@@ -38,14 +38,14 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string notr="true">Copyright © 2014-2016 SilkEdit</string>
+      <string notr="true">Copyright (C) 2016 Shinichi Katayama &amp; Mizuki Yamamoto</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="licenseUrlLabel">
      <property name="text">
-      <string>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;License&lt;/a&gt;</string>
+      <string>&lt;a href=&quot;https://raw.githubusercontent.com/silkedit/silkedit/master/LICENSE.md&quot;&gt;License&lt;/a&gt;</string>
      </property>
      <property name="textFormat">
       <enum>Qt::RichText</enum>

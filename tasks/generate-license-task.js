@@ -20,10 +20,7 @@ module.exports = (grunt) => {
 
 
       var text = `
-${fs.readFileSync('LICENSE.md', 'utf8')}
-
-This application bundles the following third-party packages in accordance
-with the following licenses:\n\n
+${fs.readFileSync('resources/LICENSE_base.md', 'utf8')}
 `;
       
       const packagesOptions = {
@@ -40,7 +37,7 @@ with the following licenses:\n\n
         text += getLicenseText(Object.assign(dependencyLicenses, jslibDependencyLicenses));
       
         if (mode === 'save') {
-          const targetPath = 'resources/LICENSE';
+          const targetPath = 'LICENSE.md';
           fs.writeFileSync(targetPath, text);
         } else {
           console.log(text);
