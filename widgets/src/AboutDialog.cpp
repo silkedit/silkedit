@@ -9,8 +9,8 @@
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent), ui(new Ui::AboutDialog) {
   ui->setupUi(this);
 
-  ui->buildLabel->setText(tr("version") + " " + App::applicationVersion() + " (" + tr("build") +
-                          ": " + BUILD + ")");
+  const QString text = tr("version %1 ( %2 )").arg(App::applicationVersion()).arg(COMMIT);
+  ui->buildLabel->setText(text);
 }
 
 AboutDialog::~AboutDialog() {
