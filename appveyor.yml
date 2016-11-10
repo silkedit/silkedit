@@ -46,13 +46,14 @@ test_script:
 
 artifacts:
   - path: 'build/Release/Releases/*'
+    name: package
 
 deploy:
   description: ''
   provider: GitHub
   auth_token:
     secure: Kh53wSQy/gm9WoQAGwu/Fx27DPj203tFv3NQzqOIwTIG1Oi256auEB+WDzmspdPl
-  artifact: *
+  artifact: package
   draft: false
   prerelease: false
   on:
