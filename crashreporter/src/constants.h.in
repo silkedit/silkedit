@@ -1,0 +1,3 @@
+#pragma once
+
+#define BUGSPLAT_URL "@BUGSPLAT_URL@"
