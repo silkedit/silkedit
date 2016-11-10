@@ -1,4 +1,5 @@
 ﻿#include "HttpSendDump.h"
+#include "constants.h"
 
 #include <qdebug.h>
 #include <qstring.h>
@@ -15,13 +16,6 @@
 namespace CrashReport {
 
 QString HttpSendDump::sendDump() const {
-  // Note :
-  // curl -X POST 'http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/crash/postBP.php'
-  //  -F 'prod=silkedit'
-  //  -F 'ver=0.7.0'
-  //  -F 'upload_file_minidump=@/path/5a18259d-815b-4352-87ae-cc2e5cbf5c4d.dmp'
-  //  -F 'comments=abc'
-  //  -v
   QString ret = "";
   QHttpMultiPart* multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
 
@@ -63,7 +57,7 @@ QString HttpSendDump::sendDump() const {
   file->setParent(multiPart);  // we cannot delete the file now, so delete it with the multiPart
   multiPart->append(imagePart);
 
-  QUrl serviceUrl("http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/crash/postBP.php");
+  QUrl serviceUrl(BUGSPLAT_URL);
   QNetworkRequest request(serviceUrl);
   QNetworkAccessManager manager;
   auto res = manager.post(request, multiPart);
