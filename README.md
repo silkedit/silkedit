@@ -11,24 +11,25 @@ SilkEdit is the simple, modern, cross-platform text editor.
 
 **MacOS**
 
-- [Qt](https://www.qt.io/)
-- [Node.js](https://nodejs.org/)
-- [CMake](https://cmake.org/)
-- [Conan](http://docs.conan.io/en/latest/installation.html)
 - Xcode
 - Command Line Tools for Xcode
-- Ninja
+- [Homebrew](http://brew.sh/index.html)
+
+Install dependencies by Homebrew.
+
+```brew install carthage cmake conan node qt5```
 
 Set QTDIR environment variable e.g. `export QTDIR=<Qt root directory>`
 
 **Windows**
 
-- [Qt](https://www.qt.io/)
-- [Node.js](https://nodejs.org/)
 - [CMake](https://cmake.org/)
 - [Conan](http://docs.conan.io/en/latest/installation.html)
-- Python
 - [Msys2](https://sourceforge.net/projects/msys2/files/Base/)
+- [Node.js](https://nodejs.org/)
+- [NuGet](https://www.nuget.org/)
+- [Python](https://www.python.org/downloads/windows/)
+- [Qt](https://www.qt.io/)
 - [Visual Studio 2015](https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx?wt.mc_id=github_microsoft_vscode) or [Visual C++ Build Tools](http://landinghub.visualstudio.com/visual-cpp-build-tools)
 
 Set QTDIR environment variable e.g. `set QTDIR=<Qt root directory>`
