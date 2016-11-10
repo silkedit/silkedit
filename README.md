@@ -11,7 +11,7 @@ SilkEdit is the simple, modern, cross-platform text editor.
 
 **MacOS**
 
-- Xcode
+- Xcode 7.3
 - Command Line Tools for Xcode
 - [Homebrew](http://brew.sh/index.html)
 
