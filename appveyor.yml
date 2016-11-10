@@ -14,6 +14,8 @@ environment:
       secure: 7FTxgSibgJumWQq8WvefKA==
     BUGSPLAT_URL:
       secure: qrZXrg1X3NvaF8M0ggKhDtI8V3I6Tet1IJkhc3Ia9BigafOoJRAatd2YDEKCril/DFTKKmeMjBSStRYzFDbYled3MeRZ9GDICi8ofgrECXI=
+    BUGSPLAT_SYMBOL_URL:
+      secure: qrZXrg1X3NvaF8M0ggKhDtI8V3I6Tet1IJkhc3Ia9BigafOoJRAatd2YDEKCril/O2uTqatDVfQjoW8qk69o0wpk7ktAc5+1gnPw6dTCUIyypT2xXtNnidEPiNbH9lkS
 
 init:
   - 'echo system architecture: %PLATFORM%'

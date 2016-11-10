@@ -9,7 +9,7 @@
         <key>CFBundleIconFile</key>
         <string>silkedit.icns</string>
         <key>CFBundleIdentifier</key>
-        <string>com.silkeditapp.SilkEdit</string>
+        <string>io.silkedit.SilkEdit</string>
         <key>CFBundleInfoDictionaryVersion</key>
         <string>6.0</string>
         <key>CFBundlePackageType</key>

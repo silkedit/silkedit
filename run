@@ -348,11 +348,11 @@ send_symbol() {
       DSYM_DIR="/tmp/SilkEdit.dSYM"
       rm -rf ${DSYM_DIR}
       dsymutil "build/${APP_NAME}.app/Contents/MacOS/${APP_NAME}" -o ${DSYM_DIR}
-      vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a "${BUGSPLAT_APP_NAME}" -v ${VERSION} -s ${DSYM_DIR}
+      vendor/bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d ${BUGSPLAT_DATABASE} -a "${BUGSPLAT_APP_NAME}" -v ${VERSION} -s ${DSYM_DIR}
     else
       TMP_BAT=tmp.bat
       cp activate.bat $TMP_BAT
-      ARG="http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${BUGSPLAT_APP_NAME}&appVer=${VERSION}"
+      ARG="${BUGSPLAT_SYMBOL_URL}?appName=${BUGSPLAT_APP_NAME}&appVer=${VERSION}"
       echo " & symupload.exe ./build/SilkEdit.exe $ARG" >> $TMP_BAT
       ./$TMP_BAT
       rm $TMP_BAT

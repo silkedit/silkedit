@@ -443,9 +443,9 @@ send_symbol() {
       DSYM_DIR="/tmp/SilkEdit.dSYM"
       rm -rf ${DSYM_DIR}
       dsymutil build/SilkEdit.app/Contents/MacOS/SilkEdit -o ${DSYM_DIR}
-      bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d silkeditapp_gmail_com -a ${APP_NAME} -v ${VERSION} -s ${DSYM_DIR}
+      bugsplat/Breakpad.framework/Resources/dump_sdk_symbols -d ${BUGSPLAT_DATABASE} -a ${APP_NAME} -v ${VERSION} -s ${DSYM_DIR}
     else
-      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "http://silkeditapp_gmail_com.bugsplatsoftware.com/post/bp/symbol/breakpadsymbols.php?appName=${APP_NAME}&appVer=${VERSION}"
+      ./breakpad/src/tools/windows/binaries/symupload.exe ./build/SilkEdit.exe "${BUGSPLAT_SYMBOL_URL}?appName=${APP_NAME}&appVer=${VERSION}"
     fi
 }
 
