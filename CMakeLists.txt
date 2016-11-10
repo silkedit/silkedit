@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1.0)
 
-project(SilkEdit VERSION 0.13.1)
+project(SilkEdit VERSION 0.14.0)
 set(COMMIT $ENV{COMMIT})
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
