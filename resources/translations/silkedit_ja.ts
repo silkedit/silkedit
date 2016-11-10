@@ -4,19 +4,22 @@
 <context>
     <name>AboutDialog</name>
     <message>
-        <location filename="../../widgets/src/AboutDialog.cpp" line="12"/>
         <source>version</source>
-        <translation>バージョン</translation>
+        <translation type="vanished">バージョン</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/AboutDialog.cpp" line="12"/>
         <source>build</source>
-        <translation>ビルド</translation>
+        <translation type="vanished">ビルド</translation>
     </message>
     <message>
         <location filename="../../widgets/src/AboutDialog.ui" line="48"/>
         <source>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;License&lt;/a&gt;</source>
         <translation>&lt;a href=&quot;https://silkedit.io/license/latest/LICENSE&quot;&gt;ライセンス&lt;/a&gt;</translation>
+    </message>
+    <message>
+        <location filename="../../widgets/src/AboutDialog.cpp" line="12"/>
+        <source>version %1 ( %2 )</source>
+        <translation>バージョン %1 ( %2 )</translation>
     </message>
 </context>
 <context>
@@ -354,127 +357,127 @@ has been removed on disk. Do you want to close its tab?</source>
 <context>
     <name>MenuBar</name>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="48"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="47"/>
         <source>&amp;File</source>
         <translation>ファイル(&amp;F)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="48"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="47"/>
         <source>File</source>
         <translation>ファイル</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="54"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="53"/>
         <source>&amp;Exit</source>
         <translation>終了(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="54"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="53"/>
         <source>Exit</source>
         <translation>終了</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="62"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="61"/>
         <source>&amp;Text</source>
         <translation>編集(&amp;E)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="62"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="61"/>
         <source>Text</source>
         <translation>編集</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="68"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="67"/>
         <source>&amp;Undo</source>
         <translation>元に戻す(&amp;U)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="68"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="67"/>
         <source>Undo</source>
         <translation>元に戻す</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="72"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="71"/>
         <source>F&amp;ind</source>
         <translation>検索(&amp;I)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="72"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="71"/>
         <source>Find</source>
         <translation>検索</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="76"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="75"/>
         <source>Find/Replace</source>
         <translation>検索/置換</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="80"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="79"/>
         <source>&amp;View</source>
         <translation>表示(&amp;V)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="80"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="79"/>
         <source>View</source>
         <translation>表示</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="31"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="30"/>
         <source>&amp;Theme</source>
         <translation>テーマ(&amp;T)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="31"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="30"/>
         <source>Theme</source>
         <translation>テーマ</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="89"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="88"/>
         <source>&amp;Packages</source>
         <translation>パッケージ(&amp;P)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="89"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="88"/>
         <source>Packages</source>
         <translation>パッケージ</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="93"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="92"/>
         <source>Package Development</source>
         <translation>パッケージ開発</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="95"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="94"/>
         <source>&amp;New Package</source>
         <translation>新しいパッケージ(&amp;N)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="100"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="99"/>
         <source>&amp;Settings</source>
         <translation>設定(&amp;S)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="100"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="99"/>
         <source>Settings</source>
         <translation>設定</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="119"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="118"/>
         <source>&amp;Help</source>
         <translation>ヘルプ(&amp;H)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="119"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="118"/>
         <source>Help</source>
         <translation>ヘルプ</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="123"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="122"/>
         <source>&amp;About</source>
         <translation>SilkEdit について(&amp;A)</translation>
     </message>
     <message>
-        <location filename="../../widgets/src/MenuBar.cpp" line="123"/>
+        <location filename="../../widgets/src/MenuBar.cpp" line="122"/>
         <source>About</source>
         <translation>SilkEdit について</translation>
     </message>

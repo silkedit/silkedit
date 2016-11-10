@@ -17,6 +17,7 @@ environment:
 
 init:
   - 'echo system architecture: %PLATFORM%'
+  - 'set COMMIT=%APPVEYOR_REPO_COMMIT%'
 
 install:
   - 'set PATH=%PYTHON%\Scripts;%PATH%'

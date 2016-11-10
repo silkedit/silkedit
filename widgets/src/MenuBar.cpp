@@ -6,7 +6,6 @@
 #include "OpenRecentItemManager.h"
 #include "App.h"
 #include "CommandManager.h"
-#include "version.h"
 #include "ConfigDialog.h"
 #include "AboutDialog.h"
 #include "Window.h"

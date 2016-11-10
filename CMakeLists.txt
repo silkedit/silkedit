@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.1.0)
 
 project(SilkEdit VERSION 0.13.1)
-set(BUILD_NUMBER $ENV{SILK_BUILD_NUMBER})
+set(COMMIT $ENV{COMMIT})
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_set_find_paths()
@@ -18,7 +18,7 @@ else ()
   message(SEND_ERROR "QTDIR is not defined")
 endif ()
 
-message(STATUS "BUILD_NUMBER: ${BUILD_NUMBER}")
+message(STATUS "COMMIT: ${COMMIT}")
 
 option(BUILD_EDGE "Build edge version" OFF)
 
